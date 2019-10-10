@@ -125,26 +125,16 @@ template("dart_snapshot_aot") {
       invoker.dart_kernel,
     ]
 
-    vm_snapshot_data = "$target_gen_dir/assets/vm_snapshot_data"
-    vm_snapshot_instr = "$target_gen_dir/assets/vm_snapshot_instr"
-    isolate_snapshot_data = "$target_gen_dir/assets/isolate_snapshot_data"
-    isolate_snapshot_instr = "$target_gen_dir/assets/isolate_snapshot_instr"
+    # Custom ELF loader is used for Mac and Windows.
+    elf_object = "$target_gen_dir/assets/app_elf_snapshot.so"
 
-    outputs = [
-      vm_snapshot_data,
-      vm_snapshot_instr,
-      isolate_snapshot_data,
-      isolate_snapshot_instr,
-    ]
+    outputs = [elf_object]
 
     args = [
       "--causal_async_stacks",
       "--deterministic",
-      "--snapshot_kind=app-aot-blobs",
-      "--vm_snapshot_data=" + rebase_path(vm_snapshot_data),
-      "--vm_snapshot_instructions=" + rebase_path(vm_snapshot_instr),
-      "--isolate_snapshot_data=" + rebase_path(isolate_snapshot_data),
-      "--isolate_snapshot_instructions=" + rebase_path(isolate_snapshot_instr),
+      "--snapshot_kind=app-aot-elf",
+      "--elf=" + rebase_path(elf_object),
       rebase_path(invoker.dart_kernel),
     ]
 

@@ -6,6 +6,7 @@
 
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
+#include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
@@ -16,16 +17,33 @@ EmbedderTestContext::EmbedderTestContext(std::string assets_path)
       native_resolver_(std::make_shared<TestDartNativeResolver>()) {
   auto assets_dir = fml::OpenDirectory(assets_path_.c_str(), false,
                                        fml::FilePermission::kRead);
-  vm_snapshot_data_ =
-      fml::FileMapping::CreateReadOnly(assets_dir, "vm_snapshot_data");
-  isolate_snapshot_data_ =
-      fml::FileMapping::CreateReadOnly(assets_dir, "isolate_snapshot_data");
 
   if (flutter::DartVM::IsRunningPrecompiledCode()) {
-    vm_snapshot_instructions_ =
-        fml::FileMapping::CreateReadExecute(assets_dir, "vm_snapshot_instr");
-    isolate_snapshot_instructions_ = fml::FileMapping::CreateReadExecute(
-        assets_dir, "isolate_snapshot_instr");
+    std::string filename(assets_path_);
+    filename += "/app_elf_snapshot.so";
+
+    const uint8_t *vm_snapshot_data = nullptr,
+                  *vm_snapshot_instructions = nullptr,
+                  *isolate_snapshot_data = nullptr,
+                  *isolate_snapshot_instructions = nullptr;
+    const char* error = nullptr;
+
+    elf_library_handle_ =
+        Dart_LoadELF(filename.c_str(), /*file_offset=*/0, &error,
+                     &vm_snapshot_data, &vm_snapshot_instructions,
+                     &isolate_snapshot_data, &isolate_snapshot_instructions);
+
+    if (elf_library_handle_ != nullptr) {
+      vm_snapshot_data_.reset(new fml::NonOwnedMapping(vm_snapshot_data, 0));
+      vm_snapshot_instructions_.reset(
+          new fml::NonOwnedMapping(vm_snapshot_instructions, 0));
+      isolate_snapshot_data_.reset(
+          new fml::NonOwnedMapping(isolate_snapshot_data, 0));
+      isolate_snapshot_instructions_.reset(
+          new fml::NonOwnedMapping(isolate_snapshot_instructions, 0));
+    } else {
+      FML_LOG(WARNING) << "Could not load snapshot: " << error;
+    }
   }
 
   isolate_create_callbacks_.push_back(
@@ -37,7 +55,11 @@ EmbedderTestContext::EmbedderTestContext(std::string assets_path)
       });
 }
 
-EmbedderTestContext::~EmbedderTestContext() = default;
+EmbedderTestContext::~EmbedderTestContext() {
+  if (elf_library_handle_ != nullptr) {
+    Dart_UnloadELF(elf_library_handle_);
+  }
+}
 
 const std::string& EmbedderTestContext::GetAssetsPath() const {
   return assets_path_;

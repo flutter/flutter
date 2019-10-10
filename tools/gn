@@ -281,7 +281,7 @@ def parse_args(args):
 
   parser.add_argument('--runtime-mode', type=str, choices=['debug', 'profile', 'release', 'jit_release'], default='debug')
   parser.add_argument('--interpreter', default=False, action='store_true')
-  parser.add_argument('--dart-debug', default=False, action='store_true', help='Enables assertsion in the Dart VM. ' +
+  parser.add_argument('--dart-debug', default=False, action='store_true', help='Enables assertions in the Dart VM. ' +
       'Does not affect optimization levels. If you need to disable optimizations in Dart, use --full-dart-debug')
   parser.add_argument('--full-dart-debug', default=False, action='store_true', help='Implies --dart-debug ' +
       'and also disables optimizations in the Dart VM making it easier to step through VM code in the debugger.')
