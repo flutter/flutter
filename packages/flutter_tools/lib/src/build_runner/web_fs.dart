@@ -12,7 +12,6 @@ import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
 import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
-import 'package:file/memory.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
@@ -179,8 +178,8 @@ class WebFs {
     }
     // Workaround for https://github.com/flutter/flutter/issues/41681.
     final String toolPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
-    if (!fs.isFileSync(fs.path.join(toolPath, '.packages')) && fs is! MemoryFileSystem) {
-      await pubGet(
+    if (!fs.isFileSync(fs.path.join(toolPath, '.packages'))) {
+      await pub.get(
         context: PubContext.pubGet,
         directory: toolPath,
         offline: true,
@@ -290,7 +289,7 @@ class WebFs {
             return (await ChromeLauncher.connectedInstance).chromeConnection;
           },
           reloadConfiguration: ReloadConfiguration.none,
-          serveDevTools: true,
+          serveDevTools: false,
           verbose: false,
           enableDebugExtension: true,
           logWriter: (dynamic level, String message) => printTrace(message),
