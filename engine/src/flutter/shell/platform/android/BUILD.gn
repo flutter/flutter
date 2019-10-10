@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/config/android/config.gni")
+import("//flutter/build/zip_bundle.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
@@ -115,6 +116,125 @@ embedding_jar_path = "$root_out_dir/$embedding_jar_filename"
 embedding_sources_jar_filename = "$embedding_artifact_id-sources.jar"
 embedding_source_jar_path = "$root_out_dir/$embedding_sources_jar_filename"
 
+android_java_sources = [
+  "io/flutter/Log.java",
+  "io/flutter/app/FlutterActivity.java",
+  "io/flutter/app/FlutterActivityDelegate.java",
+  "io/flutter/app/FlutterActivityEvents.java",
+  "io/flutter/app/FlutterApplication.java",
+  "io/flutter/app/FlutterFragmentActivity.java",
+  "io/flutter/app/FlutterPluginRegistry.java",
+  "io/flutter/embedding/android/AndroidKeyProcessor.java",
+  "io/flutter/embedding/android/AndroidTouchProcessor.java",
+  "io/flutter/embedding/android/DrawableSplashScreen.java",
+  "io/flutter/embedding/android/FlutterActivity.java",
+  "io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java",
+  "io/flutter/embedding/android/FlutterActivityLaunchConfigs.java",
+  "io/flutter/embedding/android/FlutterEngineConfigurator.java",
+  "io/flutter/embedding/android/FlutterEngineProvider.java",
+  "io/flutter/embedding/android/FlutterFragment.java",
+  "io/flutter/embedding/android/FlutterFragmentActivity.java",
+  "io/flutter/embedding/android/FlutterSplashView.java",
+  "io/flutter/embedding/android/FlutterSurfaceView.java",
+  "io/flutter/embedding/android/FlutterTextureView.java",
+  "io/flutter/embedding/android/FlutterView.java",
+  "io/flutter/embedding/android/SplashScreen.java",
+  "io/flutter/embedding/android/SplashScreenProvider.java",
+  "io/flutter/embedding/engine/FlutterEngine.java",
+  "io/flutter/embedding/engine/FlutterEngineAndroidLifecycle.java",
+  "io/flutter/embedding/engine/FlutterEngineCache.java",
+  "io/flutter/embedding/engine/FlutterEnginePluginRegistry.java",
+  "io/flutter/embedding/engine/FlutterJNI.java",
+  "io/flutter/embedding/engine/FlutterShellArgs.java",
+  "io/flutter/embedding/engine/dart/DartExecutor.java",
+  "io/flutter/embedding/engine/dart/DartMessenger.java",
+  "io/flutter/embedding/engine/dart/PlatformMessageHandler.java",
+  "io/flutter/embedding/engine/plugins/FlutterPlugin.java",
+  "io/flutter/embedding/engine/plugins/PluginRegistry.java",
+  "io/flutter/embedding/engine/plugins/activity/ActivityAware.java",
+  "io/flutter/embedding/engine/plugins/activity/ActivityControlSurface.java",
+  "io/flutter/embedding/engine/plugins/activity/ActivityPluginBinding.java",
+  "io/flutter/embedding/engine/plugins/broadcastreceiver/BroadcastReceiverAware.java",
+  "io/flutter/embedding/engine/plugins/broadcastreceiver/BroadcastReceiverControlSurface.java",
+  "io/flutter/embedding/engine/plugins/broadcastreceiver/BroadcastReceiverPluginBinding.java",
+  "io/flutter/embedding/engine/plugins/contentprovider/ContentProviderAware.java",
+  "io/flutter/embedding/engine/plugins/contentprovider/ContentProviderControlSurface.java",
+  "io/flutter/embedding/engine/plugins/contentprovider/ContentProviderPluginBinding.java",
+  "io/flutter/embedding/engine/plugins/service/ServiceAware.java",
+  "io/flutter/embedding/engine/plugins/service/ServiceControlSurface.java",
+  "io/flutter/embedding/engine/plugins/service/ServicePluginBinding.java",
+  "io/flutter/embedding/engine/plugins/shim/ShimPluginRegistry.java",
+  "io/flutter/embedding/engine/plugins/shim/ShimRegistrar.java",
+  "io/flutter/embedding/engine/renderer/FlutterRenderer.java",
+  "io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java",
+  "io/flutter/embedding/engine/renderer/RenderSurface.java",
+  "io/flutter/embedding/engine/systemchannels/AccessibilityChannel.java",
+  "io/flutter/embedding/engine/systemchannels/KeyEventChannel.java",
+  "io/flutter/embedding/engine/systemchannels/LifecycleChannel.java",
+  "io/flutter/embedding/engine/systemchannels/LocalizationChannel.java",
+  "io/flutter/embedding/engine/systemchannels/NavigationChannel.java",
+  "io/flutter/embedding/engine/systemchannels/PlatformChannel.java",
+  "io/flutter/embedding/engine/systemchannels/PlatformViewsChannel.java",
+  "io/flutter/embedding/engine/systemchannels/SettingsChannel.java",
+  "io/flutter/embedding/engine/systemchannels/SystemChannel.java",
+  "io/flutter/embedding/engine/systemchannels/TextInputChannel.java",
+  "io/flutter/plugin/common/ActivityLifecycleListener.java",
+  "io/flutter/plugin/common/BasicMessageChannel.java",
+  "io/flutter/plugin/common/BinaryCodec.java",
+  "io/flutter/plugin/common/BinaryMessenger.java",
+  "io/flutter/plugin/common/ErrorLogResult.java",
+  "io/flutter/plugin/common/EventChannel.java",
+  "io/flutter/plugin/common/FlutterException.java",
+  "io/flutter/plugin/common/JSONMessageCodec.java",
+  "io/flutter/plugin/common/JSONMethodCodec.java",
+  "io/flutter/plugin/common/JSONUtil.java",
+  "io/flutter/plugin/common/MessageCodec.java",
+  "io/flutter/plugin/common/MethodCall.java",
+  "io/flutter/plugin/common/MethodChannel.java",
+  "io/flutter/plugin/common/MethodCodec.java",
+  "io/flutter/plugin/common/PluginRegistry.java",
+  "io/flutter/plugin/common/StandardMessageCodec.java",
+  "io/flutter/plugin/common/StandardMethodCodec.java",
+  "io/flutter/plugin/common/StringCodec.java",
+  "io/flutter/plugin/editing/InputConnectionAdaptor.java",
+  "io/flutter/plugin/editing/TextInputPlugin.java",
+  "io/flutter/plugin/platform/AccessibilityEventsDelegate.java",
+  "io/flutter/plugin/platform/PlatformPlugin.java",
+  "io/flutter/plugin/platform/PlatformView.java",
+  "io/flutter/plugin/platform/PlatformViewFactory.java",
+  "io/flutter/plugin/platform/PlatformViewRegistry.java",
+  "io/flutter/plugin/platform/PlatformViewRegistryImpl.java",
+  "io/flutter/plugin/platform/PlatformViewsAccessibilityDelegate.java",
+  "io/flutter/plugin/platform/PlatformViewsController.java",
+  "io/flutter/plugin/platform/SingleViewPresentation.java",
+  "io/flutter/plugin/platform/VirtualDisplayController.java",
+  "io/flutter/util/PathUtils.java",
+  "io/flutter/util/Preconditions.java",
+  "io/flutter/util/Predicate.java",
+  "io/flutter/view/AccessibilityBridge.java",
+  "io/flutter/view/AccessibilityViewEmbedder.java",
+  "io/flutter/view/FlutterCallbackInformation.java",
+  "io/flutter/view/FlutterMain.java",
+  "io/flutter/view/FlutterNativeView.java",
+  "io/flutter/view/FlutterRunArguments.java",
+  "io/flutter/view/FlutterView.java",
+  "io/flutter/view/ResourceCleaner.java",
+  "io/flutter/view/ResourceExtractor.java",
+  "io/flutter/view/ResourcePaths.java",
+  "io/flutter/view/TextureRegistry.java",
+  "io/flutter/view/VsyncWaiter.java",
+]
+
+android_support_jars = [
+  "//third_party/android_support/android_support_compat.jar",
+  "//third_party/android_support/android_support_annotations.jar",
+  "//third_party/android_support/android_support_fragment.jar",
+  "//third_party/android_support/android_arch_lifecycle_common.jar",
+  "//third_party/android_support/android_arch_lifecycle_common_java8.jar",
+  "//third_party/android_support/android_arch_lifecycle_runtime.jar",
+  "//third_party/android_support/android_arch_lifecycle_viewmodel.jar",
+]
+
 action("flutter_shell_java") {
   script = "//build/android/gyp/javac.py"
   depfile = "$target_gen_dir/$target_name.d"
@@ -122,126 +242,9 @@ action("flutter_shell_java") {
   jar_path = embedding_jar_path
   source_jar_path = embedding_source_jar_path
 
-  sources = [
-    "io/flutter/Log.java",
-    "io/flutter/app/FlutterActivity.java",
-    "io/flutter/app/FlutterActivityDelegate.java",
-    "io/flutter/app/FlutterActivityEvents.java",
-    "io/flutter/app/FlutterApplication.java",
-    "io/flutter/app/FlutterFragmentActivity.java",
-    "io/flutter/app/FlutterPluginRegistry.java",
-    "io/flutter/embedding/android/AndroidKeyProcessor.java",
-    "io/flutter/embedding/android/AndroidTouchProcessor.java",
-    "io/flutter/embedding/android/DrawableSplashScreen.java",
-    "io/flutter/embedding/android/FlutterActivity.java",
-    "io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java",
-    "io/flutter/embedding/android/FlutterActivityLaunchConfigs.java",
-    "io/flutter/embedding/android/FlutterEngineConfigurator.java",
-    "io/flutter/embedding/android/FlutterEngineProvider.java",
-    "io/flutter/embedding/android/FlutterFragment.java",
-    "io/flutter/embedding/android/FlutterFragmentActivity.java",
-    "io/flutter/embedding/android/FlutterSplashView.java",
-    "io/flutter/embedding/android/FlutterSurfaceView.java",
-    "io/flutter/embedding/android/FlutterTextureView.java",
-    "io/flutter/embedding/android/FlutterView.java",
-    "io/flutter/embedding/android/SplashScreen.java",
-    "io/flutter/embedding/android/SplashScreenProvider.java",
-    "io/flutter/embedding/engine/FlutterEngine.java",
-    "io/flutter/embedding/engine/FlutterEngineAndroidLifecycle.java",
-    "io/flutter/embedding/engine/FlutterEngineCache.java",
-    "io/flutter/embedding/engine/FlutterEnginePluginRegistry.java",
-    "io/flutter/embedding/engine/FlutterJNI.java",
-    "io/flutter/embedding/engine/FlutterShellArgs.java",
-    "io/flutter/embedding/engine/dart/DartExecutor.java",
-    "io/flutter/embedding/engine/dart/DartMessenger.java",
-    "io/flutter/embedding/engine/dart/PlatformMessageHandler.java",
-    "io/flutter/embedding/engine/plugins/FlutterPlugin.java",
-    "io/flutter/embedding/engine/plugins/PluginRegistry.java",
-    "io/flutter/embedding/engine/plugins/activity/ActivityAware.java",
-    "io/flutter/embedding/engine/plugins/activity/ActivityControlSurface.java",
-    "io/flutter/embedding/engine/plugins/activity/ActivityPluginBinding.java",
-    "io/flutter/embedding/engine/plugins/broadcastreceiver/BroadcastReceiverAware.java",
-    "io/flutter/embedding/engine/plugins/broadcastreceiver/BroadcastReceiverControlSurface.java",
-    "io/flutter/embedding/engine/plugins/broadcastreceiver/BroadcastReceiverPluginBinding.java",
-    "io/flutter/embedding/engine/plugins/contentprovider/ContentProviderAware.java",
-    "io/flutter/embedding/engine/plugins/contentprovider/ContentProviderControlSurface.java",
-    "io/flutter/embedding/engine/plugins/contentprovider/ContentProviderPluginBinding.java",
-    "io/flutter/embedding/engine/plugins/service/ServiceAware.java",
-    "io/flutter/embedding/engine/plugins/service/ServiceControlSurface.java",
-    "io/flutter/embedding/engine/plugins/service/ServicePluginBinding.java",
-    "io/flutter/embedding/engine/plugins/shim/ShimPluginRegistry.java",
-    "io/flutter/embedding/engine/plugins/shim/ShimRegistrar.java",
-    "io/flutter/embedding/engine/renderer/FlutterRenderer.java",
-    "io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java",
-    "io/flutter/embedding/engine/renderer/RenderSurface.java",
-    "io/flutter/embedding/engine/systemchannels/AccessibilityChannel.java",
-    "io/flutter/embedding/engine/systemchannels/KeyEventChannel.java",
-    "io/flutter/embedding/engine/systemchannels/LifecycleChannel.java",
-    "io/flutter/embedding/engine/systemchannels/LocalizationChannel.java",
-    "io/flutter/embedding/engine/systemchannels/NavigationChannel.java",
-    "io/flutter/embedding/engine/systemchannels/PlatformChannel.java",
-    "io/flutter/embedding/engine/systemchannels/PlatformViewsChannel.java",
-    "io/flutter/embedding/engine/systemchannels/SettingsChannel.java",
-    "io/flutter/embedding/engine/systemchannels/SystemChannel.java",
-    "io/flutter/embedding/engine/systemchannels/TextInputChannel.java",
-    "io/flutter/plugin/common/ActivityLifecycleListener.java",
-    "io/flutter/plugin/common/BasicMessageChannel.java",
-    "io/flutter/plugin/common/BinaryCodec.java",
-    "io/flutter/plugin/common/BinaryMessenger.java",
-    "io/flutter/plugin/common/ErrorLogResult.java",
-    "io/flutter/plugin/common/EventChannel.java",
-    "io/flutter/plugin/common/FlutterException.java",
-    "io/flutter/plugin/common/JSONMessageCodec.java",
-    "io/flutter/plugin/common/JSONMethodCodec.java",
-    "io/flutter/plugin/common/JSONUtil.java",
-    "io/flutter/plugin/common/MessageCodec.java",
-    "io/flutter/plugin/common/MethodCall.java",
-    "io/flutter/plugin/common/MethodChannel.java",
-    "io/flutter/plugin/common/MethodCodec.java",
-    "io/flutter/plugin/common/PluginRegistry.java",
-    "io/flutter/plugin/common/StandardMessageCodec.java",
-    "io/flutter/plugin/common/StandardMethodCodec.java",
-    "io/flutter/plugin/common/StringCodec.java",
-    "io/flutter/plugin/editing/InputConnectionAdaptor.java",
-    "io/flutter/plugin/editing/TextInputPlugin.java",
-    "io/flutter/plugin/platform/AccessibilityEventsDelegate.java",
-    "io/flutter/plugin/platform/PlatformPlugin.java",
-    "io/flutter/plugin/platform/PlatformView.java",
-    "io/flutter/plugin/platform/PlatformViewFactory.java",
-    "io/flutter/plugin/platform/PlatformViewRegistry.java",
-    "io/flutter/plugin/platform/PlatformViewRegistryImpl.java",
-    "io/flutter/plugin/platform/PlatformViewsAccessibilityDelegate.java",
-    "io/flutter/plugin/platform/PlatformViewsController.java",
-    "io/flutter/plugin/platform/SingleViewPresentation.java",
-    "io/flutter/plugin/platform/VirtualDisplayController.java",
-    "io/flutter/util/PathUtils.java",
-    "io/flutter/util/Preconditions.java",
-    "io/flutter/util/Predicate.java",
-    "io/flutter/view/AccessibilityBridge.java",
-    "io/flutter/view/AccessibilityViewEmbedder.java",
-    "io/flutter/view/FlutterCallbackInformation.java",
-    "io/flutter/view/FlutterMain.java",
-    "io/flutter/view/FlutterNativeView.java",
-    "io/flutter/view/FlutterRunArguments.java",
-    "io/flutter/view/FlutterView.java",
-    "io/flutter/view/ResourceCleaner.java",
-    "io/flutter/view/ResourceExtractor.java",
-    "io/flutter/view/ResourcePaths.java",
-    "io/flutter/view/TextureRegistry.java",
-    "io/flutter/view/VsyncWaiter.java",
-  ]
+  sources = android_java_sources
 
   sources += get_target_outputs(":gen_android_build_config_java")
-
-  android_support_jars = [
-    "//third_party/android_support/android_support_compat.jar",
-    "//third_party/android_support/android_support_annotations.jar",
-    "//third_party/android_support/android_support_fragment.jar",
-    "//third_party/android_support/android_arch_lifecycle_common.jar",
-    "//third_party/android_support/android_arch_lifecycle_common_java8.jar",
-    "//third_party/android_support/android_arch_lifecycle_runtime.jar",
-    "//third_party/android_support/android_arch_lifecycle_viewmodel.jar",
-  ]
 
   outputs = [
     depfile,
@@ -305,7 +308,7 @@ action("icudtl_object") {
   ]
 }
 
-action("android") {
+action("android_jar") {
   script = "//build/android/gyp/create_flutter_jar.py"
 
   if (stripped_symbols) {
@@ -466,5 +469,80 @@ action("robolectric_tests") {
   deps = [
     ":android",
     ":flutter_shell_java",
+  ]
+}
+
+zip_bundle("android_symbols") {
+  output = "$android_zip_archive_dir/symbols.zip"
+  files = [
+    {
+      source = "$root_build_dir/libflutter.so"
+      destination = "libflutter.so"
+    },
+  ]
+
+  deps = [
+    ":flutter_shell_native",
+  ]
+}
+
+zip_bundle("android") {
+  output = "$android_zip_archive_dir/artifacts.zip"
+  files = [
+    {
+      source = "$root_build_dir/flutter.jar"
+      destination = "flutter.jar"
+    },
+  ]
+
+  deps = [
+    ":android_jar",
+    ":android_symbols",
+  ]
+
+  if (current_cpu == "x86" || current_cpu == "x64") {
+    files += [
+      {
+        source = "$root_build_dir/lib.stripped/libflutter.so"
+        destination = "libflutter.so"
+      },
+    ]
+    deps += [ ":flutter_shell_native" ]
+  }
+}
+
+# TODO(dnfield): make these targets pass.
+# https://github.com/flutter/flutter/issues/42400
+action("gen_android_javadoc") {
+  script = "//flutter/tools/gen_javadoc.py"
+  sources = android_java_sources + android_support_jars
+
+  outputs = [
+    "$target_gen_dir/javadocs",
+  ]
+  args = [
+    "--out-dir",
+    rebase_path(outputs[0]),
+    "--android-source-root",
+    rebase_path("."),
+    "--build-config-path",
+    rebase_path(target_gen_dir),
+    "--third-party",
+    rebase_path("//third_party"),
+  ]
+}
+
+zip_bundle("android_javadoc") {
+  output = "android-javadoc.zip"
+  javadoc_dir = get_target_outputs(":gen_android_javadoc")
+
+  files = [
+    {
+      source = javadoc_dir[0]
+      destination = "/"
+    },
+  ]
+  deps = [
+    ":gen_android_javadoc",
   ]
 }

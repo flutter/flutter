@@ -1,0 +1,54 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+
+if (flutter_runtime_mode == "jit_release") {
+  android_zip_archive_dir = "android-$target_cpu-jit-release"
+} else {
+  android_zip_archive_dir = "android-$target_cpu"
+}
+
+# Creates a zip file in the $root_build_dir/zip_archives folder.
+#
+# The output variable specifies the name of the zip file to create.
+# The files variable is an array of scopes that specify a source file or
+# directory and a destination path in the archive to create.
+#
+# For example, to create a zip file named archive.zip with all files in the
+# root directory of the archive:
+#
+# zip_bundle("sample") {
+#   output = "archive.zip"
+#   files = [
+#     {
+#       source = "$root_build_dir/some/path/to/lib.so"
+#       destination = "lib.so"
+#     },
+#     {
+#       source = "$root_build_dir/some/other/path/with/files"
+#       destination = "other_files"
+#     },
+#   ]
+# }
+template("zip_bundle") {
+  assert(defined(invoker.output), "output must be defined")
+  assert(defined(invoker.files), "files must be defined as a list of scopes")
+  action(target_name) {
+    script = "//flutter/build/zip.py"
+    outputs = [ "$root_build_dir/zip_archives/${invoker.output}" ]
+    inputs = []
+    deps = invoker.deps
+
+    args = [ "-o", rebase_path(outputs[0]) ]
+    foreach(input, invoker.files) {
+      args += [
+        "-i",
+        rebase_path(input.source),
+        rebase_path(input.destination),
+      ]
+      inputs += [ input.source ]
+    }
+  }
+}
