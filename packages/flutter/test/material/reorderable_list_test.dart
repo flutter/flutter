@@ -469,6 +469,7 @@ void main() {
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,
+            isFocusable: true,
             hasEnabledState: true,
             label: 'Switch tile',
             hasTapAction: true,
