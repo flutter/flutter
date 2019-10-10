@@ -1056,9 +1056,21 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
-      final Widget emplacedHint = _enabled
-        ? widget.hint
-        : widget.disabledHint ?? widget.hint;
+      Widget emplacedHint;
+      if (_enabled) {
+        emplacedHint = widget.hint;
+      } else {
+        emplacedHint = widget.disabledHint ?? widget.hint;
+      }
+
+      if (widget.selectedItemBuilder == null) {
+        emplacedHint = Container(
+          constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
+          alignment: AlignmentDirectional.centerStart,
+          child: emplacedHint,
+        );
+      }
+
       hintIndex = items.length;
       items.add(DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
