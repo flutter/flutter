@@ -906,7 +906,7 @@ class DropdownButton<T> extends StatefulWidget {
 class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
   int _selectedIndex;
   _DropdownRoute<T> _dropdownRoute;
-  Size _lastSize;
+  Orientation _lastOrientation;
 
   @override
   void initState() {
@@ -924,7 +924,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
     _dropdownRoute = null;
-    _lastSize = null;
+    _lastOrientation = null;
   }
 
   @override
@@ -1034,15 +1034,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final Size newSize = MediaQuery.of(context).size;
-    _lastSize ??= newSize;
-    if (MediaQuery.of(context).size != _lastSize) {
-      if (newSize.width != _lastSize.width && newSize.height != _lastSize.height) {
-        // Only remove the dropdown if the orientation changes, not if the
-        // keyboard is shown or hidden.
-        _removeDropdownRoute();
-      }
-      _lastSize = newSize;
+    final Orientation newOrientation = MediaQuery.of(context).orientation;
+    _lastOrientation ??= newOrientation;
+    if (MediaQuery.of(context).orientation != _lastOrientation) {
+      _removeDropdownRoute();
+      _lastOrientation = newOrientation;
     }
 
     // The width of the button and the menu are defined by the widest
