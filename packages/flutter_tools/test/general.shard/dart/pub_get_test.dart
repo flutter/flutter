@@ -3,14 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -18,6 +21,7 @@ import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mocks.dart' as mocks;
 
 void main() {
   setUpAll(() {
@@ -32,7 +36,7 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
       expect(testLogger.statusText, '');
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -88,8 +92,9 @@ void main() {
     ProcessManager: () => MockProcessManager(69),
     FileSystem: () => MockFileSystem(),
     Platform: () => FakePlatform(
-      environment: <String, String>{},
+      environment: UnmodifiableMapView<String, String>(<String, String>{}),
     ),
+    Pub: () => const Pub(),
   });
 
   testUsingContext('pub cache in root is used', () async {
@@ -102,7 +107,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -115,8 +120,9 @@ void main() {
     ProcessManager: () => MockProcessManager(69),
     FileSystem: () => MockFileSystem(),
     Platform: () => FakePlatform(
-      environment: <String, String>{},
+      environment: UnmodifiableMapView<String, String>(<String, String>{}),
     ),
+    Pub: () => const Pub(),
   });
 
   testUsingContext('pub cache in environment is used', () async {
@@ -128,7 +134,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -141,17 +147,82 @@ void main() {
     ProcessManager: () => MockProcessManager(69),
     FileSystem: () => MockFileSystem(),
     Platform: () => FakePlatform(
-      environment: <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
+      environment: UnmodifiableMapView<String, String>(<String, String>{
+        'PUB_CACHE': 'custom/pub-cache/path',
+      }),
     ),
+    Pub: () => const Pub(),
+  });
+
+  testUsingContext('analytics sent on success', () async {
+    MockDirectory.findCache = true;
+    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(0),
+    FileSystem: () => MockFileSystem(),
+    Platform: () => FakePlatform(
+      environment: UnmodifiableMapView<String, String>(<String, String>{
+        'PUB_CACHE': 'custom/pub-cache/path',
+      }),
+    ),
+    Usage: () => MockUsage(),
+    Pub: () => const Pub(),
+  });
+
+  testUsingContext('analytics sent on failure', () async {
+    MockDirectory.findCache = true;
+    try {
+      await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+    } on ToolExit {
+      // Ignore.
+    }
+    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(1),
+    FileSystem: () => MockFileSystem(),
+    Platform: () => FakePlatform(
+      environment: UnmodifiableMapView<String, String>(<String, String>{
+        'PUB_CACHE': 'custom/pub-cache/path',
+      }),
+    ),
+    Usage: () => MockUsage(),
+    Pub: () => const Pub(),
+  });
+
+  testUsingContext('analytics sent on failed version solve', () async {
+    MockDirectory.findCache = true;
+    try {
+      await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+    } on ToolExit {
+      // Ignore.
+    }
+    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(
+      1,
+      stderr: 'version solving failed',
+    ),
+    FileSystem: () => MockFileSystem(),
+    Platform: () => FakePlatform(
+      environment: UnmodifiableMapView<String, String>(<String, String>{
+        'PUB_CACHE': 'custom/pub-cache/path',
+      }),
+    ),
+    Usage: () => MockUsage(),
+    Pub: () => const Pub(),
   });
 }
 
 typedef StartCallback = void Function(List<dynamic> command);
 
 class MockProcessManager implements ProcessManager {
-  MockProcessManager(this.fakeExitCode);
+  MockProcessManager(this.fakeExitCode, {
+    this.stderr = '',
+  });
 
   final int fakeExitCode;
+  final String stderr;
 
   String lastPubEnvironment;
   String lastPubCache;
@@ -167,58 +238,15 @@ class MockProcessManager implements ProcessManager {
   }) {
     lastPubEnvironment = environment['PUB_ENVIRONMENT'];
     lastPubCache = environment['PUB_CACHE'];
-    return Future<Process>.value(MockProcess(fakeExitCode));
+    return Future<Process>.value(mocks.createMockProcess(
+      exitCode: fakeExitCode,
+      stderr: stderr,
+    ));
   }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
-
-class MockProcess implements Process {
-  MockProcess(this.fakeExitCode);
-
-  final int fakeExitCode;
-
-  @override
-  Stream<List<int>> get stdout => MockStream<List<int>>();
-
-  @override
-  Stream<List<int>> get stderr => MockStream<List<int>>();
-
-  @override
-  Future<int> get exitCode => Future<int>.value(fakeExitCode);
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class MockStream<T> implements Stream<T> {
-  @override
-  Stream<S> transform<S>(StreamTransformer<T, S> streamTransformer) => MockStream<S>();
-
-  @override
-  Stream<T> where(bool test(T event)) => MockStream<T>();
-
-  @override
-  StreamSubscription<T> listen(void onData(T event), { Function onError, void onDone(), bool cancelOnError }) {
-    return MockStreamSubscription<T>();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class MockStreamSubscription<T> implements StreamSubscription<T> {
-  @override
-  Future<E> asFuture<E>([ E futureValue ]) => Future<E>.value();
-
-  @override
-  Future<void> cancel() async { }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
 
 class MockFileSystem extends ForwardingFileSystem {
   MockFileSystem() : super(MemoryFileSystem());
@@ -266,3 +294,5 @@ class MockDirectory implements Directory {
 }
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
+
+class MockUsage extends Mock implements Usage {}

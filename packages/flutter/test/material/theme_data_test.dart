@@ -176,7 +176,7 @@ void main() {
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
-      valueIndicatorTextStyle: const TextStyle(color: Colors.black)
+      valueIndicatorTextStyle: const TextStyle(color: Colors.black),
     );
 
     final ChipThemeData chipTheme = ChipThemeData.fromDefaults(
@@ -260,7 +260,7 @@ void main() {
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
-      valueIndicatorTextStyle: const TextStyle(color: Colors.white)
+      valueIndicatorTextStyle: const TextStyle(color: Colors.white),
     );
 
     final ChipThemeData otherChipTheme = ChipThemeData.fromDefaults(

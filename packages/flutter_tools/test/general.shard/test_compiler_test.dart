@@ -25,6 +25,7 @@ void main() {
           fs.file('test/foo.dart').createSync(recursive: true);
           residentCompiler = MockResidentCompiler();
           testCompiler = FakeTestCompiler(
+            true,
             false,
             FlutterProject.current(),
             residentCompiler,
@@ -75,10 +76,11 @@ void main() {
 /// Override the creation of the Resident Compiler to simplify testing.
 class FakeTestCompiler extends TestCompiler {
   FakeTestCompiler(
+    bool enableAsserts,
     bool trackWidgetCreation,
     FlutterProject flutterProject,
     this.residentCompiler,
-  ) : super(trackWidgetCreation, flutterProject);
+  ) : super(enableAsserts, trackWidgetCreation, flutterProject);
 
   final MockResidentCompiler residentCompiler;
 

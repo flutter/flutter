@@ -25,6 +25,13 @@ export 'source.dart';
 /// The [BuildSystem] instance.
 BuildSystem get buildSystem => context.get<BuildSystem>();
 
+/// A reasonable amount of files to open at the same time.
+///
+/// This number is somewhat arbitrary - it is difficult to detect whether
+/// or not we'll run out of file descriptiors when using async dart:io
+/// APIs.
+const int kMaxOpenFiles = 64;
+
 /// Configuration for the build system itself.
 class BuildSystemConfig {
   /// Create a new [BuildSystemConfig].
@@ -197,7 +204,7 @@ abstract class Target {
     return <String, Object>{
       'name': name,
       'dependencies': <String>[
-        for (Target target in dependencies) target.name
+        for (Target target in dependencies) target.name,
       ],
       'inputs': <String>[
         for (File file in resolveInputs(environment).sources) file.path,
@@ -285,8 +292,7 @@ class Environment {
       buffer.write(key);
       buffer.write(defines[key]);
     }
-    // in case there was no configuration, provide some value.
-    buffer.write('Flutter is awesome');
+    buffer.write(outputDir.path);
     final String output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
@@ -623,8 +629,14 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
 
 /// A node in the build graph.
 class Node {
-  Node(this.target, this.inputs, this.outputs, this.dependencies,
-      Environment environment, this.missingDepfile) {
+  Node(
+    this.target,
+    this.inputs,
+    this.outputs,
+    this.dependencies,
+    Environment environment,
+    this.missingDepfile,
+  ) {
     final File stamp = target._findStampFile(environment);
 
     // If the stamp file doesn't exist, we haven't run this step before and

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../cache.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -63,6 +64,9 @@ class PrecacheCommand extends FlutterCommand {
     for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
       if (!FlutterVersion.instance.isMaster && artifact.unstable) {
+        continue;
+      }
+      if (artifact.feature != null && !featureFlags.isEnabled(artifact.feature)) {
         continue;
       }
       if (argResults[artifact.name]) {
