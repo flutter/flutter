@@ -31,8 +31,6 @@ class FinancialEntityView extends StatelessWidget {
   }) : assert(segments.length == financialEntityCards.length);
 
   /// The amounts to assign each item.
-  ///
-  /// This list must have the same length as [colors].
   final List<RallyPieChartSegment> segments;
   final String heroLabel;
   final double heroAmount;
@@ -236,13 +234,13 @@ class FinancialEntityCategoryDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<_DetailedEventCard> cards = items
-      .map((DetailedEventData i) => _DetailedEventCard(
-        title: i.title,
-        subtitle: dateFormat.format(i.date),
-        amount: i.amount,
-      ))
-      .toList();
+    final List<_DetailedEventCard> cards = items.map((DetailedEventData detailedEventData) {
+      return _DetailedEventCard(
+        title: detailedEventData.title,
+        subtitle: dateFormat.format(detailedEventData.date),
+        amount: detailedEventData.amount,
+      );
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
