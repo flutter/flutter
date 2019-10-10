@@ -117,12 +117,14 @@ enum BuildMode {
   debug,
   profile,
   release,
+  jitRelease,
 }
 
 const List<String> _kBuildModes = <String>[
   'debug',
   'profile',
   'release',
+  'jit_release',
 ];
 
 /// Return the name for the build mode, or "any" if null.
@@ -139,6 +141,8 @@ BuildMode getBuildModeForName(String name) {
       return BuildMode.profile;
     case 'release':
       return BuildMode.release;
+    case 'jit_release':
+      return BuildMode.jitRelease;
   }
   return null;
 }

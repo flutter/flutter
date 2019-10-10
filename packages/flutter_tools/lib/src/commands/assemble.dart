@@ -33,6 +33,7 @@ const List<Target> _kDefaultTargets = <Target>[
   ReleaseMacOSBundleFlutterAssets(),
   DebugBundleLinuxAssets(),
   WebReleaseBundle(),
+  CopyFlutterBundle(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -126,7 +127,7 @@ class AssembleCommand extends FlutterCommand {
     if (!result.success) {
       for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
         printError('Target ${data.key} failed: ${data.value.exception}');
-        printError('${data.value.exception}');
+        printError('${data.value.exception}', stackTrace: data.value.stackTrace);
       }
       throwToolExit('build failed.');
     }
