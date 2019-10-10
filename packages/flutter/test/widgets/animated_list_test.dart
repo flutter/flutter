@@ -38,14 +38,17 @@ void main() {
     await tester.pump();
     expect(find.text('item 2'), findsOneWidget);
 
-    listKey.currentState.removeItem(2, (BuildContext context, Animation<double> animation) {
-      return const SizedBox(
-        height: 100.0,
-        child: Center(
-          child: Text('removing item'),
-        ),
-      );
-    }, duration: const Duration(milliseconds: 100));
+    listKey.currentState.removeItem(
+      2,
+      (BuildContext context, Animation<double> animation) {
+        return const SizedBox(
+          height: 100.0,
+          child: Center(child: Text('removing item')),
+        );
+      },
+      duration: const Duration(milliseconds: 100),
+    );
+
     await tester.pump();
     expect(find.text('removing item'), findsOneWidget);
     expect(find.text('item 2'), findsNothing);
@@ -105,9 +108,7 @@ void main() {
                     sizeFactor: animation,
                     child: SizedBox(
                       height: 100.0,
-                      child: Center(
-                        child: Text('item $index'),
-                      ),
+                      child: Center(child: Text('item $index')),
                     ),
                   );
                 },
@@ -121,7 +122,10 @@ void main() {
       double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
       double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
 
-      listKey.currentState.insertItem(0, duration: const Duration(milliseconds: 100));
+      listKey.currentState.insertItem(
+        0,
+        duration: const Duration(milliseconds: 100),
+      );
       await tester.pump();
 
       // Newly inserted item 0's height should animate from 0 to 100
@@ -136,11 +140,18 @@ void main() {
       expect(itemTop(0), 0.0);
       expect(itemBottom(0), 100.0);
 
-      listKey.currentState.insertItem(0, duration: const Duration(milliseconds: 100));
-      listKey.currentState.insertItem(0, duration: const Duration(milliseconds: 100));
+      listKey.currentState.insertItem(
+        0,
+        duration: const Duration(milliseconds: 100),
+      );
+      listKey.currentState.insertItem(
+        0,
+        duration: const Duration(milliseconds: 100),
+      );
       await tester.pump();
 
-      // The height of the newly inserted items at index 0 and 1 should animate from 0 to 100.
+      // The height of the newly inserted items at index 0 and 1 should animate
+      // from 0 to 100.
       // The height of the original item, now at index 2, should remain 100.
       expect(itemHeight(0), 0.0);
       expect(itemHeight(1), 0.0);
@@ -209,8 +220,9 @@ void main() {
       expect(find.text('item 2'), findsOneWidget);
 
       items.removeAt(0);
-      listKey.currentState.removeItem(0,
-            (BuildContext context, Animation<double> animation) => buildItem(context, 0, animation),
+      listKey.currentState.removeItem(
+        0,
+        (BuildContext context, Animation<double> animation) => buildItem(context, 0, animation),
         duration: const Duration(milliseconds: 100),
       );
 
@@ -250,10 +262,10 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CustomScrollView(
             slivers: <Widget>[
-              const SliverList(
+              SliverList(
                 delegate: SliverChildListDelegate(<Widget>[
-                  SizedBox(height: 100),
-                  SizedBox(height: 100),
+                  const SizedBox(height: 100),
+                  const SizedBox(height: 100),
                 ]),
               ),
               SliverAnimatedList(
@@ -296,7 +308,10 @@ void main() {
       expect(find.text('item 3'), findsNothing);
 
       await tester.pump(const Duration(milliseconds: 500));
-      expect(tester.getSize(find.byKey(const ObjectKey('removing'))).height, 50);
+      expect(
+        tester.getSize(find.byKey(const ObjectKey('removing'))).height,
+        50,
+      );
       expect(tester.getTopLeft(find.text('item 0')).dy, 250);
 
       await tester.pumpAndSettle();

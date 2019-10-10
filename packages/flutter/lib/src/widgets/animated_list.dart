@@ -40,15 +40,16 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 
 /// A scrolling container that animates items when they are inserted or removed.
 ///
-/// This widget's [AnimatedListState] can be used to dynamically insert or remove
-/// items. To refer to the [AnimatedListState] either provide a [GlobalKey] or
-/// use the static [of] method from an item's input callback.
+/// This widget's [AnimatedListState] can be used to dynamically insert or
+/// remove items. To refer to the [AnimatedListState] either provide a
+/// [GlobalKey] or use the static [of] method from an item's input callback.
 ///
 /// This widget is similar to one created by [ListView.builder].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
 class AnimatedList extends StatefulWidget {
-  /// Creates a scrolling container that animates items when they are inserted or removed.
+  /// Creates a scrolling container that animates items when they are inserted
+  /// or removed.
   const AnimatedList({
     Key key,
     @required this.itemBuilder,
@@ -157,7 +158,8 @@ class AnimatedList extends StatefulWidget {
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry padding;
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
   ///
   /// This method is typically used by [AnimatedList] item widgets that insert or
   /// remove items in response to user input.
@@ -173,11 +175,11 @@ class AnimatedList extends StatefulWidget {
       return result;
     throw FlutterError(
       'AnimatedList.of() called with a context that does not contain an AnimatedList.\n'
-      'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of(). '
-      'This can happen when the context provided is from the same StatefulWidget that '
-      'built the AnimatedList. Please see the AnimatedList documentation for examples '
-      'of how to refer to an AnimatedListState object: '
-      '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html \n'
+      'No AnimatedList ancestor could be found starting from the context that '
+      'was passed to AnimatedList.of(). This can happen when the context '
+      'provided is from the same StatefulWidget that built the AnimatedList. '
+      'Please see the AnimatedList documentation for examples of how to refer to '
+      'an AnimatedListState object: https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html \n'
       'The context used was:\n'
       '  $context'
     );
@@ -271,7 +273,8 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///
 /// See also:
 ///
-/// * [SliverList], which does not animate items when they are inserted or removed.
+/// * [SliverList], which does not animate items when they are inserted or
+///   removed.
 class SliverAnimatedList extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
@@ -303,7 +306,8 @@ class SliverAnimatedList extends StatefulWidget {
   @override
   SliverAnimatedListState createState() => SliverAnimatedListState();
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
   ///
   /// This method is typically used by [SliverAnimatedList] item widgets that
   /// insert or remove items in response to user input.
@@ -320,11 +324,11 @@ class SliverAnimatedList extends StatefulWidget {
     throw FlutterError(
         'SliverAnimatedList.of() called with a context that does not contain a SliverAnimatedList.\n'
         'No SliverAnimatedListState ancestor could be found starting from the '
-        'context that was passed to SliverAnimatedListState.of(). '
-        'This can happen when the context provided is from the same StatefulWidget that '
+        'context that was passed to SliverAnimatedListState.of(). This can '
+        'happen when the context provided is from the same StatefulWidget that '
         'built the AnimatedList. Please see the SliverAnimatedList documentation '
         'for examples of how to refer to an AnimatedListState object: '
-        '  https://docs.flutter.io/flutter/widgets/SliverAnimatedListState-class.html \n'
+        'https://docs.flutter.io/flutter/widgets/SliverAnimatedListState-class.html \n'
         'The context used was:\n'
         '  $context');
   }
@@ -441,8 +445,14 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
         item.itemIndex += 1;
     }
 
-    final AnimationController controller = AnimationController(duration: duration, vsync: this);
-    final _ActiveItem incomingItem = _ActiveItem.incoming(controller, itemIndex);
+    final AnimationController controller = AnimationController(
+      duration: duration,
+      vsync: this,
+    );
+    final _ActiveItem incomingItem = _ActiveItem.incoming(
+      controller,
+      itemIndex,
+    );
     setState(() {
       _incomingItems
         ..add(incomingItem)
@@ -499,20 +509,26 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
           item.itemIndex -= 1;
       }
 
-      setState(() {
-        _itemsCount -= 1;
-      });
+      setState(() => _itemsCount -= 1);
     });
   }
 
   Widget _itemBuilder(BuildContext context, int itemIndex) {
     final _ActiveItem outgoingItem = _activeItemAt(_outgoingItems, itemIndex);
-    if (outgoingItem != null)
-      return outgoingItem.removedItemBuilder(context, outgoingItem.controller.view);
+    if (outgoingItem != null) {
+      return outgoingItem.removedItemBuilder(
+        context,
+        outgoingItem.controller.view,
+      );
+    }
 
     final _ActiveItem incomingItem = _activeItemAt(_incomingItems, itemIndex);
     final Animation<double> animation = incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
-    return widget.itemBuilder(context, _itemIndexToIndex(itemIndex), animation);
+    return widget.itemBuilder(
+      context,
+      _itemIndexToIndex(itemIndex),
+      animation,
+    );
   }
 
   @override
