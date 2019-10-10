@@ -558,9 +558,10 @@ void main() {
                       TestSemantics(
                         id: 10,
                         flags: <SemanticsFlag>[
-                          SemanticsFlag.isButton,
                           SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isButton,
                           SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: 'Back',
@@ -588,9 +589,10 @@ void main() {
                   TestSemantics(
                     id: 8,
                     flags: <SemanticsFlag>[
-                      SemanticsFlag.isButton,
                       SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isButton,
                       SemanticsFlag.isEnabled,
+                      SemanticsFlag.isFocusable,
                     ],
                     actions: <SemanticsAction>[SemanticsAction.tap],
                     label: 'Suggestions',

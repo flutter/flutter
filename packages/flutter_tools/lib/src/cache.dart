@@ -16,20 +16,24 @@ import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'features.dart';
 import 'globals.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
 
-  const DevelopmentArtifact._(this.name, {this.unstable = false});
+  const DevelopmentArtifact._(this.name, {this.unstable = false, this.feature});
 
   /// The name of the artifact.
   ///
   /// This should match the flag name in precache.dart
   final String name;
 
-  /// Whether this artifact should be unavailable on stable branches.
+  /// Whether this artifact should be unavailable on master branch only.
   final bool unstable;
+
+  /// A feature to control the visibility of this artifact.
+  final Feature feature;
 
   /// Artifacts required for Android development.
   static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot');
@@ -41,7 +45,7 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
   /// Artifacts required for web development.
-  static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
+  static const DevelopmentArtifact web = DevelopmentArtifact._('web', feature: flutterWebFeature);
 
   /// Artifacts required for desktop macOS.
   static const DevelopmentArtifact macOS = DevelopmentArtifact._('macos', unstable: true);
@@ -75,6 +79,9 @@ class DevelopmentArtifact {
     universal,
     flutterRunner,
   ];
+
+  @override
+  String toString() => 'Artifact($name, $unstable)';
 }
 
 /// A wrapper around the `bin/cache/` directory.
@@ -120,6 +127,9 @@ class Cache {
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
   bool includeAllPlatforms = false;
+
+  // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
+  bool useUnsignedMacBinaries = false;
 
   static RandomAccessFile _lock;
   static bool _lockEnabled = true;
@@ -1094,12 +1104,14 @@ class IosUsbArtifacts extends CachedArtifact {
 
   @override
   Future<void> updateInner() {
-    if (!platform.isMacOS) {
+    if (!platform.isMacOS && !cache.includeAllPlatforms) {
       return Future<void>.value();
     }
-    final Uri archiveUri = Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies/$name/$version/$name.zip');
     return _downloadZipArchive('Downloading $name...', archiveUri, location);
   }
+
+  @visibleForTesting
+  Uri get archiveUri => Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
 }
 
 // Many characters are problematic in filenames, especially on Windows.

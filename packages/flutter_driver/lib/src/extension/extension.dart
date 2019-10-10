@@ -428,7 +428,11 @@ class FlutterDriverExtension {
   Future<GetSemanticsIdResult> _getSemanticsId(Command command) async {
     final GetSemanticsId semanticsCommand = command;
     final Finder target = await _waitForElement(_createFinder(semanticsCommand.finder));
-    final Element element = target.evaluate().single;
+    final Iterable<Element> elements = target.evaluate();
+    if (elements.length > 1) {
+      throw StateError('Found more than one element with the same ID: $elements');
+    }
+    final Element element = elements.single;
     RenderObject renderObject = element.renderObject;
     SemanticsNode node;
     while (renderObject != null && node == null) {

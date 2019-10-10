@@ -59,6 +59,7 @@ void main() {
       'bundle',
       ...?arguments,
       '--target=$projectPath/lib/main.dart',
+      '--no-pub'
     ]);
     return command;
   }

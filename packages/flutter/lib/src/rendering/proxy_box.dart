@@ -3485,9 +3485,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool toggled,
     bool selected,
     bool button,
+    bool link,
     bool header,
     bool textField,
     bool readOnly,
+    bool focusable,
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
@@ -3536,9 +3538,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _toggled = toggled,
        _selected = selected,
        _button = button,
+       _link = link,
        _header = header,
        _textField = textField,
        _readOnly = readOnly,
+       _focusable = focusable,
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
@@ -3678,6 +3682,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the [SemanticsNode.isLink] semantic to the given value.
+  bool get link => _link;
+  bool _link;
+  set link(bool value) {
+    if (link == value)
+      return;
+    _link = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.isHeader] semantic to the given value.
   bool get header => _header;
   bool _header;
@@ -3705,6 +3719,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (readOnly == value)
       return;
     _readOnly = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isFocusable] semantic to the given value.
+  bool get focusable => _focusable;
+  bool _focusable;
+  set focusable(bool value) {
+    if (focusable == value)
+      return;
+    _focusable = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4360,12 +4384,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isSelected = selected;
     if (button != null)
       config.isButton = button;
+    if (link != null)
+      config.isLink = link;
     if (header != null)
       config.isHeader = header;
     if (textField != null)
       config.isTextField = textField;
     if (readOnly != null)
       config.isReadOnly = readOnly;
+    if (focusable != null)
+      config.isFocusable = focusable;
     if (focused != null)
       config.isFocused = focused;
     if (inMutuallyExclusiveGroup != null)
