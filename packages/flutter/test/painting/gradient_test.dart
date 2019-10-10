@@ -771,6 +771,11 @@ void main() {
   group('Transforms', () {
     const List<Color> colors = <Color>[Color(0xFFFFFFFF), Color(0xFF009900)];
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 400.0);
+    const List<Gradient> gradients = <Gradient>[
+      LinearGradient(colors: colors),
+      RadialGradient(colors: colors),
+      SweepGradient(colors: colors),
+    ];
 
     double radians(double degrees) => degrees * math.pi / 180;
 
@@ -787,15 +792,24 @@ void main() {
         ..rotateZ(radians);
     }
 
-    testWidgets('LinearGradient - 45 degrees', (WidgetTester tester) async {
-      final Shader shader = const LinearGradient(
-        colors: colors
-      ).createShader(
-        rect,
-        transform: rotatedTransform(radians(45), rect),
-      );
-      await tester.pumpWidget(CustomPaint(painter: GradientPainter(shader, rect)));
-      expect(find.byType(CustomPaint), matchesGoldenFile('linear_gradient_45.png'));
+    Future<void> runTest(WidgetTester tester, double degrees) async {
+      for (Gradient gradient in gradients) {
+        final String goldenName = '${gradient.runtimeType}_$degrees.png';
+        final Shader shader = gradient.createShader(
+          rect,
+          transform: rotatedTransform(radians(degrees), rect),
+        );
+        await tester.pumpWidget(CustomPaint(painter: GradientPainter(shader, rect)));
+        expect(find.byType(CustomPaint), matchesGoldenFile(goldenName));
+      }
+    }
+
+    testWidgets('Gradients - 45 degrees', (WidgetTester tester) async {
+      await runTest(tester, 45);
+    });
+
+    testWidgets('Gradients - 90 degrees', (WidgetTester tester) async {
+      await runTest(tester, 90);
     });
   });
 }
