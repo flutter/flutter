@@ -174,25 +174,25 @@ class MouseTracker extends ChangeNotifier {
   final Set<MouseTrackerAnnotation> _trackedAnnotations = <MouseTrackerAnnotation>{};
   bool get _hasAttachedAnnotations => _trackedAnnotations.isNotEmpty;
 
-  void _addMouseDevice(int deviceId, PointerEvent event) {
+  void _addMouseDevice(int device, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
-    assert(!_mouseStates.containsKey(deviceId));
-    _mouseStates[deviceId] = _MouseState(mostRecentEvent: event);
+    assert(!_mouseStates.containsKey(device));
+    _mouseStates[device] = _MouseState(mostRecentEvent: event);
     // Schedule a check to enter annotations that might contain this pointer.
-    _checkDeviceUpdates(device: deviceId);
+    _checkDeviceUpdates(device: device);
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
   }
 
-  void _removeMouseDevice(int deviceId, PointerEvent event) {
+  void _removeMouseDevice(int device, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
-    assert(_mouseStates.containsKey(deviceId));
-    final _MouseState disconnectedMouseState = _mouseStates.remove(deviceId);
+    assert(_mouseStates.containsKey(device));
+    final _MouseState disconnectedMouseState = _mouseStates.remove(device);
     disconnectedMouseState.mostRecentEvent = event;
     // Schedule a check to exit annotations that used to contain this pointer.
     _checkDeviceUpdates(
-      device: deviceId,
+      device: device,
       disconnectedMouseState: disconnectedMouseState,
     );
     if (mouseIsConnected != wasConnected) {
@@ -205,19 +205,19 @@ class MouseTracker extends ChangeNotifier {
     if (event.kind != PointerDeviceKind.mouse) {
       return;
     }
-    final int deviceId = event.device;
+    final int device = event.device;
     if (event is PointerAddedEvent) {
-      _addMouseDevice(deviceId, event);
+      _addMouseDevice(device, event);
     } else if (event is PointerRemovedEvent) {
-      _removeMouseDevice(deviceId, event);
+      _removeMouseDevice(device, event);
     } else if (event is PointerHoverEvent) {
-      final _MouseState mouseState = _guaranteeMouseState(deviceId, event);
+      final _MouseState mouseState = _guaranteeMouseState(device, event);
       final PointerEvent previousEvent = mouseState.mostRecentEvent;
       mouseState.mostRecentEvent = event;
       if (previousEvent is PointerAddedEvent || previousEvent.position != event.position) {
         // Only send notifications if we have our first event, or if the
         // location of the mouse has changed
-        _checkDeviceUpdates(device: deviceId);
+        _checkDeviceUpdates(device: device);
       }
     }
   }
@@ -241,8 +241,9 @@ class MouseTracker extends ChangeNotifier {
   // Dispatch callbacks related to a device after all necessary information
   // has been collected.
   //
-  // This function should not not change provided states, and should not access
-  // information that is not provided via parameters (hence being static).
+  // This function should not not change the provided states, and should not
+  // access information that is not provided in parameters (hence being
+  // static).
   static void _dispatchDeviceCallbacks({
     @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
     @required _MouseState currentState,
