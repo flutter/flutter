@@ -15,7 +15,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:flutter_gallery/demo/rally/colors.dart';
 import 'package:flutter_gallery/demo/rally/data.dart';

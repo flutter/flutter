@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:flutter_gallery/demo/rally/colors.dart';
 import 'package:flutter_gallery/demo/rally/data.dart';
@@ -57,7 +56,7 @@ class RallyLineChartPainter extends CustomPainter {
   // points in this line.
   static const int millisInDay = 24 * 60 * 60 * 1000;
 
-  // Amount to shift the tick drawing by so that the sunday ticks do not start
+  // Amount to shift the tick drawing by so that the Sunday ticks do not start
   // on the edge.
   final int tickShift = 3;
 
@@ -82,6 +81,8 @@ class RallyLineChartPainter extends CustomPainter {
     );
   }
 
+  // As we're only using fixed dummy data, we can set should repaint to false
+  // as it's only painted once. In a real app we would need to
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 

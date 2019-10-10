@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class VerticalFractionBar extends StatelessWidget {
   const VerticalFractionBar({ this.color, this.fraction });

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 import 'package:flutter_gallery/demo/rally/tabs/accounts.dart';
 import 'package:flutter_gallery/demo/rally/tabs/bills.dart';
 import 'package:flutter_gallery/demo/rally/tabs/budgets.dart';
@@ -29,20 +29,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  _HomePageState() {
-    _tabController = TabController(length: tabCount, vsync: this);
-  }
 
   TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging && _tabController.previousIndex != _tabController.index)
-        setState(() { });
-    });
+    _tabController = TabController(length: tabCount, vsync: this);
   }
 
   @override
@@ -75,7 +68,7 @@ class _HomePageState extends State<HomePage>
                 labelPadding: EdgeInsets.zero,
                 tabs: _buildTabs(theme),
                 controller: _tabController,
-                // This removes the tab indicator.
+                // This hides the tab indicator.
                 indicatorColor: Colors.transparent,
               ),
             ),

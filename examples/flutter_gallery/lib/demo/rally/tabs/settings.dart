@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:flutter_gallery/demo/rally/data.dart';
 import 'package:flutter_gallery/demo/rally/login.dart';

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
+import 'dart:ui';
 
 /// Most color assignments in Rally are not like the the typical color
 /// assignments that are common in other apps. Instead of primarily mapping to
