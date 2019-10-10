@@ -1188,6 +1188,8 @@ const List<List<String>> _osxBinaryDirs = <List<String>>[
   <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
   <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
   <String>['android-arm64-release/darwin-x64', 'android-arm64-release/darwin-x64.zip'],
+  <String>['android-x64-profile/darwin-x64', 'android-x64-profile/darwin-x64.zip'],
+  <String>['android-x64-release/darwin-x64', 'android-x64-release/darwin-x64.zip'],
 ];
 
 const List<List<String>> _linuxBinaryDirs = <List<String>>[
@@ -1195,6 +1197,7 @@ const List<List<String>> _linuxBinaryDirs = <List<String>>[
   <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
   <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
   <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
+  <String>['android-x64-profile/linux-x64', 'android-x64-profile/linux-x64.zip'],
   <String>['android-x64-release/linux-x64', 'android-x64-release/linux-x64.zip'],
 ];
 
@@ -1203,6 +1206,8 @@ const List<List<String>> _windowsBinaryDirs = <List<String>>[
   <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
   <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
   <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
+  <String>['android-x64-profile/windows-x64', 'android-x64-profile/windows-x64.zip'],
+  <String>['android-x64-release/windows-x64', 'android-x64-release/windows-x64.zip'],
 ];
 
 const List<List<String>> _iosBinaryDirs = <List<String>>[
