@@ -1056,18 +1056,18 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
-      Widget emplacedHint;
+      Widget displayedHint;
       if (_enabled) {
-        emplacedHint = widget.hint;
+        displayedHint = widget.hint;
       } else {
-        emplacedHint = widget.disabledHint ?? widget.hint;
+        displayedHint = widget.disabledHint ?? widget.hint;
       }
 
       if (widget.selectedItemBuilder == null) {
-        emplacedHint = Container(
+        displayedHint = Container(
           constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
           alignment: AlignmentDirectional.centerStart,
-          child: emplacedHint,
+          child: displayedHint,
         );
       }
 
@@ -1076,7 +1076,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
           ignoringSemantics: false,
-          child: emplacedHint,
+          child: displayedHint,
         ),
       ));
     }
