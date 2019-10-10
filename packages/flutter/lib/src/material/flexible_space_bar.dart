@@ -12,7 +12,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 
-/// The collapsing effect while the space bar expands or collapses.
+/// The collapsing effect while the space bar collapses from its full size.
 enum CollapseMode {
   /// The background widget will scroll in a parallax fashion.
   parallax,
@@ -24,18 +24,27 @@ enum CollapseMode {
   none,
 }
 
+/// The stretching effect while the space bar stretches beyond its full size.
 enum StretchMode {
+  /// The background widget will expand to fill the extra space.
   zoomBackground,
+
+  /// The background will blur using a [ImageFilter.blur] effect.
   blurBackground,
+
+  /// The title will fade away as the user over-scrolls.
   fadeTitle,
 }
 
-/// The part of a material design [AppBar] that expands and collapses.
+/// The part of a material design [AppBar] that expands, collapses, and
+/// stretches.
 ///
 /// Most commonly used in in the [SliverAppBar.flexibleSpace] field, a flexible
 /// space bar expands and contracts as the app scrolls so that the [AppBar]
 /// reaches from the top of the app to the top of the scrolling contents of the
-/// app.
+/// app. Furthermore is included functionality for stretch behavior. When
+/// [SliverAppBar.stretch] is true, and your [ScrollPhysics] allow for
+/// overscroll, this space will stretch with the overscroll.
 ///
 /// The widget that sizes the [AppBar] must wrap it in the widget returned by
 /// [FlexibleSpaceBar.createSettings], to convey sizing information down to the
@@ -57,7 +66,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.centerTitle,
     this.titlePadding,
     this.collapseMode = CollapseMode.parallax,
-    this.stretchModes = const <StretchMode>[],
+    this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
   }) : assert(collapseMode != null),
        super(key: key);
 
@@ -82,7 +91,9 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defaults to [CollapseMode.parallax].
   final CollapseMode collapseMode;
 
-  /// Doc
+  /// Stretch effect while over-scrolling,
+  ///
+  /// Defaults to include [StretchMode.zoomBackground].
   final List<StretchMode> stretchModes;
 
   /// Defines how far the [title] is inset from either the widget's

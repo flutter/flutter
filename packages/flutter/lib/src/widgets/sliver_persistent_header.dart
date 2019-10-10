@@ -68,8 +68,15 @@ abstract class SliverPersistentHeaderDelegate {
   /// Defaults to null.
   FloatingHeaderSnapConfiguration get snapConfiguration => null;
 
-  // TODO(Piinks): Doc
+  /// Specifies the [StretchCallback] and offset for execution.
   ///
+  /// If the value of this property is null, then callback will not be
+  /// triggered.
+  ///
+  /// This is only used for stretching headers (those with
+  /// [SliverAppBar.stretch] set to true).
+  ///
+  /// Defaults to null.
   OverScrollHeaderStretchConfiguration get stretchConfiguration => null;
 
   /// Whether this delegate is meaningfully different from the old delegate.

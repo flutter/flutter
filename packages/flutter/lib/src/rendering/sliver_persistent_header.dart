@@ -17,25 +17,30 @@ import 'sliver.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
-// TODO(Piinks): Doc
-///
+/// A callback function that's invoked when the [SliverAppBar] is pulled into an
+/// overscroll and stretched to the offset specified by `stretchTriggerOffset`.
+/// Must return a [Future].
 typedef StretchCallback = Future<void> Function();
 
-// TODO(Piinks): Doc
+/// Specifies how a stretched header is to trigger a [StretchCallback].
 ///
+/// See also:
+///
+///  * [SliverAppBar], which creates a header that can stretched into an
+///  overscroll area and trigger a callback function.
 class OverScrollHeaderStretchConfiguration {
-  /// Doc
+  /// Creates an object that specifies how stretched header is to trigger a
+  /// [StretchCallback].
   OverScrollHeaderStretchConfiguration({
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
   }) : assert(stretchTriggerOffset != null);
 
-  // TODO(Piinks): Doc
-  ///
+  /// The offset of overscroll required to trigger a [StretchCallback].
   final double stretchTriggerOffset;
 
-  // TODO(Piinks): Doc
-  ///
+  /// The callback function to be executed when a user over-scrolls to the
+  /// offset specified by [stretchTriggerOffset].
   final StretchCallback onStretchTrigger;
 }
 
@@ -104,8 +109,15 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   double _lastShrinkOffset = 0.0;
   bool _lastOverlapsContent = false;
 
-  // TODO(Piinks): Doc
+  /// Defines the parameters used to execute a [StretchCallback] when a
+  /// stretching header over-scrolls.
   ///
+  /// If [stretchConfiguration] is null then callback is not triggered.
+  ///
+  /// See also:
+  ///
+  ///  * [SliverAppBar], which creates a header that can stretched into an
+  ///  overscroll area and trigger a callback function.
   OverScrollHeaderStretchConfiguration get stretchConfiguration => _stretchConfiguration;
   OverScrollHeaderStretchConfiguration _stretchConfiguration;
   set stretchConfiguration(OverScrollHeaderStretchConfiguration value) {

@@ -1173,16 +1173,19 @@ class SliverAppBar extends StatefulWidget {
   ///    behavior of the app bar in combination with [pinned] and [floating].
   final bool snap;
 
-  // TODO(Piinks): Doc
+  /// Whether the app bar should stretch to fill the over-scroll area.
   ///
+  /// The app bar can still expand and contract as the user scrolls, but it will
+  /// also stretch when the user over-scrolls.
   final bool stretch;
 
-  // TODO(Piinks): Doc
+  /// The offset of overscroll required to trigger a [StretchCallback].
   ///
+  /// This defaults to 100.0.
   final double stretchTriggerOffset;
 
-  // TODO(Piinks): Doc
-  ///
+  /// The callback function to be executed when a user over-scrolls to the
+  /// offset specified by [stretchTriggerOffset].
   final StretchCallback onStretchTrigger;
 
   @override
