@@ -3,6 +3,7 @@
 
 # We don't care about errors from the Dart VM.
 race:dart::*
+thread:dart::*
 
 # Data race on animator begin frame when the engine is shutting down.
 # https://github.com/flutter/flutter/issues/42190
