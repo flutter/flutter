@@ -4,6 +4,7 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <algorithm>
 #include <functional>
 #include <future>
 #include <memory>
@@ -871,6 +872,44 @@ TEST_F(ShellTest, TextureFrameMarkedAvailableAndUnregister) {
   latch->Wait();
 
   EXPECT_EQ(mockTexture->unregistered(), true);
+}
+
+TEST_F(ShellTest, IsolateCanAccessPersistentIsolateData) {
+  const std::string message = "dummy isolate launch data.";
+
+  Settings settings = CreateSettingsForFixture();
+  settings.persistent_isolate_data =
+      std::make_shared<fml::DataMapping>(message);
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // gpu
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+
+  fml::AutoResetWaitableEvent message_latch;
+  AddNativeCallback("NotifyMessage",
+                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                      const auto message_from_dart =
+                          tonic::DartConverter<std::string>::FromDart(
+                              Dart_GetNativeArgument(args, 0));
+                      ASSERT_EQ(message, message_from_dart);
+                      message_latch.Signal();
+                    }));
+
+  std::unique_ptr<Shell> shell =
+      CreateShell(std::move(settings), std::move(task_runners));
+
+  ASSERT_TRUE(shell->IsSetup());
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("canAccessIsolateLaunchData");
+
+  fml::AutoResetWaitableEvent event;
+  shell->RunEngine(std::move(configuration), [&](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
+
+  message_latch.Wait();
 }
 
 }  // namespace testing

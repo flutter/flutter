@@ -1176,6 +1176,18 @@ class Window {
       registrationZone.runUnaryGuarded(callback, data);
     };
   }
+
+
+  /// The embedder can specify data that the isolate can request synchronously
+  /// on launch. This accessor fetches that data.
+  ///
+  /// This data is persistent for the duration of the Flutter application and is
+  /// available even after isolate restarts. Because of this lifecycle, the size
+  /// of this data must be kept to a minimum.
+  ///
+  /// For asynchronous communication between the embedder and isolate, a
+  /// platform channel may be used.
+  ByteData getPersistentIsolateData() native 'Window_getPersistentIsolateData';
 }
 
 /// Additional accessibility features that may be enabled by the platform.

@@ -86,6 +86,8 @@ class DataMapping final : public Mapping {
  public:
   DataMapping(std::vector<uint8_t> data);
 
+  DataMapping(const std::string& string);
+
   ~DataMapping() override;
 
   // |Mapping|

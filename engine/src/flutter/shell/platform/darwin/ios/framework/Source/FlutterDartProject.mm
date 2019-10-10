@@ -7,6 +7,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/runtime/dart_vm.h"
@@ -232,6 +233,24 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
 
 + (NSString*)defaultBundleIdentifier {
   return @"io.flutter.flutter.app";
+}
+
+#pragma mark - Settings utilities
+
+- (void)setPersistentIsolateData:(NSData*)data {
+  if (data == nil) {
+    return;
+  }
+
+  NSData* persistent_isolate_data = [data copy];
+  fml::NonOwnedMapping::ReleaseProc data_release_proc = [persistent_isolate_data](auto, auto) {
+    [persistent_isolate_data release];
+  };
+  _settings.persistent_isolate_data = std::make_shared<fml::NonOwnedMapping>(
+      static_cast<const uint8_t*>(persistent_isolate_data.bytes),  // bytes
+      persistent_isolate_data.length,                              // byte length
+      data_release_proc                                            // release proc
+  );
 }
 
 @end

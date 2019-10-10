@@ -183,6 +183,14 @@ struct Settings {
   // soon as a frame is rasterized.
   FrameRasterizedCallback frame_rasterized_callback;
 
+  // This data will be available to the isolate immediately on launch via the
+  // Window.getPersistentIsolateData callback. This is meant for information
+  // that the isolate cannot request asynchronously (platform messages can be
+  // used for that purpose). This data is held for the lifetime of the shell and
+  // is available on isolate restarts in the the shell instance. Due to this,
+  // the buffer must be as small as possible.
+  std::shared_ptr<const fml::Mapping> persistent_isolate_data;
+
   std::string ToString() const;
 };
 

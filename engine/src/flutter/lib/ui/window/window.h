@@ -57,6 +57,7 @@ class WindowClient {
   virtual void UpdateIsolateDescription(const std::string isolate_name,
                                         int64_t isolate_port) = 0;
   virtual void SetNeedsReportTimings(bool value) = 0;
+  virtual std::shared_ptr<const fml::Mapping> GetPersistentIsolateData() = 0;
 
  protected:
   virtual ~WindowClient();
