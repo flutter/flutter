@@ -159,13 +159,13 @@ class FinancialEntityCategoryModel {
 
 FinancialEntityCategoryView buildFinancialEntityFromAccountData(
   AccountData model,
-  int i,
+  int accountDataIndex,
 ) {
   return FinancialEntityCategoryView(
     suffix: const Icon(Icons.chevron_right, color: Colors.grey),
     title: model.name,
     subtitle: '• • • • • • ${model.accountNumber.substring(6)}',
-    indicatorColor: RallyColors.accountColor(i),
+    indicatorColor: RallyColors.accountColor(accountDataIndex),
     indicatorFraction: 1,
     amount: model.primaryAmount,
   );
@@ -173,13 +173,13 @@ FinancialEntityCategoryView buildFinancialEntityFromAccountData(
 
 FinancialEntityCategoryView buildFinancialEntityFromBillData(
   BillData model,
-  int i,
+  int billDataInex,
 ) {
   return FinancialEntityCategoryView(
     suffix: const Icon(Icons.chevron_right, color: Colors.grey),
     title: model.name,
     subtitle: model.dueDate,
-    indicatorColor: RallyColors.billColor(i),
+    indicatorColor: RallyColors.billColor(billDataInex),
     indicatorFraction: 1,
     amount: model.primaryAmount,
   );
@@ -187,7 +187,7 @@ FinancialEntityCategoryView buildFinancialEntityFromBillData(
 
 FinancialEntityCategoryView buildFinancialEntityFromBudgetData(
   BudgetData item,
-  int i,
+  int budgetDataIndex,
   BuildContext context,
 ) {
   final String amountUsed = usdWithSignFormat.format(item.amountUsed);
@@ -200,7 +200,7 @@ FinancialEntityCategoryView buildFinancialEntityFromBudgetData(
     ),
     title: item.name,
     subtitle: amountUsed + ' / ' + primaryAmount,
-    indicatorColor: RallyColors.budgetColor(i),
+    indicatorColor: RallyColors.budgetColor(budgetDataIndex),
     indicatorFraction: item.amountUsed / item.primaryAmount,
     amount: item.primaryAmount - item.amountUsed,
   );
