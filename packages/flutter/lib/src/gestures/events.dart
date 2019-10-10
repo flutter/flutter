@@ -5,6 +5,7 @@
 import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
@@ -503,6 +504,8 @@ abstract class PointerEvent extends Diagnosticable {
     properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
     properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
     properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
+    properties.add(TransformProperty('transform', transform));
+    properties.add(DiagnosticsProperty<PointerEvent>('original', original));
   }
 
   /// Returns a complete textual description of this event.

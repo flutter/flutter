@@ -124,6 +124,13 @@ class CupertinoButton extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+    properties.add(ColorProperty('color', color));
+    properties.add(ColorProperty('disabledColor', disabledColor));
+    properties.add(DiagnosticsProperty<VoidCallback>('onPressed', onPressed));
+    properties.add(DoubleProperty('minSize', minSize));
+    properties.add(DoubleProperty('pressedOpacity', pressedOpacity));
+    properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
   }
 }
 

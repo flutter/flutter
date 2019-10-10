@@ -455,6 +455,9 @@ class FlutterErrorDetails extends Diagnosticable {
       properties.add(ErrorSpacer());
       informationCollector().forEach(properties.add);
     }
+    properties.add(StringProperty('library', library));
+    properties.add(DiagnosticsProperty<bool>('silent', silent));
+    properties.add(DiagnosticsProperty<DiagnosticsNode>('summary', summary));
   }
 
   @override

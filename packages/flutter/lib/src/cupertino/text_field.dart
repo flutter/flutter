@@ -1,6 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -572,6 +573,24 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
+    properties.add(EnumProperty<TextInputAction>('textInputAction', textInputAction));
+    properties.add(EnumProperty<TextCapitalization>('textCapitalization', textCapitalization));
+    properties.add(DiagnosticsProperty<StrutStyle>('strutStyle', strutStyle));
+    properties.add(DiagnosticsProperty<ToolbarOptions>('toolbarOptions', toolbarOptions));
+    properties.add(DiagnosticsProperty<bool>('readOnly', readOnly));
+    properties.add(DiagnosticsProperty<bool>('showCursor', showCursor));
+    properties.add(DiagnosticsProperty<ValueChanged<String>>('onChanged', onChanged));
+    properties.add(DiagnosticsProperty<VoidCallback>('onEditingComplete', onEditingComplete));
+    properties.add(DiagnosticsProperty<ValueChanged<String>>('onSubmitted', onSubmitted));
+    properties.add(IterableProperty<TextInputFormatter>('inputFormatters', inputFormatters));
+    properties.add(DiagnosticsProperty<bool>('enabled', enabled));
+    properties.add(DoubleProperty('cursorWidth', cursorWidth));
+    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius));
+    properties.add(EnumProperty<Brightness>('keyboardAppearance', keyboardAppearance));
+    properties.add(DiagnosticsProperty<EdgeInsets>('scrollPadding', scrollPadding));
+    properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection));
+    properties.add(EnumProperty<DragStartBehavior>('dragStartBehavior', dragStartBehavior));
+    properties.add(DiagnosticsProperty<GestureTapCallback>('onTap', onTap));
   }
 }
 

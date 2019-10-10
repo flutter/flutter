@@ -130,6 +130,8 @@ class CupertinoSwitch extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
     properties.add(ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(ColorProperty('activeColor', activeColor));
+    properties.add(EnumProperty<DragStartBehavior>('dragStartBehavior', dragStartBehavior));
   }
 }
 
@@ -532,5 +534,11 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     super.debugFillProperties(description);
     description.add(FlagProperty('value', value: value, ifTrue: 'checked', ifFalse: 'unchecked', showName: true));
     description.add(FlagProperty('isInteractive', value: isInteractive, ifTrue: 'enabled', ifFalse: 'disabled', showName: true, defaultValue: true));
+    description.add(DiagnosticsProperty<TickerProvider>('vsync', vsync));
+    description.add(ColorProperty('activeColor', activeColor));
+    description.add(ColorProperty('trackColor', trackColor));
+    description.add(DiagnosticsProperty<ValueChanged<bool>>('onChanged', onChanged));
+    description.add(EnumProperty<TextDirection>('textDirection', textDirection));
+    description.add(EnumProperty<DragStartBehavior>('dragStartBehavior', dragStartBehavior));
   }
 }

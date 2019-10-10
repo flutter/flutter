@@ -796,6 +796,12 @@ class _RenderCupertinoDialog extends RenderBox {
              },
            );
   }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('isInAccessibilityMode', isInAccessibilityMode));
+    properties.add(ColorProperty('dividerColor', dividerColor));
+  }
 }
 
 // Visual components of an alert dialog that need to be explicitly sized and

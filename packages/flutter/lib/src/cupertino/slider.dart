@@ -202,6 +202,11 @@ class CupertinoSlider extends StatefulWidget {
     properties.add(DoubleProperty('value', value));
     properties.add(DoubleProperty('min', min));
     properties.add(DoubleProperty('max', max));
+    properties.add(DiagnosticsProperty<ValueChanged<double>>('onChanged', onChanged));
+    properties.add(DiagnosticsProperty<ValueChanged<double>>('onChangeStart', onChangeStart));
+    properties.add(DiagnosticsProperty<ValueChanged<double>>('onChangeEnd', onChangeEnd));
+    properties.add(IntProperty('divisions', divisions));
+    properties.add(ColorProperty('activeColor', activeColor));
   }
 }
 

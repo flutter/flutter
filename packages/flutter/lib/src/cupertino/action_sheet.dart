@@ -745,6 +745,11 @@ class _RenderCupertinoAlert extends RenderBox {
              },
            );
   }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ColorProperty('dividerColor', dividerColor));
+  }
 }
 
 // Visual components of an alert that need to be explicitly sized and
