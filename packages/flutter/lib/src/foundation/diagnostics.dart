@@ -2435,7 +2435,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 ///
 /// See also:
 ///
-///  * [ObjectFlagProperty], which provides similar functionality but accepts
+///  * [ObjectFlagSummary], which provides similar functionality but accepts
 ///    only one flag, and is preferred if there is only one entry.
 ///  * [IterableProperty], which provides similar functionality describing
 ///    the values a collection of objects.
