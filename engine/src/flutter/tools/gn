@@ -223,7 +223,6 @@ def to_gn_args(args):
     if args.enable_metal:
       gn_args['skia_use_metal'] = True
       gn_args['shell_enable_metal'] = True
-      gn_args['ios_deployment_target'] = '11'
       gn_args['allow_deprecated_api_calls'] = True
 
     if args.enable_vulkan:
