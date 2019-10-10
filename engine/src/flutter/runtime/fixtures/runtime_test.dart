@@ -60,3 +60,18 @@ void testCanLaunchSecondaryIsolate() {
 void testCanRecieveArguments(List<String> args) {
   notifyResult(args != null && args.length == 1 && args[0] == 'arg1');
 }
+
+@pragma('vm:entry-point')
+void testSecondaryIsolateShutdown() {
+  final onExit = RawReceivePort((_) { notifyNative(); });
+  Isolate.spawn(shutdownIsolateMain, 'You are isolate number 1', onExit: onExit.sendPort);
+  Isolate.spawn(shutdownIsolateMain, 'You are isolate number 2', onExit: onExit.sendPort);
+  Isolate.spawn(shutdownIsolateMain, 'You are isolate number 3', onExit: onExit.sendPort);
+  Isolate.spawn(shutdownIsolateMain, 'You are isolate number 4', onExit: onExit.sendPort);
+}
+
+void shutdownIsolateMain(String message) {
+  print('Secondary isolate got message: ' + message);
+  passMessage('In child Isolate.');
+  notifyNative();
+}
