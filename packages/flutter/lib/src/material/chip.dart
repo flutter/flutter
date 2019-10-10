@@ -1747,12 +1747,12 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       GestureDetector(
         key: deleteIconKey,
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          if (widget.isEnabled) {
-            Feedback.forTap(context);
-            widget.onDeleted();
-          }
-        },
+        onTap: widget.isEnabled
+            ? () {
+                Feedback.forTap(context);
+                widget.onDeleted();
+            }
+            : null,
         child: IconTheme(
           data: theme.iconTheme.copyWith(
             color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
