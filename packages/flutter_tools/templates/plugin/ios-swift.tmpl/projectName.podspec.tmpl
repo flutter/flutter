@@ -13,11 +13,12 @@ Pod::Spec.new do |s|
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
-  s.source_files     = 'Classes/**/*'
-  s.dependency 'FlutterMacOS'
+  s.source_files = 'Classes/**/*'
+  s.dependency 'Flutter'
+  s.platform = :ios, '8.0'
 
-  s.platform = :osx, '10.11'
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
+  # Flutter.framework does not contain a i386 slice. Only x86_64 simulators are supported.
+  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
 
   swift_versions = ['4.0', '4.2', '5.0', '5.1']
   swift_versions << Pod::Validator::DEFAULT_SWIFT_VERSION if Pod::Validator.const_defined? "DEFAULT_SWIFT_VERSION"
