@@ -906,11 +906,13 @@ class DropdownButton<T> extends StatefulWidget {
 class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
   int _selectedIndex;
   _DropdownRoute<T> _dropdownRoute;
+  Size _lastSize;
 
   @override
   void initState() {
     super.initState();
     _updateSelectedIndex();
+    _lastSize = WidgetsBinding.instance.window.physicalSize;
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -925,7 +927,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Defined by WidgetsBindingObserver
   @override
   void didChangeMetrics() {
-    _removeDropdownRoute();
+    final Size newSize = WidgetsBinding.instance.window.physicalSize;
+    if (newSize.width != _lastSize.width && newSize.height != _lastSize.height) {
+      // Only remove the dropdown if the orientation changes, not if the
+      // keyboard is shown or hidden.
+      _removeDropdownRoute();
+    }
+    _lastSize = newSize;
   }
 
   void _removeDropdownRoute() {
