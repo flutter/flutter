@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,18 +49,28 @@ class _HomePage extends State<HomePage> {
   }
 }
 
+const String _webHtml = '''
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Test</title>
+  </head>
+  <body>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua.</p>
+  </body>
+</html>
+''';
+
 class SecondPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        children: const <Widget>[
+        children: <Widget>[
           Expanded(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(0, 0)
-              ),
-            ),
+            child: WebView(initialUrl: 'data:text/html;base64,${base64.encode(utf8.encode(_webHtml))}')
           ),
         ],
       ),
