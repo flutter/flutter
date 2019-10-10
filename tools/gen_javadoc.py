@@ -12,28 +12,35 @@ ANDROID_SRC_ROOT = 'flutter/shell/platform/android'
 
 
 def main():
-  if not os.path.exists(ANDROID_SRC_ROOT):
-    print 'This script must be run at the root of the Flutter source tree'
-    return 1
-
   parser = argparse.ArgumentParser(description='Runs javadoc on Flutter Android libraries')
   parser.add_argument('--out-dir', type=str, required=True)
+  parser.add_argument('--android-source-root', type=str, default=ANDROID_SRC_ROOT)
+  parser.add_argument('--build-config-path', type=str)
+  parser.add_argument('--third-party', type=str, default='third_party')
   args = parser.parse_args()
+
+  if not os.path.exists(args.android_source_root):
+    print('This script must be run at the root of the Flutter source tree, or '
+          'the --android-source-root must be set.')
+    return 1
 
   if not os.path.exists(args.out_dir):
     os.makedirs(args.out_dir)
 
   classpath = [
-    ANDROID_SRC_ROOT,
-    'third_party/android_support/android_arch_lifecycle_common.jar',
-    'third_party/android_support/android_arch_lifecycle_viewmodel.jar',
-    'third_party/android_support/android_support_annotations.jar',
-    'third_party/android_support/android_support_compat.jar',
-    'third_party/android_support/android_support_fragment.jar',
-    'third_party/android_tools/sdk/platforms/android-29/android.jar',
-    'base/android/java/src',
-    'third_party/jsr-305/src/ri/src/main/java',
+    args.android_source_root,
+    args.third_party + '/android_support/android_support_compat.jar',
+    args.third_party + '/android_support/android_support_annotations.jar',
+    args.third_party + '/android_support/android_support_fragment.jar',
+    args.third_party + '/android_support/android_arch_lifecycle_common.jar',
+    args.third_party + '/android_support/android_arch_lifecycle_common_java8.jar',
+    args.third_party + '/android_support/android_arch_lifecycle_runtime.jar',
+    args.third_party + '/android_support/android_arch_lifecycle_viewmodel.jar',
+    args.third_party + '/android_tools/sdk/platforms/android-29/android.jar',
   ]
+  if args.build_config_path:
+    classpath.append(args.build_config_path)
+
   packages = [
     'io.flutter.app',
     'io.flutter.embedding.android',
