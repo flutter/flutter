@@ -80,8 +80,9 @@ class _MouseState {
        _mostRecentEvent = mostRecentEvent;
 
   // The list of annotations that contains this device during the last frame.
-  LinkedHashSet<MouseTrackerAnnotation> lastAnnotations =
-    LinkedHashSet<MouseTrackerAnnotation>();
+  //
+  // It uses [LinkedHashSet] to keep the insertion order.
+  LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = LinkedHashSet<MouseTrackerAnnotation>();
 
   // The most recent mouse event observed from this device.
   //
@@ -111,12 +112,13 @@ class _MouseState {
 /// This class is a [ChangeNotifier] that notifies its listeners if the value of
 /// [mouseIsConnected] changes.
 ///
-/// This class is a global singleton and owned by the [RendererBinding] class.
+/// An instance of [MouseTracker] is owned by the global singleton of
+/// [RendererBinding].
 class MouseTracker extends ChangeNotifier {
   /// Creates a mouse tracker to keep track of mouse locations.
   ///
   /// The first parameter is a [PointerRouter], which [MouseTracker] will
-  /// subscribe to and receive events from. Usually it is global singleton
+  /// subscribe to and receive events from. Usually it is the global singleton
   /// instance [GestureBinding.pointerRouter].
   ///
   /// The second parameter is a function with which the [MouseTracker] can
@@ -142,8 +144,8 @@ class MouseTracker extends ChangeNotifier {
   /// [MouseTracker] uses this callback to know which annotations are affected
   /// by each device.
   ///
-  /// The order between the returned annotations is important since it
-  /// determines the order between callbacks.
+  /// The annotations should be returned in visual order from front to
+  /// back, so that the callbacks are called in an correct order.
   final MouseDetectorAnnotationFinder annotationFinder;
 
   // The pointer router that the mouse tracker listens to, and receives new
@@ -152,7 +154,7 @@ class MouseTracker extends ChangeNotifier {
 
   // Tracks the state of connected mouse devices.
   //
-  // It is the source-of-truth for the list of connected mouse devices.
+  // It is the source of truth for the list of connected mouse devices.
   final Map<int, _MouseState> _mouseStates = <int, _MouseState>{};
 
   // Returns the mouse state of a device. If it doesn't exist, create one using
@@ -170,7 +172,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   // The collection of annotations that are currently being tracked.
-  // It is operated by [attachAnnotation] and [detachAnnotation].
+  // It is operated on by [attachAnnotation] and [detachAnnotation].
   final Set<MouseTrackerAnnotation> _trackedAnnotations = <MouseTrackerAnnotation>{};
   bool get _hasAttachedAnnotations => _trackedAnnotations.isNotEmpty;
 
@@ -241,9 +243,8 @@ class MouseTracker extends ChangeNotifier {
   // Dispatch callbacks related to a device after all necessary information
   // has been collected.
   //
-  // This function should not not change the provided states, and should not
-  // access information that is not provided in parameters (hence being
-  // static).
+  // This function should not change the provided states, and should not access
+  // information that is not provided in parameters (hence being static).
   static void _dispatchDeviceCallbacks({
     @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
     @required _MouseState currentState,
@@ -262,8 +263,7 @@ class MouseTracker extends ChangeNotifier {
     final PointerEvent mostRecentEvent = currentState.mostRecentEvent;
     // The `lastAnnotations` is annotations that contains this device in the
     // previous frame in visual order.
-    final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations
-      = currentState.lastAnnotations;
+    final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = currentState.lastAnnotations;
 
     // Send exit events in visual order.
     final Iterable<MouseTrackerAnnotation> exitingAnnotations =
@@ -318,10 +318,10 @@ class MouseTracker extends ChangeNotifier {
 
     final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations =
       (_hasAttachedAnnotations && thisDeviceIsConnected)
-      ? LinkedHashSet<MouseTrackerAnnotation>.from(
-          annotationFinder(mouseState.mostRecentEvent.position)
-        )
-      : <MouseTrackerAnnotation>{};
+        ? LinkedHashSet<MouseTrackerAnnotation>.from(
+            annotationFinder(mouseState.mostRecentEvent.position)
+          )
+        : <MouseTrackerAnnotation>{};
 
     _dispatchDeviceCallbacks(
       currentState: mouseState,

@@ -477,7 +477,7 @@ void main() {
     expect(finderCalled, 0);
   });
 
-  test('should trigger callbacks between parents and children in correctly order', () {
+  test('should trigger callbacks between parents and children in correct order', () {
     // This test simulates the scenario of a layer being the child of another.
     //
     //   ———————————
