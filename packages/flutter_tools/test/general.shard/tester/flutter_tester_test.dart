@@ -134,7 +134,10 @@ void main() {
         mockArtifacts = MockArtifacts();
         final String artifactPath = fs.path.join(flutterRoot, 'artifact');
         fs.file(artifactPath).createSync(recursive: true);
-        when(mockArtifacts.getArtifactPath(any)).thenReturn(artifactPath);
+        when(mockArtifacts.getArtifactPath(
+          any,
+          mode: anyNamed('mode')
+        )).thenReturn(artifactPath);
 
         mockKernelCompiler = MockKernelCompiler();
       });
@@ -170,7 +173,7 @@ Hello!
           mainPath: anyNamed('mainPath'),
           outputFilePath: anyNamed('outputFilePath'),
           depFilePath: anyNamed('depFilePath'),
-          enableAsserts: anyNamed('enableAsserts'),
+          buildMode: BuildMode.debug,
           trackWidgetCreation: anyNamed('trackWidgetCreation'),
           extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
           fileSystemRoots: anyNamed('fileSystemRoots'),
