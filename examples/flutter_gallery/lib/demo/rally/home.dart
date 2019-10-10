@@ -149,7 +149,7 @@ class _RallyTabState extends State<_RallyTab>
     _titleFadeAnimation = _controller.drive(CurveTween(curve: Curves.easeOut));
     _iconFadeAnimation = _controller.drive(Tween<double>(begin: 0.6, end: 1));
     if (widget.isExpanded) {
-      _controller.value = 1.0;
+      _controller.value = 1;
     }
   }
 

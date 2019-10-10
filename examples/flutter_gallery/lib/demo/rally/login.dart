@@ -27,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0.0,
+        elevation: 0,
         leading: IconButton(
           icon: const BackButtonIcon(),
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,

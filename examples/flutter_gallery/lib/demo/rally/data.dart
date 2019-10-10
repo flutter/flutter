@@ -39,7 +39,7 @@ double sumBudgetDataPrimaryAmount(List<BudgetData> items) {
 /// Calculates the sum of the amounts used of a list of [BudgetData].
 double sumBudgetDataAmountUsed(List<BudgetData> items) {
   return items.fold(
-    0.0,
+    0,
     (double sum, BudgetData next) => sum + next.amountUsed,
   );
 }
@@ -127,7 +127,7 @@ class DummyDataService {
       ),
       const AccountData(
         name: 'Vacation',
-        primaryAmount: 253.0,
+        primaryAmount: 253,
         accountNumber: '1231233456',
       ),
     ];
@@ -182,7 +182,7 @@ class DummyDataService {
       ),
       const BillData(
         name: 'Rent',
-        primaryAmount: 1200.0,
+        primaryAmount: 1200,
         dueDate: 'Feb 9',
       ),
       const BillData(
@@ -192,7 +192,7 @@ class DummyDataService {
       ),
       const BillData(
         name: 'ABC Loans',
-        primaryAmount: 400.0,
+        primaryAmount: 400,
         dueDate: 'Feb 29',
       ),
     ];
@@ -202,22 +202,22 @@ class DummyDataService {
     return <BudgetData>[
       const BudgetData(
         name: 'Coffee Shops',
-        primaryAmount: 70.0,
+        primaryAmount: 70,
         amountUsed: 45.49,
       ),
       const BudgetData(
         name: 'Groceries',
-        primaryAmount: 170.0,
+        primaryAmount: 170,
         amountUsed: 16.45,
       ),
       const BudgetData(
         name: 'Restaurants',
-        primaryAmount: 170.0,
+        primaryAmount: 170,
         amountUsed: 123.25,
       ),
       const BudgetData(
         name: 'Clothing',
-        primaryAmount: 70.0,
+        primaryAmount: 70,
         amountUsed: 19.45,
       ),
     ];

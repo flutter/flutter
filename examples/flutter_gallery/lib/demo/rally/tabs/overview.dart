@@ -133,7 +133,7 @@ class _FinancialView extends StatelessWidget {
             child: Text(
               usdWithSignFormat.format(total),
               style: theme.textTheme.body2.copyWith(
-                fontSize: 44.0,
+                fontSize: 44,
                 fontWeight: FontWeight.w600,
               ),
             ),

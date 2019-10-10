@@ -89,11 +89,11 @@ class _RallyPieChartState extends State<RallyPieChart>
     animation = CurvedAnimation(
       parent: TweenSequence<double>(<TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 0.0, end: 0.0),
-          weight: 1.0,
+          tween: Tween<double>(begin: 0, end: 0),
+          weight: 1,
         ),
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 0.0, end: 1.0),
+          tween: Tween<double>(begin: 0, end: 1),
           weight: 1.5,
         ),
       ]).animate(controller),
@@ -138,7 +138,7 @@ class _AnimatedRallyPieChart extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle labelTextStyle = Theme.of(context).textTheme.body1.copyWith(
-        fontSize: 14.0,
+        fontSize: 14,
         letterSpacing: 0.5,
     );
 
@@ -149,7 +149,7 @@ class _AnimatedRallyPieChart extends AnimatedWidget {
         segments: segments,
       ),
       child: SizedBox(
-        height: 300.0,
+        height: 300,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -193,34 +193,34 @@ class _RallyPieChartOutlineBoxPainter extends BoxPainter {
   final double maxFraction;
   final double wholeAmount;
   final List<RallyPieChartSegment> segments;
-  static const double wholeRadians = 2.0 * pi;
-  static const double spaceRadians = wholeRadians / 180.0;
+  static const double wholeRadians = 2 * pi;
+  static const double spaceRadians = wholeRadians / 180;
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     // Create two padded reacts to draw arcs in: one for colored arcs and one for
     // inner bg arc.
-    const double strokeWidth = 4.0;
+    const double strokeWidth = 4;
     final double outerRadius = min(
       configuration.size.width,
       configuration.size.height,
     ) / 2;
     final Rect outerRect = Rect.fromCircle(
       center: configuration.size.center(Offset.zero),
-      radius: outerRadius - strokeWidth * 3.0,
+      radius: outerRadius - strokeWidth * 3,
     );
     final Rect innerRect = Rect.fromCircle(
       center: configuration.size.center(Offset.zero),
-      radius: outerRadius - strokeWidth * 4.0,
+      radius: outerRadius - strokeWidth * 4,
     );
 
     // Paint each arc with spacing.
-    double cumulativeSpace = 0.0;
-    double cumulativeTotal = 0.0;
+    double cumulativeSpace = 0;
+    double cumulativeTotal = 0;
     for (RallyPieChartSegment segment in segments) {
       final Paint paint = Paint()..color = segment.color;
       final double startAngle = _calculateStartAngle(cumulativeTotal, cumulativeSpace);
-      final double sweepAngle = _calculateSweepAngle(segment.value, 0.0);
+      final double sweepAngle = _calculateSweepAngle(segment.value, 0);
       canvas.drawArc(outerRect, startAngle, sweepAngle, true, paint);
       cumulativeTotal += segment.value;
       cumulativeSpace += spaceRadians;
@@ -238,7 +238,7 @@ class _RallyPieChartOutlineBoxPainter extends BoxPainter {
     // Paint a smaller inner circle to cover the painted arcs, so they are
     // display as segments.
     final Paint bgPaint = Paint()..color = RallyColors.primaryBackground;
-    canvas.drawArc(innerRect, 0.0, 2.0 * pi, true, bgPaint);
+    canvas.drawArc(innerRect, 0, 2 * pi, true, bgPaint);
   }
 
   double _calculateAngle(double amount, double offset) {
@@ -246,7 +246,7 @@ class _RallyPieChartOutlineBoxPainter extends BoxPainter {
     return maxFraction * (amount / wholeAmount * wholeMinusSpacesRadians + offset);
   }
 
-  double _calculateStartAngle(double total, double offset) => _calculateAngle(total, offset) - pi / 2.0;
+  double _calculateStartAngle(double total, double offset) => _calculateAngle(total, offset) - pi / 2;
 
   double _calculateSweepAngle(double total, double offset) => _calculateAngle(total, offset);
 }

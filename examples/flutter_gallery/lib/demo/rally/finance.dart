@@ -50,7 +50,7 @@ class FinancialEntityView extends StatelessWidget {
           segments: segments,
         ),
         SizedBox(
-          height: 1.0,
+          height: 1,
           child: Container(
             color: const Color(0xA026282F),
           ),
@@ -110,7 +110,7 @@ class FinancialEntityCategoryView extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.body1.copyWith(fontSize: 16.0),
+                        style: Theme.of(context).textTheme.body1.copyWith(fontSize: 16),
                       ),
                       Text(
                         subtitle,
@@ -121,9 +121,9 @@ class FinancialEntityCategoryView extends StatelessWidget {
                   const Spacer(),
                   Text(
                     '\$ ' + usdFormat.format(amount),
-                    style: Theme.of(context).textTheme.body2.copyWith(fontSize: 20.0, color: RallyColors.gray),
+                    style: Theme.of(context).textTheme.body2.copyWith(fontSize: 20, color: RallyColors.gray),
                   ),
-                  SizedBox(width: 32.0, child: suffix),
+                  SizedBox(width: 32, child: suffix),
                 ],
               ),
             ),
@@ -168,7 +168,7 @@ FinancialEntityCategoryView buildFinancialEntityFromAccountData(
     title: model.name,
     subtitle: '• • • • • • ${model.accountNumber.substring(6)}',
     indicatorColor: RallyColors.accountColor(i),
-    indicatorFraction: 1.0,
+    indicatorFraction: 1,
     amount: model.primaryAmount,
   );
 }
@@ -182,7 +182,7 @@ FinancialEntityCategoryView buildFinancialEntityFromBillData(
     title: model.name,
     subtitle: model.dueDate,
     indicatorColor: RallyColors.billColor(i),
-    indicatorFraction: 1.0,
+    indicatorFraction: 1,
     amount: model.primaryAmount,
   );
 }
@@ -198,7 +198,7 @@ FinancialEntityCategoryView buildFinancialEntityFromBudgetData(
   return FinancialEntityCategoryView(
     suffix: Text(
       ' LEFT',
-      style: Theme.of(context).textTheme.body1.copyWith(color: RallyColors.gray60, fontSize: 10.0),
+      style: Theme.of(context).textTheme.body1.copyWith(color: RallyColors.gray60, fontSize: 10),
     ),
     title: item.name,
     subtitle: amountUsed + ' / ' + primaryAmount,
@@ -246,17 +246,17 @@ class FinancialEntityCategoryDetailsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 0.0,
+        elevation: 0,
         centerTitle: true,
         title: Text(
           'Checking',
-          style: Theme.of(context).textTheme.body1.copyWith(fontSize: 18.0),
+          style: Theme.of(context).textTheme.body1.copyWith(fontSize: 18),
         ),
       ),
       body: Column(
         children: <Widget>[
           SizedBox(
-            height: 200.0,
+            height: 200,
             width: double.infinity,
             child: RallyLineChart(events: items),
           ),
@@ -285,11 +285,11 @@ class _DetailedEventCard extends StatelessWidget {
     return FlatButton(
       onPressed: () {},
       child: SizedBox(
-        height: 68.0,
+        height: 68,
         child: Column(
           children: <Widget>[
             SizedBox(
-              height: 67.0,
+              height: 67,
               child: Row(
                 children: <Widget>[
                   Column(
@@ -298,7 +298,7 @@ class _DetailedEventCard extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.body1.copyWith(fontSize: 16.0),
+                        style: Theme.of(context).textTheme.body1.copyWith(fontSize: 16),
                       ),
                       Text(
                         subtitle,
@@ -309,15 +309,15 @@ class _DetailedEventCard extends StatelessWidget {
                   const Spacer(),
                   Text(
                     '\$${usdFormat.format(amount)}',
-                    style: Theme.of(context).textTheme.body2.copyWith(fontSize: 20.0, color: RallyColors.gray),
+                    style: Theme.of(context).textTheme.body2.copyWith(fontSize: 20, color: RallyColors.gray),
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SizedBox(
-                height: 1.0,
+                height: 1,
                 child: Container(
                   color: const Color(0xAA282828),
                 ),

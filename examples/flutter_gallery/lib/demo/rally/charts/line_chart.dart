@@ -25,14 +25,14 @@ class RallyLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: RallyLineChartPainter(context, events));
+    return CustomPaint(painter: RallyLineChartPainter(Theme.of(context).textTheme.body1, events));
   }
 }
 
 class RallyLineChartPainter extends CustomPainter {
-  RallyLineChartPainter(this.context, this.events);
+  RallyLineChartPainter(this.labelStyle, this.events);
 
-  final BuildContext context;
+  final TextStyle labelStyle;
 
   // Events to plot on the line as points.
   final List<DetailedEventData> events;
@@ -50,7 +50,7 @@ class RallyLineChartPainter extends CustomPainter {
   // Ranges uses to lerp the pixel points.
   // This is hardcoded to reflect the dummy data, but would be dynamic in a real
   // app.
-  final double maxAmount = 3000.0; // minAmount is assumed to be 0.0
+  final double maxAmount = 3000; // minAmount is assumed to be 0
 
   // The number of milliseconds in a day. This is the inherit period fot the
   // points in this line.
@@ -61,7 +61,7 @@ class RallyLineChartPainter extends CustomPainter {
   final int tickShift = 3;
 
   // Arbitrary unit of space for absolute positioned painting.
-  final double space = 16.0;
+  final double space = 16;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -69,20 +69,21 @@ class RallyLineChartPainter extends CustomPainter {
     final double labelsTop = size.height - space * 2;
     _drawLine(
       canvas,
-      Rect.fromLTWH(0.0, 0.0, size.width, ticksTop),
+      Rect.fromLTWH(0, 0, size.width, ticksTop),
     );
     _drawXAxisTicks(
       canvas,
-      Rect.fromLTWH(0.0, ticksTop, size.width, labelsTop - ticksTop),
+      Rect.fromLTWH(0, ticksTop, size.width, labelsTop - ticksTop),
     );
     _drawXAxisLabels(
       canvas,
-      Rect.fromLTWH(0.0, labelsTop, size.width, size.height - labelsTop),
+      Rect.fromLTWH(0, labelsTop, size.width, size.height - labelsTop),
     );
   }
 
-  // As we're only using fixed dummy data, we can set should repaint to false
-  // as it's only painted once. In a real app we would need to
+  // Since we're only using fixed dummy data, we can set this to false. In a
+  // real app we would have the data as part of the state and repaint when it's
+  // changed.
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 
@@ -90,11 +91,11 @@ class RallyLineChartPainter extends CustomPainter {
     final Paint linePaint = Paint()
       ..color = RallyColors.accountColor(2)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 2;
 
     // Arbitrary value for the first point. In a real app, a wider range of
     // points would be used that go beyond the boundaries of the screen.
-    double lastAmount = 800.0;
+    double lastAmount = 800;
 
     // Try changing this value between 1, 7, 15, etc.
     const int smoothing = 7;
@@ -102,7 +103,7 @@ class RallyLineChartPainter extends CustomPainter {
     // Align the points with equal deltas (1 day) as a cumulative sum.
     int startMillis = startDate.millisecondsSinceEpoch;
     final List<Offset> points = <Offset>[
-      Offset(0.0, (maxAmount - lastAmount) / maxAmount * rect.height)
+      Offset(0, (maxAmount - lastAmount) / maxAmount * rect.height)
     ];
     for (int i = 0; i < numDays + smoothing; i++) {
       final int endMillis = startMillis + millisInDay * 1;
@@ -111,7 +112,7 @@ class RallyLineChartPainter extends CustomPainter {
           return startMillis <= e.date.millisecondsSinceEpoch && e.date.millisecondsSinceEpoch <= endMillis;
         },
       ).toList();
-      lastAmount += filteredEvents.fold<num>(0.0, (num sum, DetailedEventData e) => sum + e.amount);
+      lastAmount += filteredEvents.fold<double>(0, (double sum, DetailedEventData e) => sum + e.amount);
       final double x = i / numDays * rect.width;
       final double y = (maxAmount - lastAmount) / maxAmount * rect.height;
       points.add(Offset(x, y));
@@ -142,7 +143,7 @@ class RallyLineChartPainter extends CustomPainter {
         ),
         Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0
+          ..strokeWidth = 1
           ..color = RallyColors.gray25,
       );
     }
@@ -150,10 +151,10 @@ class RallyLineChartPainter extends CustomPainter {
 
   /// Set X-axis labels under the X-axis increment markers.
   void _drawXAxisLabels(Canvas canvas, Rect rect) {
-    final TextStyle selectedLabelStyle = Theme.of(context).textTheme.body1.copyWith(
+    final TextStyle selectedLabelStyle = labelStyle.copyWith(
       fontWeight: FontWeight.w700,
     );
-    final TextStyle unselectedLabelStyle = Theme.of(context).textTheme.body1.copyWith(
+    final TextStyle unselectedLabelStyle = labelStyle.copyWith(
       fontWeight: FontWeight.w700,
       color: RallyColors.gray25,
     );
