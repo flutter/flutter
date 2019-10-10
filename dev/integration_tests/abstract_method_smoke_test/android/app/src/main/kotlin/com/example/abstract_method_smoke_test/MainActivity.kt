@@ -27,19 +27,17 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    class SimplePlatformViewFactory(private val context: Context) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-        override fun create(context: Context?, viewId: Int, args: Any?): PlatformView {
-            return SimplePlatformView(this.context)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GeneratedPluginRegistrant.registerWith(this)
 
         registrarFor("com.example.abstract_method_smoke_test")
                 .platformViewRegistry()
-                .registerViewFactory("simple", SimplePlatformViewFactory(this))
+                .registerViewFactory("simple", object : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+                    override fun create(context: Context?, viewId: Int, args: Any?): PlatformView {
+                        return SimplePlatformView(this@MainActivity)
+                    }
+                })
 
         // Triggers the Android keyboard, which causes the resize of the Flutter view.
         // We need to wait for the app to complete.
