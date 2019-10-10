@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('LinearGradient scale test', () {
@@ -765,4 +767,51 @@ void main() {
     expect(() { test2a.createShader(rect); }, throwsArgumentError);
     expect(() { test2b.createShader(rect); }, throwsArgumentError);
   });
+
+  group('Transforms', () {
+    const List<Color> colors = <Color>[Color(0xFFFFFFFF), Color(0xFF009900)];
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 400.0);
+
+    double radians(double degrees) => degrees * math.pi / 180;
+
+    Matrix4 rotatedTransform(double radians, Rect rect) {
+      // Calculate the point to rotate about.
+      final double sinRadians = math.sin(radians);
+      final double oneMinusCosRadians = 1 - math.cos(radians);
+      final Offset center = rect.center;
+      final double originX = sinRadians * center.dy + oneMinusCosRadians * center.dx;
+      final double originY = -sinRadians * center.dy + oneMinusCosRadians * center.dx;
+
+      return Matrix4.identity()
+        ..translate(originX, originY)
+        ..rotateZ(radians);
+    }
+
+    testWidgets('LinearGradient - 45 degrees', (WidgetTester tester) async {
+      final Shader shader = const LinearGradient(
+        colors: colors
+      ).createShader(
+        rect,
+        transform: rotatedTransform(radians(45), rect),
+      );
+      await tester.pumpWidget(CustomPaint(painter: GradientPainter(shader, rect)));
+      expect(find.byType(CustomPaint), matchesGoldenFile('linear_gradient_45.png'));
+    });
+  });
+}
+
+class GradientPainter extends CustomPainter {
+  const GradientPainter(this.shader, this.rect);
+
+  final Shader shader;
+  final Rect rect;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(rect, Paint()..shader = shader);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+
 }
