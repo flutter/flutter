@@ -310,6 +310,32 @@ void main() {
       ProcessManager: () => processManager,
     });
   });
+
+  group('Unsigned mac artifacts', () {
+    MockCache mockCache;
+
+    setUp(() {
+      mockCache = MockCache();
+    });
+
+    testUsingContext('use unsigned when specified', () async {
+      when(mockCache.useUnsignedMacBinaries).thenReturn(true);
+
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      expect(iosUsbArtifacts.archiveUri.toString(), contains('/unsigned/'));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+    });
+
+    testUsingContext('not use unsigned when not specified', () async {
+      when(mockCache.useUnsignedMacBinaries).thenReturn(false);
+
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      expect(iosUsbArtifacts.archiveUri.toString(), isNot(contains('/unsigned/')));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+    });
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {
