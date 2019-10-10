@@ -40,7 +40,7 @@ class GenerateCommand extends FlutterCommand {
         break;
       }
     }
-    // Check for errors.
+    // Check for errors output in the build_runner cache.
     final Directory buildDirectory = flutterProject.dartTool.childDirectory('build');
     final Directory errorCacheParent = buildDirectory.listSync().firstWhere((FileSystemEntity entity) {
       return entity is Directory && entity.childDirectory('error_cache').existsSync();
@@ -61,6 +61,6 @@ class GenerateCommand extends FlutterCommand {
         printError('Error reading error in ${errorFile.path}');
       }
     }
-    return null;
+    return const FlutterCommandResult(ExitStatus.fail);
   }
 }
