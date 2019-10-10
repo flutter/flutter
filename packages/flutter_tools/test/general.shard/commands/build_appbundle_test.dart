@@ -42,7 +42,7 @@ void main() {
       final BuildAppBundleCommand command = await runBuildAppBundleCommand(projectPath);
 
       expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64'));
+          containsPair(CustomDimensions.commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64,android-x64'));
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
