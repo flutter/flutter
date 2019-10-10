@@ -6,11 +6,13 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../application_package.dart';
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -164,46 +166,57 @@ class ResidentWebRunner extends ResidentRunner {
     printStatus('Launching ${getDisplayPath(target)} on ${device.name} in $modeName mode...');
     Status buildStatus;
     try {
+      // dwds does not handle uncaught exceptions from its servers. To work
+      // around this, we need to catch all uncaught exceptions and determine if
+      // they are fatal or not.
       buildStatus = logger.startProgress('Building application for the web...', timeout: null);
-      _webFs = await webFsFactory(
-        target: target,
-        flutterProject: flutterProject,
-        buildInfo: debuggingOptions.buildInfo,
-        initializePlatform: debuggingOptions.initializePlatform,
-        hostname: debuggingOptions.hostname,
-        port: debuggingOptions.port,
-        skipDwds: device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
-      );
-      // When connecting to a browser, update the message with a seemsSlow notification
-      // to handle the case where we fail to connect.
-      if (debuggingOptions.browserLaunch) {
-        buildStatus.stop();
-        buildStatus = logger.startProgress(
-          'Attempting to connect to browser instance..',
-          timeout: const Duration(seconds: 30),
+      final int result = await asyncGuard(() async {
+        _webFs = await webFsFactory(
+          target: target,
+          flutterProject: flutterProject,
+          buildInfo: debuggingOptions.buildInfo,
+          initializePlatform: debuggingOptions.initializePlatform,
+          hostname: debuggingOptions.hostname,
+          port: debuggingOptions.port,
+          skipDwds: device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
         );
-      }
-      await device.startApp(package,
-        mainPath: target,
-        debuggingOptions: debuggingOptions,
-        platformArgs: <String, Object>{
-          'uri': _webFs.uri,
-        },
-      );
-      if (supportsServiceProtocol) {
-        _connectionResult = await _webFs.connect(debuggingOptions);
-        unawaited(_connectionResult.debugConnection.onDone.whenComplete(exit));
-      }
-    } catch (err) {
-      throwToolExit('Failed to build application for the web.');
+        // When connecting to a browser, update the message with a seemsSlow notification
+        // to handle the case where we fail to connect.
+        if (debuggingOptions.browserLaunch) {
+          buildStatus.stop();
+          buildStatus = logger.startProgress(
+            'Attempting to connect to browser instance..',
+            timeout: const Duration(seconds: 30),
+          );
+        }
+        await device.startApp(package,
+          mainPath: target,
+          debuggingOptions: debuggingOptions,
+          platformArgs: <String, Object>{
+            'uri': _webFs.uri,
+          },
+        );
+        if (supportsServiceProtocol) {
+          _connectionResult = await _webFs.connect(debuggingOptions);
+          unawaited(_connectionResult.debugConnection.onDone.whenComplete(() => exit(0)));
+        }
+        appStartedCompleter?.complete();
+        return attach(
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+        );
+      });
+      return result;
+    } on WebSocketException {
+      throwToolExit('Failed to connect to WebSocket.');
+    } on BuildException {
+      throwToolExit('Failed to build application for the Web.');
+    } on SocketException catch (err) {
+      throwToolExit(err.toString());
     } finally {
       buildStatus.stop();
     }
-    appStartedCompleter?.complete();
-    return attach(
-      connectionInfoCompleter: connectionInfoCompleter,
-      appStartedCompleter: appStartedCompleter,
-    );
+    return 1;
   }
 
   @override
