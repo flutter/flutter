@@ -12,6 +12,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 #if FLUTTER_SHELL_ENABLE_METAL
 #include "flutter/shell/platform/darwin/ios/ios_surface_metal.h"
@@ -67,15 +68,7 @@
 }
 
 + (Class)layerClass {
-#if TARGET_IPHONE_SIMULATOR
-  return [CALayer class];
-#else  // TARGET_IPHONE_SIMULATOR
-#if FLUTTER_SHELL_ENABLE_METAL
-  return [CAMetalLayer class];
-#else   // FLUTTER_SHELL_ENABLE_METAL
-  return [CAEAGLLayer class];
-#endif  //  FLUTTER_SHELL_ENABLE_METAL
-#endif  // TARGET_IPHONE_SIMULATOR
+  return [FlutterView layerClass];
 }
 
 - (std::unique_ptr<flutter::IOSSurface>)createSurface:

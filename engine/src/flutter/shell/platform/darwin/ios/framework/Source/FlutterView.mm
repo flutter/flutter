@@ -81,12 +81,46 @@ id<FlutterViewEngineDelegate> _delegate;
   [super layoutSubviews];
 }
 
+#if FLUTTER_SHELL_ENABLE_METAL
+static bool UseMetalRenderer() {
+  // If there is a command line argument that says Metal should not be used, that takes precedence
+  // over everything else. This allows disabling Metal on a per run basis to check for regressions
+  // on an application that has otherwise opted into Metal on an iOS version that supports it.
+  if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--disable-metal"]) {
+    return false;
+  }
+
+  // If the application wants to use metal on a per run basis with disregard for version checks or
+  // plist based opt ins, respect that opinion. This allows selectively testing features on older
+  // version of iOS than those explicitly stated as being supported.
+  if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--force-metal"]) {
+    return true;
+  }
+
+  // This is just a version we picked that is easy to support and has all necessary Metal features.
+  bool ios_version_supports_metal = false;
+  if (@available(iOS 11.0, *)) {
+    ios_version_supports_metal = true;
+  }
+
+  // The application must opt-in by default to use Metal without command line flags.
+  bool application_opts_into_metal =
+      [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"io.flutter.metal_preview"] boolValue];
+
+  return ios_version_supports_metal && application_opts_into_metal;
+}
+#endif  // FLUTTER_SHELL_ENABLE_METAL
+
 + (Class)layerClass {
 #if TARGET_IPHONE_SIMULATOR
   return [CALayer class];
 #else  // TARGET_IPHONE_SIMULATOR
 #if FLUTTER_SHELL_ENABLE_METAL
-  return [CAMetalLayer class];
+  if (UseMetalRenderer()) {
+    return [CAMetalLayer class];
+  } else {
+    return [CAEAGLLayer class];
+  }
 #else   // FLUTTER_SHELL_ENABLE_METAL
   return [CAEAGLLayer class];
 #endif  //  FLUTTER_SHELL_ENABLE_METAL
