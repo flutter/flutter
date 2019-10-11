@@ -708,7 +708,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   // Disables all directional focus actions inside of a text field, since up and
   // down shouldn't go to another field, even in a single line text field. Other
   // keys (e.g. left/right/enter) are already absorbed by the text field before
-  // the Shorcuts widget gets them, so they don't need remapping. We remap the
+  // the Shortcuts widget gets them, so they don't need remapping. We remap the
   // keys rather than the actions, since someone might want to invoke a
   // navigation action from another key.
   final Map<LogicalKeySet, Intent> _disabledNavigationKeys = <LogicalKeySet, Intent>{
