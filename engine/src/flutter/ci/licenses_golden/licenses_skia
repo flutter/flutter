@@ -1,4 +1,4 @@
-Signature: aca5dfed087e4f09384c45ff3b7569d3
+Signature: 7e1c50b87af7396c0f85b3bf776a0ea5
 
 UNUSED LICENSES:
 
@@ -3320,6 +3320,8 @@ FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/core/SkDraw_atlas.cpp
 FILE: ../../../third_party/skia/src/core/SkEffectPriv.h
 FILE: ../../../third_party/skia/src/core/SkEnumerate.h
+FILE: ../../../third_party/skia/src/core/SkGlyphBuffer.cpp
+FILE: ../../../third_party/skia/src/core/SkGlyphBuffer.h
 FILE: ../../../third_party/skia/src/core/SkPathMakers.h
 FILE: ../../../third_party/skia/src/core/SkStrikeForGPU.cpp
 FILE: ../../../third_party/skia/src/core/SkStrikeForGPU.h
@@ -4967,6 +4969,7 @@ FILE: ../../../third_party/skia/docs/examples/Text_Size.cpp
 FILE: ../../../third_party/skia/docs/examples/Text_Skew_X.cpp
 FILE: ../../../third_party/skia/docs/examples/Typeface_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Xor.cpp
+FILE: ../../../third_party/skia/docs/examples/incomplete.cpp
 FILE: ../../../third_party/skia/experimental/minimal_ios_mtl_skia_app/main.mm
 FILE: ../../../third_party/skia/experimental/skottie_ios/SkMetalViewBridge.h
 FILE: ../../../third_party/skia/experimental/skottie_ios/SkMetalViewBridge.mm
