@@ -30,4 +30,10 @@ public interface FlutterEngineConfigurator {
    * {@code Activity} at the time that this method is invoked.
    */
   void configureFlutterEngine(@NonNull FlutterEngine flutterEngine);
+
+  /**
+   * Cleans up references that were established in {@link #configureFlutterEngine(FlutterEngine)}
+   * before the host is destroyed or detached.
+   */
+  void cleanUpFlutterEngine(@NonNull FlutterEngine flutterEngine);
 }

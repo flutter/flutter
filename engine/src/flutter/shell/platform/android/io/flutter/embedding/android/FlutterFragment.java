@@ -925,6 +925,20 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   }
 
   /**
+   * Hook for the host to cleanup references that were established in
+   * {@link #configureFlutterEngine(FlutterEngine)} before the host is destroyed or detached.
+   * <p>
+   * This method is called in {@link #onDetach()}.
+   */
+  @Override
+  public void cleanUpFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    FragmentActivity attachedActivity = getActivity();
+    if (attachedActivity instanceof FlutterEngineConfigurator) {
+      ((FlutterEngineConfigurator) attachedActivity).cleanUpFlutterEngine(flutterEngine);
+    }
+  }
+
+  /**
    * See {@link NewEngineFragmentBuilder#shouldAttachEngineToActivity()} and
    * {@link CachedEngineFragmentBuilder#shouldAttachEngineToActivity()}.
    * <p>
