@@ -2850,8 +2850,8 @@ class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
     final InteractiveInkFeatureFactory splashFactory = Theme.of(splashContext).splashFactory;
 
     if (tapIsOnDeleteIcon) {
+      final RenderBox currentBox = referenceBox;
       referenceBox = deleteIconKey.currentContext.findRenderObject();
-      final RenderBox currentBox = chipContext.findRenderObject();
       position = referenceBox.globalToLocal(currentBox.localToGlobal(position));
       containedInkWell = false;
     }
