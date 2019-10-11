@@ -406,7 +406,8 @@ void main() {
     semanticsEnabled: true,
   );
 
-  testWidgets('Default RaisedButton text color when textTheme is set to ButtonTextTheme.accent', (WidgetTester tester) async { 
+  testWidgets('Default RaisedButton text color when textTheme is set to ButtonTextTheme.accent', (WidgetTester tester) async {
+    // Test for https://github.com/flutter/flutter/issues/38655
     const Color defaultEnabledAccentTextColor = Color(0xff2196f3);
 
     await tester.pumpWidget(
@@ -430,7 +431,8 @@ void main() {
     expect(getRaisedButtonTextColor(), equals(defaultEnabledAccentTextColor));
   });
 
-  testWidgets('default button theme primary color for RaisedButton', (WidgetTester tester) async { 
+  testWidgets('default button theme primary color for RaisedButton', (WidgetTester tester) async {
+    // Test for https://github.com/flutter/flutter/issues/38655
     const Color defaultEnabledPrimaryTextColor = Color(0xff000000);
 
     await tester.pumpWidget(
@@ -454,7 +456,8 @@ void main() {
     expect(getRaisedButtonTextColor(), equals(defaultEnabledPrimaryTextColor));
   });
 
-  testWidgets('default button theme normal color for RaisedButton', (WidgetTester tester) async { 
+  testWidgets('default button theme normal color for RaisedButton', (WidgetTester tester) async {
+    // Test for https://github.com/flutter/flutter/issues/38655
     const Color defaultEnabledNormalTextColor = Color(0xffffffff);
 
     await tester.pumpWidget(
