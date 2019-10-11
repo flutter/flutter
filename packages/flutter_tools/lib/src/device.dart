@@ -496,7 +496,7 @@ class DebuggingOptions {
     this.browserLaunch = true,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname })
+  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -507,7 +507,6 @@ class DebuggingOptions {
       traceSkia = false,
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
-      cacheSkSL = false,
       verboseSystemLogs = false,
       observatoryPort = null,
       browserLaunch = true;
