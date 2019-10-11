@@ -853,9 +853,36 @@ class RadialGradient extends Gradient {
 ///         Color(0xFF4285F4), // blue again to seamlessly transition to the start
 ///       ],
 ///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
-///      ),
+///     ),
+///   )
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+///
+/// This sample takes the above gradient and rotates it by 0.785398 radians,
+/// i.e. 45 degrees.
+///
+/// ```dart
+/// Container(
+///   decoration: BoxDecoration(
+///     gradient: SweepGradient(
+///       center: FractionalOffset.center,
+///       startAngle: 0.0,
+///       endAngle: math.pi * 2,
+///       colors: const <Color>[
+///         Color(0xFF4285F4), // blue
+///         Color(0xFF34A853), // green
+///         Color(0xFFFBBC05), // yellow
+///         Color(0xFFEA4335), // red
+///         Color(0xFF4285F4), // blue again to seamlessly transition to the start
+///       ],
+///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
+///       transform: GradientTransform(0.785398),
+///     ),
 ///   ),
-///  )
+/// )
 /// ```
 /// {@end-tool}
 ///
