@@ -330,7 +330,7 @@ flutter:
           ),
         );
       });
-      // The command throws a [ToolExit] because it expects an APK in the file system.
+      // The command throws a [ToolExit] because it expects an AAB in the file system.
       await expectLater(() async {
         await runBuildAppBundleCommand(
           projectPath,
@@ -384,7 +384,7 @@ flutter:
           ),
         );
       });
-      // The command throws a [ToolExit] because it expects an APK in the file system.
+      // The command throws a [ToolExit] because it expects an AAB in the file system.
       await expectLater(() async {
         await runBuildAppBundleCommand(
           projectPath,
