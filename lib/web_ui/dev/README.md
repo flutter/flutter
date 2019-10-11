@@ -23,6 +23,22 @@ felt build --watch
 
 If you don't want to add `felt` to your path, you can still invoke it using a relative path like `./web_ui/dev/felt <command>`
 
+## Running web engine tests
+To run all tests:
+```
+felt test
+```
+
+To run a single test:
+```
+felt test test/golden_tests/engine/canvas_golden_test.dart
+```
+
+To debug a test:
+```
+felt test --debug test/golden_tests/engine/canvas_golden_test.dart
+```
+
 ## Configuration files
 
 `chrome_lock.yaml` contains the version of Chrome we use to test Flutter for
