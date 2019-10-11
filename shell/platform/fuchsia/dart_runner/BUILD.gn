@@ -93,6 +93,34 @@ runner("dart_jit_product_runner_bin") {
   ]
 }
 
+runner("dart_aot_runner_bin") {
+  output_name = "dart_aot_runner"
+  product = false
+  extra_defines = [ "AOT_RUNTIME" ]
+  if (flutter_runtime_mode == "profile") {
+    extra_defines += [ "FLUTTER_PROFILE" ]
+  }
+  extra_deps = [
+    "embedder:dart_aot_snapshot_cc",
+    "//third_party/dart/runtime:libdart_precompiled_runtime",
+    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
+  ]
+}
+
+runner("dart_aot_product_runner_bin") {
+  output_name = "dart_aot_product_runner"
+  product = true
+  extra_defines = [
+    "AOT_RUNTIME",
+    "DART_PRODUCT",
+  ]
+  extra_deps = [
+    "embedder:dart_aot_product_snapshot_cc",
+    "//third_party/dart/runtime:libdart_precompiled_runtime_product",
+    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime_product",
+  ]
+}
+
 template("jit_runner_package") {
   assert(defined(invoker.product), "The parameter 'product' must be defined")
   product_suffix = ""
