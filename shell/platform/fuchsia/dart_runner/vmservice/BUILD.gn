@@ -2,22 +2,93 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//topaz/runtime/dart_runner/dart_app.gni")
+import("//build/compiled_action.gni")
+import("//build/fuchsia/sdk.gni")
+import("//third_party/dart/utils/compile_platform.gni")
+import("$flutter_root/common/config.gni")
+import("$flutter_root/tools/fuchsia/dart.gni")
+import("$flutter_root/tools/fuchsia/dart_kernel.gni")
 
-dart_aot_app("vmservice") {
+dart_kernel("vmservice_product_aot_kernel") {
+  kernel_platform_files = "../kernel:kernel_platform_files"
   main_dart = "empty.dart"
+  product = true
+  aot = true
+}
 
-  meta = [
-    {
-      path = rebase_path("meta/vmservice.cmx")
-      dest = "vmservice.cmx"
-    },
-  ]
-
-  source_dir = "."
-
+dart_kernel("vmservice_aot_kernel") {
+  kernel_platform_files = "../kernel:kernel_platform_files"
+  main_dart = "empty.dart"
   product = false
+  aot = true
+}
 
-  sources = []
-  deps = []
+template("aot_snapshot") {
+  compiled_action(target_name) {
+    kernel_name = target_name
+
+    product = defined(invoker.product) && invoker.product
+
+    product_suffix = ""
+    if (product) {
+      product_suffix = "_product"
+    }
+
+    shim_target = ":vmservice${product_suffix}_aot_kernel($host_toolchain)"
+    shim_kernel = get_label_info(shim_target, "target_gen_dir") +
+                  "/vmservice${product_suffix}_aot_kernel.dill"
+
+    deps = [
+      shim_target,
+    ]
+
+    vm_snapshot_data_path = "$target_gen_dir/${kernel_name}_vm_data.aotsnapshot"
+    vm_snapshot_instructions_path =
+        "$target_gen_dir/${kernel_name}_vm_instructions.aotsnapshot"
+    snapshot_data_path = "$target_gen_dir/${kernel_name}_data.aotsnapshot"
+    snapshot_instructions_path =
+        "$target_gen_dir/${kernel_name}_instructions.aotsnapshot"
+
+    inputs = [
+      shim_kernel,
+    ]
+
+    outputs = [
+      vm_snapshot_data_path,
+      vm_snapshot_instructions_path,
+      snapshot_data_path,
+      snapshot_instructions_path,
+    ]
+
+    if (product) {
+      tool = gen_snapshot_product
+    } else {
+      tool = gen_snapshot
+    }
+
+    args = [
+      "--no_causal_async_stacks",
+      "--deterministic",
+      "--snapshot_kind=app-aot-blobs",
+      "--vm_snapshot_data=" + rebase_path(vm_snapshot_data_path),
+      "--vm_snapshot_instructions=" +
+          rebase_path(vm_snapshot_instructions_path),
+      "--isolate_snapshot_data=" + rebase_path(snapshot_data_path),
+      "--isolate_snapshot_instructions=" +
+          rebase_path(snapshot_instructions_path),
+    ]
+
+    # No asserts in debug or release product.
+    # No asserts in release with flutter_profile=true (non-product)
+    # Yes asserts in non-product debug.
+    if (!product && (!(flutter_runtime_mode == "profile") || is_debug)) {
+      args += [ "--enable_asserts" ]
+    }
+
+    args += [ rebase_path(shim_kernel) ]
+  }
+}
+
+aot_snapshot("vmservice") {
+  product = false
 }

@@ -1,0 +1,87 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//third_party/dart/build/dart/dart_action.gni")
+import("$flutter_root/common/fuchsia_config.gni")
+import("$flutter_root/tools/fuchsia/dart.gni")
+
+template("dart_kernel") {
+  prebuilt_dart_action(target_name) {
+    assert(defined(invoker.main_dart), "main_dart is a required parameter.")
+    assert(defined(invoker.kernel_platform_files),
+           "kernel_platform_files target must be defined.")
+
+    main_dart = rebase_path(invoker.main_dart)
+
+    deps = [
+      invoker.kernel_platform_files,
+    ]
+
+    gen_kernel_script = "//third_party/dart/pkg/vm/bin/gen_kernel.dart"
+    platform_dill = "$root_out_dir/dart_runner_patched_sdk/platform_strong.dill"
+
+    dot_packages = rebase_path("//third_party/dart/.packages")
+
+    inputs = [
+      platform_dill,
+      gen_kernel_script,
+      main_dart,
+      dot_packages,
+    ]
+
+    output = "$target_gen_dir/$target_name.dill"
+    outputs = [
+      output,
+    ]
+
+    depfile = "$output.d"
+    abs_depfile = rebase_path(depfile)
+    rebased_output = rebase_path(output, root_build_dir)
+    vm_args = [
+      "--depfile=$abs_depfile",
+      "--depfile_output_filename=$rebased_output",
+    ]
+
+    script = gen_kernel_script
+
+    args = [
+      "--packages=" + rebase_path(dot_packages),
+      "--target=dart_runner",
+      "--platform=" + rebase_path(platform_dill),
+      "--no-link-platform",
+      "--output=" + rebase_path(output),
+    ]
+
+    if (is_debug) {
+      args += [ "--embed-sources" ]
+    } else {
+      args += [ "--no-embed-sources" ]
+    }
+
+    if (defined(invoker.aot) && invoker.aot) {
+      args += [
+        "--aot",
+        "--tfa",
+      ]
+    }
+
+    if (defined(invoker.product) && invoker.product) {
+      # Setting this flag in a non-product release build for AOT (a "profile"
+      # build) causes the vm service isolate code to be tree-shaken from an app.
+      # See the pragma on the entrypoint here:
+      #
+      # https://github.com/dart-lang/sdk/blob/master/runtime/bin/vmservice/vmservice_io.dart#L240
+      #
+      # Also, this define excludes debugging and profiling code from Flutter.
+      args += [ "-Ddart.vm.product=true" ]
+    } else {
+      if (!is_debug) {
+        # The following define excludes debugging code from Flutter.
+        args += [ "-Ddart.vm.profile=true" ]
+      }
+    }
+
+    args += [ rebase_path(main_dart) ]
+  }
+}
