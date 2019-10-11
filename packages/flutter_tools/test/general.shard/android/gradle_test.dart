@@ -58,6 +58,7 @@ void main() {
       expect(findApkFiles(gradleProject, buildInfo), <File>[]);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     test('androidXFailureRegex should match lines with likely AndroidX errors', () {
@@ -130,6 +131,7 @@ void main() {
       expect(bundle.path, '/foo_barRelease/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in release mode', () {
@@ -139,6 +141,7 @@ void main() {
       expect(bundle.path, '/fooRelease/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when no flavor is used in release mode', () {
@@ -148,6 +151,7 @@ void main() {
       expect(bundle.path, '/release/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode', () {
@@ -157,6 +161,7 @@ void main() {
       expect(bundle.path, '/foo_barDebug/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in debug mode', () {
@@ -166,6 +171,7 @@ void main() {
       expect(bundle.path, '/fooDebug/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when no flavor is used in debug mode', () {
@@ -175,6 +181,7 @@ void main() {
       expect(bundle.path, '/debug/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode', () {
@@ -184,6 +191,7 @@ void main() {
       expect(bundle.path, '/foo_barProfile/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in profile mode', () {
@@ -193,6 +201,7 @@ void main() {
       expect(bundle.path, '/fooProfile/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when no flavor is used in profile mode', () {
@@ -202,6 +211,7 @@ void main() {
       expect(bundle.path, '/profile/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle in release mode - Gradle 3.5', () {
@@ -211,6 +221,7 @@ void main() {
       expect(bundle.path, '/release/app-release.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle in profile mode - Gradle 3.5', () {
@@ -220,6 +231,7 @@ void main() {
       expect(bundle.path, '/profile/app-profile.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle in debug mode - Gradle 3.5', () {
@@ -229,6 +241,7 @@ void main() {
       expect(bundle.path, '/debug/app-debug.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in release mode - Gradle 3.5', () {
@@ -238,6 +251,7 @@ void main() {
       expect(bundle.path, '/foo_barRelease/app-foo_bar-release.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
@@ -247,6 +261,7 @@ void main() {
       expect(bundle.path, '/foo_barProfile/app-foo_bar-profile.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode - Gradle 3.5', () {
@@ -256,6 +271,7 @@ void main() {
       expect(bundle.path, '/foo_barDebug/app-foo_bar-debug.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -492,6 +508,7 @@ include ':app'
 
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Logger: () => mockLogger,
     });
 
@@ -525,6 +542,7 @@ include ':app'
 
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Logger: () => mockLogger,
     });
   });
@@ -587,9 +605,9 @@ include ':app'
     void testUsingAndroidContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
-        ProcessManager: () => mockProcessManager,
         Platform: () => android,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -1011,6 +1029,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Inject the wrapper when some files are missing', () {
@@ -1051,6 +1070,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Gives executable permission to gradle', () {
@@ -1068,6 +1088,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       OperatingSystemUtils: () => OperatingSystemUtils(),
     });
   });
@@ -1089,6 +1110,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('throws ToolExit if it cannot write gradle.properties', () {
@@ -1126,6 +1148,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
         equals('android.enableR8=true'));
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('sets android.enableR8=true', () {
@@ -1146,6 +1169,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -1167,6 +1191,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns false when the project is not using AndroidX', () async {
@@ -1180,6 +1205,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns false when gradle.properties does not exist', () async {
@@ -1189,6 +1215,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -1291,8 +1318,8 @@ plugin2=${plugin2.path}
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FileSystem: () => fs,
-      GradleUtils: () => FakeGradleUtils(),
       ProcessManager: () => mockProcessManager,
+      GradleUtils: () => FakeGradleUtils(),
     });
   });
 
@@ -1405,9 +1432,9 @@ plugin2=${plugin2.path}
       AndroidStudio: () => mockAndroidStudio,
       Artifacts: () => mockArtifacts,
       Cache: () => cache,
-      ProcessManager: () => mockProcessManager,
       Platform: () => android,
       FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
     });
   });
 }

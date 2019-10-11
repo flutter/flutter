@@ -1069,7 +1069,8 @@ class ProjectFileInvalidator {
     final List<Uri> invalidatedFiles = <Uri>[];
     for (final Uri uri in urisToScan) {
       final DateTime updatedAt = fs.statSync(
-          uri.toFilePath(windows: platform.isWindows)).modified;
+        uri.toFilePath(windows: platform.isWindows),
+      ).modified;
       if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
         invalidatedFiles.add(uri);
       }
