@@ -198,6 +198,21 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
+  public void itGivesHostAnOpportunityToCleanUpFlutterEngine() {
+    // ---- Test setup ----
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is created in onAttach().
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onDetach();
+
+    // Verify that the host was asked to configure our FlutterEngine.
+    verify(mockHost, times(1)).cleanUpFlutterEngine(mockFlutterEngine);
+  }
+
+  @Test
   public void itSendsInitialRouteToFlutter() {
     // ---- Test setup ----
     // Set initial route on our fake Host.

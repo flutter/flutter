@@ -852,6 +852,17 @@ public class FlutterActivity extends Activity
   }
 
   /**
+   * Hook for the host to cleanup references that were established in
+   * {@link #configureFlutterEngine(FlutterEngine)} before the host is destroyed or detached.
+   * <p>
+   * This method is called in {@link #onDestroy()}.
+   */
+  @Override
+  public void cleanUpFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    // No-op. Hook for subclasses.
+  }
+
+  /**
    * Hook for subclasses to control whether or not the {@link FlutterFragment} within this
    * {@code Activity} automatically attaches its {@link FlutterEngine} to this {@code Activity}.
    * <p>

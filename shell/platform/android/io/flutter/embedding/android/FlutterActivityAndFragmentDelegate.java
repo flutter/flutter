@@ -421,6 +421,10 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     Log.v(TAG, "onDetach()");
     ensureAlive();
 
+    // Give the host an opportunity to cleanup any references that were created in
+    // configureFlutterEngine().
+    host.cleanUpFlutterEngine(flutterEngine);
+
     if (host.shouldAttachEngineToActivity()) {
       // Notify plugins that they are no longer attached to an Activity.
       Log.d(TAG, "Detaching FlutterEngine from the Activity that owns this Fragment.");
@@ -692,6 +696,12 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
      * Hook for the host to configure the {@link FlutterEngine} as desired.
      */
     void configureFlutterEngine(@NonNull FlutterEngine flutterEngine);
+
+    /**
+     * Hook for the host to cleanup references that were established in
+     * {@link #configureFlutterEngine(FlutterEngine)} before the host is destroyed or detached.
+     */
+    void cleanUpFlutterEngine(@NonNull FlutterEngine flutterEngine);
 
     /**
      * Returns true if the {@link FlutterEngine}'s plugin system should be connected to the
