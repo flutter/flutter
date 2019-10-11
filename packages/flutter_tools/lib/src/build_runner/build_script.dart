@@ -203,9 +203,7 @@ class FlutterWebTestEntrypointBuilder implements Builder {
     await bootstrapDdc(
       buildStep,
       platform: flutterWebPlatform,
-      // skipPlatformCheck should be true.
-      // See: https://github.com/dart-lang/build/issues/2484
-      skipPlatformCheck: false,
+      skipPlatformCheck: true,
     );
   }
 }
@@ -234,9 +232,7 @@ class FlutterWebEntrypointBuilder implements Builder {
     await bootstrapDdc(
       buildStep,
       platform: flutterWebPlatform,
-      // skipPlatformCheck should be true.
-      // See: https://github.com/dart-lang/build/issues/2484
-      skipPlatformCheck: false,
+      skipPlatformCheck: true,
     );
   }
 }
