@@ -368,7 +368,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
             children: <Widget>[
               SliderTheme(
                 data: SliderThemeData(
-                  showValueIndicator: ShowValueIndicator.always,
+                  showValueIndicator: ShowValueIndicator.always
                 ),
                 child: RangeSlider(
                   values: _continuousValues,

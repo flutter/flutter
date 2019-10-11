@@ -2534,7 +2534,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
   /// Create a slider value indicator that resembles a rectangular tooltip.
   const RectangularSliderValueIndicatorShape();
 
-  static const _pathPainter = _RectangularSliderValueIndicatorPathPainter();
+  static const _RectangularSliderValueIndicatorPathPainter _pathPainter = _RectangularSliderValueIndicatorPathPainter();
 
   static const double _labelTextDesignSize = 14.0;
   static const double _labelPadding = 16.0;
@@ -2560,11 +2560,62 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
     TextDirection textDirection,
     double value,
   }) {
-    final canvas = context.canvas;
-    final textScaleFactor = labelPainter.height / _labelTextDesignSize;
-    final scale = activationAnimation.value * textScaleFactor;
-    return _pathPainter.paint(parentBox, canvas, center, scale, labelPainter, Colors.grey[600], Colors.white);
+    final Canvas canvas = context.canvas;
+    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    final double scale = activationAnimation.value * textScaleFactor;
+    _pathPainter.paint(parentBox, canvas, center, scale, labelPainter, Colors.grey[600], Colors.white);
   }
+}
+
+class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShape {
+  const RectangularRangeSliderValueIndicatorShape();
+
+  static const _RectangularSliderValueIndicatorPathPainter _pathPainter = _RectangularSliderValueIndicatorPathPainter();
+
+  static const double _labelTextDesignSize = 14.0;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete, {TextPainter labelPainter}) {
+    assert(labelPainter != null);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter);
+  }
+
+  @override
+  double getHorizontalShift({
+    RenderBox parentBox,
+    Offset center,
+    TextPainter labelPainter,
+    Animation<double> activationAnimation,
+  }) {
+    return _pathPainter.getHorizontalShift(
+      parentBox: parentBox,
+      center: center,
+      labelPainter: labelPainter,
+      scale: activationAnimation.value,
+    );
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    bool isOnTop,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+    Thumb thumb,
+  }) {
+    final Canvas canvas = context.canvas;
+    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    final double scale = activationAnimation.value * textScaleFactor;
+    _pathPainter.paint(parentBox, canvas, center, scale, labelPainter, Colors.grey[600], isOnTop ? sliderTheme.overlappingShapeStrokeColor : null);
+  }
+  
 }
 
 class _RectangularSliderValueIndicatorPathPainter {
@@ -2575,6 +2626,7 @@ class _RectangularSliderValueIndicatorPathPainter {
   static const double _preferredHeight = 32.0;
   static const double _bottomTipYOffset = 12.0;
   static const double _preferredHalfHeight = _preferredHeight / 2;
+  static const double _upperRectRadius = 4;
 
   Size getPreferredSize(
       bool isEnabled,
@@ -2586,18 +2638,12 @@ class _RectangularSliderValueIndicatorPathPainter {
     return Size(labelPainter.width + 2 * _labelPadding * textScaleFactor, _preferredHeight * textScaleFactor);
   }
 
-  void paint(
+  double getHorizontalShift({
     RenderBox parentBox,
-    Canvas canvas,
     Offset center,
-    double scale,
     TextPainter labelPainter,
-    Color backgroundPaintColor,
-    Color strokePaintColor,
-    ) {
-    // To protect against dividing by 0.
-    final double inverseScale = scale != 0 ? 1.0 / scale : 0.0;
-
+    double scale,
+  }) {
     final double rectangleWidth = labelPainter.width + _labelPadding * 2;
     final double scaledRectangleWidth = rectangleWidth * scale;
 
@@ -2608,9 +2654,29 @@ class _RectangularSliderValueIndicatorPathPainter {
     final double localCenterX = parentBox.globalToLocal(center).dx;
     final double overflowLeft = math.max(0, scaledRectangleWidth / 2 - localCenterX);
     final double overflowRight = math.max(0, scaledRectangleWidth / 2 - (parentBox.size.width - localCenterX));
-    final rectangleShift = (overflowLeft - overflowRight) * inverseScale;
-    final rect = Rect.fromLTWH(
-      -rectangleWidth / 2 + rectangleShift,
+    // To protect against dividing by 0.
+    final double inverseScale = scale != 0 ? 1.0 / scale : 0.0;
+    return (overflowLeft - overflowRight) * inverseScale;
+  }
+
+  void paint(
+    RenderBox parentBox,
+    Canvas canvas,
+    Offset center,
+    double scale,
+    TextPainter labelPainter,
+    Color backgroundPaintColor,
+    Color strokePaintColor,
+    ) {
+    final double rectangleWidth = labelPainter.width + _labelPadding * 2;
+    final double horizontalShift = getHorizontalShift(
+      parentBox: parentBox,
+      center: center,
+      labelPainter: labelPainter,
+      scale: scale,
+    );
+    final Rect upperRect = Rect.fromLTWH(
+      -rectangleWidth / 2 + horizontalShift,
       0,
       rectangleWidth,
       _preferredHeight,
@@ -2619,11 +2685,11 @@ class _RectangularSliderValueIndicatorPathPainter {
     // While the top rectangle shifts towards the center, the triangle must stay
     // pinned to the bottom of the rectangle while still pointing at the thumb.
     double triangleShift = 0;
-    if (rect.left > -_labelPadding) {
-      triangleShift = rect.left + _labelPadding;
+    if (upperRect.left > -_labelPadding) {
+      triangleShift = upperRect.left + _labelPadding;
     }
-    if (rect.right < _labelPadding) {
-      triangleShift = rect.right - _labelPadding;
+    if (upperRect.right < _labelPadding) {
+      triangleShift = upperRect.right - _labelPadding;
     }
 
     // The triangle hypotenuse is equal to the lobe radius, and since it is
@@ -2632,14 +2698,15 @@ class _RectangularSliderValueIndicatorPathPainter {
     final double triangleHeight = _preferredHalfHeight / math.sqrt(2);
     // The left and right points of the triangle are equidistant to the center,
     // unless there is a triangle shift.
-    double triangleLeft = -triangleHeight + triangleShift;
-    double triangleRight = triangleHeight + triangleShift;
+    final double triangleLeft = -triangleHeight + triangleShift;
+    final double triangleRight = triangleHeight + triangleShift;
 
-    final trianglePath = Path()
+    final Path trianglePath = Path()
       ..lineTo(triangleLeft, -triangleHeight)
       ..lineTo(triangleRight, -triangleHeight)
       ..close();
-    final fillPaint = Paint()..color = backgroundPaintColor;
+    final Paint fillPaint = Paint()..color = backgroundPaintColor;
+    final RRect upperRRect = RRect.fromRectAndRadius(upperRect, const Radius.circular(_upperRectRadius));
 
     canvas.save();
     // Prepare the canvas for the triangle, which is relative to the center of
@@ -2649,19 +2716,35 @@ class _RectangularSliderValueIndicatorPathPainter {
     // of the value indicator showing and hiding, and any text scale that is
     // to be applied.
     canvas.scale(scale, scale);
-    canvas.drawPath(trianglePath, fillPaint);
 
+    if (strokePaintColor != null) {
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      canvas.drawPath(trianglePath, strokePaint);
+    }
+
+    canvas.save();
     // Prepare the canvas for the lobe by positioning it to the top of the lobe,
     // so that the lobe can be as close as it can to the triangle without
     // protruding the sides of the triangle.
     canvas.translate(0, -triangleHeight * 2 - _preferredHalfHeight);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, Radius.circular(4)),
-      fillPaint,
-    );
+    if (strokePaintColor != null) {
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      canvas.drawRRect(upperRRect, strokePaint);
+    }
+    canvas.drawRRect(upperRRect, fillPaint);
+    canvas.restore();
+
+    canvas.drawPath(trianglePath, fillPaint);
 
     // The label text is centered within the value indicator.
-    final Offset boxCenter = Offset(rectangleShift, _preferredHalfHeight);
+    canvas.translate(0, -triangleHeight * 2 - _preferredHalfHeight);
+    final Offset boxCenter = Offset(horizontalShift, _preferredHalfHeight);
     final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
     final Offset labelOffset = boxCenter - halfLabelPainterOffset;
     labelPainter.paint(canvas, labelOffset);
