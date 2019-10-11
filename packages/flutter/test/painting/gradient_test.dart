@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
 
@@ -765,4 +766,75 @@ void main() {
     expect(() { test2a.createShader(rect); }, throwsArgumentError);
     expect(() { test2b.createShader(rect); }, throwsArgumentError);
   });
+
+  group('Transforms', () {
+    const List<Color> colors = <Color>[Color(0xFFFFFFFF), Color(0xFF000088)];
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 400.0);
+    const List<Gradient> gradients45 = <Gradient>[
+      LinearGradient(colors: colors, transform: GradientRotation(math.pi/4)),
+      // A radial gradient won't be interesting to rotate unless the center is changed.
+      RadialGradient(colors: colors, center: Alignment.topCenter, transform: GradientRotation(math.pi/4)),
+      SweepGradient(colors: colors, transform: GradientRotation(math.pi/4)),
+    ];
+    const List<Gradient> gradients90 = <Gradient>[
+      LinearGradient(colors: colors, transform: GradientRotation(math.pi/2)),
+      // A radial gradient won't be interesting to rotate unless the center is changed.
+      RadialGradient(colors: colors, center: Alignment.topCenter, transform: GradientRotation(math.pi/2)),
+      SweepGradient(colors: colors, transform: GradientRotation(math.pi/2)),
+    ];
+
+    const Map<Type, String> gradientSnakeCase = <Type, String> {
+      LinearGradient: 'linear_gradient',
+      RadialGradient: 'radial_gradient',
+      SweepGradient: 'sweep_gradient',
+    };
+
+    Future<void> runTest(WidgetTester tester, Gradient gradient, double degrees) async {
+      final String goldenName = '${gradientSnakeCase[gradient.runtimeType]}_$degrees.png';
+      final Shader shader = gradient.createShader(
+        rect,
+      );
+      final Key painterKey = UniqueKey();
+      await tester.pumpWidget(Center(
+        child: SizedBox.fromSize(
+          size: rect.size,
+          child: RepaintBoundary(
+            key: painterKey,
+            child: CustomPaint(
+              painter: GradientPainter(shader, rect)
+            ),
+          ),
+        ),
+      ));
+      await expectLater(find.byKey(painterKey), matchesGoldenFile(goldenName));
+    }
+
+    testWidgets('Gradients - 45 degrees', (WidgetTester tester) async {
+      for (Gradient gradient in gradients45) {
+        await runTest(tester, gradient, 45);
+      }
+    });
+
+    testWidgets('Gradients - 90 degrees', (WidgetTester tester) async {
+      for (Gradient gradient in gradients90) {
+        await runTest(tester, gradient, 90);
+      }
+    });
+  });
+}
+
+class GradientPainter extends CustomPainter {
+  const GradientPainter(this.shader, this.rect);
+
+  final Shader shader;
+  final Rect rect;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(rect, Paint()..shader = shader);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+
 }
