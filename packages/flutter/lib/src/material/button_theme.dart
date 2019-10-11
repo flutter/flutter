@@ -219,7 +219,7 @@ class ButtonTheme extends InheritedTheme {
   static ButtonThemeData of(BuildContext context) {
     final ButtonTheme inheritedButtonTheme = context.inheritFromWidgetOfExactType(ButtonTheme);
     ButtonThemeData buttonTheme = inheritedButtonTheme?.data;
-    if (buttonTheme == null) { // if buttonTheme is null
+    if (buttonTheme == null) {
       final ThemeData theme = Theme.of(context);
       buttonTheme ??= theme.buttonTheme;
       buttonTheme = buttonTheme.copyWith(

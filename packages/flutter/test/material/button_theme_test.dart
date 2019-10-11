@@ -406,8 +406,8 @@ void main() {
     semanticsEnabled: true,
   );
 
-  testWidgets('default button theme accent color for RaisedButton', (WidgetTester tester) async { 
-    const Color defaultColor = Color(0xff2196f3);
+  testWidgets('Default RaisedButton text color when textTheme is set to ButtonTextTheme.accent', (WidgetTester tester) async { 
+    const Color defaultEnabledAccentTextColor = Color(0xff2196f3);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -423,18 +423,15 @@ void main() {
       ),
     );
 
-    Color textColor() {
+    Color getRaisedButtonTextColor() {
       return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
     }
 
-    // Default, not disabled.
-    expect(textColor(), equals(defaultColor));
-  },
-    semanticsEnabled: true,
-  );
+    expect(getRaisedButtonTextColor(), equals(defaultEnabledAccentTextColor));
+  });
 
   testWidgets('default button theme primary color for RaisedButton', (WidgetTester tester) async { 
-    const Color defaultColor = Color(0xff000000);
+    const Color defaultEnabledPrimaryTextColor = Color(0xff000000);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -450,18 +447,15 @@ void main() {
       ),
     );
 
-    Color textColor() {
+    Color getRaisedButtonTextColor() {
       return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
     }
 
-    // Default, not disabled.
-    expect(textColor(), equals(defaultColor));
-  },
-    semanticsEnabled: true,
-  );
+    expect(getRaisedButtonTextColor(), equals(defaultEnabledPrimaryTextColor));
+  });
 
   testWidgets('default button theme normal color for RaisedButton', (WidgetTester tester) async { 
-    const Color defaultColor = Color(0xffffffff);
+    const Color defaultEnabledNormalTextColor = Color(0xffffffff);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -478,13 +472,10 @@ void main() {
       ),
     );
 
-    Color textColor() {
+    Color getRaisedButtonTextColor() {
       return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
     }
 
-    // Default, not disabled.
-    expect(textColor(), equals(defaultColor));
-  },
-    semanticsEnabled: true,
-  );
+    expect(getRaisedButtonTextColor(), equals(defaultEnabledNormalTextColor));
+  });
 }
