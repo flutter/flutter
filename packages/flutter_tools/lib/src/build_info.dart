@@ -113,38 +113,46 @@ class AndroidBuildInfo {
 }
 
 /// The type of build.
-enum BuildMode {
-  debug,
-  profile,
-  release,
-  jitRelease,
-}
+class BuildMode {
+  const BuildMode._(this.name);
 
-const List<String> _kBuildModes = <String>[
-  'debug',
-  'profile',
-  'release',
-  'jit_release',
-];
+  factory BuildMode.fromName(String value) {
+    switch (value) {
+      case 'debug':
+        return BuildMode.debug;
+      case 'profile':
+        return BuildMode.profile;
+      case 'release':
+        return BuildMode.release;
+      case 'jit_release':
+        return BuildMode.jitRelease;
+    }
+    throw ArgumentError('$value is not a supported build mode');
+  }
+
+  static const BuildMode debug = BuildMode._('debug');
+  static const BuildMode profile = BuildMode._('profile');
+  static const BuildMode release = BuildMode._('release');
+  static const BuildMode jitRelease = BuildMode._('jit_release');
+  static const List<BuildMode> values = <BuildMode>[
+    debug,
+    profile,
+    release,
+    jitRelease,
+  ];
+
+  /// The name for this build mode.
+  final String name;
+}
 
 /// Return the name for the build mode, or "any" if null.
 String getNameForBuildMode(BuildMode buildMode) {
-  return _kBuildModes[buildMode.index];
+  return buildMode.name;
 }
 
 /// Returns the [BuildMode] for a particular `name`.
 BuildMode getBuildModeForName(String name) {
-  switch (name) {
-    case 'debug':
-      return BuildMode.debug;
-    case 'profile':
-      return BuildMode.profile;
-    case 'release':
-      return BuildMode.release;
-    case 'jit_release':
-      return BuildMode.jitRelease;
-  }
-  return null;
+  return BuildMode.fromName(name);
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {

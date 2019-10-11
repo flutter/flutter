@@ -221,6 +221,7 @@ class KernelSnapshot extends Target {
       linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
+      bytecode: buildMode == BuildMode.jitRelease,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
