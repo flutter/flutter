@@ -7256,4 +7256,29 @@ void main() {
     // visible.
     expect(scrollController.offset, 44.0);
   });
+  testWidgets('Can autofocus a TextField in a route.', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+    await tester.pumpWidget(
+      Material(
+        child: MaterialApp(
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
+                return TextField(
+                  autofocus: true,
+                  focusNode: focusNode,
+                  controller: controller,
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+  });
 }
