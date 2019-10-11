@@ -20,7 +20,6 @@ if (using_fuchsia_sdk) {
     deps = [
       "dart:kernel_compiler",
       "dart_runner:$dart_runner_target",
-      "dart_runner/embedder:dart_aot_product_snapshot_cc",
       "flutter:flutter_aot_${product_suffix}runner",
       "flutter:flutter_jit_${product_suffix}runner",
       "flutter:flutter_runner_tests",
