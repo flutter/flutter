@@ -432,12 +432,16 @@ void _tests() {
             thickness: 0.0,
             children: <TestSemantics>[
               TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: '2016',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isSelected,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'Fri, Jan 15',
                 textDirection: TextDirection.ltr,
@@ -636,25 +640,45 @@ void _tests() {
                 ],
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'Previous month December 2015',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'Next month February 2016',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'CANCEL',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'OK',
                 textDirection: TextDirection.ltr,

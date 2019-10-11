@@ -417,6 +417,7 @@ void _defineTests() {
             textField: true,
             readOnly: true,
             focused: true,
+            focusable: true,
             inMutuallyExclusiveGroup: true,
             header: true,
             obscured: true,
@@ -431,6 +432,7 @@ void _defineTests() {
       ),
     ));
     List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    print('flags: $flags');
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
     flags.remove(SemanticsFlag.hasImplicitScrolling);
@@ -466,6 +468,7 @@ void _defineTests() {
             textField: true,
             readOnly: true,
             focused: true,
+            focusable: true,
             inMutuallyExclusiveGroup: true,
             header: true,
             obscured: true,
@@ -482,7 +485,6 @@ void _defineTests() {
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
     flags.remove(SemanticsFlag.hasImplicitScrolling);
-
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(

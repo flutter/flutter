@@ -560,9 +560,10 @@ void main() {
         TestSemantics.rootChild(
           label: 'Add',
           flags: <SemanticsFlag>[
-            SemanticsFlag.isButton,
             SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isButton,
             SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
           ],
           actions: <SemanticsAction>[
             SemanticsAction.tap,
@@ -634,9 +635,10 @@ void main() {
                     SemanticsAction.tap,
                   ],
                   flags: <SemanticsFlag>[
-                    SemanticsFlag.isButton,
                     SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isButton,
                     SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocusable,
                   ],
                 ),
               ],
@@ -780,6 +782,7 @@ void main() {
         hasEnabledState: true,
         isButton: true,
         isEnabled: true,
+        isFocusable: true,
       ),
     );
   }, semanticsEnabled: true);

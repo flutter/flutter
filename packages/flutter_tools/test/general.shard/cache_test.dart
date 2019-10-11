@@ -209,7 +209,7 @@ void main() {
   });
 
   test('Unstable artifacts', () {
-    expect(DevelopmentArtifact.web.unstable, true);
+    expect(DevelopmentArtifact.web.unstable, false);
     expect(DevelopmentArtifact.linux.unstable, true);
     expect(DevelopmentArtifact.macOS.unstable, true);
     expect(DevelopmentArtifact.windows.unstable, true);
@@ -308,6 +308,32 @@ void main() {
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => processManager,
+    });
+  });
+
+  group('Unsigned mac artifacts', () {
+    MockCache mockCache;
+
+    setUp(() {
+      mockCache = MockCache();
+    });
+
+    testUsingContext('use unsigned when specified', () async {
+      when(mockCache.useUnsignedMacBinaries).thenReturn(true);
+
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      expect(iosUsbArtifacts.archiveUri.toString(), contains('/unsigned/'));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+    });
+
+    testUsingContext('not use unsigned when not specified', () async {
+      when(mockCache.useUnsignedMacBinaries).thenReturn(false);
+
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      expect(iosUsbArtifacts.archiveUri.toString(), isNot(contains('/unsigned/')));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
     });
   });
 }

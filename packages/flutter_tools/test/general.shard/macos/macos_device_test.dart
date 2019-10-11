@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -21,7 +18,6 @@ import 'package:flutter_tools/src/macos/macos_device.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   group(MacOSDevice, () {
@@ -36,93 +32,13 @@ void main() {
 
     testUsingContext('defaults', () async {
       final MockMacOSApp mockMacOSApp = MockMacOSApp();
-      when(mockMacOSApp.executable(any)).thenReturn('foo');
       expect(await device.targetPlatform, TargetPlatform.darwin_x64);
       expect(device.name, 'macOS');
       expect(await device.installApp(mockMacOSApp), true);
       expect(await device.uninstallApp(mockMacOSApp), true);
       expect(await device.isLatestBuildInstalled(mockMacOSApp), true);
       expect(await device.isAppInstalled(mockMacOSApp), true);
-      expect(await device.stopApp(mockMacOSApp), false);
       expect(device.category, Category.desktop);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('stopApp', () async {
-      const String psOut = r'''
-tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applications/foo
-''';
-      final MockMacOSApp mockMacOSApp = MockMacOSApp();
-      when(mockMacOSApp.executable(any)).thenReturn('/Applications/foo');
-      when(mockProcessManager.run(<String>['ps', 'aux'])).thenAnswer((Invocation invocation) async {
-        return ProcessResult(1, 0, psOut, '');
-      });
-      when(mockProcessManager.run(<String>['kill', '17193'])).thenAnswer((Invocation invocation) async {
-        return ProcessResult(2, 0, '', '');
-      });
-      expect(await device.stopApp(mockMacOSApp), true);
-      verify(mockProcessManager.run(<String>['kill', '17193']));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    group('startApp', () {
-      final MockMacOSApp macOSApp = MockMacOSApp();
-      final MockFileSystem mockFileSystem = MockFileSystem();
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final MockFile mockFile = MockFile();
-      when(macOSApp.executable(any)).thenReturn('test');
-      when(mockFileSystem.file('test')).thenReturn(mockFile);
-      when(mockFile.existsSync()).thenReturn(true);
-      when(mockProcessManager.start(<String>['test'])).thenAnswer((Invocation invocation) async {
-        return FakeProcess(
-          exitCode: Completer<int>().future,
-          stdout: Stream<List<int>>.fromIterable(<List<int>>[
-            utf8.encode('Observatory listening on http://127.0.0.1/0\n'),
-          ]),
-          stderr: const Stream<List<int>>.empty(),
-        );
-      });
-      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-        return ProcessResult(0, 1, '', '');
-      });
-
-      testUsingContext('Can run from prebuilt application', () async {
-        final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: true);
-        expect(result.started, true);
-        expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => mockFileSystem,
-        ProcessManager: () => mockProcessManager,
-      });
-
-      testUsingContext('The current running process is not killed when stopping the app', () async {
-        final String psOut = '''
-tester    $pid   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 flutter run --use-application-binary /Applications/foo
-''';
-        final MockMacOSApp mockMacOSApp = MockMacOSApp();
-        // The name of the executable is the same as a command line argument to the flutter tool
-        when(mockMacOSApp.executable(any)).thenReturn('/Applications/foo');
-        when(mockProcessManager.run(<String>['ps', 'aux'])).thenAnswer((Invocation invocation) async {
-          return ProcessResult(1, 0, psOut, '');
-        });
-        when(mockProcessManager.run(<String>[
-          'kill', '$pid',
-        ])).thenThrow(Exception('Flutter tool process has been killed'));
-
-        expect(await device.stopApp(mockMacOSApp), true);
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-      });
-    });
-
-    test('noop port forwarding', () async {
-      final MacOSDevice device = MacOSDevice();
-      final DevicePortForwarder portForwarder = device.portForwarder;
-      final int result = await portForwarder.forward(2);
-      expect(result, 2);
-      expect(portForwarder.forwardedPorts.isEmpty, true);
     });
 
     testUsingContext('No devices listed if platform unsupported', () async {
@@ -151,6 +67,22 @@ tester    $pid   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 flutter r
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
     });
+
+    testUsingContext('executablePathForDevice uses the correct package executable', () async {
+      final MockMacOSApp mockApp = MockMacOSApp();
+      const String debugPath = 'debug/executable';
+      const String profilePath = 'profile/executable';
+      const String releasePath = 'release/executable';
+      when(mockApp.executable(BuildMode.debug)).thenReturn(debugPath);
+      when(mockApp.executable(BuildMode.profile)).thenReturn(profilePath);
+      when(mockApp.executable(BuildMode.release)).thenReturn(releasePath);
+
+      expect(MacOSDevice().executablePathForDevice(mockApp, BuildMode.debug), debugPath);
+      expect(MacOSDevice().executablePathForDevice(mockApp, BuildMode.profile), profilePath);
+      expect(MacOSDevice().executablePathForDevice(mockApp, BuildMode.release), releasePath);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
   });
 }
 
@@ -158,10 +90,4 @@ class MockPlatform extends Mock implements Platform {}
 
 class MockMacOSApp extends Mock implements MacOSApp {}
 
-class MockFileSystem extends Mock implements FileSystem {}
-
-class MockFile extends Mock implements File {}
-
 class MockProcessManager extends Mock implements ProcessManager {}
-
-class MockProcess extends Mock implements Process {}
