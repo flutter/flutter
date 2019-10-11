@@ -5,12 +5,10 @@
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -48,27 +46,20 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   // Invoke make.
   final String buildFlag = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Stopwatch sw = Stopwatch()..start();
-  final Process process = await processManager.start(<String>[
-    'make',
-    '-C',
-    linuxProject.makeFile.parent.path,
-    'BUILD=$buildFlag'
-  ]);
   final Status status = logger.startProgress(
     'Building Linux application...',
     timeout: null,
   );
   int result;
   try {
-    process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printError);
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printTrace);
-    result = await process.exitCode;
+    result = await processUtils.stream(<String>[
+      'make',
+      '-C',
+      linuxProject.makeFile.parent.path,
+      'BUILD=$buildFlag',
+    ]);
+  } on ArgumentError {
+    throwToolExit('make not found. Run \'flutter doctor\' for more information.');
   } finally {
     status.cancel();
   }

@@ -62,9 +62,10 @@ void main() {
                   SemanticsAction.tap,
                 ],
                 flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
                   SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
                   SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
                 ],
               ),
             ],

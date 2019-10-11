@@ -498,7 +498,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['description'] = description;
     generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
-      await pubGet(
+      await pub.get(
         context: PubContext.create,
         directory: directory.path,
         offline: argResults['offline'],
@@ -517,7 +517,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
-      await pubGet(
+      await pub.get(
         context: PubContext.createPackage,
         directory: directory.path,
         offline: argResults['offline'],
@@ -534,7 +534,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['description'] = description;
     generatedCount += _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
-      await pubGet(
+      await pub.get(
         context: PubContext.createPlugin,
         directory: directory.path,
         offline: argResults['offline'],
@@ -570,7 +570,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     }
 
     if (argResults['pub']) {
-      await pubGet(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
+      await pub.get(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 

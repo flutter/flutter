@@ -131,7 +131,7 @@ class TestCommand extends FastFlutterCommand {
         'directory (or one of its subdirectories).');
     }
     if (shouldRunPub) {
-      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+      await pub.get(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
     final bool buildTestAssets = argResults['test-assets'];
     final List<String> names = argResults['name'];

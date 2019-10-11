@@ -179,7 +179,7 @@ class WebFs {
     // Workaround for https://github.com/flutter/flutter/issues/41681.
     final String toolPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
     if (!fs.isFileSync(fs.path.join(toolPath, '.packages'))) {
-      await pubGet(
+      await pub.get(
         context: PubContext.pubGet,
         directory: toolPath,
         offline: true,
@@ -289,7 +289,7 @@ class WebFs {
             return (await ChromeLauncher.connectedInstance).chromeConnection;
           },
           reloadConfiguration: ReloadConfiguration.none,
-          serveDevTools: true,
+          serveDevTools: false,
           verbose: false,
           enableDebugExtension: true,
           logWriter: (dynamic level, String message) => printTrace(message),
@@ -324,11 +324,19 @@ class WebFs {
       initializePlatform,
     );
     if (!await firstBuildCompleter.future) {
-      throw Exception('Failed to compile for the web.');
+      throw const BuildException();
     }
     await firstBuild?.cancel();
     return webFS;
   }
+}
+
+/// An exception thrown when build runner fails.
+///
+/// This contains no error information as it will have already been printed to
+/// the console.
+class BuildException implements Exception {
+  const BuildException();
 }
 
 abstract class AssetServer {
