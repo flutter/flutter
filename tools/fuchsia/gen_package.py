@@ -91,10 +91,20 @@ def main():
   ]
 
   # Build the package
-  subprocess.check_call(pm_command_base + ['build'])
+  try:
+    subprocess.check_call(pm_command_base + ['build'])
+  except subprocess.CalledProcessError as e:
+    print('The "%s" command failed:' % e.cmd)
+    print(e.output)
+    raise
 
   # Archive the package
-  subprocess.check_call(pm_command_base + ['archive'])
+  try:
+    subprocess.check_call(pm_command_base + ['archive'])
+  except subprocess.CalledProcessError as e:
+    print('The "%s" command failed:' % e.cmd)
+    print(e.output)
+    raise
 
   return 0
 
