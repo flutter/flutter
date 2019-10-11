@@ -502,7 +502,7 @@ class _BuildInstance {
         outputFiles[output.path] = output;
       }
       for (File input in node.inputs) {
-        final String resolvedPath = input.resolveSymbolicLinksSync();
+        final String resolvedPath = input.absolute.path;
         if (outputFiles.containsKey(resolvedPath)) {
           continue;
         }

@@ -123,12 +123,14 @@ Future<void> buildWithAssemble({
     }
     throwToolExit('Failed to build bundle.');
   }
-  final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-  final File outputDepfile = fs.file(depfilePath);
-  if (!outputDepfile.parent.existsSync()) {
-    outputDepfile.parent.createSync(recursive: true);
+  if (depfilePath != null) {
+    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+    final File outputDepfile = fs.file(depfilePath);
+    if (!outputDepfile.parent.existsSync()) {
+      outputDepfile.parent.createSync(recursive: true);
+    }
+    depfile.writeToFile(outputDepfile);
   }
-  depfile.writeToFile(outputDepfile);
 }
 
 Future<AssetBundle> buildAssets({

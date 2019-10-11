@@ -150,6 +150,7 @@ class FlutterTesterDevice extends Device {
       applicationKernelFilePath: applicationKernelFilePath,
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
+      platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
     );
     command.add('--flutter-assets-dir=$assetDirPath');
 
