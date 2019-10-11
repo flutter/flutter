@@ -57,10 +57,14 @@ class _ProxyLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => _layer.find(regionOffset);
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
+  @protected
+  bool findAnnotations<S>(
+    AnnotationResult<S> result,
+    Offset localPosition, {
+    @required bool onlyFirst,
+  }) {
+    return _layer.findAnnotations(result, localPosition, onlyFirst: onlyFirst);
+  }
 }
 
 /// A [Canvas] that multicasts all method calls to a main canvas and a
@@ -2662,10 +2666,14 @@ class _InspectorOverlayLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
+  @protected
+  bool findAnnotations<S>(
+    AnnotationResult<S> result,
+    Offset localPosition, {
+    bool onlyFirst,
+  }) {
+    return false;
+  }
 }
 
 const double _kScreenEdgeMargin = 10.0;

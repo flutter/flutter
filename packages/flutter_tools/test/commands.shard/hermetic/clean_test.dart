@@ -12,29 +12,22 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  MemoryFileSystem fs;
-  MockPlatform windowsPlatform;
-  MockXcode mockXcode;
-  FlutterProject projectUnderTest;
-  MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
-  Directory buildDirectory;
-
-  setUp(() {
-    fs = MemoryFileSystem();
-    mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-    windowsPlatform = MockPlatform();
-    mockXcode = MockXcode();
+  void test1() {
+    final MemoryFileSystem fs = MemoryFileSystem();
+    final MockXcodeProjectInterpreter mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+    final MockXcode mockXcode = MockXcode();
 
     final Directory currentDirectory = fs.currentDirectory;
-    buildDirectory = currentDirectory.childDirectory('build');
+    final Directory buildDirectory = currentDirectory.childDirectory('build');
     buildDirectory.createSync(recursive: true);
 
-    projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
+    final FlutterProject projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
     projectUnderTest.ios.xcodeWorkspace.createSync(recursive: true);
     projectUnderTest.macos.xcodeWorkspace.createSync(recursive: true);
 
@@ -44,10 +37,8 @@ void main() {
     projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
     projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
     projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
-  });
 
-  group(CleanCommand, () {
-    testUsingContext('removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
+    testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
       when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       await CleanCommand().runCommand();
 
@@ -62,12 +53,16 @@ void main() {
       verify(xcodeProjectInterpreter.cleanWorkspace(any, 'Runner')).called(2);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Xcode: () => mockXcode,
-      FileSystem: () => fs,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
+  }
 
-    testUsingContext('prints a helpful error message on Windows', () async {
+  void test2() {
+    final MockXcode mockXcode = MockXcode();
+    final MockPlatform windowsPlatform = MockPlatform();
+    testUsingContext('$CleanCommand prints a helpful error message on Windows', () async {
       when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
       when(windowsPlatform.isWindows).thenReturn(true);
 
@@ -85,7 +80,10 @@ void main() {
       Logger: () => BufferLogger(),
       Xcode: () => mockXcode,
     });
-  });
+  }
+
+  test1();
+  test2();
 }
 
 class MockFile extends Mock implements File {}

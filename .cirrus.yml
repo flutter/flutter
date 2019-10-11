@@ -597,7 +597,9 @@ docker_builder:
     - tool_tests_integration-linux
     - build_tests-linux
     - integration_tests-linux
-    - integration_tests_gradle-linux
+    - integration_tests_gradle1-linux
+    - integration_tests_gradle2-linux
+    - release_smoke_tests
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"

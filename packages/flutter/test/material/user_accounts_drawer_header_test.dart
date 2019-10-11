@@ -481,6 +481,7 @@ void main() {
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                       label: 'Signed in\nname\nemail',
                       textDirection: TextDirection.ltr,
                       children: <TestSemantics>[
