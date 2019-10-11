@@ -14,7 +14,7 @@ template("dart_shim_kernel") {
     main_dart = rebase_path(invoker.main_dart)
 
     deps = [
-      "../kernel:kernel_platform_files($host_toolchain)",
+      "../kernel:kernel_platform_files",
     ]
 
     gen_kernel_script = "//third_party/dart/pkg/vm/bin/gen_kernel.dart"
@@ -23,6 +23,7 @@ template("dart_shim_kernel") {
     dot_packages = rebase_path("//third_party/dart/.packages")
 
     inputs = [
+      platform_dill,
       gen_kernel_script,
       main_dart,
       dot_packages,
@@ -108,7 +109,7 @@ template("create_aot_snapshot") {
     snapshot_assembly = "$target_gen_dir/aot${product_suffix}_vm_snapshot.S"
 
     # gen_snapshot only needs this to go through the motions of setting up an isolate.
-    shim_target = ":shim${product_suffix}_kernel"
+    shim_target = ":shim${product_suffix}_kernel($host_toolchain)"
     shim_kernel = get_label_info(shim_target, "target_gen_dir") +
                   "/shim${product_suffix}_kernel.dill"
 
