@@ -322,11 +322,11 @@ abstract class ImageProvider<T> {
       }
       key.then<void>((T key) {
         obtainedKey = key;
-        final ImageStreamCompleter completer = PaintingBinding.instance
-            .imageCache.putIfAbsent(
-              key,
-              () => load(key, PaintingBinding.instance.instantiateImageCodec),
-              onError: handleError);
+        final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
+          key,
+          () => load(key, PaintingBinding.instance.instantiateImageCodec),
+          onError: handleError,
+        );
         if (completer != null) {
           stream.setCompleter(completer);
         }
@@ -542,17 +542,14 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    if (width == null && height == null) {
-      return imageProvider.load(key.providerCacheKey, decode);
-    } else {
-      final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-        // ResizeImage cannot be composed with another ImageProvider that
-        // applies cacheWidth or cacheHeight.
-        assert(cacheWidth == null && cacheHeight == null);
-        return decode(bytes, cacheWidth: width, cacheHeight: height);
-      };
-      return imageProvider.load(key.providerCacheKey, decodeResize);
-    }
+    final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+      assert(
+        cacheWidth == null && cacheHeight == null,
+        'ResizeImage cannot be composed with another ImageProvider that applies cacheWidth or cacheHeight.'
+      );
+      return decode(bytes, cacheWidth: width, cacheHeight: height);
+    };
+    return imageProvider.load(key.providerCacheKey, decodeResize);
   }
 
   @override
