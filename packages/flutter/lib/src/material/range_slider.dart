@@ -525,7 +525,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   static const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape();
-  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = PaddleRangeSliderValueIndicatorShape();
+//  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = PaddleRangeSliderValueIndicatorShape();
+  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
   static const double _defaultMinThumbSeparation = 8;
 
@@ -550,7 +551,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // value indicator is assumed to be the same as the active color.
     final RangeSliderValueIndicatorShape valueIndicatorShape = sliderTheme.rangeValueIndicatorShape ?? _defaultValueIndicatorShape;
     Color valueIndicatorColor;
-    if (valueIndicatorShape is RectangularSliderValueIndicatorShape) {
+    if (valueIndicatorShape is RectangularRangeSliderValueIndicatorShape) {
       // TODO: use color scheme?
       valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Colors.grey[600];
     } else {
