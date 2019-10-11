@@ -491,7 +491,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 class _SizeAwareCacheKey {
   const _SizeAwareCacheKey(this.providerCacheKey, this.width, this.height);
 
-  final dynamic providerCacheKey;
+  final Object providerCacheKey;
 
   final int width;
 
