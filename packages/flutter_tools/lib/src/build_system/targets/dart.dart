@@ -211,17 +211,17 @@ class KernelSnapshot extends Target {
 
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
-      aot: buildMode == BuildMode.profile || buildMode == BuildMode.release,
+      aot: buildMode.isPrecompiled,
       enableAsserts: buildMode == BuildMode.debug,
       trackWidgetCreation: buildMode == BuildMode.debug,
       targetModel: TargetModel.flutter,
-      targetProductVm: buildMode == BuildMode.release || buildMode == BuildMode.jitRelease,
+      targetProductVm: buildMode.isRelease,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
-      bytecode: buildMode == BuildMode.jitRelease,
+      bytecode: false,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');

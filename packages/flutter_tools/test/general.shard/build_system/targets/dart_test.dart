@@ -220,7 +220,7 @@ flutter_tools:lib/''');
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
       linkPlatformKernelIn: false,
-      bytecode: true,
+      bytecode: false,
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });

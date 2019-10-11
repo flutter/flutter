@@ -140,6 +140,26 @@ class BuildMode {
     release,
     jitRelease,
   ];
+  static const Set<BuildMode> releaseModes = <BuildMode>{
+    release,
+    jitRelease,
+  };
+  static const Set<BuildMode> jitModes = <BuildMode>{
+    debug,
+    jitRelease,
+  };
+
+  /// Whether this mode is considered release.
+  ///
+  /// Useful for determining whether we should enable/disable asserts or
+  /// other development features.
+  bool get isRelease => releaseModes.contains(this);
+
+  /// Whether this mode is using the jit runtime.
+  bool get isJit => jitModes.contains(this);
+
+  /// Whether this mode is using the precompiled runtime.
+  bool get isPrecompiled => !isJit;
 
   /// The name for this build mode.
   final String name;
