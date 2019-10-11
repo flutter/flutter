@@ -189,8 +189,8 @@ flutter:
       overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
         GradleUtils: () => GradleUtils(),
-        ProcessManager: () => mockProcessManager,
         FileSystem: () => memoryFileSystem,
+        ProcessManager: () => mockProcessManager,
       });
     });
 

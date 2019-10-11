@@ -45,6 +45,7 @@ void main() {
       expect(sdk.latestVersion.sdkLevel, 23);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('parse sdk N', () {
@@ -56,6 +57,7 @@ void main() {
       expect(sdk.latestVersion.sdkLevel, 24);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns sdkmanager path', () {
@@ -66,6 +68,7 @@ void main() {
       expect(sdk.sdkManagerPath, fs.path.join(sdk.directory, 'tools', 'bin', 'sdkmanager'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns sdkmanager version', () {
@@ -158,6 +161,7 @@ void main() {
           expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot]);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
           Platform: () => FakePlatform(operatingSystem: os),
         });
 
@@ -192,6 +196,7 @@ void main() {
           expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot, '-fuse-ld=$realNdkLinker']);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
           Platform: () => FakePlatform(operatingSystem: os),
         });
       });
@@ -209,6 +214,7 @@ void main() {
           expect(explanation, contains('Can not locate ndk-bundle'));
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
           Platform: () => FakePlatform(operatingSystem: os),
         });
       }

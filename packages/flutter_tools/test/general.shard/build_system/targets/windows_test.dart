@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/testbed.dart';
 
 void main() {
@@ -51,6 +52,7 @@ void main() {
       fs.directory('windows').createSync();
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Platform: () => platform,
     });
   });

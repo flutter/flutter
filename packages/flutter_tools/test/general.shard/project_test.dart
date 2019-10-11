@@ -196,6 +196,7 @@ void main() {
         expectExists(project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'));
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem(),
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(),
       });
@@ -206,6 +207,7 @@ void main() {
         expectExists(project.macos.generatedXcodePropertiesFile);
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem(),
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(),
       });
@@ -217,6 +219,7 @@ void main() {
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem(),
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(),
       });
@@ -228,6 +231,7 @@ void main() {
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem(),
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(),
       });
@@ -324,6 +328,7 @@ apply plugin: 'kotlin-android'
         expect(project.android.isKotlin, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
@@ -344,6 +349,7 @@ apply plugin: 'kotlin-android'
       void testWithMocks(String description, Future<void> testMethod()) {
         testUsingContext(description, testMethod, overrides: <Type, Generator>{
           FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
           PlistParser: () => mockPlistUtils,
           XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
           FlutterProjectFactory: () => flutterProjectFactory,
@@ -606,6 +612,7 @@ void testInMemory(String description, Future<void> testMethod()) {
     testMethod,
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Cache: () => Cache(),
       FlutterProjectFactory: () => flutterProjectFactory,
     },

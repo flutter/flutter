@@ -89,8 +89,8 @@ void main() {
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(69),
     FileSystem: () => MockFileSystem(),
+    ProcessManager: () => MockProcessManager(69),
     Platform: () => FakePlatform(
       environment: UnmodifiableMapView<String, String>(<String, String>{}),
     ),
@@ -144,8 +144,8 @@ void main() {
       expect(error, isNull);
     });
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(69),
     FileSystem: () => MockFileSystem(),
+    ProcessManager: () => MockProcessManager(69),
     Platform: () => FakePlatform(
       environment: UnmodifiableMapView<String, String>(<String, String>{}),
     ),
@@ -171,8 +171,8 @@ void main() {
       expect(error, isNull);
     });
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(69),
     FileSystem: () => MockFileSystem(),
+    ProcessManager: () => MockProcessManager(69),
     Platform: () => FakePlatform(
       environment: UnmodifiableMapView<String, String>(<String, String>{
         'PUB_CACHE': 'custom/pub-cache/path',
@@ -186,8 +186,8 @@ void main() {
     await pub.get(context: PubContext.flutterTests, checkLastModified: false);
     verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(0),
     FileSystem: () => MockFileSystem(),
+    ProcessManager: () => MockProcessManager(0),
     Platform: () => FakePlatform(
       environment: UnmodifiableMapView<String, String>(<String, String>{
         'PUB_CACHE': 'custom/pub-cache/path',
@@ -206,8 +206,8 @@ void main() {
     }
     verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(1),
     FileSystem: () => MockFileSystem(),
+    ProcessManager: () => MockProcessManager(1),
     Platform: () => FakePlatform(
       environment: UnmodifiableMapView<String, String>(<String, String>{
         'PUB_CACHE': 'custom/pub-cache/path',
@@ -226,11 +226,11 @@ void main() {
     }
     verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
   }, overrides: <Type, Generator>{
+    FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(
       1,
       stderr: 'version solving failed',
     ),
-    FileSystem: () => MockFileSystem(),
     Platform: () => FakePlatform(
       environment: UnmodifiableMapView<String, String>(<String, String>{
         'PUB_CACHE': 'custom/pub-cache/path',

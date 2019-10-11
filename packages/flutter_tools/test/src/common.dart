@@ -42,7 +42,7 @@ String getFlutterRoot() {
     return platform.environment['FLUTTER_ROOT'];
   }
 
-  Error invalidScript() => StateError('Invalid script: ${platform.script}');
+  Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
   switch (platform.script.scheme) {
