@@ -324,11 +324,19 @@ class WebFs {
       initializePlatform,
     );
     if (!await firstBuildCompleter.future) {
-      throw Exception('Failed to compile for the web.');
+      throw const BuildException();
     }
     await firstBuild?.cancel();
     return webFS;
   }
+}
+
+/// An exception thrown when build runner fails.
+///
+/// This contains no error information as it will have already been printed to
+/// the console.
+class BuildException implements Exception {
+  const BuildException();
 }
 
 abstract class AssetServer {

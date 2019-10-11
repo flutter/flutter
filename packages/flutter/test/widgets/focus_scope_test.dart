@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/semantics.dart';
 
 class TestFocus extends StatefulWidget {
   const TestFocus({
@@ -24,6 +27,7 @@ class TestFocus extends StatefulWidget {
 class TestFocusState extends State<TestFocus> {
   FocusNode focusNode;
   String _label;
+  bool built = false;
 
   @override
   void dispose() {
@@ -50,6 +54,7 @@ class TestFocusState extends State<TestFocus> {
 
   @override
   Widget build(BuildContext context) {
+    built = true;
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(focusNode);
@@ -1289,5 +1294,49 @@ void main() {
     await tester.pumpWidget(Container());
 
     expect(WidgetsBinding.instance.focusManager.rootScope.descendants, isEmpty);
+  });
+  testWidgets('Focus widgets set Semantics information about focus', (WidgetTester tester) async {
+    final GlobalKey<TestFocusState> key = GlobalKey();
+
+    await tester.pumpWidget(
+      TestFocus(key: key, name: 'a'),
+    );
+
+    final SemanticsNode semantics = tester.getSemantics(find.byKey(key));
+
+    expect(key.currentState.focusNode.hasFocus, isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
+
+    FocusScope.of(key.currentContext).requestFocus(key.currentState.focusNode);
+    await tester.pumpAndSettle();
+
+    expect(key.currentState.focusNode.hasFocus, isTrue);
+    expect(semantics.hasFlag(SemanticsFlag.isFocused), isTrue);
+    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
+
+    key.currentState.focusNode.canRequestFocus = false;
+    await tester.pumpAndSettle();
+
+    expect(key.currentState.focusNode.hasFocus, isFalse);
+    expect(key.currentState.focusNode.canRequestFocus, isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isFalse);
+  });
+  testWidgets('Setting canRequestFocus on focus node causes update.', (WidgetTester tester) async {
+    final GlobalKey<TestFocusState> key = GlobalKey();
+
+    final TestFocus testFocus = TestFocus(key: key, name: 'a');
+    await tester.pumpWidget(
+      testFocus,
+    );
+
+    await tester.pumpAndSettle();
+    key.currentState.built = false;
+    key.currentState.focusNode.canRequestFocus = false;
+    await tester.pumpAndSettle();
+    key.currentState.built = true;
+
+    expect(key.currentState.focusNode.canRequestFocus, isFalse);
   });
 }

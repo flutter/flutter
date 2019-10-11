@@ -840,6 +840,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.readOnly != null) {
       config.isReadOnly = properties.readOnly;
     }
+    if (properties.focusable != null) {
+      config.isFocusable = properties.focusable;
+    }
     if (properties.focused != null) {
       config.isFocused = properties.focused;
     }
