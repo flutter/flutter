@@ -488,7 +488,15 @@ class RenderParagraph extends RenderBox
     _textPainter.markNeedsLayout();
   }
 
+  // Placeholder dimensions representing the sizes of child inline widgets.
+  //
+  // These need to be cached because the text painter's placeholder dimensions
+  // will be overwritten during intrinsic width/height calculations and must be
+  // restored to the original values before final layout and painting.
+  List<PlaceholderDimensions> _placeholderDimensions;
+
   void _layoutTextWithConstraints(BoxConstraints constraints) {
+    _textPainter.setPlaceholderDimensions(_placeholderDimensions);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 
@@ -501,7 +509,7 @@ class RenderParagraph extends RenderBox
       return;
     }
     RenderBox child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
+    _placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
       // Only constrain the width to the maximum width of the paragraph.
@@ -525,7 +533,7 @@ class RenderParagraph extends RenderBox
           break;
         }
       }
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
+      _placeholderDimensions[childIndex] = PlaceholderDimensions(
         size: child.size,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
@@ -534,7 +542,6 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   // Iterate through the laid-out children and set the parentData offsets based
