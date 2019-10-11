@@ -87,8 +87,8 @@ abstract class GradientTransform {
 /// This sample would rotate a sweep gradient by a quarter turn clockwise:
 ///
 /// ```dart
-/// SweepGradient(
-///   colors: colors,
+/// const SweepGradient(
+///   colors: <Color>[Color(0xFFFFFFFF), Color(0xFF009900)],
 ///   transform: GradientRotation(math.pi/4),
 /// );
 /// ```
