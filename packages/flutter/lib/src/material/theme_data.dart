@@ -182,6 +182,20 @@ class ThemeData extends Diagnosticable {
   ///    ([accentColorBrightness]), so that the right contrasting text
   ///    color will be used over the accent color.
   ///
+  /// Most of these parameters map to the [ThemeData] field with the same name,
+  /// all of which are described in more detail on the fields themselves. The
+  /// exceptions are:
+  ///
+  ///  * [primarySwatch] - used to configure default values for several fields,
+  ///    including: [primaryColor], [primaryColorBrightness], [primaryColorLight],
+  ///    [primaryColorDark], [toggleableActiveColor], [accentColor], [colorScheme],
+  ///    [secondaryHeaderColor], [textSelectionColor], [backgroundColor], and
+  ///    [buttonColor].
+  ///
+  ///  * [fontFamily] - sets the default fontFamily for any
+  ///    [TextStyle.fontFamily] that isn't set directly in the [textTheme],
+  ///    [primaryTextTheme], or [accentTextTheme].
+  ///
   /// See <https://material.io/design/color/> for
   /// more discussion on how to pick the right colors.
   factory ThemeData({
@@ -301,19 +315,19 @@ class ThemeData extends Diagnosticable {
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
     typography ??= Typography(platform: platform);
-    final TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
+    TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
+    if (fontFamily != null) {
+      defaultTextTheme = defaultTextTheme.apply(fontFamily: fontFamily);
+      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
+      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamily: fontFamily);
+    }
     textTheme = defaultTextTheme.merge(textTheme);
-    final TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    final TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     materialTapTargetSize ??= MaterialTapTargetSize.padded;
     applyElevationOverlayColor ??= false;
-    if (fontFamily != null) {
-      textTheme = textTheme.apply(fontFamily: fontFamily);
-      primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
-      accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
-    }
 
     // Used as the default color (fill color) for RaisedButtons. Computing the
     // default for ButtonThemeData for the sake of backwards compatibility.
