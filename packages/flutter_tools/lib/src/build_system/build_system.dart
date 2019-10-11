@@ -772,9 +772,12 @@ class Node {
       }
     }
 
-    // If we depend on a file that doesnt exist on disk, kill the build.
+    // If we depend on a file that doesnt exist on disk, mark the build as
+    // dirty. if the rule is not correctly specified, this will result in it
+    // always being rerun.
     if (missingInputs.isNotEmpty) {
-      throw MissingInputException(missingInputs, target.name);
+      _dirty = true;
+      invalidatedReasons.add(InvalidedReason.inputChanged);
     }
 
     // If we have files to hash, compute them asynchronously and then

@@ -106,13 +106,12 @@ void main() {
     );
   });
 
-  test('Throws exception if asked to build with missing inputs', () => testbed.run(() async {
+  test('Does not throw exception if asked to build with missing inputs', () => testbed.run(() async {
     // Delete required input file.
     fs.file('foo.dart').deleteSync();
     final BuildResult buildResult = await buildSystem.build(fooTarget, environment);
 
-    expect(buildResult.hasException, true);
-    expect(buildResult.exceptions.values.single.exception, isInstanceOf<MissingInputException>());
+    expect(buildResult.hasException, false);
   }));
 
   test('Throws exception if it does not produce a specified output', () => testbed.run(() async {

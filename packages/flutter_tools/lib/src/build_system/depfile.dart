@@ -9,7 +9,7 @@ import '../globals.dart';
 /// A class for representing depfile formats.
 class Depfile {
   /// Create a [Depfile] from a list of [input] files and [output] files.
-  const Depfile(this.name, this.inputs, this.outputs);
+  const Depfile(this.inputs, this.outputs);
 
   /// Parse the depfile contents from [file].
   ///
@@ -19,11 +19,11 @@ class Depfile {
     final List<String> colonSeparated = contents.split(': ');
     if (colonSeparated.length != 2) {
       printError('Invalid depfile: ${file.path}');
-      return Depfile(file.basename, <File>[], <File>[]);
+      return const Depfile(<File>[], <File>[]);
     }
     final List<File> inputs = _processList(colonSeparated[1].trim());
     final List<File> outputs = _processList(colonSeparated[0].trim());
-    return Depfile(file.basename, inputs, outputs);
+    return Depfile(inputs, outputs);
   }
 
   /// The input files for this depfile.
@@ -32,13 +32,14 @@ class Depfile {
   /// The output files for this depfile.
   final List<File> outputs;
 
-  /// The name of this depfile.
-  final String name;
-
   /// Given an [depfile] File, write the depfile contents.
+  ///
+  /// If either [inputs] or [outputs] is empty, does not write to the file.
   void writeToFile(File depfile) {
+    if (inputs.isEmpty || outputs.isEmpty) {
+      return;
+    }
     final StringBuffer buffer = StringBuffer();
-    buffer.write('flutter_bundle');
     _writeFilesToBuffer(outputs, buffer);
     buffer.write(': ');
     _writeFilesToBuffer(inputs, buffer);

@@ -93,7 +93,7 @@ class UnpackLinuxDebug extends Target {
         outputs.add(destinationFile);
       }
     }
-    final Depfile depfile = Depfile('linux_engine_sources.d', inputs, outputs);
+    final Depfile depfile = Depfile(inputs, outputs);
     depfile.writeToFile(environment.buildDir.childFile('linux_engine_sources.d'));
   }
 }

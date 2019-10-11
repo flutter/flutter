@@ -43,7 +43,7 @@ void main() {
     );
     expect(fs.file(fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
     expect(fs.file(fs.path.join('example', 'LICENSE')).existsSync(), true);
-    expect(fs.file(fs.path.join('example.d')).existsSync(), true);
+    expect(fs.file(fs.path.join('example.d')).existsSync(), false);
   }));
 
   test('Handles build system failure', () => testbed.run(() {
