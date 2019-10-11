@@ -146,7 +146,7 @@ abstract class Gradient {
   ///   final double oneMinusCosRadians = 1 - math.cos(radians);
   ///   final Offset center = rect.center;
   ///   final double originX = sinRadians * center.dy + oneMinusCosRadians * center.dx;
-  ///   final double originY = -sinRadians * center.dy + oneMinusCosRadians * center.dx;
+  ///   final double originY = -sinRadians * center.dx + oneMinusCosRadians * center.dy;
   ///
   ///   final Matrix4 transform = Matrix4.identity()
   ///     ..translate(originX, originY)

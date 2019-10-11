@@ -769,13 +769,20 @@ void main() {
   });
 
   group('Transforms', () {
-    const List<Color> colors = <Color>[Color(0xFFFFFFFF), Color(0xFF009900)];
+    const List<Color> colors = <Color>[Color(0xFFFFFFFF), Color(0xFF000088)];
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 400.0);
     const List<Gradient> gradients = <Gradient>[
       LinearGradient(colors: colors),
-      RadialGradient(colors: colors),
+      // A radial gradient won't be interesting to rotate unless the center is changed.
+      RadialGradient(colors: colors, center: Alignment.topCenter),
       SweepGradient(colors: colors),
     ];
+
+    const Map<Type, String> gradientSnakeCase = <Type, String> {
+      LinearGradient: 'linear_gradient',
+      RadialGradient: 'radial_gradient',
+      SweepGradient: 'sweep_gradient',
+    };
 
     double radians(double degrees) => degrees * math.pi / 180;
 
@@ -785,7 +792,7 @@ void main() {
       final double oneMinusCosRadians = 1 - math.cos(radians);
       final Offset center = rect.center;
       final double originX = sinRadians * center.dy + oneMinusCosRadians * center.dx;
-      final double originY = -sinRadians * center.dy + oneMinusCosRadians * center.dx;
+      final double originY = -sinRadians * center.dx + oneMinusCosRadians * center.dy;
 
       return Matrix4.identity()
         ..translate(originX, originY)
@@ -794,13 +801,24 @@ void main() {
 
     Future<void> runTest(WidgetTester tester, double degrees) async {
       for (Gradient gradient in gradients) {
-        final String goldenName = '${gradient.runtimeType}_$degrees.png';
+        final String goldenName = '${gradientSnakeCase[gradient.runtimeType]}_$degrees.png';
         final Shader shader = gradient.createShader(
           rect,
           transform: rotatedTransform(radians(degrees), rect),
         );
-        await tester.pumpWidget(CustomPaint(painter: GradientPainter(shader, rect)));
-        expect(find.byType(CustomPaint), matchesGoldenFile(goldenName));
+        final Key painterKey = UniqueKey();
+        await tester.pumpWidget(Center(
+          child: SizedBox.fromSize(
+            size: rect.size,
+            child: RepaintBoundary(
+              key: painterKey,
+              child: CustomPaint(
+                painter: GradientPainter(shader, rect)
+              ),
+            ),
+          ),
+        ));
+        await expectLater(find.byKey(painterKey), matchesGoldenFile(goldenName));
       }
     }
 
@@ -826,6 +844,6 @@ class GradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 
 }
