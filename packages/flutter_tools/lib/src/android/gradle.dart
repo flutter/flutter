@@ -755,8 +755,9 @@ Future<void> _buildGradleProjectV2(
     printStatus('$exclamationMark Your app isn\'t using AndroidX.', emphasis: true);
     printStatus(
       'To avoid potential build failures, you can quickly migrate your app '
-      'by following the steps on https://goo.gl/CP92wY.'
-    , indent: 4);
+      'by following the steps on https://goo.gl/CP92wY.',
+      indent: 4,
+    );
   }
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
 
