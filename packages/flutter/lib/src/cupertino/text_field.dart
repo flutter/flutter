@@ -600,14 +600,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
   // Disables all directional focus actions inside of a text field, since up and
-  // down shouldn't go to another field, even in a single line text field. Other
-  // keys (e.g. left/right/enter) are already absorbed by the text field before
-  // the Shortcuts widget gets them, so they don't need remapping. We remap the
-  // keys rather than the actions, since someone might want to invoke a
-  // navigation action from another key.
+  // down shouldn't go to another field, even in a single line text field. We
+  // remap the keys rather than the actions, since someone might want to invoke
+  // a directional navigation action from another key binding.
   final Map<LogicalKeySet, Intent> _disabledNavigationKeys = <LogicalKeySet, Intent>{
     LogicalKeySet(LogicalKeyboardKey.arrowUp): const Intent(DoNothingAction.key),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): const Intent(DoNothingAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const Intent(DoNothingAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const Intent(DoNothingAction.key),
   };
 
   @override
