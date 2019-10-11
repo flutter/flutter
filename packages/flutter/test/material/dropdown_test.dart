@@ -946,10 +946,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ListView), findsOneWidget);
 
+    // Show a keyboard (simulate by shortening the height).
     await tester.pumpWidget(buildFrame(onChanged: onChanged, mediaSize: const Size(800, 300)));
     await tester.pump();
     expect(find.byType(ListView, skipOffstage: false), findsOneWidget);
 
+    // Hide a keyboard again (simulate by increasing the height).
+    await tester.pumpWidget(buildFrame(onChanged: onChanged, mediaSize: const Size(800, 600)));
+    await tester.pump();
+    expect(find.byType(ListView, skipOffstage: false), findsOneWidget);
+
+    // Rotate the device (simulate by changing the aspect ratio).
     await tester.pumpWidget(buildFrame(onChanged: onChanged, mediaSize: const Size(600, 800)));
     await tester.pump();
     expect(find.byType(ListView, skipOffstage: false), findsNothing);

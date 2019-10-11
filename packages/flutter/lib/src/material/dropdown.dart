@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show window;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -1030,13 +1031,24 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   bool get _enabled => widget.items != null && widget.items.isNotEmpty && widget.onChanged != null;
 
+  Orientation _getOrientation(BuildContext context) {
+    Orientation result = MediaQuery.of(context, nullOk: true)?.orientation;
+    if (result == null) {
+      // If there's no MediaQuery, then use the window aspect to determine
+      // orientation.
+      final Size size = window.physicalSize;
+      result = size.width > size.height ? Orientation.landscape : Orientation.portrait;
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final Orientation newOrientation = MediaQuery.of(context).orientation;
+    final Orientation newOrientation = _getOrientation(context);
     _lastOrientation ??= newOrientation;
-    if (MediaQuery.of(context).orientation != _lastOrientation) {
+    if (newOrientation != _lastOrientation) {
       _removeDropdownRoute();
       _lastOrientation = newOrientation;
     }
