@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -58,6 +59,63 @@ _ColorsAndStops _interpolateColorsAndStops(
   return _ColorsAndStops(interpolatedColors, interpolatedStops);
 }
 
+/// Base class for transforming gradient shaders without applying the same
+/// transform to the entire canvas.
+///
+/// For example, a [SweepGradient] normally starts its gradation at 3 o'clock
+/// and draws clockwise. To have the sweep appear to start at 6 o'clock, supply
+/// a [GradientRotation] of `0.785398` radians (i.e. `45` degrees).
+@immutable
+abstract class GradientTransform {
+  /// A const constructor that allows subclasses to be const.
+  const GradientTransform();
+
+  /// When a [Gradient] creates its [Shader], it will call this method to
+  /// determine what transform to apply to the shader for the given [Rect] and
+  /// [TextDirection].
+  ///
+  /// Implementers may return null from this method, which achieves the same
+  /// final effect as returning [Matrix4.identity].
+  Matrix4 transform(Rect bounds, {TextDirection textDirection});
+}
+
+/// A [GradientTransform] that rotates the gradient around the center-point of
+/// its bounding box.
+///
+/// For example, the following would rotate a sweep gradient by a quarter turn
+/// clockwise:
+///
+/// ```dart
+/// SweepGradient(
+///   colors: colors,
+///   transform: GradientRotation(0.785398),
+/// );
+/// ```
+@immutable
+class GradientRotation extends GradientTransform {
+  /// Constructs a `GradientRotation` for the specified angle.
+  ///
+  /// The angle is in radians in the clockwise direction.
+  const GradientRotation(this.radians);
+
+  /// The angle of rotation.
+  final double radians;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection textDirection}) {
+    assert(bounds != null);
+    final double sinRadians = math.sin(radians);
+    final double oneMinusCosRadians = 1 - math.cos(radians);
+    final Offset center = bounds.center;
+    final double originX = sinRadians * center.dy + oneMinusCosRadians * center.dx;
+    final double originY = -sinRadians * center.dx + oneMinusCosRadians * center.dy;
+
+    return Matrix4.identity()
+      ..translate(originX, originY)
+      ..rotateZ(radians);
+  }
+}
+
 /// A 2D gradient.
 ///
 /// This is an interface that allows [LinearGradient], [RadialGradient], and
@@ -77,9 +135,17 @@ abstract class Gradient {
   /// If specified, the [stops] argument must have the same number of entries as
   /// [colors] (this is also not verified until the [createShader] method is
   /// called).
+  ///
+  /// The [transform] argument can be applied to transform _only_ the gradient,
+  /// without rotating the canvas itself or other geometry on the canvas. For
+  /// example, a `GradientRotation(0.785398)` will result in a [SweepGradient]
+  /// that starts from a position of 6 o'clock instead of 3 o'clock, assuming
+  /// no other rotation or perspective transformations have been applied to the
+  /// [Canvas]. If null, no transformation is applied.
   const Gradient({
     @required this.colors,
     this.stops,
+    this.transform,
   }) : assert(colors != null);
 
   /// The colors the gradient should obtain at each of the stops.
@@ -108,6 +174,12 @@ abstract class Gradient {
   /// with the first stop at 0.0 and the last stop at 1.0.
   final List<double> stops;
 
+  /// The transform, if any, to apply to the gradient.
+  ///
+  /// This transform is in addition to any other transformations applied to the
+  /// canvas, but does not add any transformations to the canvas.
+  final GradientTransform transform;
+
   List<double> _impliedStops() {
     if (stops != null)
       return stops;
@@ -126,40 +198,9 @@ abstract class Gradient {
   /// it uses [AlignmentDirectional] objects instead of [Alignment]
   /// objects, then the `textDirection` argument must not be null.
   ///
-  /// The `transform` property will be applied as a local transform to the
-  /// gradient, allowing the shader to be transformed without transforming the
-  /// entire canvas.
-  ///
-  /// {@tool sample}
-  /// This example shows how to rotate a [SweepGradient] without rotating the
-  /// [Canvas] or the [Rect] that the gradient is shading.
-  ///
-  /// ```dart
-  /// import 'dart:math' as math;
-  ///
-  /// void paint(Canvas canvas, Rect rect) {
-  ///   // Calculate 45 degrees (clockwise rotation) as radians.
-  ///   final double radians = 45 * math.pi / 180;
-  ///
-  ///   // Calculate the point to rotate about.
-  ///   final double sinRadians = math.sin(radians);
-  ///   final double oneMinusCosRadians = 1 - math.cos(radians);
-  ///   final Offset center = rect.center;
-  ///   final double originX = sinRadians * center.dy + oneMinusCosRadians * center.dx;
-  ///   final double originY = -sinRadians * center.dx + oneMinusCosRadians * center.dy;
-  ///
-  ///   final Matrix4 transform = Matrix4.identity()
-  ///     ..translate(originX, originY)
-  ///     ..rotateZ(radians);
-  ///   final SweepGradient gradient = SweepGradient(colors: [Colors.white, Colors.blue]);
-  ///   final Paint paint = Paint()
-  ///     ..shader = gradient.createShader(rect, transform: transform)
-  ///     ..color = Colors.blue;
-  ///   canvas.drawRect(rect, paint);
-  /// }
-  /// ```
-  /// {@end-tool}
-  Shader createShader(Rect rect, { TextDirection textDirection, Matrix4 transform });
+  /// The shader's transform will be resolved from the [transform] of this
+  /// gradient.
+  Shader createShader(Rect rect, { TextDirection textDirection });
 
   /// Returns a new gradient with its properties scaled by the given factor.
   ///
@@ -255,6 +296,10 @@ abstract class Gradient {
     assert(a != null && b != null);
     return t < 0.5 ? a.scale(1.0 - (t * 2.0)) : b.scale((t - 0.5) * 2.0);
   }
+
+  Float64List _resolveTransform(Rect bounds, TextDirection textDirection) {
+    return transform?.transform(bounds, textDirection: textDirection)?.storage;
+  }
 }
 
 /// A 2D linear gradient.
@@ -319,10 +364,11 @@ class LinearGradient extends Gradient {
     @required List<Color> colors,
     List<double> stops,
     this.tileMode = TileMode.clamp,
+    GradientTransform transform,
   }) : assert(begin != null),
        assert(end != null),
        assert(tileMode != null),
-       super(colors: colors, stops: stops);
+       super(colors: colors, stops: stops, transform: transform);
 
   /// The offset at which stop 0.0 of the gradient is placed.
   ///
@@ -365,11 +411,11 @@ class LinearGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection, Matrix4 transform }) {
+  Shader createShader(Rect rect, { TextDirection textDirection }) {
     return ui.Gradient.linear(
       begin.resolve(textDirection).withinRect(rect),
       end.resolve(textDirection).withinRect(rect),
-      colors, _impliedStops(), tileMode, transform?.storage,
+      colors, _impliedStops(), tileMode, _resolveTransform(rect, textDirection),
     );
   }
 
@@ -568,11 +614,12 @@ class RadialGradient extends Gradient {
     this.tileMode = TileMode.clamp,
     this.focal,
     this.focalRadius = 0.0,
+    GradientTransform transform,
   }) : assert(center != null),
        assert(radius != null),
        assert(tileMode != null),
        assert(focalRadius != null),
-       super(colors: colors, stops: stops);
+       super(colors: colors, stops: stops, transform: transform);
 
   /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
   /// square describing the gradient which will be mapped onto the paint box.
@@ -635,12 +682,12 @@ class RadialGradient extends Gradient {
   final double focalRadius;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection, Matrix4 transform }) {
+  Shader createShader(Rect rect, { TextDirection textDirection }) {
     return ui.Gradient.radial(
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
       colors, _impliedStops(), tileMode,
-      transform?.storage,
+      _resolveTransform(rect, textDirection),
       focal == null  ? null : focal.resolve(textDirection).withinRect(rect),
       focalRadius * rect.shortestSide,
     );
@@ -832,11 +879,12 @@ class SweepGradient extends Gradient {
     @required List<Color> colors,
     List<double> stops,
     this.tileMode = TileMode.clamp,
+    GradientTransform transform,
   }) : assert(center != null),
        assert(startAngle != null),
        assert(endAngle != null),
        assert(tileMode != null),
-       super(colors: colors, stops: stops);
+       super(colors: colors, stops: stops, transform: transform);
 
   /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
   /// square describing the gradient which will be mapped onto the paint box.
@@ -875,14 +923,13 @@ class SweepGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection, Matrix4 transform }) {
-    final Offset resolvedCenter = center.resolve(textDirection).withinRect(rect);
+  Shader createShader(Rect rect, { TextDirection textDirection }) {
     return ui.Gradient.sweep(
-      resolvedCenter,
+      center.resolve(textDirection).withinRect(rect),
       colors, _impliedStops(), tileMode,
       startAngle,
       endAngle,
-      transform?.storage,
+      _resolveTransform(rect, textDirection),
     );
   }
 

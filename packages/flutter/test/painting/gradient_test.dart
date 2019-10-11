@@ -771,11 +771,17 @@ void main() {
   group('Transforms', () {
     const List<Color> colors = <Color>[Color(0xFFFFFFFF), Color(0xFF000088)];
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 400.0);
-    const List<Gradient> gradients = <Gradient>[
-      LinearGradient(colors: colors),
+    const List<Gradient> gradients45 = <Gradient>[
+      LinearGradient(colors: colors, transform: GradientRotation(0.785398)),
       // A radial gradient won't be interesting to rotate unless the center is changed.
-      RadialGradient(colors: colors, center: Alignment.topCenter),
-      SweepGradient(colors: colors),
+      RadialGradient(colors: colors, center: Alignment.topCenter, transform: GradientRotation(0.785398)),
+      SweepGradient(colors: colors, transform: GradientRotation(0.785398)),
+    ];
+    const List<Gradient> gradients90 = <Gradient>[
+      LinearGradient(colors: colors, transform: GradientRotation(1.5708)),
+      // A radial gradient won't be interesting to rotate unless the center is changed.
+      RadialGradient(colors: colors, center: Alignment.topCenter, transform: GradientRotation(1.5708)),
+      SweepGradient(colors: colors, transform: GradientRotation(1.5708)),
     ];
 
     const Map<Type, String> gradientSnakeCase = <Type, String> {
@@ -784,50 +790,36 @@ void main() {
       SweepGradient: 'sweep_gradient',
     };
 
-    double radians(double degrees) => degrees * math.pi / 180;
-
-    Matrix4 rotatedTransform(double radians, Rect rect) {
-      // Calculate the point to rotate about.
-      final double sinRadians = math.sin(radians);
-      final double oneMinusCosRadians = 1 - math.cos(radians);
-      final Offset center = rect.center;
-      final double originX = sinRadians * center.dy + oneMinusCosRadians * center.dx;
-      final double originY = -sinRadians * center.dx + oneMinusCosRadians * center.dy;
-
-      return Matrix4.identity()
-        ..translate(originX, originY)
-        ..rotateZ(radians);
-    }
-
-    Future<void> runTest(WidgetTester tester, double degrees) async {
-      for (Gradient gradient in gradients) {
-        final String goldenName = '${gradientSnakeCase[gradient.runtimeType]}_$degrees.png';
-        final Shader shader = gradient.createShader(
-          rect,
-          transform: rotatedTransform(radians(degrees), rect),
-        );
-        final Key painterKey = UniqueKey();
-        await tester.pumpWidget(Center(
-          child: SizedBox.fromSize(
-            size: rect.size,
-            child: RepaintBoundary(
-              key: painterKey,
-              child: CustomPaint(
-                painter: GradientPainter(shader, rect)
-              ),
+    Future<void> runTest(WidgetTester tester, Gradient gradient, double degrees) async {
+      final String goldenName = '${gradientSnakeCase[gradient.runtimeType]}_$degrees.png';
+      final Shader shader = gradient.createShader(
+        rect,
+      );
+      final Key painterKey = UniqueKey();
+      await tester.pumpWidget(Center(
+        child: SizedBox.fromSize(
+          size: rect.size,
+          child: RepaintBoundary(
+            key: painterKey,
+            child: CustomPaint(
+              painter: GradientPainter(shader, rect)
             ),
           ),
-        ));
-        await expectLater(find.byKey(painterKey), matchesGoldenFile(goldenName));
-      }
+        ),
+      ));
+      await expectLater(find.byKey(painterKey), matchesGoldenFile(goldenName));
     }
 
     testWidgets('Gradients - 45 degrees', (WidgetTester tester) async {
-      await runTest(tester, 45);
+      for (Gradient gradient in gradients45) {
+        await runTest(tester, gradient, 45);
+      }
     });
 
     testWidgets('Gradients - 90 degrees', (WidgetTester tester) async {
-      await runTest(tester, 90);
+      for (Gradient gradient in gradients90) {
+        await runTest(tester, gradient, 90);
+      }
     });
   });
 }
