@@ -145,7 +145,7 @@ name: example''');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/34446
   });
 
 }
