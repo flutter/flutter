@@ -36,6 +36,11 @@ TEST_F(ShellTest, CacheSkSLWorks) {
   auto settings = CreateSettingsForFixture();
   settings.cache_sksl = true;
   settings.dump_skp_on_shader_compilation = true;
+
+  fml::AutoResetWaitableEvent firstFrameLatch;
+  settings.frame_rasterized_callback =
+      [&firstFrameLatch](const FrameTiming& t) { firstFrameLatch.Signal(); };
+
   auto sksl_config = RunConfiguration::InferFromSettings(settings);
   sksl_config.SetEntrypoint("emptyMain");
   std::unique_ptr<Shell> shell = CreateShell(settings);
@@ -55,9 +60,7 @@ TEST_F(ShellTest, CacheSkSLWorks) {
     root->Add(physical_shape_layer);
   };
   PumpOneFrame(shell.get(), 100, 100, builder);
-  fml::Status result =
-      shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1000));
-  ASSERT_TRUE(result.ok());
+  firstFrameLatch.Wait();
   WaitForIO(shell.get());
 
   // Some skp should be dumped due to shader compilations.
@@ -88,9 +91,9 @@ TEST_F(ShellTest, CacheSkSLWorks) {
   shell = CreateShell(settings);
   PlatformViewNotifyCreated(shell.get());
   RunEngine(shell.get(), std::move(normal_config));
+  firstFrameLatch.Reset();
   PumpOneFrame(shell.get(), 100, 100, builder);
-  result = shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1000));
-  ASSERT_TRUE(result.ok());
+  firstFrameLatch.Wait();
   WaitForIO(shell.get());
 
   // To check that all shaders are precompiled, verify that no new skp is dumped
