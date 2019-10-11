@@ -9,33 +9,48 @@ import 'package:flutter_tools/src/run_hot.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
+// assumption: tests have a timeout less than 100 days
+final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
+
 void main() {
   group('ProjectFileInvalidator', () {
-    final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
     testUsingContext('No last compile', () async {
       expect(
-        ProjectFileInvalidator.findInvalidated(lastCompiled: null, urisToMonitor: <Uri>[], packagesPath: ''),
-        isEmpty);
+        ProjectFileInvalidator.findInvalidated(
+          lastCompiled: null,
+          urisToMonitor: <Uri>[],
+          packagesPath: '',
+        ),
+        isEmpty,
+      );
     });
 
     testUsingContext('Empty project', () async {
       expect(
-        ProjectFileInvalidator.findInvalidated(lastCompiled: DateTime.now(), urisToMonitor: <Uri>[], packagesPath: ''),
-        isEmpty);
+        ProjectFileInvalidator.findInvalidated(
+          lastCompiled: inFuture,
+          urisToMonitor: <Uri>[],
+          packagesPath: '',
+        ),
+        isEmpty,
+      );
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Non-existent files are ignored', () async {
       expect(
         ProjectFileInvalidator.findInvalidated(
-            lastCompiled: DateTime.now(),
-            urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
-            packagesPath: '',
-          ),
-        isEmpty);
+          lastCompiled: inFuture,
+          urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
+          packagesPath: '',
+        ),
+        isEmpty,
+      );
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 }

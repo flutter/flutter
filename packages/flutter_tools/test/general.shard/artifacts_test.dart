@@ -45,6 +45,7 @@ void main() {
       }, overrides: <Type, Generator>{
         Cache: () => Cache(rootOverride: tempDir),
         FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
 
@@ -64,6 +65,7 @@ void main() {
       }, overrides: <Type, Generator>{
         Cache: () => Cache(rootOverride: tempDir),
         FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
     });
@@ -93,6 +95,7 @@ void main() {
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
 
@@ -111,6 +114,7 @@ void main() {
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
 
@@ -118,6 +122,7 @@ void main() {
         expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => FakePlatform(operatingSystem: 'windows'),
       });
 
@@ -125,6 +130,7 @@ void main() {
         expect(artifacts.getArtifactPath(Artifact.engineDartBinary), isNot(contains('.exe')));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
     });

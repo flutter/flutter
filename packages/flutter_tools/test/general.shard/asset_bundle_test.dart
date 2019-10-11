@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -39,6 +38,7 @@ void main() {
       expect(ab.entries.length, greaterThan(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('empty pubspec', () async {
@@ -56,6 +56,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('wildcard directories are updated when filesystem changes', () async {
@@ -96,10 +97,10 @@ flutter:
       expect(bundle.entries.length, 5);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('handle removal of wildcard directories', () async {
-      fs.file('.packages').createSync();
       fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       fs.file('pubspec.yaml')
         ..createSync()
@@ -109,6 +110,7 @@ flutter:
   assets:
     - assets/foo/
 ''');
+      fs.file('.packages').createSync();
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       // Expected assets:
@@ -126,6 +128,9 @@ flutter:
         ..writeAsStringSync(r'''
 name: example''');
 
+      // touch .packages to make sure its change time is after pubspec.yaml's
+      fs.file('.packages').createSync();
+
       // Even though the previous file was removed, it is left in the
       // asset manifest and not updated. This is due to the devfs not
       // supporting file deletion.
@@ -139,7 +144,8 @@ name: example''');
       expect(bundle.entries.length, 4);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-    }, skip: io.Platform.isWindows /* https://github.com/flutter/flutter/issues/34446 */);
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    });
   });
 
 }

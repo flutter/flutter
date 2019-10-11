@@ -368,33 +368,41 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            label: 'one',
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isEnabled,
-            ],
-          ),
-          TestSemantics.rootChild(
-            label: 'two',
-            flags: <SemanticsFlag>[
-              SemanticsFlag.isSelected,
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isEnabled,
-            ],
-          ),
-          TestSemantics.rootChild(
-            label: 'three',
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasEnabledState,
-            ],
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+              ],
+              label: 'one',
+            ),
+            TestSemantics.rootChild(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isSelected,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+              ],
+              label: 'two',
+            ),
+            TestSemantics.rootChild(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isFocusable,
+              ],
+              label: 'three',
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
       ),
-      ignoreTransform: true, ignoreId: true, ignoreRect: true),
     );
 
     semantics.dispose();
