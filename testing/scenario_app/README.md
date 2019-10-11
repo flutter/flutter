@@ -45,3 +45,8 @@ the app in the `android/` folder. The app can be run by opening it in Android
 Studio and running it, or by running `./gradlew assemble` in the `android/`
 folder and installing the APK from the correct folder in
 `android/app/build/outputs/apk`.
+
+## Changing dart:ui code
+
+If you change the dart:ui interface, remember to point the sky_engine and
+sky_services clauses to your local engine's output path before compiling.

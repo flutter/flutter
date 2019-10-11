@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.view;
+package io.flutter.embedding.engine.loader;
 
 import static java.util.Arrays.asList;
 

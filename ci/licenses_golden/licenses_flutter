@@ -597,6 +597,10 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/Flutte
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartExecutor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartMessenger.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/PlatformMessageHandler.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterLoader.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/ResourceCleaner.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/ResourceExtractor.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/ResourcePaths.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/FlutterPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/PluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/activity/ActivityAware.java
@@ -666,9 +670,6 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterMain.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterNativeView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterRunArguments.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourceCleaner.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourcePaths.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/TextureRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/VsyncWaiter.java
 FILE: ../../../flutter/shell/platform/android/library_loader.cc

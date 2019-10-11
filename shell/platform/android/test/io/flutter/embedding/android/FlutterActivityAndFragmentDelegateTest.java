@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +27,6 @@ import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
-import io.flutter.view.FlutterMain;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 import static org.junit.Assert.assertEquals;
@@ -49,10 +47,6 @@ public class FlutterActivityAndFragmentDelegateTest {
 
   @Before
   public void setup() {
-    // FlutterMain is utilized statically, therefore we need to inform it to behave differently
-    // for testing purposes.
-    FlutterMain.setIsRunningInRobolectricTest(true);
-
     // Create a mocked FlutterEngine for the various interactions required by the delegate
     // being tested.
     mockFlutterEngine = mockFlutterEngine();
@@ -71,12 +65,6 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(mockFlutterEngine);
     when(mockHost.shouldAttachEngineToActivity()).thenReturn(true);
     when(mockHost.shouldDestroyEngineWithHost()).thenReturn(true);
-  }
-
-  @After
-  public void teardown() {
-    // Return FlutterMain to normal.
-    FlutterMain.setIsRunningInRobolectricTest(false);
   }
 
   @Test

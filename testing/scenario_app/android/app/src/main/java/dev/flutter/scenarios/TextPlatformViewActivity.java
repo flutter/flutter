@@ -15,14 +15,12 @@ import java.nio.ByteBuffer;
 
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivity;
-import io.flutter.embedding.android.FlutterFragment;
-import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.BinaryCodec;
 
-public class MainActivity extends FlutterActivity {
+public class TextPlatformViewActivity extends FlutterActivity {
   final static String TAG = "Scenarios";
 
   @Override
