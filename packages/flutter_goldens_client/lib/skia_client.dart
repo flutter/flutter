@@ -71,8 +71,8 @@ class SkiaGoldClient {
   /// This is set and used by the [FlutterLocalFileComparator] and
   /// [FlutterPreSubmitFileComparator] to test against golden masters maintained
   /// in the Flutter Gold dashboard.
-  Map<String, dynamic> get expectations => _expectations;
-  Map<String, dynamic> _expectations;
+  Map<String, List<String>> get expectations => _expectations;
+  Map<String, List<String>> _expectations;
 
   /// The local [Directory] where the Flutter repository is hosted.
   ///
@@ -195,6 +195,7 @@ class SkiaGoldClient {
 
   /// Requests and sets the [_expectations] known to Flutter Gold at head.
   Future<void> getExpectations() async {
+    _expectations = <String, List<String>>{};
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
         'https://flutter-gold.skia.org/json/expectations/commit/HEAD'
@@ -204,8 +205,12 @@ class SkiaGoldClient {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
-        final Map<String, dynamic> skiaJson = json.decode(rawResponse);
-        _expectations = skiaJson['master'];
+        final Map<String, dynamic> skiaJson = json.decode(rawResponse)['master'];
+
+        skiaJson.forEach((String key, dynamic value) {
+          final Map<String, dynamic> hashesMap = value;
+          _expectations[key] = hashesMap.keys.toList();
+        });
       } on FormatException catch(_) {
         print('Formatting error detected requesting expectations from Flutter Gold.\n'
           'rawResponse: $rawResponse');
@@ -282,8 +287,10 @@ class SkiaGoldClient {
     return ignoreIsActive;
   }
 
-  /// Queries the Flutter Gold details api to determine if the given expectation
-  /// for a test matches the configuration of the executing machine.
+  /// The [_expectations] retrieved from Flutter Gold do not include the
+  /// parameters of the given test. This function queries the Flutter Gold
+  /// details api to determine if the given expectation for a test matches the
+  /// configuration of the executing machine.
   Future<bool> isValidDigestForExpectation(String expectation, String testName) async {
     bool isValid = false;
     testName = cleanTestName(testName);

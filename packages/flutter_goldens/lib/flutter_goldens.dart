@@ -71,7 +71,10 @@ Future<void> main(FutureOr<void> testMain()) async {
 abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
   /// URIs relative to the specified [basedir], and retrieve golden baselines
-  /// using the [skiaClient].
+  /// using the [skiaClient]. The [basedir] is used for writing and accessing
+  /// information and files for interacting with the [skiaClient]. When testing
+  /// locally, the [basedir] will also contain any diffs from failed tests, or
+  /// goldens generated from newly introduced tests.
   ///
   /// The [fs] and [platform] parameters are useful in tests, where the default
   /// file system and platform can be replaced by mock instances.
@@ -302,7 +305,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
-    final Map<String, dynamic> testExpectations = skiaClient.expectations[testName];
+    final List<String> testExpectations = skiaClient.expectations[testName];
 
     if (testExpectations == null) {
       // There is no baseline for this test
@@ -310,7 +313,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     }
 
     ComparisonResult result;
-    for (String expectation in testExpectations.keys) {
+    for (String expectation in testExpectations) {
       final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
 
       result = GoldenFileComparator.compareLists(
@@ -409,7 +412,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
-    final Map<String, dynamic> testExpectations = skiaClient.expectations[testName];
+    final List<String> testExpectations = skiaClient.expectations[testName];
 
     if (testExpectations == null) {
       // There is no baseline for this test
@@ -423,7 +426,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     }
 
     ComparisonResult result;
-    for (String expectation in testExpectations.keys) {
+    for (String expectation in testExpectations) {
       final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
 
       result = GoldenFileComparator.compareLists(

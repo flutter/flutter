@@ -4,7 +4,7 @@
 
 /// Json response template for Skia Gold expectations request:
 /// https://flutter-gold.skia.org/json/expectations/commit/HEAD
-String expectationsTemplate() {
+String rawExpectationsTemplate() {
   return '''
     {
       "md5": "a7489b00e03a1846e43500b7c14dd7b0",
@@ -24,6 +24,25 @@ String expectationsTemplate() {
       }
     }
   ''';
+}
+
+/// Decoded json response template for Skia Gold expectations request:
+/// https://flutter-gold.skia.org/json/expectations/commit/HEAD
+Map<String, List<String>> expectationsTemplate() {
+  return <String, List<String>>{
+    'flutter.golden_test.1': <String>[
+      '55109a4bed52acc780530f7a9aeff6c0'
+    ],
+    'flutter.golden_test.3': <String>[
+      '87cb35131e6ad4b57d4d09d59ae743c3',
+      'dc94eb2c39c0c8ae11a4efd090b72f94',
+      'f2583c9003978a06b7888878bdc089e2',
+    ],
+    'flutter.golden_test.2': <String>[
+      'eb03a5e3114c9ecad5e4f1178f285a49',
+      'f14631979de24fca6e14ad247d5f2bd6',
+    ],
+  };
 }
 
 /// Json response template for Skia Gold digest request:

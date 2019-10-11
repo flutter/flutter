@@ -172,7 +172,7 @@ void main() {
       test('sets up expectations', () async {
         url = Uri.parse('https://flutter-gold.skia.org/json/expectations/commit/HEAD');
         final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
-          utf8.encode(expectationsTemplate())
+          utf8.encode(rawExpectationsTemplate())
         );
         when(mockHttpClient.getUrl(url))
           .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
@@ -183,7 +183,7 @@ void main() {
         expect(skiaClient.expectations, isNotNull);
         expect(
           skiaClient.expectations['flutter.golden_test.1'],
-          containsPair(expectation, 1),
+          contains(expectation),
         );
       });
 
@@ -397,7 +397,7 @@ void main() {
         when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
           .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
         when(mockSkiaClient.expectations)
-          .thenReturn(json.decode(expectationsTemplate())['master']);
+          .thenReturn(expectationsTemplate());
         when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
           .thenReturn('flutter.golden_test.1');
         when(mockSkiaClient.isValidDigestForExpectation(
@@ -487,7 +487,7 @@ void main() {
         when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
           .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
         when(mockSkiaClient.expectations)
-          .thenReturn(json.decode(expectationsTemplate())['master']);
+          .thenReturn(expectationsTemplate());
         when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
           .thenReturn('flutter.golden_test.1');
         when(mockSkiaClient.isValidDigestForExpectation(
