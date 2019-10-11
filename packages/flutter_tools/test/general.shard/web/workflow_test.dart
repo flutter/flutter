@@ -88,13 +88,14 @@ void main() {
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockPlatform extends Mock implements Platform {
-  MockPlatform(
-      {this.windows = false,
-      this.macos = false,
-      this.linux = false,
-      this.environment = const <String, String>{
-        kChromeEnvironment: 'chrome',
-      }});
+  MockPlatform({
+    this.windows = false,
+    this.macos = false,
+    this.linux = false,
+    this.environment = const <String, String>{
+      kChromeEnvironment: 'chrome',
+    },
+  });
 
   final bool windows;
   final bool macos;

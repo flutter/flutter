@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/tests/controls_page.dart';
+import 'src/tests/popup_constants.dart';
+import 'src/tests/popup_page.dart';
 import 'src/tests/text_field_page.dart';
 
 void main() {
@@ -40,10 +42,11 @@ Future<String> dataHandler(String message) async {
   throw UnimplementedError();
 }
 
-const List<String> routes = <String>[
-  selectionControlsRoute,
-  textFieldRoute,
-];
+Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+  selectionControlsRoute : (BuildContext context) => SelectionControlsPage(),
+  popupControlsRoute : (BuildContext context) => PopupControlsPage(),
+  textFieldRoute : (BuildContext context) => TextFieldPage(),
+};
 
 class TestApp extends StatelessWidget {
   const TestApp();
@@ -51,15 +54,12 @@ class TestApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      routes: <String, WidgetBuilder>{
-        selectionControlsRoute: (BuildContext context) => SelectionControlsPage(),
-        textFieldRoute: (BuildContext context) => TextFieldPage(),
-      },
+      routes: routes,
       home: Builder(
         builder: (BuildContext context) {
           return Scaffold(
             body: ListView(
-              children: routes.map<Widget>((String value) {
+              children: routes.keys.map<Widget>((String value) {
                 return MaterialButton(
                   child: Text(value),
                   onPressed: () {

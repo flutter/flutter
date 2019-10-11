@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -29,6 +30,7 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import 'common.dart';
+import 'testbed.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
@@ -82,7 +84,7 @@ void testUsingContext(
             when(mock.getAttachedDevices()).thenAnswer((Invocation _) async => <IOSSimulator>[]);
             return mock;
           },
-          OutputPreferences: () => OutputPreferences(showColor: false),
+          OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
@@ -92,6 +94,7 @@ void testUsingContext(
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
+          Pub: () => ThrowingPub() // prevent accidentally using pub.
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -303,7 +306,11 @@ class FakeUsage implements Usage {
   void sendCommand(String command, { Map<String, String> parameters }) { }
 
   @override
-  void sendEvent(String category, String parameter, { Map<String, String> parameters }) { }
+  void sendEvent(String category, String parameter, {
+    String label,
+    int value,
+    Map<String, String> parameters,
+  }) { }
 
   @override
   void sendTiming(String category, String variableName, Duration duration, { String label }) { }

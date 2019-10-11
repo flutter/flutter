@@ -10,6 +10,7 @@ import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
+import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
@@ -29,6 +30,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
+import '../dart/pub.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
@@ -57,9 +59,7 @@ typedef HttpMultiServerFactory = Future<HttpServer> Function(dynamic address, in
 
 /// A function with the same signature as [Dwds.start].
 typedef DwdsFactory = Future<Dwds> Function({
-  @required int applicationPort,
-  @required int assetServerPort,
-  @required String applicationTarget,
+  @required AssetHandler assetHandler,
   @required Stream<BuildResult> buildResults,
   @required ConnectionProvider chromeConnection,
   String hostname,
@@ -176,6 +176,18 @@ class WebFs {
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
+    // Workaround for https://github.com/flutter/flutter/issues/41681.
+    final String toolPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
+    if (!fs.isFileSync(fs.path.join(toolPath, '.packages'))) {
+      await pub.get(
+        context: PubContext.pubGet,
+        directory: toolPath,
+        offline: true,
+        skipPubspecYamlCheck: true,
+        checkLastModified: false,
+      );
+    }
+
     final Completer<bool> firstBuildCompleter = Completer<bool>();
 
     // Initialize the asset bundle.
@@ -264,17 +276,20 @@ class WebFs {
       await assetBundle.build();
       await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
       if (!skipDwds) {
+        final BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
+          daemonAssetPort,
+          kBuildTargetName,
+          hostname ?? _kHostName,
+          hostPort);
         dwds = await dwdsFactory(
           hostname: hostname ?? _kHostName,
-          applicationPort: hostPort,
-          applicationTarget: kBuildTargetName,
-          assetServerPort: daemonAssetPort,
+          assetHandler: assetHandler,
           buildResults: filteredBuildResults,
           chromeConnection: () async {
             return (await ChromeLauncher.connectedInstance).chromeConnection;
           },
           reloadConfiguration: ReloadConfiguration.none,
-          serveDevTools: true,
+          serveDevTools: false,
           verbose: false,
           enableDebugExtension: true,
           logWriter: (dynamic level, String message) => printTrace(message),
@@ -309,11 +324,19 @@ class WebFs {
       initializePlatform,
     );
     if (!await firstBuildCompleter.future) {
-      throw Exception('Failed to compile for the web.');
+      throw const BuildException();
     }
     await firstBuild?.cancel();
     return webFS;
   }
+}
+
+/// An exception thrown when build runner fails.
+///
+/// This contains no error information as it will have already been printed to
+/// the console.
+class BuildException implements Exception {
+  const BuildException();
 }
 
 abstract class AssetServer {
@@ -398,7 +421,7 @@ class DebugAssetServer extends AssetServer {
         ));
         if (dart2jsArchive.existsSync()) {
           final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
-          partFiles = fs.systemTempDirectory.createTempSync('_flutter_tool')
+          partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
           for (ArchiveFile file in archive) {
             partFiles.childFile(file.name).writeAsBytesSync(file.content);

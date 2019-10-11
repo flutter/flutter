@@ -209,7 +209,7 @@ void main() {
   });
 
   test('Unstable artifacts', () {
-    expect(DevelopmentArtifact.web.unstable, true);
+    expect(DevelopmentArtifact.web.unstable, false);
     expect(DevelopmentArtifact.linux.unstable, true);
     expect(DevelopmentArtifact.macOS.unstable, true);
     expect(DevelopmentArtifact.windows.unstable, true);
@@ -234,8 +234,8 @@ void main() {
     });
 
     testUsingContext('makes binary dirs readable and executable by all', () async {
-      final Directory artifactDir = fs.systemTempDirectory.createTempSync('artifact.');
-      final Directory downloadDir = fs.systemTempDirectory.createTempSync('download.');
+      final Directory artifactDir = fs.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+      final Directory downloadDir = fs.systemTempDirectory.createTempSync('flutter_cache_test_download.');
       when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
       when(mockCache.getDownloadDir()).thenReturn(downloadDir);
       final FakeCachedArtifact artifact = FakeCachedArtifact(
@@ -282,7 +282,7 @@ void main() {
       final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
       expect(mavenArtifacts.isUpToDate(), isFalse);
 
-      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('flutter_cache_test_gradle_wrapper.');
       when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
 
       fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
@@ -308,6 +308,32 @@ void main() {
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => processManager,
+    });
+  });
+
+  group('Unsigned mac artifacts', () {
+    MockCache mockCache;
+
+    setUp(() {
+      mockCache = MockCache();
+    });
+
+    testUsingContext('use unsigned when specified', () async {
+      when(mockCache.useUnsignedMacBinaries).thenReturn(true);
+
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      expect(iosUsbArtifacts.archiveUri.toString(), contains('/unsigned/'));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+    });
+
+    testUsingContext('not use unsigned when not specified', () async {
+      when(mockCache.useUnsignedMacBinaries).thenReturn(false);
+
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      expect(iosUsbArtifacts.archiveUri.toString(), isNot(contains('/unsigned/')));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
     });
   });
 }

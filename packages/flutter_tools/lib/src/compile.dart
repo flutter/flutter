@@ -101,7 +101,6 @@ class StdoutHandler {
   bool _badState = false;
 
   void handler(String message) {
-    printTrace('-> $message');
     if (_badState) {
       return;
     }
@@ -250,6 +249,8 @@ class KernelCompiler {
     TargetModel targetModel = TargetModel.flutter,
     bool linkPlatformKernelIn = false,
     bool aot = false,
+    bool enableAsserts = false,
+    bool causalAsyncStacks = true,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
@@ -286,6 +287,8 @@ class KernelCompiler {
       sdkRoot,
       '--strong',
       '--target=$targetModel',
+      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
+      if (enableAsserts) '--enable-asserts',
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
@@ -426,6 +429,8 @@ class _RejectRequest extends _CompilationRequest {
 class ResidentCompiler {
   ResidentCompiler(
     this._sdkRoot, {
+    bool enableAsserts = false,
+    bool causalAsyncStacks = true,
     bool trackWidgetCreation = false,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -436,6 +441,8 @@ class ResidentCompiler {
     bool unsafePackageSerialization,
     List<String> experimentalFlags,
   }) : assert(_sdkRoot != null),
+       _enableAsserts = enableAsserts,
+       _causalAsyncStacks = causalAsyncStacks,
        _trackWidgetCreation = trackWidgetCreation,
        _packagesPath = packagesPath,
        _fileSystemRoots = fileSystemRoots,
@@ -452,6 +459,8 @@ class ResidentCompiler {
     }
   }
 
+  final bool _enableAsserts;
+  final bool _causalAsyncStacks;
   final bool _trackWidgetCreation;
   final String _packagesPath;
   final TargetModel _targetModel;
@@ -525,7 +534,6 @@ class ResidentCompiler {
     printTrace('<- recompile $mainUri$inputKey');
     for (Uri fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
-      printTrace('<- ${_mapFileUri(fileUri.toString(), packageUriMapper)}');
     }
     _server.stdin.writeln(inputKey);
     printTrace('<- $inputKey');
@@ -566,6 +574,7 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=$_targetModel',
+      '-Ddart.developer.causal_async_stacks=$_causalAsyncStacks',
       if (outputPath != null) ...<String>[
         '--output-dill',
         outputPath,
@@ -577,6 +586,7 @@ class ResidentCompiler {
         '--packages',
         _packagesPath,
       ],
+      if (_enableAsserts) '--enable-asserts',
       if (_trackWidgetCreation) '--track-widget-creation',
       if (_fileSystemRoots != null)
         for (String root in _fileSystemRoots) ...<String>[

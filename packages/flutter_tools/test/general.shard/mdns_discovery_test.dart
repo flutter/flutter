@@ -17,8 +17,9 @@ void main() {
 
     MDnsClient getMockClient(
       List<PtrResourceRecord> ptrRecords,
-      Map<String, List<SrvResourceRecord>> srvResponse,
-    ) {
+      Map<String, List<SrvResourceRecord>> srvResponse, {
+      Map<String, List<TxtResourceRecord>> txtResponse = const <String, List<TxtResourceRecord>>{},
+    }) {
       final MDnsClient client = MockMDnsClient();
 
       when(client.lookup<PtrResourceRecord>(
@@ -29,6 +30,12 @@ void main() {
         when(client.lookup<SrvResourceRecord>(
           ResourceRecordQuery.service(entry.key),
         )).thenAnswer((_) => Stream<SrvResourceRecord>.fromIterable(entry.value));
+      }
+
+      for (final MapEntry<String, List<TxtResourceRecord>> entry in txtResponse.entries) {
+        when(client.lookup<TxtResourceRecord>(
+          ResourceRecordQuery.text(entry.key),
+        )).thenAnswer((_) => Stream<TxtResourceRecord>.fromIterable(entry.value));
       }
       return client;
     }
@@ -56,6 +63,31 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query())?.port;
       expect(port, 123);
+    });
+
+    testUsingContext('One port available, no appId, with authCode', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+        },
+        txtResponse: <String, List<TxtResourceRecord>>{
+          'bar': <TxtResourceRecord>[
+            TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+      );
+      final MDnsObservatoryDiscoveryResult result = await portDiscovery.query();
+      expect(result?.port, 123);
+      expect(result?.authCode, 'xyz/');
     });
 
     testUsingContext('Multiple ports available, without appId', () async {

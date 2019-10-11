@@ -137,7 +137,7 @@ class Focus extends StatefulWidget {
   ///
   /// The [child] argument is required and must not be null.
   ///
-  /// The [autofocus] and [skipTraversal] arguments must not be null.
+  /// The [autofocus] argument must not be null.
   const Focus({
     Key key,
     @required this.child,
@@ -186,7 +186,7 @@ class Focus extends StatefulWidget {
 
   /// Handler called when the focus changes.
   ///
-  /// Called with true if this node gains focus, and false if it loses
+  /// Called with true if this widget's node gains focus, and false if it loses
   /// focus.
   final ValueChanged<bool> onFocusChange;
 
@@ -230,6 +230,7 @@ class Focus extends StatefulWidget {
   /// still be focused explicitly.
   final bool skipTraversal;
 
+  /// {@template flutter.widgets.Focus.canRequestFocus}
   /// If true, this widget may request the primary focus.
   ///
   /// Defaults to true.  Set to false if you want the [FocusNode] this widget
@@ -249,6 +250,7 @@ class Focus extends StatefulWidget {
   ///     its descendants.
   ///   - [FocusTraversalPolicy], a class that can be extended to describe a
   ///     traversal policy.
+  /// {@endtemplate}
   final bool canRequestFocus;
 
   /// Returns the [focusNode] of the [Focus] that most tightly encloses the
@@ -323,6 +325,8 @@ class _FocusState extends State<Focus> {
   FocusNode _internalNode;
   FocusNode get focusNode => widget.focusNode ?? _internalNode;
   bool _hasFocus;
+  bool _hasPrimaryFocus;
+  bool _canRequestFocus;
   bool _didAutofocus = false;
   FocusAttachment _focusAttachment;
 
@@ -343,6 +347,8 @@ class _FocusState extends State<Focus> {
     focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
     focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
     _hasFocus = focusNode.hasFocus;
+    _canRequestFocus = focusNode.canRequestFocus;
+    _hasPrimaryFocus = focusNode.hasPrimaryFocus;
 
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should
@@ -426,6 +432,16 @@ class _FocusState extends State<Focus> {
         widget.onFocusChange(focusNode.hasFocus);
       }
     }
+    if (_hasPrimaryFocus != focusNode.hasPrimaryFocus) {
+      setState(() {
+        _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+      });
+    }
+    if (_canRequestFocus != focusNode.canRequestFocus) {
+      setState(() {
+        _canRequestFocus = focusNode.canRequestFocus;
+      });
+    }
   }
 
   @override
@@ -433,7 +449,11 @@ class _FocusState extends State<Focus> {
     _focusAttachment.reparent();
     return _FocusMarker(
       node: focusNode,
-      child: widget.child,
+      child: Semantics(
+        focusable: _canRequestFocus,
+        focused: _hasPrimaryFocus,
+        child: widget.child,
+      ),
     );
   }
 }

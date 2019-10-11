@@ -205,8 +205,12 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   @override
-  Future<RunnerSuite> load(String path, SuitePlatform platform,
-      SuiteConfiguration suiteConfig, Object message) async {
+  Future<RunnerSuite> load(
+    String path,
+    SuitePlatform platform,
+    SuiteConfiguration suiteConfig,
+    Object message,
+  ) async {
     if (_closed) {
       return null;
     }
@@ -509,8 +513,11 @@ class BrowserManager {
   /// Returns the browser manager, or throws an [ApplicationException] if a
   /// connection fails to be established.
   static Future<BrowserManager> start(
-      Runtime runtime, Uri url, Future<WebSocketChannel> future,
-      {bool debug = false}) async {
+    Runtime runtime,
+    Uri url,
+    Future<WebSocketChannel> future, {
+    bool debug = false,
+  }) async {
     final Chrome chrome =
         await chromeLauncher.launch(url.toString(), headless: true);
 
@@ -671,8 +678,12 @@ class BrowserManager {
 ///
 /// All methods forward directly to [BrowserManager].
 class _BrowserEnvironment implements Environment {
-  _BrowserEnvironment(this._manager, this.observatoryUrl,
-      this.remoteDebuggerUrl, this.onRestart);
+  _BrowserEnvironment(
+    this._manager,
+    this.observatoryUrl,
+    this.remoteDebuggerUrl,
+    this.onRestart,
+  );
 
   final BrowserManager _manager;
 

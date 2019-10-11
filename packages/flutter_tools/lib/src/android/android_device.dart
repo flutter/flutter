@@ -224,10 +224,11 @@ class AndroidDevice extends Device {
   }
 
   String runAdbCheckedSync(
-      List<String> params, {
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-        Map<String, String> environment}) {
+    List<String> params, {
+    String workingDirectory,
+    bool allowReentrantFlutter = false,
+    Map<String, String> environment,
+  }) {
     return processUtils.runSync(
       adbCommandForDevice(params),
       throwOnError: true,
@@ -239,10 +240,10 @@ class AndroidDevice extends Device {
   }
 
   Future<RunResult> runAdbCheckedAsync(
-      List<String> params, {
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-      }) async {
+    List<String> params, {
+    String workingDirectory,
+    bool allowReentrantFlutter = false,
+  }) async {
     return processUtils.run(
       adbCommandForDevice(params),
       throwOnError: true,
@@ -573,24 +574,22 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'trace-systrace', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
-      if (debuggingOptions.debuggingEnabled)
-        ...<String>[
-          if (debuggingOptions.buildInfo.isDebug)
-            ...<String>[
-              ...<String>['--ez', 'enable-checked-mode', 'true'],
-              ...<String>['--ez', 'verify-entry-points', 'true'],
-            ],
-          if (debuggingOptions.startPaused)
-            ...<String>['--ez', 'start-paused', 'true'],
-          if (debuggingOptions.disableServiceAuthCodes)
-            ...<String>['--ez', 'disable-service-auth-codes', 'true'],
-          if (debuggingOptions.dartFlags.isNotEmpty)
-            ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
-          if (debuggingOptions.useTestFonts)
-            ...<String>['--ez', 'use-test-fonts', 'true'],
-          if (debuggingOptions.verboseSystemLogs)
-            ...<String>['--ez', 'verbose-logging', 'true'],
+      if (debuggingOptions.debuggingEnabled) ...<String>[
+        if (debuggingOptions.buildInfo.isDebug) ...<String>[
+          ...<String>['--ez', 'enable-checked-mode', 'true'],
+          ...<String>['--ez', 'verify-entry-points', 'true'],
         ],
+        if (debuggingOptions.startPaused)
+          ...<String>['--ez', 'start-paused', 'true'],
+        if (debuggingOptions.disableServiceAuthCodes)
+          ...<String>['--ez', 'disable-service-auth-codes', 'true'],
+        if (debuggingOptions.dartFlags.isNotEmpty)
+          ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
+        if (debuggingOptions.useTestFonts)
+          ...<String>['--ez', 'use-test-fonts', 'true'],
+        if (debuggingOptions.verboseSystemLogs)
+          ...<String>['--ez', 'verbose-logging', 'true'],
+      ],
       apk.launchActivity,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
