@@ -21,6 +21,7 @@ if (using_fuchsia_sdk) {
       "dart:kernel_compiler",
       "dart_runner:$dart_runner_target",
       "dart_runner/embedder:dart_aot_product_snapshot_cc",
+      "dart_runner/vmservice:vmservice",
       "flutter:flutter_aot_${product_suffix}runner",
       "flutter:flutter_jit_${product_suffix}runner",
       "flutter:flutter_runner_tests",
