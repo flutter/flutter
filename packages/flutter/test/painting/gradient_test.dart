@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('LinearGradient scale test', () {
