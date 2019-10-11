@@ -16,6 +16,9 @@ dynamic getRenderSegmentedControl(WidgetTester tester) {
   );
 }
 
+Rect currentUnscaledThumbRect(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbRect;
+Rect currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale;
+
 StatefulBuilder setupSimpleSegmentedControl() {
   final Map<int, Widget> children = <int, Widget>{};
   children[0] = const Text('Child 1');
@@ -39,10 +42,6 @@ Widget boilerplate({ Widget child }) {
     textDirection: TextDirection.ltr,
     child: Center(child: child),
   );
-}
-
-Color getBackgroundColor(WidgetTester tester, int childIndex) {
-  return getRenderSegmentedControl(tester).backgroundColors[childIndex];
 }
 
 void main() {
@@ -255,6 +254,15 @@ void main() {
     await tester.tap(find.text('Child 2'));
 
     expect(controller.value, 1);
+
+    // Tapping the currently selected item should not change controller's value.
+    bool valueChanged = false;
+    controller.addListener(() { valueChanged = true; });
+
+    await tester.tap(find.text('Child 2'));
+
+    expect(valueChanged, isFalse);
+    expect(controller.value, 1);
   });
 
   testWidgets('Widgets have correct default text/icon styles, change correctly on selection', (WidgetTester tester) async {
@@ -296,13 +304,13 @@ void main() {
   });
 
   testWidgets(
-    'Segmented controls respects themes',
+    'Segmented controls respect theme',
     (WidgetTester tester) async {
       final Map<int, Widget> children = <int, Widget>{};
       children[0] = const Text('Child 1');
       children[1] = const Icon(IconData(1));
 
-      int sharedValue = 0;
+      final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -311,12 +319,7 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return CupertinoSlidingSegmentedControl<int>(
                 children: children,
-                onValueChanged: (int newValue) {
-                  setState(() {
-                    sharedValue = newValue;
-                  });
-                },
-                groupValue: sharedValue,
+                controller: controller,
               );
             },
           ),
@@ -324,186 +327,66 @@ void main() {
       );
 
       DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
-      IconThemeData iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
-      expect(textStyle.style.color, CupertinoColors.black);
-      expect(iconTheme.color.value, CupertinoColors.activeOrange.darkColor.value);
+      expect(textStyle.style.fontWeight, FontWeight.w400);
 
       await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
-      iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
-      expect(textStyle.style.color.value, CupertinoColors.activeOrange.darkColor.value);
-      expect(iconTheme.color, CupertinoColors.black);
+      expect(textStyle.style.fontWeight, FontWeight.normal);
     },
   );
 
-  testWidgets('SegmentedControl is correct when user provides custom colors', (WidgetTester tester) async {
+  testWidgets('SegmentedControl dark mode', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Icon(IconData(1));
 
-    int sharedValue = 0;
+    final ValueNotifier<int> controller = ValueNotifier<int>(0);
+    Brightness brightness = Brightness.light;
+    StateSetter setState;
 
     await tester.pumpWidget(
       StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-              unselectedColor: CupertinoColors.lightBackgroundGray,
-              selectedColor: CupertinoColors.activeGreen,
-              borderColor: CupertinoColors.black,
-              pressedColor: const Color(0x638CFC7B),
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return MediaQuery(
+            data: MediaQueryData(platformBrightness: brightness),
+            child: boilerplate(
+              child: CupertinoSlidingSegmentedControl<int>(
+                children: children,
+                controller: controller,
+                thumbColor: CupertinoColors.activeGreen,
+                backgroundColor: CupertinoColors.systemRed,
+              ),
             ),
           );
         },
       ),
     );
 
-    DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
-    IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+    final BoxDecoration decoration = tester.widget<Container>(find.descendant(
+      of: find.byType(CupertinoSlidingSegmentedControl),
+      matching: find.byType(Container),
+    )).decoration;
 
-    expect(getRenderSegmentedControl(tester).borderColor, CupertinoColors.black);
-    expect(textStyle.style.color, CupertinoColors.lightBackgroundGray);
-    expect(iconTheme.data.color, CupertinoColors.activeGreen);
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.lightBackgroundGray);
+    expect(getRenderSegmentedControl(tester).thumbColor, CupertinoColors.activeGreen.color);
+    expect(decoration.color, CupertinoColors.systemRed.color);
 
-    await tester.tap(find.widgetWithIcon(IconTheme, const IconData(1)));
-    await tester.pumpAndSettle();
+    setState(() { brightness = Brightness.dark; });
 
-    textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
-    iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
+    final BoxDecoration decorationDark = tester.widget<Container>(find.descendant(
+      of: find.byType(CupertinoSlidingSegmentedControl),
+      matching: find.byType(Container),
+    )).decoration;
 
-    expect(textStyle.style.color, CupertinoColors.activeGreen);
-    expect(iconTheme.data.color, CupertinoColors.lightBackgroundGray);
-    expect(getBackgroundColor(tester, 0), CupertinoColors.lightBackgroundGray);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
 
-    final Offset center = tester.getCenter(find.text('Child 1'));
-    await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    expect(getBackgroundColor(tester, 0), const Color(0x638CFC7B));
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
+    expect(getRenderSegmentedControl(tester).thumbColor, CupertinoColors.activeGreen.darkColor);
+    expect(decorationDark.color, CupertinoColors.systemRed.darkColor);
   });
-
-  testWidgets('Widgets are centered within segments', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: 200.0,
-            height: 200.0,
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) { },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Widgets are centered taking into account 16px of horizontal padding
-    expect(tester.getCenter(find.text('Child 1')), const Offset(58.0, 100.0));
-    expect(tester.getCenter(find.text('Child 2')), const Offset(142.0, 100.0));
-  });
-
-  testWidgets('Tap calls onValueChanged', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
-
-    bool value = false;
-
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                value = true;
-              },
-            ),
-          );
-        },
-      ),
-    );
-
-    expect(value, isFalse);
-
-    await tester.tap(find.text('Child 2'));
-
-    expect(value, isTrue);
-  });
-
-  testWidgets('State does not change if onValueChanged does not call setState()', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
-
-    const int sharedValue = 0;
-
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) { },
-              groupValue: sharedValue,
-            ),
-          );
-        },
-      ),
-    );
-
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
-
-    await tester.tap(find.text('Child 2'));
-    await tester.pump();
-
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
-  });
-
-  testWidgets(
-    'Background color of child should change on selection, '
-    'and should not change when tapped again',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(setupSimpleSegmentedControl());
-
-      expect(getBackgroundColor(tester, 1), CupertinoColors.white);
-
-      await tester.tap(find.text('Child 2'));
-      await tester.pumpAndSettle(const Duration(milliseconds: 200));
-
-      expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
-
-      await tester.tap(find.text('Child 2'));
-      await tester.pump();
-
-      expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
-    },
-  );
 
   testWidgets(
     'Children can be non-Text or Icon widgets (in this case, '
@@ -516,7 +399,7 @@ void main() {
       );
       children[2] = const Placeholder();
 
-      int sharedValue = 0;
+      final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
       await tester.pumpWidget(
         StatefulBuilder(
@@ -524,12 +407,7 @@ void main() {
             return boilerplate(
               child: CupertinoSlidingSegmentedControl<int>(
                 children: children,
-                onValueChanged: (int newValue) {
-                  setState(() {
-                    sharedValue = newValue;
-                  });
-                },
-                groupValue: sharedValue,
+                controller: controller,
               ),
             );
           },
@@ -541,10 +419,7 @@ void main() {
   testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    expect(getRenderSegmentedControl(tester).selectedIndex, 0);
-
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
+    expect(getRenderSegmentedControl(tester).highlightedIndex, 0);
   });
 
   testWidgets('Null input for value results in no child initially selected', (WidgetTester tester) async {
@@ -552,7 +427,7 @@ void main() {
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    int sharedValue;
+    final ValueNotifier<int> controller = ValueNotifier<int>(null);
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -560,50 +435,91 @@ void main() {
           return boilerplate(
             child: CupertinoSlidingSegmentedControl<int>(
               children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
+              controller: controller,
             ),
           );
         },
       ),
     );
 
-    expect(getRenderSegmentedControl(tester).selectedIndex, null);
-
-    expect(getBackgroundColor(tester, 0), CupertinoColors.white);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
+    expect(getRenderSegmentedControl(tester).highlightedIndex, null);
   });
 
-  testWidgets('Long press changes background color of not-selected child', (WidgetTester tester) async {
-    await tester.pumpWidget(setupSimpleSegmentedControl());
+  testWidgets('Long press not-selected child interactions', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+      2: Text('Child 3'),
+      3: Text('Child 4'),
+      4: Text('Child 5'),
+    };
 
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
+    // Child 3 is intially selected.
+    final ValueNotifier<int> controller = ValueNotifier<int>(2);
 
-    final Offset center = tester.getCenter(find.text('Child 2'));
-    await tester.startGesture(center);
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoSlidingSegmentedControl<int>(
+          children: children,
+          controller: controller,
+        ),
+      ),
+    );
+
+    double getChildOpacityByName(String childName) {
+      return tester.widget<Opacity>(
+        find.ancestor(matching: find.byType(Opacity), of: find.text(childName)),
+      ).opacity;
+    }
+
+    // Opacity 1 with no interaction.
+    expect(getChildOpacityByName('Child 1'), 1);
+
+    final Offset center = tester.getCenter(find.text('Child 1'));
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
+    // Opacity drops to 0.2.
+    expect(getChildOpacityByName('Child 1'), 0.2);
+
+    // Move down slightly, slightly outside of the segmented control.
+    await gesture.moveBy(const Offset(0, 50));
+    await tester.pumpAndSettle();
+    expect(getChildOpacityByName('Child 1'), 0.2);
+
+    // Move further down and far away from the segmented control.
+    await gesture.moveBy(const Offset(0, 200));
+    await tester.pumpAndSettle();
+    expect(getChildOpacityByName('Child 1'), 1);
+
+    // Move to child 5.
+    await gesture.moveTo(tester.getCenter(find.text('Child 5')));
+    await tester.pumpAndSettle();
+    expect(getChildOpacityByName('Child 1'), 1);
+    expect(getChildOpacityByName('Child 5'), 0.2);
+
+    // Move to child 2.
+    await gesture.moveTo(tester.getCenter(find.text('Child 2')));
+    await tester.pumpAndSettle();
+    expect(getChildOpacityByName('Child 1'), 1);
+    expect(getChildOpacityByName('Child 5'), 1);
+    expect(getChildOpacityByName('Child 2'), 0.2);
   });
 
   testWidgets('Long press does not change background color of currently-selected child', (WidgetTester tester) async {
-    await tester.pumpWidget(setupSimpleSegmentedControl());
+    double getChildOpacityByName(String childName) {
+      return tester.widget<Opacity>(
+        find.ancestor(matching: find.byType(Opacity), of: find.text(childName)),
+      ).opacity;
+    }
 
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
+    await tester.pumpWidget(setupSimpleSegmentedControl());
 
     final Offset center = tester.getCenter(find.text('Child 1'));
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
+    expect(getChildOpacityByName('Child 1'), 1);
   });
 
   testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
@@ -618,6 +534,8 @@ void main() {
       constraints: const BoxConstraints.tightFor(height: 200.0),
     );
 
+    final ValueNotifier<int> controller = ValueNotifier<int>(null);
+
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
@@ -625,7 +543,7 @@ void main() {
             child: CupertinoSlidingSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
-              onValueChanged: (int newValue) { },
+              controller: controller,
             ),
           );
         },
@@ -633,7 +551,8 @@ void main() {
     );
 
     final RenderBox buttonBox = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+      find.byKey(const ValueKey<String>('Segmented Control')),
+    );
 
     expect(buttonBox.size.height, 400.0);
   });
@@ -650,6 +569,7 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 200.0),
     );
 
+    final ValueNotifier<int> controller = ValueNotifier<int>(null);
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
@@ -657,7 +577,7 @@ void main() {
             child: CupertinoSlidingSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
-              onValueChanged: (int newValue) { },
+              controller: controller,
             ),
           );
         },
@@ -665,26 +585,22 @@ void main() {
     );
 
     final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+      find.byKey(const ValueKey<String>('Segmented Control')),
+    );
 
     // Subtract the 16.0px from each side. Remaining width should be allocated
     // to each child equally.
     final double childWidth = (segmentedControl.size.width - 32.0) / 3;
 
     expect(childWidth, 200.0);
-
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[0].parentData.surroundingRect.width);
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[1].parentData.surroundingRect.width);
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[2].parentData.surroundingRect.width);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
+
+    final ValueNotifier<int> controller = ValueNotifier<int>(null);
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -695,7 +611,7 @@ void main() {
                 CupertinoSlidingSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
-                  onValueChanged: (int newValue) { },
+                  controller: controller,
                 ),
               ],
             ),
@@ -705,7 +621,8 @@ void main() {
     );
 
     final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+      find.byKey(const ValueKey<String>('Segmented Control')),
+    );
 
     expect(segmentedControl.size.width.isFinite, isTrue);
   });
@@ -715,13 +632,14 @@ void main() {
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
+    final ValueNotifier<int> controller = ValueNotifier<int>(null);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
           child: CupertinoSlidingSegmentedControl<int>(
             children: children,
-            onValueChanged: (int newValue) { },
+            controller: controller,
           ),
         ),
       ),
@@ -736,42 +654,32 @@ void main() {
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    int sharedValue = 0;
+    final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
     await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Directionality(
-            textDirection: TextDirection.rtl,
-            child: Center(
-              child: CupertinoSlidingSegmentedControl<int>(
-                children: children,
-                onValueChanged: (int newValue) {
-                  setState(() {
-                    sharedValue = newValue;
-                  });
-                },
-                groupValue: sharedValue,
-              ),
-            ),
-          );
-        },
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Center(
+          child: CupertinoSlidingSegmentedControl<int>(
+            children: children,
+            controller: controller,
+          ),
+        ),
       ),
     );
 
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
-
-    await tester.tap(find.text('Child 2'));
-    await tester.pumpAndSettle();
-
-    expect(getBackgroundColor(tester, 0), CupertinoColors.white);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
+    // highlightedIndex is 1 instead of 0 because of RTL.
+    expect(getRenderSegmentedControl(tester).highlightedIndex, 1);
 
     await tester.tap(find.text('Child 2'));
     await tester.pump();
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
+    expect(getRenderSegmentedControl(tester).highlightedIndex, 0);
+
+    await tester.tap(find.text('Child 2'));
+    await tester.pump();
+
+    expect(getRenderSegmentedControl(tester).highlightedIndex, 0);
   });
 
   testWidgets('Segmented control semantics', (WidgetTester tester) async {
@@ -780,26 +688,17 @@ void main() {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
-    int sharedValue = 0;
+    final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
     await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: CupertinoSlidingSegmentedControl<int>(
-                children: children,
-                onValueChanged: (int newValue) {
-                  setState(() {
-                    sharedValue = newValue;
-                  });
-                },
-                groupValue: sharedValue,
-              ),
-            ),
-          );
-        },
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSlidingSegmentedControl<int>(
+            children: children,
+            controller: controller,
+          ),
+        ),
       ),
     );
 
@@ -877,35 +776,27 @@ void main() {
   });
 
   testWidgets('Non-centered taps work on smaller widgets', (WidgetTester tester) async {
+    const Key key = Key('smol widget');
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
+    children[1] = const SizedBox(key: key);
 
-    int sharedValue = 1;
+    final ValueNotifier<int> controller = ValueNotifier<int>(1);
 
     await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              key: const ValueKey<String>('Segmented Control'),
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
+      boilerplate(
+        child: CupertinoSlidingSegmentedControl<int>(
+          key: const ValueKey<String>('Segmented Control'),
+          children: children,
+          controller: controller,
+        ),
       ),
     );
 
-    expect(sharedValue, 1);
+    expect(controller.value, 1);
 
     final double childWidth = getRenderSegmentedControl(tester).firstChild.size.width;
-    final Offset centerOfSegmentedControl = tester.getCenter(find.text('Child 1'));
+    final Offset centerOfSegmentedControl = tester.getCenter(find.byKey(key));
 
     // Tap just inside segment bounds
     await tester.tapAt(
@@ -915,231 +806,63 @@ void main() {
       ),
     );
 
-    expect(sharedValue, 0);
+    expect(controller.value, 0);
   });
 
-  testWidgets('Animation is correct when the selected segment changes', (WidgetTester tester) async {
+  testWidgets('Thumb animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    await tester.tap(find.text('Child 2'));
-
+    final Rect initialRect = currentUnscaledThumbRect(tester);
+    expect(currentThumbScale(tester), 1);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Child 2')));
     await tester.pump();
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
 
-    await tester.pump(const Duration(milliseconds: 40));
-    expect(getBackgroundColor(tester, 0), const Color(0xff3d9aff));
-    expect(getBackgroundColor(tester, 1), const Color(0x64007aff));
+    // Does not move until tapUp.
+    expect(currentThumbScale(tester), 1);
+    expect(currentUnscaledThumbRect(tester), initialRect);
 
-    await tester.pump(const Duration(milliseconds: 40));
-    expect(getBackgroundColor(tester, 0), const Color(0xff7bbaff));
-    expect(getBackgroundColor(tester, 1), const Color(0x95007aff));
+    // Tap up and the sliding animation should play.
+    await gesture.up();
+    await tester.pump();
 
-    await tester.pump(const Duration(milliseconds: 40));
-    expect(getBackgroundColor(tester, 0), const Color(0xffb9daff));
-    expect(getBackgroundColor(tester, 1), const Color(0xc7007aff));
+    expect(currentThumbScale(tester), 1);
+    expect(currentUnscaledThumbRect(tester).center.dy, lessThan(initialRect.center.dy));
 
-    await tester.pump(const Duration(milliseconds: 40));
-    expect(getBackgroundColor(tester, 0), const Color(0xfff7faff));
-    expect(getBackgroundColor(tester, 1), const Color(0xf8007aff));
+    await tester.pumpAndSettle();
 
-    await tester.pump(const Duration(milliseconds: 40));
-    expect(getBackgroundColor(tester, 0), CupertinoColors.white);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
-  });
+    expect(currentThumbScale(tester), 1);
+    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('Child 2')));
 
-  testWidgets('Animation is correct when widget is rebuilt', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
-    int sharedValue = 0;
+    // Press the currently selected widget.
+    await gesture.down(tester.getCenter(find.text('Child 2')));
+    await tester.pump();
 
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
-      ),
-    );
+    // The thumb shrinks but does not moves towards left.
+    expect(currentThumbScale(tester), lessThan(1));
+    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('Child 2')));
 
-    await tester.tap(find.text('Child 2'));
+    await tester.pumpAndSettle();
+    expect(currentThumbScale(tester), 0.95);
+    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('Child 2')));
 
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
-      ),
-    );
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
+    // Drag to Child 1.
+    await gesture.moveTo(tester.getCenter(find.text('Child 1')));
+    await tester.pump();
 
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
-      ),
-      const Duration(milliseconds: 40),
-    );
-    expect(getBackgroundColor(tester, 0), const Color(0xff3d9aff));
-    expect(getBackgroundColor(tester, 1), const Color(0x64007aff));
+    // Moved slightly to the left
+    expect(currentThumbScale(tester), 0.95);
+    expect(currentUnscaledThumbRect(tester).center.dx, greaterThan(tester.getCenter(find.text('Child 2')).dx));
 
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
-      ),
-      const Duration(milliseconds: 40),
-    );
-    expect(getBackgroundColor(tester, 0), const Color(0xff7bbaff));
-    expect(getBackgroundColor(tester, 1), const Color(0x95007aff));
+    await tester.pumpAndSettle();
+    expect(currentThumbScale(tester), 0.95);
+    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('Child 1')));
 
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
-      ),
-      const Duration(milliseconds: 40),
-    );
-    expect(getBackgroundColor(tester, 0), const Color(0xffb9daff));
-    expect(getBackgroundColor(tester, 1), const Color(0xc7007aff));
+    await gesture.up();
+    await tester.pump();
+    expect(currentThumbScale(tester), greaterThan(0.95));
 
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
-      ),
-      const Duration(milliseconds: 40),
-    );
-    expect(getBackgroundColor(tester, 0), const Color(0xfff7faff));
-    expect(getBackgroundColor(tester, 1), const Color(0xf8007aff));
-
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
-      ),
-      const Duration(milliseconds: 40),
-    );
-    expect(getBackgroundColor(tester, 0), CupertinoColors.white);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
-  });
-
-  testWidgets('Multiple segments are pressed', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('A');
-    children[1] = const Text('B');
-    children[2] = const Text('C');
-    int sharedValue = 0;
-
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              key: const ValueKey<String>('Segmented Control'),
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
-      ),
-    );
-
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
-
-    await tester.startGesture(tester.getCenter(find.text('B')));
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
-
-    expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
-    expect(getBackgroundColor(tester, 2), CupertinoColors.white);
-
-    await tester.startGesture(tester.getCenter(find.text('C')));
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
-
-    // Press on C has no effect while B is held down.
-    expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
-    expect(getBackgroundColor(tester, 2), CupertinoColors.white);
+    await tester.pumpAndSettle();
+    expect(currentThumbScale(tester), 1);
   });
 
   testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
@@ -1147,61 +870,41 @@ void main() {
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
-    int sharedValue = 0;
+    final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
     await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              key: const ValueKey<String>('Segmented Control'),
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-            ),
-          );
-        },
+      boilerplate(
+        child: CupertinoSlidingSegmentedControl<int>(
+          key: const ValueKey<String>('Segmented Control'),
+          children: children,
+          controller: controller,
+        ),
       ),
     );
 
     await tester.tap(find.text('B'));
 
-    await tester.pump();
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
-    expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
-
     await tester.pump(const Duration(milliseconds: 40));
-    expect(getBackgroundColor(tester, 0), const Color(0xff3d9aff));
-    expect(getBackgroundColor(tester, 1), const Color(0x64007aff));
+
+    // Between A and B.
+    final Rect initialThumbRect = currentUnscaledThumbRect(tester);
+    expect(initialThumbRect.center.dx, greaterThan(tester.getCenter(find.text('A')).dx));
+    expect(initialThumbRect.center.dx, lessThan(tester.getCenter(find.text('B')).dx));
 
     // While A to B transition is occurring, press on C.
     await tester.tap(find.text('C'));
-
     await tester.pump();
 
-    // A and B are now both transitioning to white.
-    expect(getBackgroundColor(tester, 0), const Color(0xff3d9aff));
-    expect(getBackgroundColor(tester, 1), const Color(0xffc1deff));
-    expect(getBackgroundColor(tester, 2), const Color(0x33007aff));
+    final Rect secondThumbRect = currentUnscaledThumbRect(tester);
 
-    await tester.pump(const Duration(milliseconds: 40));
-    // B background color has reached unselected state.
-    expect(getBackgroundColor(tester, 0), const Color(0xff7bbaff));
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
-    expect(getBackgroundColor(tester, 2), const Color(0x64007aff));
+    // Between the initial Rect and B.
+    expect(secondThumbRect.center.dx, initialThumbRect.center.dx);
+    expect(initialThumbRect.center.dx, lessThan(tester.getCenter(find.text('B')).dx));
 
-    await tester.pump(const Duration(milliseconds: 100));
-    // A background color has reached unselected state.
-    expect(getBackgroundColor(tester, 0), CupertinoColors.white);
-    expect(getBackgroundColor(tester, 2), const Color(0xe0007aff));
+    await tester.pump(const Duration(milliseconds: 500));
 
-    await tester.pump(const Duration(milliseconds: 40));
-    // C background color has reached selected state.
-    expect(getBackgroundColor(tester, 2), CupertinoColors.activeBlue);
+    // Eventually moves to C.
+    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('B')));
   });
 
   testWidgets('Segment is selected while it is transitioning to unselected state', (WidgetTester tester) async {
