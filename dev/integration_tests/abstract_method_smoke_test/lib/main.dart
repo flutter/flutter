@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,11 +53,7 @@ class SecondPage extends StatelessWidget {
       body: Column(
         children: const <Widget>[
           Expanded(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(0, 0)
-              ),
-            ),
+            child: AndroidView(viewType: 'simple')
           ),
         ],
       ),
