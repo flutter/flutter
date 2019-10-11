@@ -390,7 +390,7 @@ flutter:
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('isSupportedForProject is true with editable host app', () async {
@@ -402,7 +402,7 @@ flutter:
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('isSupportedForProject is false with no host app and no module', () async {
@@ -413,7 +413,7 @@ flutter:
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   group('emulatorId', () {
