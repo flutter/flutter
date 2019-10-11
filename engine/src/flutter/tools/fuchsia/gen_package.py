@@ -24,6 +24,7 @@ def GenerateManifest(package_dir):
       common_prefix = os.path.commonprefix([root, package_dir])
       rel_path = os.path.relpath(os.path.join(root, f), common_prefix)
       from_package = os.path.abspath(os.path.join(package_dir, rel_path))
+      assert from_package, 'Failed to create from_package for %s' % os.path.join(root, f)
       full_paths.append('%s=%s' % (rel_path, from_package))
   parent_dir = os.path.abspath(os.path.join(package_dir, os.pardir))
   manifest_file_name = os.path.basename(package_dir) + '.manifest'
@@ -42,10 +43,10 @@ def CreateFarPackage(pm_bin, package_dir, signing_key, dst_dir):
   ]
 
   # Build the package
-  subprocess.check_call(pm_command_base + ['build'])
+  subprocess.check_output(pm_command_base + ['build'])
 
   # Archive the package
-  subprocess.check_call(pm_command_base + ['archive'])
+  subprocess.check_output(pm_command_base + ['archive'])
 
   return 0
 
@@ -90,20 +91,16 @@ def main():
       manifest_file,
   ]
 
-  # Build the package
+  # Build and then archive the package
+  # Use check_output so if anything goes wrong we get the output.
   try:
-    output = subprocess.check_output(pm_command_base + ['build'])
+    subprocess.check_output(pm_command_base + ['build'])
+    subprocess.check_output(pm_command_base + ['archive'])
   except subprocess.CalledProcessError as e:
-    print('The "%s" command failed:' % e.cmd)
-    print(e.output)
-    raise
-
-  # Archive the package
-  try:
-    output = subprocess.check_output(pm_command_base + ['archive'])
-  except subprocess.CalledProcessError as e:
-    print('The "%s" command failed:' % e.cmd)
-    print(e.output)
+    print('==================== Manifest contents =========================================')
+    with open(manifest_file, 'r') as manifest:
+      print(manifest.read())
+    print('==================== End manifest contents =====================================')
     raise
 
   return 0
