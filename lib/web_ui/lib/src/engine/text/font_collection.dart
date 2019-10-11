@@ -16,8 +16,8 @@ const String _robotoFontUrl = 'packages/ui/assets/Roboto-Regular.ttf';
 /// font manifest. If test fonts are enabled, then call
 /// [registerTestFonts] as well.
 class FontCollection {
-  _FontManager _assetFontManager;
-  _FontManager _testFontManager;
+  FontManager _assetFontManager;
+  FontManager _testFontManager;
 
   /// Reads the font manifest using the [assetManager] and registers all of the
   /// fonts declared within.
@@ -49,7 +49,7 @@ class FontCollection {
     }
 
     if (supportsFontLoadingApi) {
-      _assetFontManager = _FontManager();
+      _assetFontManager = FontManager();
     } else {
       _assetFontManager = _PolyfillFontManager();
     }
@@ -75,7 +75,7 @@ class FontCollection {
 
   /// Registers fonts that are used by tests.
   void debugRegisterTestFonts() {
-    _testFontManager = _FontManager();
+    _testFontManager = FontManager();
     _testFontManager.registerAsset(
         _ahemFontFamily, 'url($_ahemFontUrl)', const <String, String>{});
     _testFontManager.registerAsset(
@@ -100,40 +100,88 @@ class FontCollection {
 }
 
 /// Manages a collection of fonts and ensures they are loaded.
-class _FontManager {
+class FontManager {
   final List<Future<void>> _fontLoadingFutures = <Future<void>>[];
 
-  factory _FontManager() {
+  // Regular expression to detect a string with no punctuations.
+  // For example font family 'Ahem!' does not fall into this category
+  // so the family name will be wrapped in quotes.
+  static final RegExp notPunctuation =
+      RegExp(r"[a-z0-9\s]+", caseSensitive: false);
+  // Regular expression to detect tokens starting with a digit.
+  // For example font family 'Goudy Bookletter 1911' falls into this
+  // category.
+  static final RegExp startWithDigit = RegExp(r"\b\d");
+
+  factory FontManager() {
     if (supportsFontLoadingApi) {
-      return _FontManager._();
+      return FontManager._();
     } else {
       return _PolyfillFontManager();
     }
   }
 
-  _FontManager._();
+  FontManager._();
 
+  /// Registers assets to Flutter Web Engine.
+  ///
+  /// Browsers and browsers versions differ significantly on how a valid font
+  /// family name should be formatted. Notable issues are:
+  ///
+  /// Safari 12 and Firefox crash if you create a [html.FontFace] with a font
+  /// family that is not correct CSS syntax. Font family names with invalid
+  /// characters are accepted accepted on these browsers, when wrapped it in
+  /// quotes.
+  ///
+  /// Additionally, for Safari 12 to work [html.FontFace] name should be
+  /// loaded correctly on the first try.
+  ///
+  /// A font in Chrome is not usable other than inside a '<p>' tag, if a
+  /// [html.FontFace] is loaded wrapped with quotes. Unlike Safari 12 if a
+  /// valid version of the font is also loaded afterwards it will show
+  /// that font normally.
+  ///
+  /// In Safari 13 the [html.FontFace] should be loaded with unquoted family
+  /// names.
+  ///
+  /// In order to avoid all these browser compatibility issues this method:
+  /// * Detects the family names that might cause a conflict.
+  /// * Loads it with the quotes.
+  /// * Loads it again without the quotes.
+  /// * For all the other family names [html.FontFace] is loaded only once.
+  ///
+  /// See also:
+  ///
+  /// * https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Valid_family_names
+  /// * https://drafts.csswg.org/css-fonts-3/#font-family-prop
   void registerAsset(
     String family,
     String asset,
     Map<String, String> descriptors,
   ) {
-    // Safari and Firefox crash if you create a [html.FontFace] with a font
-    // family that is not correct CSS syntax. To ensure the font family is
-    // accepted on these browsers, wrap it in quotes.
-    // See: https://drafts.csswg.org/css-fonts-3/#font-family-prop
-    if (browserEngine == BrowserEngine.webkit || browserEngine == BrowserEngine.firefox) {
-      family = "'$family'";
+    if (startWithDigit.hasMatch(family) ||
+        notPunctuation.stringMatch(family) != family) {
+      // Load a font family name with special characters once here wrapped in
+      // quotes.
+      _loadFontFace('\'$family\'', asset, descriptors);
     }
+    // Load all fonts, without quoted family names.
+    _loadFontFace(family, asset, descriptors);
+  }
+
+  void _loadFontFace(
+    String family,
+    String asset,
+    Map<String, String> descriptors,
+  ) {
     // try/catch because `new FontFace` can crash with an improper font family.
     try {
       final html.FontFace fontFace = html.FontFace(family, asset, descriptors);
-      _fontLoadingFutures.add(fontFace
-          .load()
-          .then((_) => html.document.fonts.add(fontFace), onError: (dynamic e) {
+      _fontLoadingFutures.add(fontFace.load().then((_) {
+        html.document.fonts.add(fontFace);
+      }, onError: (dynamic e) {
         html.window.console
             .warn('Error while trying to load font family "$family":\n$e');
-        return null;
       }));
     } catch (e) {
       html.window.console
@@ -153,7 +201,7 @@ class _FontManager {
 /// The CSS Font Loading API is not implemented in IE 11 or Edge. To tell if a
 /// font is loaded, we continuously measure some text using that font until the
 /// width changes.
-class _PolyfillFontManager extends _FontManager {
+class _PolyfillFontManager extends FontManager {
   _PolyfillFontManager() : super._();
 
   /// A String containing characters whose width varies greatly between fonts.
