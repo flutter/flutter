@@ -6562,7 +6562,6 @@ void main() {
       'decoration: InputDecoration(labelText: "foo")',
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
-      'obscureText: false',
       'autocorrect: false',
       'maxLines: 10',
       'maxLength: 100',
