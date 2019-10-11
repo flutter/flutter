@@ -189,6 +189,7 @@ void _expectCheckmarkColor(Finder finder, Color color) {
 }
 
 void main() {
+  /*
   testWidgets('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     final List<String> deletedChipLabels = <String>[];
@@ -923,6 +924,159 @@ void main() {
     expect(find.byKey(deleteButtonKey), findsNothing);
   }, skip: isBrowser);
 
+
+  */
+  testWidgets('Delete button ripple works correctly', (WidgetTester tester) async {
+    final UniqueKey labelKey = UniqueKey();
+    final UniqueKey deleteButtonKey = UniqueKey();
+    List<String> responses = <String>[];
+    responses.add('Initial.');
+    Future<void> pushChip({ bool deletable = false }) async {
+      return tester.pumpWidget(
+        _wrapForChip(
+          child: Wrap(
+            children: <Widget>[
+              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return RawChip(
+                  onPressed: () {
+                    responses.add('Chip is pressed.');
+                  },
+                  onDeleted: deletable ? () {
+                    responses.add('Chip is deleted.');
+                  } : null,
+                  deleteIcon: Icon(Icons.beach_access, key: deleteButtonKey),
+                  // deleteIcon: Container(width: 80.0, height: 80.0, key: deleteButtonKey),
+                  label: Text('Supercalifragilisticexpialidocious', key: labelKey),
+                  // shape: const StadiumBorder(),
+                );
+              }),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await pushChip(deletable: true);
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    print('box is $box');
+
+    final Offset tapDownOffset = tester.getTopLeft(find.byType(InkWell));
+
+
+
+    print('find.byType(RawChip) is ${find.byType(RawChip)}');
+
+
+    //await tester.press(find.byType(InkWell));
+    /*
+    await tester.press(find.byKey(labelKey));
+    print(find.byKey(labelKey));
+    print('pressed');
+    await tester.pump(const Duration(milliseconds: 600));
+    print('pumped');
+    print(responses);
+    */
+
+
+
+    Finder _findTooltipContainer(String tooltipText) {
+      return find.ancestor(
+        of: find.text(tooltipText),
+        matching: find.byType(Container),
+      );
+    }
+
+
+
+    final Offset centerOfLabel = tester.getCenter(find.byKey(deleteButtonKey));
+    print('centerOfLabel = $centerOfLabel');
+    final TestGesture gesture = await tester.startGesture(centerOfLabel);
+    await tester.pump(); // start gesture
+    print('pumped');
+
+    int i;
+    for (i = 0; i < 10; i ++) {
+      await tester.pump(const Duration(milliseconds: 20));
+      print('pumping $i...');
+    }
+
+    // tester.pumpAndSettle(const Duration(milliseconds: 10));
+
+    print('waited');
+    print(responses);
+
+    bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
+    bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
+
+    PaintPattern ripplePattern(Offset expectedCenter) {
+      return paints
+        ..something((Symbol method, List<dynamic> arguments) {
+          print('$method !@!@ $arguments');
+          if (method != #drawCircle)
+            return false;
+          return true;
+          throw '''
+            Expected: center == $expectedCenter
+            Found: center == ???''';
+        }
+        );
+    }
+
+    print(tester.getTopLeft(find.byType(InkWell)));
+    print(tester.getSize(find.byType(InkWell)));
+
+    print(find.byType(InkWell).evaluate());
+    print(find.byType(InkResponse).evaluate());
+
+
+    expect(Material.of(tester.element(find.byKey(deleteButtonKey))), ripplePattern(const Offset(0, 0)));
+    // expect(_findTooltipContainer('Delete'), findsNothing);
+
+
+    // await gesture.up();
+
+    return; // Finish.
+
+    // Remove the delete button again
+    await pushChip();
+    // Delete button drawer should start out open.
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)), equals(const Offset(76.0, 12.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    // Delete button drawer should start contracting.
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(103.8, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(75.8, 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(102.9, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(74.9, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(101.0, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(73.0, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(97.5, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(69.5, 0.1));
+
+    // Wait for being done with animation, make sure it didn't change
+    // height, and make sure that the delete button is no longer drawn.
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+    expect(find.byKey(deleteButtonKey), findsNothing);
+  }, skip: isBrowser);
+
+  /*
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
@@ -2102,4 +2256,6 @@ void main() {
       const Color(0xffff0000),
     );
   });
+
+   */
 }

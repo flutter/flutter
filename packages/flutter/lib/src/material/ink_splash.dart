@@ -223,6 +223,7 @@ class InkSplash extends InteractiveInkFeature {
         canvas.clipRect(rect);
       }
     }
+    print("ink_splash.dart -> I'm drawing circle $center, ${_radius.value}, $paint");
     canvas.drawCircle(center, _radius.value, paint);
     canvas.restore();
   }
