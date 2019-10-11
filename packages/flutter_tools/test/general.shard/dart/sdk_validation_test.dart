@@ -56,7 +56,9 @@ void main() {
       tryToDelete(projectDirectory);
       Cache.enableLocking();
     }
-  }, skip: true);
+  }, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 }
 
 Future<int> analyze(AnalysisServer server) async {
