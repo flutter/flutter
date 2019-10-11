@@ -879,7 +879,7 @@ class RadialGradient extends Gradient {
 ///         Color(0xFF4285F4), // blue again to seamlessly transition to the start
 ///       ],
 ///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
-///       transform: GradientTransform(0.785398),
+///       transform: GradientRotation(0.785398),
 ///     ),
 ///   ),
 /// )
