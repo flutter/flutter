@@ -619,7 +619,6 @@ void main() {
     //    2      6      space below the baseline = 0.2 * fontSize
     //  -------------   widget text dy values
 
-
     final double firstTextDy = tester.getBottomLeft(find.text('First')).dy;
     final double secondTextDy = tester.getBottomLeft(find.text('Second')).dy;
     expect(firstTextDy,  closeTo(secondTextDy - 4.0, 0.001));
