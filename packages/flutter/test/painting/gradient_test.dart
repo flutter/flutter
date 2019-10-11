@@ -771,16 +771,16 @@ void main() {
     const List<Color> colors = <Color>[Color(0xFFFFFFFF), Color(0xFF000088)];
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 400.0);
     const List<Gradient> gradients45 = <Gradient>[
-      LinearGradient(colors: colors, transform: GradientRotation(0.785398)),
+      LinearGradient(colors: colors, transform: GradientRotation(math.pi/4)),
       // A radial gradient won't be interesting to rotate unless the center is changed.
-      RadialGradient(colors: colors, center: Alignment.topCenter, transform: GradientRotation(0.785398)),
-      SweepGradient(colors: colors, transform: GradientRotation(0.785398)),
+      RadialGradient(colors: colors, center: Alignment.topCenter, transform: GradientRotation(math.pi/4)),
+      SweepGradient(colors: colors, transform: GradientRotation(math.pi/4)),
     ];
     const List<Gradient> gradients90 = <Gradient>[
-      LinearGradient(colors: colors, transform: GradientRotation(1.5708)),
+      LinearGradient(colors: colors, transform: GradientRotation(math.pi/2)),
       // A radial gradient won't be interesting to rotate unless the center is changed.
-      RadialGradient(colors: colors, center: Alignment.topCenter, transform: GradientRotation(1.5708)),
-      SweepGradient(colors: colors, transform: GradientRotation(1.5708)),
+      RadialGradient(colors: colors, center: Alignment.topCenter, transform: GradientRotation(math.pi/2)),
+      SweepGradient(colors: colors, transform: GradientRotation(math.pi/2)),
     ];
 
     const Map<Type, String> gradientSnakeCase = <Type, String> {

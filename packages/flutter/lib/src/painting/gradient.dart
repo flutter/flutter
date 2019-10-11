@@ -64,10 +64,10 @@ _ColorsAndStops _interpolateColorsAndStops(
 ///
 /// For example, a [SweepGradient] normally starts its gradation at 3 o'clock
 /// and draws clockwise. To have the sweep appear to start at 6 o'clock, supply
-/// a [GradientRotation] of `0.785398` radians (i.e. `45` degrees).
+/// a [GradientRotation] of `pi/4` radians (i.e. 45 degrees).
 @immutable
 abstract class GradientTransform {
-  /// A const constructor that allows subclasses to be const.
+  /// A const constructor so that subclasses may be const.
   const GradientTransform();
 
   /// When a [Gradient] creates its [Shader], it will call this method to
@@ -82,23 +82,24 @@ abstract class GradientTransform {
 /// A [GradientTransform] that rotates the gradient around the center-point of
 /// its bounding box.
 ///
-/// For example, the following would rotate a sweep gradient by a quarter turn
-/// clockwise:
+/// {@tool sample}
+///
+/// This sample would rotate a sweep gradient by a quarter turn clockwise:
 ///
 /// ```dart
 /// SweepGradient(
 ///   colors: colors,
-///   transform: GradientRotation(0.785398),
+///   transform: GradientRotation(math.pi/4),
 /// );
 /// ```
 @immutable
 class GradientRotation extends GradientTransform {
-  /// Constructs a `GradientRotation` for the specified angle.
+  /// Constructs a [GradientRotation] for the specified angle.
   ///
   /// The angle is in radians in the clockwise direction.
   const GradientRotation(this.radians);
 
-  /// The angle of rotation.
+  /// The angle of rotation in radians in the clockwise direction.
   final double radians;
 
   @override
@@ -138,7 +139,7 @@ abstract class Gradient {
   ///
   /// The [transform] argument can be applied to transform _only_ the gradient,
   /// without rotating the canvas itself or other geometry on the canvas. For
-  /// example, a `GradientRotation(0.785398)` will result in a [SweepGradient]
+  /// example, a `GradientRotation(math.pi/4)` will result in a [SweepGradient]
   /// that starts from a position of 6 o'clock instead of 3 o'clock, assuming
   /// no other rotation or perspective transformations have been applied to the
   /// [Canvas]. If null, no transformation is applied.
@@ -861,7 +862,7 @@ class RadialGradient extends Gradient {
 ///
 /// {@tool sample}
 ///
-/// This sample takes the above gradient and rotates it by 0.785398 radians,
+/// This sample takes the above gradient and rotates it by `math.pi/4` radians,
 /// i.e. 45 degrees.
 ///
 /// ```dart
@@ -879,7 +880,7 @@ class RadialGradient extends Gradient {
 ///         Color(0xFF4285F4), // blue again to seamlessly transition to the start
 ///       ],
 ///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
-///       transform: GradientRotation(0.785398),
+///       transform: GradientRotation(math.pi/4),
 ///     ),
 ///   ),
 /// )
