@@ -200,8 +200,11 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
     );
-    if (!baseDirectory.existsSync())
-      baseDirectory.createSync(recursive: true);
+    if (baseDirectory.existsSync()) {
+      // Cleaning up and prior test output.
+      baseDirectory.deleteSync(recursive: true);
+    }
+    baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.auth();
@@ -283,8 +286,11 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
     );
-    if (!baseDirectory.existsSync())
-      baseDirectory.createSync(recursive: true);
+    if (baseDirectory.existsSync()) {
+      // Cleaning up and prior test output.
+      baseDirectory.deleteSync(recursive: true);
+    }
+    baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.getExpectations();
@@ -386,8 +392,12 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       defaultComparator,
       platform,
     );
-    if (!baseDirectory.existsSync())
-      baseDirectory.createSync(recursive: true);
+
+    if (baseDirectory.existsSync()) {
+     // Cleaning up and prior test output.
+     baseDirectory.deleteSync(recursive: true);
+    }
+    baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.getExpectations();
