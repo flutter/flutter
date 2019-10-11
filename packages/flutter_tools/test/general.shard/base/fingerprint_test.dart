@@ -30,6 +30,7 @@ void main() {
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     };
 
     testUsingContext('throws when depfile is malformed', () {
@@ -290,7 +291,10 @@ void main() {
           () => Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']),
           throwsArgumentError,
         );
-      }, overrides: <Type, Generator>{FileSystem: () => fs});
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      });
 
       testUsingContext('populates checksums for valid files', () {
         fs.file('a.dart').writeAsStringSync('This is a');
@@ -301,7 +305,10 @@ void main() {
         expect(jsonObject['files'], hasLength(2));
         expect(jsonObject['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
         expect(jsonObject['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
-      }, overrides: <Type, Generator>{FileSystem: () => fs});
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      });
 
       testUsingContext('includes framework version', () {
         final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{}, <String>[]);
@@ -480,7 +487,10 @@ void main() {
       fs = MemoryFileSystem();
     });
 
-    final Map<Type, Generator> contextOverrides = <Type, Generator>{FileSystem: () => fs};
+    final Map<Type, Generator> contextOverrides = <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    };
 
     testUsingContext('returns one file if only one is listed', () {
       fs.file('a.d').writeAsStringSync('snapshot.d: /foo/a.dart');
