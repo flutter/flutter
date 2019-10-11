@@ -77,7 +77,7 @@ export 'src/material/ink_well.dart';
 export 'src/material/input_border.dart';
 export 'src/material/input_decorator.dart';
 export 'src/material/list_tile.dart';
-export 'src/material/material.dart' hide ElevationOverlay;
+export 'src/material/material.dart';
 export 'src/material/material_button.dart';
 export 'src/material/material_localizations.dart';
 export 'src/material/material_state.dart';

@@ -143,17 +143,15 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.dark()),
-        home: const Scaffold(
-          floatingActionButton: FloatingActionButton(
-            onPressed: null,
+        home: Scaffold(
+          bottomNavigationBar: BottomAppBar(
+            color: const ColorScheme.dark().surface,
           ),
-          bottomNavigationBar: BottomAppBar(),
         ),
       )
     );
 
-    final PhysicalShape physicalShape =
-    tester.widget(find.byType(PhysicalShape).at(0));
+    final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
     // For the default dark theme the overlay color for elevation 8 is 0xFF2D2D2D
     expect(physicalShape.color, const Color(0xFF2D2D2D));

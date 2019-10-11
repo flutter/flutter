@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
+import 'elevation_overlay.dart';
 import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
