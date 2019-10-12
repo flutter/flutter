@@ -1,4 +1,4 @@
-Signature: bc4d21a786e83b7d5bc617aeb8754294
+Signature: 64fa7bfa91ac6fd6be65ff8db06c8b9b
 
 UNUSED LICENSES:
 
@@ -7368,6 +7368,7 @@ FILE: ../../../third_party/dart/.mailmap
 FILE: ../../../third_party/dart/.style.yapf
 FILE: ../../../third_party/dart/.vpython
 FILE: ../../../third_party/dart/PATENT_GRANT
+FILE: ../../../third_party/dart/benchmarks/IsolateSpawn/dart/helloworld.dart
 FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
@@ -7452,6 +7453,7 @@ FILE: ../../../third_party/dart/benchmarks/FfiCall/dart/native/native_functions.
 FILE: ../../../third_party/dart/benchmarks/FfiMemory/dart/FfiMemory.dart
 FILE: ../../../third_party/dart/benchmarks/FfiStruct/dart/FfiStruct.dart
 FILE: ../../../third_party/dart/benchmarks/Isolate/dart/Isolate.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateSpawn/dart/IsolateSpawn.dart
 FILE: ../../../third_party/dart/runtime/bin/abi_version.h
 FILE: ../../../third_party/dart/runtime/bin/abi_version_in.cc
 FILE: ../../../third_party/dart/runtime/bin/elf_loader.cc
