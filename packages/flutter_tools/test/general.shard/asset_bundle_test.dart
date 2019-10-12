@@ -101,7 +101,7 @@ flutter:
 
     testUsingContext('handle removal of wildcard directories', () async {
       fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
-      fs.file('pubspec.yaml')
+      final File pubspec = fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 name: example
@@ -121,14 +121,17 @@ flutter:
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
 
       // Delete the wildcard directory and update pubspec file.
+      final DateTime modifiedTime = pubspec.lastModifiedSync().add(const Duration(hours: 1));
       fs.directory(fs.path.join('assets', 'foo')).deleteSync(recursive: true);
       fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
-name: example''');
+name: example''')
+        ..setLastModifiedSync(modifiedTime);
 
       // touch .packages to make sure its change time is after pubspec.yaml's
-      fs.file('.packages').createSync();
+      fs.file('.packages')
+        ..setLastModifiedSync(modifiedTime);
 
       // Even though the previous file was removed, it is left in the
       // asset manifest and not updated. This is due to the devfs not
@@ -144,7 +147,7 @@ name: example''');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
-    }, skip: true); // https://github.com/flutter/flutter/issues/34446
+    });
   });
 
 }
