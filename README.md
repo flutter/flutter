@@ -58,20 +58,6 @@ Flutter works with any development tool, but includes editor plug-ins for both
 of your target platform. And accessing platform features is easy. Here is a
 snippet from our [interop example]:
 
-```dart
-Future<void> getBatteryLevel() async {
-  var batteryLevel = 'unknown';
-  try {
-    int result = await methodChannel.invokeMethod('getBatteryLevel');
-    batteryLevel = 'Battery level: $result%';
-  } on PlatformException {
-    batteryLevel = 'Failed to get battery level.';
-  }
-  setState(() {
-    _batteryLevel = batteryLevel;
-  });
-}
-```
 
 Flutter is a fully open source project, and we welcome contributions.
 Information on how to get started can be found at our
