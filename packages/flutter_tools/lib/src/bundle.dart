@@ -71,7 +71,6 @@ class BundleBuilder {
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
-    //applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
     final FlutterProject flutterProject = FlutterProject.current();
 
     await buildWithAssemble(
