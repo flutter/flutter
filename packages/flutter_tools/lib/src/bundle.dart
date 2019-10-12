@@ -71,7 +71,7 @@ class BundleBuilder {
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
-    applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
+    //applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
     final FlutterProject flutterProject = FlutterProject.current();
 
     await buildWithAssemble(
@@ -83,6 +83,13 @@ class BundleBuilder {
       depfilePath: depfilePath,
       precompiled: precompiledSnapshot,
     );
+    // Work around for flutter_tester placing kernel artifacts in odd places.
+    if (applicationKernelFilePath != null) {
+      final File outputDill = fs.directory(assetDirPath).childFile('kernel_blob.bin');
+      if (outputDill.existsSync()) {
+        outputDill.copySync(applicationKernelFilePath);
+      }
+    }
     return;
   }
 }
