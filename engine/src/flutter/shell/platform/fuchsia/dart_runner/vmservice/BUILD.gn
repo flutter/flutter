@@ -27,6 +27,10 @@ template("aot_snapshot") {
   compiled_action(target_name) {
     kernel_name = target_name
 
+    if (defined(invoker.kernel_name)) {
+      kernel_name = invoker.kernel_name
+    }
+
     product = defined(invoker.product) && invoker.product
 
     product_suffix = ""
@@ -89,6 +93,7 @@ template("aot_snapshot") {
   }
 }
 
-aot_snapshot("vmservice") {
+aot_snapshot("vmservice_snapshot") {
+  kernel_name = "vmservice"
   product = false
 }

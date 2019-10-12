@@ -14,14 +14,11 @@ if (using_fuchsia_sdk) {
     product_suffix = "product_"
   }
 
-  dart_runner_target = "dart_jit_${product_suffix}runner"
-
   group("fuchsia") {
     deps = [
       "dart:kernel_compiler",
-      "dart_runner:$dart_runner_target",
-      "dart_runner/embedder:dart_aot_product_snapshot_cc",
-      "dart_runner/vmservice:vmservice",
+      "dart_runner:dart_aot_${product_suffix}runner",
+      "dart_runner:dart_jit_${product_suffix}runner",
       "flutter:flutter_aot_${product_suffix}runner",
       "flutter:flutter_jit_${product_suffix}runner",
       "flutter:flutter_runner_tests",

@@ -121,6 +121,80 @@ runner("dart_aot_product_runner_bin") {
   ]
 }
 
+template("aot_runner_package") {
+  assert(defined(invoker.product), "The parameter 'product' must be defined")
+  product_suffix = ""
+  if (invoker.product) {
+    product_suffix = "_product"
+  }
+  fuchsia_archive(target_name) {
+    deps = [
+      ":dart_aot${product_suffix}_runner_bin",
+    ]
+    if (!invoker.product) {
+      deps += [
+        "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
+        "vmservice:vmservice_snapshot",
+
+        # TODO(kaushikiska): Figure out how to get the profiler symbols for `libdart_precompiled_runtime`
+        # "//topaz/runtime/dart/profiler_symbols:libdart_precompiled_runtime",
+        observatory_target,
+      ]
+    }
+
+    binary = "dart_aot${product_suffix}_runner"
+
+    meta_dir = "$flutter_root/shell/platform/fuchsia/dart_runner/meta"
+
+    meta = [
+      {
+        path = rebase_path("meta/dart_aot${product_suffix}_runner.cmx")
+        dest = "dart_aot${product_suffix}_runner.cmx"
+      },
+    ]
+
+    resources = []
+    if (!invoker.product) {
+      vmservice_data = rebase_path(
+              get_label_info("vmservice:vmservice_snapshot", "target_gen_dir") +
+              "/vmservice_data.aotsnapshot")
+      vmservice_instr = rebase_path(
+              get_label_info("vmservice:vmservice_snapshot", "target_gen_dir") +
+              "/vmservice_instructions.aotsnapshot")
+      dart_profiler_symbols = rebase_path(
+              get_label_info(
+                  "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
+                  "target_gen_dir") + "/dart_aot_runner.dartprofilersymbols")
+
+      inputs = [
+        vmservice_data,
+        vmservice_instr,
+        observatory_archive_file,
+        dart_profiler_symbols,
+      ]
+
+      resources += [
+        {
+          path = vmservice_data
+          dest = "vmservice_isolate_snapshot_data.bin"
+        },
+        {
+          path = vmservice_instr
+          dest = "vmservice_isolate_snapshot_instructions.bin"
+        },
+        {
+          path = rebase_path(observatory_archive_file)
+          dest = "observatory.tar"
+        },
+        {
+          path = dart_profiler_symbols
+          dest = "dart_aot_runner.dartprofilersymbols"
+        },
+      ]
+    }
+  }
+}
+
 template("jit_runner_package") {
   assert(defined(invoker.product), "The parameter 'product' must be defined")
   product_suffix = ""
@@ -135,7 +209,10 @@ template("jit_runner_package") {
     ]
 
     if (!invoker.product) {
-      deps += [ observatory_target ]
+      deps += [
+        "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_jit_runner",
+        observatory_target,
+      ]
     }
 
     binary = "dart_jit${product_suffix}_runner"
@@ -173,6 +250,13 @@ template("jit_runner_package") {
           path = rebase_path(observatory_archive_file)
           dest = "observatory.tar"
         },
+        {
+          path = rebase_path(
+                  get_label_info(
+                      "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_jit_runner",
+                      "target_gen_dir") + "/dart_jit_runner.dartprofilersymbols")
+          dest = "dart_jit_runner.dartprofilersymbols"
+        },
       ]
     }
 
@@ -183,6 +267,14 @@ template("jit_runner_package") {
       },
     ]
   }
+}
+
+aot_runner_package("dart_aot_runner") {
+  product = false
+}
+
+aot_runner_package("dart_aot_product_runner") {
+  product = true
 }
 
 jit_runner_package("dart_jit_runner") {
