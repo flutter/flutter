@@ -15,6 +15,10 @@
 /// to pick values, as long as the result does not collide with existing
 /// values and is consistent between platforms and the framework.
 class MouseCursors {
+  // Constants here must be kept in sync with the following files:
+  //
+  // * MouseCursorController.java
+
   /// A special value that tells Flutter to release the control of cursors.
   ///
   /// A layer with this value will absorb the search for mouse cursor

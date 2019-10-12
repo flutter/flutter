@@ -114,6 +114,9 @@ class MouseTracker extends ChangeNotifier {
       : assert(_router != null),
         assert(annotationFinder != null) {
     _router.addGlobalRoute(_handleEvent);
+    _cursorManager = MouseCursorManager(
+      delegate: MouseCursorManagerDefaultDelegate(SystemChannels.mouseCursor),
+    );
   }
 
   @override
@@ -133,9 +136,7 @@ class MouseTracker extends ChangeNotifier {
   final Map<MouseTrackerAnnotation, _TrackedAnnotation> _trackedAnnotations =
     <MouseTrackerAnnotation, _TrackedAnnotation>{};
 
-  final MouseCursorManager _cursorManager = MouseCursorManager(
-    delegate: MouseCursorManagerDefaultDelegate(SystemChannels.mouseCursor),
-  );
+  MouseCursorManager _cursorManager;
 
   /// Track an annotation so that if the mouse enters it, we send it events.
   ///

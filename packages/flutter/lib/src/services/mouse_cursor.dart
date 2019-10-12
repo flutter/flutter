@@ -93,19 +93,21 @@ class MouseCursorManager {
   /// [MouseCursorManager] keeps track of the current cursor of each device.
   Future<bool> setCursors(Map<int, int> deviceCursors) async {
     // Create a state if absent, then find the devices that need changing.
-    final Iterable<MapEntry<int, int>> filteredEntries = deviceCursors.entries.where(
-      (MapEntry<int, int> entry) {
-        final _DeviceCursorState state = _deviceStates.putIfAbsent(
-          entry.key,
-          () => _DeviceCursorState(entry.key, cursor: MouseCursors.basic),
-        );
-        return state.changeCursor(entry.value);
-      }
+    final Map<int, int> filteredMap = Map<int, int>.fromEntries(
+      deviceCursors.entries.where(
+        (MapEntry<int, int> entry) {
+          final _DeviceCursorState state = _deviceStates.putIfAbsent(
+            entry.key,
+            () => _DeviceCursorState(entry.key, cursor: MouseCursors.basic),
+          );
+          return state.changeCursor(entry.value);
+        }
+      ),
     );
-    if (filteredEntries.isEmpty) {
+    if (filteredMap.isEmpty) {
       return true;
     }
-    return _delegate.setCursors(Map<int, int>.fromEntries(filteredEntries));
+    return _delegate.setCursors(filteredMap);
   }
 
   /// Called when a device is disconnected.
