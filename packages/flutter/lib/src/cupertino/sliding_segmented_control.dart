@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -313,7 +314,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     // Update animation controllers.
     for (T oldKey in oldWidget.children.keys) {
       if (!widget.children.containsKey(oldKey)) {
-        _highlightControllers[oldKey]..dispose();
+        _highlightControllers[oldKey].dispose();
         _pressControllers[oldKey].dispose();
 
         _highlightControllers.remove(oldKey);
@@ -337,6 +338,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 
   @override
   void dispose() {
+    print('disposing $this');
     for (AnimationController animationController in _highlightControllers.values) {
       animationController.dispose();
     }
@@ -381,6 +383,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       return;
 
     if (_pressed != null) {
+      print('$this pressed: $_pressed -> $newValue');
       _pressControllers[_pressed]?.animateTo(0, duration: _kOpacityAnimationDuration, curve: Curves.ease);
     }
     if (newValue != _highlighted && newValue != null) {
@@ -419,7 +422,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           inMutuallyExclusiveGroup: true,
           selected: controller.value == currentKey,
           child: Opacity(
-            alwaysIncludeSemantics: true,
             opacity: pressTween.evaluate(_pressControllers[currentKey]),
             // Expand the hitTest area to be as large as the Opacity widget.
             child: MetaData(
@@ -500,6 +502,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
       ..onPressedIndexChange = onPressedIndexChange
       ..onSelectedIndexChange = onSelectedIndexChange
       ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)
+      ..vsync = vsync
       ..guardedSetHighlightedIndex(selectedIndex);
   }
 }
@@ -582,10 +585,6 @@ class _RenderSegmentedControl<T> extends RenderBox
          value: 0,
          vsync: vsync,
        ) {
-         thumbController.addListener(markNeedsPaint);
-         thumbScaleController.addListener(markNeedsPaint);
-         separatorOpacityController.addListener(markNeedsPaint);
-
          _drag
           ..onDown = _onDown
           ..onUpdate = _onUpdate
@@ -597,7 +596,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   TickerProvider _vsync;
   set vsync(TickerProvider value) {
     assert(value != null);
-    if (value == _vsync)
+    if (value == vsync)
       return;
     _vsync = value;
     thumbController.resync(vsync);
@@ -645,6 +644,22 @@ class _RenderSegmentedControl<T> extends RenderBox
     childAnimations?.remove(child);
   }
 
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    thumbController.addListener(markNeedsPaint);
+    thumbScaleController.addListener(markNeedsPaint);
+    separatorOpacityController.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    thumbController.removeListener(markNeedsPaint);
+    thumbScaleController.removeListener(markNeedsPaint);
+    separatorOpacityController.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
   // selectedIndex has changed, animations need to be updated.
   bool _needsThumbAnimationUpdate = false;
 
@@ -688,6 +703,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     assert(value == null || (value >= 0 && value < childCount));
 
+    print('onPressedIndexChange called $_pressedIndex -> $value from renderObject $this');
     _pressedIndex = value;
     onPressedIndexChange(value);
   }
@@ -714,7 +730,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   int indexFromLocation(Offset location) {
     return childCount == 0
-      ? 0
+      ? null
       // This assumes all children have the same width.
       : (localDragOffset.dx / (size.width / childCount))
         .floor()
