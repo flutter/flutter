@@ -60,6 +60,7 @@ class CupertinoSlider extends StatefulWidget {
     this.max = 1.0,
     this.divisions,
     this.activeColor,
+    this.thumbColor,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
@@ -193,6 +194,11 @@ class CupertinoSlider extends StatefulWidget {
   /// Defaults to the [CupertinoTheme]'s primary color if null.
   final Color activeColor;
 
+  /// The color to use for the thumb of the slider.
+  ///
+  /// Defaults to the [CupertinoColors]'s white if null.
+  final Color thumbColor;
+
   @override
   _CupertinoSliderState createState() => _CupertinoSliderState();
 
@@ -233,6 +239,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
         widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
         context,
       ),
+      thumbColor: widget.thumbColor ?? CupertinoColors.white,
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -247,6 +254,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.value,
     this.divisions,
     this.activeColor,
+    this.thumbColor,
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -256,11 +264,11 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final double value;
   final int divisions;
   final Color activeColor;
+  final Color thumbColor;
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
   final TickerProvider vsync;
-
 
   @override
   _RenderCupertinoSlider createRenderObject(BuildContext context) {
@@ -268,6 +276,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       value: value,
       divisions: divisions,
       activeColor: activeColor,
+      thumbColor: thumbColor,
       trackColor: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
       onChanged: onChanged,
       onChangeStart: onChangeStart,
@@ -305,6 +314,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     @required double value,
     int divisions,
     Color activeColor,
+    @required this.thumbColor,
     Color trackColor,
     ValueChanged<double> onChanged,
     this.onChangeStart,
@@ -313,6 +323,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     @required TextDirection textDirection,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(textDirection != null),
+       assert(thumbColor != null),
        _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
@@ -362,6 +373,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     _activeColor = value;
     markNeedsPaint();
   }
+
+  final Color thumbColor;
 
   Color get trackColor => _trackColor;
   Color _trackColor;
@@ -512,7 +525,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     }
 
     final Offset thumbCenter = Offset(trackActive, trackCenter);
-    const CupertinoThumbPainter().paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
+    CupertinoThumbPainter(color: thumbColor).paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
   }
 
   @override
