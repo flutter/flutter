@@ -60,7 +60,7 @@ void main() {
     });
 
     testUsingContext('wildcard directories are updated when filesystem changes', () async {
-      fs.file('.packages').createSync();
+      final File packageFile = fs.file('.packages')..createSync();
       fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       fs.file('pubspec.yaml')
         ..createSync()
@@ -80,11 +80,10 @@ flutter:
       expect(bundle.entries.length, 4);
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
 
-      // Adding a file should update the stat of the directory, but instead
-      // we need to fully recreate it.
-      fs.directory(fs.path.join('assets', 'foo')).deleteSync(recursive: true);
-      fs.file(fs.path.join('assets', 'foo', 'fizz.txt')).createSync(recursive: true);
-      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync();
+      // Simulate modifying the files by updating the filestat time manually.
+      fs.file(fs.path.join('assets', 'foo', 'fizz.txt'))
+        ..createSync(recursive: true)
+        ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), true);
       await bundle.build(manifestPath: 'pubspec.yaml');
