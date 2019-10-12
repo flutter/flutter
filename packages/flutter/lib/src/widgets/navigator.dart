@@ -135,8 +135,9 @@ abstract class Route<T> {
   @protected
   @mustCallSuper
   TickerFuture didPush() {
-    navigator.focusScopeNode.requestFocus();
-    return TickerFuture.complete();
+    return TickerFuture.complete()..then<void>((void _) {
+      navigator.focusScopeNode.requestFocus();
+    });
   }
 
   /// Called after [install] when the route replaced another in the navigator.

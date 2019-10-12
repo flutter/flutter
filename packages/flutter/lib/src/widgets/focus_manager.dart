@@ -18,7 +18,7 @@ import 'framework.dart';
 
 // Used for debugging focus code. Set to true to see highly verbose debug output
 // when focus changes occur.
-const bool _kDebugFocus = true;
+const bool _kDebugFocus = false;
 
 bool _focusDebug(String message, [Iterable<String> details]) {
   if (_kDebugFocus) {
@@ -698,13 +698,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   // Removes the given FocusNode and its children as a child of this node.
   @mustCallSuper
-  void _removeChild(FocusNode node) {
+  void _removeChild(FocusNode node, {bool removeScopeFocus = true}) {
     assert(node != null);
     assert(_children.contains(node), "Tried to remove a node that wasn't a child.");
     assert(node._parent == this);
     assert(node._manager == _manager);
 
-    node.enclosingScope?._focusedChildren?.remove(node);
+    if (removeScopeFocus) {
+      node.enclosingScope?._focusedChildren?.remove(node);
+    }
 
     node._parent = null;
     _children.remove(node);
@@ -732,7 +734,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(!ancestors.contains(child), 'The supplied child is already an ancestor of this node. Loops are not allowed.');
     final FocusScopeNode oldScope = child.enclosingScope;
     final bool hadFocus = child.hasFocus;
-    child._parent?._removeChild(child);
+    child._parent?._removeChild(child, removeScopeFocus: oldScope != nearestScope);
     _children.add(child);
     child._parent = this;
     child._updateManager(_manager);
@@ -882,6 +884,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return child.toDiagnosticsNode(name: 'Child ${count++}');
     }).toList();
   }
+
+  @override
+  String toStringShort() {
+    return '${describeIdentity(this)}${debugLabel != null && debugLabel.isNotEmpty ? '($debugLabel)' : ''}';
+  }
 }
 
 /// A subclass of [FocusNode] that acts as a scope for its descendants,
@@ -1020,7 +1027,7 @@ class FocusScopeNode extends FocusNode {
       return;
     }
     final List<String> childList = _focusedChildren.reversed.map<String>((FocusNode child) {
-      return '${describeIdentity(child)}${child.debugLabel != null && child.debugLabel.isNotEmpty ? '(${child.debugLabel})' : ''}';
+      return child.toStringShort();
     }).toList();
     properties.add(IterableProperty<String>('focusedChildren', childList, defaultValue: <String>[]));
   }

@@ -529,8 +529,6 @@ void main() {
       ),
     );
     await tester.pump();
-    debugDumpApp();
-    debugDumpFocusTree();
 
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
