@@ -250,6 +250,7 @@ class KernelCompiler {
     bool linkPlatformKernelIn = false,
     bool aot = false,
     bool enableAsserts = false,
+    bool causalAsyncStacks = true,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
@@ -286,6 +287,7 @@ class KernelCompiler {
       sdkRoot,
       '--strong',
       '--target=$targetModel',
+      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
       if (enableAsserts) '--enable-asserts',
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
@@ -428,6 +430,7 @@ class ResidentCompiler {
   ResidentCompiler(
     this._sdkRoot, {
     bool enableAsserts = false,
+    bool causalAsyncStacks = true,
     bool trackWidgetCreation = false,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -439,6 +442,7 @@ class ResidentCompiler {
     List<String> experimentalFlags,
   }) : assert(_sdkRoot != null),
        _enableAsserts = enableAsserts,
+       _causalAsyncStacks = causalAsyncStacks,
        _trackWidgetCreation = trackWidgetCreation,
        _packagesPath = packagesPath,
        _fileSystemRoots = fileSystemRoots,
@@ -456,6 +460,7 @@ class ResidentCompiler {
   }
 
   final bool _enableAsserts;
+  final bool _causalAsyncStacks;
   final bool _trackWidgetCreation;
   final String _packagesPath;
   final TargetModel _targetModel;
@@ -569,6 +574,7 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=$_targetModel',
+      '-Ddart.developer.causal_async_stacks=$_causalAsyncStacks',
       if (outputPath != null) ...<String>[
         '--output-dill',
         outputPath,

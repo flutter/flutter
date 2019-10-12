@@ -39,9 +39,9 @@ void main() {
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -188,9 +188,9 @@ void main() {
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -355,9 +355,9 @@ Information about project "Runner":
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 

@@ -5575,11 +5575,11 @@ class Listener extends StatelessWidget {
     // TODO(tongmu): After it goes stable, remove these 3 parameters from Listener
     // and Listener should no longer need an intermediate class _PointerListener.
     // https://github.com/flutter/flutter/issues/36085
-    @Deprecated('Use MouseRegion.onEnter instead')
+    @Deprecated('Use MouseRegion.onEnter instead. See MouseRegion.opaque for behavioral difference.')
     this.onPointerEnter, // ignore: deprecated_member_use_from_same_package
-    @Deprecated('Use MouseRegion.onExit instead')
+    @Deprecated('Use MouseRegion.onExit instead. See MouseRegion.opaque for behavioral difference.')
     this.onPointerExit, // ignore: deprecated_member_use_from_same_package
-    @Deprecated('Use MouseRegion.onHover instead')
+    @Deprecated('Use MouseRegion.onHover instead. See MouseRegion.opaque for behavioral difference.')
     this.onPointerHover, // ignore: deprecated_member_use_from_same_package
     this.onPointerUp,
     this.onPointerCancel,
@@ -5656,6 +5656,7 @@ class Listener extends StatelessWidget {
         onEnter: onPointerEnter,
         onExit: onPointerExit,
         onHover: onPointerHover,
+        opaque: false,
         child: result,
       );
     }
@@ -5815,8 +5816,10 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.opaque = true,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : assert(opaque != null),
+       super(key: key, child: child);
 
   /// Called when a mouse pointer (with or without buttons pressed) enters the
   /// region defined by this widget, or when the widget appears under the
@@ -5832,6 +5835,22 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// the pointer.
   final PointerExitEventListener onExit;
 
+  /// Whether this widget should prevent other [MouseRegion]s visually behind it
+  /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
+  /// and [onExit] behave.
+  ///
+  /// If [opaque] is true, this widget will absorb the mouse pointer and
+  /// prevent this widget's siblings (or any other widgets that are not
+  /// ancestors or descendants of this widget) from detecting the mouse
+  /// pointer even when the pointer is within their areas.
+  ///
+  /// If [opaque] is false, this object will not affect how [MouseRegion]s
+  /// behind it behave, which will detect the mouse pointer as long as the
+  /// pointer is within their areas.
+  ///
+  /// This defaults to true.
+  final bool opaque;
+
   @override
   _MouseRegionElement createElement() => _MouseRegionElement(this);
 
@@ -5841,6 +5860,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       onEnter: onEnter,
       onHover: onHover,
       onExit: onExit,
+      opaque: opaque,
     );
   }
 
@@ -5849,7 +5869,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     renderObject
       ..onEnter = onEnter
       ..onHover = onHover
-      ..onExit = onExit;
+      ..onExit = onExit
+      ..opaque = opaque;
   }
 
   @override
@@ -5863,6 +5884,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     if (onHover != null)
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }
 
