@@ -20,7 +20,7 @@ class BuildAarCommand extends BuildSubCommand {
     argParser
       ..addMultiOption('target-platform',
         splitCommas: true,
-        defaultsTo: <String>['android-arm', 'android-arm64'],
+        defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the project is compiled.',
       )

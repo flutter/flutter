@@ -22,7 +22,7 @@ class AndroidStudioValidator extends DoctorValidator {
       if (studios.isEmpty)
         NoAndroidStudioValidator()
       else
-        ...studios.map<DoctorValidator>((AndroidStudio studio) => AndroidStudioValidator(studio))
+        ...studios.map<DoctorValidator>((AndroidStudio studio) => AndroidStudioValidator(studio)),
     ];
   }
 

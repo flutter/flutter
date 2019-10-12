@@ -81,7 +81,7 @@ void main() {
     });
     when(mockFlutterDevice.devFS).thenReturn(mockDevFS);
     when(mockFlutterDevice.views).thenReturn(<FlutterView>[
-      mockFlutterView
+      mockFlutterView,
     ]);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
@@ -306,7 +306,7 @@ void main() {
   }));
 
   test('ResidentRunner uses temp directory when there is no output dill path', () => testbed.run(() {
-    expect(residentRunner.artifactDirectory.path, contains('_fluttter_tool'));
+    expect(residentRunner.artifactDirectory.path, contains('flutter_tool.'));
 
     final ResidentRunner otherRunner = HotRunner(
       <FlutterDevice>[

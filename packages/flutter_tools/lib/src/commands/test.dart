@@ -131,7 +131,7 @@ class TestCommand extends FastFlutterCommand {
         'directory (or one of its subdirectories).');
     }
     if (shouldRunPub) {
-      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+      await pub.get(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
     final bool buildTestAssets = argResults['test-assets'];
     final List<String> names = argResults['name'];
@@ -180,7 +180,7 @@ class TestCommand extends FastFlutterCommand {
           if (fs.isDirectorySync(path))
             ..._findTests(fs.directory(path))
           else
-            path
+            path,
       ];
     }
 
@@ -234,6 +234,7 @@ class TestCommand extends FastFlutterCommand {
       disableServiceAuthCodes: disableServiceAuthCodes,
       ipv6: argResults['ipv6'],
       machine: machine,
+      enableAsserts: true,
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,

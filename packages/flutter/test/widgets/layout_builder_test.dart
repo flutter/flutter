@@ -28,7 +28,7 @@ void main() {
             },
           ),
         ),
-      )
+      ),
     );
 
     expect(layoutBuilderSize, const Size(100.0, 200.0));
@@ -231,7 +231,7 @@ void main() {
             );
           }
         ),
-      )
+      ),
     );
 
     expect(layoutBuilderSize, equals(const Size(10.0, 20.0)));

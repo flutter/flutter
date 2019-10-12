@@ -171,7 +171,7 @@ Future<void> _pumpCheckmarkChip(
           );
         },
       ),
-    )
+    ),
   );
 }
 
@@ -333,7 +333,7 @@ void main() {
                     label: Text(text),
                     onDeleted: onDeleted,
                   ),
-                ]
+                ],
               ),
             ),
           ),
@@ -1353,6 +1353,7 @@ void main() {
                       TestSemantics(
                         label: 'test',
                         textDirection: TextDirection.ltr,
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                       ),
                     ],
                   ),
@@ -1390,6 +1391,7 @@ void main() {
                         flags: <SemanticsFlag>[
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                       ),
@@ -1436,6 +1438,7 @@ void main() {
                         flags: <SemanticsFlag>[
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                       ),
@@ -1474,9 +1477,10 @@ void main() {
                         label: 'test',
                         textDirection: TextDirection.ltr,
                         flags: <SemanticsFlag>[
-                          SemanticsFlag.isSelected,
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                          SemanticsFlag.isSelected,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                       ),
@@ -1783,7 +1787,7 @@ void main() {
         matching: find.byWidgetPredicate((Widget widget) {
           return widget.runtimeType.toString() == '_ChipRenderWidget';
         }),
-      )
+      ),
     );
     const Color selectScrimColor = Color(0x60191919);
     expect(rawChip, paints..path(color: selectScrimColor, includes: <Offset>[

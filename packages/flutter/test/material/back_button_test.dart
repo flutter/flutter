@@ -20,7 +20,7 @@ void main() {
             );
           },
         },
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
@@ -48,7 +48,7 @@ void main() {
             );
           },
         },
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
@@ -119,6 +119,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      isFocusable: true,
     ));
     handle.dispose();
   });

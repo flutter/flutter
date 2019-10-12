@@ -831,11 +831,17 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.button != null) {
       config.isButton = properties.button;
     }
+    if (properties.link != null) {
+      config.isLink = properties.link;
+    }
     if (properties.textField != null) {
       config.isTextField = properties.textField;
     }
     if (properties.readOnly != null) {
       config.isReadOnly = properties.readOnly;
+    }
+    if (properties.focusable != null) {
+      config.isFocusable = properties.focusable;
     }
     if (properties.focused != null) {
       config.isFocused = properties.focused;

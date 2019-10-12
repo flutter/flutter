@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
@@ -41,7 +42,7 @@ void main() {
       final BuildApkCommand command = await runBuildApkCommand(projectPath);
 
       expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildApkTargetPlatform, 'android-arm,android-arm64'));
+          containsPair(CustomDimensions.commandBuildApkTargetPlatform, 'android-arm,android-arm64,android-x64'));
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -137,6 +138,62 @@ void main() {
       tryToDelete(tempDir);
     });
 
+    group('AndroidSdk', () {
+      FileSystem memoryFileSystem;
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem();
+
+        tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+        memoryFileSystem.currentDirectory = tempDir;
+
+        gradlew = memoryFileSystem.path.join(tempDir.path, 'flutter_project', 'android',
+            platform.isWindows ? 'gradlew.bat' : 'gradlew');
+      });
+      testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
+        final Directory gradleCacheDir = memoryFileSystem.directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')..createSync(recursive: true);
+        gradleCacheDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').createSync();
+
+        tempDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''name: test
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+''');
+        tempDir.childFile('.packages').createSync(recursive: true);
+        final Directory androidDir = tempDir.childDirectory('android');
+        androidDir.childFile('build.gradle').createSync(recursive: true);
+        androidDir.childFile('gradle.properties').createSync(recursive: true);
+        androidDir.childDirectory('gradle').childDirectory('wrapper').childFile('gradle-wrapper.properties').createSync(recursive: true);
+        tempDir.childDirectory('build').childDirectory('outputs').childDirectory('repo').createSync(recursive: true);
+        tempDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+        when(mockProcessManager.run(any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, 'any', '')));
+
+        await expectLater(
+          runBuildApkCommand(tempDir.path, arguments: <String>['--no-pub', '--flutter-root=/flutter_root']),
+          throwsToolExit(message: 'Gradle build failed: 1'),
+        );
+
+        verifyNever(mockAndroidSdk.validateSdkWellFormed());
+        verify(mockAndroidSdk.reinitialize()).called(1);
+      },
+      overrides: <Type, Generator>{
+        AndroidSdk: () => mockAndroidSdk,
+        GradleUtils: () => GradleUtils(),
+        FileSystem: () => memoryFileSystem,
+        ProcessManager: () => mockProcessManager,
+      });
+    });
+
     testUsingContext('shrinking is enabled by default on release mode', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
@@ -152,7 +209,7 @@ void main() {
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -184,7 +241,7 @@ void main() {
           '-q',
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
-          '-Ptarget-platform=android-arm,android-arm64',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -210,7 +267,7 @@ void main() {
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -223,7 +280,7 @@ void main() {
           createMockProcess(
             exitCode: 1,
             stdout: r8StdoutWarning,
-          )
+          ),
         );
       });
 
@@ -241,8 +298,9 @@ void main() {
           contains('To learn more, see: https://developer.android.com/studio/build/shrink-code'));
 
       verify(mockUsage.sendEvent(
-        'build-apk',
-        'r8-failure',
+        'build',
+        'apk',
+        label: 'r8-failure',
         parameters: anyNamed('parameters'),
       )).called(1);
     },
@@ -266,6 +324,7 @@ Future<BuildApkCommand> runBuildApkCommand(
   await runner.run(<String>[
     'apk',
     ...?arguments,
+    '--no-pub',
     fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;

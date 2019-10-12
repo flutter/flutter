@@ -176,7 +176,7 @@ class HotRunner extends ResidentRunner {
             httpUri: flutterDevices.first.observatoryUris.first,
             wsUri: flutterDevices.first.vmServices.first.wsAddress,
             baseUri: baseUris.first.toString(),
-          )
+          ),
         );
       }
     } catch (error) {
@@ -289,7 +289,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<UpdateFSReport> _updateDevFS({ bool fullRestart = false }) async {
-    final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
+    final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');
@@ -314,7 +314,7 @@ class HotRunner extends ResidentRunner {
         bundle: assetBundle,
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: isFirstUpload,
-        bundleDirty: isFirstUpload == false && rebuildBundle,
+        bundleDirty: !isFirstUpload && rebuildBundle,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart),
@@ -1037,6 +1037,9 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async {
+    for (FlutterDevice flutterDevice in flutterDevices) {
+      flutterDevice.device.dispose();
+    }
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
   }
@@ -1051,33 +1054,42 @@ class ProjectFileInvalidator {
     @required List<Uri> urisToMonitor,
     @required String packagesPath,
   }) {
-    final List<Uri> invalidatedFiles = <Uri>[];
-    int scanned = 0;
+    assert(urisToMonitor != null);
+    assert(packagesPath != null);
+
+    if (lastCompiled == null) {
+      // Initial load.
+      assert(urisToMonitor.isEmpty);
+      return <Uri>[];
+    }
+
     final Stopwatch stopwatch = Stopwatch()..start();
-    for (Uri uri in urisToMonitor) {
-      if ((platform.isWindows && uri.path.contains(_pubCachePathWindows))
-          || uri.path.contains(_pubCachePathLinuxAndMac)) {
-        // Don't watch pub cache directories to speed things up a little.
-        continue;
-      }
+
+    final List<Uri> urisToScan = <Uri>[
+      // Don't watch pub cache directories to speed things up a little.
+      ...urisToMonitor.where(_isNotInPubCache),
+
+      // We need to check the .packages file too since it is not used in compilation.
+      fs.file(packagesPath).uri,
+    ];
+    final List<Uri> invalidatedFiles = <Uri>[];
+    for (final Uri uri in urisToScan) {
       final DateTime updatedAt = fs.statSync(
-          uri.toFilePath(windows: platform.isWindows)).modified;
-      scanned++;
-      if (updatedAt == null) {
-        continue;
-      }
-      if (updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+        uri.toFilePath(windows: platform.isWindows),
+      ).modified;
+      if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
         invalidatedFiles.add(uri);
       }
     }
-    // we need to check the .packages file too since it is not used in compilation.
-    final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
-    if (lastCompiled != null && packagesUpdatedAt != null
-        && packagesUpdatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
-      invalidatedFiles.add(fs.file(packagesPath).uri);
-      scanned++;
-    }
-    printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
+    printTrace(
+      'Scanned through ${urisToScan.length} files in '
+      '${stopwatch.elapsedMilliseconds}ms',
+    );
     return invalidatedFiles;
+  }
+
+  static bool _isNotInPubCache(Uri uri) {
+    return !(platform.isWindows && uri.path.contains(_pubCachePathWindows))
+        && !uri.path.contains(_pubCachePathLinuxAndMac);
   }
 }

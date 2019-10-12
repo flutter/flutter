@@ -143,7 +143,8 @@ void main() {
             LogicalKeyboardKey.keyB,
             LogicalKeyboardKey.keyC,
             LogicalKeyboardKey.keyD,
-          })));
+          })),
+      );
     });
     test('$KeySet diagnostics work.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();

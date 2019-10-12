@@ -15,17 +15,16 @@ import 'text_style.dart';
 
 /// An immutable span of text.
 ///
-/// A [TextSpan] object can be styled using its [style] property.
-/// The style will be applied to the [text] and the [children].
+/// A [TextSpan] object can be styled using its [style] property. The style will
+/// be applied to the [text] and the [children].
 ///
-/// A [TextSpan] object can just have plain text, or it can have
-/// children [TextSpan] objects with their own styles that (possibly
-/// only partially) override the [style] of this object. If a
-/// [TextSpan] has both [text] and [children], then the [text] is
-/// treated as if it was an unstyled [TextSpan] at the start of the
-/// [children] list. Leaving the [TextSpan.text] field null results
-/// in the [TextSpan] acting as an empty node in the [InlineSpan]
-/// tree with a list of children.
+/// A [TextSpan] object can just have plain text, or it can have children
+/// [TextSpan] objects with their own styles that (possibly only partially)
+/// override the [style] of this object. If a [TextSpan] has both [text] and
+/// [children], then the [text] is treated as if it was an un-styled [TextSpan]
+/// at the start of the [children] list. Leaving the [TextSpan.text] field null
+/// results in the [TextSpan] acting as an empty node in the [InlineSpan] tree
+/// with a list of children.
 ///
 /// To paint a [TextSpan] on a [Canvas], use a [TextPainter]. To display a text
 /// span in a widget, use a [RichText]. For text with a single style, consider
@@ -46,17 +45,17 @@ import 'text_style.dart';
 /// _There is some more detailed sample code in the documentation for the
 /// [recognizer] property._
 ///
-/// The [TextSpan.text] will be used as the semantics label unless overriden
+/// The [TextSpan.text] will be used as the semantics label unless overridden
 /// by the [TextSpan.semanticsLabel] property. Any [PlaceholderSpan]s in the
-/// [TextSpan.children] list will separate the text before and after it into
-/// two semantics nodes.
+/// [TextSpan.children] list will separate the text before and after it into two
+/// semantics nodes.
 ///
 /// See also:
 ///
-///  * [WidgetSpan], a leaf node that represents an embedded inline widget
-///    in an [InlineSpan] tree. Specify a widget within the [children]
-///    list by wrapping the widget with a [WidgetSpan]. The widget will be
-///    laid out inline within the paragraph.
+///  * [WidgetSpan], a leaf node that represents an embedded inline widget in an
+///    [InlineSpan] tree. Specify a widget within the [children] list by
+///    wrapping the widget with a [WidgetSpan]. The widget will be laid out
+///    inline within the paragraph.
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
@@ -89,8 +88,8 @@ class TextSpan extends InlineSpan {
   /// If both [text] and [children] are non-null, the text will precede the
   /// children.
   ///
-  /// Modifying the list after the [TextSpan] has been created is not
-  /// supported and may have unexpected results.
+  /// Modifying the list after the [TextSpan] has been created is not supported
+  /// and may have unexpected results.
   ///
   /// The list must not contain any nulls.
   @override
@@ -102,19 +101,20 @@ class TextSpan extends InlineSpan {
   /// object that manages the [InlineSpan] painting is also responsible for
   /// dispatching events. In the rendering library, that is the
   /// [RenderParagraph] object, which corresponds to the [RichText] widget in
-  /// the widgets layer; these objects do not bubble events in [InlineSpan]s, so a
-  /// [recognizer] is only effective for events that directly hit the [text] of
-  /// that [InlineSpan], not any of its [children].
+  /// the widgets layer; these objects do not bubble events in [InlineSpan]s,
+  /// so a [recognizer] is only effective for events that directly hit the
+  /// [text] of that [InlineSpan], not any of its [children].
   ///
   /// [InlineSpan] also does not manage the lifetime of the gesture recognizer.
   /// The code that owns the [GestureRecognizer] object must call
-  /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer used.
+  /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer
+  /// used.
   ///
   /// {@tool sample}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget which
-  /// uses the [HapticFeedback] class to vibrate the device when the user
+  /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget
+  /// which uses the [HapticFeedback] class to vibrate the device when the user
   /// long-presses the "find the" span, which is underlined in wavy green. The
   /// hit-testing is handled by the [RichText] widget.
   ///
@@ -194,7 +194,11 @@ class TextSpan extends InlineSpan {
   /// [TextPainter] class to paint [TextSpan] objects onto [Canvas]
   /// objects.
   @override
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions }) {
+  void build(
+    ui.ParagraphBuilder builder, {
+    double textScaleFactor = 1.0,
+    List<PlaceholderDimensions> dimensions,
+  }) {
     assert(debugAssertIsValid());
     final bool hasStyle = style != null;
     if (hasStyle)
@@ -204,7 +208,11 @@ class TextSpan extends InlineSpan {
     if (children != null) {
       for (InlineSpan child in children) {
         assert(child != null);
-        child.build(builder, textScaleFactor: textScaleFactor, dimensions: dimensions);
+        child.build(
+          builder,
+          textScaleFactor: textScaleFactor,
+          dimensions: dimensions,
+        );
       }
     }
     if (hasStyle)
@@ -214,8 +222,8 @@ class TextSpan extends InlineSpan {
   /// Walks this [TextSpan] and its descendants in pre-order and calls [visitor]
   /// for each span that has text.
   ///
-  /// When `visitor` returns true, the walk will continue. When `visitor` returns
-  /// false, then the walk will end.
+  /// When `visitor` returns true, the walk will continue. When `visitor`
+  /// returns false, then the walk will end.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
     if (text != null) {
@@ -235,8 +243,8 @@ class TextSpan extends InlineSpan {
   /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.
   ///
-  /// When `visitor` returns true, the walk will continue. When `visitor` returns
-  /// false, then the walk will end.
+  /// When `visitor` returns true, the walk will continue. When `visitor`
+  /// returns false, then the walk will end.
   @override
   @Deprecated('Use to visitChildren instead')
   bool visitTextSpan(bool visitor(TextSpan span)) {
@@ -246,7 +254,10 @@ class TextSpan extends InlineSpan {
     }
     if (children != null) {
       for (InlineSpan child in children) {
-        assert(child is TextSpan, 'visitTextSpan is deprecated. Use visitChildren to support InlineSpans');
+        assert(
+          child is TextSpan,
+          'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
+        );
         final TextSpan textSpanChild = child;
         if (!textSpanChild.visitTextSpan(visitor))
           return false;
@@ -274,7 +285,11 @@ class TextSpan extends InlineSpan {
   }
 
   @override
-  void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
+  void computeToPlainText(
+    StringBuffer buffer, {
+    bool includeSemanticsLabels = true,
+    bool includePlaceholders = true
+  }) {
     assert(debugAssertIsValid());
     if (semanticsLabel != null && includeSemanticsLabels) {
       buffer.write(semanticsLabel);
@@ -322,7 +337,10 @@ class TextSpan extends InlineSpan {
 
   @override
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    if (recognizer != null && (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)) {
+    if (
+      recognizer != null &&
+      (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)
+    ) {
       final int length = semanticsLabel?.length ?? text.length;
       semanticsOffsets.add(offset.value);
       semanticsOffsets.add(offset.value + length);
@@ -331,8 +349,8 @@ class TextSpan extends InlineSpan {
     offset.increment(text != null ? text.length : 0);
   }
 
-  /// In checked mode, throws an exception if the object is not in a
-  /// valid configuration. Otherwise, returns true.
+  /// In checked mode, throws an exception if the object is not in a valid
+  /// configuration. Otherwise, returns true.
   ///
   /// This is intended to be used as follows:
   ///
@@ -369,7 +387,9 @@ class TextSpan extends InlineSpan {
         children?.length != textSpan.children?.length ||
         (style == null) != (textSpan.style == null))
       return RenderComparison.layout;
-    RenderComparison result = recognizer == textSpan.recognizer ? RenderComparison.identical : RenderComparison.metadata;
+    RenderComparison result = recognizer == textSpan.recognizer ?
+      RenderComparison.identical :
+      RenderComparison.metadata;
     if (style != null) {
       final RenderComparison candidate = style.compareTo(textSpan.style);
       if (candidate.index > result.index)
@@ -405,7 +425,13 @@ class TextSpan extends InlineSpan {
   }
 
   @override
-  int get hashCode => hashValues(super.hashCode, text, recognizer, semanticsLabel, hashList(children));
+  int get hashCode => hashValues(
+    super.hashCode,
+    text,
+    recognizer,
+    semanticsLabel,
+    hashList(children),
+  );
 
   @override
   String toStringShort() => '$runtimeType';
@@ -414,7 +440,14 @@ class TextSpan extends InlineSpan {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
 
-    properties.add(StringProperty('text', text, showName: false, defaultValue: null));
+    properties.add(
+      StringProperty(
+        'text',
+        text,
+        showName: false,
+        defaultValue: null,
+      )
+    );
     if (style == null && text == null && children == null)
       properties.add(DiagnosticsNode.message('(empty)'));
 

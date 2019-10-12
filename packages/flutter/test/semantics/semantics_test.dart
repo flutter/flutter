@@ -74,7 +74,7 @@ void main() {
       final List<SemanticsNode> children = <SemanticsNode>[
         SemanticsNode()
           ..isMergedIntoParent = true
-          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
       ];
 
       node.updateWith(
@@ -82,7 +82,7 @@ void main() {
         childrenInInversePaintOrder: children,
       );
 
-      children.add( SemanticsNode()
+      children.add(SemanticsNode()
         ..isMergedIntoParent = true
         ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0)
       );
@@ -573,6 +573,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
+    expect(config.isLink, isFalse);
     expect(config.isMergingSemanticsOfDescendants, isFalse);
     expect(config.isEnabled, null);
     expect(config.isChecked, null);
@@ -596,6 +597,7 @@ void main() {
 
     config.isSemanticBoundary = true;
     config.isButton = true;
+    config.isLink = true;
     config.isMergingSemanticsOfDescendants = true;
     config.isEnabled = true;
     config.isChecked = true;
@@ -632,6 +634,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isTrue);
     expect(config.isButton, isTrue);
+    expect(config.isLink, isTrue);
     expect(config.isMergingSemanticsOfDescendants, isTrue);
     expect(config.isEnabled, isTrue);
     expect(config.isChecked, isTrue);

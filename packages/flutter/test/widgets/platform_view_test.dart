@@ -4,6 +4,7 @@
 @TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -836,7 +837,15 @@ void main() {
         ),
       );
 
-      final SemanticsNode semantics =  tester.getSemantics(find.byType(AndroidView));
+      // Find the first _AndroidPlatformView widget inside of the AndroidView so
+      // that it finds the right RenderObject when looking for semantics.
+      final Finder semanticsFinder = find.byWidgetPredicate(
+            (Widget widget) {
+          return widget.runtimeType.toString() == '_AndroidPlatformView';
+        },
+        description: '_AndroidPlatformView widget inside AndroidView',
+      );
+      final SemanticsNode semantics = tester.getSemantics(semanticsFinder.first);
 
       // Platform view has not been created yet, no platformViewId.
       expect(semantics.platformViewId, null);
@@ -888,7 +897,7 @@ void main() {
           find.descendant(
               of: find.byType(AndroidView),
               matching: find.byType(Focus),
-          )
+          ),
       );
       final Element containerElement = tester.element(find.byKey(containerKey));
       final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode;
@@ -1579,7 +1588,7 @@ void main() {
               height: 100,
             ),
           ],
-        )
+        ),
       );
 
       // First frame is before the platform view was created so the render object
@@ -1914,7 +1923,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
 
       await tester.pumpWidget(
@@ -1925,7 +1935,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
       expect(factoryInvocationCount, 1);
     });
@@ -2048,6 +2059,7 @@ void main() {
     testWidgets('PlatformViewLink re-initializes when view type changes', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final List<int> ids = <int>[];
+      final List<int> surfaceViewIds = <int>[];
       final List<String> viewTypes = <String>[];
 
       PlatformViewLink createPlatformViewLink(String viewType) {
@@ -2061,6 +2073,7 @@ void main() {
             return controller;
           },
           surfaceFactory: (BuildContext context, PlatformViewController controller) {
+            surfaceViewIds.add(controller.viewId);
             return PlatformViewSurface(
               gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
               controller: controller,
@@ -2091,6 +2104,13 @@ void main() {
 
       expect(
         ids,
+        unorderedEquals(<int>[
+          currentViewId+1, currentViewId+2,
+        ]),
+      );
+
+      expect(
+        surfaceViewIds,
         unorderedEquals(<int>[
           currentViewId+1, currentViewId+2,
         ]),
@@ -2160,7 +2180,7 @@ void main() {
           find.descendant(
               of: find.byType(PlatformViewLink),
               matching: find.byType(Focus),
-          )
+          ),
       );
       final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode;
       final Element containerElement = tester.element(find.byKey(containerKey));

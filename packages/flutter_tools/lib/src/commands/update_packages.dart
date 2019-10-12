@@ -253,7 +253,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First we run "pub upgrade" on this generated package:
-        await pubGet(
+        await pub.get(
           context: PubContext.updatePackages,
           directory: tempDir.path,
           upgrade: true,
@@ -264,7 +264,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         // of all the dependencies so that we can figure out the transitive
         // dependencies later. It also remembers which version was selected for
         // each package.
-        await pub(
+        await pub.batch(
           <String>['deps', '--style=compact'],
           context: PubContext.updatePackages,
           directory: tempDir.path,
@@ -324,7 +324,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     int count = 0;
 
     for (Directory dir in packages) {
-      await pubGet(context: PubContext.updatePackages, directory: dir.path, checkLastModified: false);
+      await pub.get(context: PubContext.updatePackages, directory: dir.path, checkLastModified: false);
       count += 1;
     }
 
@@ -1150,7 +1150,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
     printStatus('WARNING: the following packages use hard-coded version constraints:');
     final Set<String> allTransitive = <String>{
       for (PubspecDependency dependency in dependencies)
-        dependency.name
+        dependency.name,
     };
     for (String package in _kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.

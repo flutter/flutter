@@ -119,7 +119,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(textField1));
@@ -174,7 +174,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     // If there were a splash, this would cancel the splash.

@@ -171,7 +171,7 @@ void main() {
             children: children,
             onValueChanged: (int newValue) { },
           ),
-        )
+        ),
     );
 
     // Default padding works.
@@ -191,7 +191,7 @@ void main() {
             children: children,
             onValueChanged: (int newValue) { },
           ),
-        )
+        ),
     );
 
     // Custom padding works.

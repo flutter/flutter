@@ -1097,8 +1097,8 @@ class TextTreeRenderer {
   /// single line style does not provide any meaningful style for how children
   /// should be connected to their parents.
   TextTreeConfiguration _childTextConfiguration(
-      DiagnosticsNode child,
-      TextTreeConfiguration textStyle,
+    DiagnosticsNode child,
+    TextTreeConfiguration textStyle,
   ) {
     final DiagnosticsTreeStyle childStyle = child?.style;
     return (_isSingleLine(childStyle) || childStyle == DiagnosticsTreeStyle.errorProperty) ? textStyle : child.textTreeConfiguration;
@@ -1588,9 +1588,9 @@ abstract class DiagnosticsNode {
   /// The provided `nodes` may be properties or children of the `parent`
   /// [DiagnosticsNode].
   static List<Map<String, Object>> toJsonList(
-      List<DiagnosticsNode> nodes,
-      DiagnosticsNode parent,
-      DiagnosticsSerializationDelegate delegate,
+    List<DiagnosticsNode> nodes,
+    DiagnosticsNode parent,
+    DiagnosticsSerializationDelegate delegate,
   ) {
     bool truncated = false;
     if (nodes == null)
@@ -2435,7 +2435,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 ///
 /// See also:
 ///
-///  * [ObjectFlagSummary], which provides similar functionality but accepts
+///  * [ObjectFlagProperty], which provides similar functionality but accepts
 ///    only one flag, and is preferred if there is only one entry.
 ///  * [IterableProperty], which provides similar functionality describing
 ///    the values a collection of objects.
