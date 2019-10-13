@@ -1099,7 +1099,8 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
     if (widget.tooltip != null) {
       result = Tooltip(
-        message: widget.tooltip,
+        message:
+            widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: result,
       );
     }

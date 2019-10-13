@@ -898,7 +898,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(Tooltip), findsNothing);
+    // The default tooltip is defined as MaterialLocalizations.showMenuTooltip
+    // and it is used when no tooltip is provided.
+    expect(find.byType(Tooltip), findsNWidgets(3));
+    expect(find.byTooltip(const DefaultMaterialLocalizations().showMenuTooltip), findsNWidgets(3));
 
     // Clear the widget tree.
     await tester.pumpWidget(Container(key: UniqueKey()));
