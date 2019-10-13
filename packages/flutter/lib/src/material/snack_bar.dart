@@ -249,7 +249,7 @@ class SnackBar extends StatefulWidget {
   /// Called the first time that the snackbar is visible within a [Scaffold].
   final VoidCallback onVisible;
 
-  // API for Scaffold.addSnackBar():
+  // API for Scaffold.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
   static AnimationController createAnimationController({ @required TickerProvider vsync }) {
@@ -285,11 +285,26 @@ class SnackBar extends StatefulWidget {
 
 
 class _SnackBarState extends State<SnackBar> {
+  bool _wasVisible = false;
+
   @override
   void initState() {
     super.initState();
-    if (widget.onVisible != null) {
-      widget.onVisible();
+    widget.animation.addStatusListener(_onAnimationStatusChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.animation.removeStatusListener(_onAnimationStatusChanged);
+    super.dispose();
+  }
+
+  void _onAnimationStatusChanged(AnimationStatus animationStatus) {
+    if (animationStatus == AnimationStatus.completed) {
+      if (widget.onVisible != null && !_wasVisible) {
+        widget.onVisible();
+        _wasVisible = true;
+      }
     }
   }
 
