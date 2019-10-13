@@ -23,7 +23,10 @@ class PointerRouter {
   /// Routes added reentrantly within [PointerRouter.route] will take effect when
   /// routing the next event.
   void addRoute(int pointer, PointerRoute route, [Matrix4 transform]) {
-    final Map<PointerRoute, Matrix4> routes = _routeMap.putIfAbsent(pointer, () => <PointerRoute, Matrix4>{});
+    final Map<PointerRoute, Matrix4> routes = _routeMap.putIfAbsent(
+      pointer,
+      () => <PointerRoute, Matrix4>{},
+    );
     assert(!routes.containsKey(route));
     routes[route] = transform;
   }
@@ -95,7 +98,11 @@ class PointerRouter {
     final Map<PointerRoute, Matrix4> routes = _routeMap[event.pointer];
     final Map<PointerRoute, Matrix4> copiedGlobalRoutes = Map<PointerRoute, Matrix4>.from(_globalRoutes);
     if (routes != null) {
-      _dispatchEventToRoutes(event, routes, Map<PointerRoute, Matrix4>.from(routes));
+      _dispatchEventToRoutes(
+        event,
+        routes,
+        Map<PointerRoute, Matrix4>.from(routes),
+      );
     }
     _dispatchEventToRoutes(event, _globalRoutes, copiedGlobalRoutes);
   }
