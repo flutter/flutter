@@ -9,7 +9,9 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
@@ -292,6 +294,116 @@ flutter:
         'build',
         'appbundle',
         label: 'r8-failure',
+        parameters: anyNamed('parameters'),
+      )).called(1);
+    },
+    overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      GradleUtils: () => GradleUtils(),
+      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      ProcessManager: () => mockProcessManager,
+      Usage: () => mockUsage,
+    },
+    timeout: allowForCreateFlutterProject);
+
+    testUsingContext('reports when the app isn\'t using AndroidX', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--no-androidx', '--template=app']);
+
+      when(mockProcessManager.start(
+        <String>[
+          gradlew,
+          '-q',
+          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=false',
+          '-Pshrink=true',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          'assembleRelease',
+        ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) {
+        return Future<Process>.value(
+          createMockProcess(
+            exitCode: 0,
+            stdout: '',
+          ),
+        );
+      });
+      // The command throws a [ToolExit] because it expects an AAB in the file system.
+      await expectLater(() async {
+        await runBuildAppBundleCommand(
+          projectPath,
+        );
+      }, throwsToolExit());
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.statusText, contains('[!] Your app isn\'t using AndroidX'));
+      expect(logger.statusText, contains(
+        'To avoid potential build failures, you can quickly migrate your app by '
+        'following the steps on https://goo.gl/CP92wY'
+        )
+      );
+      verify(mockUsage.sendEvent(
+        'build',
+        'appbundle',
+        label: 'app-not-using-android-x',
+        parameters: anyNamed('parameters'),
+      )).called(1);
+    },
+    overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      GradleUtils: () => GradleUtils(),
+      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      ProcessManager: () => mockProcessManager,
+      Usage: () => mockUsage,
+    },
+    timeout: allowForCreateFlutterProject);
+
+    testUsingContext('reports when the app is using AndroidX', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=app']);
+
+      when(mockProcessManager.start(
+        <String>[
+          gradlew,
+          '-q',
+          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=false',
+          '-Pshrink=true',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          'assembleRelease',
+        ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) {
+        return Future<Process>.value(
+          createMockProcess(
+            exitCode: 0,
+            stdout: '',
+          ),
+        );
+      });
+      // The command throws a [ToolExit] because it expects an AAB in the file system.
+      await expectLater(() async {
+        await runBuildAppBundleCommand(
+          projectPath,
+        );
+      }, throwsToolExit());
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.statusText.contains('[!] Your app isn\'t using AndroidX'), isFalse);
+      expect(
+        logger.statusText.contains(
+          'To avoid potential build failures, you can quickly migrate your app by '
+          'following the steps on https://goo.gl/CP92wY'
+        ),
+        isFalse,
+      );
+      verify(mockUsage.sendEvent(
+        'build',
+        'appbundle',
+        label: 'app-using-android-x',
         parameters: anyNamed('parameters'),
       )).called(1);
     },
