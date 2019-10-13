@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -939,7 +940,8 @@ class PopupMenuButton<T> extends StatefulWidget {
        assert(offset != null),
        assert(enabled != null),
        assert(captureInheritedThemes != null),
-       assert(!(child != null && icon != null)), // fails if passed both parameters
+       assert(!(child != null && icon != null),
+           'You can only pass [child] or [icon], not both.'),
        super(key: key);
 
   /// Called when the button is pressed to create the items to show in the menu.
@@ -1080,16 +1082,28 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    return widget.child != null
-      ? InkWell(
-          onTap: widget.enabled ? showButtonMenu : null,
-          child: widget.child,
-        )
-      : IconButton(
-          icon: widget.icon ?? _getIcon(Theme.of(context).platform),
-          padding: widget.padding,
-          tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
-          onPressed: widget.enabled ? showButtonMenu : null,
-        );
+
+    if (widget.child == null)
+      return IconButton(
+        icon: widget.icon ?? _getIcon(Theme.of(context).platform),
+        padding: widget.padding,
+        tooltip:
+            widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+        onPressed: widget.enabled ? showButtonMenu : null,
+      );
+
+    Widget result = InkWell(
+      onTap: widget.enabled ? showButtonMenu : null,
+      child: widget.child,
+    );
+
+    if (widget.tooltip != null) {
+      result = Tooltip(
+        message: widget.tooltip,
+        child: result,
+      );
+    }
+
+    return result;
   }
 }

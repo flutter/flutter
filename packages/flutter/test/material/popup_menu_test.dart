@@ -851,6 +851,109 @@ void main() {
     expect(tester.getTopLeft(find.text('Item 0')).dx, 72);
     expect(tester.getTopLeft(find.text('Item 1')).dx, 72);
   });
+
+  testWidgets('test tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              // Using three different PopupMenuButton's to test
+              // passing child, icon, and neither of those.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                child: const Text('Test text'),
+              ),
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                icon: const Icon(Icons.check),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNothing);
+
+    // Clear the widget tree.
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              // Using three different PopupMenuButton's to test
+              // passing child, icon, and neither of those.
+              PopupMenuButton<int>(
+                tooltip: 'Test tooltip',
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+              PopupMenuButton<int>(
+                tooltip: 'Test tooltip',
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                child: const Text('Test text'),
+              ),
+              PopupMenuButton<int>(
+                tooltip: 'Test tooltip',
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                icon: const Icon(Icons.check),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNWidgets(3));
+    expect(find.byTooltip('Test tooltip'), findsNWidgets(3));
+  });
 }
 
 class TestApp extends StatefulWidget {
