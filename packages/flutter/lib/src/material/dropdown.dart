@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show window;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -906,12 +907,12 @@ class DropdownButton<T> extends StatefulWidget {
 class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
   int _selectedIndex;
   _DropdownRoute<T> _dropdownRoute;
+  Orientation _lastOrientation;
 
   @override
   void initState() {
     super.initState();
     _updateSelectedIndex();
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -921,16 +922,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     super.dispose();
   }
 
-  // Typically called because the device's orientation has changed.
-  // Defined by WidgetsBindingObserver
-  @override
-  void didChangeMetrics() {
-    _removeDropdownRoute();
-  }
-
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
     _dropdownRoute = null;
+    _lastOrientation = null;
   }
 
   @override
@@ -1036,10 +1031,27 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   bool get _enabled => widget.items != null && widget.items.isNotEmpty && widget.onChanged != null;
 
+  Orientation _getOrientation(BuildContext context) {
+    Orientation result = MediaQuery.of(context, nullOk: true)?.orientation;
+    if (result == null) {
+      // If there's no MediaQuery, then use the window aspect to determine
+      // orientation.
+      final Size size = window.physicalSize;
+      result = size.width > size.height ? Orientation.landscape : Orientation.portrait;
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    final Orientation newOrientation = _getOrientation(context);
+    _lastOrientation ??= newOrientation;
+    if (newOrientation != _lastOrientation) {
+      _removeDropdownRoute();
+      _lastOrientation = newOrientation;
+    }
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
