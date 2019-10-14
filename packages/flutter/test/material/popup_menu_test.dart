@@ -852,14 +852,14 @@ void main() {
     expect(tester.getTopLeft(find.text('Item 1')).dx, 72);
   });
 
-  testWidgets('PopupMenuButton takes only child or only icon', (WidgetTester tester) async {
+  test('PopupMenuButton takes only child or only icon', () {
     // [PopupMenuButton] should assert that either child == null, icon == null,
     // or that both are null because only one of the two can be displayed/used.
     expect(PopupMenuButton<int>(
       itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
       child: Container(),
       icon: const Icon(Icons.error),
-    ), throwsA(const TypeMatcher<AssertionError>()));
+    ), throwsAssertionError);
   });
 
   testWidgets('PopupMenuButton default tooltip', (WidgetTester tester) async {
