@@ -426,7 +426,8 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/ruler.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/unicode_range.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/word_break_properties.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/word_breaker.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/text_editing.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/text_editing/input_type.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/text_editing/text_editing.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/util.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/validators.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/vector_math.dart

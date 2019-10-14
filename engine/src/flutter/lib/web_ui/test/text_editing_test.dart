@@ -18,22 +18,14 @@ TextEditingElement editingElement;
 EditingState lastEditingState;
 
 final InputConfiguration singlelineConfig =
-    InputConfiguration(inputType: InputType.text);
-final Map<String, dynamic> flutterSinglelineConfig = <String, dynamic>{
-  'inputType': <String, String>{
-    'name': 'TextInputType.text',
-  },
-  'obscureText': false,
-};
+    InputConfiguration(inputType: EngineInputType.text);
+final Map<String, dynamic> flutterSinglelineConfig =
+    createFlutterConfig('text');
 
 final InputConfiguration multilineConfig =
-    InputConfiguration(inputType: InputType.multiline);
-final Map<String, dynamic> flutterMultilineConfig = <String, dynamic>{
-  'inputType': <String, String>{
-    'name': 'TextInputType.multiline',
-  },
-  'obscureText': false,
-};
+    InputConfiguration(inputType: EngineInputType.multiline);
+final Map<String, dynamic> flutterMultilineConfig =
+    createFlutterConfig('multiline');
 
 void trackEditingState(EditingState editingState) {
   lastEditingState = editingState;
@@ -315,6 +307,30 @@ void main() {
     HybridTextEditing textEditing;
     final PlatformMessagesSpy spy = PlatformMessagesSpy();
 
+    int clientId = 0;
+    void showKeyboard({String inputType}) {
+      final MethodCall setClient = MethodCall(
+        'TextInput.setClient',
+        <dynamic>[++clientId, createFlutterConfig(inputType)],
+      );
+      textEditing.handleTextInput(codec.encodeMethodCall(setClient));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      textEditing.handleTextInput(codec.encodeMethodCall(show));
+    }
+
+    void hideKeyboard() {
+      const MethodCall hide = MethodCall('TextInput.hide');
+      textEditing.handleTextInput(codec.encodeMethodCall(hide));
+
+      const MethodCall clearClient = MethodCall('TextInput.clearClient');
+      textEditing.handleTextInput(codec.encodeMethodCall(clearClient));
+    }
+
+    String getEditingInputMode() {
+      return textEditing.editingElement.domElement.getAttribute('inputmode');
+    }
+
     setUp(() {
       textEditing = HybridTextEditing();
       spy.activate();
@@ -422,6 +438,8 @@ void main() {
 
       // Confirm that [HybridTextEditing] didn't send any messages.
       expect(spy.messages, isEmpty);
+
+      hideKeyboard();
     });
 
     test('setClient, setEditingState, show, setEditingState, clearClient', () {
@@ -546,11 +564,7 @@ void main() {
       expect(
           textEditing.editingElement.domElement.style.font, '12px sans-serif');
 
-      const MethodCall clearClient = MethodCall('TextInput.clearClient');
-      textEditing.handleTextInput(codec.encodeMethodCall(clearClient));
-
-      // Confirm that [HybridTextEditing] didn't send any messages.
-      expect(spy.messages, isEmpty);
+      hideKeyboard();
     });
 
     test(
@@ -587,11 +601,7 @@ void main() {
       checkInputEditingState(
           textEditing.editingElement.domElement, 'xyz', 0, 0);
 
-      const MethodCall clearClient = MethodCall('TextInput.clearClient');
-      textEditing.handleTextInput(codec.encodeMethodCall(clearClient));
-
-      // Confirm that [HybridTextEditing] didn't send any messages.
-      expect(spy.messages, isEmpty);
+      hideKeyboard();
     });
 
     test('Syncs the editing state back to Flutter', () {
@@ -650,8 +660,7 @@ void main() {
         ],
       );
 
-      const MethodCall clearClient = MethodCall('TextInput.clearClient');
-      textEditing.handleTextInput(codec.encodeMethodCall(clearClient));
+      hideKeyboard();
     });
 
     test('Multi-line mode also works', () {
@@ -710,6 +719,52 @@ void main() {
 
       // Confirm that [HybridTextEditing] didn't send any more messages.
       expect(spy.messages, isEmpty);
+    });
+
+    test('sets correct input type in Android', () {
+      debugOperatingSystemOverride = OperatingSystem.android;
+
+      showKeyboard(inputType: 'text');
+      expect(getEditingInputMode(), 'text');
+
+      showKeyboard(inputType: 'number');
+      expect(getEditingInputMode(), 'numeric');
+
+      showKeyboard(inputType: 'phone');
+      expect(getEditingInputMode(), 'tel');
+
+      showKeyboard(inputType: 'emailAddress');
+      expect(getEditingInputMode(), 'email');
+
+      showKeyboard(inputType: 'url');
+      expect(getEditingInputMode(), 'url');
+
+      hideKeyboard();
+
+      debugOperatingSystemOverride = null;
+    });
+
+    test('sets correct input type in iOS', () {
+      debugOperatingSystemOverride = OperatingSystem.iOs;
+
+      showKeyboard(inputType: 'text');
+      expect(getEditingInputMode(), 'text');
+
+      showKeyboard(inputType: 'number');
+      expect(getEditingInputMode(), 'numeric');
+
+      showKeyboard(inputType: 'phone');
+      expect(getEditingInputMode(), 'tel');
+
+      showKeyboard(inputType: 'emailAddress');
+      expect(getEditingInputMode(), 'email');
+
+      showKeyboard(inputType: 'url');
+      expect(getEditingInputMode(), 'url');
+
+      hideKeyboard();
+
+      debugOperatingSystemOverride = null;
     });
   });
 
@@ -849,4 +904,16 @@ class PlatformMessagesSpy {
     messages.clear();
     ui.window.onPlatformMessage = _backup;
   }
+}
+
+Map<String, dynamic> createFlutterConfig(
+  String inputType, {
+  bool obscureText = false,
+}) {
+  return <String, dynamic>{
+    'inputType': <String, String>{
+      'name': 'TextInputType.$inputType',
+    },
+    'obscureText': obscureText,
+  };
 }

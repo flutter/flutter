@@ -163,31 +163,6 @@ class EditingState {
   }
 }
 
-/// Various types of inputs used in text fields.
-///
-/// These types are coming from Flutter's [TextInputType]. Currently, we don't
-/// support all the types. We fallback to [InputType.text] when Flutter sends
-/// a type that isn't supported.
-// TODO(flutter_web): Support more types.
-enum InputType {
-  /// Single-line plain text.
-  text,
-
-  /// Multi-line text.
-  multiline,
-}
-
-InputType _getInputTypeFromString(String inputType) {
-  switch (inputType) {
-    case 'TextInputType.multiline':
-      return InputType.multiline;
-
-    case 'TextInputType.text':
-    default:
-      return InputType.text;
-  }
-}
-
 /// Controls the appearance of the input control being edited.
 ///
 /// For example, [inputType] determines whether we should use `<input>` or
@@ -201,12 +176,12 @@ class InputConfiguration {
   });
 
   InputConfiguration.fromFlutter(Map<String, dynamic> flutterInputConfiguration)
-      : inputType = _getInputTypeFromString(
+      : inputType = EngineInputType.fromName(
             flutterInputConfiguration['inputType']['name']),
         obscureText = flutterInputConfiguration['obscureText'];
 
   /// The type of information being edited in the input control.
-  final InputType inputType;
+  final EngineInputType inputType;
 
   /// Whether to hide the text being edited.
   final bool obscureText;
@@ -341,6 +316,7 @@ class TextEditingElement {
       _subscriptions.add(domElement.onKeyUp.listen((event) {
         _handleChange(event);
       }));
+
       /// In Firefox the context menu item "Select All" does not work without
       /// listening to onSelect. On the other browsers onSelectionChange is
       /// enough for covering "Select All" functionality.
@@ -370,19 +346,10 @@ class TextEditingElement {
   }
 
   void _initDomElement(InputConfiguration inputConfig) {
-    switch (inputConfig.inputType) {
-      case InputType.text:
-        domElement = owner.createInputElement();
-        break;
-
-      case InputType.multiline:
-        domElement = owner.createTextAreaElement();
-        break;
-
-      default:
-        throw UnsupportedError(
-            'Unsupported input type: ${inputConfig.inputType}');
-    }
+    domElement = inputConfig.inputType.createDomElement();
+    inputConfig.inputType.configureDomElement(domElement);
+    _setStaticStyleAttributes(domElement);
+    owner._setDynamicStyleAttributes(domElement);
     domRenderer.glassPaneElement.append(domElement);
   }
 
@@ -756,20 +723,6 @@ class HybridTextEditing {
   /// See [TextEditingElement._delayBeforePositioning].
   void setStyleOutsideOfScreen(html.HtmlElement domElement) {
     domElement.style.transform = 'translate(-9999px, -9999px)';
-  }
-
-  html.InputElement createInputElement() {
-    final html.InputElement input = html.InputElement();
-    _setStaticStyleAttributes(input);
-    _setDynamicStyleAttributes(input);
-    return input;
-  }
-
-  html.TextAreaElement createTextAreaElement() {
-    final html.TextAreaElement textarea = html.TextAreaElement();
-    _setStaticStyleAttributes(textarea);
-    _setDynamicStyleAttributes(textarea);
-    return textarea;
   }
 }
 
