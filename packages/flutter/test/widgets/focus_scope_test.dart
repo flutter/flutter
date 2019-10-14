@@ -504,6 +504,7 @@ void main() {
 
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
       expect(FocusScope.of(keyA.currentContext), equals(childFocusScope));
+      expect(Focus.of(keyA.currentContext, scopeOk: true), equals(childFocusScope));
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
       await tester.pumpAndSettle();

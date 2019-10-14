@@ -262,9 +262,10 @@ class Focus extends StatefulWidget {
   /// [nullOk].
   ///
   /// The [context] and [nullOk] arguments must not be null.
-  static FocusNode of(BuildContext context, { bool nullOk = false }) {
+  static FocusNode of(BuildContext context, { bool nullOk = false, bool scopeOk = false }) {
     assert(context != null);
     assert(nullOk != null);
+    assert(scopeOk != null);
     final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
     final FocusNode node = marker?.notifier;
     if (node == null) {
@@ -280,7 +281,7 @@ class Focus extends StatefulWidget {
       }
       return null;
     }
-    if (node is FocusScopeNode) {
+    if (!scopeOk && node is FocusScopeNode) {
       if (!nullOk) {
         throw FlutterError(
             'Focus.of() was called with a context that does not contain a Focus between the given '
