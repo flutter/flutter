@@ -4,6 +4,7 @@
 
 import("//build/fuchsia/sdk.gni")
 import("//third_party/dart/sdk/lib/_http/http_sources.gni")
+import("//third_party/dart/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
 import("//third_party/dart/sdk/lib/async/async_sources.gni")
 import("//third_party/dart/sdk/lib/collection/collection_sources.gni")
 import("//third_party/dart/sdk/lib/convert/convert_sources.gni")
@@ -81,6 +82,14 @@ copy("_http") {
   sources = rebase_path(http_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/_http/{{source_file_part}}",
+  ]
+}
+
+copy("_interceptors") {
+  lib_path = rebase_path("_internal/js_runtime", "", dart_sdk_lib_path)
+  sources = rebase_path(interceptors_sdk_sources, "", lib_path)
+  outputs = [
+    "$root_gen_dir/dart-pkg/sky_engine/lib/_interceptors/{{source_file_part}}",
   ]
 }
 
@@ -175,6 +184,7 @@ copy("copy_dart_ui") {
 group("copy_dart_sdk") {
   deps = [
     ":_http",
+    ":_interceptors",
     ":async",
     ":collection",
     ":convert",
