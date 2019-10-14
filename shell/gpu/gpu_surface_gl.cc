@@ -50,8 +50,8 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate,
   if (PersistentCache::cache_sksl()) {
     FML_LOG(INFO) << "Cache SkSL";
     options.fShaderCacheStrategy = GrContextOptions::ShaderCacheStrategy::kSkSL;
-    PersistentCache::MarkStrategySet();
   }
+  PersistentCache::MarkStrategySet();
   options.fPersistentCache = PersistentCache::GetCacheForProcess();
 
   options.fAvoidStencilBuffers = true;
