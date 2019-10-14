@@ -555,23 +555,23 @@ void main() {
         description,
         equalsIgnoringHashCodes(
           'FocusManager#00000\n'
-          ' │ primaryFocus: FocusNode#00000\n'
+          ' │ primaryFocus: FocusNode#00000(Child 4)\n'
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← [root]\n'
           ' │\n'
-          ' └─rootScope: FocusScopeNode#00000\n'
+          ' └─rootScope: FocusScopeNode#00000(Root Focus Scope)\n'
           '   │ FOCUSED\n'
           '   │ debugLabel: "Root Focus Scope"\n'
           '   │ focusedChildren: FocusScopeNode#00000\n'
           '   │\n'
-          '   ├─Child 1: FocusScopeNode#00000\n'
+          '   ├─Child 1: FocusScopeNode#00000(Scope 1)\n'
           '   │ │ context: Container-[GlobalKey#00000]\n'
           '   │ │ debugLabel: "Scope 1"\n'
           '   │ │\n'
-          '   │ └─Child 1: FocusNode#00000\n'
+          '   │ └─Child 1: FocusNode#00000(Parent 1)\n'
           '   │   │ context: Container-[GlobalKey#00000]\n'
           '   │   │ debugLabel: "Parent 1"\n'
           '   │   │\n'
-          '   │   ├─Child 1: FocusNode#00000\n'
+          '   │   ├─Child 1: FocusNode#00000(Child 1)\n'
           '   │   │   context: Container-[GlobalKey#00000]\n'
           '   │   │   debugLabel: "Child 1"\n'
           '   │   │\n'
@@ -583,20 +583,45 @@ void main() {
           '     │ FOCUSED\n'
           '     │ focusedChildren: FocusNode#00000(Child 4)\n'
           '     │\n'
-          '     └─Child 1: FocusNode#00000\n'
+          '     └─Child 1: FocusNode#00000(Parent 2)\n'
           '       │ context: Container-[GlobalKey#00000]\n'
           '       │ FOCUSED\n'
           '       │ debugLabel: "Parent 2"\n'
           '       │\n'
-          '       ├─Child 1: FocusNode#00000\n'
+          '       ├─Child 1: FocusNode#00000(Child 3)\n'
           '       │   context: Container-[GlobalKey#00000]\n'
           '       │   debugLabel: "Child 3"\n'
           '       │\n'
-          '       └─Child 2: FocusNode#00000\n'
+          '       └─Child 2: FocusNode#00000(Child 4)\n'
           '           context: Container-[GlobalKey#00000]\n'
           '           FOCUSED\n'
           '           debugLabel: "Child 4"\n'
         ));
     });
+  });
+  testWidgets("Doesn't lose focused child when reparenting if the nearestScope doesn't change.", (WidgetTester tester) async {
+    final BuildContext context = await setupWidget(tester);
+    final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+    final FocusScopeNode parent2 = FocusScopeNode(debugLabel: 'parent2');
+    final FocusAttachment parent1Attachment = parent1.attach(context);
+    final FocusAttachment parent2Attachment = parent2.attach(context);
+    final FocusNode child1 = FocusNode(debugLabel: 'child1');
+    final FocusAttachment child1Attachment = child1.attach(context);
+    final FocusNode child2 = FocusNode(debugLabel: 'child2');
+    final FocusAttachment child2Attachment = child2.attach(context);
+    parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+    child1Attachment.reparent(parent: parent1);
+    child2Attachment.reparent(parent: child1);
+    parent1.autofocus(child2);
+    await tester.pump();
+    parent2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+    parent2.requestFocus();
+    await tester.pump();
+    expect(parent1.focusedChild, equals(child2));
+    child2Attachment.reparent(parent: parent1);
+    expect(parent1.focusedChild, equals(child2));
+    parent1.requestFocus();
+    await tester.pump();
+    expect(parent1.focusedChild, equals(child2));
   });
 }
