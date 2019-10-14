@@ -7,7 +7,6 @@ import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'features.dart';
 
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
