@@ -1774,73 +1774,71 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final Color resolvedLabelColor =  MaterialStateProperty.resolveAs<Color>(effectiveLabelStyle?.color, _states);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle?.copyWith(color: resolvedLabelColor);
 
-    Widget result = Focus(
-      onFocusChange: _handleFocus,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      canRequestFocus: widget.isEnabled,
-      child: Material(
-        elevation: isTapping ? pressElevation : elevation,
-        shadowColor: widget.selected ? selectedShadowColor : shadowColor,
-        animationDuration: pressedAnimationDuration,
-        shape: shape,
-        clipBehavior: widget.clipBehavior,
-        child: InkWell(
-          onTap: canTap ? _handleTap : null,
-          onTapDown: canTap ? _handleTapDown : null,
-          onTapCancel: canTap ? _handleTapCancel : null,
-          onHover: canTap ? _handleHover : null,
-          customBorder: shape,
-          child: AnimatedBuilder(
-            animation: Listenable.merge(<Listenable>[selectController, enableController]),
-            builder: (BuildContext context, Widget child) {
-              return Container(
-                decoration: ShapeDecoration(
-                  shape: shape,
-                  color: getBackgroundColor(chipTheme),
-                ),
-                child: child,
-              );
-            },
-            child: _wrapWithTooltip(
-              widget.tooltip,
-              widget.onPressed,
-              _ChipRenderWidget(
-                theme: _ChipRenderTheme(
-                  label: DefaultTextStyle(
-                    overflow: TextOverflow.fade,
-                    textAlign: TextAlign.start,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: resolvedLabelStyle,
-                    child: widget.label,
-                  ),
-                  avatar: AnimatedSwitcher(
-                    child: widget.avatar,
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  deleteIcon: AnimatedSwitcher(
-                    child: _buildDeleteIcon(context, theme, chipTheme),
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  brightness: chipTheme.brightness,
-                  padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
-                  labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
-                  showAvatar: hasAvatar,
-                  showCheckmark: showCheckmark,
-                  checkmarkColor: checkmarkColor,
-                  canTapBody: canTap,
-                ),
-                value: widget.selected,
-                checkmarkAnimation: checkmarkAnimation,
-                enableAnimation: enableAnimation,
-                avatarDrawerAnimation: avatarDrawerAnimation,
-                deleteDrawerAnimation: deleteDrawerAnimation,
-                isEnabled: widget.isEnabled,
-                avatarBorder: widget.avatarBorder,
+    Widget result = Material(
+      elevation: isTapping ? pressElevation : elevation,
+      shadowColor: widget.selected ? selectedShadowColor : shadowColor,
+      animationDuration: pressedAnimationDuration,
+      shape: shape,
+      clipBehavior: widget.clipBehavior,
+      child: InkWell(
+        onFocusChange: _handleFocus,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        canRequestFocus: widget.isEnabled,
+        onTap: canTap ? _handleTap : null,
+        onTapDown: canTap ? _handleTapDown : null,
+        onTapCancel: canTap ? _handleTapCancel : null,
+        onHover: canTap ? _handleHover : null,
+        customBorder: shape,
+        child: AnimatedBuilder(
+          animation: Listenable.merge(<Listenable>[selectController, enableController]),
+          builder: (BuildContext context, Widget child) {
+            return Container(
+              decoration: ShapeDecoration(
+                shape: shape,
+                color: getBackgroundColor(chipTheme),
               ),
+              child: child,
+            );
+          },
+          child: _wrapWithTooltip(
+            widget.tooltip,
+            widget.onPressed,
+            _ChipRenderWidget(
+              theme: _ChipRenderTheme(
+                label: DefaultTextStyle(
+                  overflow: TextOverflow.fade,
+                  textAlign: TextAlign.start,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: resolvedLabelStyle,
+                  child: widget.label,
+                ),
+                avatar: AnimatedSwitcher(
+                  child: widget.avatar,
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                deleteIcon: AnimatedSwitcher(
+                  child: _buildDeleteIcon(context, theme, chipTheme),
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                brightness: chipTheme.brightness,
+                padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
+                labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
+                showAvatar: hasAvatar,
+                showCheckmark: showCheckmark,
+                checkmarkColor: checkmarkColor,
+                canTapBody: canTap,
+              ),
+              value: widget.selected,
+              checkmarkAnimation: checkmarkAnimation,
+              enableAnimation: enableAnimation,
+              avatarDrawerAnimation: avatarDrawerAnimation,
+              deleteDrawerAnimation: deleteDrawerAnimation,
+              isEnabled: widget.isEnabled,
+              avatarBorder: widget.avatarBorder,
             ),
           ),
         ),

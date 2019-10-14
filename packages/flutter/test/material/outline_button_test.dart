@@ -666,9 +666,10 @@ void main() {
             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
-              SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
               SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocusable,
             ],
           ),
         ],

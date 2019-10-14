@@ -91,7 +91,7 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
       return false;
     }
     final KeySet<T> typedOther = other;
-    return _keys.length == typedOther._keys.length && _keys.containsAll(typedOther._keys);
+    return setEquals<T>(_keys, typedOther._keys);
   }
 
   @override
@@ -169,10 +169,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
   Map<LogicalKeySet, Intent> get shortcuts => _shortcuts;
   Map<LogicalKeySet, Intent> _shortcuts;
   set shortcuts(Map<LogicalKeySet, Intent> value) {
-    if (_shortcuts == value) {
-      return;
-    }
-    if (_shortcuts != value) {
+    if (!mapEquals<LogicalKeySet, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       notifyListeners();
     }
@@ -259,6 +256,10 @@ class Shortcuts extends StatefulWidget {
   final ShortcutManager manager;
 
   /// The map of shortcuts that the [manager] will be given to manage.
+  ///
+  /// For performance reasons, it is recommended that a pre-built map is passed
+  /// in here (e.g. a final variable from your widget class) instead of defining
+  /// it inline in the build function.
   final Map<LogicalKeySet, Intent> shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
@@ -324,15 +325,15 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   void didUpdateWidget(Shortcuts oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.manager != oldWidget.manager || widget.shortcuts != oldWidget.shortcuts) {
+    if (widget.manager != oldWidget.manager) {
       if (widget.manager != null) {
         _internalManager?.dispose();
         _internalManager = null;
       } else {
         _internalManager ??= ShortcutManager();
       }
-      manager.shortcuts = widget.shortcuts;
     }
+    manager.shortcuts = widget.shortcuts;
   }
 
   bool _handleOnKey(FocusNode node, RawKeyEvent event) {
@@ -345,7 +346,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      debugLabel: describeIdentity(widget),
+      debugLabel: '$Shortcuts',
       canRequestFocus: false,
       onKey: _handleOnKey,
       child: _ShortcutsMarker(

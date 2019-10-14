@@ -124,9 +124,12 @@ abstract class WidgetsBindingObserver {
   /// }
   ///
   /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
+  ///   Size _lastSize;
+  ///
   ///   @override
   ///   void initState() {
   ///     super.initState();
+  ///     _lastSize = WidgetsBinding.instance.window.physicalSize;
   ///     WidgetsBinding.instance.addObserver(this);
   ///   }
   ///
@@ -135,8 +138,6 @@ abstract class WidgetsBindingObserver {
   ///     WidgetsBinding.instance.removeObserver(this);
   ///     super.dispose();
   ///   }
-  ///
-  ///   Size _lastSize;
   ///
   ///   @override
   ///   void didChangeMetrics() {
