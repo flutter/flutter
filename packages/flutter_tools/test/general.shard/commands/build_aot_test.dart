@@ -41,6 +41,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
     FileSystem: () => memoryFileSystem,
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 
   testUsingContext('build aot prints error if Clang version invalid', () async {

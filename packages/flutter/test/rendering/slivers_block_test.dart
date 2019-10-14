@@ -98,10 +98,10 @@ class ViewportOffsetSpy extends ViewportOffset {
 
   @override
   Future<void> animateTo(
-      double to, {
-        @required Duration duration,
-        @required Curve curve,
-      }) async {
+    double to, {
+    @required Duration duration,
+    @required Curve curve,
+  }) async {
     // Do nothing, not required in test.
   }
 

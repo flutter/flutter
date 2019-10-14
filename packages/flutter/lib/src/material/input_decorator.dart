@@ -283,6 +283,7 @@ class _HelperError extends StatefulWidget {
     this.textAlign,
     this.helperText,
     this.helperStyle,
+    this.helperMaxLines,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -291,6 +292,7 @@ class _HelperError extends StatefulWidget {
   final TextAlign textAlign;
   final String helperText;
   final TextStyle helperStyle;
+  final int helperMaxLines;
   final String errorText;
   final TextStyle errorStyle;
   final int errorMaxLines;
@@ -372,6 +374,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
           style: widget.helperStyle,
           textAlign: widget.textAlign,
           overflow: TextOverflow.ellipsis,
+          maxLines: widget.helperMaxLines,
         ),
       ),
     );
@@ -2184,6 +2187,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       textAlign: textAlign,
       helperText: decoration.helperText,
       helperStyle: _getHelperStyle(themeData),
+      helperMaxLines: decoration.helperMaxLines,
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData),
       errorMaxLines: decoration.errorMaxLines,
@@ -2304,6 +2308,7 @@ class InputDecoration {
     this.labelStyle,
     this.helperText,
     this.helperStyle,
+    this.helperMaxLines,
     this.hintText,
     this.hintStyle,
     this.hintMaxLines,
@@ -2363,6 +2368,7 @@ class InputDecoration {
        labelStyle = null,
        helperText = null,
        helperStyle = null,
+       helperMaxLines = null,
        hintMaxLines = null,
        errorText = null,
        errorStyle = null,
@@ -2436,6 +2442,19 @@ class InputDecoration {
   /// The style to use for the [helperText].
   final TextStyle helperStyle;
 
+  /// The maximum number of lines the [helperText] can occupy.
+  ///
+  /// Defaults to null, which means that the [helperText] will be limited
+  /// to a single line with [TextOverflow.ellipsis].
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the helper.
+  ///
+  /// See also:
+  ///
+  ///  * [errorMaxLines], the equivalent but for the [errorText].
+  final int helperMaxLines;
+
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the input [child] (i.e., at the same location on the
@@ -2485,6 +2504,10 @@ class InputDecoration {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
+  ///
+  /// See also:
+  ///
+  ///  * [helperMaxLines], the equivalent but for the [helperText].
   final int errorMaxLines;
 
   /// Whether the label floats on focus.
@@ -2939,6 +2962,7 @@ class InputDecoration {
     TextStyle labelStyle,
     String helperText,
     TextStyle helperStyle,
+    int helperMaxLines,
     String hintText,
     TextStyle hintStyle,
     int hintMaxLines,
@@ -2979,6 +3003,7 @@ class InputDecoration {
       labelStyle: labelStyle ?? this.labelStyle,
       helperText: helperText ?? this.helperText,
       helperStyle: helperStyle ?? this.helperStyle,
+      helperMaxLines : helperMaxLines ?? this.helperMaxLines,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
@@ -3024,6 +3049,7 @@ class InputDecoration {
     return copyWith(
       labelStyle: labelStyle ?? theme.labelStyle,
       helperStyle: helperStyle ?? theme.helperStyle,
+      helperMaxLines : helperMaxLines ?? theme.helperMaxLines,
       hintStyle: hintStyle ?? theme.hintStyle,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
@@ -3059,6 +3085,7 @@ class InputDecoration {
         && typedOther.labelStyle == labelStyle
         && typedOther.helperText == helperText
         && typedOther.helperStyle == helperStyle
+        && typedOther.helperMaxLines == helperMaxLines
         && typedOther.hintText == hintText
         && typedOther.hintStyle == hintStyle
         && typedOther.hintMaxLines == hintMaxLines
@@ -3103,6 +3130,7 @@ class InputDecoration {
       labelStyle,
       helperText,
       helperStyle,
+      helperMaxLines,
       hintText,
       hintStyle,
       hintMaxLines,
@@ -3149,6 +3177,7 @@ class InputDecoration {
       if (icon != null) 'icon: $icon',
       if (labelText != null) 'labelText: "$labelText"',
       if (helperText != null) 'helperText: "$helperText"',
+      if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
       if (errorText != null) 'errorText: "$errorText"',
@@ -3206,6 +3235,7 @@ class InputDecorationTheme extends Diagnosticable {
   const InputDecorationTheme({
     this.labelStyle,
     this.helperStyle,
+    this.helperMaxLines,
     this.hintStyle,
     this.errorStyle,
     this.errorMaxLines,
@@ -3245,6 +3275,19 @@ class InputDecorationTheme extends Diagnosticable {
   /// The style to use for [InputDecoration.helperText].
   final TextStyle helperStyle;
 
+  /// The maximum number of lines the [helperText] can occupy.
+  ///
+  /// Defaults to null, which means that the [helperText] will be limited
+  /// to a single line with [TextOverflow.ellipsis].
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the helper.
+  ///
+  /// See also:
+  ///
+  ///  * [errorMaxLines], the equivalent but for the [errorText].
+  final int helperMaxLines;
+
   /// The style to use for the [InputDecoration.hintText].
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
@@ -3268,6 +3311,10 @@ class InputDecorationTheme extends Diagnosticable {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
+  ///
+  /// See also:
+  ///
+  ///  * [helperMaxLines], the equivalent but for the [helperText].
   final int errorMaxLines;
 
   /// Whether the placeholder text floats to become a label on focus.
@@ -3522,6 +3569,7 @@ class InputDecorationTheme extends Diagnosticable {
   InputDecorationTheme copyWith({
     TextStyle labelStyle,
     TextStyle helperStyle,
+    int helperMaxLines,
     TextStyle hintStyle,
     TextStyle errorStyle,
     int errorMaxLines,
@@ -3547,6 +3595,7 @@ class InputDecorationTheme extends Diagnosticable {
     return InputDecorationTheme(
       labelStyle: labelStyle ?? this.labelStyle,
       helperStyle: helperStyle ?? this.helperStyle,
+      helperMaxLines: helperMaxLines ?? this.helperMaxLines,
       hintStyle: hintStyle ?? this.hintStyle,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
@@ -3576,6 +3625,7 @@ class InputDecorationTheme extends Diagnosticable {
     return hashList(<dynamic>[
       labelStyle,
       helperStyle,
+      helperMaxLines,
       hintStyle,
       errorStyle,
       errorMaxLines,
@@ -3609,6 +3659,7 @@ class InputDecorationTheme extends Diagnosticable {
     final InputDecorationTheme typedOther = other;
     return typedOther.labelStyle == labelStyle
         && typedOther.helperStyle == helperStyle
+        && typedOther.helperMaxLines == helperMaxLines
         && typedOther.hintStyle == hintStyle
         && typedOther.errorStyle == errorStyle
         && typedOther.errorMaxLines == errorMaxLines
@@ -3638,6 +3689,7 @@ class InputDecorationTheme extends Diagnosticable {
     const InputDecorationTheme defaultTheme = InputDecorationTheme();
     properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultTheme.labelStyle));
     properties.add(DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
+    properties.add(IntProperty('helperMaxLines', helperMaxLines, defaultValue: defaultTheme.helperMaxLines));
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));

@@ -745,6 +745,20 @@ Future<void> _buildGradleProjectV2(
     );
   }
 
+  final String exclamationMark = terminal.color('[!]', TerminalColor.red);
+  final bool usesAndroidX = isAppUsingAndroidX(flutterProject.android.hostAppGradleRoot);
+
+  if (usesAndroidX) {
+    BuildEvent('app-using-android-x').send();
+  } else if (!usesAndroidX) {
+    BuildEvent('app-not-using-android-x').send();
+    printStatus('$exclamationMark Your app isn\'t using AndroidX.', emphasis: true);
+    printStatus(
+      'To avoid potential build failures, you can quickly migrate your app '
+      'by following the steps on https://goo.gl/CP92wY.',
+      indent: 4,
+    );
+  }
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
 
   String assembleTask;
@@ -820,9 +834,8 @@ Future<void> _buildGradleProjectV2(
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
       environment: gradleEnv,
-      // TODO(mklim): if AndroidX warnings are no longer required, this
-      // mapFunction and all its associated variabled can be replaced with just
-      // `filter: ndkMessagefilter`.
+      // TODO(mklim): if AndroidX warnings are no longer required, we can remove
+      // them from this map function.
       mapFunction: (String line) {
         final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
         if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
@@ -848,14 +861,12 @@ Future<void> _buildGradleProjectV2(
 
   if (exitCode != 0) {
     if (potentialR8Failure) {
-      final String exclamationMark = terminal.color('[!]', TerminalColor.red);
       printStatus('$exclamationMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
       printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
       printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
       BuildEvent('r8-failure').send();
     } else if (potentialAndroidXFailure) {
       final bool hasPlugins = flutterProject.flutterPluginsFile.existsSync();
-      final bool usesAndroidX = isAppUsingAndroidX(flutterProject.android.hostAppGradleRoot);
       if (!hasPlugins) {
         // If the app doesn't use any plugin, then it's unclear where the incompatibility is coming from.
         BuildEvent('android-x-failure', eventError: 'app-not-using-plugins').send();
@@ -940,7 +951,6 @@ Future<void> _buildGradleProjectV2(
 /// Returns [true] if the current app uses AndroidX.
 // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
 // Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
-@visibleForTesting
 bool isAppUsingAndroidX(Directory androidDirectory) {
   final File properties = androidDirectory.childFile('gradle.properties');
   if (!properties.existsSync()) {

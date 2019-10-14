@@ -39,6 +39,7 @@ void main() {
       expect(app.packagesFile.path, fs.path.join(projectPath, '.packages'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -108,8 +109,8 @@ void main() {
       final Map<Type, Generator> startOverrides = <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: 'linux'),
         FileSystem: () => fs,
-        Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         ProcessManager: () => mockProcessManager,
+        Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         KernelCompilerFactory: () => FakeKernelCompilerFactory(mockKernelCompiler),
         Artifacts: () => mockArtifacts,
       };
@@ -169,6 +170,7 @@ Hello!
           mainPath: anyNamed('mainPath'),
           outputFilePath: anyNamed('outputFilePath'),
           depFilePath: anyNamed('depFilePath'),
+          enableAsserts: anyNamed('enableAsserts'),
           trackWidgetCreation: anyNamed('trackWidgetCreation'),
           extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
           fileSystemRoots: anyNamed('fileSystemRoots'),

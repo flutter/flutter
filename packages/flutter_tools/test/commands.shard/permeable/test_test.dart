@@ -65,6 +65,12 @@ void main() {
       return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
+    testUsingContext('report correct created widget caused the error', () async {
+      Cache.flutterRoot = '../..';
+      return _testFile('print_correct_local_widget', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--track-widget-creation']);
+    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+
     testUsingContext('can load assets within its own package', () async {
       Cache.flutterRoot = '../..';
       return _testFile('package_assets', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
@@ -128,12 +134,12 @@ void main() {
 }
 
 Future<void> _testFile(
-    String testName,
-    String workingDirectory,
-    String testDirectory, {
-      Matcher exitCode,
-      List<String> extraArguments = const <String>[],
-    }) async {
+  String testName,
+  String workingDirectory,
+  String testDirectory, {
+  Matcher exitCode,
+  List<String> extraArguments = const <String>[],
+}) async {
   exitCode ??= isNonZero;
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);

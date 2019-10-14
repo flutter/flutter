@@ -128,21 +128,17 @@ void main() {
         ..translate(x: 0.0, y: 0.0)
         ..translate(x: tapDownOffset.dx, y: tapDownOffset.dy)
         ..something((Symbol method, List<dynamic> arguments) {
-          if (method != #drawCircle) {
+          if (method != #drawCircle)
             return false;
-          }
           final Offset center = arguments[0];
           final double radius = arguments[1];
           final Paint paint = arguments[2];
-          if (offsetsAreClose(center, expectedCenter) &&
-              radiiAreClose(radius, expectedRadius) &&
-              paint.color.alpha == expectedAlpha) {
+          if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == expectedAlpha)
             return true;
-          }
           throw '''
             Expected: center == $expectedCenter, radius == $expectedRadius, alpha == $expectedAlpha
             Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
-        },
+        }
       );
     }
 

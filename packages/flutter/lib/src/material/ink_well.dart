@@ -485,12 +485,24 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   InteractiveInkFeature _currentSplash;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight> _highlights = <_HighlightType, InkHighlight>{};
+  Map<LocalKey, ActionFactory> _actionMap;
 
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
 
   @override
   void initState() {
     super.initState();
+    _actionMap = <LocalKey, ActionFactory>{
+      ActivateAction.key: () {
+        return CallbackAction(
+          ActivateAction.key,
+          onInvoke: (FocusNode node, Intent intent) {
+            _startSplash(context: node.context);
+            _handleTap(node.context);
+          },
+        );
+      },
+    };
     WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
@@ -757,17 +769,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
     return Actions(
-      actions: <LocalKey, ActionFactory>{
-        ActivateAction.key: () {
-          return CallbackAction(
-            ActivateAction.key,
-            onInvoke: (FocusNode node, Intent intent) {
-              _startSplash(context: node.context);
-              _handleTap(node.context);
-            },
-          );
-        },
-      },
+      actions: _actionMap,
       child: Focus(
         focusNode: widget.focusNode,
         canRequestFocus: widget.canRequestFocus,

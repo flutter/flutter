@@ -68,8 +68,12 @@ class VMPlatform extends PlatformPlugin {
       throw UnimplementedError();
 
   @override
-  Future<RunnerSuite> load(String codePath, SuitePlatform platform,
-      SuiteConfiguration suiteConfig, Object message) async {
+  Future<RunnerSuite> load(
+    String codePath,
+    SuitePlatform platform,
+    SuiteConfiguration suiteConfig,
+    Object message,
+  ) async {
     final ReceivePort receivePort = ReceivePort();
     Isolate isolate;
     try {

@@ -50,12 +50,12 @@ void main() {
     caughtByHandler = false;
     zone = Zone.current.fork(specification: ZoneSpecification(
       handleUncaughtError: (
-          Zone self,
-          ZoneDelegate parent,
-          Zone zone,
-          Object error,
-          StackTrace stackTrace,
-          ) {
+        Zone self,
+        ZoneDelegate parent,
+        Zone zone,
+        Object error,
+        StackTrace stackTrace,
+      ) {
         caughtByZone = true;
         if (!caughtInZone.isCompleted) {
           caughtInZone.complete();

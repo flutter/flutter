@@ -77,8 +77,24 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
-      verify(usage.sendEvent(captureAny, 'success', parameters: captureAnyNamed('parameters')));
+      verify(usage.sendCommand(
+        'dummy',
+        parameters: anyNamed('parameters'),
+      ));
+      verify(usage.sendEvent(
+        'tool-command-result',
+        'dummy',
+        label: 'success',
+        parameters: anyNamed('parameters'),
+      ));
+      expect(verify(usage.sendEvent(
+          'tool-command-max-rss',
+          'dummy',
+          label: 'success',
+          value: captureAnyNamed('value'),
+        )).captured[0],
+        10,
+      );
     });
 
     testUsingCommandContext('reports command that results in warning', () async {
@@ -92,8 +108,24 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
-      verify(usage.sendEvent(captureAny, 'warning', parameters: captureAnyNamed('parameters')));
+      verify(usage.sendCommand(
+        'dummy',
+        parameters: anyNamed('parameters'),
+      ));
+      verify(usage.sendEvent(
+        'tool-command-result',
+        'dummy',
+        label: 'warning',
+        parameters: anyNamed('parameters'),
+      ));
+      expect(verify(usage.sendEvent(
+          'tool-command-max-rss',
+          'dummy',
+          label: 'warning',
+          value: captureAnyNamed('value'),
+        )).captured[0],
+        10,
+      );
     });
 
     testUsingCommandContext('reports command that results in failure', () async {
@@ -109,8 +141,24 @@ void main() {
       try {
         await flutterCommand.run();
       } on ToolExit {
-        verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
-        verify(usage.sendEvent(captureAny, 'fail', parameters: captureAnyNamed('parameters')));
+        verify(usage.sendCommand(
+          'dummy',
+          parameters: anyNamed('parameters'),
+        ));
+        verify(usage.sendEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'fail',
+          parameters: anyNamed('parameters'),
+        ));
+        expect(verify(usage.sendEvent(
+            'tool-command-max-rss',
+            'dummy',
+            label: 'fail',
+            value: captureAnyNamed('value'),
+          )).captured[0],
+          10,
+        );
       }
     });
 
@@ -129,8 +177,24 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
-        verify(usage.sendEvent(captureAny, 'fail', parameters: captureAnyNamed('parameters')));
+        verify(usage.sendCommand(
+          'dummy',
+          parameters: anyNamed('parameters'),
+        ));
+        verify(usage.sendEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'fail',
+          parameters: anyNamed('parameters'),
+        ));
+        expect(verify(usage.sendEvent(
+            'tool-command-max-rss',
+            'dummy',
+            label: 'fail',
+            value: captureAnyNamed('value'),
+          )).captured[0],
+          10,
+        );
       }
     });
 
@@ -169,8 +233,24 @@ void main() {
         signalController.add(mockSignal);
         await completer.future;
 
-        verify(usage.sendCommand(any, parameters: anyNamed('parameters')));
-        verify(usage.sendEvent(any, 'killed', parameters: anyNamed('parameters')));
+        verify(usage.sendCommand(
+          'dummy',
+          parameters: anyNamed('parameters'),
+        ));
+        verify(usage.sendEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'killed',
+          parameters: anyNamed('parameters'),
+        ));
+        expect(verify(usage.sendEvent(
+            'tool-command-max-rss',
+            'dummy',
+            label: 'killed',
+            value: captureAnyNamed('value'),
+          )).captured[0],
+          10,
+        );
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(
@@ -180,27 +260,6 @@ void main() {
         SystemClock: () => clock,
         Usage: () => usage,
       });
-    });
-
-    testUsingCommandContext('reports maxRss', () async {
-      // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
-
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
-      );
-      await flutterCommand.run();
-
-      verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
-      expect(verify(usage.sendEvent(
-          any,
-          'success',
-          parameters: captureAnyNamed('parameters'),
-        )).captured[0],
-        containsPair(cdKey(CustomDimensions.commandResultEventMaxRss),
-            mockProcessInfo.maxRss.toString()));
     });
 
     testUsingCommandContext('report execution timing by default', () async {
