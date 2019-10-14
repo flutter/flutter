@@ -560,10 +560,9 @@ void main() {
   testWidgets('Thumb color can be overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.light),
         home: Center(
           child: CupertinoSlider(
-            thumbColor: CupertinoColors.activeGreen,
+            thumbColor: CupertinoColors.systemPurple,
             onChanged: (double value) { },
             value: 0,
           ),
@@ -573,12 +572,36 @@ void main() {
 
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: _kSystemFill.color),
+      paints
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect(color: CupertinoColors.systemPurple.color)
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSlider(
+            thumbColor: CupertinoColors.activeOrange,
+            onChanged: (double value) { },
+            value: 0,
+          ),
+        ),
+      ),
     );
 
     expect(
-      find.byType(CupertinoSlider),
-      isNot(paints..rrect(color: _kSystemFill.darkColor)),
+        find.byType(CupertinoSlider),
+        paints
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect(color: CupertinoColors.activeOrange.color)
     );
   });
 }
