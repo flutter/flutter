@@ -37,7 +37,7 @@ class TestCompiler {
   ///
   /// [flutterProject] is the project for which we are running tests.
   TestCompiler(
-    this.enableAsserts,
+    this.buildMode,
     this.trackWidgetCreation,
     this.flutterProject,
   ) : testFilePath = getKernelPathForTransformerOptions(
@@ -60,7 +60,7 @@ class TestCompiler {
   final StreamController<_CompilationRequest> compilerController = StreamController<_CompilationRequest>();
   final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   final FlutterProject flutterProject;
-  final bool enableAsserts;
+  final BuildMode buildMode;
   final bool trackWidgetCreation;
   final String testFilePath;
 
@@ -96,7 +96,7 @@ class TestCompiler {
     if (flutterProject.hasBuilders) {
       return CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
-        enableAsserts: enableAsserts,
+        buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: _reportCompilerMessage,
         initializeFromDill: testFilePath,
@@ -108,7 +108,7 @@ class TestCompiler {
     return ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       packagesPath: PackageMap.globalPackagesPath,
-      enableAsserts: enableAsserts,
+      buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
       compilerMessageConsumer: _reportCompilerMessage,
       initializeFromDill: testFilePath,
