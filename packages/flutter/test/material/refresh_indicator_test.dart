@@ -423,4 +423,57 @@ void main() {
 
     debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets('RefreshIndicator - default strokeWidth', (WidgetTester tester) async {
+    refreshCalled = true;
+    const double defaultStrokeWidth = 2.0;
+    final Key refreshIndicatorKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          key: refreshIndicatorKey,
+          onRefresh: holdRefresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('label'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RefreshIndicator refreshIndicator = tester.widget(find.byKey(refreshIndicatorKey));
+    expect(refreshIndicator.strokeWidth, defaultStrokeWidth);
+  });
+
+  testWidgets('RefreshIndicator - custom strokeWidth', (WidgetTester tester) async {
+    refreshCalled = true;
+    const double customStrokeWidth = 5.0;
+    final Key refreshIndicatorKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          key: refreshIndicatorKey,
+          onRefresh: holdRefresh,
+          strokeWidth: customStrokeWidth,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('label'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RefreshIndicator refreshIndicator = tester.widget(find.byKey(refreshIndicatorKey));
+    expect(refreshIndicator.strokeWidth, customStrokeWidth);
+  });
 }
