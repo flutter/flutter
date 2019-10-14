@@ -687,6 +687,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.hint,
     this.disabledHint,
     @required this.onChanged,
+    this.onBlur,
     this.elevation = 8,
     this.style,
     this.underline,
@@ -735,6 +736,11 @@ class DropdownButton<T> extends StatefulWidget {
   /// will display the [disabledHint] widget if it is non-null.
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
+
+  /// {@template flutter.material.DropdownButton.onBlur}
+  /// Called when the component has its focus lost.
+  /// {@endtemplate}
+  final void Function() onBlur;
 
   /// A builder to customize the dropdown buttons corresponding to the
   /// [DropdownMenuItem]s in [items].
@@ -990,7 +996,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
       _dropdownRoute = null;
-      if (!mounted || newValue == null)
+      if (!mounted)
+        return;
+      if (widget.onBlur != null)
+        widget.onBlur();
+      if (newValue == null)
         return;
       if (widget.onChanged != null)
         widget.onChanged(newValue.result);
