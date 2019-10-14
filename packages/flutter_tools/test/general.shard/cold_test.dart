@@ -111,6 +111,26 @@ void main() {
       verify(mockFlutterDevice2.stopEchoingDeviceLog());
     });
   });
+
+  group('cold run', () {
+    BufferLogger mockLogger;
+
+    setUp(() {
+      mockLogger = BufferLogger();
+    });
+
+    testUsingContext('returns 1 if not prebuilt mode & mainPath does not exist', () async {
+      final MockDevice mockDevice = MockDevice();
+      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
+      when(mockFlutterDevice.device).thenReturn(mockDevice);
+      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
+      final int result = await ColdRunner(devices).run();
+      expect(result, 1);
+      expect(mockLogger.errorText, matches(r'Tried to run .*, but that file does not exist\.'));
+    }, overrides: <Type, Generator>{
+      Logger: () => mockLogger,
+    });
+  });
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
