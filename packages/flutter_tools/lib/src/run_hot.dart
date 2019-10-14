@@ -228,12 +228,7 @@ class HotRunner extends ResidentRunner {
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
       return 0;
     }
-
-    if (debuggingOptions.vmserviceOutFile != null) {
-      final File vmserviceOutFile = fs.file(debuggingOptions.vmserviceOutFile);
-      vmserviceOutFile.createSync(recursive: true);
-      vmserviceOutFile.writeAsStringSync(flutterDevices.first.vmServices.first.wsAddress.toString());
-    }
+    writeVmserviceFile();
 
     int result = 0;
     if (stayResident) {

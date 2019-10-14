@@ -114,11 +114,7 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
-    if (debuggingOptions.vmserviceOutFile != null) {
-      final File vmserviceOutFile = fs.file(debuggingOptions.vmserviceOutFile);
-      vmserviceOutFile.createSync(recursive: true);
-      vmserviceOutFile.writeAsStringSync(flutterDevices.first.vmServices.first.wsAddress.toString());
-    }
+    writeVmserviceFile();
 
     if (stayResident && !traceStartup) {
       return waitForAppToFinish();
