@@ -472,7 +472,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// An iterator over the children that are allowed to be traversed by the
   /// [FocusTraversalPolicy].
   Iterable<FocusNode> get traversalChildren {
-    if (!canRequestFocus || skipTraversal) {
+    if (!canRequestFocus) {
       return const <FocusNode>[];
     }
     return children.where(
@@ -1279,7 +1279,7 @@ class FocusManager with DiagnosticableTreeMixin {
       return;
     }
     bool handled = false;
-    for (FocusNode node in <FocusNode>[_primaryFocus,..._primaryFocus.ancestors]) {
+    for (FocusNode node in <FocusNode>[_primaryFocus, ..._primaryFocus.ancestors]) {
       if (node.onKey != null && node.onKey(node, event)) {
         assert(_focusDebug('Node $node handled key event $event.'));
         handled = true;
