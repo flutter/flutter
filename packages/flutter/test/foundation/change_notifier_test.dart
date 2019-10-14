@@ -5,8 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../material/theme_test.dart';
-
 class TestNotifier extends ChangeNotifier {
   void notify() {
     notifyListeners();
