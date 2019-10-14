@@ -13,7 +13,7 @@
     android:layout_weight="1"
     />
 
-  <android.support.design.widget.CoordinatorLayout
+  <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_weight="1"
@@ -47,7 +47,7 @@
 
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
       android:id="@+id/button"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -62,6 +62,6 @@
       app:backgroundTint="@color/white"
       />
 
-  </android.support.design.widget.CoordinatorLayout>
+  </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </LinearLayout>

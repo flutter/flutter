@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import '../base/context.dart';
-import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../doctor.dart';
 import 'cocoapods.dart';
@@ -14,8 +13,6 @@ CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 class CocoaPodsValidator extends DoctorValidator {
   const CocoaPodsValidator() : super('CocoaPods subvalidator');
-
-  bool get hasHomebrew => os.which('brew') != null;
 
   @override
   Future<ValidationResult> validate() async {
@@ -37,20 +34,21 @@ class CocoaPodsValidator extends DoctorValidator {
         status = ValidationType.missing;
         messages.add(ValidationMessage.error(
             userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
+      } else if (cocoaPodsStatus == CocoaPodsStatus.brokenInstall) {
+        status = ValidationType.missing;
+        messages.add(ValidationMessage.error(
+            userMessages.cocoaPodsBrokenInstall(brokenCocoaPodsConsequence, cocoaPodsInstallInstructions)));
+
       } else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.hint(
             userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
       } else {
         status = ValidationType.partial;
+        final String currentVersionText = await cocoaPods.cocoaPodsVersionText;
         messages.add(ValidationMessage.hint(
-            userMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+            userMessages.cocoaPodsOutdated(currentVersionText, cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
       }
-    }
-
-    // Only check/report homebrew status if CocoaPods isn't installed.
-    if (status == ValidationType.missing && !hasHomebrew) {
-      messages.add(ValidationMessage.hint(userMessages.cocoaPodsBrewMissing));
     }
 
     return ValidationResult(status, messages);

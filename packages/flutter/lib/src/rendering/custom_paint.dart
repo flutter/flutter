@@ -522,7 +522,10 @@ class RenderCustomPaint extends RenderProxyBox {
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
     int debugPreviousCanvasSaveCount;
     canvas.save();
-    assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; }());
+    assert(() {
+      debugPreviousCanvasSaveCount = canvas.getSaveCount();
+      return true;
+    }());
     if (offset != Offset.zero)
       canvas.translate(offset.dx, offset.dy);
     painter.paint(canvas, size);
@@ -628,12 +631,11 @@ class RenderCustomPaint extends RenderProxyBox {
 
     final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes.isNotEmpty;
     final bool hasForegroundSemantics = _foregroundSemanticsNodes != null && _foregroundSemanticsNodes.isNotEmpty;
-    final List<SemanticsNode> finalChildren = <SemanticsNode>[];
-    if (hasBackgroundSemantics)
-      finalChildren.addAll(_backgroundSemanticsNodes);
-    finalChildren.addAll(children);
-    if (hasForegroundSemantics)
-      finalChildren.addAll(_foregroundSemanticsNodes);
+    final List<SemanticsNode> finalChildren = <SemanticsNode>[
+      if (hasBackgroundSemantics) ..._backgroundSemanticsNodes,
+      ...children,
+      if (hasForegroundSemantics) ..._foregroundSemanticsNodes,
+    ];
     super.assembleSemanticsNode(node, config, finalChildren);
   }
 
@@ -829,8 +831,17 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.button != null) {
       config.isButton = properties.button;
     }
+    if (properties.link != null) {
+      config.isLink = properties.link;
+    }
     if (properties.textField != null) {
       config.isTextField = properties.textField;
+    }
+    if (properties.readOnly != null) {
+      config.isReadOnly = properties.readOnly;
+    }
+    if (properties.focusable != null) {
+      config.isFocusable = properties.focusable;
     }
     if (properties.focused != null) {
       config.isFocused = properties.focused;
@@ -843,6 +854,9 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.obscured != null) {
       config.isObscured = properties.obscured;
+    }
+    if (properties.multiline != null) {
+      config.isMultiline = properties.multiline;
     }
     if (properties.hidden != null) {
       config.isHidden = properties.hidden;
@@ -858,6 +872,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.liveRegion != null) {
       config.liveRegion = properties.liveRegion;
+    }
+    if (properties.maxValueLength != null) {
+      config.maxValueLength = properties.maxValueLength;
+    }
+    if (properties.currentValueLength != null) {
+      config.currentValueLength = properties.currentValueLength;
     }
     if (properties.toggled != null) {
       config.isToggled = properties.toggled;
@@ -921,6 +941,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.onMoveCursorBackwardByCharacter != null) {
       config.onMoveCursorBackwardByCharacter = properties.onMoveCursorBackwardByCharacter;
+    }
+    if (properties.onMoveCursorForwardByWord != null) {
+      config.onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord;
+    }
+    if (properties.onMoveCursorBackwardByWord != null) {
+      config.onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord;
     }
     if (properties.onSetSelection != null) {
       config.onSetSelection = properties.onSetSelection;

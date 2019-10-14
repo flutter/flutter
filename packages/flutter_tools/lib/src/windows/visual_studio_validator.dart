@@ -12,6 +12,10 @@ VisualStudioValidator get visualStudioValidator => context.get<VisualStudioValid
 class VisualStudioValidator extends DoctorValidator {
   const VisualStudioValidator() : super('Visual Studio - develop for Windows');
 
+  int get majorVersion => visualStudio.fullVersion != null
+      ? int.tryParse(visualStudio.fullVersion.split('.')[0])
+      : null;
+
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
@@ -30,20 +34,38 @@ class VisualStudioValidator extends DoctorValidator {
           visualStudio.fullVersion,
       )));
 
-      if (!visualStudio.hasNecessaryComponents) {
+      if (visualStudio.isPrerelease) {
+        messages.add(ValidationMessage(userMessages.visualStudioIsPrerelease));
+      }
+
+      // Messages for faulty installations.
+      if (visualStudio.isRebootRequired) {
         status = ValidationType.partial;
-        final int majorVersion = int.tryParse(visualStudio.fullVersion.split('.')[0]);
+        messages.add(ValidationMessage.error(userMessages.visualStudioRebootRequired));
+      } else if (!visualStudio.isComplete) {
+        status = ValidationType.partial;
+        messages.add(ValidationMessage.error(userMessages.visualStudioIsIncomplete));
+      } else if (!visualStudio.isLaunchable) {
+        status = ValidationType.partial;
+        messages.add(ValidationMessage.error(userMessages.visualStudioNotLaunchable));
+      } else  if (!visualStudio.hasNecessaryComponents) {
+        status = ValidationType.partial;
         messages.add(ValidationMessage.error(
             userMessages.visualStudioMissingComponents(
                 visualStudio.workloadDescription,
-                visualStudio.necessaryComponentDescriptions(majorVersion)
-            )
+                visualStudio.necessaryComponentDescriptions(majorVersion),
+            ),
         ));
       }
       versionInfo = '${visualStudio.displayName} ${visualStudio.displayVersion}';
     } else {
       status = ValidationType.missing;
-      messages.add(ValidationMessage.error(userMessages.visualStudioMissing));
+      messages.add(ValidationMessage.error(
+        userMessages.visualStudioMissing(
+          visualStudio.workloadDescription,
+          visualStudio.necessaryComponentDescriptions(majorVersion),
+        ),
+      ));
     }
 
     return ValidationResult(status, messages, statusInfo: versionInfo);

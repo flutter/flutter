@@ -126,7 +126,7 @@ class RangeSlider extends StatefulWidget {
     this.labels,
     this.activeColor,
     this.inactiveColor,
-    this.semanticFormatterCallback
+    this.semanticFormatterCallback,
   }) : assert(values != null),
        assert(min != null),
        assert(max != null),
@@ -333,10 +333,28 @@ class RangeSlider extends StatefulWidget {
   final RangeSemanticFormatterCallback semanticFormatterCallback;
 
   // Touch width for the tap boundary of the slider thumbs.
-  static const double _minTouchTargetWidth = 48;
+  static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
   @override
   _RangeSliderState createState() => _RangeSliderState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('valueStart', values.start));
+    properties.add(DoubleProperty('valueEnd', values.end));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('onChangeStart', onChangeStart));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('onChangeEnd', onChangeEnd));
+    properties.add(DoubleProperty('min', min));
+    properties.add(DoubleProperty('max', max));
+    properties.add(IntProperty('divisions', divisions));
+    properties.add(StringProperty('labelStart', labels?.start));
+    properties.add(StringProperty('labelEnd', labels?.end));
+    properties.add(ColorProperty('activeColor', activeColor));
+    properties.add(ColorProperty('inactiveColor', inactiveColor));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
+  }
 }
 
 class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin {
@@ -373,17 +391,17 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController = AnimationController(
       duration: enableAnimationDuration,
       vsync: this,
-      value: widget.onChanged != null ? 1.0 : 0.0
+      value: widget.onChanged != null ? 1.0 : 0.0,
     );
     startPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.start)
+      value: _unlerp(widget.values.start),
     );
     endPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.end)
+      value: _unlerp(widget.values.end),
     );
   }
 
@@ -454,25 +472,26 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   }
 
   // Finds closest thumb. If the thumbs are close to each other, no thumb is
-  // immediately selected while the drag velocity is zero. If the first
-  // non-zero velocity is negative, then the left thumb is selected, and if its
+  // immediately selected while the drag displacement is zero. If the first
+  // non-zero displacement is negative, then the left thumb is selected, and if its
   // positive, then the right thumb is selected.
   static final RangeThumbSelector _defaultRangeThumbSelector = (
-      TextDirection textDirection,
-      RangeValues values,
-      double tapValue,
-      Size thumbSize,
-      Size trackSize,
-      double dx, // drag velocity
-    ) {
+    TextDirection textDirection,
+    RangeValues values,
+    double tapValue,
+    Size thumbSize,
+    Size trackSize,
+    double dx, // The horizontal delta or displacement of the drag update.
+  ) {
     final double touchRadius = math.max(thumbSize.width, RangeSlider._minTouchTargetWidth) / 2;
     final bool inStartTouchTarget = (tapValue - values.start).abs() * trackSize.width < touchRadius;
     final bool inEndTouchTarget = (tapValue - values.end).abs() * trackSize.width < touchRadius;
 
-    // Use the velocity if the thumb touch targets overlap. If dx is 0 and the
-    // the drag position is in both touch targets, no thumb is selected because
-    // it is ambiguous to which thumb should be selected. Once the drag
-    // velocity is non-zero, the thumb selection can be determined.
+    // Use dx if the thumb touch targets overlap. If dx is 0 and the drag
+    // position is in both touch targets, no thumb is selected because it is
+    // ambiguous to which thumb should be selected. If the dx is non-zero, the
+    // thumb selection is determined by the direction of the dx. The left thumb
+    // is chosen for negative dx, and the right thumb is chosen for positive dx.
     if (inStartTouchTarget && inEndTouchTarget) {
       bool towardsStart;
       bool towardsEnd;
@@ -629,7 +648,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class _RenderRangeSlider extends RenderBox {
+class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderRangeSlider({
     @required RangeValues values,
     int divisions,
@@ -720,7 +739,7 @@ class _RenderRangeSlider extends RenderBox {
 
   static const Duration _minimumInteractionTime = Duration(milliseconds: 500);
 
-  _RangeSliderState _state;
+  final _RangeSliderState _state;
   Animation<double> _overlayAnimation;
   Animation<double> _valueIndicatorAnimation;
   Animation<double> _enableAnimation;
@@ -729,6 +748,7 @@ class _RenderRangeSlider extends RenderBox {
   HorizontalDragGestureRecognizer _drag;
   TapGestureRecognizer _tap;
   bool _active = false;
+  RangeValues _newValues;
 
   bool get isEnabled => onChanged != null;
 
@@ -929,6 +949,14 @@ class _RenderRangeSlider extends RenderBox {
   }
 
   @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    _startLabelPainter.markNeedsLayout();
+    _endLabelPainter.markNeedsLayout();
+    _updateLabelPainters();
+  }
+
+  @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _overlayAnimation.addListener(markNeedsPaint);
@@ -985,11 +1013,10 @@ class _RenderRangeSlider extends RenderBox {
       // a tap, it consists of a call to onChangeStart with the previous value and
       // a call to onChangeEnd with the new value.
       final RangeValues currentValues = _discretizeRangeValues(values);
-      RangeValues newValues;
       if (_lastThumbSelection == Thumb.start) {
-        newValues = RangeValues(tapValue, currentValues.end);
+        _newValues = RangeValues(tapValue, currentValues.end);
       } else if (_lastThumbSelection == Thumb.end) {
-        newValues = RangeValues(currentValues.start, tapValue);
+        _newValues = RangeValues(currentValues.start, tapValue);
       }
       _updateLabelPainter(_lastThumbSelection);
 
@@ -997,7 +1024,7 @@ class _RenderRangeSlider extends RenderBox {
         onChangeStart(currentValues);
       }
 
-      onChanged(_discretizeRangeValues(newValues));
+      onChanged(_discretizeRangeValues(_newValues));
 
       _state.overlayController.forward();
       if (showValueIndicator) {
@@ -1017,11 +1044,15 @@ class _RenderRangeSlider extends RenderBox {
   void _handleDragUpdate(DragUpdateDetails details) {
     final double dragValue = _getValueFromGlobalPosition(details.globalPosition);
 
-    // If no selection has been made yet, use the velocity of the drag to
-    // determine which thumb should be selected.
+    // If no selection has been made yet, test for thumb selection again now
+    // that the value of dx can be non-zero. If this is the first selection of
+    // the interaction, then onChangeStart must be called.
+    bool shouldCallOnChangeStart = false;
     if (_lastThumbSelection == null) {
       _lastThumbSelection = sliderTheme.thumbSelector(textDirection, values, dragValue, _thumbSize, size, details.delta.dx);
       if (_lastThumbSelection != null) {
+        shouldCallOnChangeStart = true;
+        _active = true;
         _state.overlayController.forward();
         if (showValueIndicator) {
           _state.valueIndicatorController.forward();
@@ -1031,16 +1062,18 @@ class _RenderRangeSlider extends RenderBox {
 
     if (isEnabled && _lastThumbSelection != null) {
       final RangeValues currentValues = _discretizeRangeValues(values);
+      if (onChangeStart != null && shouldCallOnChangeStart) {
+        onChangeStart(currentValues);
+      }
       final double currentDragValue = _discretize(dragValue);
 
-      RangeValues newValues;
       final double minThumbSeparationValue = isDiscrete ? 0 : sliderTheme.minThumbSeparation / _trackRect.width;
       if (_lastThumbSelection == Thumb.start) {
-        newValues = RangeValues(math.min(currentDragValue, currentValues.end - minThumbSeparationValue), currentValues.end);
+        _newValues = RangeValues(math.min(currentDragValue, currentValues.end - minThumbSeparationValue), currentValues.end);
       } else if (_lastThumbSelection == Thumb.end) {
-        newValues = RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + minThumbSeparationValue));
+        _newValues = RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + minThumbSeparationValue));
       }
-      onChanged(newValues);
+      onChanged(_newValues);
     }
   }
 
@@ -1050,10 +1083,8 @@ class _RenderRangeSlider extends RenderBox {
       _state.valueIndicatorController.reverse();
     }
 
-    if (_active && _state.mounted) {
-      if (_lastThumbSelection == null)
-        return;
-      final RangeValues discreteValues = _discretizeRangeValues(values);
+    if (_active && _state.mounted && _lastThumbSelection != null) {
+      final RangeValues discreteValues = _discretizeRangeValues(_newValues);
       if (onChangeEnd != null) {
         onChangeEnd(discreteValues);
       }
@@ -1146,7 +1177,7 @@ class _RenderRangeSlider extends RenderBox {
         parentBox: this,
         offset: offset,
         sliderTheme: _sliderTheme,
-        isDiscrete: isDiscrete
+        isDiscrete: isDiscrete,
     );
     final Offset startThumbCenter = Offset(trackRect.left + startVisualPosition * trackRect.width, trackRect.center.dy);
     final Offset endThumbCenter = Offset(trackRect.left + endVisualPosition * trackRect.width, trackRect.center.dy);
@@ -1161,7 +1192,7 @@ class _RenderRangeSlider extends RenderBox {
         startThumbCenter: startThumbCenter,
         endThumbCenter: endThumbCenter,
         isDiscrete: isDiscrete,
-        isEnabled: isEnabled
+        isEnabled: isEnabled,
     );
 
     if (!_overlayAnimation.isDismissed) {
@@ -1229,14 +1260,16 @@ class _RenderRangeSlider extends RenderBox {
 
     final bool isLastThumbStart = _lastThumbSelection == Thumb.start;
     final Thumb bottomThumb = isLastThumbStart ? Thumb.end : Thumb.start;
+    final Thumb topThumb = isLastThumbStart ? Thumb.start : Thumb.end;
     final Offset bottomThumbCenter = isLastThumbStart ? endThumbCenter : startThumbCenter;
     final Offset topThumbCenter = isLastThumbStart ? startThumbCenter : endThumbCenter;
     final TextPainter bottomLabelPainter = isLastThumbStart ? _endLabelPainter : _startLabelPainter;
     final TextPainter topLabelPainter = isLastThumbStart ? _startLabelPainter : _endLabelPainter;
     final double bottomValue = isLastThumbStart ? endValue : startValue;
     final double topValue = isLastThumbStart ? startValue : endValue;
+    final bool shouldPaintValueIndicators = isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
 
-    if (isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator) {
+    if (shouldPaintValueIndicators) {
       _sliderTheme.rangeValueIndicatorShape.paint(
         context,
         bottomThumbCenter,
@@ -1251,20 +1284,6 @@ class _RenderRangeSlider extends RenderBox {
         thumb: bottomThumb,
         value: bottomValue,
       );
-      _sliderTheme.rangeValueIndicatorShape.paint(
-        context,
-        topThumbCenter,
-        activationAnimation: _valueIndicatorAnimation,
-        enableAnimation: _enableAnimation,
-        isDiscrete: isDiscrete,
-        isOnTop: thumbDelta < sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: topLabelPainter).width,
-        labelPainter: topLabelPainter,
-        parentBox: this,
-        sliderTheme: _sliderTheme,
-        textDirection: _textDirection,
-        thumb: _lastThumbSelection,
-        value: topValue,
-      );
     }
 
     _sliderTheme.rangeThumbShape.paint(
@@ -1274,9 +1293,54 @@ class _RenderRangeSlider extends RenderBox {
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
       isOnTop: false,
+      textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: bottomThumb,
     );
+
+    if (shouldPaintValueIndicators) {
+      final double startOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
+        parentBox: this,
+        center: startThumbCenter,
+        labelPainter: _startLabelPainter,
+        activationAnimation: _valueIndicatorAnimation,
+      );
+      final double endOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
+        parentBox: this,
+        center: endThumbCenter,
+        labelPainter: _endLabelPainter,
+        activationAnimation: _valueIndicatorAnimation,
+      );
+      final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _startLabelPainter).width / 2;
+      final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _endLabelPainter).width / 2;
+      double innerOverflow = startHalfWidth + endHalfWidth;
+      switch (textDirection) {
+        case TextDirection.ltr:
+          innerOverflow += startOffset;
+          innerOverflow -= endOffset;
+          break;
+        case TextDirection.rtl:
+          innerOverflow -= startOffset;
+          innerOverflow += endOffset;
+          break;
+      }
+
+      _sliderTheme.rangeValueIndicatorShape.paint(
+        context,
+        topThumbCenter,
+        activationAnimation: _valueIndicatorAnimation,
+        enableAnimation: _enableAnimation,
+        isDiscrete: isDiscrete,
+        isOnTop: thumbDelta < innerOverflow,
+        labelPainter: topLabelPainter,
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        textDirection: _textDirection,
+        thumb: topThumb,
+        value: topValue,
+      );
+    }
+
     _sliderTheme.rangeThumbShape.paint(
       context,
       topThumbCenter,
@@ -1284,8 +1348,9 @@ class _RenderRangeSlider extends RenderBox {
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
       isOnTop: thumbDelta < sliderTheme.rangeThumbShape.getPreferredSize(isEnabled, isDiscrete).width,
+      textDirection: textDirection,
       sliderTheme: _sliderTheme,
-      thumb: _lastThumbSelection,
+      thumb: topThumb,
     );
   }
 

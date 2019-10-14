@@ -210,7 +210,7 @@ void main() {
             image: imageProvider,
           ),
         ),
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
@@ -237,7 +237,7 @@ void main() {
             image: imageProvider,
           ),
         ),
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
@@ -276,7 +276,7 @@ void main() {
             child: Container(width: 100.0),
           ),
         ],
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
@@ -306,7 +306,7 @@ void main() {
             ),
           ),
         ],
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
@@ -597,7 +597,7 @@ void main() {
         image: TestImageProvider(),
         color: const Color(0xFF00FF00),
         colorBlendMode: BlendMode.clear,
-      )
+      ),
     );
     final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
     expect(renderer.color, const Color(0xFF00FF00));
@@ -792,7 +792,7 @@ void main() {
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[SemanticsFlag.isImage],
         ),
-      ]
+      ],
     ), ignoreTransform: true));
     semantics.dispose();
   });
@@ -1056,7 +1056,7 @@ void main() {
     expect(chunkEvents.length, 4);
     expect(find.byType(Text), findsNothing);
     expect(find.byType(RawImage), findsOneWidget);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Image doesn\'t rebuild on chunk events if loadingBuilder is null', (WidgetTester tester) async {
     final ui.Image image = await tester.runAsync(createTestImage);
@@ -1109,7 +1109,7 @@ void main() {
     expect(find.byType(RawImage), findsOneWidget);
     expect(tester.widget<Center>(find.byType(Center)).child, isInstanceOf<Padding>());
     expect(tester.widget<Padding>(find.byType(Padding)).child, isInstanceOf<RawImage>());
-  });
+  }, skip: isBrowser);
 
   testWidgets('Image state handles loadingBuilder update from null to non-null', (WidgetTester tester) async {
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
@@ -1141,7 +1141,7 @@ void main() {
     await tester.pump();
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Image state handles loadingBuilder update from non-null to null', (WidgetTester tester) async {
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
@@ -1174,7 +1174,7 @@ void main() {
     expect(tester.state(find.byType(Image)), same(state));
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
-  });
+  }, skip: isBrowser);
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {

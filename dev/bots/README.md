@@ -205,21 +205,21 @@ For example To remove a published package corresponding to the git hash
 see what it will do:
 
 ```
-$ dart ./unpublish_pacakge.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+$ dart ./unpublish_package.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 And once you've verified the output of the dry run to be sure it is what you
 want to do, run:
 
 ```
-$ dart ./unpublish_pacakge.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+$ dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 and it will actually perform the actions. You will of course need to have access
 to the cloud storage server and have gsutil installed in order to perform this
 operation. Only runs on Linux or macOS systems.
 
-See `dart ./unpublish_pacakge.dart --help` for more details.
+See `dart ./unpublish_package.dart --help` for more details.
 
 Once the package is unpublished, it will not be available from the website for
 download, and will not be rebuilt (even though there is a tagged revision in the

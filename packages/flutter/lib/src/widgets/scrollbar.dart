@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'scroll_metrics.dart';
 
 const double _kMinThumbExtent = 18.0;
+const double _kMinInteractiveSize = 48.0;
 
 /// A [CustomPainter] for painting scrollbars.
 ///
@@ -43,11 +44,11 @@ const double _kMinThumbExtent = 18.0;
 class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
-    @required this.color,
-    @required this.textDirection,
+    @required Color color,
+    @required TextDirection textDirection,
     @required this.thickness,
     @required this.fadeoutOpacityAnimation,
-    this.padding = EdgeInsets.zero,
+    EdgeInsets padding = EdgeInsets.zero,
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
     this.radius,
@@ -65,19 +66,40 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(padding != null),
        assert(padding.isNonNegative),
+       _color = color,
+       _textDirection = textDirection,
+       _padding = padding,
        minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
   /// [Color] of the thumb. Mustn't be null.
-  final Color color;
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    assert(value != null);
+    if (color == value)
+      return;
+
+    _color = value;
+    notifyListeners();
+  }
 
   /// [TextDirection] of the [BuildContext] which dictates the side of the
   /// screen the scrollbar appears in (the trailing side). Mustn't be null.
-  final TextDirection textDirection;
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (textDirection == value)
+      return;
+
+    _textDirection = value;
+    notifyListeners();
+  }
 
   /// Thickness of the scrollbar in its cross-axis in logical pixels. Mustn't be null.
-  final double thickness;
+  double thickness;
 
   /// An opacity [Animation] that dictates the opacity of the thumb.
   /// Changes in value of this [Listenable] will automatically trigger repaints.
@@ -98,7 +120,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// [Radius] of corners if the scrollbar should have rounded corners.
   ///
   /// Scrollbar will be rectangular if [radius] is null.
-  final Radius radius;
+  Radius radius;
 
   /// The amount of space by which to inset the scrollbar's start and end, as
   /// well as its side to the nearest edge, in logical pixels.
@@ -109,7 +131,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// Defaults to [EdgeInsets.zero]. Must not be null and offsets from all four
   /// directions must be greater than or equal to zero.
-  final EdgeInsets padding;
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  set padding(EdgeInsets value) {
+    assert(value != null);
+    if (padding == value)
+      return;
+
+    _padding = value;
+    notifyListeners();
+  }
+
 
   /// The preferred smallest size the scrollbar can shrink to when the total
   /// scrollable extent is large, the current visible viewport is small, and the
@@ -138,6 +170,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   ScrollMetrics _lastMetrics;
   AxisDirection _lastAxisDirection;
+  Rect _thumbRect;
 
   /// Update with new [ScrollMetrics]. The scrollbar will show and redraw itself
   /// based on these new metrics.
@@ -152,9 +185,16 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
+  /// Update and redraw with new scrollbar thickness and radius.
+  void updateThickness(double nextThickness, Radius nextRadius) {
+    thickness = nextThickness;
+    radius = nextRadius;
+    notifyListeners();
+  }
+
   Paint get _paint {
-    return Paint()..color =
-        color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
+    return Paint()
+      ..color = color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
   void _paintThumbCrossAxis(Canvas canvas, Size size, double thumbOffset, double thumbExtent, AxisDirection direction) {
@@ -188,34 +228,28 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         break;
     }
 
-    final Rect thumbRect = Offset(x, y) & thumbSize;
+    _thumbRect = Offset(x, y) & thumbSize;
     if (radius == null)
-      canvas.drawRect(thumbRect, _paint);
+      canvas.drawRect(_thumbRect, _paint);
     else
-      canvas.drawRRect(RRect.fromRectAndRadius(thumbRect, radius), _paint);
+      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect, radius), _paint);
   }
 
-  double _thumbExtent(
-    double mainAxisPadding,
-    double extentInside,
-    double contentExtent,
-    double beforeExtent,
-    double afterExtent,
-    double trackExtent
-  ) {
+  double _thumbExtent() {
     // Thumb extent reflects fraction of content visible, as long as this
     // isn't less than the absolute minimum size.
-    // contentExtent >= viewportDimension, so (contentExtent - mainAxisPadding) > 0
-    final double fractionVisible = ((extentInside - mainAxisPadding) / (contentExtent - mainAxisPadding))
+    // _totalContentExtent >= viewportDimension, so (_totalContentExtent - _mainAxisPadding) > 0
+    final double fractionVisible = ((_lastMetrics.extentInside - _mainAxisPadding) / (_totalContentExtent - _mainAxisPadding))
       .clamp(0.0, 1.0);
 
     final double thumbExtent = math.max(
-      math.min(trackExtent, minOverscrollLength),
-      trackExtent * fractionVisible
+      math.min(_trackExtent, minOverscrollLength),
+      _trackExtent * fractionVisible,
     );
 
-    final double safeMinLength = math.min(minLength, trackExtent);
-    final double newMinLength = (beforeExtent > 0 && afterExtent > 0)
+    final double fractionOverscrolled = 1.0 - _lastMetrics.extentInside / _lastMetrics.viewportDimension;
+    final double safeMinLength = math.min(minLength, _trackExtent);
+    final double newMinLength = (_beforeExtent > 0 && _afterExtent > 0)
       // Thumb extent is no smaller than minLength if scrolling normally.
       ? safeMinLength
       // User is overscrolling. Thumb extent can be less than minLength
@@ -229,17 +263,58 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
       // values for the thumb that range between minLength and the smallest
       // possible value, minOverscrollLength.
-      : safeMinLength * ((fractionVisible - 0.8).clamp(0.0, 0.2) / 0.2);
+      : safeMinLength * (1.0 - fractionOverscrolled.clamp(0.0, 0.2) / 0.2);
 
     // The `thumbExtent` should be no greater than `trackSize`, otherwise
     // the scrollbar may scroll towards the wrong direction.
-    return thumbExtent.clamp(newMinLength, trackExtent);
+    return thumbExtent.clamp(newMinLength, _trackExtent);
   }
 
   @override
   void dispose() {
     fadeoutOpacityAnimation.removeListener(notifyListeners);
     super.dispose();
+  }
+
+  bool get _isVertical => _lastAxisDirection == AxisDirection.down || _lastAxisDirection == AxisDirection.up;
+  bool get _isReversed => _lastAxisDirection == AxisDirection.up || _lastAxisDirection == AxisDirection.left;
+  // The amount of scroll distance before and after the current position.
+  double get _beforeExtent => _isReversed ? _lastMetrics.extentAfter : _lastMetrics.extentBefore;
+  double get _afterExtent => _isReversed ? _lastMetrics.extentBefore : _lastMetrics.extentAfter;
+  // Padding of the thumb track.
+  double get _mainAxisPadding => _isVertical ? padding.vertical : padding.horizontal;
+  // The size of the thumb track.
+  double get _trackExtent => _lastMetrics.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding;
+
+  // The total size of the scrollable content.
+  double get _totalContentExtent {
+    return _lastMetrics.maxScrollExtent
+      - _lastMetrics.minScrollExtent
+      + _lastMetrics.viewportDimension;
+  }
+
+  /// Convert between a thumb track position and the corresponding scroll
+  /// position.
+  ///
+  /// thumbOffsetLocal is a position in the thumb track. Cannot be null.
+  double getTrackToScroll(double thumbOffsetLocal) {
+    assert(thumbOffsetLocal != null);
+    final double scrollableExtent = _lastMetrics.maxScrollExtent - _lastMetrics.minScrollExtent;
+    final double thumbMovableExtent = _trackExtent - _thumbExtent();
+
+    return scrollableExtent * thumbOffsetLocal / thumbMovableExtent;
+  }
+
+  // Converts between a scroll position and the corresponding position in the
+  // thumb track.
+  double _getScrollToTrack(ScrollMetrics metrics, double thumbExtent) {
+    final double scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
+
+    final double fractionPast = (scrollableExtent > 0)
+      ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
+      : 0;
+
+    return (_isReversed ? 1 - fractionPast : fractionPast) * (_trackExtent - thumbExtent);
   }
 
   @override
@@ -249,45 +324,47 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || fadeoutOpacityAnimation.value == 0.0)
       return;
 
-    final bool isVertical = _lastAxisDirection == AxisDirection.down || _lastAxisDirection == AxisDirection.up;
-    final bool isReversed = _lastAxisDirection == AxisDirection.up || _lastAxisDirection == AxisDirection.left;
-
-    final double mainAxisPadding = isVertical ? padding.vertical : padding.horizontal;
-    // The size of the scrollable area.
-    final double trackExtent = _lastMetrics.viewportDimension - 2 * mainAxisMargin - mainAxisPadding;
-
     // Skip painting if there's not enough space.
-    if (_lastMetrics.viewportDimension <= mainAxisPadding || trackExtent <= 0) {
+    if (_lastMetrics.viewportDimension <= _mainAxisPadding || _trackExtent <= 0) {
       return;
     }
 
-    final double totalContentExtent =
-      _lastMetrics.maxScrollExtent
-      - _lastMetrics.minScrollExtent
-      + _lastMetrics.viewportDimension;
-
-    final double beforeExtent = isReversed ? _lastMetrics.extentAfter : _lastMetrics.extentBefore;
-    final double afterExtent = isReversed ? _lastMetrics.extentBefore : _lastMetrics.extentAfter;
-
-    final double thumbExtent = _thumbExtent(mainAxisPadding, _lastMetrics.extentInside, totalContentExtent,
-      beforeExtent, afterExtent, trackExtent);
-
-    final double beforePadding = isVertical ? padding.top : padding.left;
-    final double scrollableExtent = _lastMetrics.maxScrollExtent - _lastMetrics.minScrollExtent;
-
-    final double fractionPast = (scrollableExtent > 0)
-      ? ((_lastMetrics.pixels - _lastMetrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
-      : 0;
-
-    final double thumbOffset = (isReversed ? 1 - fractionPast : fractionPast) * (trackExtent - thumbExtent)
-      + mainAxisMargin + beforePadding;
+    final double beforePadding = _isVertical ? padding.top : padding.left;
+    final double thumbExtent = _thumbExtent();
+    final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics, thumbExtent);
+    final double thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
 
     return _paintThumbCrossAxis(canvas, size, thumbOffset, thumbExtent, _lastAxisDirection);
   }
 
-  // Scrollbars are (currently) not interactive.
+  /// Same as hitTest, but includes some padding to make sure that the region
+  /// isn't too small to be interacted with by the user.
+  bool hitTestInteractive(Offset position) {
+    if (_thumbRect == null) {
+      return false;
+    }
+    // The thumb is not able to be hit when transparent.
+    if (fadeoutOpacityAnimation.value == 0.0) {
+      return false;
+    }
+    final Rect interactiveThumbRect = _thumbRect.expandToInclude(
+      Rect.fromCircle(center: _thumbRect.center, radius: _kMinInteractiveSize / 2),
+    );
+    return interactiveThumbRect.contains(position);
+  }
+
+  // Scrollbars can be interactive in Cupertino.
   @override
-  bool hitTest(Offset position) => null;
+  bool hitTest(Offset position) {
+    if (_thumbRect == null) {
+      return null;
+    }
+    // The thumb is not able to be hit when transparent.
+    if (fadeoutOpacityAnimation.value == 0.0) {
+      return false;
+    }
+    return _thumbRect.contains(position);
+  }
 
   @override
   bool shouldRepaint(ScrollbarPainter old) {

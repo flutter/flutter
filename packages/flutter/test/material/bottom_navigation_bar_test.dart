@@ -35,7 +35,7 @@ void main() {
             },
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('Alarm'));
@@ -57,10 +57,10 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
@@ -94,7 +94,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     const double selectedFontSize = 14.0;
@@ -146,7 +146,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
     );
 
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
@@ -187,7 +187,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
     );
 
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
@@ -199,8 +199,8 @@ void main() {
   });
 
   testWidgets('Custom selected and unselected icon themes', (WidgetTester tester) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -221,7 +221,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
@@ -233,10 +233,10 @@ void main() {
   });
 
   testWidgets('color on icon theme overrides selected and unselected item colors', (WidgetTester tester) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
-    const Color selectedItemColor = Color(3);
-    const Color unselectedItemColor = Color(4);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
+    const Color selectedItemColor = Color(0x00000003);
+    const Color unselectedItemColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -259,7 +259,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
@@ -303,7 +303,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
@@ -346,7 +346,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
     );
 
     final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
@@ -388,7 +388,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
     );
 
     final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
@@ -417,7 +417,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     const double selectedFontSize = 14.0;
@@ -460,7 +460,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
@@ -509,7 +509,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
@@ -536,7 +536,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(_getOpacity(tester, 'AC'), equals(1.0));
@@ -564,7 +564,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(_getMaterial(tester).color, equals(color));
@@ -593,7 +593,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(_getMaterial(tester).color, equals(itemColor));
@@ -642,7 +642,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(fixedColor));
@@ -669,7 +669,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(_getMaterial(tester).elevation, equals(customElevation));
@@ -691,11 +691,11 @@ void main() {
                   icon: Icon(Icons.access_alarm),
                   title: Text('Alarm'),
                 ),
-              ]
+              ],
             ),
           ),
         ),
-      )
+      ),
     );
 
     const double labelBottomMargin = 7.0; // 7 == defaulted selectedFontSize / 2.0.
@@ -722,7 +722,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
@@ -748,7 +748,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
@@ -785,7 +785,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     // We want to make sure that the last label does not get displaced,
@@ -847,7 +847,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('Alarm'));
@@ -885,13 +885,13 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('Alarm'));
     await tester.pump(const Duration(seconds: 1));
     expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar iconSize test', (WidgetTester tester) async {
     double builderIconSize;
@@ -1001,7 +1001,7 @@ void main() {
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(66.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
     final Text longTextA = Text(''.padLeft(100, 'A'));
@@ -1033,7 +1033,7 @@ void main() {
     expect(itemBoxA.size, equals(const Size(400.0, 14.0)));
     final RenderBox itemBoxB = tester.renderObject(find.text(longTextB.data));
     expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar paints circles', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1103,7 +1103,7 @@ void main() {
           ..translate(x: 400.0)
           ..circle(x: 200.0),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar inactiveIcon shown', (WidgetTester tester) async {
     const Key filled = Key('filled');
@@ -1191,25 +1191,21 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   flags: <SemanticsFlag>[
+                    SemanticsFlag.isFocusable,
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'AC\nTab 1 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
@@ -1259,25 +1255,21 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   flags: <SemanticsFlag>[
+                    SemanticsFlag.isFocusable,
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'AC\nTab 1 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
@@ -1434,27 +1426,32 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.2.png'),
-        skip: !isLinux,
+        matchesGoldenFile(
+          'bottom_navigation_bar.shifting_transition.$pump.png',
+          version: 2,
+        ),
       );
     }
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
     expect(() {
       MaterialApp(
-          home: Scaffold(
-              bottomNavigationBar: BottomNavigationBar(
-                  type: BottomNavigationBarType.shifting,
-                  items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.ac_unit),
-              title: Text('AC'),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.access_alarm),
-            ),
-          ])));
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+              ),
+            ],
+          ),
+        ),
+      );
     }, throwsA(isInstanceOf<AssertionError>()));
   });
 
@@ -1562,17 +1559,15 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   flags: <SemanticsFlag>[
+                    SemanticsFlag.isFocusable,
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Red\nTab 1 of 2',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Green\nTab 2 of 2',
                   textDirection: TextDirection.ltr,
@@ -1621,16 +1616,14 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
+                    SemanticsFlag.isFocusable,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Red\nTab 1 of 2',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Green\nTab 2 of 2',
                   textDirection: TextDirection.ltr,
@@ -1675,7 +1668,7 @@ double _getOpacity(WidgetTester tester, String textValue) {
       find.ancestor(
         of: find.text(textValue),
         matching: find.byType(FadeTransition),
-      ).first
+      ).first,
   );
   return opacityWidget.opacity.value;
 }
@@ -1697,7 +1690,7 @@ EdgeInsets _itemPadding(WidgetTester tester, IconData icon) {
   return tester.widget<Padding>(
       find.descendant(
         of: find.ancestor(of: find.byIcon(icon), matching: find.byType(InkResponse)),
-        matching: find.byType(Padding)
+        matching: find.byType(Padding),
       ).first,
     ).padding.resolve(TextDirection.ltr);
 }

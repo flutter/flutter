@@ -493,11 +493,9 @@ class RecipeSheet extends StatelessWidget {
                   ),
                 ]
               ),
-            ]..addAll(recipe.ingredients.map<TableRow>(
-              (RecipeIngredient ingredient) {
+              ...recipe.ingredients.map<TableRow>((RecipeIngredient ingredient) {
                 return _buildItemRow(ingredient.amount, ingredient.description);
-              }
-            ))..add(
+              }),
               TableRow(
                 children: <Widget>[
                   const SizedBox(),
@@ -506,12 +504,11 @@ class RecipeSheet extends StatelessWidget {
                     child: Text('Steps', style: headingStyle),
                   ),
                 ]
-              )
-            )..addAll(recipe.steps.map<TableRow>(
-              (RecipeStep step) {
+              ),
+              ...recipe.steps.map<TableRow>((RecipeStep step) {
                 return _buildItemRow(step.duration ?? '', step.description);
-              }
-            )),
+              }),
+            ],
           ),
         ),
       ),

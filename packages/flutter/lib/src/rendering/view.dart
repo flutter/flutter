@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, Window;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show MouseTrackerAnnotation;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -39,7 +40,7 @@ class ViewConfiguration {
   }
 
   @override
-  String toString() => '$size at ${devicePixelRatio}x';
+  String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
 }
 
 /// The root of the render tree.
@@ -73,7 +74,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The configuration is initially set by the `configuration` argument
   /// passed to the constructor.
   ///
-  /// Always call [scheduleInitialFrame] before changing the configuration.
+  /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     assert(value != null);
     if (configuration == value)
@@ -84,7 +85,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  ui.Window _window;
+  final ui.Window _window;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -109,16 +110,28 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// Bootstrap the rendering pipeline by scheduling the first frame.
   ///
+  /// Deprecated. Call [prepareInitialFrame] followed by a call to
+  /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
+  @Deprecated('Call prepareInitialFrame followed by owner.requestVisualUpdate() instead.')
+  void scheduleInitialFrame() {
+    prepareInitialFrame();
+    owner.requestVisualUpdate();
+  }
+
+  /// Bootstrap the rendering pipeline by preparing the first frame.
+  ///
   /// This should only be called once, and must be called before changing
   /// [configuration]. It is typically called immediately after calling the
   /// constructor.
-  void scheduleInitialFrame() {
+  ///
+  /// This does not actually schedule the first frame. Call
+  /// [PipelineOwner.requestVisualUpdate] on [owner] to do that.
+  void prepareInitialFrame() {
     assert(owner != null);
     assert(_rootTransform == null);
     scheduleInitialLayout();
     scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
     assert(_rootTransform != null);
-    owner.requestVisualUpdate();
   }
 
   Matrix4 _rootTransform;
@@ -173,6 +186,21 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
+  /// Determines the set of mouse tracker annotations at the given position.
+  ///
+  /// See also:
+  ///
+  /// * [Layer.findAll], which is used by this method to find all
+  ///   [AnnotatedRegionLayer]s annotated for mouse tracking.
+  Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
+    // Layer hit testing is done using device pixels, so we have to convert
+    // the logical coordinates of the event location back to device pixels
+    // here.
+    return layer.findAll<MouseTrackerAnnotation>(
+      position * configuration.devicePixelRatio
+    ).annotations;
+  }
+
   @override
   bool get isRepaintBoundary => true;
 
@@ -215,12 +243,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     final Rect bounds = paintBounds;
     final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
     final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
-    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
+    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top)?.annotation;
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
+        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom)?.annotation;
         break;
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
@@ -256,7 +284,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // root superclasses don't include any interesting information for this
     // class
     assert(() {
-      properties.add(DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
+      properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
       return true;
     }());
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));

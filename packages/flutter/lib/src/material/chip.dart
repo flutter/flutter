@@ -11,11 +11,13 @@ import 'package:flutter/widgets.dart';
 
 import 'chip_theme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
@@ -77,6 +79,15 @@ abstract class ChipAttributes {
   ///
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
+  ///
+  /// If [labelStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
   TextStyle get labelStyle;
 
   /// The [ShapeBorder] to draw around the chip.
@@ -85,7 +96,15 @@ abstract class ChipAttributes {
   ShapeBorder get shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  FocusNode get focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  bool get autofocus;
 
   /// Color to be used for the unselected, enabled chip's background.
   ///
@@ -156,7 +175,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool snippet --template=stateful_widget_scaffold}
+  /// {@tool snippet --template=stateful_widget_scaffold_center}
   ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
@@ -212,7 +231,7 @@ abstract class DeletableChipAttributes {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return Center(child: CastList());
+  ///   return CastList();
   /// }
   /// ```
   /// {@end-tool}
@@ -224,6 +243,38 @@ abstract class DeletableChipAttributes {
 
   /// The message to be used for the chip's delete button tooltip.
   String get deleteButtonTooltipMessage;
+}
+
+/// An interface for material design chips that can have check marks.
+///
+/// The defaults mentioned in the documentation for each attribute are what
+/// the implementing classes typically use for defaults (but this class doesn't
+/// provide or enforce them).
+///
+/// See also:
+///
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
+///  * [FilterChip], uses tags or descriptive words as a way to filter content.
+///  * <https://material.io/design/components/chips.html>
+abstract class CheckmarkableChipAttributes {
+  // This class is intended to be used as an interface, and should not be
+  // extended directly.
+  factory CheckmarkableChipAttributes._() => null;
+
+  /// Whether or not to show a check mark when [selected] is true.
+  ///
+  /// Defaults to true.
+  bool get showCheckmark;
+
+  /// [Color] of the chip's check mark when a check mark is visible.
+  ///
+  /// This will override the color set by the platform's brightness setting.
+  ///
+  /// If null, it will defer to a color selected by the platform's brightness
+  /// setting.
+  Color get checkmarkColor;
 }
 
 /// An interface for material design chips that can be selected.
@@ -482,7 +533,7 @@ abstract class TappableChipAttributes {
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a material design chip.
   ///
-  /// The [label] and [clipBehavior] arguments must not be null.
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// The [elevation] must be null or non-negative.
   const Chip({
     Key key,
@@ -496,12 +547,15 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.deleteButtonTooltipMessage,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
   }) : assert(label != null),
+       assert(autofocus != null),
        assert(clipBehavior != null),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
@@ -518,6 +572,10 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final ShapeBorder shape;
   @override
   final Clip clipBehavior;
+  @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
   @override
   final Color backgroundColor;
   @override
@@ -552,6 +610,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       tapEnabled: false,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       backgroundColor: backgroundColor,
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
@@ -612,6 +672,7 @@ class InputChip extends StatelessWidget
         ChipAttributes,
         DeletableChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
   /// Creates an [InputChip].
@@ -619,9 +680,10 @@ class InputChip extends StatelessWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
+  /// arguments must not be null. The [pressElevation] and [elevation] must be
+  /// null or non-negative. Typically, [pressElevation] is greater than
+  /// [elevation].
   const InputChip({
     Key key,
     this.avatar,
@@ -642,17 +704,22 @@ class InputChip extends StatelessWidget
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
+    this.showCheckmark,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(isEnabled != null),
        assert(label != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
@@ -694,6 +761,10 @@ class InputChip extends StatelessWidget
   @override
   final Clip clipBehavior;
   @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
+  @override
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
@@ -705,6 +776,10 @@ class InputChip extends StatelessWidget
   final Color shadowColor;
   @override
   final Color selectedShadowColor;
+  @override
+  final bool showCheckmark;
+  @override
+  final Color checkmarkColor;
   @override
   final ShapeBorder avatarBorder;
 
@@ -730,12 +805,16 @@ class InputChip extends StatelessWidget
       tooltip: tooltip,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       backgroundColor: backgroundColor,
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
       selectedShadowColor: selectedShadowColor,
+      showCheckmark: showCheckmark,
+      checkmarkColor: checkmarkColor,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
       avatarBorder: avatarBorder,
     );
@@ -803,9 +882,9 @@ class ChoiceChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
-  /// The [label], [selected], and [clipBehavior] arguments must not be null.
-  /// The [pressElevation] and [elevation] must be null or non-negative.
-  /// Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [selected], [autofocus], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
   const ChoiceChip({
     Key key,
     this.avatar,
@@ -820,6 +899,8 @@ class ChoiceChip extends StatelessWidget
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
@@ -830,6 +911,7 @@ class ChoiceChip extends StatelessWidget
   }) : assert(selected != null),
        assert(label != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
@@ -858,6 +940,10 @@ class ChoiceChip extends StatelessWidget
   final ShapeBorder shape;
   @override
   final Clip clipBehavior;
+  @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
   @override
   final Color backgroundColor;
   @override
@@ -893,6 +979,8 @@ class ChoiceChip extends StatelessWidget
       tooltip: tooltip,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       disabledColor: disabledColor,
       selectedColor: selectedColor ?? chipTheme.secondarySelectedColor,
       backgroundColor: backgroundColor,
@@ -997,12 +1085,13 @@ class FilterChip extends StatelessWidget
     implements
         ChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
-  /// The [selected], [label], and [clipBehavior] arguments must not be null.
-  /// The [pressElevation] and [elevation] must be null or non-negative.
-  /// Typically, [pressElevation] is greater than [elevation].
+  /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
   const FilterChip({
     Key key,
     this.avatar,
@@ -1017,16 +1106,21 @@ class FilterChip extends StatelessWidget
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
+    this.showCheckmark,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(label != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
@@ -1056,6 +1150,10 @@ class FilterChip extends StatelessWidget
   @override
   final Clip clipBehavior;
   @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
+  @override
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
@@ -1067,6 +1165,10 @@ class FilterChip extends StatelessWidget
   final Color shadowColor;
   @override
   final Color selectedShadowColor;
+  @override
+  final bool showCheckmark;
+  @override
+  final Color checkmarkColor;
   @override
   final ShapeBorder avatarBorder;
 
@@ -1087,6 +1189,8 @@ class FilterChip extends StatelessWidget
       tooltip: tooltip,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       backgroundColor: backgroundColor,
       disabledColor: disabledColor,
       selectedColor: selectedColor,
@@ -1096,6 +1200,8 @@ class FilterChip extends StatelessWidget
       elevation: elevation,
       shadowColor: shadowColor,
       selectedShadowColor: selectedShadowColor,
+      showCheckmark: showCheckmark,
+      checkmarkColor: checkmarkColor,
       avatarBorder: avatarBorder,
     );
   }
@@ -1151,9 +1257,9 @@ class FilterChip extends StatelessWidget
 class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes {
   /// Create a chip that acts like a button.
   ///
-  /// The [label], [onPressed] and [clipBehavior] arguments must not be null.
-  /// The [pressElevation] and [elevation] must be null or non-negative.
-  /// Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [onPressed], [autofocus], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
   const ActionChip({
     Key key,
     this.avatar,
@@ -1165,12 +1271,16 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
   }) : assert(label != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(
          onPressed != null,
          'Rather than disabling an ActionChip by setting onPressed to null, '
@@ -1199,6 +1309,10 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   final Clip clipBehavior;
   @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
+  @override
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
@@ -1222,6 +1336,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       backgroundColor: backgroundColor,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       padding: padding,
       labelPadding: labelPadding,
       isEnabled: true,
@@ -1267,6 +1383,7 @@ class RawChip extends StatefulWidget
         ChipAttributes,
         DeletableChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
   /// Creates a RawChip
@@ -1274,9 +1391,10 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], and [clipBehavior] arguments must not be null.
-  /// The [pressElevation] and [elevation] must be null or non-negative.
-  /// Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
+  /// arguments must not be null. The [pressElevation] and [elevation] must be
+  /// null or non-negative. Typically, [pressElevation] is greater than
+  /// [elevation].
   const RawChip({
     Key key,
     this.avatar,
@@ -1292,23 +1410,28 @@ class RawChip extends StatefulWidget
     this.onSelected,
     this.pressElevation,
     this.tapEnabled = true,
-    this.selected,
-    this.showCheckmark = true,
+    this.selected = false,
     this.isEnabled = true,
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
+    this.showCheckmark = true,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(label != null),
        assert(isEnabled != null),
+       assert(selected != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
@@ -1351,6 +1474,10 @@ class RawChip extends StatefulWidget
   @override
   final Clip clipBehavior;
   @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
+  @override
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
@@ -1363,15 +1490,11 @@ class RawChip extends StatefulWidget
   @override
   final Color selectedShadowColor;
   @override
-  final CircleBorder avatarBorder;
-
-  /// Whether or not to show a check mark when [selected] is true.
-  ///
-  /// For instance, the [ChoiceChip] sets this to false so that it can be
-  /// be selected without showing the check mark.
-  ///
-  /// Defaults to true.
   final bool showCheckmark;
+  @override
+  final Color checkmarkColor;
+  @override
+  final CircleBorder avatarBorder;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -1400,6 +1523,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   Animation<double> enableAnimation;
   Animation<double> selectionFade;
 
+  final Set<MaterialState> _states = <MaterialState>{};
+
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
 
@@ -1410,12 +1535,14 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   }
 
   bool _isTapping = false;
-  bool get isTapping => !canTap ? false : _isTapping;
+  bool get isTapping => canTap && _isTapping;
 
   @override
   void initState() {
     assert(widget.onSelected == null || widget.onPressed == null);
     super.initState();
+    _updateState(MaterialState.disabled, !widget.isEnabled);
+    _updateState(MaterialState.selected, widget.selected);
     selectController = AnimationController(
       duration: _kSelectDuration,
       value: widget.selected == true ? 1.0 : 0.0,
@@ -1486,12 +1613,17 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     super.dispose();
   }
 
+  void _updateState(MaterialState state, bool value) {
+    value ? _states.add(state) : _states.remove(state);
+  }
+
   void _handleTapDown(TapDownDetails details) {
     if (!canTap) {
       return;
     }
     setState(() {
       _isTapping = true;
+      _updateState(MaterialState.pressed, true);
     });
   }
 
@@ -1501,6 +1633,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     setState(() {
       _isTapping = false;
+      _updateState(MaterialState.pressed, false);
     });
   }
 
@@ -1510,10 +1643,23 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     setState(() {
       _isTapping = false;
+      _updateState(MaterialState.pressed, false);
     });
     // Only one of these can be set, so only one will be called.
     widget.onSelected?.call(!widget.selected);
     widget.onPressed?.call();
+  }
+
+  void _handleFocus(bool isFocused) {
+    setState(() {
+      _updateState(MaterialState.focused, isFocused);
+    });
+  }
+
+  void _handleHover(bool isHovered) {
+    setState(() {
+      _updateState(MaterialState.hovered, isHovered);
+    });
   }
 
   /// Picks between three different colors, depending upon the state of two
@@ -1535,6 +1681,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
+        _updateState(MaterialState.disabled, !widget.isEnabled);
         if (widget.isEnabled) {
           enableController.forward();
         } else {
@@ -1553,6 +1700,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     if (oldWidget.selected != widget.selected) {
       setState(() {
+        _updateState(MaterialState.selected, widget.selected);
         if (widget.selected == true) {
           selectController.forward();
         } else {
@@ -1619,18 +1767,28 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
     final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? _defaultShadowColor;
     final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
-    final bool selected = widget.selected ?? false;
+    final Color checkmarkColor = widget.checkmarkColor ?? chipTheme.checkmarkColor;
+    final bool showCheckmark = widget.showCheckmark ?? chipTheme.showCheckmark ?? true;
+
+    final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
+    final Color resolvedLabelColor =  MaterialStateProperty.resolveAs<Color>(effectiveLabelStyle?.color, _states);
+    final TextStyle resolvedLabelStyle = effectiveLabelStyle?.copyWith(color: resolvedLabelColor);
 
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
-      shadowColor: selected ? selectedShadowColor : shadowColor,
+      shadowColor: widget.selected ? selectedShadowColor : shadowColor,
       animationDuration: pressedAnimationDuration,
       shape: shape,
       clipBehavior: widget.clipBehavior,
       child: InkWell(
+        onFocusChange: _handleFocus,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        canRequestFocus: widget.isEnabled,
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
+        onHover: canTap ? _handleHover : null,
         customBorder: shape,
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
@@ -1653,7 +1811,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   textAlign: TextAlign.start,
                   maxLines: 1,
                   softWrap: false,
-                  style: widget.labelStyle ?? chipTheme.labelStyle,
+                  style: resolvedLabelStyle,
                   child: widget.label,
                 ),
                 avatar: AnimatedSwitcher(
@@ -1670,7 +1828,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                 padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
                 labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
                 showAvatar: hasAvatar,
-                showCheckmark: widget.showCheckmark,
+                showCheckmark: showCheckmark,
+                checkmarkColor: checkmarkColor,
                 canTapBody: canTap,
               ),
               value: widget.selected,
@@ -1688,7 +1847,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     BoxConstraints constraints;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        constraints = const BoxConstraints(minHeight: 48.0);
+        constraints = const BoxConstraints(minHeight: kMinInteractiveDimension);
         break;
       case MaterialTapTargetSize.shrinkWrap:
         constraints = const BoxConstraints();
@@ -1938,6 +2097,7 @@ class _ChipRenderTheme {
     @required this.labelPadding,
     @required this.showAvatar,
     @required this.showCheckmark,
+    @required this.checkmarkColor,
     @required this.canTapBody,
   });
 
@@ -1949,6 +2109,7 @@ class _ChipRenderTheme {
   final EdgeInsets labelPadding;
   final bool showAvatar;
   final bool showCheckmark;
+  final Color checkmarkColor;
   final bool canTapBody;
 
   @override
@@ -1968,6 +2129,7 @@ class _ChipRenderTheme {
         && typedOther.labelPadding == labelPadding
         && typedOther.showAvatar == showAvatar
         && typedOther.showCheckmark == showCheckmark
+        && typedOther.checkmarkColor == checkmarkColor
         && typedOther.canTapBody == canTapBody;
   }
 
@@ -1982,6 +2144,7 @@ class _ChipRenderTheme {
       labelPadding,
       showAvatar,
       showCheckmark,
+      checkmarkColor,
       canTapBody,
     );
   }
@@ -2474,13 +2637,17 @@ class _RenderChip extends RenderBox {
 
   void _paintCheck(Canvas canvas, Offset origin, double size) {
     Color paintColor;
-    switch (theme.brightness) {
-      case Brightness.light:
-        paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha);
-        break;
-      case Brightness.dark:
-        paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha);
-        break;
+    if (theme.checkmarkColor != null) {
+      paintColor = theme.checkmarkColor;
+    } else {
+      switch (theme.brightness) {
+        case Brightness.light:
+          paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha);
+          break;
+        case Brightness.dark:
+          paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha);
+          break;
+      }
     }
 
     final ColorTween fadeTween = ColorTween(begin: Colors.transparent, end: paintColor);
@@ -2607,23 +2774,22 @@ class _RenderChip extends RenderBox {
 
   @override
   void debugPaint(PaintingContext context, Offset offset) {
-    assert(!_debugShowTapTargetOutlines ||
-        () {
-          // Draws a rect around the tap targets to help with visualizing where
-          // they really are.
-          final Paint outlinePaint = Paint()
-            ..color = const Color(0xff800000)
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
-          if (deleteIconShowing) {
-            context.canvas.drawRect(deleteButtonRect.shift(offset), outlinePaint);
-          }
-          context.canvas.drawRect(
-            pressRect.shift(offset),
-            outlinePaint..color = const Color(0xff008000),
-          );
-          return true;
-        }());
+    assert(!_debugShowTapTargetOutlines || () {
+      // Draws a rect around the tap targets to help with visualizing where
+      // they really are.
+      final Paint outlinePaint = Paint()
+        ..color = const Color(0xff800000)
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      if (deleteIconShowing) {
+        context.canvas.drawRect(deleteButtonRect.shift(offset), outlinePaint);
+      }
+      context.canvas.drawRect(
+        pressRect.shift(offset),
+        outlinePaint..color = const Color(0xff008000),
+      );
+      return true;
+    }());
   }
 
   @override

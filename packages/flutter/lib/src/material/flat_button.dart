@@ -44,6 +44,8 @@ import 'theme_data.dart';
 ///
 /// This example shows a simple [FlatButton].
 ///
+/// ![A simple FlatButton](https://flutter.github.io/assets-for-api-docs/assets/material/flat_button.png)
+///
 /// ```dart
 /// FlatButton(
 ///   onPressed: () {
@@ -62,6 +64,8 @@ import 'theme_data.dart';
 /// with splashes rendered in a different shade of blue.
 /// It turns black-on-grey when disabled.
 /// The button has 8px of padding on each side, and the text is 20px high.
+///
+/// ![A FlatButton with white text on a blue background](https://flutter.github.io/assets-for-api-docs/assets/material/flat_button_properties.png)
 ///
 /// ```dart
 /// FlatButton(
@@ -93,6 +97,8 @@ import 'theme_data.dart';
 ///  * <https://material.io/design/components/buttons.html>
 class FlatButton extends MaterialButton {
   /// Create a simple text button.
+  ///
+  /// The [autofocus] and [clipBehavior] arguments must not be null.
   const FlatButton({
     Key key,
     @required VoidCallback onPressed,
@@ -109,11 +115,14 @@ class FlatButton extends MaterialButton {
     Brightness colorBrightness,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior,
+    Clip clipBehavior = Clip.none,
     FocusNode focusNode,
+    bool autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget child,
-  }) : super(
+  }) : assert(clipBehavior != null),
+       assert(autofocus != null),
+       super(
          key: key,
          onPressed: onPressed,
          onHighlightChanged: onHighlightChanged,
@@ -131,6 +140,7 @@ class FlatButton extends MaterialButton {
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         autofocus: autofocus,
          materialTapTargetSize: materialTapTargetSize,
          child: child,
       );
@@ -160,6 +170,7 @@ class FlatButton extends MaterialButton {
     ShapeBorder shape,
     Clip clipBehavior,
     FocusNode focusNode,
+    bool autofocus,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
@@ -186,8 +197,9 @@ class FlatButton extends MaterialButton {
       padding: buttonTheme.getPadding(this),
       constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
-      clipBehavior: clipBehavior ?? Clip.none,
+      clipBehavior: clipBehavior,
       focusNode: focusNode,
+      autofocus: autofocus,
       materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
@@ -216,13 +228,16 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
     Brightness colorBrightness,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior,
+    Clip clipBehavior = Clip.none,
     FocusNode focusNode,
+    bool autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
        assert(label != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
        super(
          key: key,
          onPressed: onPressed,
@@ -241,6 +256,7 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         autofocus: autofocus,
          materialTapTargetSize: materialTapTargetSize,
          child: Row(
            mainAxisSize: MainAxisSize.min,

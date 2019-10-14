@@ -297,12 +297,15 @@ Future<void> main() async {
           final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
           final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
-          await tester.pumpWidget(FadeInImage(
-            placeholder: placeholderProvider,
-            image: imageProvider,
-            fadeOutDuration: animationDuration,
-            fadeInDuration: animationDuration,
-            imageSemanticLabel: imageSemanticText,
+          await tester.pumpWidget(Directionality(
+            textDirection: TextDirection.ltr,
+            child: FadeInImage(
+              placeholder: placeholderProvider,
+              image: imageProvider,
+              fadeOutDuration: animationDuration,
+              fadeInDuration: animationDuration,
+              imageSemanticLabel: imageSemanticText,
+            ),
           ));
 
           placeholderProvider.complete();

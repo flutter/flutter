@@ -90,9 +90,12 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.0.3.png'),
+      matchesGoldenFile(
+        'editable_text_test.0.png',
+        version: 3,
+      ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -141,9 +144,12 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.1.3.png'),
+      matchesGoldenFile(
+        'editable_text_test.1.png',
+        version: 3,
+      ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
@@ -445,7 +451,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 10);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -501,7 +507,51 @@ void main() {
     await tester.pumpAndSettle();
     // The cursor has been set.
     expect(controller.selection.baseOffset, 10);
-  });
+  }, skip: isBrowser);
+
+  testWidgets('Updating the floating cursor can end without update', (WidgetTester tester) async {
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+
+    expect(controller.selection.baseOffset, 29);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+
+    expect(controller.selection.baseOffset, 29);
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+
+    await tester.pumpAndSettle();
+    // The cursor did not change.
+    expect(controller.selection.baseOffset, 29);
+    expect(tester.takeException(), null);
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
@@ -567,7 +617,7 @@ void main() {
       offset: const Offset(-250, 20)));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
-  });
+  }, skip: isBrowser);
 
   testWidgets('autofocus sets cursor to the end of text', (WidgetTester tester) async {
     const String text = 'hello world';
@@ -599,7 +649,7 @@ void main() {
     expect(focusNode.hasFocus, true);
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, text.length);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Floating cursor is painted on iOS', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -649,7 +699,7 @@ void main() {
           const Rect.fromLTRB(463.3333435058594, -0.916666666666668, 465.3333435058594, 17.083333015441895),
           const Radius.circular(2.0),
         ),
-        color: const Color(0xff8e8e93),
+        color: const Color(0xff999999),
       )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
@@ -674,7 +724,7 @@ void main() {
           const Rect.fromLTRB(191.3333282470703, -0.916666666666668, 193.3333282470703, 17.083333015441895),
           const Radius.circular(2.0),
         ),
-        color: const Color(0xff8e8e93),
+        color: const Color(0xff999999),
       )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
@@ -687,7 +737,7 @@ void main() {
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
     debugDefaultTargetPlatformOverride = null;
-  });
+  }, skip: isBrowser);
 
   testWidgets('cursor layout iOS', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -747,9 +797,11 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.2.0.png'),
+      matchesGoldenFile(
+        'editable_text_test.2.png',
+        version: 0,
+      ),
     );
     debugDefaultTargetPlatformOverride = null;
-  }, skip: !isLinux);
-
+  });
 }

@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:test_api/test_api.dart' as test_package;
@@ -16,6 +17,7 @@ import 'package:test_api/test_api.dart' as test_package;
 import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
+import 'event_simulation.dart';
 import 'finders.dart';
 import 'matchers.dart';
 import 'test_async_utils.dart';
@@ -49,19 +51,29 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///
 /// The callback can be asynchronous (using `async`/`await` or
 /// using explicit [Future]s).
-/// Tests using the [AutomatedTestWidgetsFlutterBinding]
-/// have a default time out of two seconds,
-/// which is automatically increased for some expensive operations,
-/// and can also be manually increased by calling
-/// [AutomatedTestWidgetsFlutterBinding.addTime].
-/// The maximum that this timeout can reach (automatically or manually increased)
-/// is defined by the timeout property,
-/// which defaults to [TestWidgetsFlutterBinding.defaultTestTimeout].
 ///
-/// If the `enableSemantics` parameter is set to `true`,
+/// There are two kinds of timeouts that can be specified. The `timeout`
+/// argument specifies the backstop timeout implemented by the `test` package.
+/// If set, it should be relatively large (minutes). It defaults to ten minutes
+/// for tests run by `flutter test`, and is unlimited for tests run by `flutter
+/// run`; specifically, it defaults to
+/// [TestWidgetsFlutterBinding.defaultTestTimeout].
+///
+/// The `initialTimeout` argument specifies the timeout implemented by the
+/// `flutter_test` package itself. If set, it may be relatively small (seconds),
+/// as it is automatically increased for some expensive operations, and can also
+/// be manually increased by calling
+/// [AutomatedTestWidgetsFlutterBinding.addTime]. The effective maximum value of
+/// this timeout (even after calling `addTime`) is the one specified by the
+/// `timeout` argument.
+///
+/// In general, timeouts are race conditions and cause flakes, so best practice
+/// is to avoid the use of timeouts in tests.
+///
+/// If the `semanticsEnabled` parameter is set to `true`,
 /// [WidgetTester.ensureSemantics] will have been called before the tester is
 /// passed to the `callback`, and that handle will automatically be disposed
-/// after the callback is finished.
+/// after the callback is finished. It defaults to true.
 ///
 /// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
@@ -89,11 +101,11 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool skip = false,
   test_package.Timeout timeout,
-  bool semanticsEnabled = false,
+  Duration initialTimeout,
+  bool semanticsEnabled = true,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
-  timeout ??= binding.defaultTestTimeout;
   test(
     description,
     () {
@@ -105,15 +117,17 @@ void testWidgets(
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
         () async {
+          debugResetSemanticsIdCounter();
           await callback(tester);
           semanticsHandle?.dispose();
         },
         tester._endOfTestVerifications,
         description: description ?? '',
+        timeout: initialTimeout,
       );
     },
     skip: skip,
-    timeout: timeout,
+    timeout: timeout ?? binding.defaultTestTimeout,
   );
 }
 
@@ -132,6 +146,11 @@ void testWidgets(
 ///
 /// If the callback is asynchronous, make sure you `await` the call
 /// to [benchmarkWidgets], otherwise it won't run!
+///
+/// If the `semanticsEnabled` parameter is set to `true`,
+/// [WidgetTester.ensureSemantics] will have been called before the tester is
+/// passed to the `callback`, and that handle will automatically be disposed
+/// after the callback is finished.
 ///
 /// Benchmarks must not be run in checked mode, because the performance is not
 /// representative. To avoid this, this function will print a big message if it
@@ -154,7 +173,11 @@ void testWidgets(
 ///       });
 ///       exit(0);
 ///     }
-Future<void> benchmarkWidgets(WidgetTesterCallback callback, {bool mayRunWithAsserts = false}) {
+Future<void> benchmarkWidgets(
+  WidgetTesterCallback callback, {
+  bool mayRunWithAsserts = false,
+  bool semanticsEnabled = false,
+}) {
   assert(() {
     if (mayRunWithAsserts)
       return true;
@@ -175,9 +198,16 @@ Future<void> benchmarkWidgets(WidgetTesterCallback callback, {bool mayRunWithAss
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
+  SemanticsHandle semanticsHandle;
+  if (semanticsEnabled == true) {
+    semanticsHandle = tester.ensureSemantics();
+  }
   tester._recordNumberOfSemanticsHandles();
   return binding.runTest(
-    () => callback(tester),
+    () async {
+      await callback(tester);
+      semanticsHandle?.dispose();
+    },
     tester._endOfTestVerifications,
   ) ?? Future<void>.value();
 }
@@ -691,6 +721,74 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
+  /// Simulates sending physical key down and up events through the system channel.
+  ///
+  /// This only simulates key events coming from a physical keyboard, not from a
+  /// soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
+  /// Windows, iOS) are not yet supported.
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// This method sends both the key down and the key up events, to simulate a
+  /// key press. To simulate individual down and/or up events, see
+  /// [sendKeyDownEvent] and [sendKeyUpEvent].
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] to simulate only a key down event.
+  ///  - [sendKeyUpEvent] to simulate only a key up event.
+  Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    await simulateKeyDownEvent(key, platform: platform);
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key down event through the system channel.
+  ///
+  /// This only simulates key down events coming from a physical keyboard, not
+  /// from a soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
+  /// Windows, iOS) are not yet supported.
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    return simulateKeyDownEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key up event through the system channel.
+  ///
+  /// This only simulates key up events coming from a physical keyboard,
+  /// not from a soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". May not be null.
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
+  }
+
   /// Makes an effort to dismiss the current page with a Material [Scaffold] or
   /// a [CupertinoPageScaffold].
   ///
@@ -758,7 +856,7 @@ typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
 
-  _TickerDisposeCallback _onDispose;
+  final _TickerDisposeCallback _onDispose;
 
   @override
   void dispose() {

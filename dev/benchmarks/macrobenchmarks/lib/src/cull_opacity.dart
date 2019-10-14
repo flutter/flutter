@@ -21,6 +21,12 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(children: List<Widget>.generate(50, (int i) => Positioned(
       left: 0,

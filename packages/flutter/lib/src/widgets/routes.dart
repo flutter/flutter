@@ -185,6 +185,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _animation.addStatusListener(_handleStatusChanged);
+    super.didPush();
     return _controller.forward();
   }
 
@@ -589,11 +590,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   @override
   void initState() {
     super.initState();
-    final List<Listenable> animations = <Listenable>[];
-    if (widget.route.animation != null)
-      animations.add(widget.route.animation);
-    if (widget.route.secondaryAnimation != null)
-      animations.add(widget.route.secondaryAnimation);
+    final List<Listenable> animations = <Listenable>[
+      if (widget.route.animation != null) widget.route.animation,
+      if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation,
+    ];
     _listenable = Listenable.merge(animations);
     if (widget.route.isCurrent) {
       widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
@@ -630,6 +630,9 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
+    if (widget.route.isCurrent) {
+      widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
+    }
     setState(fn);
   }
 
@@ -653,8 +656,21 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     context,
                     widget.route.animation,
                     widget.route.secondaryAnimation,
-                    IgnorePointer(
-                      ignoring: widget.route.animation?.status == AnimationStatus.reverse,
+                    // This additional AnimatedBuilder is include because if the
+                    // value of the userGestureInProgressNotifier changes, it's
+                    // only necessary to rebuild the IgnorePointer widget and set
+                    // the focus node's ability to focus.
+                    AnimatedBuilder(
+                      animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                      builder: (BuildContext context, Widget child) {
+                        final bool ignoreEvents = widget.route.animation?.status == AnimationStatus.reverse ||
+                            (widget.route.navigator?.userGestureInProgress ?? false);
+                        focusScopeNode.canRequestFocus = !ignoreEvents;
+                        return IgnorePointer(
+                          ignoring: ignoreEvents,
+                          child: child,
+                        );
+                      },
                       child: child,
                     ),
                   );

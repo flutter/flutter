@@ -13,6 +13,8 @@ void main() {
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
+
+      await driver.waitUntilFirstFrameRasterized();
     });
 
     tearDownAll(() async {

@@ -1,0 +1,148 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+//
+// This script is used to initialize the build in a module or plugin project.
+// During this phase, the script applies the Maven plugin and configures the
+// destination of the local repository.
+// The local repository will contain the AAR and POM files.
+
+import java.nio.file.Paths
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.maven.MavenDeployer
+import org.gradle.api.plugins.MavenPlugin
+import org.gradle.api.tasks.Upload
+
+void configureProject(Project project, String outputDir) {
+    if (!project.hasProperty("android")) {
+        throw new GradleException("Android property not found.")
+    }
+    if (!project.android.hasProperty("libraryVariants")) {
+        throw new GradleException("Can't generate AAR on a non Android library project.");
+    }
+
+    project.apply plugin: "maven"
+
+    project.android.libraryVariants.all { variant ->
+        addAarTask(project, variant)
+    }
+    // Snapshot versions include the timestamp in the artifact name.
+    // Therefore, remove the snapshot part, so new runs of `flutter build aar` overrides existing artifacts.
+    // This version isn't relevant in Flutter since the pub version is used
+    // to resolve dependencies.
+    project.version = project.version.replace("-SNAPSHOT", "")
+
+    project.uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: "file://${outputDir}/outputs/repo")
+            }
+        }
+    }
+    if (!project.property("is-plugin").toBoolean()) {
+        return
+    }
+    if (project.hasProperty('localEngineOut')) {
+        // TODO(egarciad): Support local engine.
+        // This most likely requires refactoring `flutter.gradle`, so the logic can be reused.
+        throw new GradleException(
+            "Local engine isn't supported when building the plugins as AAR. " +
+            "See: https://github.com/flutter/flutter/issues/40866")
+    }
+
+    // This is a Flutter plugin project. Plugin projects don't apply the Flutter Gradle plugin,
+    // as a result, add the dependency on the embedding.
+    project.repositories {
+        maven {
+            url "http://download.flutter.io"
+        }
+    }
+    String engineVersion = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.version")
+        .toFile().text.trim()
+    project.dependencies {
+        // Add the embedding dependency.
+        compileOnly ("io.flutter:flutter_embedding_release:1.0.0-$engineVersion") {
+            // We only need to expose io.flutter.plugin.*
+            // No need for the embedding transitive dependencies.
+            transitive = false
+        }
+    }
+}
+
+String getFlutterRoot(Project project) {
+    if (!project.hasProperty("flutter-root")) {
+        throw new GradleException("The `-Pflutter-root` flag must be specified.")
+    }
+    return project.property("flutter-root")
+}
+
+void addAarTask(Project project, variant) {
+    String variantName = variant.name.capitalize()
+    String taskName = "assembleAar${variantName}"
+    project.tasks.create(name: taskName) {
+        // This check is required to be able to configure the archives before `uploadArchives` runs.
+        if (!project.gradle.startParameter.taskNames.contains(taskName)) {
+            return
+        }
+        project.uploadArchives.repositories.mavenDeployer {
+            pom {
+                artifactId = "${project.name}_${variant.name.toLowerCase()}"
+            }
+        }
+        overrideDefaultPublishConfig(project, variant)
+        // Generate the Maven artifacts.
+        finalizedBy "uploadArchives"
+    }
+}
+
+// This method mimics the logic in AGP when `android.defaultPublishConfig` is set in `build.gradle`:
+// https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/variant/VariantHelper.java
+//
+// Unfortunately, `android.defaultPublishConfig` cannot be overriden at this point since
+// AGP already run this code.
+void overrideDefaultPublishConfig(Project project, variant) {
+    String variantName = variant.name.capitalize()
+    Task bundle = project.tasks.findByName("bundle${variantName}Aar") // gradle:3.2.0
+    if (bundle == null) {
+        bundle = project.tasks.findByName("bundle${variantName}") // gradle:3.1.0
+    }
+    if (bundle == null) {
+        throw new GradleException("Can't generate AAR for variant ${variantName}.");
+    }
+    // Clear the current archive artifacts since the artifacts are based on `android.defaultPublishConfig`.
+    project.configurations["archives"].artifacts.clear()
+    // Add the artifact that will be published.
+    project.artifacts.add("archives", bundle)
+
+    def scopeMappings = project.uploadArchives.repositories.mavenDeployer.pom.scopeMappings
+    // Clear the scope mappings added by AGP since they are based on the current `android.defaultPublishConfig`.
+    scopeMappings.mappings.clear()
+    // Add the new mappings.
+    for (Configuration configuration : flattenConfiguration(variant.runtimeConfiguration)) {
+        scopeMappings.addMapping(/* priority = */ 300, configuration, "compile")
+    }
+}
+
+Set<Configuration> flattenConfiguration(Configuration configuration) {
+    Set<Configuration> configs = [configuration]
+    for (Configuration extend : configuration.extendsFrom) {
+        configs.addAll(flattenConfiguration(extend))
+    }
+    return configs
+}
+
+projectsEvaluated {
+    assert rootProject.hasProperty("is-plugin")
+    if (rootProject.property("is-plugin").toBoolean()) {
+        assert rootProject.hasProperty("output-dir")
+        // In plugin projects, the Android library is the root project.
+        configureProject(rootProject, rootProject.property("output-dir"))
+        return
+    }
+    // In module projects, the Android library project is the `:flutter` subproject.
+    Project androidLibraryProject = rootProject.subprojects.find { it.name == "flutter" }
+    assert androidLibraryProject != null
+    assert androidLibraryProject.hasProperty("output-dir")
+    configureProject(androidLibraryProject, androidLibraryProject.property("output-dir"))
+}

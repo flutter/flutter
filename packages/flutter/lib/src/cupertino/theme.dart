@@ -54,7 +54,20 @@ class CupertinoTheme extends StatelessWidget {
   /// exist in the ancestry tree.
   static CupertinoThemeData of(BuildContext context) {
     final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
-    return inheritedTheme?.theme?.data ?? const CupertinoThemeData();
+    return (inheritedTheme?.theme?.data ?? const CupertinoThemeData()).resolveFrom(context, nullOk: true);
+  }
+
+  /// Retrieve the [Brightness] value from the closest ancestor [CupertinoTheme]
+  /// widget.
+  ///
+  /// If no ancestral [CupertinoTheme] widget with explicit brightness value could
+  /// be found, the method will resort to the closest ancestor [MediaQuery] widget.
+  ///
+  /// Throws an exception if no such [CupertinoTheme] or [MediaQuery] widgets exist
+  /// in the ancestry tree, unless [nullOk] is set to true.
+  static Brightness brightnessOf(BuildContext context, { bool nullOk = false }) {
+    final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
+    return inheritedTheme?.theme?.data?._brightness ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness;
   }
 
   /// The widget below this widget in the tree.
@@ -69,7 +82,7 @@ class CupertinoTheme extends StatelessWidget {
       child: IconTheme(
         data: IconThemeData(color: data.primaryColor),
         child: child,
-      )
+      ),
     );
   }
 }
@@ -229,6 +242,23 @@ class CupertinoThemeData extends Diagnosticable {
     );
   }
 
+  /// Return a new `CupertinoThemeData` whose colors are from this `CupertinoThemeData`,
+  /// but resolved aginst the given [BuildContext].
+  ///
+  /// It will be called in [CupertinoTheme.of].
+  @protected
+  CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+
+    return copyWith(
+      primaryColor: convertColor(primaryColor),
+      primaryContrastingColor: convertColor(primaryContrastingColor),
+      textTheme: textTheme?.resolveFrom(context, nullOk: nullOk),
+      barBackgroundColor: convertColor(barBackgroundColor),
+      scaffoldBackgroundColor: convertColor(scaffoldBackgroundColor),
+    );
+  }
+
   /// Create a copy of [CupertinoThemeData] with specified attributes overridden.
   ///
   /// Only the current instance's specified attributes are copied instead of
@@ -259,11 +289,11 @@ class CupertinoThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     const CupertinoThemeData defaultData = CupertinoThemeData();
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
-    properties.add(DiagnosticsProperty<Color>('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
-    properties.add(DiagnosticsProperty<Color>('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
+    properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
+    properties.add(ColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
     properties.add(DiagnosticsProperty<CupertinoTextThemeData>('textTheme', textTheme, defaultValue: defaultData.textTheme));
-    properties.add(DiagnosticsProperty<Color>('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
-    properties.add(DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    properties.add(ColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
+    properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
   }
 }
 
@@ -296,4 +326,37 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
   final Color barBackgroundColor;
   @override
   final Color scaffoldBackgroundColor;
+
+  @override
+  _NoDefaultCupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+
+    return _NoDefaultCupertinoThemeData(
+      brightness,
+      convertColor(primaryColor),
+      convertColor(primaryContrastingColor),
+      textTheme?.resolveFrom(context, nullOk: nullOk),
+      convertColor(barBackgroundColor),
+      convertColor(scaffoldBackgroundColor),
+    );
+  }
+
+  @override
+  CupertinoThemeData copyWith({
+    Brightness brightness,
+    Color primaryColor,
+    Color primaryContrastingColor,
+    CupertinoTextThemeData textTheme,
+    Color barBackgroundColor ,
+    Color scaffoldBackgroundColor,
+  }) {
+    return _NoDefaultCupertinoThemeData(
+      brightness ?? this.brightness,
+      primaryColor ?? this.primaryColor,
+      primaryContrastingColor ?? this.primaryContrastingColor,
+      textTheme ?? this.textTheme,
+      barBackgroundColor ?? this.barBackgroundColor,
+      scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
+    );
+  }
 }

@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 import 'package:yaml/yaml.dart';
 
 import 'utils.dart';
+
+Platform get platform => _platform ??= const LocalPlatform();
+Platform _platform;
 
 /// Loads manifest data from `manifest.yaml` file or from [yaml], if present.
 Manifest loadTaskManifest([ String yaml ]) {
@@ -52,7 +56,7 @@ class ManifestTask {
   final String stage;
 
   /// Capabilities required of the build agent to be able to perform this task.
-  final List<dynamic> requiredAgentCapabilities;
+  final List<String> requiredAgentCapabilities;
 
   /// Whether this test is flaky.
   ///
@@ -61,6 +65,20 @@ class ManifestTask {
 
   /// An optional custom timeout specified in minutes.
   final int timeoutInMinutes;
+
+  /// Whether the task is supported by the current host platform
+  bool isSupportedByHost() {
+    final Set<String> supportedHosts = Set<String>.from(
+      requiredAgentCapabilities.map<String>(
+        (String str) => str.split('/')[0]
+      )
+    );
+    String hostPlatform = platform.operatingSystem;
+    if (hostPlatform == 'macos') {
+      hostPlatform = 'mac'; // package:platform uses 'macos' while manifest.yaml uses 'mac'
+    }
+    return supportedHosts.contains(hostPlatform);
+  }
 }
 
 /// Thrown when the manifest YAML is not valid.

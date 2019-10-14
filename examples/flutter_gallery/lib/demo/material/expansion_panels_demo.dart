@@ -301,14 +301,18 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                     initialValue: item.value,
                     onSaved: (double value) { item.value = value; },
                     builder: (FormFieldState<double> field) {
-                      return Slider(
-                        min: 0.0,
-                        max: 100.0,
-                        divisions: 5,
-                        activeColor: Colors.orange[100 + (field.value * 5.0).round()],
-                        label: '${field.value.round()}',
-                        value: field.value,
-                        onChanged: field.didChange,
+                      return Container(
+                        // Allow room for the value indicator.
+                        padding: const EdgeInsets.only(top: 44.0),
+                        child: Slider(
+                          min: 0.0,
+                          max: 100.0,
+                          divisions: 5,
+                          activeColor: Colors.orange[100 + (field.value * 5.0).round()],
+                          label: '${field.value.round()}',
+                          value: field.value,
+                          onChanged: field.didChange,
+                        ),
                       );
                     },
                   ),

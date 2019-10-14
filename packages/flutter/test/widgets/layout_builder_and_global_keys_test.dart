@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/rendering/sliver.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -55,5 +56,48 @@ void main() {
         return StatefulWrapper(key: key, child: Container(height: 100.0));
       }),
     );
+
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
+    final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverLayoutBuilder(
+              builder: (BuildContext context, SliverConstraints constraint) {
+                return SliverToBoxAdapter(
+                  child: Wrapper(child: StatefulWrapper(key: key, child: Container(height: 100.0))),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverLayoutBuilder(
+              builder: (BuildContext context, SliverConstraints constraint) {
+                key.currentState.trigger();
+                return SliverToBoxAdapter(
+                  child: StatefulWrapper(key: key, child: Container(height: 100.0)),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), null);
   });
 }

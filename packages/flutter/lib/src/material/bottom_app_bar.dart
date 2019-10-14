@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
+import 'elevation_overlay.dart';
 import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -42,7 +43,7 @@ import 'theme.dart';
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
   ///
-  /// The [clipBehavior] argument must not be null.
+  /// The [clipBehavior] argument defaults to [Clip.none] and must not be null.
   /// Additionally, [elevation] must be non-negative.
   ///
   /// If [color], [elevation], or [shape] are null, their [BottomAppBarTheme] values will be used.
@@ -56,9 +57,9 @@ class BottomAppBar extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.notchMargin = 4.0,
     this.child,
-  }) : assert(clipBehavior != null),
-       assert(elevation == null || elevation >= 0.0),
+  }) : assert(elevation == null || elevation >= 0.0),
        assert(notchMargin != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -92,6 +93,8 @@ class BottomAppBar extends StatefulWidget {
   final NotchedShape shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
@@ -125,10 +128,13 @@ class _BottomAppBarState extends State<BottomAppBar> {
         notchMargin: widget.notchMargin,
       )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
+    final double elevation = widget.elevation ?? babTheme.elevation ?? _defaultElevation;
+    final Color color = widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor;
+    final Color effectiveColor = ElevationOverlay.applyOverlay(context, color, elevation);
     return PhysicalShape(
       clipper: clipper,
-      elevation: widget.elevation ?? babTheme.elevation ?? _defaultElevation,
-      color: widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor,
+      elevation: elevation,
+      color: effectiveColor,
       clipBehavior: widget.clipBehavior,
       child: Material(
         type: MaterialType.transparency,

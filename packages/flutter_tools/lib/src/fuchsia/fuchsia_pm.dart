@@ -58,8 +58,7 @@ class FuchsiaPM {
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
   /// is set up to be the file `meta/package` created by [init].
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,
@@ -118,7 +117,7 @@ class FuchsiaPM {
       '-l',
       '$host:$port',
     ];
-    final Process process = await runCommand(command);
+    final Process process = await processUtils.start(command);
     process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -151,8 +150,8 @@ class FuchsiaPM {
     if (fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
-    final List<String> command = <String>[fuchsiaArtifacts.pm.path] + args;
-    final RunResult result = await runAsync(command);
+    final List<String> command = <String>[fuchsiaArtifacts.pm.path, ...args];
+    final RunResult result = await processUtils.run(command);
     return result.exitCode == 0;
   }
 }
@@ -166,6 +165,7 @@ class FuchsiaPM {
 /// Example usage:
 /// var server = FuchsiaPackageServer(
 ///     '/path/to/repo',
+///     'server_name',
 ///     await FuchsiaDevFinder.resolve(deviceName),
 ///     await freshPort());
 /// try {
@@ -176,7 +176,7 @@ class FuchsiaPM {
 ///   server.stop();
 /// }
 class FuchsiaPackageServer {
-  FuchsiaPackageServer(this._repo, this._host, this._port);
+  FuchsiaPackageServer(this._repo, this.name, this._host, this._port);
 
   final String _repo;
   final String _host;
@@ -186,6 +186,9 @@ class FuchsiaPackageServer {
 
   /// The url that can be used by the device to access this package server.
   String get url => 'http://$_host:$_port';
+
+  // The name used to reference the server by fuchsia-pkg:// urls.
+  final String name;
 
   /// Usees [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.

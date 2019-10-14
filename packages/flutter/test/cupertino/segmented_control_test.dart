@@ -117,6 +117,93 @@ void main() {
     }
   });
 
+  testWidgets('Padding works', (WidgetTester tester) async {
+    const Key key = Key('Container');
+
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const SizedBox(
+      height: double.infinity,
+      child: Text('Child 1'),
+    ) ;
+    children[1] = const SizedBox(
+      height: double.infinity,
+      child: Text('Child 2'),
+    ) ;
+
+    Future<void> verifyPadding({ EdgeInsets padding }) async {
+      final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 16);
+      final Rect segmentedControlRect = tester.getRect(find.byKey(key));
+      expect(
+          tester.getTopLeft(find.byWidget(children[0])),
+          segmentedControlRect.topLeft.translate(
+            effectivePadding.topLeft.dx,
+            effectivePadding.topLeft.dy,
+          ),
+      );
+      expect(
+        tester.getBottomLeft(find.byWidget(children[0])),
+        segmentedControlRect.bottomLeft.translate(
+          effectivePadding.bottomLeft.dx,
+          effectivePadding.bottomLeft.dy,
+        ),
+      );
+
+      expect(
+        tester.getTopRight(find.byWidget(children[1])),
+        segmentedControlRect.topRight.translate(
+          effectivePadding.topRight.dx,
+          effectivePadding.topRight.dy,
+        ),
+      );
+      expect(
+        tester.getBottomRight(find.byWidget(children[1])),
+        segmentedControlRect.bottomRight.translate(
+          effectivePadding.bottomRight.dx,
+          effectivePadding.bottomRight.dy,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+        boilerplate(
+          child: CupertinoSegmentedControl<int>(
+            key: key,
+            children: children,
+            onValueChanged: (int newValue) { },
+          ),
+        ),
+    );
+
+    // Default padding works.
+    await verifyPadding();
+
+    // Switch to Child 2 padding should remain the same.
+    await tester.tap(find.text('Child 2'));
+    await tester.pumpAndSettle();
+
+    await verifyPadding();
+
+    await tester.pumpWidget(
+        boilerplate(
+          child: CupertinoSegmentedControl<int>(
+            key: key,
+            padding: const EdgeInsets.fromLTRB(1, 3, 5, 7),
+            children: children,
+            onValueChanged: (int newValue) { },
+          ),
+        ),
+    );
+
+    // Custom padding works.
+    await verifyPadding(padding: const EdgeInsets.fromLTRB(1, 3, 5, 7));
+
+    // Switch back to Child 1 padding should remain the same.
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+
+    await verifyPadding(padding: const EdgeInsets.fromLTRB(1, 3, 5, 7));
+  });
+
   testWidgets('Value attribute must be the key of one of the children widgets', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
@@ -248,7 +335,7 @@ void main() {
       IconThemeData iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
       expect(textStyle.style.color, CupertinoColors.black);
-      expect(iconTheme.color, CupertinoColors.activeOrange);
+      expect(iconTheme.color.value, CupertinoColors.activeOrange.darkColor.value);
 
       await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();
@@ -257,7 +344,7 @@ void main() {
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
       iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
-      expect(textStyle.style.color, CupertinoColors.activeOrange);
+      expect(textStyle.style.color.value, CupertinoColors.activeOrange.darkColor.value);
       expect(iconTheme.color, CupertinoColors.black);
     },
   );
@@ -407,22 +494,24 @@ void main() {
   });
 
   testWidgets(
-      'Background color of child should change on selection, '
-      'and should not change when tapped again', (WidgetTester tester) async {
-    await tester.pumpWidget(setupSimpleSegmentedControl());
+    'Background color of child should change on selection, '
+    'and should not change when tapped again',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
+      expect(getBackgroundColor(tester, 1), CupertinoColors.white);
 
-    await tester.tap(find.text('Child 2'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+      await tester.tap(find.text('Child 2'));
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
+      expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
 
-    await tester.tap(find.text('Child 2'));
-    await tester.pump();
+      await tester.tap(find.text('Child 2'));
+      await tester.pump();
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
-  });
+      expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
+    },
+  );
 
   testWidgets(
     'Children can be non-Text or Icon widgets (in this case, '
@@ -1325,9 +1414,12 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('segmented_control_test.0.0.png'),
+      matchesGoldenFile(
+        'segmented_control_test.0.png',
+        version: 0,
+      ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
@@ -1363,7 +1455,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('segmented_control_test.1.0.png'),
+      matchesGoldenFile(
+        'segmented_control_test.1.png',
+        version: 0,
+      ),
     );
-  }, skip: !isLinux);
+  });
 }

@@ -14,11 +14,6 @@ import 'package:stack_trace/stack_trace.dart';
 import 'running_processes.dart';
 import 'utils.dart';
 
-/// Maximum amount of time a single task is allowed to take to run.
-///
-/// If exceeded the task is considered to have failed.
-const Duration _kDefaultTaskTimeout = Duration(minutes: 15);
-
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
 typedef TaskFunction = Future<TaskResult> Function();
@@ -55,7 +50,7 @@ class _TaskRunner {
         (String method, Map<String, String> parameters) async {
       final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
         ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
-        : _kDefaultTaskTimeout;
+        : null;
       final TaskResult result = await run(taskTimeout);
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
@@ -90,7 +85,10 @@ class _TaskRunner {
       ).toSet();
       beforeRunningDartInstances.forEach(print);
 
-      TaskResult result = await _performTask().timeout(taskTimeout);
+      Future<TaskResult> futureResult = _performTask();
+      if (taskTimeout != null)
+        futureResult = futureResult.timeout(taskTimeout);
+      TaskResult result = await futureResult;
 
       section('Checking running Dart$exe processes after task...');
       final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(

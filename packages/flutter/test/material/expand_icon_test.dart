@@ -92,7 +92,7 @@ void main() {
     await tester.pumpAndSettle();
 
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
-    expect(iconTheme.data.color, equals(Colors.white30));
+    expect(iconTheme.data.color, equals(Colors.white38));
   });
 
   testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
@@ -148,6 +148,7 @@ void main() {
       hasTapAction: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       isButton: true,
       onTapHint: localizations.expandedIconTapHint,
     ));
@@ -163,6 +164,7 @@ void main() {
       hasTapAction: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       isButton: true,
       onTapHint: localizations.collapsedIconTapHint,
     ));
@@ -176,16 +178,17 @@ void main() {
     await tester.pumpWidget(wrap(
       child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-        return ExpandIcon(
-          isExpanded: expanded,
-          onPressed: (bool isExpanded) {
-            setState(() {
-              expanded = !isExpanded;
-            });
-          },
-          color: Colors.indigo,
-        );
-      }),
+          return ExpandIcon(
+            isExpanded: expanded,
+            onPressed: (bool isExpanded) {
+              setState(() {
+                expanded = !isExpanded;
+              });
+            },
+            color: Colors.indigo,
+          );
+        },
+      ),
     ));
     await tester.pumpAndSettle();
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
@@ -201,17 +204,18 @@ void main() {
     await tester.pumpWidget(wrap(
       child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-        return ExpandIcon(
-          isExpanded: expanded,
-          onPressed: (bool isExpanded) {
-            setState(() {
-              expanded = !isExpanded;
-            });
-          },
-          color: Colors.indigo,
-          expandedColor: Colors.teal,
-        );
-      }),
+          return ExpandIcon(
+            isExpanded: expanded,
+            onPressed: (bool isExpanded) {
+              setState(() {
+                expanded = !isExpanded;
+              });
+            },
+            color: Colors.indigo,
+            expandedColor: Colors.teal,
+          );
+        },
+      ),
     ));
     await tester.pumpAndSettle();
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);

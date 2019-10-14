@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -12,6 +13,12 @@ import 'package:flutter/scheduler.dart';
 int seed = 0;
 
 void main() {
+  if (Platform.isMacOS) {
+    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
+    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+
   runApp(MaterialApp(
     title: 'Text tester',
     home: const Home(),
@@ -145,7 +152,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((TextSpan child) => _fiddleWith(child))?.toList() ?? <TextSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child))?.toList() ?? <InlineSpan>[]),
     );
   }
 
@@ -556,9 +563,6 @@ class _UnderlinesState extends State<Underlines> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> lines = <Widget>[_wrap(null)];
-    for (TextDecorationStyle style in TextDecorationStyle.values)
-      lines.add(_wrap(style));
     final Size size = MediaQuery.of(context).size;
     return Container(
       color: Colors.black,
@@ -572,7 +576,10 @@ class _UnderlinesState extends State<Underlines> {
                   vertical: size.height * 0.1,
                 ),
                 child: ListBody(
-                  children: lines,
+                  children: <Widget>[
+                    _wrap(null),
+                    for (TextDecorationStyle style in TextDecorationStyle.values) _wrap(style),
+                  ],
                 ),
               ),
             ),
@@ -647,9 +654,6 @@ class _FallbackState extends State<Fallback> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> lines = <Widget>[];
-    for (String font in androidFonts)
-      lines.add(Text(multiScript, style: style.copyWith(fontFamily: font, fontSize: math.exp(_fontSize))));
     final Size size = MediaQuery.of(context).size;
     return Container(
       color: Colors.black,
@@ -666,7 +670,16 @@ class _FallbackState extends State<Fallback> {
                   ),
                   child: IntrinsicWidth(
                     child: ListBody(
-                      children: lines,
+                      children: <Widget>[
+                        for (String font in androidFonts)
+                          Text(
+                            multiScript,
+                            style: style.copyWith(
+                              fontFamily: font,
+                              fontSize: math.exp(_fontSize),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -1401,8 +1414,7 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
     }
   }
   base ??= String.fromCharCode(randomCharacter(random));
-  final List<int> characters = <int>[];
-  characters.addAll(these);
+  final List<int> characters = these.toList();
   return base + String.fromCharCodes(characters);
 }
 

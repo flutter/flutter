@@ -69,5 +69,5 @@ void main() {
 
     expect(positioner.size.width, equals(200.0));
     expect(positioner.size.height, equals(200.0));
-  });
+  }, skip: isBrowser);
 }

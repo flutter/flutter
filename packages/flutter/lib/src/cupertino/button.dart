@@ -5,12 +5,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
+import 'constants.dart';
 import 'theme.dart';
 
-const Color _kDisabledBackground = Color(0xFFA9A9A9);
 // Measured against iOS 12 in Xcode.
-const Color _kDisabledForeground = Color(0xFFD1D1D1);
-
 const EdgeInsets _kButtonPadding = EdgeInsets.all(16.0);
 const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
   vertical: 14.0,
@@ -32,12 +31,13 @@ class CupertinoButton extends StatefulWidget {
     @required this.child,
     this.padding,
     this.color,
-    this.disabledColor,
-    this.minSize = 44.0,
+    this.disabledColor = CupertinoColors.quaternarySystemFill,
+    this.minSize = kMinInteractiveDimensionCupertino,
     this.pressedOpacity = 0.1,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert(disabledColor != null),
        _filled = false,
        super(key: key);
 
@@ -51,12 +51,13 @@ class CupertinoButton extends StatefulWidget {
     Key key,
     @required this.child,
     this.padding,
-    this.disabledColor,
-    this.minSize = 44.0,
+    this.disabledColor = CupertinoColors.quaternarySystemFill,
+    this.minSize = kMinInteractiveDimensionCupertino,
     this.pressedOpacity = 0.1,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert(disabledColor != null),
        color = null,
        _filled = true,
        super(key: key);
@@ -83,8 +84,8 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// Ignored if the [CupertinoButton] doesn't also have a [color].
   ///
-  /// Defaults to a standard iOS disabled color when [color] is specified and
-  /// [disabledColor] is null.
+  /// Defaults to [CupertinoColors.quaternarySystemFill] when [color] is
+  /// specified. Must not be null.
   final Color disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
@@ -94,12 +95,8 @@ class CupertinoButton extends StatefulWidget {
 
   /// Minimum size of the button.
   ///
-  /// Defaults to 44.0 which the iOS Human Interface Guideline recommends as the
-  /// minimum tappable area
-  ///
-  /// See also:
-  ///
-  ///  * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/adaptivity-and-layout/>
+  /// Defaults to kMinInteractiveDimensionCupertino which the iOS Human
+  /// Interface Guidelines recommends as the minimum tappable area.
   final double minSize;
 
   /// The opacity that the button will fade to when it is pressed.
@@ -209,15 +206,19 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
-    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
-    final Color backgroundColor = widget.color ?? (widget._filled ? primaryColor : null);
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
+    final Color primaryColor = themeData.primaryColor;
+    final Color backgroundColor = widget.color == null
+      ? (widget._filled ? primaryColor : null)
+      : CupertinoDynamicColor.resolve(widget.color, context);
+
     final Color foregroundColor = backgroundColor != null
-        ? CupertinoTheme.of(context).primaryContrastingColor
-        : enabled
-            ? primaryColor
-            : _kDisabledForeground;
-    final TextStyle textStyle =
-        CupertinoTheme.of(context).textTheme.textStyle.copyWith(color: foregroundColor);
+      ? themeData.primaryContrastingColor
+      : enabled
+        ? primaryColor
+        : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
+
+    final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -240,7 +241,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               decoration: BoxDecoration(
                 borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
-                  ? widget.disabledColor ?? _kDisabledBackground
+                  ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
                   : backgroundColor,
               ),
               child: Padding(

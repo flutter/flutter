@@ -403,7 +403,7 @@ List<Widget> createSwitchedChildList(List<Widget> childList, int i, int j) {
 class SwitchingChildBuilderTest extends StatefulWidget {
   const SwitchingChildBuilderTest({
     this.children,
-    Key key
+    Key key,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -462,7 +462,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
                   childCount: children.length,
                   findChildIndexCallback: (Key key) => _mapKeyToIndex[key] ?? -1,
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -475,7 +475,7 @@ class SwitchingChildListTest extends StatefulWidget {
   const SwitchingChildListTest({
     this.children,
     this.viewportFraction = 1.0,
-    Key key
+    Key key,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -499,7 +499,7 @@ class _SwitchingChildListTest extends State<SwitchingChildListTest> {
               SliverFillViewport(
                 viewportFraction: widget.viewportFraction,
                 delegate: SliverChildListDelegate(widget.children),
-              )
+              ),
             ],
           ),
         ),
@@ -512,7 +512,7 @@ class SwitchingSliverListTest extends StatefulWidget {
   const SwitchingSliverListTest({
     this.children,
     this.viewportFraction = 1.0,
-    Key key
+    Key key,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -535,7 +535,7 @@ class _SwitchingSliverListTest extends State<SwitchingSliverListTest> {
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildListDelegate(widget.children),
-              )
+              ),
             ],
           ),
         ),
@@ -548,7 +548,7 @@ class WidgetTest0 extends StatefulWidget {
   const WidgetTest0({
     this.text,
     this.keepAlive = false,
-    Key key
+    Key key,
   }) : super(key: key);
 
   final String text;
@@ -581,7 +581,7 @@ class WidgetTest1 extends StatefulWidget {
   const WidgetTest1({
     this.text,
     this.keepAlive = false,
-    Key key
+    Key key,
   }) : super(key: key);
 
   final String text;
@@ -614,7 +614,7 @@ class WidgetTest2 extends StatefulWidget {
   const WidgetTest2({
     this.text,
     this.keepAlive = false,
-    Key key
+    Key key,
   }) : super(key: key);
 
   final String text;

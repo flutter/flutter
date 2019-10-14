@@ -40,7 +40,7 @@ void main() {
 
   testWidgets('should not allow non-opaque color', (WidgetTester tester) async {
     expect(() => Title(
-      color: const Color(0),
+      color: const Color(0x00000000),
       child: Container(),
     ), throwsAssertionError);
   });

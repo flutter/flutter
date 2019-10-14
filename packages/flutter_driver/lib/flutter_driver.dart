@@ -26,6 +26,13 @@ export 'src/common/message.dart' show
   Result;
 export 'src/common/render_tree.dart' show
   RenderTree;
+export 'src/common/wait.dart' show
+  CombinedCondition,
+  FirstFrameRasterized,
+  NoPendingFrame,
+  NoPendingPlatformMessages,
+  NoTransientCallbacks,
+  SerializableWaitCondition;
 export 'src/driver/common.dart' show
   testOutputsDirectory;
 export 'src/driver/driver.dart' show

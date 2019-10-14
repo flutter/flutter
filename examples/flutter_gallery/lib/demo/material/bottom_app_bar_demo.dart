@@ -349,52 +349,42 @@ class _DemoBottomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> rowContents = <Widget> [
-      IconButton(
-        icon: const Icon(Icons.menu, semanticLabel: 'Show bottom sheet'),
-        onPressed: () {
-          showModalBottomSheet<void>(
-            context: context,
-            builder: (BuildContext context) => const _DemoDrawer(),
-          );
-        },
-      ),
-    ];
-
-    if (kCenterLocations.contains(fabLocation)) {
-      rowContents.add(
-        const Expanded(child: SizedBox()),
-      );
-    }
-
-    rowContents.addAll(<Widget> [
-      IconButton(
-        icon: const Icon(Icons.search, semanticLabel: 'show search action',),
-        onPressed: () {
-          Scaffold.of(context).showSnackBar(
-            const SnackBar(content: Text('This is a dummy search action.')),
-          );
-        },
-      ),
-      IconButton(
-        icon: Icon(
-          Theme.of(context).platform == TargetPlatform.iOS
-              ? Icons.more_horiz
-              : Icons.more_vert,
-          semanticLabel: 'Show menu actions',
-        ),
-        onPressed: () {
-          Scaffold.of(context).showSnackBar(
-            const SnackBar(content: Text('This is a dummy menu action.')),
-          );
-        },
-      ),
-    ]);
-
     return BottomAppBar(
       color: color,
-      child: Row(children: rowContents),
       shape: shape,
+      child: Row(children: <Widget>[
+        IconButton(
+          icon: const Icon(Icons.menu, semanticLabel: 'Show bottom sheet'),
+          onPressed: () {
+            showModalBottomSheet<void>(
+              context: context,
+              builder: (BuildContext context) => const _DemoDrawer(),
+            );
+          },
+        ),
+        if (kCenterLocations.contains(fabLocation)) const Expanded(child: SizedBox()),
+        IconButton(
+          icon: const Icon(Icons.search, semanticLabel: 'show search action',),
+          onPressed: () {
+            Scaffold.of(context).showSnackBar(
+              const SnackBar(content: Text('This is a dummy search action.')),
+            );
+          },
+        ),
+        IconButton(
+          icon: Icon(
+            Theme.of(context).platform == TargetPlatform.iOS
+                ? Icons.more_horiz
+                : Icons.more_vert,
+            semanticLabel: 'Show menu actions',
+          ),
+          onPressed: () {
+            Scaffold.of(context).showSnackBar(
+              const SnackBar(content: Text('This is a dummy menu action.')),
+            );
+          },
+        ),
+      ]),
     );
   }
 }

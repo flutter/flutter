@@ -182,7 +182,7 @@ void main() {
         child: Center(
           child: CircularProgressIndicator(value: 0.0),
         ),
-      )
+      ),
     );
 
     expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
@@ -197,7 +197,7 @@ void main() {
     await tester.pumpWidget(
       const Center(
         child: CircularProgressIndicator(value: null),
-      )
+      ),
     );
 
     expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
@@ -278,14 +278,17 @@ void main() {
     double progressValue;
     StateSetter setState;
     await tester.pumpWidget(
-      Center(
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
-            setState = setter;
-            return CircularProgressIndicator(value: progressValue);
-          }
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return CircularProgressIndicator(value: progressValue);
+            }
+          ),
         ),
-      )
+      ),
     );
     expect(tester.hasRunningAnimations, isTrue);
 

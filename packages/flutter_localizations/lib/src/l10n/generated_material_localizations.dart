@@ -21,6 +21,414 @@ import '../material_localizations.dart';
 // bottom of this file, and used by the [_MaterialLocalizationsDelegate.load]
 // method defined in `flutter_localizations/lib/src/material_localizations.dart`.
 
+/// The translations for Afrikaans (`af`).
+class MaterialLocalizationAf extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Afrikaans.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationAf({
+    String localeName = 'af',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'Meer oor $applicationName';
+
+  @override
+  String get alertDialogLabel => r'Opletberig';
+
+  @override
+  String get anteMeridiemAbbreviation => r'vm.';
+
+  @override
+  String get backButtonTooltip => r'Terug';
+
+  @override
+  String get cancelButtonLabel => r'KANSELLEER';
+
+  @override
+  String get closeButtonLabel => r'MAAK TOE';
+
+  @override
+  String get closeButtonTooltip => r'Maak toe';
+
+  @override
+  String get collapsedIconTapHint => r'Vou uit';
+
+  @override
+  String get continueButtonLabel => r'GAAN VOORT';
+
+  @override
+  String get copyButtonLabel => r'KOPIEER';
+
+  @override
+  String get cutButtonLabel => r'KNIP';
+
+  @override
+  String get deleteButtonTooltip => r'Vee uit';
+
+  @override
+  String get dialogLabel => r'Dialoog';
+
+  @override
+  String get drawerLabel => r'Navigasiekieslys';
+
+  @override
+  String get expandedIconTapHint => r'Vou in';
+
+  @override
+  String get hideAccountsLabel => r'Versteek rekeninge';
+
+  @override
+  String get licensesPageTitle => r'Lisensies';
+
+  @override
+  String get modalBarrierDismissLabel => r'Maak toe';
+
+  @override
+  String get nextMonthTooltip => r'Volgende maand';
+
+  @override
+  String get nextPageTooltip => r'Volgende bladsy';
+
+  @override
+  String get okButtonLabel => r'OK';
+
+  @override
+  String get openAppDrawerTooltip => r'Maak navigasiekieslys oop';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow van $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow van ongeveer $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'PLAK';
+
+  @override
+  String get popupMenuLabel => r'Opspringkieslys';
+
+  @override
+  String get postMeridiemAbbreviation => r'nm.';
+
+  @override
+  String get previousMonthTooltip => r'Vorige maand';
+
+  @override
+  String get previousPageTooltip => r'Vorige bladsy';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Herlaai';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 karakter oor';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karakters oor';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Skuif af';
+
+  @override
+  String get reorderItemLeft => r'Skuif na links';
+
+  @override
+  String get reorderItemRight => r'Skuif na regs';
+
+  @override
+  String get reorderItemToEnd => r'Skuif na die einde';
+
+  @override
+  String get reorderItemToStart => r'Skuif na die begin';
+
+  @override
+  String get reorderItemUp => r'Skuif op';
+
+  @override
+  String get rowsPerPageTitle => r'Rye per bladsy:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Soek';
+
+  @override
+  String get selectAllButtonLabel => r'KIES ALLES';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 item is gekies';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount items is gekies';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Wys rekeninge';
+
+  @override
+  String get showMenuTooltip => r'Wys kieslys';
+
+  @override
+  String get signedInLabel => r'Aangemeld';
+
+  @override
+  String get tabLabelRaw => r'Oortjie $tabIndex van $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Kies ure';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Kies minute';
+
+  @override
+  String get viewLicensesButtonLabel => r'BEKYK LISENSIES';
+}
+
+/// The translations for Amharic (`am`).
+class MaterialLocalizationAm extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Amharic.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationAm({
+    String localeName = 'am',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'ስለ $applicationName';
+
+  @override
+  String get alertDialogLabel => r'ማንቂያ';
+
+  @override
+  String get anteMeridiemAbbreviation => r'ጥዋት';
+
+  @override
+  String get backButtonTooltip => r'ተመለስ';
+
+  @override
+  String get cancelButtonLabel => r'ይቅር';
+
+  @override
+  String get closeButtonLabel => r'ዝጋ';
+
+  @override
+  String get closeButtonTooltip => r'ዝጋ';
+
+  @override
+  String get collapsedIconTapHint => r'ዘርጋ';
+
+  @override
+  String get continueButtonLabel => r'ቀጥል';
+
+  @override
+  String get copyButtonLabel => r'ቅዳ';
+
+  @override
+  String get cutButtonLabel => r'ቁረጥ';
+
+  @override
+  String get deleteButtonTooltip => r'ሰርዝ';
+
+  @override
+  String get dialogLabel => r'መገናኛ';
+
+  @override
+  String get drawerLabel => r'የዳሰሳ ምናሌ';
+
+  @override
+  String get expandedIconTapHint => r'ሰብስብ';
+
+  @override
+  String get hideAccountsLabel => r'መለያዎችን ደብቅ';
+
+  @override
+  String get licensesPageTitle => r'ፈቃዶች';
+
+  @override
+  String get modalBarrierDismissLabel => r'አሰናብት';
+
+  @override
+  String get nextMonthTooltip => r'ቀጣይ ወር';
+
+  @override
+  String get nextPageTooltip => r'ቀጣይ ገጽ';
+
+  @override
+  String get okButtonLabel => r'እሺ';
+
+  @override
+  String get openAppDrawerTooltip => r'የዳሰሳ ምናሌን ክፈት';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ከ$rowCount ውስጥ';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ከ$rowCount ያህል ውስጥ';
+
+  @override
+  String get pasteButtonLabel => r'ለጥፍ';
+
+  @override
+  String get popupMenuLabel => r'የብቅ-ባይ ምናሌ';
+
+  @override
+  String get postMeridiemAbbreviation => r'ከሰዓት';
+
+  @override
+  String get previousMonthTooltip => r'ቀዳሚ ወር';
+
+  @override
+  String get previousPageTooltip => r'ቀዳሚ ገጽ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'አድስ';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 ቁምፊ ይቀራል';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount ቁምፊዎች ይቀራሉ';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'ወደ ታች ውሰድ';
+
+  @override
+  String get reorderItemLeft => r'ወደ ግራ ውሰድ';
+
+  @override
+  String get reorderItemRight => r'ወደ ቀኝ ውሰድ';
+
+  @override
+  String get reorderItemToEnd => r'ወደ መጨረሻ ውሰድ';
+
+  @override
+  String get reorderItemToStart => r'ወደ መጀመሪያ ውሰድ';
+
+  @override
+  String get reorderItemUp => r'ወደ ላይ ውሰድ';
+
+  @override
+  String get rowsPerPageTitle => r'ረድፎች በገጽ፦';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'ይፈልጉ';
+
+  @override
+  String get selectAllButtonLabel => r'ሁሉንም ምረጥ';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 ንጥል ተመርጧል';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount ንጥሎች ተመርጠዋል';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'መለያዎችን አሳይ';
+
+  @override
+  String get showMenuTooltip => r'ምናሌን አሳይ';
+
+  @override
+  String get signedInLabel => r'በመለያ ገብቷል';
+
+  @override
+  String get tabLabelRaw => r'ትር $tabIndex ከ$tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'ሰዓታትን ምረጥ';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'ደቂቃዎችን ይምረጡ';
+
+  @override
+  String get viewLicensesButtonLabel => r'ፈቃዶችን ይመልከቱ';
+}
+
 /// The translations for Arabic (`ar`).
 class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Arabic.
@@ -223,6 +631,618 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => r'الاطّلاع على التراخيص';
+}
+
+/// The translations for Assamese (`as`).
+class MaterialLocalizationAs extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Assamese.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationAs({
+    String localeName = 'as',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationNameৰ বিষয়ে';
+
+  @override
+  String get alertDialogLabel => r'সতৰ্কবাৰ্তা';
+
+  @override
+  String get anteMeridiemAbbreviation => r'পূৰ্বাহ্ন';
+
+  @override
+  String get backButtonTooltip => r'উভতি যাওক';
+
+  @override
+  String get cancelButtonLabel => r'বাতিল কৰক';
+
+  @override
+  String get closeButtonLabel => r'বন্ধ কৰক';
+
+  @override
+  String get closeButtonTooltip => r'বন্ধ কৰক';
+
+  @override
+  String get collapsedIconTapHint => r'বিস্তাৰ কৰক';
+
+  @override
+  String get continueButtonLabel => r'অব্যাহত ৰাখক';
+
+  @override
+  String get copyButtonLabel => r'প্ৰতিলিপি কৰক';
+
+  @override
+  String get cutButtonLabel => r'কাট কৰক';
+
+  @override
+  String get deleteButtonTooltip => r'মচক';
+
+  @override
+  String get dialogLabel => r'ডায়ল' "'" r'গ';
+
+  @override
+  String get drawerLabel => r'নেভিগেশ্বন মেনু';
+
+  @override
+  String get expandedIconTapHint => r'সংকোচন কৰক';
+
+  @override
+  String get hideAccountsLabel => r'একাউণ্টসমূহ লুকুৱাওক';
+
+  @override
+  String get licensesPageTitle => r'অনুজ্ঞাপত্ৰসমূহ';
+
+  @override
+  String get modalBarrierDismissLabel => r'অগ্ৰাহ্য কৰক';
+
+  @override
+  String get nextMonthTooltip => r'পৰৱৰ্তী মাহ';
+
+  @override
+  String get nextPageTooltip => r'পৰৱৰ্তী পৃষ্ঠা';
+
+  @override
+  String get okButtonLabel => r'ঠিক আছে';
+
+  @override
+  String get openAppDrawerTooltip => r'নেভিগেশ্বন মেনু খোলক';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCountৰ $firstRow–$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCountৰ $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'পে' "'" r'ষ্ট কৰক';
+
+  @override
+  String get popupMenuLabel => r'প' "'" r'পআপ মেনু';
+
+  @override
+  String get postMeridiemAbbreviation => r'অপৰাহ্ন';
+
+  @override
+  String get previousMonthTooltip => r'পূৰ্বৱৰ্তী মাহ';
+
+  @override
+  String get previousPageTooltip => r'পূৰ্বৱৰ্তী পৃষ্ঠা';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'ৰিফ্ৰেশ্ব কৰক';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'১টা বর্ণ বাকী আছে';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCountটা বর্ণ বাকী আছে';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'তললৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemLeft => r'বাওঁফাললৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemRight => r'সোঁফাললৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemToEnd => r'শেষলৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemToStart => r'আৰম্ভণিলৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemUp => r'ওপৰলৈ নিয়ক';
+
+  @override
+  String get rowsPerPageTitle => r'প্ৰতিটো পৃষ্ঠাত থকা শাৰী:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'সন্ধান কৰক';
+
+  @override
+  String get selectAllButtonLabel => r'সকলো বাছনি কৰক';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'১টা বস্তু বাছনি কৰা হ' "'" r'ল';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCountটা বস্তু বাছনি কৰা হ’ল';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'একাউণ্টসমূহ দেখুৱাওক';
+
+  @override
+  String get showMenuTooltip => r'মেনুখন দেখুৱাওক';
+
+  @override
+  String get signedInLabel => r'ছাইন ইন কৰা হ’ল';
+
+  @override
+  String get tabLabelRaw => r'$tabCountৰ $tabIndexটা টেব';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'সময় বাছনি কৰক';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'মিনিট বাছনি কৰক';
+
+  @override
+  String get viewLicensesButtonLabel => r'অনুজ্ঞাপত্ৰসমূহ চাওক';
+}
+
+/// The translations for Azerbaijani (`az`).
+class MaterialLocalizationAz extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Azerbaijani.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationAz({
+    String localeName = 'az',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName haqqında';
+
+  @override
+  String get alertDialogLabel => r'Bildiriş';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'Geri';
+
+  @override
+  String get cancelButtonLabel => r'LƏĞV EDİN';
+
+  @override
+  String get closeButtonLabel => r'BAĞLAYIN';
+
+  @override
+  String get closeButtonTooltip => r'Bağlayın';
+
+  @override
+  String get collapsedIconTapHint => r'Genişləndirin';
+
+  @override
+  String get continueButtonLabel => r'DAVAM EDİN';
+
+  @override
+  String get copyButtonLabel => r'KOPYALAYIN';
+
+  @override
+  String get cutButtonLabel => r'KƏSİN';
+
+  @override
+  String get deleteButtonTooltip => r'Silin';
+
+  @override
+  String get dialogLabel => r'Dialoq';
+
+  @override
+  String get drawerLabel => r'Naviqasiya menyusu';
+
+  @override
+  String get expandedIconTapHint => r'Yığcamlaşdırın';
+
+  @override
+  String get hideAccountsLabel => r'Hesabları gizlədin';
+
+  @override
+  String get licensesPageTitle => r'Lisenziyalar';
+
+  @override
+  String get modalBarrierDismissLabel => r'İmtina edin';
+
+  @override
+  String get nextMonthTooltip => r'Növbəti ay';
+
+  @override
+  String get nextPageTooltip => r'Növbəti səhifə';
+
+  @override
+  String get okButtonLabel => r'OK';
+
+  @override
+  String get openAppDrawerTooltip => r'Naviqasiya menyusunu açın';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow/$rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow/ təxminən $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'YERLƏŞDİRİN';
+
+  @override
+  String get popupMenuLabel => r'Popap menyusu';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'Keçən ay';
+
+  @override
+  String get previousPageTooltip => r'Əvvəlki səhifə';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Yeniləyin';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 simvol qalır';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount simvol qalır';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Aşağı köçürün';
+
+  @override
+  String get reorderItemLeft => r'Sola köçürün';
+
+  @override
+  String get reorderItemRight => r'Sağa köçürün';
+
+  @override
+  String get reorderItemToEnd => r'Sona köçürün';
+
+  @override
+  String get reorderItemToStart => r'Əvvələ köçürün';
+
+  @override
+  String get reorderItemUp => r'Yuxarı köçürün';
+
+  @override
+  String get rowsPerPageTitle => r'Hər səhifə üzrə sıra:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Axtarın';
+
+  @override
+  String get selectAllButtonLabel => r'HAMISINI SEÇİN';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 element seçildi';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount element seçildi';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Hesabları göstərin';
+
+  @override
+  String get showMenuTooltip => r'Menyunu göstərin';
+
+  @override
+  String get signedInLabel => r'Daxil olundu';
+
+  @override
+  String get tabLabelRaw => r'$tabIndex/$tabCount tab';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Saat seçin';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Dəqiqə seçin';
+
+  @override
+  String get viewLicensesButtonLabel => r'LİSENZİYALARA BAXIN';
+}
+
+/// The translations for Belarusian (`be`).
+class MaterialLocalizationBe extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Belarusian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationBe({
+    String localeName = 'be',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'Інфармацыя пра праграму "$applicationName"';
+
+  @override
+  String get alertDialogLabel => r'Абвестка';
+
+  @override
+  String get anteMeridiemAbbreviation => r'раніцы';
+
+  @override
+  String get backButtonTooltip => r'Назад';
+
+  @override
+  String get cancelButtonLabel => r'СКАСАВАЦЬ';
+
+  @override
+  String get closeButtonLabel => r'ЗАКРЫЦЬ';
+
+  @override
+  String get closeButtonTooltip => r'Закрыць';
+
+  @override
+  String get collapsedIconTapHint => r'Разгарнуць';
+
+  @override
+  String get continueButtonLabel => r'ПРАЦЯГНУЦЬ';
+
+  @override
+  String get copyButtonLabel => r'КАПІРАВАЦЬ';
+
+  @override
+  String get cutButtonLabel => r'ВЫРАЗАЦЬ';
+
+  @override
+  String get deleteButtonTooltip => r'Выдаліць';
+
+  @override
+  String get dialogLabel => r'Дыялогавае акно';
+
+  @override
+  String get drawerLabel => r'Меню навігацыі';
+
+  @override
+  String get expandedIconTapHint => r'Згарнуць';
+
+  @override
+  String get hideAccountsLabel => r'Схаваць уліковыя запісы';
+
+  @override
+  String get licensesPageTitle => r'Ліцэнзіі';
+
+  @override
+  String get modalBarrierDismissLabel => r'Адхіліць';
+
+  @override
+  String get nextMonthTooltip => r'Наступны месяц';
+
+  @override
+  String get nextPageTooltip => r'Наступная старонка';
+
+  @override
+  String get okButtonLabel => r'ОК';
+
+  @override
+  String get openAppDrawerTooltip => r'Адкрыць меню навігацыі';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow з $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow з прыблізна $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'УСТАВІЦЬ';
+
+  @override
+  String get popupMenuLabel => r'Меню ўсплывальнага акна';
+
+  @override
+  String get postMeridiemAbbreviation => r'вечара';
+
+  @override
+  String get previousMonthTooltip => r'Папярэдні месяц';
+
+  @override
+  String get previousPageTooltip => r'Папярэдняя старонка';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Абнавіць';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => r'Засталося $remainingCount сімвалы';
+
+  @override
+  String get remainingTextFieldCharacterCountMany => r'Засталося $remainingCount сімвалаў';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Застаўся 1 сімвал';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Засталося $remainingCount сімвала';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Перамясціць уніз';
+
+  @override
+  String get reorderItemLeft => r'Перамясціць улева';
+
+  @override
+  String get reorderItemRight => r'Перамясціць управа';
+
+  @override
+  String get reorderItemToEnd => r'Перамясціць у канец';
+
+  @override
+  String get reorderItemToStart => r'Перамясціць у пачатак';
+
+  @override
+  String get reorderItemUp => r'Перамясціць уверх';
+
+  @override
+  String get rowsPerPageTitle => r'Радкоў на старонку:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Пошук';
+
+  @override
+  String get selectAllButtonLabel => r'ВЫБРАЦЬ УСЕ';
+
+  @override
+  String get selectedRowCountTitleFew => r'Выбрана $selectedRowCount элементы';
+
+  @override
+  String get selectedRowCountTitleMany => r'Выбрана $selectedRowCount элементаў';
+
+  @override
+  String get selectedRowCountTitleOne => r'Выбраны 1 элемент';
+
+  @override
+  String get selectedRowCountTitleOther => r'Выбрана $selectedRowCount элемента';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Паказаць уліковыя запісы';
+
+  @override
+  String get showMenuTooltip => r'Паказаць меню';
+
+  @override
+  String get signedInLabel => r'Уваход выкананы';
+
+  @override
+  String get tabLabelRaw => r'Укладка $tabIndex з $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Выберыце гадзіны';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Выберыце хвіліны';
+
+  @override
+  String get viewLicensesButtonLabel => r'ПАКАЗАЦЬ ЛІЦЭНЗІІ';
 }
 
 /// The translations for Bulgarian (`bg`).
@@ -429,6 +1449,210 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'ПРЕГЛЕД НА ЛИЦЕНЗИТЕ';
 }
 
+/// The translations for Bengali Bangla (`bn`).
+class MaterialLocalizationBn extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Bengali Bangla.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationBn({
+    String localeName = 'bn',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName সম্পর্কে';
+
+  @override
+  String get alertDialogLabel => r'সতর্কতা';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'ফিরে যান';
+
+  @override
+  String get cancelButtonLabel => r'বাতিল করুন';
+
+  @override
+  String get closeButtonLabel => r'বন্ধ করুন';
+
+  @override
+  String get closeButtonTooltip => r'বন্ধ করুন';
+
+  @override
+  String get collapsedIconTapHint => r'বড় করুন';
+
+  @override
+  String get continueButtonLabel => r'চালিয়ে যান';
+
+  @override
+  String get copyButtonLabel => r'কপি করুন';
+
+  @override
+  String get cutButtonLabel => r'কাট করুন';
+
+  @override
+  String get deleteButtonTooltip => r'মুছে দিন';
+
+  @override
+  String get dialogLabel => r'ডায়ালগ';
+
+  @override
+  String get drawerLabel => r'নেভিগেশান মেনু';
+
+  @override
+  String get expandedIconTapHint => r'আড়াল করুন';
+
+  @override
+  String get hideAccountsLabel => r'অ্যাকাউন্টগুলি লুকান';
+
+  @override
+  String get licensesPageTitle => r'লাইসেন্স';
+
+  @override
+  String get modalBarrierDismissLabel => r'খারিজ করুন';
+
+  @override
+  String get nextMonthTooltip => r'পরের মাস';
+
+  @override
+  String get nextPageTooltip => r'পরের পৃষ্ঠা';
+
+  @override
+  String get okButtonLabel => r'ঠিক আছে';
+
+  @override
+  String get openAppDrawerTooltip => r'নেভিগেশন মেনু খুলুন';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCountটির মধ্যে $firstRow-$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'প্রায় $rowCountটির মধ্যে $firstRow-$lastRow নম্বর';
+
+  @override
+  String get pasteButtonLabel => r'পেস্ট করুন';
+
+  @override
+  String get popupMenuLabel => r'পপ-আপ মেনু';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'আগের মাস';
+
+  @override
+  String get previousPageTooltip => r'আগের পৃষ্ঠা';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'রিফ্রেশ করুন';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'আর ১টি অক্ষর লেখা যাবে';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'আর $remainingCountটি অক্ষর লেখা যাবে';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'নিচের দিকে সরান';
+
+  @override
+  String get reorderItemLeft => r'বাঁদিকে সরান';
+
+  @override
+  String get reorderItemRight => r'ডানদিকে সরান';
+
+  @override
+  String get reorderItemToEnd => r'একদম শেষের দিকে যান';
+
+  @override
+  String get reorderItemToStart => r'চালু করতে সরান';
+
+  @override
+  String get reorderItemUp => r'উপরের দিকে সরান';
+
+  @override
+  String get rowsPerPageTitle => r'প্রতি পৃষ্ঠায় সারির সংখ্যা:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => r'সার্চ';
+
+  @override
+  String get selectAllButtonLabel => r'সব বেছে নিন';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'১টি আইটেম বেছে নেওয়া হয়েছে';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCountটি আইটেম বেছে নেওয়া হয়েছে';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'অ্যাকাউন্টগুলি দেখান';
+
+  @override
+  String get showMenuTooltip => r'মেনু দেখান';
+
+  @override
+  String get signedInLabel => r'সাইন-ইন করা হয়েছে';
+
+  @override
+  String get tabLabelRaw => r'$tabCount-এর মধ্যে $tabIndexটি ট্যাব';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'ঘণ্টা বেছে নিন';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'মিনিট বেছে নিন';
+
+  @override
+  String get viewLicensesButtonLabel => r'লাইসেন্স দেখুন';
+}
+
 /// The translations for Bosnian (`bs`).
 class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Bosnian.
@@ -462,10 +1686,10 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get anteMeridiemAbbreviation => r'prijepodne';
 
   @override
-  String get backButtonTooltip => r'Natrag';
+  String get backButtonTooltip => r'Nazad';
 
   @override
-  String get cancelButtonLabel => r'ODUSTANI';
+  String get cancelButtonLabel => r'OTKAŽI';
 
   @override
   String get closeButtonLabel => r'ZATVORI';
@@ -489,16 +1713,16 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => r'Brisanje';
 
   @override
-  String get dialogLabel => r'Dijalog';
+  String get dialogLabel => r'Dijaloški okvir';
 
   @override
-  String get drawerLabel => r'Navigacijski izbornik';
+  String get drawerLabel => r'Meni za navigaciju';
 
   @override
-  String get expandedIconTapHint => r'Sažmi';
+  String get expandedIconTapHint => r'Suzi';
 
   @override
-  String get hideAccountsLabel => r'Sakrijte račune';
+  String get hideAccountsLabel => r'Sakrij račune';
 
   @override
   String get licensesPageTitle => r'Licence';
@@ -513,25 +1737,25 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Sljedeća stranica';
 
   @override
-  String get okButtonLabel => r'U REDU';
+  String get okButtonLabel => r'Uredu';
 
   @override
-  String get openAppDrawerTooltip => r'Otvaranje izbornika za navigaciju';
+  String get openAppDrawerTooltip => r'Otvorite meni za navigaciju';
 
   @override
-  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow od $rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow od otprilike $rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow od oko $rowCount';
 
   @override
   String get pasteButtonLabel => r'ZALIJEPI';
 
   @override
-  String get popupMenuLabel => r'Skočni izbornik';
+  String get popupMenuLabel => r'Skočni meni';
 
   @override
-  String get postMeridiemAbbreviation => r'popodne';
+  String get postMeridiemAbbreviation => r'poslijepodne';
 
   @override
   String get previousMonthTooltip => r'Prethodni mjesec';
@@ -543,16 +1767,16 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => r'Osvježi';
 
   @override
-  String get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
+  String get remainingTextFieldCharacterCountFew => r'Još $remainingCount znaka';
 
   @override
   String get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'Preostao je 1 znak';
+  String get remainingTextFieldCharacterCountOne => r'Još jedan znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
+  String get remainingTextFieldCharacterCountOther => r'Još $remainingCount znakova';
 
   @override
   String get remainingTextFieldCharacterCountTwo => null;
@@ -561,25 +1785,25 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'Pomakni prema dolje';
+  String get reorderItemDown => r'Pomjeri prema dolje';
 
   @override
-  String get reorderItemLeft => r'Pomakni ulijevo';
+  String get reorderItemLeft => r'Pomjeri lijevo';
 
   @override
-  String get reorderItemRight => r'Pomakni udesno';
+  String get reorderItemRight => r'Pomjeri desno';
 
   @override
-  String get reorderItemToEnd => r'Premjesti na kraj';
+  String get reorderItemToEnd => r'Pomjerite na kraj';
 
   @override
-  String get reorderItemToStart => r'Premjesti na početak';
+  String get reorderItemToStart => r'Pomjerite na početak';
 
   @override
-  String get reorderItemUp => r'Pomakni prema gore';
+  String get reorderItemUp => r'Pomjeri prema gore';
 
   @override
-  String get rowsPerPageTitle => r'Redaka po stranici:';
+  String get rowsPerPageTitle => r'Broj redova po stranici:';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -609,22 +1833,22 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleZero => null;
 
   @override
-  String get showAccountsLabel => r'Prikažite račune';
+  String get showAccountsLabel => r'Prikaži račune';
 
   @override
-  String get showMenuTooltip => r'Prikaz izbornika';
+  String get showMenuTooltip => r'Prikaži meni';
 
   @override
-  String get signedInLabel => r'Prijavljeni korisnik';
+  String get signedInLabel => r'Prijavljeni ste';
 
   @override
-  String get tabLabelRaw => r'Kartica $tabIndex od $tabCount';
+  String get tabLabelRaw => r'$tabIndex. kartica od $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerHourModeAnnouncement => r'Odaberite sate';
+  String get timePickerHourModeAnnouncement => r'Odaberite sat';
 
   @override
   String get timePickerMinuteModeAnnouncement => r'Odaberite minute';
@@ -1329,7 +2553,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Nächste Seite';
 
   @override
-  String get okButtonLabel => r'Ok';
+  String get okButtonLabel => r'OK';
 
   @override
   String get openAppDrawerTooltip => r'Navigationsmenü öffnen';
@@ -2068,6 +3292,48 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnIn({
     String localeName = 'en_IN',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get licensesPageTitle => r'Licences';
+
+  @override
+  String get viewLicensesButtonLabel => r'VIEW LICENCES';
+
+  @override
+  String get popupMenuLabel => r'Pop-up menu';
+
+  @override
+  String get dialogLabel => r'Dialogue';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
+}
+
+/// The translations for English, as used in New Zealand (`en_NZ`).
+class MaterialLocalizationEnNz extends MaterialLocalizationEn {
+  /// Create an instance of the translation bundle for English, as used in New Zealand.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationEnNz({
+    String localeName = 'en_NZ',
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
@@ -4221,6 +5487,210 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'KUVA LITSENTSID';
 }
 
+/// The translations for Basque (`eu`).
+class MaterialLocalizationEu extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Basque.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationEu({
+    String localeName = 'eu',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName aplikazioari buruz';
+
+  @override
+  String get alertDialogLabel => r'Alerta';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'Atzera';
+
+  @override
+  String get cancelButtonLabel => r'UTZI';
+
+  @override
+  String get closeButtonLabel => r'ITXI';
+
+  @override
+  String get closeButtonTooltip => r'Itxi';
+
+  @override
+  String get collapsedIconTapHint => r'Zabaldu';
+
+  @override
+  String get continueButtonLabel => r'EGIN AURRERA';
+
+  @override
+  String get copyButtonLabel => r'KOPIATU';
+
+  @override
+  String get cutButtonLabel => r'EBAKI';
+
+  @override
+  String get deleteButtonTooltip => r'Ezabatu';
+
+  @override
+  String get dialogLabel => r'Leihoa';
+
+  @override
+  String get drawerLabel => r'Nabigazio-menua';
+
+  @override
+  String get expandedIconTapHint => r'Tolestu';
+
+  @override
+  String get hideAccountsLabel => r'Ezkutatu kontuak';
+
+  @override
+  String get licensesPageTitle => r'Lizentziak';
+
+  @override
+  String get modalBarrierDismissLabel => r'Baztertu';
+
+  @override
+  String get nextMonthTooltip => r'Hurrengo hilabetea';
+
+  @override
+  String get nextPageTooltip => r'Hurrengo orria';
+
+  @override
+  String get okButtonLabel => r'Ados';
+
+  @override
+  String get openAppDrawerTooltip => r'Ireki nabigazio-menua';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow - $lastRow / $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow - $lastRow / $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'ITSATSI';
+
+  @override
+  String get popupMenuLabel => r'Menu gainerakorra';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'Aurreko hilabetea';
+
+  @override
+  String get previousPageTooltip => r'Aurreko orria';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Freskatu';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 karaktere geratzen da';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karaktere geratzen dira';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Eraman behera';
+
+  @override
+  String get reorderItemLeft => r'Eraman ezkerrera';
+
+  @override
+  String get reorderItemRight => r'Eraman eskuinera';
+
+  @override
+  String get reorderItemToEnd => r'Eraman amaierara';
+
+  @override
+  String get reorderItemToStart => r'Eraman hasierara';
+
+  @override
+  String get reorderItemUp => r'Eraman gora';
+
+  @override
+  String get rowsPerPageTitle => r'Errenkadak orriko:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Bilatu';
+
+  @override
+  String get selectAllButtonLabel => r'HAUTATU GUZTIAK';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 elementu hautatu da';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount elementu hautatu dira';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Erakutsi kontuak';
+
+  @override
+  String get showMenuTooltip => r'Erakutsi menua';
+
+  @override
+  String get signedInLabel => r'Hasi da saioa';
+
+  @override
+  String get tabLabelRaw => r'$tabIndex/$tabCount fitxa';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Hautatu orduak';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Hautatu minutuak';
+
+  @override
+  String get viewLicensesButtonLabel => r'IKUSI LIZENTZIAK';
+}
+
 /// The translations for Persian (`fa`).
 class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Persian.
@@ -4521,7 +5991,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow/~$rowCount';
 
   @override
-  String get pasteButtonLabel => r'LIITÄ';
+  String get pasteButtonLabel => r'Sijoita';
 
   @override
   String get popupMenuLabel => r'Ponnahdusvalikko';
@@ -5061,6 +6531,33 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   );
 
   @override
+  String get pageRowsInfoTitleRaw => r'$firstRow à $lastRow sur $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow à $lastRow sur environ $rowCount';
+
+  @override
+  String get tabLabelRaw => r'Onglet $tabIndex sur $tabCount';
+
+  @override
+  String get anteMeridiemAbbreviation => r'am';
+
+  @override
+  String get postMeridiemAbbreviation => r'pm';
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Sélectionnez les heures';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Sélectionnez les minutes';
+
+  @override
+  String get reorderItemToStart => r'Déplacer au début';
+
+  @override
+  String get reorderItemToEnd => r'Déplacer à la fin';
+
+  @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.frenchCanadian;
 }
 
@@ -5352,7 +6849,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Nächste Seite';
 
   @override
-  String get okButtonLabel => r'Ok';
+  String get okButtonLabel => r'OK';
 
   @override
   String get openAppDrawerTooltip => r'Navigationsmenü öffnen';
@@ -5470,6 +6967,210 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => r'LIZENZEN ANZEIGEN';
+}
+
+/// The translations for Gujarati (`gu`).
+class MaterialLocalizationGu extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Gujarati.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationGu({
+    String localeName = 'gu',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName વિશે';
+
+  @override
+  String get alertDialogLabel => r'અલર્ટ';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'પાછળ';
+
+  @override
+  String get cancelButtonLabel => r'રદ કરો';
+
+  @override
+  String get closeButtonLabel => r'બંધ કરો';
+
+  @override
+  String get closeButtonTooltip => r'બંધ કરો';
+
+  @override
+  String get collapsedIconTapHint => r'વિસ્તૃત કરો';
+
+  @override
+  String get continueButtonLabel => r'ચાલુ રાખો';
+
+  @override
+  String get copyButtonLabel => r'કૉપિ કરો';
+
+  @override
+  String get cutButtonLabel => r'કાપો';
+
+  @override
+  String get deleteButtonTooltip => r'ડિલીટ કરો';
+
+  @override
+  String get dialogLabel => r'સંવાદ';
+
+  @override
+  String get drawerLabel => r'નૅવિગેશન મેનૂ';
+
+  @override
+  String get expandedIconTapHint => r'સંકુચિત કરો';
+
+  @override
+  String get hideAccountsLabel => r'એકાઉન્ટ છુપાવો';
+
+  @override
+  String get licensesPageTitle => r'લાઇસન્સ';
+
+  @override
+  String get modalBarrierDismissLabel => r'છોડી દો';
+
+  @override
+  String get nextMonthTooltip => r'આગલો મહિનો';
+
+  @override
+  String get nextPageTooltip => r'આગલું પેજ';
+
+  @override
+  String get okButtonLabel => r'ઓકે';
+
+  @override
+  String get openAppDrawerTooltip => r'નૅવિગેશન મેનૂ ખોલો';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCountમાંથી $firstRow–$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'આશરે $rowCountમાંથી $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'પેસ્ટ કરો';
+
+  @override
+  String get popupMenuLabel => r'પૉપઅપ મેનૂ';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'પાછલો મહિનો';
+
+  @override
+  String get previousPageTooltip => r'પાછલું પેજ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'રિફ્રેશ કરો';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 અક્ષર બાકી';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount અક્ષર બાકી';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'નીચે ખસેડો';
+
+  @override
+  String get reorderItemLeft => r'ડાબે ખસેડો';
+
+  @override
+  String get reorderItemRight => r'જમણે ખસેડો';
+
+  @override
+  String get reorderItemToEnd => r'અંતમાં ખસેડો';
+
+  @override
+  String get reorderItemToStart => r'પ્રારંભમાં ખસેડો';
+
+  @override
+  String get reorderItemUp => r'ઉપર ખસેડો';
+
+  @override
+  String get rowsPerPageTitle => r'પેજ દીઠ પંક્તિઓ:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => r'શોધો';
+
+  @override
+  String get selectAllButtonLabel => r'બધા પસંદ કરો';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 આઇટમ પસંદ કરી';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount આઇટમ પસંદ કરી';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'એકાઉન્ટ બતાવો';
+
+  @override
+  String get showMenuTooltip => r'મેનૂ બતાવો';
+
+  @override
+  String get signedInLabel => r'આમાં સાઇન ઇન કર્યું છે';
+
+  @override
+  String get tabLabelRaw => r'$tabCountમાંથી $tabIndex ટૅબ';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'કલાક પસંદ કરો';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'મિનિટ પસંદ કરો';
+
+  @override
+  String get viewLicensesButtonLabel => r'લાઇસન્સ જુઓ';
 }
 
 /// The translations for Hebrew (`he`).
@@ -6696,6 +8397,210 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'LIHAT LISENSI';
 }
 
+/// The translations for Icelandic (`is`).
+class MaterialLocalizationIs extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Icelandic.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationIs({
+    String localeName = 'is',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'Um $applicationName';
+
+  @override
+  String get alertDialogLabel => r'Tilkynning';
+
+  @override
+  String get anteMeridiemAbbreviation => r'f.h.';
+
+  @override
+  String get backButtonTooltip => r'Til baka';
+
+  @override
+  String get cancelButtonLabel => r'HÆTTA';
+
+  @override
+  String get closeButtonLabel => r'LOKA';
+
+  @override
+  String get closeButtonTooltip => r'Loka';
+
+  @override
+  String get collapsedIconTapHint => r'Stækka';
+
+  @override
+  String get continueButtonLabel => r'HALDA ÁFRAM';
+
+  @override
+  String get copyButtonLabel => r'AFRITA';
+
+  @override
+  String get cutButtonLabel => r'KLIPPA';
+
+  @override
+  String get deleteButtonTooltip => r'Eyða';
+
+  @override
+  String get dialogLabel => r'Gluggi';
+
+  @override
+  String get drawerLabel => r'Yfirlitsvalmynd';
+
+  @override
+  String get expandedIconTapHint => r'Draga saman';
+
+  @override
+  String get hideAccountsLabel => r'Fela reikninga';
+
+  @override
+  String get licensesPageTitle => r'Leyfi';
+
+  @override
+  String get modalBarrierDismissLabel => r'Hunsa';
+
+  @override
+  String get nextMonthTooltip => r'Næsti mánuður';
+
+  @override
+  String get nextPageTooltip => r'Næsta síða';
+
+  @override
+  String get okButtonLabel => r'Í lagi';
+
+  @override
+  String get openAppDrawerTooltip => r'Opna yfirlitsvalmynd';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow af $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow af um það bil $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'LÍMA';
+
+  @override
+  String get popupMenuLabel => r'Sprettivalmynd';
+
+  @override
+  String get postMeridiemAbbreviation => r'e.h.';
+
+  @override
+  String get previousMonthTooltip => r'Fyrri mánuður';
+
+  @override
+  String get previousPageTooltip => r'Fyrri síða';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Endurnýja';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 stafur eftir';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount stafir eftir';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Færa niður';
+
+  @override
+  String get reorderItemLeft => r'Færa til vinstri';
+
+  @override
+  String get reorderItemRight => r'Færa til hægri';
+
+  @override
+  String get reorderItemToEnd => r'Færa aftast';
+
+  @override
+  String get reorderItemToStart => r'Færa fremst';
+
+  @override
+  String get reorderItemUp => r'Færa upp';
+
+  @override
+  String get rowsPerPageTitle => r'Línur á síðu:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Leit';
+
+  @override
+  String get selectAllButtonLabel => r'VELJA ALLT';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 atriði valið';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount atriði valin';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Sýna reikninga';
+
+  @override
+  String get showMenuTooltip => r'Sýna valmynd';
+
+  @override
+  String get signedInLabel => r'Innskráð(ur)';
+
+  @override
+  String get tabLabelRaw => r'Flipi $tabIndex af $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Velja klukkustundir';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Velja mínútur';
+
+  @override
+  String get viewLicensesButtonLabel => r'SKOÐA LEYFI';
+}
+
 /// The translations for Italian (`it`).
 class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Italian.
@@ -7102,6 +9007,210 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => r'ライセンスを表示';
+}
+
+/// The translations for Georgian (`ka`).
+class MaterialLocalizationKa extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Georgian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationKa({
+    String localeName = 'ka',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName-ის შესახებ';
+
+  @override
+  String get alertDialogLabel => r'გაფრთხილება';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'უკან';
+
+  @override
+  String get cancelButtonLabel => r'გაუქმება';
+
+  @override
+  String get closeButtonLabel => r'დახურვა';
+
+  @override
+  String get closeButtonTooltip => r'დახურვა';
+
+  @override
+  String get collapsedIconTapHint => r'გაშლა';
+
+  @override
+  String get continueButtonLabel => r'გაგრძელება';
+
+  @override
+  String get copyButtonLabel => r'კოპირება';
+
+  @override
+  String get cutButtonLabel => r'ამოჭრა';
+
+  @override
+  String get deleteButtonTooltip => r'წაშლა';
+
+  @override
+  String get dialogLabel => r'დიალოგი';
+
+  @override
+  String get drawerLabel => r'ნავიგაციის მენიუ';
+
+  @override
+  String get expandedIconTapHint => r'ჩაკეცვა';
+
+  @override
+  String get hideAccountsLabel => r'ანგარიშების დამალვა';
+
+  @override
+  String get licensesPageTitle => r'ლიცენზიები';
+
+  @override
+  String get modalBarrierDismissLabel => r'დახურვა';
+
+  @override
+  String get nextMonthTooltip => r'შემდეგი თვე';
+
+  @override
+  String get nextPageTooltip => r'შემდეგი გვერდი';
+
+  @override
+  String get okButtonLabel => r'კარგი';
+
+  @override
+  String get openAppDrawerTooltip => r'სანავიგაციო მენიუს გახსნა';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow / $rowCount-დან';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow / დაახლოებით $rowCount-დან';
+
+  @override
+  String get pasteButtonLabel => r'ჩასმა';
+
+  @override
+  String get popupMenuLabel => r'ამომხტარი მენიუ';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'წინა თვე';
+
+  @override
+  String get previousPageTooltip => r'წინა გვერდი';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'განახლება';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'დარჩა 1 სიმბოლო';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'დარჩა $remainingCount სიმბოლო';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'ქვემოთ გადატანა';
+
+  @override
+  String get reorderItemLeft => r'მარცხნივ გადატანა';
+
+  @override
+  String get reorderItemRight => r'მარჯვნივ გადატანა';
+
+  @override
+  String get reorderItemToEnd => r'ბოლოში გადატანა';
+
+  @override
+  String get reorderItemToStart => r'დასაწყისში გადატანა';
+
+  @override
+  String get reorderItemUp => r'ზემოთ გადატანა';
+
+  @override
+  String get rowsPerPageTitle => r'მწკრივი გვერდზე:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'ძიება';
+
+  @override
+  String get selectAllButtonLabel => r'ყველას არჩევა';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'არჩეულია 1 ერთეული';
+
+  @override
+  String get selectedRowCountTitleOther => r'არჩეულია $selectedRowCount ერთეული';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'ანგარიშების ჩვენება';
+
+  @override
+  String get showMenuTooltip => r'მენიუს ჩვენება';
+
+  @override
+  String get signedInLabel => r'შესული';
+
+  @override
+  String get tabLabelRaw => r'ჩანართი $tabIndex / $tabCount-დან';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'აირჩიეთ საათები';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'აირჩიეთ წუთები';
+
+  @override
+  String get viewLicensesButtonLabel => r'ლიცენზიების ნახვა';
 }
 
 /// The translations for Kazakh (`kk`).
@@ -7512,6 +9621,210 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'មើលអាជ្ញាបណ្ណ';
 }
 
+/// The translations for Kannada (`kn`).
+class MaterialLocalizationKn extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Kannada.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationKn({
+    String localeName = 'kn',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => '\u{24}\u{61}\u{70}\u{70}\u{6c}\u{69}\u{63}\u{61}\u{74}\u{69}\u{6f}\u{6e}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{cac}\u{c97}\u{ccd}\u{c97}\u{cc6}';
+
+  @override
+  String get alertDialogLabel => '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
+
+  @override
+  String get anteMeridiemAbbreviation => '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
+
+  @override
+  String get backButtonTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca4}\u{cbf}\u{cb0}\u{cc1}\u{c97}\u{cbf}';
+
+  @override
+  String get cancelButtonLabel => '\u{cb0}\u{ca6}\u{ccd}\u{ca6}\u{cc1}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get closeButtonLabel => '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
+
+  @override
+  String get closeButtonTooltip => '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
+
+  @override
+  String get collapsedIconTapHint => '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get continueButtonLabel => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cc1}\u{cb5}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get deleteButtonTooltip => '\u{c85}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get dialogLabel => '\u{ca1}\u{cc8}\u{cb2}\u{cbe}\u{c97}\u{ccd}';
+
+  @override
+  String get drawerLabel => '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
+
+  @override
+  String get expandedIconTapHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get hideAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cb0}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
+
+  @override
+  String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get nextMonthTooltip => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
+
+  @override
+  String get nextPageTooltip => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{caa}\u{cc1}\u{c9f}';
+
+  @override
+  String get okButtonLabel => '\u{cb8}\u{cb0}\u{cbf}';
+
+  @override
+  String get openAppDrawerTooltip => '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{cc6}\u{cb0}\u{cc6}\u{caf}\u{cbf}\u{cb0}\u{cbf}';
+
+  @override
+  String get pageRowsInfoTitleRaw => '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
+
+  @override
+  String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get popupMenuLabel => '\u{caa}\u{cbe}\u{caa}\u{ccd}\u{c85}\u{caa}\u{ccd}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
+
+  @override
+  String get postMeridiemAbbreviation => '\u{cb8}\u{c82}\u{c9c}\u{cc6}';
+
+  @override
+  String get previousMonthTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
+
+  @override
+  String get previousPageTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{caa}\u{cc1}\u{c9f}';
+
+  @override
+  String get refreshIndicatorSemanticLabel => '\u{cb0}\u{cbf}\u{cab}\u{ccd}\u{cb0}\u{cc6}\u{cb6}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => '\u{31}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{ca6}\u{cc6}';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => '\u{24}\u{72}\u{65}\u{6d}\u{61}\u{69}\u{6e}\u{69}\u{6e}\u{67}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{cb5}\u{cc6}';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => '\u{c95}\u{cc6}\u{cb3}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemLeft => '\u{c8e}\u{ca1}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemRight => '\u{cac}\u{cb2}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemToEnd => '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemToStart => '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemUp => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get rowsPerPageTitle => '\u{caa}\u{ccd}\u{cb0}\u{ca4}\u{cbf}\u{20}\u{caa}\u{cc1}\u{c9f}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cbe}\u{cb2}\u{cc1}\u{c97}\u{cb3}\u{cc1}\u{3a}';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
+
+  @override
+  String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => '\u{31}\u{20}\u{c90}\u{c9f}\u{c82}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+
+  @override
+  String get selectedRowCountTitleOther => '\u{24}\u{73}\u{65}\u{6c}\u{65}\u{63}\u{74}\u{65}\u{64}\u{52}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c90}\u{c9f}\u{c82}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get showMenuTooltip => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get signedInLabel => '\u{cb8}\u{cc8}\u{ca8}\u{ccd}\u{20}\u{c87}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+
+  @override
+  String get tabLabelRaw => '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get viewLicensesButtonLabel => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{cbf}\u{cd5}\u{c95}\u{ccd}\u{cb7}\u{cbf}\u{cb8}\u{cbf}';
+}
+
 /// The translations for Korean (`ko`).
 class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Korean.
@@ -7714,6 +10027,414 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => r'라이선스 보기';
+}
+
+/// The translations for Kirghiz Kyrgyz (`ky`).
+class MaterialLocalizationKy extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Kirghiz Kyrgyz.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationKy({
+    String localeName = 'ky',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName каналы жөнүндө';
+
+  @override
+  String get alertDialogLabel => r'Эскертүү';
+
+  @override
+  String get anteMeridiemAbbreviation => r'түшкө чейин';
+
+  @override
+  String get backButtonTooltip => r'Артка';
+
+  @override
+  String get cancelButtonLabel => r'ЖОККО ЧЫГАРУУ';
+
+  @override
+  String get closeButtonLabel => r'ЖАБУУ';
+
+  @override
+  String get closeButtonTooltip => r'Жабуу';
+
+  @override
+  String get collapsedIconTapHint => r'Жайып көрсөтүү';
+
+  @override
+  String get continueButtonLabel => r'УЛАНТУУ';
+
+  @override
+  String get copyButtonLabel => r'КӨЧҮРҮҮ';
+
+  @override
+  String get cutButtonLabel => r'КЕСҮҮ';
+
+  @override
+  String get deleteButtonTooltip => r'Жок кылуу';
+
+  @override
+  String get dialogLabel => r'Диалог';
+
+  @override
+  String get drawerLabel => r'Чабыттоо менюсу';
+
+  @override
+  String get expandedIconTapHint => r'Жыйыштыруу';
+
+  @override
+  String get hideAccountsLabel => r'Аккаунттарды жашыруу';
+
+  @override
+  String get licensesPageTitle => r'Уруксаттамалар';
+
+  @override
+  String get modalBarrierDismissLabel => r'Жабуу';
+
+  @override
+  String get nextMonthTooltip => r'Кийинки ай';
+
+  @override
+  String get nextPageTooltip => r'Кийинки бет';
+
+  @override
+  String get okButtonLabel => r'Макул';
+
+  @override
+  String get openAppDrawerTooltip => r'Чабыттоо менюсун ачуу';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCount ичинен $firstRow–$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'Болжол менен $rowCount ичинен $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'ЧАПТОО';
+
+  @override
+  String get popupMenuLabel => r'Калкып чыгуучу меню';
+
+  @override
+  String get postMeridiemAbbreviation => r'түштөн кийин';
+
+  @override
+  String get previousMonthTooltip => r'Мурунку ай';
+
+  @override
+  String get previousPageTooltip => r'Мурунку бет';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Жаңыртуу';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 белги калды';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount белги калды';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Төмөн жылдыруу';
+
+  @override
+  String get reorderItemLeft => r'Солго жылдыруу';
+
+  @override
+  String get reorderItemRight => r'Оңго жылдыруу';
+
+  @override
+  String get reorderItemToEnd => r'Аягына жылдыруу';
+
+  @override
+  String get reorderItemToStart => r'Башына жылдыруу';
+
+  @override
+  String get reorderItemUp => r'Жогору жылдыруу';
+
+  @override
+  String get rowsPerPageTitle => r'Бир бетте көрсөтүлүүчү саптардын саны:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Издөө';
+
+  @override
+  String get selectAllButtonLabel => r'БААРЫН ТАНДОО';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 нерсе тандалды';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount нерсе тандалды';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Аккаунттарды көрсөтүү';
+
+  @override
+  String get showMenuTooltip => r'Менюну көрсөтүү';
+
+  @override
+  String get signedInLabel => r'Аккаунтуңузга кирдиңиз';
+
+  @override
+  String get tabLabelRaw => r'$tabCount кыналма ичинен $tabIndex';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Саатты тандаңыз';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Мүнөттөрдү тандаңыз';
+
+  @override
+  String get viewLicensesButtonLabel => r'УРУКСАТТАМАЛАРДЫ КӨРҮҮ';
+}
+
+/// The translations for Lao (`lo`).
+class MaterialLocalizationLo extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Lao.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationLo({
+    String localeName = 'lo',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'ກ່ຽວກັບ $applicationName';
+
+  @override
+  String get alertDialogLabel => r'ການເຕືອນ';
+
+  @override
+  String get anteMeridiemAbbreviation => r'ກ່ອນທ່ຽງ';
+
+  @override
+  String get backButtonTooltip => r'ກັບຄືນ';
+
+  @override
+  String get cancelButtonLabel => r'ຍົກເລີກ';
+
+  @override
+  String get closeButtonLabel => r'ປິດ';
+
+  @override
+  String get closeButtonTooltip => r'ປິດ';
+
+  @override
+  String get collapsedIconTapHint => r'ຂະຫຍາຍ';
+
+  @override
+  String get continueButtonLabel => r'ສືບຕໍ່';
+
+  @override
+  String get copyButtonLabel => r'ສຳເນົາ';
+
+  @override
+  String get cutButtonLabel => r'ຕັດ';
+
+  @override
+  String get deleteButtonTooltip => r'ລຶບ';
+
+  @override
+  String get dialogLabel => r'ຂໍ້ຄວາມ';
+
+  @override
+  String get drawerLabel => r'ເມນູນຳທາງ';
+
+  @override
+  String get expandedIconTapHint => r'ຫຍໍ້ເຂົ້າ';
+
+  @override
+  String get hideAccountsLabel => r'ເຊື່ອງບັນຊີ';
+
+  @override
+  String get licensesPageTitle => r'ໃບອະນຸຍາດ';
+
+  @override
+  String get modalBarrierDismissLabel => r'ປິດໄວ້';
+
+  @override
+  String get nextMonthTooltip => r'ເດືອນໜ້າ';
+
+  @override
+  String get nextPageTooltip => r'ໜ້າຕໍ່ໄປ';
+
+  @override
+  String get okButtonLabel => r'ຕົກລົງ';
+
+  @override
+  String get openAppDrawerTooltip => r'ເປີດເມນູການນຳທາງ';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ຈາກທັງໝົດ $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ຈາກປະມານ $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'ວາງ';
+
+  @override
+  String get popupMenuLabel => r'ເມນູປັອບອັບ';
+
+  @override
+  String get postMeridiemAbbreviation => r'ຫຼັງທ່ຽງ';
+
+  @override
+  String get previousMonthTooltip => r'ເດືອນແລ້ວ';
+
+  @override
+  String get previousPageTooltip => r'ໜ້າກ່ອນໜ້າ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'ໂຫຼດຄືນໃໝ່';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'ຍັງອີກ 1 ຕົວອັກສອນ';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'ຍັງອີກ $remainingCount ຕົວອັກສອນ';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'ຍ້າຍລົງ';
+
+  @override
+  String get reorderItemLeft => r'ຍ້າຍໄປຊ້າຍ';
+
+  @override
+  String get reorderItemRight => r'ຍ້າຍໄປຂວາ';
+
+  @override
+  String get reorderItemToEnd => r'ຍ້າຍໄປສິ້ນສຸດ';
+
+  @override
+  String get reorderItemToStart => r'ຍ້າຍໄປເລີ່ມຕົ້ນ';
+
+  @override
+  String get reorderItemUp => r'ຍ້າຍຂຶ້ນ';
+
+  @override
+  String get rowsPerPageTitle => r'ແຖວຕໍ່ໜ້າ:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => r'ຊອກຫາ';
+
+  @override
+  String get selectAllButtonLabel => r'ເລືອກທັງໝົດ';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'ເລືອກ 1 ລາຍການແລ້ວ';
+
+  @override
+  String get selectedRowCountTitleOther => r'ເລືອກ $selectedRowCount ລາຍການແລ້ວ';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'ສະແດງບັນຊີ';
+
+  @override
+  String get showMenuTooltip => r'ສະແດງເມນູ';
+
+  @override
+  String get signedInLabel => r'ເຂົ້າສູ່ລະບົບແລ້ວ';
+
+  @override
+  String get tabLabelRaw => r'ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'ເລືອກໂມງ';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'ເລືອກນາທີ';
+
+  @override
+  String get viewLicensesButtonLabel => r'ເບິ່ງໃບອະນຸຍາດ';
 }
 
 /// The translations for Lithuanian (`lt`).
@@ -8122,6 +10843,414 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => r'SKATĪT LICENCES';
+}
+
+/// The translations for Macedonian (`mk`).
+class MaterialLocalizationMk extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Macedonian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationMk({
+    String localeName = 'mk',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'За $applicationName';
+
+  @override
+  String get alertDialogLabel => r'Предупредување';
+
+  @override
+  String get anteMeridiemAbbreviation => r'ПРЕТПЛАДНЕ';
+
+  @override
+  String get backButtonTooltip => r'Назад';
+
+  @override
+  String get cancelButtonLabel => r'ОТКАЖИ';
+
+  @override
+  String get closeButtonLabel => r'ЗАТВОРИ';
+
+  @override
+  String get closeButtonTooltip => r'Затвори';
+
+  @override
+  String get collapsedIconTapHint => r'Прошири';
+
+  @override
+  String get continueButtonLabel => r'ПРОДОЛЖИ';
+
+  @override
+  String get copyButtonLabel => r'КОПИРАЈ';
+
+  @override
+  String get cutButtonLabel => r'ИСЕЧИ';
+
+  @override
+  String get deleteButtonTooltip => r'Избриши';
+
+  @override
+  String get dialogLabel => r'Дијалог';
+
+  @override
+  String get drawerLabel => r'Мени за навигација';
+
+  @override
+  String get expandedIconTapHint => r'Собери';
+
+  @override
+  String get hideAccountsLabel => r'Сокриј сметки';
+
+  @override
+  String get licensesPageTitle => r'Лиценци';
+
+  @override
+  String get modalBarrierDismissLabel => r'Отфрли';
+
+  @override
+  String get nextMonthTooltip => r'Следниот месец';
+
+  @override
+  String get nextPageTooltip => r'Следна страница';
+
+  @override
+  String get okButtonLabel => r'Во ред';
+
+  @override
+  String get openAppDrawerTooltip => r'Отворете го менито за навигација';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow - $lastRow од $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow - $lastRow од приближно $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'ЗАЛЕПИ';
+
+  @override
+  String get popupMenuLabel => r'Скокачко мени';
+
+  @override
+  String get postMeridiemAbbreviation => r'ПОПЛАДНЕ';
+
+  @override
+  String get previousMonthTooltip => r'Претходниот месец';
+
+  @override
+  String get previousPageTooltip => r'Претходна страница';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Освежи';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'Преостанува уште 1 знак';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'Преостануваат уште $remainingCount знаци';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Преместете надолу';
+
+  @override
+  String get reorderItemLeft => r'Преместете налево';
+
+  @override
+  String get reorderItemRight => r'Преместете надесно';
+
+  @override
+  String get reorderItemToEnd => r'Преместете на крајот';
+
+  @override
+  String get reorderItemToStart => r'Преместете на почеток';
+
+  @override
+  String get reorderItemUp => r'Преместете нагоре';
+
+  @override
+  String get rowsPerPageTitle => r'Редови на страница:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Пребарувајте';
+
+  @override
+  String get selectAllButtonLabel => r'ИЗБЕРИ ГИ СИТЕ';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'Избрана е 1 ставка';
+
+  @override
+  String get selectedRowCountTitleOther => r'Избрани се $selectedRowCount ставки';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Прикажи сметки';
+
+  @override
+  String get showMenuTooltip => r'Прикажи мени';
+
+  @override
+  String get signedInLabel => r'Најавени сте';
+
+  @override
+  String get tabLabelRaw => r'Картичка $tabIndex од $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Изберете часови';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Изберете минути';
+
+  @override
+  String get viewLicensesButtonLabel => r'ПРИКАЖИ ЛИЦЕНЦИ';
+}
+
+/// The translations for Malayalam (`ml`).
+class MaterialLocalizationMl extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Malayalam.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationMl({
+    String localeName = 'ml',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName എന്നതിനെക്കുറിച്ച്';
+
+  @override
+  String get alertDialogLabel => r'മുന്നറിയിപ്പ്';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'മടങ്ങുക';
+
+  @override
+  String get cancelButtonLabel => r'റദ്ദാക്കുക';
+
+  @override
+  String get closeButtonLabel => r'അടയ്‌ക്കുക';
+
+  @override
+  String get closeButtonTooltip => r'അടയ്‌ക്കുക';
+
+  @override
+  String get collapsedIconTapHint => r'വികസിപ്പിക്കുക';
+
+  @override
+  String get continueButtonLabel => r'തുടരുക';
+
+  @override
+  String get copyButtonLabel => r'പകർത്തുക';
+
+  @override
+  String get cutButtonLabel => r'മുറിക്കുക';
+
+  @override
+  String get deleteButtonTooltip => r'ഇല്ലാതാക്കുക';
+
+  @override
+  String get dialogLabel => r'ഡയലോഗ്';
+
+  @override
+  String get drawerLabel => r'നാവിഗേഷൻ മെനു';
+
+  @override
+  String get expandedIconTapHint => r'ചുരുക്കുക';
+
+  @override
+  String get hideAccountsLabel => r'അക്കൗണ്ടുകൾ മറയ്‌ക്കുക';
+
+  @override
+  String get licensesPageTitle => r'ലൈസൻസുകൾ';
+
+  @override
+  String get modalBarrierDismissLabel => r'നിരസിക്കുക';
+
+  @override
+  String get nextMonthTooltip => r'അടുത്ത മാസം';
+
+  @override
+  String get nextPageTooltip => r'അടുത്ത പേജ്';
+
+  @override
+  String get okButtonLabel => r'ശരി';
+
+  @override
+  String get openAppDrawerTooltip => r'നാവിഗേഷൻ മെനു തുറക്കുക';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCount-ൽ $firstRow –$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'ഏകദേശം $rowCount-ൽ $firstRow –$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'ഒട്ടിക്കുക';
+
+  @override
+  String get popupMenuLabel => r'പോപ്പ് അപ്പ് മെനു';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'മുമ്പത്തെ മാസം';
+
+  @override
+  String get previousPageTooltip => r'മുമ്പത്തെ പേജ്';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'പുതുക്കിയെടുക്കുക';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'ഒരു പ്രതീകം ശേഷിക്കുന്നു';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount പ്രതീകങ്ങൾ ശേഷിക്കുന്നു';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'താഴോട്ട് നീക്കുക';
+
+  @override
+  String get reorderItemLeft => r'ഇടത്തോട്ട് നീക്കുക';
+
+  @override
+  String get reorderItemRight => r'വലത്തോട്ട് നീക്കുക';
+
+  @override
+  String get reorderItemToEnd => r'അവസാന ഭാഗത്തേക്ക് പോവുക';
+
+  @override
+  String get reorderItemToStart => r'തുടക്കത്തിലേക്ക് പോവുക';
+
+  @override
+  String get reorderItemUp => r'മുകളിലോട്ട് നീക്കുക';
+
+  @override
+  String get rowsPerPageTitle => r'ഓരോ പേജിലുമുള്ള വരികൾ:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => r'തിരയുക';
+
+  @override
+  String get selectAllButtonLabel => r'എല്ലാം തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'ഒരു ഇനം തിരഞ്ഞെടുത്തു';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount ഇനങ്ങൾ തിരഞ്ഞെടുത്തു';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'അക്കൗണ്ടുകൾ കാണിക്കുക';
+
+  @override
+  String get showMenuTooltip => r'മെനു കാണിക്കുക';
+
+  @override
+  String get signedInLabel => r'സൈൻ ഇൻ ചെയ്‌തു';
+
+  @override
+  String get tabLabelRaw => r'$tabCount-ൽ $tabIndex';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'മണിക്കൂർ തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'മിനിറ്റ് തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get viewLicensesButtonLabel => r'ലൈസൻസുകൾ കാണുക';
 }
 
 /// The translations for Mongolian (`mn`).
@@ -8736,6 +11865,210 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'LIHAT LESEN';
 }
 
+/// The translations for Burmese (`my`).
+class MaterialLocalizationMy extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Burmese.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationMy({
+    String localeName = 'my',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName အကြောင်း';
+
+  @override
+  String get alertDialogLabel => r'သတိပေးချက်';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'နောက်သို့';
+
+  @override
+  String get cancelButtonLabel => r'မလုပ်တော့';
+
+  @override
+  String get closeButtonLabel => r'ပိတ်ရန်';
+
+  @override
+  String get closeButtonTooltip => r'ပိတ်ရန်';
+
+  @override
+  String get collapsedIconTapHint => r'ချဲ့ရန်';
+
+  @override
+  String get continueButtonLabel => r'ရှေ့ဆက်ရန်';
+
+  @override
+  String get copyButtonLabel => r'မိတ္တူကူးရန်';
+
+  @override
+  String get cutButtonLabel => r'ဖြတ်ယူရန်';
+
+  @override
+  String get deleteButtonTooltip => r'ဖျက်ရန်';
+
+  @override
+  String get dialogLabel => r'ဒိုင်ယာလော့';
+
+  @override
+  String get drawerLabel => r'လမ်းညွှန် မီနူး';
+
+  @override
+  String get expandedIconTapHint => r'လျှော့ပြရန်';
+
+  @override
+  String get hideAccountsLabel => r'အကောင့်များကို ဝှက်ရန်';
+
+  @override
+  String get licensesPageTitle => r'လိုင်စင်များ';
+
+  @override
+  String get modalBarrierDismissLabel => r'ပယ်ရန်';
+
+  @override
+  String get nextMonthTooltip => r'နောက်လ';
+
+  @override
+  String get nextPageTooltip => r'နောက်စာမျက်နှာ';
+
+  @override
+  String get okButtonLabel => r'OK';
+
+  @override
+  String get openAppDrawerTooltip => r'လမ်းညွှန်မီနူးကို ဖွင့်ရန်';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCount အနက် $firstRow–$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCount ခန့်မှ $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'ကူးထည့်ရန်';
+
+  @override
+  String get popupMenuLabel => r'ပေါ့ပ်အပ်မီနူး';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'ယခင်လ';
+
+  @override
+  String get previousPageTooltip => r'ယခင်စာမျက်နှာ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'ပြန်လည်စတင်ရန်';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'အက္ခရာ ၁ လုံးကျန်သည်';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'အက္ခရာ $remainingCount လုံးကျန်သည်';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'အောက်သို့ရွှေ့ရန်';
+
+  @override
+  String get reorderItemLeft => r'ဘယ်ဘက်သို့ရွှေ့ရန်';
+
+  @override
+  String get reorderItemRight => r'ညာဘက်သို့ရွှေ့ရန်';
+
+  @override
+  String get reorderItemToEnd => r'အဆုံးသို့ ‌ရွှေ့ရန်';
+
+  @override
+  String get reorderItemToStart => r'အစသို့ ရွှေ့ရန်';
+
+  @override
+  String get reorderItemUp => r'အပေါ်သို့ ရွှေ့ရန်';
+
+  @override
+  String get rowsPerPageTitle => r'စာတစ်မျက်နှာပါ လိုင်းအရေအတွက်−';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => r'ရှာဖွေရန်';
+
+  @override
+  String get selectAllButtonLabel => r'အားလုံး ရွေးရန်';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'၁ ခု ရွေးထားသည်';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount ခု ရွေးထားသည်';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'အကောင့်များကို ပြရန်';
+
+  @override
+  String get showMenuTooltip => r'မီနူး ပြရန်';
+
+  @override
+  String get signedInLabel => r'လက်မှတ်ထိုး ဝင်ထားသည်';
+
+  @override
+  String get tabLabelRaw => r'တဘ် $tabCount အနက် $tabIndex ခု';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'နာရီကို ရွေးပါ';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'မိနစ်ကို ရွေးပါ';
+
+  @override
+  String get viewLicensesButtonLabel => r'လိုင်စင်များကို ကြည့်ရန်';
+}
+
 /// The translations for Norwegian Bokmål (`nb`).
 class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Norwegian Bokmål.
@@ -8940,6 +12273,210 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'SE LISENSER';
 }
 
+/// The translations for Nepali (`ne`).
+class MaterialLocalizationNe extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Nepali.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationNe({
+    String localeName = 'ne',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName बारे';
+
+  @override
+  String get alertDialogLabel => r'अलर्ट';
+
+  @override
+  String get anteMeridiemAbbreviation => r'पूर्वाह्न';
+
+  @override
+  String get backButtonTooltip => r'पछाडि जानुहोस्';
+
+  @override
+  String get cancelButtonLabel => r'रद्द गर्नुहोस्';
+
+  @override
+  String get closeButtonLabel => r'बन्द गर्नुहोस्';
+
+  @override
+  String get closeButtonTooltip => r'बन्द गर्नुहोस्';
+
+  @override
+  String get collapsedIconTapHint => r'विस्तार गर्नुहोस्';
+
+  @override
+  String get continueButtonLabel => r'जारी राख्नुहोस्';
+
+  @override
+  String get copyButtonLabel => r'प्रतिलिपि गर्नुहोस्';
+
+  @override
+  String get cutButtonLabel => r'काट्नुहोस्';
+
+  @override
+  String get deleteButtonTooltip => r'मेट्नुहोस्';
+
+  @override
+  String get dialogLabel => r'संवाद';
+
+  @override
+  String get drawerLabel => r'नेभिगेसन मेनु';
+
+  @override
+  String get expandedIconTapHint => r'संक्षिप्त गर्नुहोस्';
+
+  @override
+  String get hideAccountsLabel => r'खाताहरू लुकाउनुहोस्';
+
+  @override
+  String get licensesPageTitle => r'इजाजतपत्रहरू';
+
+  @override
+  String get modalBarrierDismissLabel => r'खारेज गर्नुहोस्';
+
+  @override
+  String get nextMonthTooltip => r'अर्को महिना';
+
+  @override
+  String get nextPageTooltip => r'अर्को पृष्ठ';
+
+  @override
+  String get okButtonLabel => r'ठिक छ';
+
+  @override
+  String get openAppDrawerTooltip => r'नेभिगेसन मेनु खोल्नुहोस्';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCount मध्ये $firstRow–$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'लगभग $rowCount को $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'टाँस्नुहोस्';
+
+  @override
+  String get popupMenuLabel => r'पपअप मेनु';
+
+  @override
+  String get postMeridiemAbbreviation => r'अपराह्न';
+
+  @override
+  String get previousMonthTooltip => r'अघिल्लो महिना';
+
+  @override
+  String get previousPageTooltip => r'अघिल्लो पृष्ठ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'पुनः ताजा गर्नुहोस्';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'१ वर्ण बाँकी';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount वर्णहरू बाँकी';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'तल सार्नुहोस्';
+
+  @override
+  String get reorderItemLeft => r'बायाँ सार्नुहोस्';
+
+  @override
+  String get reorderItemRight => r'दायाँ सार्नुहोस्';
+
+  @override
+  String get reorderItemToEnd => r'अन्त्यमा जानुहोस्';
+
+  @override
+  String get reorderItemToStart => r'सुरुमा सार्नुहोस्';
+
+  @override
+  String get reorderItemUp => r'माथि सार्नुहोस्';
+
+  @override
+  String get rowsPerPageTitle => r'प्रत्येक पृष्ठमा रहेका पङ्क्तिहरूको सङ्ख्या:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => r'खोज्नुहोस्';
+
+  @override
+  String get selectAllButtonLabel => r'सबै चयन गर्नुहोस्';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'१ वस्तु चयन गरियो';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount वस्तुहरू चयन गरिए';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'खाताहरू देखाउनुहोस्';
+
+  @override
+  String get showMenuTooltip => r'मेनु देखाउनुहोस्';
+
+  @override
+  String get signedInLabel => r'साइन इन गरियो';
+
+  @override
+  String get tabLabelRaw => r'$tabCount मध्ये $tabIndex ट्याब';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'घन्टा चयन गर्नुहोस्';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'मिनेट चयन गर्नुहोस्';
+
+  @override
+  String get viewLicensesButtonLabel => r'इजाजतपत्रहरू हेर्नुहोस्';
+}
+
 /// The translations for Dutch Flemish (`nl`).
 class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Dutch Flemish.
@@ -9142,6 +12679,414 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => r'LICENTIES BEKIJKEN';
+}
+
+/// The translations for Oriya (`or`).
+class MaterialLocalizationOr extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Oriya.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationOr({
+    String localeName = 'or',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName ବିଷୟରେ';
+
+  @override
+  String get alertDialogLabel => r'ଆଲର୍ଟ';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'ପଛକୁ ଫେରନ୍ତୁ';
+
+  @override
+  String get cancelButtonLabel => r'ବାତିଲ୍ କରନ୍ତୁ';
+
+  @override
+  String get closeButtonLabel => r'ବନ୍ଦ କରନ୍ତୁ';
+
+  @override
+  String get closeButtonTooltip => r'ବନ୍ଦ କରନ୍ତୁ';
+
+  @override
+  String get collapsedIconTapHint => r'ପ୍ରସାରିତ କରନ୍ତୁ';
+
+  @override
+  String get continueButtonLabel => r'ଜାରି ରଖନ୍ତୁ';
+
+  @override
+  String get copyButtonLabel => r'କପି କରନ୍ତୁ';
+
+  @override
+  String get cutButtonLabel => r'କଟ୍ କରନ୍ତୁ';
+
+  @override
+  String get deleteButtonTooltip => r'ଡିଲିଟ୍ କରନ୍ତୁ';
+
+  @override
+  String get dialogLabel => r'ଡାୟଲଗ୍';
+
+  @override
+  String get drawerLabel => r'ନେଭିଗେସନ୍ ମେନୁ';
+
+  @override
+  String get expandedIconTapHint => r'ସଙ୍କୁଚିତ କରନ୍ତୁ';
+
+  @override
+  String get hideAccountsLabel => r'ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଲୁଚାନ୍ତୁ';
+
+  @override
+  String get licensesPageTitle => r'ଲାଇସେନ୍ସଗୁଡ଼କ';
+
+  @override
+  String get modalBarrierDismissLabel => r'ଖାରଜ କରନ୍ତୁ';
+
+  @override
+  String get nextMonthTooltip => r'ପରବର୍ତ୍ତୀ ମାସ';
+
+  @override
+  String get nextPageTooltip => r'ପରବର୍ତ୍ତୀ ପେଜ୍';
+
+  @override
+  String get okButtonLabel => r'ଠିକ୍ ଅଛି';
+
+  @override
+  String get openAppDrawerTooltip => r'ନାଭିଗେସନ୍ ମେନୁ ଖୋଲନ୍ତୁ';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCountର $firstRow–$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'ପାଖାପାଖି $rowCountର $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'ପେଷ୍ଟ କରନ୍ତୁ';
+
+  @override
+  String get popupMenuLabel => r'ପପ୍-ଅପ୍ ମେନୁ';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'ପୂର୍ବ ମାସ';
+
+  @override
+  String get previousPageTooltip => r'ପୂର୍ବବର୍ତ୍ତୀ ପେଜ୍';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'ରିଫ୍ରେସ୍ କରନ୍ତୁ';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1ଟି ଅକ୍ଷର ବାକି ଅଛି';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCountଟି ଅକ୍ଷର ବାକି ଅଛି';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'ତଳକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemLeft => r'ବାମକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemRight => r'ଡାହାଣକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemToEnd => r'ଶେଷକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemToStart => r'ଆରମ୍ଭକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemUp => r'ଉପରକୁ ନିଅନ୍ତୁ';
+
+  @override
+  String get rowsPerPageTitle => r'ପୃଷ୍ଠା ପିଛା ଧାଡ଼ି:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => r'ଖୋଜନ୍ତୁ';
+
+  @override
+  String get selectAllButtonLabel => r'ସମସ୍ତ ଚୟନ କରନ୍ତୁ';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1ଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCountଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'ଆକାଉଣ୍ଟ ଦେଖାନ୍ତୁ';
+
+  @override
+  String get showMenuTooltip => r'ମେନୁ ଦେଖାନ୍ତୁ';
+
+  @override
+  String get signedInLabel => r'ସାଇନ୍ ଇନ୍ କରାଯାଇଛି';
+
+  @override
+  String get tabLabelRaw => r'$tabCountର $tabIndex ଟାବ୍';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'ଘଣ୍ଟା ଚୟନ କରନ୍ତୁ';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'ମିନିଟ୍ ଚୟନ କରନ୍ତୁ';
+
+  @override
+  String get viewLicensesButtonLabel => r'ଲାଇସେନ୍ସ ଦେଖାନ୍ତୁ';
+}
+
+/// The translations for Panjabi Punjabi (`pa`).
+class MaterialLocalizationPa extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Panjabi Punjabi.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationPa({
+    String localeName = 'pa',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName ਬਾਰੇ';
+
+  @override
+  String get alertDialogLabel => r'ਸੁਚੇਤਨਾ';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'ਪਿੱਛੇ';
+
+  @override
+  String get cancelButtonLabel => r'ਰੱਦ ਕਰੋ';
+
+  @override
+  String get closeButtonLabel => r'ਬੰਦ ਕਰੋ';
+
+  @override
+  String get closeButtonTooltip => r'ਬੰਦ ਕਰੋ';
+
+  @override
+  String get collapsedIconTapHint => r'ਵਿਸਤਾਰ ਕਰੋ';
+
+  @override
+  String get continueButtonLabel => r'ਜਾਰੀ ਰੱਖੋ';
+
+  @override
+  String get copyButtonLabel => r'ਕਾਪੀ ਕਰੋ';
+
+  @override
+  String get cutButtonLabel => r'ਕੱਟ ਕਰੋ';
+
+  @override
+  String get deleteButtonTooltip => r'ਮਿਟਾਓ';
+
+  @override
+  String get dialogLabel => r'ਵਿੰਡੋ';
+
+  @override
+  String get drawerLabel => r'ਨੈਵੀਗੇਸ਼ਨ ਮੀਨੂ';
+
+  @override
+  String get expandedIconTapHint => r'ਸਮੇਟੋ';
+
+  @override
+  String get hideAccountsLabel => r'ਖਾਤੇ ਲੁਕਾਓ';
+
+  @override
+  String get licensesPageTitle => r'ਲਾਇਸੰਸ';
+
+  @override
+  String get modalBarrierDismissLabel => r'ਖਾਰਜ ਕਰੋ';
+
+  @override
+  String get nextMonthTooltip => r'ਅਗਲਾ ਮਹੀਨਾ';
+
+  @override
+  String get nextPageTooltip => r'ਅਗਲਾ ਪੰਨਾ';
+
+  @override
+  String get okButtonLabel => r'ਠੀਕ ਹੈ';
+
+  @override
+  String get openAppDrawerTooltip => r'ਨੈਵੀਗੇਸ਼ਨ ਮੀਨੂ ਖੋਲ੍ਹੋ';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCount ਵਿੱਚੋਂ $firstRow–$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'ਲਗਭਗ $rowCount ਵਿੱਚੋਂ $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'ਪੇਸਟ ਕਰੋ';
+
+  @override
+  String get popupMenuLabel => r'ਪੌਪਅੱਪ ਮੀਨੂ';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'ਪਿਛਲਾ ਮਹੀਨਾ';
+
+  @override
+  String get previousPageTooltip => r'ਪਿਛਲਾ ਪੰਨਾ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'ਰਿਫ੍ਰੈਸ਼ ਕਰੋ';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 ਅੱਖਰ-ਚਿੰਨ੍ਹ ਬਾਕੀ';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount ਅੱਖਰ-ਚਿੰਨ੍ਹ ਬਾਕੀ';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'ਹੇਠਾਂ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemLeft => r'ਖੱਬੇ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemRight => r'ਸੱਜੇ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemToEnd => r'ਅੰਤ ਵਿੱਚ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemToStart => r'ਸ਼ੁਰੂ ਵਿੱਚ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemUp => r'ਉੱਪਰ ਲਿਜਾਓ';
+
+  @override
+  String get rowsPerPageTitle => r'ਹਰ ਪੰਨੇ ' "'" r'ਤੇ ਕਤਾਰਾਂ:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => r'ਖੋਜੋ';
+
+  @override
+  String get selectAllButtonLabel => r'ਸਭ ਚੁਣੋ';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 ਆਈਟਮ ਚੁਣੀ ਗਈ';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount ਆਈਟਮਾਂ ਚੁਣੀਆਂ ਗਈਆਂ';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'ਖਾਤੇ ਦਿਖਾਓ';
+
+  @override
+  String get showMenuTooltip => r'ਮੀਨੂ ਦਿਖਾਓ';
+
+  @override
+  String get signedInLabel => r'ਸਾਈਨ-ਇਨ ਕੀਤਾ ਗਿਆ';
+
+  @override
+  String get tabLabelRaw => r'$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'ਘੰਟੇ ਚੁਣੋ';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'ਮਿੰਟ ਚੁਣੋ';
+
+  @override
+  String get viewLicensesButtonLabel => r'ਲਾਇਸੰਸ ਦੇਖੋ';
 }
 
 /// The translations for Polish (`pl`).
@@ -10242,6 +14187,210 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'ЛИЦЕНЗИИ';
 }
 
+/// The translations for Sinhala Sinhalese (`si`).
+class MaterialLocalizationSi extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Sinhala Sinhalese.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationSi({
+    String localeName = 'si',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName ගැන';
+
+  @override
+  String get alertDialogLabel => r'ඇඟවීම';
+
+  @override
+  String get anteMeridiemAbbreviation => r'පෙ.ව.';
+
+  @override
+  String get backButtonTooltip => r'ආපසු';
+
+  @override
+  String get cancelButtonLabel => r'අවලංගු කරන්න';
+
+  @override
+  String get closeButtonLabel => r'වසන්න';
+
+  @override
+  String get closeButtonTooltip => r'වසන්න';
+
+  @override
+  String get collapsedIconTapHint => r'දිග හරින්න';
+
+  @override
+  String get continueButtonLabel => r'ඉදිරියට';
+
+  @override
+  String get copyButtonLabel => r'පිටපත් කරන්න';
+
+  @override
+  String get cutButtonLabel => r'කපන්න';
+
+  @override
+  String get deleteButtonTooltip => r'මකන්න';
+
+  @override
+  String get dialogLabel => r'සංවාදය';
+
+  @override
+  String get drawerLabel => r'සංචාලන මෙනුව';
+
+  @override
+  String get expandedIconTapHint => r'හකුළන්න';
+
+  @override
+  String get hideAccountsLabel => r'ගිණුම් සඟවන්න';
+
+  @override
+  String get licensesPageTitle => r'බලපත්‍ර';
+
+  @override
+  String get modalBarrierDismissLabel => r'ඉවත ලන්න';
+
+  @override
+  String get nextMonthTooltip => r'ඊළඟ මාසය';
+
+  @override
+  String get nextPageTooltip => r'ඊළඟ පිටුව';
+
+  @override
+  String get okButtonLabel => r'හරි';
+
+  @override
+  String get openAppDrawerTooltip => r'සංචාලන මෙනුව විවෘත කරන්න';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCountන් $firstRow–$lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCountකින් පමණ $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'අලවන්න';
+
+  @override
+  String get popupMenuLabel => r'උත්පතන මෙනුව';
+
+  @override
+  String get postMeridiemAbbreviation => r'ප.ව.';
+
+  @override
+  String get previousMonthTooltip => r'පෙර මාසය';
+
+  @override
+  String get previousPageTooltip => r'පෙර පිටුව';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'නැවුම් කරන්න';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'අනුලකුණු 1ක් ඉතිරිය';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'අනුලකුණු $remainingCountක් ඉතිරිය';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'පහළට ගෙන යන්න';
+
+  @override
+  String get reorderItemLeft => r'වමට ගෙන යන්න';
+
+  @override
+  String get reorderItemRight => r'දකුණට ගෙන යන්න';
+
+  @override
+  String get reorderItemToEnd => r'අවසානයට යන්න';
+
+  @override
+  String get reorderItemToStart => r'ආරම්භය වෙත යන්න';
+
+  @override
+  String get reorderItemUp => r'ඉහළට ගෙන යන්න';
+
+  @override
+  String get rowsPerPageTitle => r'පිටුවකට පේළි:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'සෙවීම';
+
+  @override
+  String get selectAllButtonLabel => r'සියල්ල තෝරන්න';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'අයිතම 1ක් තෝරන ලදී';
+
+  @override
+  String get selectedRowCountTitleOther => r'අයිතම $selectedRowCountක් තෝරන ලදී';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'ගිණුම් පෙන්වන්න';
+
+  @override
+  String get showMenuTooltip => r'මෙනුව පෙන්වන්න';
+
+  @override
+  String get signedInLabel => r'පුරන ලදී';
+
+  @override
+  String get tabLabelRaw => r'ටැබ $tabIndexකින් $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'පැය ගණන තෝරන්න';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'මිනිත්තු ගණන තෝරන්න';
+
+  @override
+  String get viewLicensesButtonLabel => r'බලපත්‍ර බලන්න';
+}
+
 /// The translations for Slovak (`sk`).
 class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Slovak.
@@ -10648,6 +14797,210 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => r'PRIKAŽI LICENCE';
+}
+
+/// The translations for Albanian (`sq`).
+class MaterialLocalizationSq extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Albanian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationSq({
+    String localeName = 'sq',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'Rreth $applicationName';
+
+  @override
+  String get alertDialogLabel => r'Sinjalizim';
+
+  @override
+  String get anteMeridiemAbbreviation => r'paradite';
+
+  @override
+  String get backButtonTooltip => r'Prapa';
+
+  @override
+  String get cancelButtonLabel => r'ANULO';
+
+  @override
+  String get closeButtonLabel => r'MBYLL';
+
+  @override
+  String get closeButtonTooltip => r'Mbyll';
+
+  @override
+  String get collapsedIconTapHint => r'Zgjero';
+
+  @override
+  String get continueButtonLabel => r'VAZHDO';
+
+  @override
+  String get copyButtonLabel => r'KOPJO';
+
+  @override
+  String get cutButtonLabel => r'PRIT';
+
+  @override
+  String get deleteButtonTooltip => r'Fshi';
+
+  @override
+  String get dialogLabel => r'Dialogu';
+
+  @override
+  String get drawerLabel => r'Menyja e navigimit';
+
+  @override
+  String get expandedIconTapHint => r'Palos';
+
+  @override
+  String get hideAccountsLabel => r'Fshih llogaritë';
+
+  @override
+  String get licensesPageTitle => r'Licencat';
+
+  @override
+  String get modalBarrierDismissLabel => r'Hiq';
+
+  @override
+  String get nextMonthTooltip => r'Muaji i ardhshëm';
+
+  @override
+  String get nextPageTooltip => r'Faqja tjetër';
+
+  @override
+  String get okButtonLabel => r'Në rregull';
+
+  @override
+  String get openAppDrawerTooltip => r'Hap menynë e navigimit';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow nga $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow nga rreth $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'NGJIT';
+
+  @override
+  String get popupMenuLabel => r'Menyja kërcyese';
+
+  @override
+  String get postMeridiemAbbreviation => r'pasdite';
+
+  @override
+  String get previousMonthTooltip => r'Muaji i mëparshëm';
+
+  @override
+  String get previousPageTooltip => r'Faqja e mëparshme';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Rifresko';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 karakter i mbetur';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount karaktere të mbetura';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Lëvize poshtë';
+
+  @override
+  String get reorderItemLeft => r'Lëvize majtas';
+
+  @override
+  String get reorderItemRight => r'Lëvize djathtas';
+
+  @override
+  String get reorderItemToEnd => r'Lëvize në fund';
+
+  @override
+  String get reorderItemToStart => r'Lëvize në fillim';
+
+  @override
+  String get reorderItemUp => r'Lëvize lart';
+
+  @override
+  String get rowsPerPageTitle => r'Rreshtat për faqe:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Kërko';
+
+  @override
+  String get selectAllButtonLabel => r'ZGJIDHI TË GJITHA';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'U zgjodh 1 artikull';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount artikuj u zgjodhën';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Shfaq llogaritë';
+
+  @override
+  String get showMenuTooltip => r'Shfaq menynë';
+
+  @override
+  String get signedInLabel => r'Je identifikuar';
+
+  @override
+  String get tabLabelRaw => r'Skeda $tabIndex nga $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Zgjidh orët';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Zgjidh minutat';
+
+  @override
+  String get viewLicensesButtonLabel => r'SHIKO LICENCAT';
 }
 
 /// The translations for Serbian (`sr`).
@@ -11670,6 +16023,210 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'உரிமங்களைக் காட்டு';
 }
 
+/// The translations for Telugu (`te`).
+class MaterialLocalizationTe extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Telugu.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationTe({
+    String localeName = 'te',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName గురించి';
+
+  @override
+  String get alertDialogLabel => r'అలర్ట్';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'వెనుకకు';
+
+  @override
+  String get cancelButtonLabel => r'రద్దు చేయి';
+
+  @override
+  String get closeButtonLabel => r'మూసివేయి';
+
+  @override
+  String get closeButtonTooltip => r'మూసివేయి';
+
+  @override
+  String get collapsedIconTapHint => r'విస్తరించు';
+
+  @override
+  String get continueButtonLabel => r'కొనసాగించు';
+
+  @override
+  String get copyButtonLabel => r'కాపీ చేయి';
+
+  @override
+  String get cutButtonLabel => r'కత్తిరించు';
+
+  @override
+  String get deleteButtonTooltip => r'తొలగించు';
+
+  @override
+  String get dialogLabel => r'డైలాగ్';
+
+  @override
+  String get drawerLabel => r'నావిగేషన్ మెను';
+
+  @override
+  String get expandedIconTapHint => r'కుదించు';
+
+  @override
+  String get hideAccountsLabel => r'ఖాతాలను దాచు';
+
+  @override
+  String get licensesPageTitle => r'లైసెన్స్‌లు';
+
+  @override
+  String get modalBarrierDismissLabel => r'విస్మరించు';
+
+  @override
+  String get nextMonthTooltip => r'తర్వాత నెల';
+
+  @override
+  String get nextPageTooltip => r'తర్వాత పేజీ';
+
+  @override
+  String get okButtonLabel => r'సరే';
+
+  @override
+  String get openAppDrawerTooltip => r'నావిగేషన్ మెనూను తెరువు';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$rowCountలో $firstRow - $lastRow';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCountలో $firstRow–$lastRow';
+
+  @override
+  String get pasteButtonLabel => r'అతికించు';
+
+  @override
+  String get popupMenuLabel => r'పాప్‌అప్ మెను';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'మునుపటి నెల';
+
+  @override
+  String get previousPageTooltip => r'మునుపటి పేజీ';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'రిఫ్రెష్ చేయి';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 అక్షరం మిగిలి ఉంది';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount అక్షరాలు మిగిలి ఉన్నాయి';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'కిందికు జరుపు';
+
+  @override
+  String get reorderItemLeft => r'ఎడమవైపుగా జరపండి';
+
+  @override
+  String get reorderItemRight => r'కుడివైపుగా జరపండి';
+
+  @override
+  String get reorderItemToEnd => r'చివరకు తరలించండి';
+
+  @override
+  String get reorderItemToStart => r'ప్రారంభానికి తరలించండి';
+
+  @override
+  String get reorderItemUp => r'పైకి జరపండి';
+
+  @override
+  String get rowsPerPageTitle => r'పేజీకి ఉండే అడ్డు వరుసలు:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => r'వెతుకు';
+
+  @override
+  String get selectAllButtonLabel => r'అన్నింటినీ ఎంచుకోండి';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 అంశం ఎంచుకోబడింది';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount అంశాలు ఎంచుకోబడ్డాయి';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'ఖాతాలను చూపు';
+
+  @override
+  String get showMenuTooltip => r'మెనూను చూపు';
+
+  @override
+  String get signedInLabel => r'సైన్ ఇన్ చేసారు';
+
+  @override
+  String get tabLabelRaw => r'$tabCountలో $tabIndexవ ట్యాబ్';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'గంటలను ఎంచుకోండి';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'నిమిషాలను ఎంచుకోండి';
+
+  @override
+  String get viewLicensesButtonLabel => r'లైసెన్స్‌లను చూడండి';
+}
+
 /// The translations for Thai (`th`).
 class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Thai.
@@ -12690,6 +17247,210 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'لائسنسز دیکھیں';
 }
 
+/// The translations for Uzbek (`uz`).
+class MaterialLocalizationUz extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Uzbek.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationUz({
+    String localeName = 'uz',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName haqida';
+
+  @override
+  String get alertDialogLabel => r'Ogohlantirish';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'Orqaga';
+
+  @override
+  String get cancelButtonLabel => r'BEKOR QILISH';
+
+  @override
+  String get closeButtonLabel => r'YOPISH';
+
+  @override
+  String get closeButtonTooltip => r'Yopish';
+
+  @override
+  String get collapsedIconTapHint => r'Yoyish';
+
+  @override
+  String get continueButtonLabel => r'DAVOM ETISH';
+
+  @override
+  String get copyButtonLabel => r'NUSXA OLISH';
+
+  @override
+  String get cutButtonLabel => r'KESIB OLISH';
+
+  @override
+  String get deleteButtonTooltip => r'Olib tashlash';
+
+  @override
+  String get dialogLabel => r'Muloqot oynasi';
+
+  @override
+  String get drawerLabel => r'Navigatsiya menyusi';
+
+  @override
+  String get expandedIconTapHint => r'Kichraytirish';
+
+  @override
+  String get hideAccountsLabel => r'Hisoblarni berkitish';
+
+  @override
+  String get licensesPageTitle => r'Litsenziyalar';
+
+  @override
+  String get modalBarrierDismissLabel => r'Yopish';
+
+  @override
+  String get nextMonthTooltip => r'Keyingi oy';
+
+  @override
+  String get nextPageTooltip => r'Keyingi sahifa';
+
+  @override
+  String get okButtonLabel => r'OK';
+
+  @override
+  String get openAppDrawerTooltip => r'Navigatsiya menyusini ochish';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow, jami: $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow, jami: $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'JOYLASH';
+
+  @override
+  String get popupMenuLabel => r'Pop-ap menyusi';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'Avvalgi oy';
+
+  @override
+  String get previousPageTooltip => r'Avvalgi sahifa';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Yangilash';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 ta belgi qoldi';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount ta belgi qoldi';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Pastga siljitish';
+
+  @override
+  String get reorderItemLeft => r'Chapga siljitish';
+
+  @override
+  String get reorderItemRight => r'Oʻngga siljitish';
+
+  @override
+  String get reorderItemToEnd => r'Oxiriga siljitish';
+
+  @override
+  String get reorderItemToStart => r'Boshiga siljitish';
+
+  @override
+  String get reorderItemUp => r'Tepaga siljitish';
+
+  @override
+  String get rowsPerPageTitle => r'Har bir sahifadagi qatorlar soni:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Qidirish';
+
+  @override
+  String get selectAllButtonLabel => r'BARCHASINI TANLASH';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 ta element tanlandi';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount ta element tanlandi';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Hisoblarni koʻrsatish';
+
+  @override
+  String get showMenuTooltip => r'Menyuni koʻrsatish';
+
+  @override
+  String get signedInLabel => r'Hisobingizga kirgansiz';
+
+  @override
+  String get tabLabelRaw => r'$tabCount varaqdan $tabIndex';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Soatni tanlang';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Daqiqani tanlang';
+
+  @override
+  String get viewLicensesButtonLabel => r'Litsenziyalarni koʻrish';
+}
+
 /// The translations for Vietnamese (`vi`).
 class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Vietnamese.
@@ -13146,19 +17907,19 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   );
 
   @override
-  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
+  String get tabLabelRaw => r'第 $tabIndex 個標籤，總共 $tabCount 個';
 
   @override
   String get showAccountsLabel => r'顯示帳戶';
 
   @override
-  String get modalBarrierDismissLabel => r'關閉';
+  String get modalBarrierDismissLabel => r'拒絕';
 
   @override
   String get hideAccountsLabel => r'隱藏帳戶';
 
   @override
-  String get signedInLabel => r'已登入帳戶';
+  String get signedInLabel => r'已登入';
 
   @override
   String get openAppDrawerTooltip => r'開啟導覽選單';
@@ -13185,16 +17946,16 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get showMenuTooltip => r'顯示選單';
 
   @override
-  String get aboutListTileTitleRaw => r'關於「$applicationName」';
+  String get aboutListTileTitleRaw => r'關於$applicationName';
 
   @override
   String get licensesPageTitle => r'授權';
 
   @override
-  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
+  String get pageRowsInfoTitleRaw => r'第 $firstRow 至 $lastRow 列，共 $rowCount 列';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
 
   @override
   String get rowsPerPageTitle => r'每頁列數：';
@@ -13230,10 +17991,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get viewLicensesButtonLabel => r'查看授權';
 
   @override
-  String get timePickerHourModeAnnouncement => r'選取小時數';
+  String get timePickerHourModeAnnouncement => r'揀選小時';
 
   @override
-  String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
+  String get timePickerMinuteModeAnnouncement => r'揀選分鐘';
 
   @override
   String get drawerLabel => r'導覽選單';
@@ -13245,16 +18006,16 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get dialogLabel => r'對話方塊';
 
   @override
-  String get alertDialogLabel => r'快訊';
+  String get alertDialogLabel => r'通知';
 
   @override
   String get searchFieldLabel => r'搜尋';
 
   @override
-  String get reorderItemToStart => r'移至開頭';
+  String get reorderItemToStart => r'移到開頭';
 
   @override
-  String get reorderItemToEnd => r'移至結尾';
+  String get reorderItemToEnd => r'移到最後';
 
   @override
   String get reorderItemUp => r'向上移';
@@ -13275,10 +18036,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get collapsedIconTapHint => r'展開';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
+  String get remainingTextFieldCharacterCountOne => r'尚餘 1 個字元';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
+  String get remainingTextFieldCharacterCountOther => r'尚餘 $remainingCount 個字元';
 
   @override
   String get refreshIndicatorSemanticLabel => r'重新整理';
@@ -13330,6 +18091,249 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
+
+  @override
+  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
+
+  @override
+  String get modalBarrierDismissLabel => r'關閉';
+
+  @override
+  String get signedInLabel => r'已登入帳戶';
+
+  @override
+  String get aboutListTileTitleRaw => r'關於「$applicationName」';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
+
+  @override
+  String get timePickerHourModeAnnouncement => r'選取小時數';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
+
+  @override
+  String get alertDialogLabel => r'快訊';
+
+  @override
+  String get reorderItemToStart => r'移至開頭';
+
+  @override
+  String get reorderItemToEnd => r'移至結尾';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
+}
+
+/// The translations for Zulu (`zu`).
+class MaterialLocalizationZu extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Zulu.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationZu({
+    String localeName = 'zu',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'Mayelana no-$applicationName';
+
+  @override
+  String get alertDialogLabel => r'Isexwayiso';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'Emuva';
+
+  @override
+  String get cancelButtonLabel => r'KHANSELA';
+
+  @override
+  String get closeButtonLabel => r'VALA';
+
+  @override
+  String get closeButtonTooltip => r'Vala';
+
+  @override
+  String get collapsedIconTapHint => r'Nweba';
+
+  @override
+  String get continueButtonLabel => r'QHUBEKA';
+
+  @override
+  String get copyButtonLabel => r'KOPISHA';
+
+  @override
+  String get cutButtonLabel => r'SIKA';
+
+  @override
+  String get deleteButtonTooltip => r'Susa';
+
+  @override
+  String get dialogLabel => r'Ingxoxo';
+
+  @override
+  String get drawerLabel => r'Imenyu yokuzulazula';
+
+  @override
+  String get expandedIconTapHint => r'Goqa';
+
+  @override
+  String get hideAccountsLabel => r'Fihla ama-akhawunti';
+
+  @override
+  String get licensesPageTitle => r'Amalayisense';
+
+  @override
+  String get modalBarrierDismissLabel => r'Cashisa';
+
+  @override
+  String get nextMonthTooltip => r'Inyanga ezayo';
+
+  @override
+  String get nextPageTooltip => r'Ikhasi elilandelayo';
+
+  @override
+  String get okButtonLabel => r'KULUNGILE';
+
+  @override
+  String get openAppDrawerTooltip => r'Vula imenyu yokuzulazula';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow kokungu-$rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow cishe kokungu-$rowCount';
+
+  @override
+  String get pasteButtonLabel => r'NAMATHISELA';
+
+  @override
+  String get popupMenuLabel => r'Imenyu ye-popup';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'Inyanga edlule';
+
+  @override
+  String get previousPageTooltip => r'Ikhasi elidlule';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Vuselela';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 uhlamvu olusele';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount izinhlamvu ezisele';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => r'Iya phansi';
+
+  @override
+  String get reorderItemLeft => r'Hambisa kwesokunxele';
+
+  @override
+  String get reorderItemRight => r'Yisa kwesokudla';
+
+  @override
+  String get reorderItemToEnd => r'Yisa ekugcineni';
+
+  @override
+  String get reorderItemToStart => r'Yisa ekuqaleni';
+
+  @override
+  String get reorderItemUp => r'Iya phezulu';
+
+  @override
+  String get rowsPerPageTitle => r'Imigqa ekhasini ngalinye:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Sesha';
+
+  @override
+  String get selectAllButtonLabel => r'KHETHA KONKE';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'1 into ekhethiwe';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount izinto ezikhethiwe';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => r'Bonisa ama-akhawunti';
+
+  @override
+  String get showMenuTooltip => r'Bonisa imenyu';
+
+  @override
+  String get signedInLabel => r'Ungene ngemvume';
+
+  @override
+  String get tabLabelRaw => r'Ithebhu $tabIndex kwangu-$tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Khetha amahora';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Khetha amaminithi';
+
+  @override
+  String get viewLicensesButtonLabel => r'Buka amalayisense';
 }
 
 /// The set of supported languages, as language code strings.
@@ -13344,8 +18348,14 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
 ///
 ///  * [getMaterialTranslation], whose documentation describes these values.
 final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <String>[
+  'af', // Afrikaans
+  'am', // Amharic
   'ar', // Arabic
+  'as', // Assamese
+  'az', // Azerbaijani
+  'be', // Belarusian
   'bg', // Bulgarian
+  'bn', // Bengali Bangla
   'bs', // Bosnian
   'ca', // Catalan Valencian
   'cs', // Czech
@@ -13355,48 +18365,66 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'en', // English
   'es', // Spanish Castilian
   'et', // Estonian
+  'eu', // Basque
   'fa', // Persian
   'fi', // Finnish
   'fil', // Filipino Pilipino
   'fr', // French
   'gl', // Galician
   'gsw', // Swiss German Alemannic Alsatian
+  'gu', // Gujarati
   'he', // Hebrew
   'hi', // Hindi
   'hr', // Croatian
   'hu', // Hungarian
   'hy', // Armenian
   'id', // Indonesian
+  'is', // Icelandic
   'it', // Italian
   'ja', // Japanese
+  'ka', // Georgian
   'kk', // Kazakh
   'km', // Khmer Central Khmer
+  'kn', // Kannada
   'ko', // Korean
+  'ky', // Kirghiz Kyrgyz
+  'lo', // Lao
   'lt', // Lithuanian
   'lv', // Latvian
+  'mk', // Macedonian
+  'ml', // Malayalam
   'mn', // Mongolian
   'mr', // Marathi
   'ms', // Malay
+  'my', // Burmese
   'nb', // Norwegian Bokmål
+  'ne', // Nepali
   'nl', // Dutch Flemish
+  'or', // Oriya
+  'pa', // Panjabi Punjabi
   'pl', // Polish
   'ps', // Pushto Pashto
   'pt', // Portuguese
   'ro', // Romanian Moldavian Moldovan
   'ru', // Russian
+  'si', // Sinhala Sinhalese
   'sk', // Slovak
   'sl', // Slovenian
+  'sq', // Albanian
   'sr', // Serbian
   'sv', // Swedish
   'sw', // Swahili
   'ta', // Tamil
+  'te', // Telugu
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
   'uk', // Ukrainian
   'ur', // Urdu
+  'uz', // Uzbek
   'vi', // Vietnamese
   'zh', // Chinese
+  'zu', // Zulu
 ]);
 
 /// Creates a [GlobalMaterialLocalizations] instance for the given `locale`.
@@ -13409,59 +18437,83 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 /// The following locales are supported by this package:
 ///
 /// {@template flutter.localizations.material.languages}
+///  * `af` - Afrikaans
+///  * `am` - Amharic
 ///  * `ar` - Arabic
+///  * `as` - Assamese
+///  * `az` - Azerbaijani
+///  * `be` - Belarusian
 ///  * `bg` - Bulgarian
+///  * `bn` - Bengali Bangla
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
 ///  * `da` - Danish
 ///  * `de` - German (plus one country variation)
 ///  * `el` - Modern Greek
-///  * `en` - English (plus 7 country variations)
+///  * `en` - English (plus 8 country variations)
 ///  * `es` - Spanish Castilian (plus 20 country variations)
 ///  * `et` - Estonian
+///  * `eu` - Basque
 ///  * `fa` - Persian
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
 ///  * `fr` - French (plus one country variation)
 ///  * `gl` - Galician
 ///  * `gsw` - Swiss German Alemannic Alsatian
+///  * `gu` - Gujarati
 ///  * `he` - Hebrew
 ///  * `hi` - Hindi
 ///  * `hr` - Croatian
 ///  * `hu` - Hungarian
 ///  * `hy` - Armenian
 ///  * `id` - Indonesian
+///  * `is` - Icelandic
 ///  * `it` - Italian
 ///  * `ja` - Japanese
+///  * `ka` - Georgian
 ///  * `kk` - Kazakh
 ///  * `km` - Khmer Central Khmer
+///  * `kn` - Kannada
 ///  * `ko` - Korean
+///  * `ky` - Kirghiz Kyrgyz
+///  * `lo` - Lao
 ///  * `lt` - Lithuanian
 ///  * `lv` - Latvian
+///  * `mk` - Macedonian
+///  * `ml` - Malayalam
 ///  * `mn` - Mongolian
 ///  * `mr` - Marathi
 ///  * `ms` - Malay
+///  * `my` - Burmese
 ///  * `nb` - Norwegian Bokmål
+///  * `ne` - Nepali
 ///  * `nl` - Dutch Flemish
+///  * `or` - Oriya
+///  * `pa` - Panjabi Punjabi
 ///  * `pl` - Polish
 ///  * `ps` - Pushto Pashto
 ///  * `pt` - Portuguese (plus one country variation)
 ///  * `ro` - Romanian Moldavian Moldovan
 ///  * `ru` - Russian
+///  * `si` - Sinhala Sinhalese
 ///  * `sk` - Slovak
 ///  * `sl` - Slovenian
+///  * `sq` - Albanian
 ///  * `sr` - Serbian (plus 2 scripts)
 ///  * `sv` - Swedish
 ///  * `sw` - Swahili
 ///  * `ta` - Tamil
+///  * `te` - Telugu
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
 ///  * `uk` - Ukrainian
 ///  * `ur` - Urdu
+///  * `uz` - Uzbek
 ///  * `vi` - Vietnamese
 ///  * `zh` - Chinese (plus 2 country variations and 2 scripts)
+///  * `zu` - Zulu
 /// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
@@ -13476,10 +18528,22 @@ GlobalMaterialLocalizations getMaterialTranslation(
   intl.NumberFormat twoDigitZeroPaddedFormat,
 ) {
   switch (locale.languageCode) {
+    case 'af':
+      return MaterialLocalizationAf(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'am':
+      return MaterialLocalizationAm(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ar':
       return MaterialLocalizationAr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'as':
+      return MaterialLocalizationAs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'az':
+      return MaterialLocalizationAz(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'be':
+      return MaterialLocalizationBe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bg':
       return MaterialLocalizationBg(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'bn':
+      return MaterialLocalizationBn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bs':
       return MaterialLocalizationBs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ca':
@@ -13509,6 +18573,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
           return MaterialLocalizationEnIe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'IN':
           return MaterialLocalizationEnIn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        case 'NZ':
+          return MaterialLocalizationEnNz(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'SG':
           return MaterialLocalizationEnSg(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'ZA':
@@ -13563,6 +18629,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
     }
     case 'et':
       return MaterialLocalizationEt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'eu':
+      return MaterialLocalizationEu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fa':
       return MaterialLocalizationFa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fi':
@@ -13580,6 +18648,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
       return MaterialLocalizationGl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gsw':
       return MaterialLocalizationGsw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'gu':
+      return MaterialLocalizationGu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'he':
       return MaterialLocalizationHe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hi':
@@ -13592,30 +18662,52 @@ GlobalMaterialLocalizations getMaterialTranslation(
       return MaterialLocalizationHy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'id':
       return MaterialLocalizationId(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'is':
+      return MaterialLocalizationIs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'it':
       return MaterialLocalizationIt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ja':
       return MaterialLocalizationJa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'ka':
+      return MaterialLocalizationKa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'kk':
       return MaterialLocalizationKk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'km':
       return MaterialLocalizationKm(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'kn':
+      return MaterialLocalizationKn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ko':
       return MaterialLocalizationKo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'ky':
+      return MaterialLocalizationKy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'lo':
+      return MaterialLocalizationLo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lt':
       return MaterialLocalizationLt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lv':
       return MaterialLocalizationLv(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'mk':
+      return MaterialLocalizationMk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'ml':
+      return MaterialLocalizationMl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mn':
       return MaterialLocalizationMn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mr':
       return MaterialLocalizationMr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ms':
       return MaterialLocalizationMs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'my':
+      return MaterialLocalizationMy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nb':
       return MaterialLocalizationNb(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'ne':
+      return MaterialLocalizationNe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nl':
       return MaterialLocalizationNl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'or':
+      return MaterialLocalizationOr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'pa':
+      return MaterialLocalizationPa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'pl':
       return MaterialLocalizationPl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ps':
@@ -13631,10 +18723,14 @@ GlobalMaterialLocalizations getMaterialTranslation(
       return MaterialLocalizationRo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ru':
       return MaterialLocalizationRu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'si':
+      return MaterialLocalizationSi(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sk':
       return MaterialLocalizationSk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sl':
       return MaterialLocalizationSl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'sq':
+      return MaterialLocalizationSq(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sr': {
       switch (locale.scriptCode) {
         case 'Cyrl': {
@@ -13652,6 +18748,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
       return MaterialLocalizationSw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ta':
       return MaterialLocalizationTa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'te':
+      return MaterialLocalizationTe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'th':
       return MaterialLocalizationTh(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tl':
@@ -13662,6 +18760,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
       return MaterialLocalizationUk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ur':
       return MaterialLocalizationUr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'uz':
+      return MaterialLocalizationUz(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'vi':
       return MaterialLocalizationVi(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'zh': {
@@ -13687,6 +18787,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
       }
       return MaterialLocalizationZh(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
+    case 'zu':
+      return MaterialLocalizationZu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
   }
   assert(false, 'getMaterialTranslation() called for unsupported locale "$locale"');
   return null;

@@ -81,7 +81,7 @@ void main() {
           sampleSize: 100,
         ),
       );
-    });
+    }, skip: isBrowser);
 
     test('AutomaticNotchedShape - no guest', () {
       expect(

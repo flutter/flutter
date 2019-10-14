@@ -79,6 +79,50 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     super.evict(asset);
     imageCache.clear();
   }
+
+  /// Listenable that notifies when the available fonts on the system have
+  /// changed.
+  ///
+  /// System fonts can change when the system installs or removes new font. To
+  /// correctly reflect the change, it is important to relayout text related
+  /// widgets when this happens.
+  ///
+  /// Objects that show text and/or measure text (e.g. via [TextPainter] or
+  /// [Paragraph]) should listen to this and redraw/remeasure.
+  Listenable get systemFonts => _systemFonts;
+  final _SystemFontsNotifier _systemFonts = _SystemFontsNotifier();
+
+  @override
+  Future<void> handleSystemMessage(Object systemMessage) async {
+    await super.handleSystemMessage(systemMessage);
+    final Map<String, dynamic> message = systemMessage;
+    final String type = message['type'];
+    switch (type) {
+      case 'fontsChange':
+        _systemFonts.notifyListeners();
+        break;
+    }
+    return;
+  }
+}
+
+class _SystemFontsNotifier extends Listenable {
+  final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
+
+  void notifyListeners () {
+    for (VoidCallback callback in _systemFontsCallbacks) {
+      callback();
+    }
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    _systemFontsCallbacks.add(listener);
+  }
+  @override
+  void removeListener(VoidCallback listener) {
+    _systemFontsCallbacks.remove(listener);
+  }
 }
 
 /// The singleton that implements the Flutter framework's image cache.

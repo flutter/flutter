@@ -5,7 +5,13 @@
 import 'bitfield.dart' as bitfield;
 
 /// The dart:html implementation of [bitfield.kMaxUnsignedSMI].
-const int kMaxUnsignedSMI = 0;
+///
+/// This value is used as an optimization to coerse some numbers to be within
+/// the SMI range and avoid heap allocations. Because number encoding is
+/// VM-specific, there's no guarantee that this optimization will be effective
+/// on all JavaScript engines. The value picked here should be correct, but it
+/// does not have to guarantee efficiency.
+const int kMaxUnsignedSMI = -1;
 
 /// The dart:html implementation of [bitfield.Bitfield].
 class BitField<T extends dynamic> implements bitfield.BitField<T> {

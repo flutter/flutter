@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer';
-import 'dart:ui' show AppLifecycleState;
+import 'dart:developer' show Flow, Timeline;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -150,7 +150,7 @@ enum SchedulerPhase {
   /// Microtasks scheduled during the processing of transient callbacks are
   /// current executing.
   ///
-  /// This may include, for instance, callbacks from futures resulted during the
+  /// This may include, for instance, callbacks from futures resolved during the
   /// [transientCallbacks] phase.
   midFrameMicrotasks,
 
@@ -194,10 +194,21 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    window.onBeginFrame = _handleBeginFrame;
-    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     readInitialLifecycleStateFromNativeWindow();
+
+    if (!kReleaseMode) {
+      int frameNumber = 0;
+
+      // use frameTimings. https://github.com/flutter/flutter/issues/38838
+      // ignore: deprecated_member_use
+      window.onReportTimings = (List<FrameTiming> timings) {
+        for (FrameTiming frameTiming in timings) {
+          frameNumber += 1;
+          _profileFramePostEvent(frameNumber, frameTiming);
+        }
+      };
+    }
   }
 
   /// The current [SchedulerBinding], if one has been created.
@@ -493,7 +504,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         FlutterError.reportError(FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
-            informationCollector: () sync* {
+          informationCollector: () sync* {
             if (count == 1) {
               // TODO(jacobr): I have added an extra line break in this case.
               yield ErrorDescription(
@@ -643,6 +654,12 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       scheduleFrame();
   }
 
+  @protected
+  void ensureFrameCallbacksRegistered() {
+    window.onBeginFrame ??= _handleBeginFrame;
+    window.onDrawFrame ??= _handleDrawFrame;
+  }
+
   /// Schedules a new frame using [scheduleFrame] if this object is not
   /// currently producing a frame.
   ///
@@ -704,6 +721,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
+    ensureFrameCallbacksRegistered();
     window.scheduleFrame();
     _hasScheduledFrame = true;
   }
@@ -834,16 +852,32 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   /// The time stamp for the frame currently being processed.
   ///
-  /// This is only valid while [handleBeginFrame] is running, i.e. while a frame
-  /// is being produced.
+  /// This is only valid while between the start of [handleBeginFrame] and the
+  /// end of the corresponding [handleDrawFrame], i.e. while a frame is being
+  /// produced.
   Duration get currentFrameTimeStamp {
     assert(_currentFrameTimeStamp != null);
     return _currentFrameTimeStamp;
   }
   Duration _currentFrameTimeStamp;
 
-  int _profileFrameNumber = 0;
-  final Stopwatch _profileFrameStopwatch = Stopwatch();
+  /// The raw time stamp as provided by the engine to [Window.onBeginFrame]
+  /// for the frame currently being processed.
+  ///
+  /// Unlike [currentFrameTimeStamp], this time stamp is neither adjusted to
+  /// offset when the epoch started nor scaled to reflect the [timeDilation] in
+  /// the current epoch.
+  ///
+  /// On most platforms, this is a more or less arbitrary value, and should
+  /// generally be ignored. On Fuchsia, this corresponds to the system-provided
+  /// presentation time, and can be used to ensure that animations running in
+  /// different processes are synchronized.
+  Duration get currentSystemFrameTimeStamp {
+    assert(_lastRawTimeStamp != null);
+    return _lastRawTimeStamp;
+  }
+
+  int _debugFrameNumber = 0;
   String _debugBanner;
   bool _ignoreNextEngineDrawFrame = false;
 
@@ -894,13 +928,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (rawTimeStamp != null)
       _lastRawTimeStamp = rawTimeStamp;
 
-    if (!kReleaseMode) {
-      _profileFrameNumber += 1;
-      _profileFrameStopwatch.reset();
-      _profileFrameStopwatch.start();
-    }
-
     assert(() {
+      _debugFrameNumber += 1;
+
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
         final StringBuffer frameTimeStampDescription = StringBuffer();
         if (rawTimeStamp != null) {
@@ -908,7 +938,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         } else {
           frameTimeStampDescription.write('(warm-up frame)');
         }
-        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_profileFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
+        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_debugFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
         if (debugPrintBeginFrameBanner)
           debugPrint(_debugBanner);
       }
@@ -961,10 +991,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
       Timeline.finishSync(); // end the Frame
-      if (!kReleaseMode) {
-        _profileFrameStopwatch.stop();
-        _profileFramePostEvent();
-      }
       assert(() {
         if (debugPrintEndFrameBanner)
           debugPrint('▀' * _debugBanner.length);
@@ -975,11 +1001,13 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     }
   }
 
-  void _profileFramePostEvent() {
+  void _profileFramePostEvent(int frameNumber, FrameTiming frameTiming) {
     postEvent('Flutter.Frame', <String, dynamic>{
-      'number': _profileFrameNumber,
-      'startTime': _currentFrameTimeStamp.inMicroseconds,
-      'elapsed': _profileFrameStopwatch.elapsedMicroseconds,
+      'number': frameNumber,
+      'startTime': frameTiming.timestampInMicroseconds(FramePhase.buildStart),
+      'elapsed': frameTiming.totalSpan.inMicroseconds,
+      'build': frameTiming.buildDuration.inMicroseconds,
+      'raster': frameTiming.rasterDuration.inMicroseconds,
     });
   }
 
@@ -1007,7 +1035,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace callbackStack ]) {
     assert(callback != null);
     assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack; return true; }());
+    assert(() {
+      _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack;
+      return true;
+    }());
     try {
       callback(timeStamp);
     } catch (exception, exceptionStack) {
@@ -1026,7 +1057,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         },
       ));
     }
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; }());
+    assert(() {
+      _FrameCallbackEntry.debugCurrentCallbackStack = null;
+      return true;
+    }());
   }
 }
 

@@ -11,6 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -27,7 +29,103 @@ class MockClipboard {
   }
 }
 
+class PathBoundsMatcher extends Matcher {
+  const PathBoundsMatcher({
+    this.rectMatcher,
+    this.topMatcher,
+    this.leftMatcher,
+    this.rightMatcher,
+    this.bottomMatcher,
+  }) : super();
+
+  final Matcher rectMatcher;
+  final Matcher topMatcher;
+  final Matcher leftMatcher;
+  final Matcher rightMatcher;
+  final Matcher bottomMatcher;
+
+  @override
+  bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
+    final Rect bounds = item.getBounds();
+
+    final List<Matcher> matchers = <Matcher> [rectMatcher, topMatcher, leftMatcher, rightMatcher, bottomMatcher];
+    final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
+    final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
+
+    for(int idx = 0; idx < matchers.length; idx++) {
+      if (!(matchers[idx]?.matches(values[idx], matchState) != false)) {
+        failedMatcher[matchers[idx]] = values[idx];
+      }
+    }
+
+    matchState['failedMatcher'] = failedMatcher;
+    return failedMatcher.isEmpty;
+  }
+
+  @override
+  Description describe(Description description) => description.add('The actual Rect does not match');
+
+  @override
+  Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+    final Map<Matcher, dynamic> map = matchState['failedMatcher'];
+    final Iterable<String> descriptions = map.entries
+      .map<String>(
+        (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString()
+      );
+
+    // description is guaranteed to be non-null.
+    return description
+        ..add('mismatch Rect: ${item.getBounds()}')
+        .addAll(': ', ', ', '. ', descriptions);
+  }
+}
+
+class PathPointsMatcher extends Matcher {
+  const PathPointsMatcher({
+    this.includes = const <Offset>[],
+    this.excludes = const <Offset>[],
+  }) : super();
+
+  final Iterable<Offset> includes;
+  final Iterable<Offset> excludes;
+
+  @override
+  bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
+    final Offset notIncluded = includes.firstWhere((Offset offset) => !item.contains(offset), orElse: () => null);
+    final Offset notExcluded = excludes.firstWhere(item.contains, orElse: () => null);
+
+    matchState['notIncluded'] = notIncluded;
+    matchState['notExcluded'] = notExcluded;
+    return (notIncluded ?? notExcluded) == null;
+  }
+
+  @override
+  Description describe(Description description) => description.add('must include these points $includes and must not include $excludes');
+
+  @override
+  Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final Offset notIncluded = matchState['notIncluded'];
+    final Offset notExcluded = matchState['notExcluded'];
+    final Description desc = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+
+    if ((notExcluded ?? notIncluded) != null) {
+      desc.add('Within the bounds of the path ${item.getBounds()}: ');
+    }
+
+    if (notIncluded != null) {
+      desc.add('$notIncluded is not included. ');
+    }
+    if (notExcluded != null) {
+      desc.add('$notExcluded is not excluded. ');
+    }
+    return desc;
+  }
+}
+
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
@@ -58,7 +156,7 @@ void main() {
     }).toList();
   }
 
-  Offset textOffsetToPosition(WidgetTester tester, int offset) {
+  Offset textOffsetToBottomLeftPosition(WidgetTester tester, int offset) {
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
       renderEditable.getEndpointsForSelection(
@@ -67,8 +165,14 @@ void main() {
       renderEditable,
     );
     expect(endpoints.length, 1);
-    return endpoints[0].point + const Offset(0.0, -2.0);
+    return endpoints[0].point;
   }
+
+  Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(0, -2);
+
+  setUp(() {
+    EditableText.debugDeterministicCursor = false;
+  });
 
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically no-strut',
@@ -223,7 +327,7 @@ void main() {
         ),
       );
 
-      final BoxDecoration decoration = tester.widget<DecoratedBox>(
+      BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
@@ -232,11 +336,37 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(4.0),
+        BorderRadius.circular(5),
       );
       expect(
-        decoration.border.bottom.color,
-        CupertinoColors.lightBackgroundGray,
+        decoration.border.bottom.color.value,
+        0x33000000,
+      );
+
+      // Dark mode.
+      await tester.pumpWidget(
+        const CupertinoApp(
+          theme: CupertinoThemeData(brightness: Brightness.dark),
+          home: Center(
+            child: CupertinoTextField(),
+          ),
+        ),
+      );
+
+      decoration = tester.widget<DecoratedBox>(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(DecoratedBox),
+        ),
+      ).decoration;
+
+      expect(
+        decoration.borderRadius,
+        BorderRadius.circular(5),
+      );
+      expect(
+        decoration.border.bottom.color.value,
+        0x33FFFFFF,
       );
     },
   );
@@ -373,9 +503,12 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.cupertino.0.2.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino.0.png',
+        version: 3,
+      ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('Cupertino cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -403,9 +536,12 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.cupertino.1.2.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino.1.png',
+        version: 3,
+      ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets(
     'can control text content via controller',
@@ -435,6 +571,48 @@ void main() {
   );
 
   testWidgets(
+    'placeholder respects textAlign',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              placeholder: 'placeholder',
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      );
+
+      final Text placeholder = tester.widget(find.text('placeholder'));
+      expect(placeholder.textAlign, TextAlign.right);
+
+      await tester.enterText(find.byType(CupertinoTextField), 'input');
+      await tester.pump();
+
+      final EditableText inputText = tester.widget(find.text('input'));
+      expect(placeholder.textAlign, inputText.textAlign);
+    },
+  );
+
+  testWidgets('placeholder dark mode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoTextField(
+            placeholder: 'placeholder',
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    );
+
+    final Text placeholder = tester.widget(find.text('placeholder'));
+    expect(placeholder.style.color.value, CupertinoColors.placeholderText.darkColor.value);
+  });
+
+  testWidgets(
     'placeholders are lightly colored and disappears once typing starts',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -448,7 +626,7 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color, const Color(0xFFC2C2C2));
+      expect(placeholder.style.color.value, CupertinoColors.placeholderText.color.value);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
@@ -465,12 +643,12 @@ void main() {
             child: CupertinoTextField(
               placeholder: 'placeholder',
               style: TextStyle(
-                color: Color(0X00FFFFFF),
+                color: Color(0x00FFFFFF),
                 fontWeight: FontWeight.w300,
               ),
               placeholderStyle: TextStyle(
-                color: Color(0XAAFFFFFF),
-                fontWeight: FontWeight.w600
+                color: Color(0xAAFFFFFF),
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -478,14 +656,14 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color, const Color(0XAAFFFFFF));
+      expect(placeholder.style.color, const Color(0xAAFFFFFF));
       expect(placeholder.style.fontWeight, FontWeight.w600);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
 
       final EditableText inputText = tester.widget(find.text('input'));
-      expect(inputText.style.color, const Color(0X00FFFFFF));
+      expect(inputText.style.color, const Color(0x00FFFFFF));
       expect(inputText.style.fontWeight, FontWeight.w300);
     },
   );
@@ -493,10 +671,12 @@ void main() {
   testWidgets(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoTextField(
+              focusNode: focusNode,
               prefix: const Icon(CupertinoIcons.add),
               controller: TextEditingController(text: 'input'),
             ),
@@ -558,11 +738,13 @@ void main() {
   testWidgets(
     'suffix widget is after the text',
     (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
-        const CupertinoApp(
+        CupertinoApp(
           home: Center(
             child: CupertinoTextField(
-              suffix: Icon(CupertinoIcons.add),
+              focusNode: focusNode,
+              suffix: const Icon(CupertinoIcons.add),
             ),
           ),
         ),
@@ -842,7 +1024,7 @@ void main() {
 
   testWidgets(
     'tapping clear button also calls onChanged when text not empty',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       String value = 'text entry';
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
@@ -1115,8 +1297,8 @@ void main() {
     Text text = tester.widget<Text>(find.text('Paste'));
     expect(text.style.color, CupertinoColors.white);
     expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.11);
-    expect(text.style.fontWeight, FontWeight.w300);
+    expect(text.style.letterSpacing, -0.15);
+    expect(text.style.fontWeight, FontWeight.w400);
 
     // Change the theme.
     await tester.pumpWidget(
@@ -1147,10 +1329,53 @@ void main() {
     // The toolbar buttons' text are still the same style.
     expect(text.style.color, CupertinoColors.white);
     expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.11);
-    expect(text.style.fontWeight, FontWeight.w300);
+    expect(text.style.letterSpacing, -0.15);
+    expect(text.style.fontWeight, FontWeight.w400);
   });
 
+
+  testWidgets('text field toolbar options correctly changes options', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+              toolbarOptions: const ToolbarOptions(copy: true),
+            ),
+          ],
+        ),
+      ),
+    );
+
+      // Long press to put the cursor after the "w".
+      const int index = 3;
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Selected text shows 'Copy'.
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Select All'), findsNothing);
+  });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
 
@@ -1323,10 +1548,7 @@ void main() {
 
       // Long press to put the cursor after the "w".
       const int index = 3;
-      final TestGesture gesture =
-        await tester.startGesture(textOffsetToPosition(tester, index));
-      await tester.pump(const Duration(milliseconds: 500));
-      await gesture.up();
+      await tester.longPressAt(textOffsetToPosition(tester, index));
       await tester.pump();
       expect(
         controller.selection,
@@ -1481,7 +1703,7 @@ void main() {
   );
 
   testWidgets(
-    'An obscured CupertinoTextField is not selectable by default',
+    'An obscured CupertinoTextField is not selectable when disabled',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1492,6 +1714,7 @@ void main() {
             child: CupertinoTextField(
               controller: controller,
               obscureText: true,
+              enableInteractiveSelection: false,
             ),
           ),
         ),
@@ -1528,7 +1751,7 @@ void main() {
   );
 
   testWidgets(
-    'An obscured CupertinoTextField is selectable when enabled',
+    'An obscured CupertinoTextField is selectable by default',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1539,7 +1762,6 @@ void main() {
             child: CupertinoTextField(
               controller: controller,
               obscureText: true,
-              enableInteractiveSelection: true,
             ),
           ),
         ),
@@ -1554,15 +1776,14 @@ void main() {
       // Hold the press.
       await tester.pump(const Duration(milliseconds: 500));
 
-      // The obscured text is not broken into words, so only one letter is
-      // selected at a time.
+      // The obscured text is treated as one word, should select all
       expect(
         controller.selection,
-        const TextSelection(baseOffset: 9, extentOffset: 10),
+        const TextSelection(baseOffset: 0, extentOffset: 35),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), findsNWidgets(3));
+      // Selected text shows paste toolbar buttons.
+      expect(find.byType(CupertinoButton), findsNWidgets(1));
 
       await gesture.up();
       await tester.pump();
@@ -1570,11 +1791,55 @@ void main() {
       // Still selected.
       expect(
         controller.selection,
-        const TextSelection(baseOffset: 9, extentOffset: 10),
+        const TextSelection(baseOffset: 0, extentOffset: 35),
       );
-      expect(find.byType(CupertinoButton), findsNWidgets(3));
+      expect(find.byType(CupertinoButton), findsNWidgets(1));
     },
   );
+
+  testWidgets('An obscured TextField has correct default context menu', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+            obscureText: true,
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getCenter(find.byType(CupertinoTextField));
+
+    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.longPressAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.pump();
+
+    // Should only have paste option when whole obscure text is selected.
+    expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select All'), findsNothing);
+
+    // Tap to cancel selection.
+    final Offset textfieldEnd = tester.getTopRight(find.byType(CupertinoTextField));
+    await tester.tapAt(textfieldEnd + const Offset(-10.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    // Long tap at the end.
+    await tester.longPressAt(textfieldEnd + const Offset(-10.0, 5.0));
+    await tester.pump();
+
+    // Should have paste and select all options when collapse.
+    expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Select All'), findsOneWidget);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+  });
 
   testWidgets(
     'long press moves cursor to the exact long press position and shows toolbar',
@@ -2115,6 +2380,7 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -2123,8 +2389,6 @@ void main() {
 
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
-
-    await gesture.removePointer();
   });
 
   testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
@@ -2157,6 +2421,7 @@ void main() {
 
     // Drag from 'c' to 'g'.
     final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
@@ -2180,8 +2445,6 @@ void main() {
     expect(selectionChangedCount, 1);
     expect(controller.selection.baseOffset, 2);
     expect(controller.selection.extentOffset, 9);
-
-    await gesture.removePointer();
   });
 
   testWidgets('Tap does not show handles nor toolbar', (WidgetTester tester) async {
@@ -2232,7 +2495,7 @@ void main() {
 
   testWidgets(
     'Double tap shows handles and toolbar if selection is not collapsed',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2261,7 +2524,7 @@ void main() {
 
   testWidgets(
     'Double tap shows toolbar but not handles if selection is collapsed',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2290,7 +2553,7 @@ void main() {
 
   testWidgets(
     'Mouse long press does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2309,6 +2572,7 @@ void main() {
         textFieldPos,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(seconds: 2));
       await gesture.up();
       await tester.pump();
@@ -2316,14 +2580,12 @@ void main() {
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-
-      await gesture.removePointer();
     },
   );
 
   testWidgets(
     'Mouse double tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2362,6 +2624,7 @@ void main() {
         hPos,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -2372,10 +2635,92 @@ void main() {
 
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-
-      await gesture.removePointer();
     },
   );
+
+  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
+    int tapCount = 0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            onTap: () => tapCount++,
+          ),
+        ),
+      ),
+    );
+
+    expect(tapCount, 0);
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pump();
+    expect(tapCount, 1);
+
+    // Wait out the double tap interval so the next tap doesn't end up being
+    // recognized as a double tap.
+    await tester.pump(const Duration(seconds: 1));
+
+    // Double tap count as one single tap.
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pump();
+    expect(tapCount, 2);
+  });
+
+  testWidgets('onTap does not work when the text field is disabled',
+    (WidgetTester tester) async {
+      int tapCount = 0;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              enabled: false,
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      );
+
+      expect(tapCount, 0);
+      await tester.tap(find.byType(CupertinoTextField));
+      await tester.pump();
+      expect(tapCount, 0);
+
+      // Wait out the double tap interval so the next tap doesn't end up being
+      // recognized as a double tap.
+      await tester.pump(const Duration(seconds: 1));
+
+      // Enabling the text field, now it should accept taps.
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(CupertinoTextField));
+      expect(tapCount, 1);
+
+      await tester.pump(const Duration(seconds: 1));
+
+      // Disable it again.
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              enabled: false,
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(CupertinoTextField));
+      await tester.pump();
+      expect(tapCount, 1);
+  });
 
   testWidgets(
     'text field respects theme',
@@ -2399,8 +2744,8 @@ void main() {
       ).decoration;
 
       expect(
-        decoration.border.bottom.color,
-        CupertinoColors.lightBackgroundGray, // Border color is the same regardless.
+        decoration.border.bottom.color.value,
+        0x33FFFFFF,
       );
 
       await tester.enterText(find.byType(CupertinoTextField), 'smoked meat');
@@ -2482,7 +2827,7 @@ void main() {
       toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
       textFieldTopLeft = tester.getTopLeft(find.byType(CupertinoTextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
-    }
+    },
   );
 
   testWidgets('text field respects keyboardAppearance from theme', (WidgetTester tester) async {
@@ -2548,7 +2893,7 @@ void main() {
     tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor, CupertinoColors.activeBlue);
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue.color);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2560,7 +2905,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(renderEditable.cursorColor, CupertinoColors.activeOrange);
+    expect(renderEditable.cursorColor, CupertinoColors.activeOrange.darkColor);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2576,19 +2921,38 @@ void main() {
   });
 
   testWidgets('cursor can override color from theme', (WidgetTester tester) async {
+    const CupertinoDynamicColor cursorColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0x12345678),
+      darkColor: Color(0x87654321),
+    );
+
     await tester.pumpWidget(
       const CupertinoApp(
         theme: CupertinoThemeData(),
         home: Center(
           child: CupertinoTextField(
-            cursorColor: Color(0xFFF44336),
+            cursorColor: cursorColor,
           ),
         ),
       ),
     );
 
-    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
-    expect(editableText.cursorColor, const Color(0xFFF44336));
+    EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor.value, 0x12345678);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoTextField(
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor.value, 0x87654321);
   });
 
   testWidgets('iOS shows selection handles', (WidgetTester tester) async {
@@ -2663,20 +3027,847 @@ void main() {
             child: SizedBox(
               width: 200,
               height: 200,
-              child: CupertinoTextField(
-                controller: TextEditingController(text: 'lorem'),
-                enabled: false,
+              child: RepaintBoundary(
+                key: const ValueKey<int>(1),
+                child: CupertinoTextField(
+                  controller: TextEditingController(text: 'lorem'),
+                  enabled: false,
+                ),
               ),
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     );
 
     await expectLater(
-      find.byType(CupertinoTextField),
-      matchesGoldenFile('text_field_test.disabled.0.png'),
-      skip: !isLinux,
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile(
+        'text_field_test.disabled.png',
+        version: 1,
+      ),
+    );
+  });
+
+  group('Text selection toolbar', () {
+    testWidgets('Collapsed selection works', (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.devicePixelRatioTestValue = 1;
+      TextEditingController controller;
+      EditableTextState state;
+      Offset bottomLeftSelectionPosition;
+
+      controller = TextEditingController(text: 'a');
+      // Top left collapsed selection. The toolbar should flip vertically, and
+      // the arrow should not point exactly to the caret because the caret is
+      // too close to the left.
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      final double lineHeight = state.renderEditable.preferredLineHeight;
+
+      state.renderEditable.selectPositionAt(from: textOffsetToPosition(tester, 0), cause: SelectionChangedCause.tap);
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, 0);
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            excludes: <Offset> [
+              // Arrow should not point to the selection handle.
+              bottomLeftSelectionPosition.translate(0, 8 + 0.1),
+            ],
+            includes: <Offset> [
+              // Expected center of the arrow.
+              Offset(26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
+            leftMatcher: moreOrLessEquals(8),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+          ),
+        ),
+      );
+
+      // Top Right collapsed selection. The toolbar should flip vertically, and
+      // the arrow should not point exactly to the caret because the caret is
+      // too close to the right.
+      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.renderEditable.selectPositionAt(
+        from: tester.getTopRight(find.byType(CupertinoApp)),
+        cause: SelectionChangedCause.tap,
+      );
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      // -1 because we want to reach the end of the line, not the start of a new line.
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset - 1);
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            excludes: <Offset> [
+              // Arrow should not point to the selection handle.
+              bottomLeftSelectionPosition.translate(0, 8 + 0.1),
+            ],
+            includes: <Offset> [
+              // Expected center of the arrow.
+              Offset(400 - 26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
+            rightMatcher: moreOrLessEquals(400.0 - 8),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
+
+      // Normal centered collapsed selection. The toolbar arrow should point down, and
+      // it should point exactly to the caret.
+      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.renderEditable.selectPositionAt(
+        from: tester.getCenter(find.byType(EditableText)),
+        cause: SelectionChangedCause.tap,
+      );
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset);
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            includes: <Offset> [
+              // Expected center of the arrow.
+              bottomLeftSelectionPosition.translate(0, -lineHeight - 8 - 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
+
+      tester.binding.window.physicalSizeTestValue = null;
+      tester.binding.window.devicePixelRatioTestValue = null;
+    });
+
+    testWidgets('selecting multiple words works', (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.devicePixelRatioTestValue = 1;
+      TextEditingController controller;
+      EditableTextState state;
+
+      // Normal multiword collapsed selection. The toolbar arrow should point down, and
+      // it should point exactly to the caret.
+      controller = TextEditingController(text: List<String>.filled(20, 'a').join('  '));
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      final double lineHeight = state.renderEditable.preferredLineHeight;
+
+      // Select the first 2 words.
+      state.renderEditable.selectPositionAt(
+        from: textOffsetToPosition(tester, 0),
+        to: textOffsetToPosition(tester, 4),
+        cause: SelectionChangedCause.tap,
+      );
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      final Offset selectionPosition = (textOffsetToBottomLeftPosition(tester, 0) + textOffsetToBottomLeftPosition(tester, 4)) / 2;
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            includes: <Offset> [
+              // Expected center of the arrow.
+              selectionPosition.translate(0, -lineHeight - 8 - 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
+
+      tester.binding.window.physicalSizeTestValue = null;
+      tester.binding.window.devicePixelRatioTestValue = null;
+    });
+
+    testWidgets('selecting multiline works', (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.devicePixelRatioTestValue = 1;
+      TextEditingController controller;
+      EditableTextState state;
+
+      // Normal multiline collapsed selection. The toolbar arrow should point down, and
+      // it should point exactly to the horizontal center of the text field.
+      controller = TextEditingController(text: List<String>.filled(20, 'a  a  ').join('\n'));
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      final double lineHeight = state.renderEditable.preferredLineHeight;
+
+      // Select the first 2 words.
+      state.renderEditable.selectPositionAt(
+        from: textOffsetToPosition(tester, 0),
+        to: textOffsetToPosition(tester, 10),
+        cause: SelectionChangedCause.tap,
+      );
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      final Offset selectionPosition = Offset(
+        // Toolbar should be centered.
+        200,
+        textOffsetToBottomLeftPosition(tester, 0).dy,
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            includes: <Offset> [
+              // Expected center of the arrow.
+              selectionPosition.translate(0, -lineHeight - 8 - 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
+
+      tester.binding.window.physicalSizeTestValue = null;
+      tester.binding.window.devicePixelRatioTestValue = null;
+    });
+
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/37046.
+    testWidgets('No exceptions when showing selection menu inside of nested Navigators', (WidgetTester tester) async {
+      const String testValue = '123456';
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 100,
+                    color: CupertinoColors.activeOrange,
+                  ),
+                  Expanded(
+                    child: Navigator(
+                      onGenerateRoute: (_) =>
+                        CupertinoPageRoute<void>(builder: (_) => Container(
+                          child: CupertinoTextField(
+                            controller: controller,
+                          ),
+                        )),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // No text selection toolbar.
+      expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
+
+      // Double tap on the text in the input.
+      await tester.pumpAndSettle();
+      await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
+      await tester.pumpAndSettle();
+
+      // Now the text selection toolbar is showing and there were no exceptions.
+      expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
+      expect(tester.takeException(), null);
+    });
+  });
+
+  group('textAlignVertical position', () {
+    group('simple case', () {
+      testWidgets('align top (default)', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode();
+        const Size size = Size(200.0, 200.0);
+        await tester.pumpWidget(
+          CupertinoApp(
+            debugShowCheckedModeBanner: false,
+            home: CupertinoPageScaffold(
+              child: Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: CupertinoTextField(
+                    focusNode: focusNode,
+                    expands: true,
+                    maxLines: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Fills the whole container since expands is true.
+        expect(tester.getSize(find.byType(CupertinoTextField)), size);
+
+        // Tapping anywhere inside focuses it.
+        expect(focusNode.hasFocus, false);
+        await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, false);
+        final Offset justInside = tester
+          .getBottomLeft(find.byType(CupertinoTextField))
+          .translate(0.0, -1.0);
+        await tester.tapAt(justInside);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(focusNode.hasFocus, true);
+
+        // The EditableText is at the top.
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(206.0, .0001));
+      });
+
+      testWidgets('align center', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode();
+        const Size size = Size(200.0, 200.0);
+        await tester.pumpWidget(
+          CupertinoApp(
+            debugShowCheckedModeBanner: false,
+            home: CupertinoPageScaffold(
+              child: Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: CupertinoTextField(
+                    textAlignVertical: TextAlignVertical.center,
+                    focusNode: focusNode,
+                    expands: true,
+                    maxLines: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Fills the whole container since expands is true.
+        expect(tester.getSize(find.byType(CupertinoTextField)), size);
+
+        // Tapping anywhere inside focuses it.
+        expect(focusNode.hasFocus, false);
+        await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, false);
+        final Offset justInside = tester
+          .getBottomLeft(find.byType(CupertinoTextField))
+          .translate(0.0, -1.0);
+        await tester.tapAt(justInside);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(focusNode.hasFocus, true);
+
+        // The EditableText is at the center.
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(291.5, .0001));
+      });
+
+      testWidgets('align bottom', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode();
+        const Size size = Size(200.0, 200.0);
+        await tester.pumpWidget(
+          CupertinoApp(
+            debugShowCheckedModeBanner: false,
+            home: CupertinoPageScaffold(
+              child: Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: CupertinoTextField(
+                    textAlignVertical: TextAlignVertical.bottom,
+                    focusNode: focusNode,
+                    expands: true,
+                    maxLines: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Fills the whole container since expands is true.
+        expect(tester.getSize(find.byType(CupertinoTextField)), size);
+
+        // Tapping anywhere inside focuses it.
+        expect(focusNode.hasFocus, false);
+        await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, false);
+        final Offset justInside = tester
+          .getBottomLeft(find.byType(CupertinoTextField))
+          .translate(0.0, -1.0);
+        await tester.tapAt(justInside);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(focusNode.hasFocus, true);
+
+        // The EditableText is at the bottom.
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(377.0, .0001));
+      });
+
+      testWidgets('align as a double', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode();
+        const Size size = Size(200.0, 200.0);
+        await tester.pumpWidget(
+          CupertinoApp(
+            debugShowCheckedModeBanner: false,
+            home: CupertinoPageScaffold(
+              child: Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: CupertinoTextField(
+                    textAlignVertical: const TextAlignVertical(y: 0.75),
+                    focusNode: focusNode,
+                    expands: true,
+                    maxLines: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Fills the whole container since expands is true.
+        expect(tester.getSize(find.byType(CupertinoTextField)), size);
+
+        // Tapping anywhere inside focuses it.
+        expect(focusNode.hasFocus, false);
+        await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, false);
+        final Offset justInside = tester
+          .getBottomLeft(find.byType(CupertinoTextField))
+          .translate(0.0, -1.0);
+        await tester.tapAt(justInside);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(focusNode.hasFocus, true);
+
+        // The EditableText is near the bottom.
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(355.625, .0001));
+      });
+    });
+
+    group('tall prefix', () {
+      testWidgets('align center (default when prefix)', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode();
+        const Size size = Size(200.0, 200.0);
+        await tester.pumpWidget(
+          CupertinoApp(
+            debugShowCheckedModeBanner: false,
+            home: CupertinoPageScaffold(
+              child: Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: CupertinoTextField(
+                    focusNode: focusNode,
+                    expands: true,
+                    maxLines: null,
+                    prefix: Container(
+                      height: 100,
+                      width: 10,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Fills the whole container since expands is true.
+        expect(tester.getSize(find.byType(CupertinoTextField)), size);
+
+        // Tapping anywhere inside focuses it. This includes tapping on the
+        // prefix, because in this case it is transparent.
+        expect(focusNode.hasFocus, false);
+        await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, false);
+        final Offset justInside = tester
+          .getBottomLeft(find.byType(CupertinoTextField))
+          .translate(0.0, -1.0);
+        await tester.tapAt(justInside);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(focusNode.hasFocus, true);
+
+        // The EditableText is at the center. Same as without prefix.
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(291.5, .0001));
+      });
+
+      testWidgets('align top', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode();
+        const Size size = Size(200.0, 200.0);
+        await tester.pumpWidget(
+          CupertinoApp(
+            debugShowCheckedModeBanner: false,
+            home: CupertinoPageScaffold(
+              child: Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: CupertinoTextField(
+                    textAlignVertical: TextAlignVertical.top,
+                    focusNode: focusNode,
+                    expands: true,
+                    maxLines: null,
+                    prefix: Container(
+                      height: 100,
+                      width: 10,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Fills the whole container since expands is true.
+        expect(tester.getSize(find.byType(CupertinoTextField)), size);
+
+        // Tapping anywhere inside focuses it. This includes tapping on the
+        // prefix, because in this case it is transparent.
+        expect(focusNode.hasFocus, false);
+        await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, false);
+        final Offset justInside = tester
+          .getBottomLeft(find.byType(CupertinoTextField))
+          .translate(0.0, -1.0);
+        await tester.tapAt(justInside);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(focusNode.hasFocus, true);
+
+        // The prefix is at the top, and the EditableText is centered within its
+        // height.
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(241.5, .0001));
+      });
+
+      testWidgets('align bottom', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode();
+        const Size size = Size(200.0, 200.0);
+        await tester.pumpWidget(
+          CupertinoApp(
+            debugShowCheckedModeBanner: false,
+            home: CupertinoPageScaffold(
+              child: Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: CupertinoTextField(
+                    textAlignVertical: TextAlignVertical.bottom,
+                    focusNode: focusNode,
+                    expands: true,
+                    maxLines: null,
+                    prefix: Container(
+                      height: 100,
+                      width: 10,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Fills the whole container since expands is true.
+        expect(tester.getSize(find.byType(CupertinoTextField)), size);
+
+        // Tapping anywhere inside focuses it. This includes tapping on the
+        // prefix, because in this case it is transparent.
+        expect(focusNode.hasFocus, false);
+        await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, false);
+        final Offset justInside = tester
+          .getBottomLeft(find.byType(CupertinoTextField))
+          .translate(0.0, -1.0);
+        await tester.tapAt(justInside);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(focusNode.hasFocus, true);
+
+        // The prefix is at the bottom, and the EditableText is centered within
+        // its height.
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(341.5, .0001));
+      });
+
+      testWidgets('align as a double', (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode();
+        const Size size = Size(200.0, 200.0);
+        await tester.pumpWidget(
+          CupertinoApp(
+            debugShowCheckedModeBanner: false,
+            home: CupertinoPageScaffold(
+              child: Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: CupertinoTextField(
+                    textAlignVertical: const TextAlignVertical(y: 0.75),
+                    focusNode: focusNode,
+                    expands: true,
+                    maxLines: null,
+                    prefix: Container(
+                      height: 100,
+                      width: 10,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Fills the whole container since expands is true.
+        expect(tester.getSize(find.byType(CupertinoTextField)), size);
+
+        // Tapping anywhere inside focuses it. This includes tapping on the
+        // prefix, because in this case it is transparent.
+        expect(focusNode.hasFocus, false);
+        await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, false);
+        final Offset justInside = tester
+          .getBottomLeft(find.byType(CupertinoTextField))
+          .translate(0.0, -1.0);
+        await tester.tapAt(justInside);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(focusNode.hasFocus, true);
+
+        // The EditableText is near the bottom.
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(329.0, .0001));
+      });
+    });
+
+    testWidgets(
+      'Long press on an autofocused field shows the selection menu',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints.loose(const Size(200, 200)),
+                child: const CupertinoTextField(
+                  autofocus: true,
+                ),
+              ),
+            ),
+          ),
+        );
+        // This extra pump allows the selection set by autofocus to propagate to
+        // the RenderEditable.
+        await tester.pump();
+
+        // Long press shows the selection menu.
+        await tester.longPressAt(textOffsetToPosition(tester, 0));
+        await tester.pump();
+        expect(find.text('Paste'), findsOneWidget);
+      },
     );
   });
 }

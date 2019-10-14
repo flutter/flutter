@@ -24,9 +24,9 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../vmservice.dart';
+import '../web/web_runner.dart';
 
-const String protocolVersion = '0.5.0';
+const String protocolVersion = '0.5.3';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -49,6 +49,7 @@ class DaemonCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     printStatus('Starting device daemon...');
+    isRunningFromDaemon = true;
 
     final NotifyingLogger notifyingLogger = NotifyingLogger();
 
@@ -61,8 +62,9 @@ class DaemonCommand extends FlutterCommand {
             daemonCommand: this, notifyingLogger: notifyingLogger);
 
         final int code = await daemon.onExit;
-        if (code != 0)
+        if (code != 0) {
           throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
+        }
       },
       overrides: <Type, Generator>{
         Logger: () => notifyingLogger,
@@ -94,8 +96,9 @@ class Daemon {
     _commandSubscription = commandStream.listen(
       _handleRequest,
       onDone: () {
-        if (!_onExitCompleter.isCompleted)
+        if (!_onExitCompleter.isCompleted) {
           _onExitCompleter.complete(0);
+        }
       },
     );
   }
@@ -133,13 +136,15 @@ class Daemon {
 
     try {
       final String method = request['method'];
-      if (!method.contains('.'))
+      if (!method.contains('.')) {
         throw 'method not understood: $method';
+      }
 
       final String prefix = method.substring(0, method.indexOf('.'));
       final String name = method.substring(method.indexOf('.') + 1);
-      if (_domainMap[prefix] == null)
+      if (_domainMap[prefix] == null) {
         throw 'no domain for method: $method';
+      }
 
       _domainMap[prefix].handleCommand(name, id, request['params'] ?? const <String, dynamic>{});
     } catch (error, trace) {
@@ -155,13 +160,15 @@ class Daemon {
 
   void shutdown({ dynamic error }) {
     _commandSubscription?.cancel();
-    for (Domain domain in _domainMap.values)
+    for (Domain domain in _domainMap.values) {
       domain.dispose();
+    }
     if (!_onExitCompleter.isCompleted) {
-      if (error == null)
+      if (error == null) {
         _onExitCompleter.complete(0);
-      else
+      } else {
         _onExitCompleter.completeError(error);
+      }
     }
   }
 }
@@ -184,8 +191,9 @@ abstract class Domain {
 
   void handleCommand(String command, dynamic id, Map<String, dynamic> args) {
     Future<dynamic>.sync(() {
-      if (_handlers.containsKey(command))
+      if (_handlers.containsKey(command)) {
         return _handlers[command](args);
+      }
       throw 'command not understood: $name.$command';
     }).then<dynamic>((dynamic result) {
       if (result == null) {
@@ -204,37 +212,44 @@ abstract class Domain {
 
   void sendEvent(String name, [ dynamic args ]) {
     final Map<String, dynamic> map = <String, dynamic>{'event': name};
-    if (args != null)
+    if (args != null) {
       map['params'] = _toJsonable(args);
+    }
     _send(map);
   }
 
   void _send(Map<String, dynamic> map) => daemon._send(map);
 
   String _getStringArg(Map<String, dynamic> args, String name, { bool required = false }) {
-    if (required && !args.containsKey(name))
+    if (required && !args.containsKey(name)) {
       throw '$name is required';
+    }
     final dynamic val = args[name];
-    if (val != null && val is! String)
+    if (val != null && val is! String) {
       throw '$name is not a String';
+    }
     return val;
   }
 
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required = false }) {
-    if (required && !args.containsKey(name))
+    if (required && !args.containsKey(name)) {
       throw '$name is required';
+    }
     final dynamic val = args[name];
-    if (val != null && val is! bool)
+    if (val != null && val is! bool) {
       throw '$name is not a bool';
+    }
     return val;
   }
 
   int _getIntArg(Map<String, dynamic> args, String name, { bool required = false }) {
-    if (required && !args.containsKey(name))
+    if (required && !args.containsKey(name)) {
       throw '$name is required';
+    }
     final dynamic val = args[name];
-    if (val != null && val is! int)
+    if (val != null && val is! int) {
       throw '$name is not an int';
+    }
     return val;
   }
 
@@ -266,8 +281,9 @@ class DaemonDomain extends Domain {
           print(message.message);
         } else if (message.level == 'error') {
           stderr.writeln(message.message);
-          if (message.stackTrace != null)
+          if (message.stackTrace != null) {
             stderr.writeln(message.stackTrace.toString().trimRight());
+          }
         }
       } else {
         if (message.stackTrace != null) {
@@ -405,7 +421,6 @@ class AppDomain extends Domain {
       device,
       flutterProject: flutterProject,
       trackWidgetCreation: trackWidgetCreation,
-      dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
       target: target,
       buildMode: options.buildInfo.mode,
@@ -413,12 +428,19 @@ class AppDomain extends Domain {
 
     ResidentRunner runner;
 
-    if (enableHotReload) {
+    if (await device.targetPlatform == TargetPlatform.web_javascript) {
+      runner = webRunnerFactory.createWebRunner(
+        device,
+        flutterProject: flutterProject,
+        target: target,
+        debuggingOptions: options,
+        ipv6: ipv6,
+      );
+    } else if (enableHotReload) {
       runner = HotRunner(
         <FlutterDevice>[flutterDevice],
         target: target,
         debuggingOptions: options,
-        usesTerminalUI: false,
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
@@ -431,7 +453,6 @@ class AppDomain extends Domain {
         <FlutterDevice>[flutterDevice],
         target: target,
         debuggingOptions: options,
-        usesTerminalUI: false,
         applicationBinary: applicationBinary,
         ipv6: ipv6,
       );
@@ -478,18 +499,20 @@ class AppDomain extends Domain {
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
 
-    if (runner.debuggingOptions.debuggingEnabled) {
+    if (runner.debuggingEnabled) {
       connectionInfoCompleter = Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
       unawaited(connectionInfoCompleter.future.then<void>(
         (DebugConnectionInfo info) {
           final Map<String, dynamic> params = <String, dynamic>{
-            'port': info.httpUri.port,
+            // The web vmservice proxy does not have an http address.
+            'port': info.httpUri?.port ?? info.wsUri.port,
             'wsUri': info.wsUri.toString(),
           };
-          if (info.baseUri != null)
+          if (info.baseUri != null) {
             params['baseUri'] = info.baseUri;
+          }
           _sendAppEvent(app, 'debugPort', params);
         },
       ));
@@ -533,11 +556,13 @@ class AppDomain extends Domain {
     final String restartReason = _getStringArg(args, 'reason');
 
     final AppInstance app = _getApp(appId);
-    if (app == null)
+    if (app == null) {
       throw "app '$appId' not found";
+    }
 
-    if (_inProgressHotReload != null)
+    if (_inProgressHotReload != null) {
       throw 'hot restart already in progress';
+    }
 
     _inProgressHotReload = app._runInZone<OperationResult>(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: restartReason);
@@ -562,16 +587,19 @@ class AppDomain extends Domain {
     final Map<String, dynamic> params = args['params'] == null ? <String, dynamic>{} : castStringKeyedMap(args['params']);
 
     final AppInstance app = _getApp(appId);
-    if (app == null)
+    if (app == null) {
       throw "app '$appId' not found";
+    }
 
-    final Isolate isolate = app.runner.flutterDevices.first.views.first.uiIsolate;
-    final Map<String, dynamic> result = await isolate.invokeFlutterExtensionRpcRaw(methodName, params: params);
-    if (result == null)
+    final Map<String, dynamic> result = await app.runner
+        .invokeFlutterExtensionRpcRawOnFirstIsolate(methodName, params: params);
+    if (result == null) {
       throw 'method not available: $methodName';
+    }
 
-    if (result.containsKey('error'))
+    if (result.containsKey('error')) {
       throw result['error'];
+    }
 
     return result;
   }
@@ -580,8 +608,9 @@ class AppDomain extends Domain {
     final String appId = _getStringArg(args, 'appId', required: true);
 
     final AppInstance app = _getApp(appId);
-    if (app == null)
+    if (app == null) {
       throw "app '$appId' not found";
+    }
 
     return app.stop().then<bool>(
       (void value) => true,
@@ -598,8 +627,9 @@ class AppDomain extends Domain {
     final String appId = _getStringArg(args, 'appId', required: true);
 
     final AppInstance app = _getApp(appId);
-    if (app == null)
+    if (app == null) {
       throw "app '$appId' not found";
+    }
 
     return app.detach().then<bool>(
       (void value) => true,
@@ -617,10 +647,10 @@ class AppDomain extends Domain {
   }
 
   void _sendAppEvent(AppInstance app, String name, [ Map<String, dynamic> args ]) {
-    final Map<String, dynamic> eventArgs = <String, dynamic>{'appId': app.id};
-    if (args != null)
-      eventArgs.addAll(args);
-    sendEvent('app.$name', eventArgs);
+    sendEvent('app.$name', <String, dynamic>{
+      'appId': app.id,
+      ...?args,
+    });
   }
 }
 
@@ -644,8 +674,9 @@ class DeviceDomain extends Domain {
   }
 
   void addDeviceDiscoverer(DeviceDiscovery discoverer) {
-    if (!discoverer.supportsPlatform)
+    if (!discoverer.supportsPlatform) {
       return;
+    }
 
     _discoverers.add(discoverer);
     if (discoverer is PollingDeviceDiscovery) {
@@ -659,7 +690,12 @@ class DeviceDomain extends Domain {
   _DeviceEventHandler _onDeviceEvent(String eventName) {
     return (Device device) {
       _serializeDeviceEvents = _serializeDeviceEvents.then<void>((_) async {
-        sendEvent(eventName, await _deviceToMap(device));
+        try {
+          final Map<String, Object> response = await _deviceToMap(device);
+          sendEvent(eventName, response);
+        } catch (err) {
+          printError('$err');
+        }
       });
     };
   }
@@ -669,28 +705,26 @@ class DeviceDomain extends Domain {
   /// Return a list of the current devices, with each device represented as a map
   /// of properties (id, name, platform, ...).
   Future<List<Map<String, dynamic>>> getDevices([ Map<String, dynamic> args ]) async {
-    final List<Map<String, dynamic>> devicesInfo = <Map<String, dynamic>>[];
-
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
-      for (Device device in await discoverer.devices) {
-        devicesInfo.add(await _deviceToMap(device));
-      }
-    }
-
-    return devicesInfo;
+    return <Map<String, dynamic>>[
+      for (PollingDeviceDiscovery discoverer in _discoverers)
+        for (Device device in await discoverer.devices)
+          await _deviceToMap(device),
+    ];
   }
 
   /// Enable device events.
   Future<void> enable(Map<String, dynamic> args) {
-    for (PollingDeviceDiscovery discoverer in _discoverers)
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.startPolling();
+    }
     return Future<void>.value();
   }
 
   /// Disable device events.
   Future<void> disable(Map<String, dynamic> args) {
-    for (PollingDeviceDiscovery discoverer in _discoverers)
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.stopPolling();
+    }
     return Future<void>.value();
   }
 
@@ -701,8 +735,9 @@ class DeviceDomain extends Domain {
     int hostPort = _getIntArg(args, 'hostPort');
 
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
-    if (device == null)
+    if (device == null) {
       throw "device '$deviceId' not found";
+    }
 
     hostPort = await device.portForwarder.forward(devicePort, hostPort: hostPort);
 
@@ -716,24 +751,27 @@ class DeviceDomain extends Domain {
     final int hostPort = _getIntArg(args, 'hostPort', required: true);
 
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
-    if (device == null)
+    if (device == null) {
       throw "device '$deviceId' not found";
+    }
 
     return device.portForwarder.unforward(ForwardedPort(hostPort, devicePort));
   }
 
   @override
   void dispose() {
-    for (PollingDeviceDiscovery discoverer in _discoverers)
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.dispose();
+    }
   }
 
   /// Return the device matching the deviceId field in the args.
   Future<Device> _getDevice(String deviceId) async {
     for (PollingDeviceDiscovery discoverer in _discoverers) {
       final Device device = (await discoverer.devices).firstWhere((Device device) => device.id == deviceId, orElse: () => null);
-      if (device != null)
+      if (device != null) {
         return device;
+      }
     }
     return null;
   }
@@ -757,8 +795,9 @@ String jsonEncodeObject(dynamic object) {
 }
 
 dynamic _toEncodable(dynamic object) {
-  if (object is OperationResult)
+  if (object is OperationResult) {
     return _operationResultToMap(object);
+  }
   return object;
 }
 
@@ -768,6 +807,10 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
     'name': device.name,
     'platform': getNameForTargetPlatform(await device.targetPlatform),
     'emulator': await device.isLocalEmulator,
+    'category': device.category?.toString(),
+    'platformType': device.platformType?.toString(),
+    'ephemeral': device.ephemeral,
+    'emulatorId': await device.emulatorId,
   };
 }
 
@@ -775,6 +818,8 @@ Map<String, dynamic> _emulatorToMap(Emulator emulator) {
   return <String, dynamic>{
     'id': emulator.id,
     'name': emulator.name,
+    'category': emulator.category?.toString(),
+    'platformType': emulator.platformType?.toString(),
   };
 }
 
@@ -786,12 +831,15 @@ Map<String, dynamic> _operationResultToMap(OperationResult result) {
 }
 
 dynamic _toJsonable(dynamic obj) {
-  if (obj is String || obj is int || obj is bool || obj is Map<dynamic, dynamic> || obj is List<dynamic> || obj == null)
+  if (obj is String || obj is int || obj is bool || obj is Map<dynamic, dynamic> || obj is List<dynamic> || obj == null) {
     return obj;
-  if (obj is OperationResult)
+  }
+  if (obj is OperationResult) {
     return obj;
-  if (obj is ToolExit)
+  }
+  if (obj is ToolExit) {
     return obj.message;
+  }
   return '$obj';
 }
 
@@ -847,6 +895,9 @@ class NotifyingLogger extends Logger {
   void dispose() {
     _messageController.close();
   }
+
+  @override
+  void sendNotification(String message, {String progressId}) { }
 }
 
 /// A running application, started by this daemon.
@@ -1043,17 +1094,29 @@ class _AppRunLogger extends Logger {
   }
 
   void _sendLogEvent(Map<String, dynamic> event) {
-    if (domain == null)
+    if (domain == null) {
       printStatus('event sent after app closed: $event');
-    else
+    } else {
       domain._sendAppEvent(app, 'log', event);
+    }
   }
 
   void _sendProgressEvent(Map<String, dynamic> event) {
-    if (domain == null)
+    if (domain == null) {
       printStatus('event sent after app closed: $event');
-    else
+    } else {
       domain._sendAppEvent(app, 'progress', event);
+    }
+  }
+
+  @override
+  void sendNotification(String message, {String progressId}) {
+    final int id = _nextProgressId++;
+    _sendProgressEvent(<String, dynamic>{
+      'id': id.toString(),
+      'progressId': progressId,
+      'finished': true,
+    });
   }
 }
 
