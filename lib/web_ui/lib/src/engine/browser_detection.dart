@@ -77,11 +77,24 @@ OperatingSystem _operatingSystem;
 ///
 /// This is used to implement operating system specific behavior such as
 /// soft keyboards.
-OperatingSystem get operatingSystem =>
-    _operatingSystem ??= _detectOperatingSystem();
+OperatingSystem get operatingSystem {
+  if (debugOperatingSystemOverride != null) {
+    return debugOperatingSystemOverride;
+  }
+  return _operatingSystem ??= _detectOperatingSystem();
+}
+
+/// Override the value of [operatingSystem].
+///
+/// Setting this to `null` lets [operatingSystem] detect the real OS that the
+/// app is running on.
+///
+/// This is intended to be used for testing and debugging only.
+OperatingSystem debugOperatingSystemOverride;
 
 OperatingSystem _detectOperatingSystem() {
   final String platform = html.window.navigator.platform;
+  final String userAgent = html.window.navigator.userAgent;
 
   if (platform.startsWith('Mac')) {
     return OperatingSystem.macOs;
@@ -89,7 +102,10 @@ OperatingSystem _detectOperatingSystem() {
       platform.toLowerCase().contains('ipad') ||
       platform.toLowerCase().contains('ipod')) {
     return OperatingSystem.iOs;
-  } else if (platform.toLowerCase().contains('android')) {
+  } else if (userAgent.contains('Android')) {
+    // The Android OS reports itself as "Linux armv8l" in
+    // [html.window.navigator.platform]. So we have to check the user-agent to
+    // determine if the OS is Android or not.
     return OperatingSystem.android;
   } else if (platform.startsWith('Linux')) {
     return OperatingSystem.linux;
