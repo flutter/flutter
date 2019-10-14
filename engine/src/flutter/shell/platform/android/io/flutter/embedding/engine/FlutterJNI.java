@@ -121,7 +121,7 @@ public class FlutterJNI {
 
   // TODO(mattcarroll): add javadocs
   @UiThread
-  public static native boolean nativeGetIsSoftwareRenderingEnabled();
+  public native boolean nativeGetIsSoftwareRenderingEnabled();
 
   @Nullable
   // TODO(mattcarroll): add javadocs

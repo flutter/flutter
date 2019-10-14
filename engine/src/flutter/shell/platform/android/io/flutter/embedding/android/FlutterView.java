@@ -633,6 +633,8 @@ public class FlutterView extends FrameLayout {
     sendLocalesToFlutter(getResources().getConfiguration());
     sendViewportMetricsToFlutter();
 
+    flutterEngine.getPlatformViewsController().attachToView(this);
+
     // Notify engine attachment listeners of the attachment.
     for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
       listener.onFlutterEngineAttachedToFlutterView(flutterEngine);
@@ -667,6 +669,8 @@ public class FlutterView extends FrameLayout {
     for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
       listener.onFlutterEngineDetachedFromFlutterView();
     }
+
+    flutterEngine.getPlatformViewsController().detachFromView();
 
     // Disconnect the FlutterEngine's PlatformViewsController from the AccessibilityBridge.
     flutterEngine.getPlatformViewsController().detachAccessibiltyBridge();

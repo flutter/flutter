@@ -38,7 +38,6 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -162,7 +161,7 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
 
         dartExecutor = mNativeView.getDartExecutor();
         flutterRenderer = new FlutterRenderer(mNativeView.getFlutterJNI());
-        mIsSoftwareRenderingEnabled = FlutterJNI.nativeGetIsSoftwareRenderingEnabled();
+        mIsSoftwareRenderingEnabled = mNativeView.getFlutterJNI().nativeGetIsSoftwareRenderingEnabled();
         mMetrics = new ViewportMetrics();
         mMetrics.devicePixelRatio = context.getResources().getDisplayMetrics().density;
         setFocusable(true);

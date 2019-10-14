@@ -143,14 +143,19 @@ public class FlutterEngine implements LifecycleOwner {
    * and {@link FlutterLoader#ensureInitializationComplete(Context, String[])}.
    */
   public FlutterEngine(@NonNull Context context) {
-    this(context, FlutterLoader.getInstance());
+    this(context, FlutterLoader.getInstance(), new FlutterJNI());
   }
 
-  /* package */ FlutterEngine(@NonNull Context context, @NonNull FlutterLoader flutterLoader) {
+  /**
+   * Constructs a new {@code FlutterEngine}. See {@link #FlutterEngine(Context)}.
+   *
+   * {@code flutterJNI} should be a new instance that has never been attached to an engine before.
+   */
+  public FlutterEngine(@NonNull Context context, @NonNull FlutterLoader flutterLoader, @NonNull FlutterJNI flutterJNI) {
+    this.flutterJNI = flutterJNI;
     flutterLoader.startInitialization(context);
     flutterLoader.ensureInitializationComplete(context, null);
 
-    this.flutterJNI = new FlutterJNI();
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     attachToJni();
 
