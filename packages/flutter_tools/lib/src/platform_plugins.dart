@@ -75,9 +75,6 @@ class AndroidPlugin extends PluginPlatform {
   String get _embeddingVersion => _cachedEmbeddingVersion ??= _getEmbeddingVersion();
 
   String _getEmbeddingVersion() {
-    if (!featureFlags.isNewAndroidEmbeddingEnabled) {
-      return '1';
-    }
     assert(pluginPath != null);
     final String baseMainPath = fs.path.join(
       pluginPath,
