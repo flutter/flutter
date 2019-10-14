@@ -440,7 +440,7 @@ task:
     # Apple Certificates Match Passphrase
     MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
   osx_instance:
-    image: mojave-xcode-10.1
+    image: mojave-xcode-10.2
   # occasionally the clock on these machines is out of sync
   # with the actual time - this should help to verify
   print_date_script:
@@ -460,7 +460,7 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
-    image: mojave-xcode-10.1
+    image: mojave-xcode-10.2
   depends_on:
     - analyze
   env:
