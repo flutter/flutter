@@ -492,27 +492,41 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// An [Iterable] over the hierarchy of children below this one, in
   /// depth-first order.
-  Iterable<FocusNode> get descendants sync* {
+  Iterable<FocusNode> get descendants {
+    final List<FocusNode> result = <FocusNode>[];
     for (FocusNode child in _children) {
-      yield* child.descendants;
-      yield child;
+      result.add(child);
+      result.addAll(child.descendants);
     }
+    return result;
   }
 
   /// Returns all descendants which do not have the [skipTraversal] flag set.
-  Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
+  Iterable<FocusNode> get traversalDescendants {
+    final List<FocusNode> result = <FocusNode>[];
+    for (FocusNode child in _children) {
+      if (!child.skipTraversal && child.canRequestFocus)
+        result.add(child);
+      if (child._children.isNotEmpty)
+        result.addAll(child.traversalDescendants);
+    }
+    return result;
+  }
+
 
   /// An [Iterable] over the ancestors of this node.
   ///
   /// Iterates the ancestors of this node starting at the parent and iterating
   /// over successively more remote ancestors of this node, ending at the root
   /// [FocusScope] ([FocusManager.rootScope]).
-  Iterable<FocusNode> get ancestors sync* {
+  Iterable<FocusNode> get ancestors {
+    final List<FocusNode> result = <FocusNode>[];
     FocusNode parent = _parent;
     while (parent != null) {
-      yield parent;
+      result.add(parent);
       parent = parent._parent;
     }
+    return result;
   }
 
   /// Whether this node has input focus.
@@ -1254,15 +1268,8 @@ class FocusManager with DiagnosticableTreeMixin {
       assert(_focusDebug('No primary focus for key event, ignored: $event'));
       return;
     }
-    Iterable<FocusNode> allNodes(FocusNode node) sync* {
-      yield node;
-      for (FocusNode ancestor in node.ancestors) {
-        yield ancestor;
-      }
-    }
-
     bool handled = false;
-    for (FocusNode node in allNodes(_primaryFocus)) {
+    for (FocusNode node in <FocusNode>[_primaryFocus,..._primaryFocus.ancestors]) {
       if (node.onKey != null && node.onKey(node, event)) {
         assert(_focusDebug('Node $node handled key event $event.'));
         handled = true;
