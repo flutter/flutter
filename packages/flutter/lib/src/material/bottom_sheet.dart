@@ -343,9 +343,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.isDismissible = true,
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
+       assert(isDismissible != null),
        super(settings: settings);
 
   final WidgetBuilder builder;
@@ -355,12 +357,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final bool isDismissible;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
 
   @override
-  bool get barrierDismissible => true;
+  bool get barrierDismissible => isDismissible;
 
   @override
   final String barrierLabel;
@@ -428,6 +431,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// that a modal [BottomSheet] needs to be displayed above all other content
 /// but the caller is inside another [Navigator].
 ///
+/// The [isDismissible] parameter specifies whether the bottom sheet will be
+/// dismissed when user taps on the scrim.
+///
 /// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
@@ -453,11 +459,13 @@ Future<T> showModalBottomSheet<T>({
   Clip clipBehavior,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
+  bool isDismissible = true,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
   assert(useRootNavigator != null);
+  assert(isDismissible != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -470,6 +478,7 @@ Future<T> showModalBottomSheet<T>({
     elevation: elevation,
     shape: shape,
     clipBehavior: clipBehavior,
+    isDismissible: isDismissible,
   ));
 }
 
