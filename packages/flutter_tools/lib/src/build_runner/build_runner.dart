@@ -139,7 +139,6 @@ class BuildRunner extends CodeGenerator {
     FlutterProject flutterProject, {
     String mainPath,
     bool linkPlatformKernelIn = false,
-    bool targetProductVm = false,
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions = const <String> [],
   }) async {
