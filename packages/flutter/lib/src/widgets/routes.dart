@@ -661,10 +661,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     // only necessary to rebuild the IgnorePointer widget and set
                     // the focus node's ability to focus.
                     AnimatedBuilder(
-                      animation: widget.route.navigator.userGestureInProgressNotifier,
+                      animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
                       builder: (BuildContext context, Widget child) {
                         final bool ignoreEvents = widget.route.animation?.status == AnimationStatus.reverse ||
-                            widget.route.navigator.userGestureInProgress;
+                            (widget.route.navigator?.userGestureInProgress ?? false);
                         focusScopeNode.canRequestFocus = !ignoreEvents;
                         return IgnorePointer(
                           ignoring: ignoreEvents,
