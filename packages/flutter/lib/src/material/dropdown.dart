@@ -1083,18 +1083,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
-      Widget displayedHint;
-      if (_enabled) {
-        displayedHint = widget.hint;
-      } else {
-        displayedHint = widget.disabledHint ?? widget.hint;
-      }
-
-      if (widget.selectedItemBuilder == null) {
-        displayedHint = _DropdownMenuItemContainer(
-          child: displayedHint,
-        );
-      }
+      Widget displayedHint = _enabled ? widget.hint : widget.disabledHint ?? widget.hint;
+      if (widget.selectedItemBuilder == null)
+        displayedHint = _DropdownMenuItemContainer(child: displayedHint);
 
       hintIndex = items.length;
       items.add(DefaultTextStyle(
