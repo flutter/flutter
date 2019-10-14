@@ -277,6 +277,7 @@ Future<void> main() async {
   // The following parameters are hard-coded in Flutter's test embedder. Since
   // we don't have an embedder yet this is the lowest-most layer we can put
   // this stuff in.
+  ui.debugEmulateFlutterTesterEnvironment = true;
   await ui.webOnlyInitializeEngine();
   // TODO(flutterweb): remove need for dynamic cast.
   (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
