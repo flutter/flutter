@@ -15,6 +15,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
+import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -36,7 +37,7 @@ Future<int> runTests(
   bool machine = false,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
-  bool enableAsserts = false,
+  @required BuildMode buildMode,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   TestWatcher watcher,
@@ -114,7 +115,7 @@ Future<int> runTests(
     serverType: serverType,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
-    enableAsserts: enableAsserts,
+    buildMode: buildMode,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,
