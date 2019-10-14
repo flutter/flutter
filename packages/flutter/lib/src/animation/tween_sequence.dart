@@ -88,7 +88,7 @@ class TweenSequence<T> extends Animatable<T> {
         return _evaluateAt(t, index);
     }
     // Should be unreachable.
-    assert(false, 'TweenSequence.evaluate() could not find a interval for $t');
+    assert(false, 'TweenSequence.evaluate() could not find an interval for $t');
     return null;
   }
 
@@ -96,10 +96,22 @@ class TweenSequence<T> extends Animatable<T> {
   String toString() => 'TweenSequence(${_items.length} items)';
 }
 
+/// Enables creating a flipped [Animation] whose value is defined by a sequence
+/// of [Tween]s.
+///
+/// This creates a [TweenSequence] that evaluates to a result that flips the
+/// tween both horizontally and vertically.
+///
+/// This tween sequence assumes that the evaluated result has to be a double
+/// between 0.0 and 1.0.
 class FlippedTweenSequence extends TweenSequence<double> {
   /// Creates a flipped [TweenSequence].
   ///
-  /// The [tweenSequence] argument must not be null.
+  /// The [items] parameter must be a list of one or more [TweenSequenceItem]s.
+  ///
+  /// There's a small cost associated with building a `TweenSequence` so it's
+  /// best to reuse one, rather than rebuilding it on every frame, when that's
+  /// possible.
   FlippedTweenSequence(List<TweenSequenceItem<double>> items)
     : assert(items != null),
       super(items);
@@ -114,7 +126,7 @@ class FlippedTweenSequence extends TweenSequence<double> {
         return 1.0 - _evaluateAt(1.0 - t, index);
     }
     // Should be unreachable.
-    assert(false, 'TweenSequence.evaluate() could not find a interval for $t');
+    assert(false, 'TweenSequence.evaluate() could not find an interval for $t');
     return null;
   }
 }
