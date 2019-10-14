@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import '../flutter_test_alternative.dart';
 
 void main() {
-  test('MouseCursorManagerDefaultDelegate correctly send legal requests', () async {
+  test('MouseCursorDefaultDelegate correctly send legal requests', () async {
     const String channelName = 'test_flutter/mousecursor';
     final _TestBinaryMessenger messenger = _TestBinaryMessenger(channelName);
     final MethodChannel channel = MethodChannel(channelName , const JSONMethodCodec(),
@@ -21,8 +21,8 @@ void main() {
       return <dynamic>[true];
     };
 
-    final MouseCursorManagerDefaultDelegate delegate =
-      MouseCursorManagerDefaultDelegate(channel);
+    final MouseCursorDefaultDelegate delegate =
+      MouseCursorDefaultDelegate(channel);
 
     await delegate.setCursors(<int, int>{1: 1, 2: 3});
     expect(valueInJson, <String, int>{'1': 1, '2': 3});

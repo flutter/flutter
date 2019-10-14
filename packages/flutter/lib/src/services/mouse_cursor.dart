@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'mouse_cursors.dart';
 import 'platform_channel.dart';
 
@@ -11,50 +9,35 @@ String _cursorToString(int cursor) {
   return '0x${cursor.toRadixString(16).padLeft(8, '0')}';
 }
 
-class _DeviceCursorState {
-  _DeviceCursorState (
-    this.device, {
-    int cursor = MouseCursors.basic,
-  }) : _cursor = cursor;
-
-  final int device;
-  int _cursor;
-
-  bool changeCursor(int cursor) {
-    if (cursor == MouseCursors.releaseControl)
-      return false;
-    if (cursor != _cursor) {
-      _cursor = cursor;
-      return true;
-    }
-    return false;
-  }
-}
-
 /// TODOC
-abstract class MouseCursorManagerDelegate {
+abstract class MouseCursorDelegate {
   // This class is only used for implementation.
-  MouseCursorManagerDelegate._();
+  MouseCursorDelegate._();
 
-  /// Handles when [MouseCursorManager] requests to set cursors of certain devices.
+  /// Handles when [MouseCursorDelegate] requests to set cursors of certain devices.
   /// The returning future resolves true if and only if the entire request is
   /// successful.
   ///
-  /// The `deviceCursors` is a map from device ID to their targer cursors.
+  /// The `deviceCursors` is a map from device ID to their targer cursors. An
+  /// empty map is does nothing and returns true. It's caller's responsibility
+  /// to avoid sending duplicate requests, since this class does not keep track
+  /// of history requests.
   Future<bool> setCursors(Map<int, int> deviceCursors);
 }
 
 /// TODOC
-class MouseCursorManagerDefaultDelegate implements MouseCursorManagerDelegate {
+class MouseCursorDefaultDelegate implements MouseCursorDelegate {
   /// TODOC
-  MouseCursorManagerDefaultDelegate(this.channel);
+  MouseCursorDefaultDelegate(this.channel);
 
   /// TODOC
   final MethodChannel channel;
 
   @override
-  Future<bool> setCursors(Map<int, int> deviceCursors) {
-    assert(deviceCursors.isNotEmpty);
+  Future<bool> setCursors(Map<int, int> deviceCursors) async {
+    if (deviceCursors.isEmpty) {
+      return true;
+    }
     // Translate int keys into string keys
     final Map<String, int> translated = <String, int>{};
     deviceCursors.forEach((int device, int cursor) {
@@ -63,58 +46,5 @@ class MouseCursorManagerDefaultDelegate implements MouseCursorManagerDelegate {
       translated[device.toString()] = cursor;
     });
     return channel.invokeMethod<bool>('setCursors', <dynamic>[translated]);
-  }
-}
-
-/// TODOC
-class MouseCursorManager {
-  /// Create a [MouseCursorManager] by providing necessary information.
-  ///
-  /// The `channel` is the method channel that can talk to the platform.
-  /// Typically [SystemChannels.mouseCursor].
-  MouseCursorManager({
-    @required MouseCursorManagerDelegate delegate,
-  }) : assert(delegate != null),
-       _delegate = delegate;
-
-  final MouseCursorManagerDelegate _delegate;
-
-  // A map from devices to their cursor states.
-  final Map<int, _DeviceCursorState> _deviceStates = <int, _DeviceCursorState>{};
-
-  /// Called on an event that might cause pointers to change cursors.
-  ///
-  /// The values might contain [MouseCursors.releaseControl].
-  ///
-  /// It resolves to true if all requests are successful, or false if any
-  /// request fails.
-  ///
-  /// Calling this method with the same cursor configuration is cheap, because
-  /// [MouseCursorManager] keeps track of the current cursor of each device.
-  Future<bool> setCursors(Map<int, int> deviceCursors) async {
-    // Create a state if absent, then find the devices that need changing.
-    final Map<int, int> filteredMap = Map<int, int>.fromEntries(
-      deviceCursors.entries.where(
-        (MapEntry<int, int> entry) {
-          final _DeviceCursorState state = _deviceStates.putIfAbsent(
-            entry.key,
-            () => _DeviceCursorState(entry.key, cursor: MouseCursors.basic),
-          );
-          return state.changeCursor(entry.value);
-        }
-      ),
-    );
-    if (filteredMap.isEmpty) {
-      return true;
-    }
-    return _delegate.setCursors(filteredMap);
-  }
-
-  /// Called when a device is disconnected.
-  ///
-  /// It only frees the memory of the internal record. Nothing needs to be sent
-  /// to the platform, since the pointer should be gone.
-  void clearDeviceRecords(Iterable<int> devices) {
-    devices.forEach(_deviceStates.remove);
   }
 }

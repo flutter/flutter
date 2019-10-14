@@ -245,7 +245,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @visibleForTesting
   void initMouseTracker([MouseTracker tracker]) {
     _mouseTracker?.dispose();
-    _mouseTracker = tracker ?? MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
+    _mouseTracker = tracker ?? MouseTracker(
+      pointerRouter,
+      renderView.hitTestMouseTrackers,
+      MouseCursorDefaultDelegate(SystemChannels.mouseCursor),
+    );
   }
 
   void _handleSemanticsEnabledChanged() {

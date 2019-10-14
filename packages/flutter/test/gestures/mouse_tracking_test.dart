@@ -49,25 +49,43 @@ void _ensureTestGestureBinding() {
 }
 
 void main() {
-  void _setUpMouseAnnotationFinder(MouseDetectorAnnotationFinder annotationFinder) {
+  void _setUpMouseTracker({
+    MouseDetectorAnnotationFinder annotationFinder,
+    bool Function(Map<int, int>) handleSetCursors,
+  }) {
     final MouseTracker mouseTracker = MouseTracker(
       GestureBinding.instance.pointerRouter,
       annotationFinder,
+      _MouseCursorManagerTestDelegate(handleSetCursors)
     );
     RendererBinding.instance.initMouseTracker(mouseTracker);
   }
 
-  // Set up a trivial test environment that includes one annotation, which adds
-  // the enter, hover, and exit events it received to [logEvents].
-  MouseTrackerAnnotation _setUpWithOneAnnotation({List<PointerEvent> logEvents}) {
+  const int kTestCursor = 0xdeadbeef;
+
+  // Set up a trivial test environment that includes one annotation.
+  // This annotation records the enter, hover, and exit events it receives to
+  // `logEvents`.
+  // This annotation also contains a cursor with a value of `kTestCursor`.
+  // The mouse tracker records the cursor requests it receives to `logCursors`.
+  MouseTrackerAnnotation _setUpWithOneAnnotation({
+    @required List<PointerEvent> logEvents,
+    List<Map<int, int>> logCursors,
+  }) {
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) => logEvents.add(event),
       onHover: (PointerHoverEvent event) => logEvents.add(event),
       onExit: (PointerExitEvent event) => logEvents.add(event),
+      cursor: () => kTestCursor,
     );
-    _setUpMouseAnnotationFinder(
-      (Offset position) sync* {
+    _setUpMouseTracker(
+      annotationFinder: (Offset position) sync* {
         yield annotation;
+      },
+      handleSetCursors: (Map<int, int> deviceCursors) {
+        if (logCursors != null)
+          logCursors.add(deviceCursors);
+        return true;
       },
     );
     _mouseTracker.attachAnnotation(annotation);
@@ -100,7 +118,8 @@ void main() {
 
   test('should detect enter, hover, and exit from Added, Hover, and Removed events', () {
     final List<PointerEvent> events = <PointerEvent>[];
-    _setUpWithOneAnnotation(logEvents: events);
+    final List<Map<int, int>> cursors = <Map<int, int>>[];
+    _setUpWithOneAnnotation(logEvents: events, logCursors: cursors);
 
     final List<bool> listenerLogs = <bool>[];
     _mouseTracker.addListener(() {
@@ -118,6 +137,8 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 0.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
+    expect(cursors, <Map<int, int>>[<int, int>{0: kTestCursor}]);
+    cursors.clear();
     events.clear();
     listenerLogs.clear();
 
@@ -129,7 +150,8 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
-    expect(listenerLogs, <bool>[]);
+    expect(cursors, isEmpty);
+    expect(listenerLogs, isEmpty);
     events.clear();
 
     // Remove
@@ -141,6 +163,8 @@ void main() {
       const PointerExitEvent(position: Offset(1.0, 201.0)),
     ]));
     expect(listenerLogs, <bool>[false]);
+    expect(cursors, <Map<int, int>>[<int, int>{0: MouseCursors.basic}]);
+    cursors.clear();
     events.clear();
     listenerLogs.clear();
 
@@ -153,6 +177,8 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 301.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
+    expect(cursors, <Map<int, int>>[<int, int>{0: kTestCursor}]);
+    cursors.clear();
     events.clear();
     listenerLogs.clear();
   });
@@ -244,7 +270,7 @@ void main() {
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    _setUpMouseTracker(annotationFinder: (Offset position) sync* {
       if (isInHitRegion) {
         yield annotation;
       }
@@ -319,7 +345,7 @@ void main() {
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    _setUpMouseTracker(annotationFinder: (Offset position) sync* {
       if (isInHitRegion) {
         yield annotation;
       }
@@ -366,7 +392,7 @@ void main() {
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    _setUpMouseTracker(annotationFinder: (Offset position) sync* {
       // This annotation is never in the region
     });
 
@@ -412,7 +438,7 @@ void main() {
     final MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation(
       onExit: (PointerExitEvent event) {}
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    _setUpMouseTracker(annotationFinder: (Offset position) sync* {
       if (isInHitRegionOne)
         yield annotation1;
       else if (isInHitRegionTwo)
@@ -439,7 +465,7 @@ void main() {
       onEnter: (PointerEnterEvent event) {},
     );
     int finderCalled = 0;
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    _setUpMouseTracker(annotationFinder: (Offset position) sync* {
       finderCalled++;
       // This annotation is never in the region
     });
@@ -499,7 +525,7 @@ void main() {
       onExit: (PointerExitEvent event) => logs.add('exitB'),
       onHover: (PointerHoverEvent event) => logs.add('hoverB'),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    _setUpMouseTracker(annotationFinder: (Offset position) sync* {
       // Children's annotations come before parents'
       if (isInB) {
         yield annotationB;
@@ -554,7 +580,7 @@ void main() {
       onExit: (PointerExitEvent event) => logs.add('exitB'),
       onHover: (PointerHoverEvent event) => logs.add('hoverB'),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    _setUpMouseTracker(annotationFinder: (Offset position) sync* {
       if (isInA) {
         yield annotationA;
       } else if (isInB) {
@@ -747,4 +773,18 @@ class _EventListCriticalFieldsMatcher extends Matcher {
 
 Matcher _equalToEventsOnCriticalFields(List<PointerEvent> source) {
   return _EventListCriticalFieldsMatcher(source);
+}
+
+class _MouseCursorManagerTestDelegate implements MouseCursorDelegate {
+  _MouseCursorManagerTestDelegate(this.handleSetCursors);
+
+  final bool Function(Map<int, int>) handleSetCursors;
+
+  @override
+  Future<bool> setCursors(Map<int, int> deviceCursors) async {
+    if (handleSetCursors == null) {
+      return true;
+    }
+    return handleSetCursors(deviceCursors);
+  }
 }

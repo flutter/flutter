@@ -27,25 +27,25 @@ class MouseCursors {
   /// or other layers that manages the cursor by itself.
   ///
   /// This constant is parsed by [MouseCursorManger] and should not be sent
-  /// to the platforms via the channel.
+  /// to the platforms over the channel.
   static const int releaseControl = 0xc3c7870d;
 
   /// Displays no cursor at the pointer.
   static const int none = 0x334c4a4c;
 
-  /// The platform-dependent basic cursor. Typically an arrow.
+  /// The platform-dependent basic cursor. Typically the shape of an arrow.
   static const int basic = 0xf17aaabc;
 
-  /// A cursor that indicates a link or other clickable object that is not
-  /// obvious enough otherwise. Typically the shape of a pointing hand.
+  /// A cursor that indicates links or something that needs to be emphasized
+  /// to be clickable. Typically the shape of a pointing hand.
   static const int click = 0xa8affc08;
 
   /// A cursor that indicates a selectable text. Typically the shape of an
   /// I-beam.
   static const int text = 0x1cb251ec;
 
-  /// A cursor that indicates that the intended action is not permitted.
-  /// Typically the shape of a circle with a diagnal line.
+  /// A cursor that indicates an unpermitted action. Typically the shape of a
+  /// circle with a diagnal line.
   static const int no = 0x7fa3b767;
 
   /// A cursor that indicates something that can be dragged. Typically the shape

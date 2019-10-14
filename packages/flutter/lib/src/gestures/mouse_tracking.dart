@@ -58,6 +58,10 @@ class MouseTrackerAnnotation {
   ///
   /// Returning null is equivalent to [MouseCursors.fallThrough .
   ///
+  /// The `cursor` needs to be a function because [MouseTrackerAnnotation] can
+  /// not contain mutable properties, but it needs to reflect the change of
+  /// cursors of its owner layer.
+  ///
   /// See also:
   ///
   ///
@@ -116,6 +120,9 @@ class _MouseState {
 
   int get device => _mostRecentEvent.device;
 
+  // The current mouse cursor.
+  int cursor = MouseCursors.basic;
+
   @override
   String toString() {
     final String describeEvent = '${_mostRecentEvent.runtimeType}(device: ${_mostRecentEvent.device})';
@@ -144,14 +151,14 @@ class MouseTracker extends ChangeNotifier {
   /// search for [MouseTrackerAnnotation]s at a given position.
   /// Usually it is [Layer.findAll] of the root layer.
   ///
+  /// The third parameter is a [MouseCursorDelegate] that handles when some
+  /// devices have changed cursors.
+  ///
   /// All of the parameters must not be null.
-  MouseTracker(this._router, this.annotationFinder)
+  MouseTracker(this._router, this.annotationFinder, this._cursorDelegate)
       : assert(_router != null),
         assert(annotationFinder != null) {
     _router.addGlobalRoute(_handleEvent);
-    _cursorManager = MouseCursorManager(
-      delegate: MouseCursorManagerDefaultDelegate(SystemChannels.mouseCursor),
-    );
   }
 
   @override
@@ -174,7 +181,7 @@ class MouseTracker extends ChangeNotifier {
   // mouse events from.
   final PointerRouter _router;
 
-  MouseCursorManager _cursorManager;
+  final MouseCursorDelegate _cursorDelegate;
 
   // Tracks the state of connected mouse devices.
   //
@@ -275,9 +282,14 @@ class MouseTracker extends ChangeNotifier {
   //
   // If `disconnectedMouseState` is provided, this state will be used instead,
   // but this mouse will be hovering no annotations.
+  //
+  // If `performChangeCursor` is provided, this function will be called when this
+  // device should change cursor. Otherwise, the default handler is to call
+  // `_cursorDelegate.setCursors`.
   void _checkDeviceUpdates({
     int device,
     _MouseState disconnectedMouseState,
+    void Function(int) onChangeCursor,
   }) {
     final _MouseState mouseState = disconnectedMouseState ?? _mouseStates[device];
     final bool thisDeviceIsConnected = mouseState != disconnectedMouseState;
@@ -290,11 +302,23 @@ class MouseTracker extends ChangeNotifier {
           )
         : <MouseTrackerAnnotation>{};
 
+    // Dispatch events (onEnter, onHover, onExit).
     _dispatchDeviceCallbacks(
       currentState: mouseState,
       nextAnnotations: nextAnnotations,
     );
 
+    // Change mouse cursor.
+    final int cursor = _findDeviceCursor(nextAnnotations);
+    if (cursor != mouseState.cursor) {
+      if (onChangeCursor != null) {
+        onChangeCursor(cursor);
+      } else {
+        _cursorDelegate.setCursors(<int, int>{device: cursor});
+      }
+    }
+
+    mouseState.cursor = cursor;
     mouseState.lastAnnotations = nextAnnotations;
   }
 
@@ -302,10 +326,32 @@ class MouseTracker extends ChangeNotifier {
   // callbacks.
   //
   // For detailed behaviors, see [_checkDeviceUpdates].
+  //
+  // This method also calls `_cursorDelegate.setCursors` for all applicable
+  // devices in batch.
   void _checkAllDevicesUpdates() {
+    final Map<int, int> changedDeviceCursors = <int, int>{};
     for (final int device in _mouseStates.keys) {
-      _checkDeviceUpdates(device: device);
+      _checkDeviceUpdates(
+        device: device,
+        onChangeCursor: (int cursor) { changedDeviceCursors[device] = cursor; }
+      );
     }
+    _cursorDelegate.setCursors(changedDeviceCursors);
+  }
+
+  // Find the mouse cursor.
+  // The `annotations` is the current annotations that the device is
+  // hovering in visual order from front the back.
+  // Guarantees to return a non-null cursor.
+  static int _findDeviceCursor(Iterable<MouseTrackerAnnotation> annotations) {
+    for (final MouseTrackerAnnotation annotation in annotations) {
+      final int cursor = annotation.cursor == null ? null : annotation.cursor();
+      if (cursor != null) {
+        return cursor;
+      }
+    }
+    return MouseCursors.basic;
   }
 
   // Dispatch callbacks related to a device after all necessary information
@@ -353,10 +399,9 @@ class MouseTracker extends ChangeNotifier {
     // Send hover events in reverse visual order.
     // For now the order between the hover events is designed this way for no
     // solid reasons but to keep it aligned with enter events for simplicity.
+    final List<MouseTrackerAnnotation> nextAnnotationsList = nextAnnotations.toList();
     if (mostRecentEvent is PointerHoverEvent) {
-      final Iterable<MouseTrackerAnnotation> hoveringAnnotations =
-        nextAnnotations.toList().reversed;
-      for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
+      for (final MouseTrackerAnnotation annotation in nextAnnotationsList.reversed) {
         if (annotation.onHover != null) {
           annotation.onHover(mostRecentEvent);
         }
