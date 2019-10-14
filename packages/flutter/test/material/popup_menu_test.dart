@@ -852,14 +852,29 @@ void main() {
     expect(tester.getTopLeft(find.text('Item 1')).dx, 72);
   });
 
-  testWidgets('test tooltip', (WidgetTester tester) async {
+  testWidgets('PopupMenuButton takes only child or only icon', (WidgetTester tester) async {
+    // [PopupMenuButton] should assert that either child == null, icon == null,
+    // or that both are null because only one of the two can be displayed/used.
+    expect(PopupMenuButton<int>(
+      itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
+      child: Container(),
+      icon: const Icon(Icons.error),
+    ), throwsA(const TypeMatcher<AssertionError>()));
+  });
+
+  testWidgets('PopupMenuButton default tooltip', (WidgetTester tester) async {
+    // If the tooltip parameter for [PopupMenuButton] is not specified,
+    // a default tooltip should be used instead.
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Column(
+            // The default tooltip should be present when
+            // [PopupMenuButton.icon] or [PopupMenuButton.child] is defined
+            // and also when neither of the two is defined.
             children: <Widget>[
-              // Using three different PopupMenuButton's to test
-              // passing child, icon, and neither of those.
+              // Default Tooltip should be present when [PopupMenuButton.child]
+              // and [PopupMenuButton.child] are undefined.
               PopupMenuButton<int>(
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuEntry<int>>[
@@ -870,6 +885,8 @@ void main() {
                   ];
                 },
               ),
+              // Default Tooltip should be present when
+              // [PopupMenuButton.child] is defined.
               PopupMenuButton<int>(
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuEntry<int>>[
@@ -881,6 +898,8 @@ void main() {
                 },
                 child: const Text('Test text'),
               ),
+              // Default Tooltip should be present when
+              // [PopupMenuButton.icon] is defined.
               PopupMenuButton<int>(
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuEntry<int>>[
@@ -898,23 +917,26 @@ void main() {
       ),
     );
 
-    // The default tooltip is defined as MaterialLocalizations.showMenuTooltip
+    // The default tooltip is defined as [MaterialLocalizations.showMenuTooltip]
     // and it is used when no tooltip is provided.
     expect(find.byType(Tooltip), findsNWidgets(3));
     expect(find.byTooltip(const DefaultMaterialLocalizations().showMenuTooltip), findsNWidgets(3));
+  });
 
-    // Clear the widget tree.
-    await tester.pumpWidget(Container(key: UniqueKey()));
-
+  testWidgets('PopupMenuButton custom tooltip', (WidgetTester tester) async {
+    // A custom tooltip can be provided to [PopupMenuButton.tooltip]
+    // to replace the default tooltip, which is tested in the previous test.
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Column(
+            // The tooltip should be present when
+            // [PopupMenuButton.icon] or [PopupMenuButton.child] is defined
+            // and also when neither of the two is defined.
             children: <Widget>[
-              // Using three different PopupMenuButton's to test
-              // passing child, icon, and neither of those.
+              // Tooltip should be work when [PopupMenuButton.child]
+              // and [PopupMenuButton.child] are undefined.
               PopupMenuButton<int>(
-                tooltip: 'Test tooltip',
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuEntry<int>>[
                     const PopupMenuItem<int>(
@@ -923,9 +945,11 @@ void main() {
                     ),
                   ];
                 },
+                tooltip: 'Test tooltip',
               ),
+              // Tooltip should work when
+              // [PopupMenuButton.child] is defined.
               PopupMenuButton<int>(
-                tooltip: 'Test tooltip',
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuEntry<int>>[
                     const PopupMenuItem<int>(
@@ -934,10 +958,12 @@ void main() {
                     ),
                   ];
                 },
+                tooltip: 'Test tooltip',
                 child: const Text('Test text'),
               ),
+              // Tooltip should work when
+              // [PopupMenuButton.icon] is defined.
               PopupMenuButton<int>(
-                tooltip: 'Test tooltip',
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuEntry<int>>[
                     const PopupMenuItem<int>(
@@ -946,6 +972,7 @@ void main() {
                     ),
                   ];
                 },
+                tooltip: 'Test tooltip',
                 icon: const Icon(Icons.check),
               ),
             ],
@@ -955,7 +982,7 @@ void main() {
     );
 
     expect(find.byType(Tooltip), findsNWidgets(3));
-    expect(find.byTooltip('Test tooltip'), findsNWidgets(3));
+    expect(find.byTooltip('Test tooltip',), findsNWidgets(3));
   });
 }
 
