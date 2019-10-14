@@ -421,7 +421,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///     its descendants.
   ///   - [FocusTraversalPolicy], a class that can be extended to describe a
   ///     traversal policy.
-  bool get canRequestFocus => _canRequestFocus && (enclosingScope == null || enclosingScope.canRequestFocus);
+  bool get canRequestFocus {
+    final FocusScopeNode scope = enclosingScope;
+    return _canRequestFocus && (scope == null || scope.canRequestFocus);
+  }
   bool _canRequestFocus;
   @mustCallSuper
   set canRequestFocus(bool value) {
@@ -450,6 +453,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusOnKeyCallback _onKey;
 
   FocusManager _manager;
+  List<FocusNode> _ancestors;
+  List<FocusNode> _descendants;
   bool _hasKeyboardToken = false;
 
   /// Returns the parent node for this object.
@@ -467,11 +472,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// An iterator over the children that are allowed to be traversed by the
   /// [FocusTraversalPolicy].
   Iterable<FocusNode> get traversalChildren {
-    if (!canRequestFocus) {
+    if (!canRequestFocus || skipTraversal) {
       return const <FocusNode>[];
     }
     return children.where(
-      (FocusNode node) => !node.skipTraversal && node._canRequestFocus,
+      (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
     );
   }
 
@@ -493,26 +498,19 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// An [Iterable] over the hierarchy of children below this one, in
   /// depth-first order.
   Iterable<FocusNode> get descendants {
-    final List<FocusNode> result = <FocusNode>[];
-    for (FocusNode child in _children) {
-      result.add(child);
-      result.addAll(child.descendants);
+    if (_descendants == null) {
+      final List<FocusNode> result = <FocusNode>[];
+      for (FocusNode child in _children) {
+        result.addAll(child.descendants);
+        result.add(child);
+      }
+      _descendants = result;
     }
-    return result;
+    return _descendants;
   }
 
   /// Returns all descendants which do not have the [skipTraversal] flag set.
-  Iterable<FocusNode> get traversalDescendants {
-    final List<FocusNode> result = <FocusNode>[];
-    for (FocusNode child in _children) {
-      if (!child.skipTraversal && child.canRequestFocus)
-        result.add(child);
-      if (child._children.isNotEmpty)
-        result.addAll(child.traversalDescendants);
-    }
-    return result;
-  }
-
+  Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
 
   /// An [Iterable] over the ancestors of this node.
   ///
@@ -520,13 +518,16 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// over successively more remote ancestors of this node, ending at the root
   /// [FocusScope] ([FocusManager.rootScope]).
   Iterable<FocusNode> get ancestors {
-    final List<FocusNode> result = <FocusNode>[];
-    FocusNode parent = _parent;
-    while (parent != null) {
-      result.add(parent);
-      parent = parent._parent;
+    if (_ancestors == null) {
+      final List<FocusNode> result = <FocusNode>[];
+      FocusNode parent = _parent;
+      while (parent != null) {
+        result.add(parent);
+        parent = parent._parent;
+      }
+      _ancestors = result;
     }
-    return result;
+    return _ancestors;
   }
 
   /// Whether this node has input focus.
@@ -722,6 +723,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
     node._parent = null;
     _children.remove(node);
+    for (FocusNode ancestor in ancestors) {
+      ancestor._descendants = null;
+    }
+    _descendants = null;
     assert(_manager == null || !_manager.rootScope.descendants.contains(node));
   }
 
@@ -729,6 +734,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     _manager = manager;
     for (FocusNode descendant in descendants) {
       descendant._manager = manager;
+      descendant._ancestors = null;
     }
   }
 
@@ -749,7 +755,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     child._parent?._removeChild(child);
     _children.add(child);
     child._parent = this;
+    child._ancestors = null;
     child._updateManager(_manager);
+    for (FocusNode ancestor in child.ancestors) {
+      ancestor._descendants = null;
+    }
     if (hadFocus) {
       // Update the focus chain for the current focus without changing it.
       _manager?.primaryFocus?._setAsFocusedChild();
@@ -1333,7 +1343,7 @@ class FocusManager with DiagnosticableTreeMixin {
     final FocusNode previousFocus = _primaryFocus;
     if (_primaryFocus == null && _nextFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
-      // then pick a first one using widget order as a default.
+      // then revert to the root scope.
       _nextFocus = rootScope;
     }
     if (_nextFocus != null && _nextFocus != _primaryFocus) {
