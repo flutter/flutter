@@ -243,17 +243,20 @@ List<String> _buildModeOptions(BuildMode mode) {
   switch (mode) {
     case BuildMode.debug:
       return <String>[
+        '-Ddart.vm.profile=false',
         '-Ddart.vm.product=false',
         '--bytecode-options=source-positions,local-var-info,debugger-stops,instance-field-initializers,keep-unreachable-code,avoid-closure-call-instructions',
         '--enable-asserts',
       ];
     case BuildMode.profile:
       return <String>[
+        '-Ddart.vm.profile=true',
         '-Ddart.vm.product=false',
         '--bytecode-options=source-positions',
       ];
     case BuildMode.release:
       return <String>[
+        '-Ddart.vm.profile=false',
         '-Ddart.vm.product=true',
         '--bytecode-options=source-positions',
       ];
@@ -279,7 +282,6 @@ class KernelCompiler {
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    bool targetProductVm = false,
     String initializeFromDill,
     String platformDill,
   }) async {
@@ -318,12 +320,6 @@ class KernelCompiler {
         '--aot',
         '--tfa',
       ],
-      // If we're not targeting product (release) mode and we're still aot, then
-      // target profile mode.
-      if (targetProductVm)
-        '-Ddart.vm.product=true'
-      else if (aot)
-        '-Ddart.vm.profile=true',
       if (packagesPath != null) ...<String>[
         '--packages',
         packagesPath,

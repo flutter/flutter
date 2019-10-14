@@ -134,7 +134,6 @@ flutter_tools:lib/''');
       packagesPath: anyNamed('packagesPath'),
       fileSystemRoots: anyNamed('fileSystemRoots'),
       fileSystemScheme: anyNamed('fileSystemScheme'),
-      targetProductVm: anyNamed('targetProductVm'),
       platformDill: anyNamed('platformDill'),
       initializeFromDill: anyNamed('initializeFromDill'),
     )).thenAnswer((Invocation invocation) async {
@@ -156,7 +155,6 @@ flutter_tools:lib/''');
       buildMode: anyNamed('buildMode'),
       trackWidgetCreation: false,
       targetModel: anyNamed('targetModel'),
-      targetProductVm: anyNamed('targetProductVm'),
       outputFilePath: anyNamed('outputFilePath'),
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
@@ -181,7 +179,6 @@ flutter_tools:lib/''');
       buildMode: anyNamed('buildMode'),
       trackWidgetCreation: true,
       targetModel: anyNamed('targetModel'),
-      targetProductVm: anyNamed('targetProductVm'),
       outputFilePath: anyNamed('outputFilePath'),
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
@@ -398,7 +395,6 @@ class FakeKernelCompiler implements KernelCompiler {
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    bool targetProductVm = false,
     String platformDill,
     String initializeFromDill,
   }) async {

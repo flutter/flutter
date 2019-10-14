@@ -100,7 +100,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     bool causalAsyncStacks = true,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    bool targetProductVm = false,
     // These arguments are currently unused.
     String sdkRoot,
     String packagesPath,
@@ -138,7 +137,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       causalAsyncStacks: causalAsyncStacks,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
-      targetProductVm: targetProductVm,
       sdkRoot: sdkRoot,
       packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[
