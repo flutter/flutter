@@ -11,31 +11,17 @@ import 'package:flutter/physics.dart';
 class GestureTransformable extends StatelessWidget {
   const GestureTransformable({
     Key key,
-    // The child to perform the transformations on.
     @required this.child,
-    // The scale will be clamped to between these values. A maxScale of null has
-    // no bounds. minScale must be greater than zero.
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    // Transforms will be limited so that the viewport can not view beyond this
-    // Rect. The Rect does not rotate with the rest of the scene, so it is
-    // always aligned with the viewport. A null boundaryRect results in no
-    // limits to the distance that the viewport can be transformed to see.
     this.boundaryRect,
-    // Initial values for the transform can be provided.
     this.initialTranslation,
     this.initialScale,
     this.initialRotation,
-    // Any and all of the possible transformations can be disabled.
     this.disableTranslation = false,
     this.disableScale = false,
     this.disableRotation = false,
-    // If set to true, this widget will animate back to its initial transform
-    // and call onResetEnd when done. When utilizing reset, onResetEnd should
-    // also be implemented, and it should set reset to false when called.
     this.reset = false,
-    // Access to event callbacks from GestureDetector. Called with untransformed
-    // coordinates in an Offset.
     this.onTapDown,
     this.onTapUp,
     this.onTap,
@@ -75,44 +61,165 @@ class GestureTransformable extends StatelessWidget {
        ),
        super(key: key);
 
-  // TODO(justinmc): Document params.
-  final Widget child;
-  final bool reset;
-  final GestureTapDownCallback onTapDown;
-  final GestureTapUpCallback onTapUp;
-  final GestureTapCallback onTap;
-  final GestureTapCancelCallback onTapCancel;
-  final GestureTapCallback onDoubleTap;
-  final GestureLongPressCallback onLongPress;
-  final GestureLongPressUpCallback onLongPressUp;
-  final GestureDragDownCallback onVerticalDragDown;
-  final GestureDragStartCallback onVerticalDragStart;
-  final GestureDragUpdateCallback onVerticalDragUpdate;
-  final GestureDragEndCallback onVerticalDragEnd;
-  final GestureDragCancelCallback onVerticalDragCancel;
-  final GestureDragDownCallback onHorizontalDragDown;
-  final GestureDragStartCallback onHorizontalDragStart;
-  final GestureDragUpdateCallback onHorizontalDragUpdate;
-  final GestureDragEndCallback onHorizontalDragEnd;
-  final GestureDragCancelCallback onHorizontalDragCancel;
-  final GestureDragDownCallback onPanDown;
-  final GestureDragStartCallback onPanStart;
-  final GestureDragUpdateCallback onPanUpdate;
-  final GestureDragEndCallback onPanEnd;
-  final GestureDragCancelCallback onPanCancel;
-  final VoidCallback onResetEnd;
-  final GestureScaleStartCallback onScaleStart;
-  final GestureScaleUpdateCallback onScaleUpdate;
-  final GestureScaleEndCallback onScaleEnd;
-  final double maxScale;
-  final double minScale;
+  /// A Rect that defines the area that can be viewed by the viewport.
+  ///
+  /// Panning beyond boundaryRect will be stopped. boundaryRect does not rotate
+  /// with the rest of the scene, so it is always aligned with the viewport.
+  ///
+  /// A null boundaryRect, the default, results in no limits to the distance
+  /// that the viewport can be transformed.
   final Rect boundaryRect;
+
+  /// The child to perform the transformations on.
+  ///
+  /// Cannot be null.
+  final Widget child;
+
+  /// If true, the user will be prevented from translating.
+  ///
+  /// Defaults to false.
+  ///
+  /// See also:
+  ///   * [disableScale]
+  ///   * [disableRotation]
   final bool disableTranslation;
+
+  /// If true, the user will be prevented from scaling.
+  ///
+  /// Defaults to false.
+  ///
+  /// See also:
+  ///   * [disableTranslation]
+  ///   * [disableRotation]
   final bool disableScale;
+
+  /// If true, the user will be prevented from rotating.
+  ///
+  /// Defaults to false.
+  ///
+  /// See also:
+  ///   * [disableTranslation]
+  ///   * [disableScale]
   final bool disableRotation;
+
+  /// Sets the initial translation value of the transform.
+  ///
+  /// Defaults to Offset.zero.
   final Offset initialTranslation;
+
+  /// Sets the initial scale value of the transform.
+  ///
+  /// Defaults to 1.0.
   final double initialScale;
+
+  /// Sets the initial rotation value of the transform.
+  ///
+  /// Defaults to 0.0.
   final double initialRotation;
+
+  /// The maximum allowed scale.
+  ///
+  /// The scale will be clamped between this and [minScale].
+  ///
+  /// A maxScale of null, the default, has no bounds.
+  final double maxScale;
+
+  /// The minimum allowed scale.
+  ///
+  /// The scale will be clamped between this and [maxScale].
+  ///
+  /// A minScale of null, the default, has no bounds.
+  final double minScale;
+
+  /// A pre-transformation proxy for [GestureDetector.onDoubleTap].
+  final GestureTapCallback onDoubleTap;
+
+  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragCancel].
+  final GestureDragCancelCallback onHorizontalDragCancel;
+
+  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragDown].
+  final GestureDragDownCallback onHorizontalDragDown;
+
+  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragEnd].
+  final GestureDragEndCallback onHorizontalDragEnd;
+
+  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragStart].
+  final GestureDragStartCallback onHorizontalDragStart;
+
+  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragUpdate].
+  final GestureDragUpdateCallback onHorizontalDragUpdate;
+
+  /// A pre-transformation proxy for [GestureDetector.onLongPress].
+  final GestureLongPressCallback onLongPress;
+
+  /// A pre-transformation proxy for [GestureDetector.onLongPressUp].
+  final GestureLongPressUpCallback onLongPressUp;
+
+  /// A pre-transformation proxy for [GestureDetector.onPanCancel].
+  final GestureDragCancelCallback onPanCancel;
+
+  /// A pre-transformation proxy for [GestureDetector.onPanDown].
+  final GestureDragDownCallback onPanDown;
+
+  /// A pre-transformation proxy for [GestureDetector.onPanEnd].
+  final GestureDragEndCallback onPanEnd;
+
+  /// A pre-transformation proxy for [GestureDetector.onPanStart].
+  final GestureDragStartCallback onPanStart;
+
+  /// A pre-transformation proxy for [GestureDetector.onPanUpdate].
+  final GestureDragUpdateCallback onPanUpdate;
+
+  /// Called when the transform finishes resetting to its initial value.
+  ///
+  /// Resetting happens when [reset] is set to true. This callback should set
+  /// [reset] to false.
+  final VoidCallback onResetEnd;
+
+  /// A pre-transformation proxy for [GestureDetector.onScaleEnd].
+  final GestureScaleEndCallback onScaleEnd;
+
+  /// A pre-transformation proxy for [GestureDetector.onScaleStart].
+  final GestureScaleStartCallback onScaleStart;
+
+  /// A pre-transformation proxy for [GestureDetector.onScaleUpdate].
+  final GestureScaleUpdateCallback onScaleUpdate;
+
+  /// A pre-transformation proxy for [GestureDetector.onTap].
+  final GestureTapCallback onTap;
+
+  /// A pre-transformation proxy for [GestureDetector.onTapCancel].
+  final GestureTapCancelCallback onTapCancel;
+
+  /// A pre-transformation proxy for [GestureDetector.onTapDown].
+  final GestureTapDownCallback onTapDown;
+
+  /// A pre-transformation proxy for [GestureDetector.onTapUp].
+  final GestureTapUpCallback onTapUp;
+
+  /// A pre-transformation proxy for [GestureDetector.onVerticalDragCancel].
+  final GestureDragCancelCallback onVerticalDragCancel;
+
+  /// A pre-transformation proxy for [GestureDetector.onVerticalDragDown].
+  final GestureDragDownCallback onVerticalDragDown;
+
+  /// A pre-transformation proxy for [GestureDetector.onVerticalDragEnd].
+  final GestureDragEndCallback onVerticalDragEnd;
+
+  /// A pre-transformation proxy for [GestureDetector.onVerticalDragStart].
+  final GestureDragStartCallback onVerticalDragStart;
+
+  /// A pre-transformation proxy for [GestureDetector.onVerticalDragStart].
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+
+  /// Whether to reset the child to its original transformation state.
+  ///
+  /// If set to true, this widget will animate back to its initial transform
+  /// and call [onResetEnd] when done. When utilizing reset, [onResetEnd] should
+  /// also be implemented, and it should set reset to false when called.
+  ///
+  /// Defaults to false.
+  final bool reset;
 
   @override
   Widget build(BuildContext context) {
