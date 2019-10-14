@@ -121,7 +121,7 @@ task:
         ninja -C out/host_debug_unopt
       test_host_script: |
         cd %ENGINE_PATH%/src
-        python flutter/testing/run_tests.py --type=engine --engine-filter=flutter_windows_unittests,client_wrapper_windows_unittests
+        python flutter/testing/run_tests.py --type=engine
     - name: build_windows_opt_debug
       compile_host_script: |
         cd %ENGINE_PATH%/src
