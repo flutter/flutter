@@ -146,7 +146,7 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
   }
 }
 
-class _ZoomPageTransition extends StatelessWidget {
+class _ZoomPageTransition extends StatefulWidget {
   const _ZoomPageTransition({
     Key key,
     this.animation,
@@ -182,45 +182,89 @@ class _ZoomPageTransition extends StatelessWidget {
   final Widget child;
 
   @override
+  __ZoomPageTransitionState createState() => __ZoomPageTransitionState();
+}
+
+class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
+  AnimationStatus _currentAnimationStatus;
+  AnimationStatus _lastAnimationStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.animation.addStatusListener((AnimationStatus animationStatus) {
+      _lastAnimationStatus = _currentAnimationStatus;
+      _currentAnimationStatus = animationStatus;
+    });
+  }
+
+  bool get _transitionWasInterrupted {
+    bool wasInProgress = false;
+    bool isInProgress = false;
+
+    switch (_currentAnimationStatus) {
+      case AnimationStatus.completed:
+      case AnimationStatus.dismissed:
+        isInProgress = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        isInProgress = true;
+        break;
+    }
+    switch (_lastAnimationStatus) {
+      case AnimationStatus.completed:
+      case AnimationStatus.dismissed:
+        wasInProgress = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        wasInProgress = true;
+        break;
+    }
+    return wasInProgress && isInProgress;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Animation<double> _forwardScrimOpacityAnimation = _scrimOpacityTween
+    final Animation<double> _forwardScrimOpacityAnimation = _ZoomPageTransition._scrimOpacityTween
       .animate(CurvedAnimation(
-        parent: animation,
+        parent: widget.animation,
         curve: const Interval(0.2075, 0.4175),
       ));
 
     final Animation<double> _forwardEndScreenScaleTransition = Tween<double>(begin: 0.85, end: 1.00)
-      .chain(_scaleCurveSequence)
-      .animate(animation);
+      .chain(_ZoomPageTransition._scaleCurveSequence)
+      .animate(widget.animation);
 
     final Animation<double> _forwardStartScreenScaleTransition = Tween<double>(begin: 1.00, end: 1.05)
-      .chain(_scaleCurveSequence)
-      .animate(secondaryAnimation);
+      .chain(_ZoomPageTransition._scaleCurveSequence)
+      .animate(widget.secondaryAnimation);
 
     final Animation<double> _forwardEndScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
       .animate(CurvedAnimation(
-        parent: animation,
+        parent: widget.animation,
         curve: const Interval(0.125, 0.250),
       ));
 
     final Animation<double> _reverseEndScreenScaleTransition = Tween<double>(begin: 1.00, end: 1.10)
-      .chain(_flippedScaleCurveSequence)
-      .animate(secondaryAnimation);
+      .chain(_ZoomPageTransition._flippedScaleCurveSequence)
+      .animate(widget.secondaryAnimation);
 
     final Animation<double> _reverseStartScreenScaleTransition = Tween<double>(begin: 0.9, end: 1.0)
-      .chain(_flippedScaleCurveSequence)
-      .animate(animation);
+      .chain(_ZoomPageTransition._flippedScaleCurveSequence)
+      .animate(widget.animation);
 
     final Animation<double> _reverseStartScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
       .animate(CurvedAnimation(
-        parent: animation,
+        parent: widget.animation,
         curve: const Interval(1 - 0.2075, 1 - 0.0825),
       ));
 
     return AnimatedBuilder(
-      animation: animation,
+      animation: widget.animation,
       builder: (BuildContext context, Widget child) {
-        if (animation.status == AnimationStatus.forward) {
+        if (widget.animation.status == AnimationStatus.forward || _transitionWasInterrupted) {
           return Container(
             color: Colors.black.withOpacity(_forwardScrimOpacityAnimation.value),
             child: FadeTransition(
@@ -231,7 +275,7 @@ class _ZoomPageTransition extends StatelessWidget {
               ),
             ),
           );
-        } else if (animation.status == AnimationStatus.reverse) {
+        } else if (widget.animation.status == AnimationStatus.reverse) {
           return ScaleTransition(
             scale: _reverseStartScreenScaleTransition,
             child: FadeTransition(
@@ -243,14 +287,14 @@ class _ZoomPageTransition extends StatelessWidget {
         return child;
       },
       child: AnimatedBuilder(
-        animation: secondaryAnimation,
+        animation: widget.secondaryAnimation,
         builder: (BuildContext context, Widget child) {
-          if (secondaryAnimation.status == AnimationStatus.forward) {
+          if (widget.secondaryAnimation.status == AnimationStatus.forward || _transitionWasInterrupted) {
             return ScaleTransition(
               scale: _forwardStartScreenScaleTransition,
               child: child,
             );
-          } else if (secondaryAnimation.status == AnimationStatus.reverse) {
+          } else if (widget.secondaryAnimation.status == AnimationStatus.reverse) {
             return ScaleTransition(
               scale: _reverseEndScreenScaleTransition,
               child: child,
@@ -258,7 +302,7 @@ class _ZoomPageTransition extends StatelessWidget {
           }
           return child;
         },
-        child: child,
+        child: widget.child,
       ),
     );
   }
