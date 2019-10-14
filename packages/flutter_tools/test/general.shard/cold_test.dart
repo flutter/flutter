@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -127,12 +128,38 @@ void main() {
       final int result = await ColdRunner(devices).run();
       expect(result, 1);
       expect(mockLogger.errorText, matches(r'Tried to run .*, but that file does not exist\.'));
+      expect(mockLogger.errorText, matches(r'Consider using the -t option to specify the Dart file to start\.'));
+    }, overrides: <Type, Generator>{
+      Logger: () => mockLogger,
+    });
+
+    testUsingContext('calls runCold on attached device', () async {
+      final MockDevice mockDevice = MockDevice();
+      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
+      when(mockFlutterDevice.device).thenReturn(mockDevice);
+      when(mockFlutterDevice.runCold(
+          coldRunner: anyNamed('coldRunner'),
+          route: anyNamed('route')
+      )).thenAnswer((Invocation invocation) => Future<int>.value(1));
+      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
+      final MockFile applicationBinary = MockFile();
+      final int result = await ColdRunner(
+        devices,
+        applicationBinary: applicationBinary,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ).run();
+      expect(result, 1);
+      verify(mockFlutterDevice.runCold(
+          coldRunner: anyNamed('coldRunner'),
+          route: anyNamed('route'),
+      ));
     }, overrides: <Type, Generator>{
       Logger: () => mockLogger,
     });
   });
 }
 
+class MockFile extends Mock implements File {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockDevice extends Mock implements Device {
   MockDevice() {
