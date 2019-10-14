@@ -54,15 +54,15 @@ void PlatformViewIOS::SetOwnerViewController(fml::WeakPtr<FlutterViewController>
 
   // Add an observer that will clear out the owner_controller_ ivar and
   // the accessibility_bridge_ in case the view controller is deleted.
-  dealloc_view_controller_observer_.reset([[NSNotificationCenter defaultCenter]
-      addObserverForName:FlutterViewControllerWillDealloc
-                  object:owner_controller_.get()
-                   queue:[NSOperationQueue mainQueue]
-              usingBlock:^(NSNotification* note) {
-                // Implicit copy of 'this' is fine.
-                accessibility_bridge_.reset();
-                owner_controller_.reset();
-              }]);
+  dealloc_view_controller_observer_.reset(
+      [[[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
+                                                         object:owner_controller_.get()
+                                                          queue:[NSOperationQueue mainQueue]
+                                                     usingBlock:^(NSNotification* note) {
+                                                       // Implicit copy of 'this' is fine.
+                                                       accessibility_bridge_.reset();
+                                                       owner_controller_.reset();
+                                                     }] retain]);
 
   if (owner_controller_) {
     ios_surface_ =
@@ -172,6 +172,25 @@ fml::scoped_nsprotocol<FlutterTextInputPlugin*> PlatformViewIOS::GetTextInputPlu
 
 void PlatformViewIOS::SetTextInputPlugin(fml::scoped_nsprotocol<FlutterTextInputPlugin*> plugin) {
   text_input_plugin_ = plugin;
+}
+
+PlatformViewIOS::ScopedObserver::ScopedObserver() : observer_(nil) {}
+
+PlatformViewIOS::ScopedObserver::~ScopedObserver() {
+  if (observer_) {
+    [[NSNotificationCenter defaultCenter] removeObserver:observer_];
+    [observer_ release];
+  }
+}
+
+void PlatformViewIOS::ScopedObserver::reset(id<NSObject> observer) {
+  if (observer != observer_) {
+    if (observer_) {
+      [[NSNotificationCenter defaultCenter] removeObserver:observer_];
+      [observer_ release];
+    }
+    observer_ = observer;
+  }
 }
 
 }  // namespace flutter
