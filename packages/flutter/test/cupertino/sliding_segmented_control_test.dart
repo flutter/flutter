@@ -18,7 +18,16 @@ dynamic getRenderSegmentedControl(WidgetTester tester) {
   );
 }
 
-Rect currentUnscaledThumbRect(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbRect;
+Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false}) {
+  final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
+  final Rect local = renderSegmentedControl.currentThumbRect;
+  if (!useGlobalCoordinate)
+    return local;
+
+  final RenderBox segmentedControl = renderSegmentedControl;
+  return local.shift(segmentedControl.localToGlobal(Offset.zero));
+}
+
 double currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale;
 
 Widget setupSimpleSegmentedControl() {
@@ -746,57 +755,81 @@ void main() {
   testWidgets('Thumb animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    final Rect initialRect = currentUnscaledThumbRect(tester);
+    final Rect initialRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
     expect(currentThumbScale(tester), 1);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Child 2')));
     await tester.pump();
 
     // Does not move until tapUp.
     expect(currentThumbScale(tester), 1);
-    expect(currentUnscaledThumbRect(tester), initialRect);
+    expect(currentUnscaledThumbRect(tester, useGlobalCoordinate: true), initialRect);
 
     // Tap up and the sliding animation should play.
     await gesture.up();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
 
     expect(currentThumbScale(tester), 1);
-    expect(currentUnscaledThumbRect(tester).center.dy, lessThan(initialRect.center.dy));
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
+      greaterThan(initialRect.center.dx),
+    );
 
     await tester.pumpAndSettle();
 
     expect(currentThumbScale(tester), 1);
-    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('Child 2')));
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      // We're using a critically damped spring so the value of the animation
+      // controller will never reach 1.
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')), epsilon: 0.01),
+    );
 
     // Press the currently selected widget.
     await gesture.down(tester.getCenter(find.text('Child 2')));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
 
     // The thumb shrinks but does not moves towards left.
     expect(currentThumbScale(tester), lessThan(1));
-    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('Child 2')));
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')), epsilon: 0.01),
+    );
 
     await tester.pumpAndSettle();
-    expect(currentThumbScale(tester), 0.95);
-    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('Child 2')));
+    expect(currentThumbScale(tester), moreOrLessEquals(0.95, epsilon: 0.01));
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')), epsilon: 0.01),
+    );
 
     // Drag to Child 1.
     await gesture.moveTo(tester.getCenter(find.text('Child 1')));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
 
     // Moved slightly to the left
-    expect(currentThumbScale(tester), 0.95);
-    expect(currentUnscaledThumbRect(tester).center.dx, greaterThan(tester.getCenter(find.text('Child 2')).dx));
+    expect(currentThumbScale(tester), moreOrLessEquals(0.95, epsilon: 0.01));
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
+      lessThan(tester.getCenter(find.text('Child 2')).dx),
+    );
 
     await tester.pumpAndSettle();
-    expect(currentThumbScale(tester), 0.95);
-    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('Child 1')));
+    expect(currentThumbScale(tester), moreOrLessEquals(0.95, epsilon: 0.01));
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 1')), epsilon: 0.01),
+    );
 
     await gesture.up();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
     expect(currentThumbScale(tester), greaterThan(0.95));
 
     await tester.pumpAndSettle();
-    expect(currentThumbScale(tester), 1);
+    expect(currentThumbScale(tester), moreOrLessEquals(1, epsilon: 0.01));
   });
 
   testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
@@ -817,28 +850,32 @@ void main() {
     );
 
     await tester.tap(find.text('B'));
-
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 40));
 
     // Between A and B.
-    final Rect initialThumbRect = currentUnscaledThumbRect(tester);
+    final Rect initialThumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
     expect(initialThumbRect.center.dx, greaterThan(tester.getCenter(find.text('A')).dx));
     expect(initialThumbRect.center.dx, lessThan(tester.getCenter(find.text('B')).dx));
 
     // While A to B transition is occurring, press on C.
     await tester.tap(find.text('C'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
 
-    final Rect secondThumbRect = currentUnscaledThumbRect(tester);
+    final Rect secondThumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
 
     // Between the initial Rect and B.
-    expect(secondThumbRect.center.dx, initialThumbRect.center.dx);
-    expect(initialThumbRect.center.dx, lessThan(tester.getCenter(find.text('B')).dx));
+    expect(secondThumbRect.center.dx, greaterThan(initialThumbRect.center.dx));
+    expect(secondThumbRect.center.dx, lessThan(tester.getCenter(find.text('B')).dx));
 
     await tester.pump(const Duration(milliseconds: 500));
 
     // Eventually moves to C.
-    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('C')));
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      offsetMoreOrLessEquals(tester.getCenter(find.text('C')), epsilon: 0.01),
+    );
   });
 
   testWidgets('Insert segment while animation is running', (WidgetTester tester) async {
@@ -864,6 +901,7 @@ void main() {
     );
 
     await tester.tap(find.text('D'));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 40));
 
     children[1] = const Text('B');
@@ -877,9 +915,11 @@ void main() {
       ),
     );
 
-    await tester.pump(const Duration(milliseconds: 500));
-
+    await tester.pumpAndSettle();
     // Eventually moves to D.
-    expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('D')));
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      offsetMoreOrLessEquals(tester.getCenter(find.text('D')), epsilon: 0.01),
+    );
   });
 }

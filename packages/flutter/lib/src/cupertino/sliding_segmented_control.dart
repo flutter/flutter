@@ -417,7 +417,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     _pressed = newValue;
   }
 
-  void _didChangeSelectedByGesture() {
+  void didChangeSelectedViaGesture() {
     controller.value = _highlighted;
   }
 
@@ -444,6 +444,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         style: textStyle,
         child: Semantics(
           button: true,
+          onTap: () { controller.value = currentKey; },
           inMutuallyExclusiveGroup: true,
           selected: controller.value == currentKey,
           child: Opacity(
@@ -468,7 +469,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       thumbColor: widget.thumbColor,
       onPressedIndexChange: (int index) { pressed = index == null ? null : keys[index]; },
       onSelectedIndexChange: (int index) { highlighted = index == null ? null : keys[index]; },
-      didChangeSelectedByGesture: _didChangeSelectedByGesture,
       state: this,
     );
 
@@ -514,13 +514,12 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
       onPressedIndexChange: onPressedIndexChange,
       onSelectedIndexChange: onSelectedIndexChange,
       state: state,
-    )..didChangeSelectedByGesture = didChangeSelectedByGesture;
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSegmentedControl<T> renderObject) {
     renderObject
-      ..didChangeSelectedByGesture = didChangeSelectedByGesture
       ..onPressedIndexChange = onPressedIndexChange
       ..onSelectedIndexChange = onSelectedIndexChange
       ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)
@@ -761,12 +760,12 @@ class _RenderSegmentedControl<T> extends RenderBox
       return;
     if (startedOnSelectedSegment) {
       playThumbScaleAnimation(isExpanding: true);
-      didChangeSelectedByGesture();
+      state.didChangeSelectedViaGesture();
     }
 
     if (pressedIndex != null) {
       highlightedIndex = pressedIndex;
-      didChangeSelectedByGesture();
+      state.didChangeSelectedViaGesture();
     }
     pressedIndex = null;
     localDragOffset = null;
@@ -951,6 +950,8 @@ class _RenderSegmentedControl<T> extends RenderBox
         }
 
         _needsThumbAnimationUpdate = false;
+      } else if (currentThumbTween != null && unscaledThumbTargetRect != currentThumbTween.begin) {
+        currentThumbTween = RectTween(begin: currentThumbTween.begin, end: unscaledThumbTargetRect);
       }
 
       for (int index = 0; index < childCount - 1; index++) {
