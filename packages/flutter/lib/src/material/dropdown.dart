@@ -670,7 +670,9 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// If the [onChanged] callback is null or the list of [items] is null
 /// then the dropdown button will be disabled, i.e. its arrow will be
 /// displayed in grey and it will not respond to input. A disabled button
-/// will display the [disabledHint] widget if it is non-null.
+/// will display the [disabledHint] widget if it is non-null. However, if
+/// [disabledHint] is null and [hint] is non-null, the [hint] widget will
+/// instead be displayed.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -688,6 +690,8 @@ class DropdownButton<T> extends StatefulWidget {
   /// must be equal to one of the [DropDownMenuItem] values. If [items] or
   /// [onChanged] is null, the button will be disabled, the down arrow
   /// will be greyed out, and the [disabledHint] will be shown (if provided).
+  /// If [disabledHint] is null and [hint] is non-null, [hint] will instead be
+  /// shown.
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified). The boolean [isDense] and
@@ -723,20 +727,28 @@ class DropdownButton<T> extends StatefulWidget {
   /// If the [onChanged] callback is null or the list of items is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non-null.
+  /// will display the [disabledHint] widget if it is non-null. If
+  /// [disabledHint] is also null but [hint] is non-null, [hint] will instead
+  /// be displayed.
   final List<DropdownMenuItem<T>> items;
 
-  /// The value of the currently selected [DropdownMenuItem], or null if no
-  /// item has been selected. If `value` is null then the menu is popped up as
-  /// if the first item were selected.
+  /// The value of the currently selected [DropdownMenuItem].
+  ///
+  /// If [value] is null and [hint] is non-null, the [hint] widget is
+  /// displayed as a placeholder for the dropdown button.
   final T value;
 
-  /// A placeholder widget that is displayed if no item is selected, i.e. if [value] is null.
+  /// A placeholder widget that is displayed by the dropdown button.
+  ///
+  /// If [value] is null, this widget is displayed as a placeholder for
+  /// the dropdown button. This widget is also displayed if the button
+  /// is disabled ([items] or [onChanged] is null) and [disabledHint] is null.
   final Widget hint;
 
   /// A message to show when the dropdown is disabled.
   ///
-  /// Displayed if [items] or [onChanged] is null.
+  /// Displayed if [items] or [onChanged] is null. If [hint] is non-null and
+  /// [disabledHint] is null, the [hint] widget will instead be displayed.
   final Widget disabledHint;
 
   /// {@template flutter.material.dropdownButton.onChanged}
@@ -745,7 +757,9 @@ class DropdownButton<T> extends StatefulWidget {
   /// If the [onChanged] callback is null or the list of [items] is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non-null.
+  /// will display the [disabledHint] widget if it is non-null. If
+  /// [disabledHint] is also null but [hint] is non-null, [hint] will instead
+  /// be displayed.
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
 
