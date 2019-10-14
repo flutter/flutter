@@ -102,9 +102,11 @@ class RefreshIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
     this.semanticsValue,
+    this.strokeWidth = 2.0,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
+       assert(strokeWidth != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -148,6 +150,9 @@ class RefreshIndicator extends StatefulWidget {
 
   /// {@macro flutter.material.progressIndicator.semanticsValue}
   final String semanticsValue;
+
+  /// The width of the line used to draw the circle.
+  final double strokeWidth;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -458,6 +463,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,
                       backgroundColor: widget.backgroundColor,
+                      strokeWidth: widget.strokeWidth,
                     );
                   },
                 ),
