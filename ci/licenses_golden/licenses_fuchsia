@@ -1,4 +1,4 @@
-Signature: 99eb0b490efdb11c68339e5113921d34
+Signature: 2b67dee2e67cdd9a808ae7f3904ab47b
 
 UNUSED LICENSES:
 
@@ -1396,6 +1396,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/executor.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/executor.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/irq.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/irq.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
@@ -2803,6 +2805,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/loop.c
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/dispatcher_stub.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/include/lib/async-testing/dispatcher_stub.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/dispatcher.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/irq.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/receiver.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/task.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/wait.h
