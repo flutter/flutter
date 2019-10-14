@@ -85,39 +85,29 @@ class AndroidPlugin extends PluginPlatform {
       'src',
       'main',
     );
-    File mainPluginClass = fs.file(
-      fs.path.join(
-        baseMainPath,
-        'java',
-        package.replaceAll('.', fs.path.separator),
-        '$pluginClass.java',
-      )
-    );
-    // Check if the plugin is implemented in Kotlin since the plugin's pubspec.yaml
-    // doesn't include this information.
-    if (!mainPluginClass.existsSync()) {
-      mainPluginClass = fs.file(
-        fs.path.join(
-          baseMainPath,
-          'kotlin',
-          package.replaceAll('.', fs.path.separator),
-          '$pluginClass.kt',
-        )
-      );
-    }
-    assert(mainPluginClass.existsSync());
-    String mainClassContent;
-    try {
-      mainClassContent = mainPluginClass.readAsStringSync();
-    } on FileSystemException {
-      throwToolExit(
-        'Couldn\'t read file $mainPluginClass even though it exists. '
-        'Please verify that this file has read permission and try again.'
-      );
-    }
-    if (mainClassContent
+    final Iterable<File> files = fs.directory(baseMainPath)
+      .listSync(recursive: true)
+      .whereType<File>();
+
+    assert(pluginClass != null);
+    for (File file in files) {
+      // Skip the files that aren't the plugin's main class.
+      if (file.basename != '$pluginClass.java' && file.basename != '$pluginClass.kt') {
+        continue;
+      }
+      String mainClassContent;
+      try {
+        mainClassContent = file.readAsStringSync();
+      } on FileSystemException {
+        throwToolExit(
+          'Couldn\'t read file $file even though it exists. '
+          'Please verify that this file has read permission and try again.'
+        );
+      }
+      if (mainClassContent
         .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
-      return '2';
+        return '2';
+      }
     }
     return '1';
   }

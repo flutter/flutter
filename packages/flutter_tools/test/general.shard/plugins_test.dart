@@ -282,6 +282,80 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
     });
 
+    testUsingContext('finds plugin main class', () async {
+      when(flutterProject.isModule).thenReturn(false);
+      when(featureFlags.isNewAndroidEmbeddingEnabled).thenReturn(true);
+
+      final File androidManifest = flutterProject.directory
+        .childDirectory('android')
+        .childFile('AndroidManifest.xml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kAndroidManifestUsingNewEmbedding);
+      when(androidProject.appManifestFile).thenReturn(androidManifest);
+
+      final Directory pluginUsingJavaAndNewEmbeddingDir =
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+flutter:
+  plugin:
+    androidPackage: plugin1.unknownpath
+    pluginClass: UseNewEmbedding
+''');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('plugin1')
+        .childFile('UseNewEmbedding.java')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
+
+    final Directory pluginUsingKotlinAndNewEmbeddingDir =
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
+      pluginUsingKotlinAndNewEmbeddingDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+flutter:
+  plugin:
+    androidPackage: plugin2.unknownpath
+    pluginClass: UseNewEmbedding
+''');
+      pluginUsingKotlinAndNewEmbeddingDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childFile('UseNewEmbedding.kt')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin');
+
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync('''
+plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}
+plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri.toString()}
+''');
+
+      await injectPlugins(flutterProject);
+
+      final File registrant = flutterProject.directory
+        .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'dev', 'flutter', 'plugins'))
+        .childFile('GeneratedPluginRegistrant.java');
+
+      expect(registrant.readAsStringSync(),
+        contains('flutterEngine.getPlugins().add(new plugin1.unknownpath.UseNewEmbedding());'));
+      expect(registrant.readAsStringSync(),
+        contains('flutterEngine.getPlugins().add(new plugin2.unknownpath.UseNewEmbedding());'));
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      FeatureFlags: () => featureFlags,
+      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+    });
+
     testUsingContext('Registrant doesn\'t use new embedding if app doesn\'t use new embedding', () async {
       when(flutterProject.isModule).thenReturn(false);
       when(featureFlags.isNewAndroidEmbeddingEnabled).thenReturn(true);
