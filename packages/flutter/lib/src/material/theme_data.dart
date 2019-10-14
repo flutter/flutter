@@ -617,6 +617,7 @@ class ThemeData extends Diagnosticable {
       accentColor: colorScheme.secondary,
       accentColorBrightness: ThemeData.estimateBrightnessForColor(colorScheme.secondary),
       scaffoldBackgroundColor: colorScheme.background,
+      bottomAppBarColor: colorScheme.surface,
       cardColor: colorScheme.surface,
       dividerColor: colorScheme.onSurface.withOpacity(0.12),
       backgroundColor: colorScheme.background,

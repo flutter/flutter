@@ -139,6 +139,24 @@ void main() {
     expect(physicalShape.color, const Color(0xff0000ff));
   });
 
+  testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.dark()),
+        home: Scaffold(
+          bottomNavigationBar: BottomAppBar(
+            color: const ColorScheme.dark().surface,
+          ),
+        ),
+      )
+    );
+
+    final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
+
+    // For the default dark theme the overlay color for elevation 8 is 0xFF2D2D2D
+    expect(physicalShape.color, const Color(0xFF2D2D2D));
+  });
+
   // This is a regression test for a bug we had where toggling the notch on/off
   // would crash, as the shouldReclip method of ShapeBorderClipper or
   // _BottomAppBarClipper would try an illegal downcast.

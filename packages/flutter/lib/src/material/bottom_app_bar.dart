@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
+import 'elevation_overlay.dart';
 import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -127,10 +128,13 @@ class _BottomAppBarState extends State<BottomAppBar> {
         notchMargin: widget.notchMargin,
       )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
+    final double elevation = widget.elevation ?? babTheme.elevation ?? _defaultElevation;
+    final Color color = widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor;
+    final Color effectiveColor = ElevationOverlay.applyOverlay(context, color, elevation);
     return PhysicalShape(
       clipper: clipper,
-      elevation: widget.elevation ?? babTheme.elevation ?? _defaultElevation,
-      color: widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor,
+      elevation: elevation,
+      color: effectiveColor,
       clipBehavior: widget.clipBehavior,
       child: Material(
         type: MaterialType.transparency,
