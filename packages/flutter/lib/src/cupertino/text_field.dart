@@ -94,7 +94,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   void onSingleTapUp(TapUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
-    // this handler. If the the clear button widget recognizes the up event,
+    // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
       final RenderBox renderBox = _state._clearGlobalKey.currentContext.findRenderObject();

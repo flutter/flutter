@@ -1367,7 +1367,7 @@ void main() {
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
-    // Drag the the thumbs towards the center.
+    // Drag the thumbs towards the center.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
     await tester.dragFrom(leftTarget, middle - leftTarget);
     await tester.pumpAndSettle();
@@ -1437,7 +1437,7 @@ void main() {
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
-    // Drag the the thumbs towards the center.
+    // Drag the thumbs towards the center.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
     await tester.dragFrom(leftTarget, middle - leftTarget);
     await tester.pumpAndSettle();
@@ -1511,7 +1511,7 @@ void main() {
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
-    // Drag the the thumbs towards the center.
+    // Drag the thumbs towards the center.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
     await tester.dragFrom(leftTarget, middle - leftTarget);
     await tester.pumpAndSettle();

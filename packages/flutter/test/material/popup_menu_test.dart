@@ -711,7 +711,7 @@ void main() {
               onSelected: (String result) { },
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<String>>[
-                  // This menu item's height will be 48 because the the default minimum height
+                  // This menu item's height will be 48 because the default minimum height
                   // is 48 and the height of the text is less than 48.
                   const PopupMenuItem<String>(
                     value: '0',

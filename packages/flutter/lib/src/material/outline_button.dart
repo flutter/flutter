@@ -199,7 +199,7 @@ class OutlineButton extends MaterialButton {
   }
 }
 
-// The type of of OutlineButtons created with OutlineButton.icon.
+// The type of OutlineButtons created with OutlineButton.icon.
 //
 // This class only exists to give OutlineButtons created with OutlineButton.icon
 // a distinct class for the sake of ButtonTheme. It can not be instantiated.

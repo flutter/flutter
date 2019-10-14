@@ -207,7 +207,7 @@ class FlatButton extends MaterialButton {
   }
 }
 
-/// The type of of FlatButtons created with [FlatButton.icon].
+/// The type of FlatButtons created with [FlatButton.icon].
 ///
 /// This class only exists to give FlatButtons created with [FlatButton.icon]
 /// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.

@@ -2112,7 +2112,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   final GlobalKey _ignorePointerKey = GlobalKey();
 
-  /// Distance from the edge of of the bounding box for an element to consider
+  /// Distance from the edge of the bounding box for an element to consider
   /// as selecting the edge of the bounding box.
   static const double _edgeHitMargin = 2.0;
 
