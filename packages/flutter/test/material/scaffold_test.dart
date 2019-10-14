@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../widgets/semantics_tester.dart';
 
@@ -1675,6 +1675,90 @@ void main() {
 
     await tester.pumpWidget(buildFrame(false, null));
     expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
+  });
+
+  group('Throws FlutterError', () {
+    testWidgets(
+        'Call to Scaffold.of() without context', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+          home: Builder(
+              builder: (BuildContext context) {
+                Scaffold.of(context).showBottomSheet<void>((
+                    BuildContext context) {
+                  return Container();
+                });
+                return Container();
+              }
+          )
+      ));
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception;
+      expect(error.toStringDeep(),
+          'FlutterError\n'
+              '   Scaffold.of() called with a context that does not contain a\n'
+              '   Scaffold.\n'
+              '   No Scaffold ancestor could be found starting from the context\n'
+              '   that was passed to Scaffold.of(). This usually happens when the\n'
+              '   context provided is from the same StatefulWidget as that whose\n'
+              '   build function actually creates the Scaffold widget being sought.\n'
+              '   There are several ways to avoid this problem. The simplest is to\n'
+              '   use a Builder to get a context that is "under" the Scaffold. For\n'
+              '   an example of this, please see the documentation for\n'
+              '   Scaffold.of():\n'
+              '     https://api.flutter.dev/flutter/material/Scaffold/of.html\n'
+              '   A more efficient solution is to split your build function into\n'
+              '   several widgets. This introduces a new context from which you can\n'
+              '   obtain the Scaffold. In this solution, you would have an outer\n'
+              '   widget that creates the Scaffold populated by instances of your\n'
+              '   new inner widgets, and then in these inner widgets you would use\n'
+              '   Scaffold.of().\n'
+              '   A less elegant but more expedient solution is assign a GlobalKey\n'
+              '   to the Scaffold, then use the key.currentState property to obtain\n'
+              '   the ScaffoldState rather than using the Scaffold.of() function.\n'
+              '   The context used was:\n'
+              '     Builder\n'
+      );
+    });
+
+    testWidgets(
+        'Call to Scaffold.geometryOf() without context', (
+        WidgetTester tester) async {
+      ValueListenable<ScaffoldGeometry> geometry;
+      await tester.pumpWidget(MaterialApp(
+          home: Builder(
+              builder: (BuildContext context) {
+                geometry = Scaffold.geometryOf(context);
+                return Container();
+              }
+          )
+      ));
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(geometry, isNull);
+      final FlutterError error = exception;
+      expect(error.toStringDeep(),
+          'FlutterError\n'
+              '   Scaffold.geometryOf() called with a context that does not contain\n'
+              '   a Scaffold.\n'
+              '   This usually happens when the context provided is from the same\n'
+              '   StatefulWidget as that whose build function actually creates the\n'
+              '   Scaffold widget being sought.\n'
+              '   There are several ways to avoid this problem. The simplest is to\n'
+              '   use a Builder to get a context that is "under" the Scaffold. For\n'
+              '   an example of this, please see the documentation for\n'
+              '   Scaffold.of():\n'
+              '     https://api.flutter.dev/flutter/material/Scaffold/of.html\n'
+              '   A more efficient solution is to split your build function into\n'
+              '   several widgets. This introduces a new context from which you can\n'
+              '   obtain the Scaffold. In this solution, you would have an outer\n'
+              '   widget that creates the Scaffold populated by instances of your\n'
+              '   new inner widgets, and then in these inner widgets you would use\n'
+              '   Scaffold.geometryOf().\n'
+              '   The context used was:\n'
+              '     Builder\n'
+      );
+    });
   });
 }
 
