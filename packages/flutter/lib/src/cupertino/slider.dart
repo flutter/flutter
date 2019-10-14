@@ -197,7 +197,7 @@ class CupertinoSlider extends StatefulWidget {
 
   /// The color to use for the thumb of the slider.
   ///
-  /// Defaults to [CupertinoColors.white] if null.
+  /// Defaults to [CupertinoColors.white].
   final Color thumbColor;
 
   @override
