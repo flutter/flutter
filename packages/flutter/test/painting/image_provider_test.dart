@@ -181,7 +181,7 @@ void main() {
             .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
             .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
         );
-      });
+      }, skip: isBrowser);  // Browser implementation does not use HTTP client but a <img> tag.
 
       test('Disallows null urls', () {
         expect(() {
