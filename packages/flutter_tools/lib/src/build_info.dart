@@ -163,6 +163,9 @@ class BuildMode {
 
   /// The name for this build mode.
   final String name;
+
+  @override
+  String toString() => name;
 }
 
 /// Return the name for the build mode, or "any" if null.

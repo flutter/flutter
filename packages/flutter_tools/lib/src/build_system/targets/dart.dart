@@ -103,8 +103,8 @@ class CopyFlutterBundle extends Target {
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug || buildMode == BuildMode.jitRelease) {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+      final String vmSnapshotData = environment.buildDir.childFile('vm_snapshot_data').path;
+      final String isolateSnapshotData = environment.buildDir.childFile('isolate_snapshot_data').path;
       environment.buildDir.childFile('app.dill')
           .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
       fs.file(vmSnapshotData)
@@ -120,7 +120,7 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
+    AppSnapshot(),
   ];
 }
 
@@ -211,14 +211,14 @@ class KernelSnapshot extends Target {
 
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
-      aot: buildMode.isPrecompiled,
-      enableAsserts: buildMode == BuildMode.debug,
-      trackWidgetCreation: buildMode == BuildMode.debug,
+      aot: false,
+      enableAsserts: false,
+      trackWidgetCreation: false,
       targetModel: TargetModel.flutter,
-      targetProductVm: buildMode.isRelease,
+      targetProductVm: true,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
-      linkPlatformKernelIn: buildMode == BuildMode.release,
+      linkPlatformKernelIn: true,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
       bytecode: false,
@@ -229,6 +229,49 @@ class KernelSnapshot extends Target {
   }
 }
 
+class AppSnapshot extends Target {
+  const AppSnapshot();
+
+  @override
+  String get name => 'app_snapshot';
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/vm_snapshot_data'),
+    Source.pattern('{BUILD_DIR}/isolate_snapshot_data'),
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'kernel_snapshot');
+    }
+//    final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
+//    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+
+    await genSnapshot.run(
+      snapshotType: SnapshotType(getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())), BuildMode.debug),
+      additionalArgs: <String>[
+        '--snapshot-kind=app',
+        '--vm_snapshot_data=${environment.buildDir.childFile('vm_snapshot_data').path}',
+        '--isolate_snapshot_data=${environment.buildDir.childFile('isolate_snapshot_data').path}',
+        '',
+        '',
+        environment.buildDir.childFile('app.dill').path,
+      ]
+    );
+  }
+}
 
 /// Supports compiling a dart kernel file to an ELF binary.
 abstract class AotElfBase extends Target {
