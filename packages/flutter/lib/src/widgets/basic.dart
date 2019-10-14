@@ -5817,7 +5817,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onExit,
     this.onHover,
     this.opaque = true,
-    this.cursor,
+    this.cursor = MouseCursors.basic,
     Widget child,
   }) : assert(opaque != null),
        super(key: key, child: child);
@@ -5857,10 +5857,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// This cursor will be set to a mouse pointer if this region is the
   /// front-most widget that contains the pointer, taking opacity into account.
   ///
-  /// It defaults to [MouseCursors.fallThrough] if [opaque] is true, or `null`
-  /// otherwise. A value of `null` behaves almost identically as
-  /// [MouseCursors.fallThrough], except for a slight internal difference since
-  /// a layer will not be created if all handlers and the cursor are `null`.
+  /// It defaults to [MouseCursors.basic].
   ///
   /// See also:
   ///

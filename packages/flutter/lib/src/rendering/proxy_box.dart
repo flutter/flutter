@@ -2697,15 +2697,15 @@ class RenderMouseRegion extends RenderProxyBox {
   /// This cursor will be set to a mouse pointer if this object is the
   /// front-most object that contains the pointer, taking opacity into account.
   ///
-  /// It defaults to [MouseCursors.fallThrough] if [opaque] is true, or `null`
-  /// otherwise. A value of `null` behaves almost identically as
-  /// [MouseCursors.fallThrough], except for a slight internal difference since
-  /// a layer will not be created if all handlers and the cursor are `null`.
+  /// It defaults to `null`, which means the choice is deferred to the next
+  /// [RenderMouseRegion] behind it that is reachable by the annotation search.
   ///
   /// See also:
   ///
   ///  * [MouseCursors], which is a collection of system cursors of all
   ///    platforms.
+  ///  * [Layer.findAnnotations], which describes the annotation searching
+  ///    algorithm.
   int get cursor => _cursor;
   set cursor(int value) {
     if (_cursor != value) {

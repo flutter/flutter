@@ -56,7 +56,8 @@ class MouseTrackerAnnotation {
   /// Returns the cursor that a mouse pointer should change to if it enters
   /// or is hovering the layer that is annotated with this object.
   ///
-  /// Returning null is equivalent to [MouseCursors.fallThrough .
+  /// If [cursor] is null or returns null, the choice is deferred to the next
+  /// annotation behind this one.
   ///
   /// The `cursor` needs to be a function because [MouseTrackerAnnotation] can
   /// not contain mutable properties, but it needs to reflect the change of
