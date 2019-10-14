@@ -855,7 +855,7 @@ void main() {
   test('PopupMenuButton takes only child or only icon', () {
     // [PopupMenuButton] should assert that either child == null, icon == null,
     // or that both are null because only one of the two can be displayed/used.
-    expect(PopupMenuButton<int>(
+    expect(() => PopupMenuButton<int>(
       itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
       child: Container(),
       icon: const Icon(Icons.error),
