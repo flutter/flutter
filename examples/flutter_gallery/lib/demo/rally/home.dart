@@ -37,9 +37,7 @@ class _HomePageState extends State<HomePage>
     super.initState();
     _tabController = TabController(length: tabCount, vsync: this)
      ..addListener(() {
-      if (_tabController.indexIsChanging && _tabController.previousIndex != _tabController.index) {
-        setState(() { });
-      }
+      setState(() { });
     });
   }
 
