@@ -348,9 +348,7 @@ void main() {
 
     testUsingContext('disposes each device', () async {
       final MockDevice mockDevice1 = MockDevice();
-      when(mockDevice1.name).thenReturn('Al');
       final MockDevice mockDevice2 = MockDevice();
-      when(mockDevice2.name).thenReturn('Ferny');
       final MockFlutterDevice mockFlutterDevice1 = mockFlutterDeviceFactory(mockDevice1);
       final MockFlutterDevice mockFlutterDevice2 = mockFlutterDeviceFactory(mockDevice2);
 
