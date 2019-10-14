@@ -62,6 +62,7 @@ class CupertinoPicker extends StatefulWidget {
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
+    this.decoration,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
@@ -105,6 +106,7 @@ class CupertinoPicker extends StatefulWidget {
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
+    this.decoration,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
@@ -144,6 +146,9 @@ class CupertinoPicker extends StatefulWidget {
   /// Any alpha value less 255 (fully opaque) will cause the removal of the
   /// wheel list edge fade gradient from rendering of the widget.
   final Color backgroundColor;
+
+  /// [BoxDecoration] for magnifier so that color and border can be customized
+  final BoxDecoration decoration;
 
   /// {@macro flutter.rendering.wheelList.offAxisFraction}
   final double offAxisFraction;
@@ -283,6 +288,13 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
 
+    const BoxDecoration decoration = BoxDecoration(
+      border: Border(
+        top: BorderSide(width: 0.0, color: _kHighlighterBorder),
+        bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
+      ),
+    );
+
     return IgnorePointer(
       child: Column(
         children: <Widget>[
@@ -292,14 +304,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             ),
           ),
           Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(width: 0.0, color: _kHighlighterBorder),
-                bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
-              ),
-            ),
+            decoration: widget.decoration ?? decoration,
             constraints: BoxConstraints.expand(
-                height: widget.itemExtent * widget.magnification,
+              height: widget.itemExtent * widget.magnification,
             ),
           ),
           Expanded(

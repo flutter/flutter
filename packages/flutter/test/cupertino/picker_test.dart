@@ -214,6 +214,45 @@ void main() {
     });
   });
 
+  group('decoration', () {
+    testWidgets('can change border color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            height: 300,
+            width: 300,
+            child: CupertinoPicker(
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(width: 0.0, color: CupertinoColors.activeBlue),
+                  bottom: BorderSide(width: 0.0, color: CupertinoColors.activeOrange),
+                ),
+              ),
+              itemExtent: 15.0,
+              children: const <Widget>[
+                Text('1'),
+                Text('2'),
+                Text('3'),
+              ],
+              onSelectedItemChanged: (int i) {},
+            ),
+          ),
+        ),
+      );
+
+      final Container container = tester
+          .widgetList(find.byType(Container))
+          .skip(2)
+          .first;
+
+      final BoxDecoration boxDecoration = container.decoration;
+
+      expect(boxDecoration.border.top.color, CupertinoColors.activeBlue);
+      expect(boxDecoration.border.bottom.color, CupertinoColors.activeOrange);
+    });
+  });
+
   group('scroll', () {
     testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback',
