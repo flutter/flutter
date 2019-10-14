@@ -698,13 +698,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   // Removes the given FocusNode and its children as a child of this node.
   @mustCallSuper
-  void _removeChild(FocusNode node) {
+  void _removeChild(FocusNode node, {bool removeScopeFocus = true}) {
     assert(node != null);
     assert(_children.contains(node), "Tried to remove a node that wasn't a child.");
     assert(node._parent == this);
     assert(node._manager == _manager);
 
-    node.enclosingScope?._focusedChildren?.remove(node);
+    if (removeScopeFocus) {
+      node.enclosingScope?._focusedChildren?.remove(node);
+    }
 
     node._parent = null;
     _children.remove(node);
@@ -732,7 +734,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(!ancestors.contains(child), 'The supplied child is already an ancestor of this node. Loops are not allowed.');
     final FocusScopeNode oldScope = child.enclosingScope;
     final bool hadFocus = child.hasFocus;
-    child._parent?._removeChild(child);
+    child._parent?._removeChild(child, removeScopeFocus: oldScope != nearestScope);
     _children.add(child);
     child._parent = this;
     child._updateManager(_manager);
@@ -813,6 +815,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   // Note that this is overridden in FocusScopeNode.
   void _doRequestFocus() {
     if (!canRequestFocus) {
+      assert(_focusDebug('Node NOT requesting focus because canRequestFocus is false: $this'));
       return;
     }
     _setAsFocusedChild();
@@ -820,6 +823,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _hasKeyboardToken = true;
+    assert(_focusDebug('Node requesting focus: $this'));
     _markAsDirty(newFocus: this);
   }
 
@@ -836,6 +840,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     FocusNode scopeFocus = this;
     for (FocusScopeNode ancestor in ancestors.whereType<FocusScopeNode>()) {
       assert(scopeFocus != ancestor, 'Somehow made a loop by setting focusedChild to its scope.');
+      assert(_focusDebug('Setting $scopeFocus as focused child for scope:', <String>[ancestor.toString()]));
       // Remove it anywhere in the focused child history.
       ancestor._focusedChildren.remove(scopeFocus);
       // Add it to the end of the list, which is also the top of the queue: The
@@ -878,6 +883,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return _children.map<DiagnosticsNode>((FocusNode child) {
       return child.toDiagnosticsNode(name: 'Child ${count++}');
     }).toList();
+  }
+
+  @override
+  String toStringShort() {
+    return '${describeIdentity(this)}${debugLabel != null && debugLabel.isNotEmpty ? '($debugLabel)' : ''}';
   }
 }
 
@@ -950,6 +960,7 @@ class FocusScopeNode extends FocusNode {
   void setFirstFocus(FocusScopeNode scope) {
     assert(scope != null);
     assert(scope != this, 'Unexpected self-reference in setFirstFocus.');
+    assert(_focusDebug('Setting scope as first focus in $this to node:', <String>[scope.toString()]));
     if (scope._parent == null) {
       _reparent(scope);
     }
@@ -972,6 +983,7 @@ class FocusScopeNode extends FocusNode {
   /// The node is notified that it has received the primary focus in a
   /// microtask, so notification may lag the request by up to one frame.
   void autofocus(FocusNode node) {
+    assert(_focusDebug('Node autofocusing: $node'));
     if (focusedChild == null) {
       if (node._parent == null) {
         _reparent(node);
@@ -1015,7 +1027,7 @@ class FocusScopeNode extends FocusNode {
       return;
     }
     final List<String> childList = _focusedChildren.reversed.map<String>((FocusNode child) {
-      return '${describeIdentity(child)}${child.debugLabel != null && child.debugLabel.isNotEmpty ? '(${child.debugLabel})' : ''}';
+      return child.toStringShort();
     }).toList();
     properties.add(IterableProperty<String>('focusedChildren', childList, defaultValue: <String>[]));
   }
