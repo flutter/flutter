@@ -16,20 +16,24 @@ import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'features.dart';
 import 'globals.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
 
-  const DevelopmentArtifact._(this.name, {this.unstable = false});
+  const DevelopmentArtifact._(this.name, {this.unstable = false, this.feature});
 
   /// The name of the artifact.
   ///
   /// This should match the flag name in precache.dart
   final String name;
 
-  /// Whether this artifact should be unavailable on stable branches.
+  /// Whether this artifact should be unavailable on master branch only.
   final bool unstable;
+
+  /// A feature to control the visibility of this artifact.
+  final Feature feature;
 
   /// Artifacts required for Android development.
   static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot');
@@ -41,7 +45,7 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
   /// Artifacts required for web development.
-  static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
+  static const DevelopmentArtifact web = DevelopmentArtifact._('web', feature: flutterWebFeature);
 
   /// Artifacts required for desktop macOS.
   static const DevelopmentArtifact macOS = DevelopmentArtifact._('macos', unstable: true);
@@ -75,6 +79,9 @@ class DevelopmentArtifact {
     universal,
     flutterRunner,
   ];
+
+  @override
+  String toString() => 'Artifact($name, $unstable)';
 }
 
 /// A wrapper around the `bin/cache/` directory.
@@ -120,6 +127,9 @@ class Cache {
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
   bool includeAllPlatforms = false;
+
+  // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
+  bool useUnsignedMacBinaries = false;
 
   static RandomAccessFile _lock;
   static bool _lockEnabled = true;
@@ -732,12 +742,11 @@ class FlutterSdk extends EngineCachedArtifact {
     return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
-      if (cache.includeAllPlatforms)
-        ...<List<String>>[
-          <String>['windows-x64', 'windows-x64/artifacts.zip'],
-          <String>['linux-x64', 'linux-x64/artifacts.zip'],
-          <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-        ]
+      if (cache.includeAllPlatforms) ...<List<String>>[
+        <String>['windows-x64', 'windows-x64/artifacts.zip'],
+        <String>['linux-x64', 'linux-x64/artifacts.zip'],
+        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+      ]
       else if (platform.isWindows)
         <String>['windows-x64', 'windows-x64/artifacts.zip']
       else if (platform.isMacOS)
@@ -831,25 +840,17 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     return <List<String>>[
-      if (cache.includeAllPlatforms)
-        ...<List<String>>[
-          ..._osxBinaryDirs,
-          ..._linuxBinaryDirs,
-          ..._windowsBinaryDirs,
-          ..._dartSdks,
-        ]
-      else if (platform.isWindows)
-        ...<List<String>>[
-          ..._windowsBinaryDirs,
-        ]
+      if (cache.includeAllPlatforms) ...<List<String>>[
+        ..._osxBinaryDirs,
+        ..._linuxBinaryDirs,
+        ..._windowsBinaryDirs,
+        ..._dartSdks,
+      ] else if (platform.isWindows)
+        ..._windowsBinaryDirs
       else if (platform.isMacOS)
-        ...<List<String>>[
-          ..._osxBinaryDirs,
-        ]
+        ..._osxBinaryDirs
       else if (platform.isLinux)
-        ...<List<String>>[
-          ..._linuxBinaryDirs,
-        ],
+        ..._linuxBinaryDirs,
     ];
   }
 
@@ -885,7 +886,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
   @override
   Future<void> update() async {
     final Directory tempDir =
-        fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+        fs.systemTempDirectory.createTempSync('flutter_gradle_wrapper.');
     injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...',
@@ -1103,12 +1104,14 @@ class IosUsbArtifacts extends CachedArtifact {
 
   @override
   Future<void> updateInner() {
-    if (!platform.isMacOS) {
+    if (!platform.isMacOS && !cache.includeAllPlatforms) {
       return Future<void>.value();
     }
-    final Uri archiveUri = Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies/$name/$version/$name.zip');
     return _downloadZipArchive('Downloading $name...', archiveUri, location);
   }
+
+  @visibleForTesting
+  Uri get archiveUri => Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
 }
 
 // Many characters are problematic in filenames, especially on Windows.
@@ -1190,6 +1193,8 @@ const List<List<String>> _osxBinaryDirs = <List<String>>[
   <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
   <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
   <String>['android-arm64-release/darwin-x64', 'android-arm64-release/darwin-x64.zip'],
+  <String>['android-x64-profile/darwin-x64', 'android-x64-profile/darwin-x64.zip'],
+  <String>['android-x64-release/darwin-x64', 'android-x64-release/darwin-x64.zip'],
 ];
 
 const List<List<String>> _linuxBinaryDirs = <List<String>>[
@@ -1197,6 +1202,7 @@ const List<List<String>> _linuxBinaryDirs = <List<String>>[
   <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
   <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
   <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
+  <String>['android-x64-profile/linux-x64', 'android-x64-profile/linux-x64.zip'],
   <String>['android-x64-release/linux-x64', 'android-x64-release/linux-x64.zip'],
 ];
 
@@ -1205,6 +1211,8 @@ const List<List<String>> _windowsBinaryDirs = <List<String>>[
   <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
   <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
   <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
+  <String>['android-x64-profile/windows-x64', 'android-x64-profile/windows-x64.zip'],
+  <String>['android-x64-release/windows-x64', 'android-x64-release/windows-x64.zip'],
 ];
 
 const List<List<String>> _iosBinaryDirs = <List<String>>[
@@ -1222,6 +1230,7 @@ const List<List<String>> _androidBinaryDirs = <List<String>>[
   <String>['android-arm64', 'android-arm64/artifacts.zip'],
   <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
   <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
+  <String>['android-x64-profile', 'android-x64-profile/artifacts.zip'],
   <String>['android-x64-release', 'android-x64-release/artifacts.zip'],
   <String>['android-x86-jit-release', 'android-x86-jit-release/artifacts.zip'],
 ];

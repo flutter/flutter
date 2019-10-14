@@ -89,7 +89,7 @@ class ChromeLauncher {
   /// `skipCheck` does not attempt to make a devtools connection before returning.
   Future<Chrome> launch(String url, { bool headless = false, bool skipCheck = false }) async {
     final String chromeExecutable = findChromeExecutable();
-    final Directory dataDir = fs.systemTempDirectory.createTempSync('flutter_tool_');
+    final Directory dataDir = fs.systemTempDirectory.createTempSync('flutter_tool.');
     final int port = await os.findFreePort();
     final List<String> args = <String>[
       chromeExecutable,
@@ -153,10 +153,6 @@ class ChromeLauncher {
     _currentCompleter.complete(chrome);
     return chrome;
   }
-
-  /// Connects to an instance of Chrome with an open debug port.
-  static Future<Chrome> fromExisting(int port) async =>
-      _connect(Chrome._(port, ChromeConnection('localhost', port)), false);
 
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
 

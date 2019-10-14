@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/commands/build_bundle.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -59,6 +60,7 @@ void main() {
       'bundle',
       ...?arguments,
       '--target=$projectPath/lib/main.dart',
+      '--no-pub'
     ]);
     return command;
   }
@@ -107,6 +109,7 @@ void main() {
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   });
 
@@ -124,6 +127,7 @@ void main() {
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
@@ -141,6 +145,7 @@ void main() {
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
@@ -158,6 +163,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
@@ -175,6 +181,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
@@ -192,6 +199,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 }

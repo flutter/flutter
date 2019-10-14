@@ -520,26 +520,28 @@ void main() {
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: PopupMenuButton<int>(
-          itemBuilder: (BuildContext context) {
-            return <PopupMenuItem<int>>[
-              const PopupMenuItem<int>(value: 1, child: Text('1')),
-              const PopupMenuItem<int>(value: 2, child: Text('2')),
-              const PopupMenuItem<int>(value: 3, child: Text('3')),
-              const PopupMenuItem<int>(value: 4, child: Text('4')),
-              const PopupMenuItem<int>(value: 5, child: Text('5')),
-            ];
-          },
-          child: const SizedBox(
-            height: 100.0,
-            width: 100.0,
-            child: Text('XXX'),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(value: 1, child: Text('1')),
+                const PopupMenuItem<int>(value: 2, child: Text('2')),
+                const PopupMenuItem<int>(value: 3, child: Text('3')),
+                const PopupMenuItem<int>(value: 4, child: Text('4')),
+                const PopupMenuItem<int>(value: 5, child: Text('5')),
+              ];
+            },
+            child: const SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: Text('XXX'),
+            ),
           ),
         ),
       ),
-    ));
+    );
     await tester.tap(find.text('XXX'));
     await tester.pumpAndSettle();
 
@@ -563,26 +565,31 @@ void main() {
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '1',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '2',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '3',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '4',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '5',
                         textDirection: TextDirection.ltr,

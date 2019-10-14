@@ -75,6 +75,7 @@ flutter:
       expect(flutterProject.flutterPluginsFile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () {
@@ -85,6 +86,7 @@ flutter:
       expect(flutterProject.flutterPluginsFile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () {
@@ -95,6 +97,7 @@ flutter:
       expect(flutterProject.flutterPluginsFile.existsSync(), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
@@ -108,6 +111,7 @@ flutter:
       expect(macosProject.podManifestLock.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -157,6 +161,7 @@ flutter:
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -182,6 +187,7 @@ flutter:
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -197,7 +203,7 @@ flutter:
       when(androidProject.appManifestFile).thenReturn(androidManifest);
 
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('pluginUsingJavaAndNewEmbeddingDir.');
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
       pluginUsingJavaAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -217,7 +223,7 @@ flutter:
         ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
 
       final Directory pluginUsingKotlinAndNewEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('pluginUsingKotlinAndNewEmbeddingDir.');
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
       pluginUsingKotlinAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -237,7 +243,7 @@ flutter:
         ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin');
 
       final Directory pluginUsingOldEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('pluginUsingOldEmbeddingDir.');
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
       pluginUsingOldEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -278,6 +284,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
     });
@@ -304,6 +311,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -322,6 +330,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -347,6 +356,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -372,6 +382,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
   });

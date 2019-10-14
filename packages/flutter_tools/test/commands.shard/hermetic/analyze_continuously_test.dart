@@ -32,7 +32,7 @@ void main() {
     testUsingContext('AnalysisServer success', () async {
       _createSampleProject(tempDir);
 
-      await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+      await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -46,13 +46,14 @@ void main() {
       expect(errorCount, 0);
     }, overrides: <Type, Generator>{
       OperatingSystemUtils: () => os,
+      Pub: () => const Pub(),
     });
   });
 
   testUsingContext('AnalysisServer errors', () async {
     _createSampleProject(tempDir, brokenCode: true);
 
-    await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+    await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
     server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -68,6 +69,7 @@ void main() {
     expect(errorCount, greaterThan(0));
   }, overrides: <Type, Generator>{
     OperatingSystemUtils: () => os,
+    Pub: () => const Pub(),
   });
 
   testUsingContext('Returns no errors when source is error-free', () async {
@@ -85,6 +87,7 @@ void main() {
     expect(errorCount, 0);
   }, overrides: <Type, Generator>{
     OperatingSystemUtils: () => os,
+    Pub: () => const Pub(),
   });
 }
 

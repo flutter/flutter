@@ -36,7 +36,6 @@ class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter
 
 void main() {
   MockProcessManager mockProcessManager;
-  MemoryFileSystem memoryFilesystem;
   MockProcess mockProcess;
   MockPlatform macosPlatform;
   MockPlatform notMacosPlatform;
@@ -47,7 +46,6 @@ void main() {
 
   setUp(() {
     mockProcessManager = MockProcessManager();
-    memoryFilesystem = MemoryFileSystem();
     mockProcess = MockProcess();
     macosPlatform = MockPlatform();
     notMacosPlatform = MockPlatform();
@@ -121,7 +119,8 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -135,7 +134,7 @@ void main() {
       const <String>['build', 'macos', '--debug']
     );
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -151,7 +150,7 @@ void main() {
       const <String>['build', 'macos', '--profile']
     );
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
@@ -168,7 +167,7 @@ void main() {
       const <String>['build', 'macos', '--release']
     );
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
