@@ -578,6 +578,7 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     @required Widget child,
   }) : assert(child != null),
        super(key: key, child: child);
+
   /// The value to return if the user selects this menu item.
   ///
   /// Eventually returned in a call to [DropdownButton.onChanged].
