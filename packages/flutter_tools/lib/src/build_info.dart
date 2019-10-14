@@ -90,6 +90,7 @@ class AndroidBuildInfo {
     this.targetArchs = const <AndroidArch>[
       AndroidArch.armeabi_v7a,
       AndroidArch.arm64_v8a,
+      AndroidArch.x86_64,
     ],
     this.splitPerAbi = false,
     this.shrink = false,

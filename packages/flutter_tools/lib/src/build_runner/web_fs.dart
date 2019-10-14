@@ -209,6 +209,7 @@ class WebFs {
     };
 
     // Initialize the dwds server.
+    final String effectiveHostname = hostname ?? _kHostName;
     final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
 
     final Pipeline pipeline = const Pipeline().addMiddleware((Handler innerHandler) {
@@ -279,10 +280,10 @@ class WebFs {
         final BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
           daemonAssetPort,
           kBuildTargetName,
-          hostname ?? _kHostName,
+          effectiveHostname,
           hostPort);
         dwds = await dwdsFactory(
-          hostname: hostname ?? _kHostName,
+          hostname: effectiveHostname,
           assetHandler: assetHandler,
           buildResults: filteredBuildResults,
           chromeConnection: () async {
@@ -309,13 +310,13 @@ class WebFs {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(assetServer.handle);
-    final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
+    final HttpServer server = await httpMultiServerFactory(effectiveHostname, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     final WebFs webFS = WebFs(
       client,
       server,
       dwds,
-      'http://$_kHostName:$hostPort/',
+      'http://$effectiveHostname:$hostPort/',
       assetServer,
       buildInfo.isDebug,
       flutterProject,
@@ -324,11 +325,19 @@ class WebFs {
       initializePlatform,
     );
     if (!await firstBuildCompleter.future) {
-      throw Exception('Failed to compile for the web.');
+      throw const BuildException();
     }
     await firstBuild?.cancel();
     return webFS;
   }
+}
+
+/// An exception thrown when build runner fails.
+///
+/// This contains no error information as it will have already been printed to
+/// the console.
+class BuildException implements Exception {
+  const BuildException();
 }
 
 abstract class AssetServer {

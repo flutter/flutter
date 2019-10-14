@@ -43,9 +43,11 @@ Widget buildFrame({
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
+  Size mediaSize,
 }) {
   return TestApp(
     textDirection: textDirection,
+    mediaSize: mediaSize,
     child: Material(
       child: Align(
         alignment: alignment,
@@ -131,9 +133,10 @@ Widget buildFormFrame({
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({ this.textDirection, this.child });
+  const TestApp({ this.textDirection, this.child, this.mediaSize });
   final TextDirection textDirection;
   final Widget child;
+  final Size mediaSize;
   @override
   _TestAppState createState() => _TestAppState();
 }
@@ -148,7 +151,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(window),
+        data: MediaQueryData.fromWindow(window).copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(
@@ -937,13 +940,24 @@ void main() {
     expect(menuRect.bottomRight, const Offset(800.0, 600.0));
   });
 
-  testWidgets('Dropdown menus are dismissed on screen orientation changes', (WidgetTester tester) async {
-    await tester.pumpWidget(buildFrame(onChanged: onChanged));
+  testWidgets('Dropdown menus are dismissed on screen orientation changes, but not on keyboard hide', (WidgetTester tester) async {
+    await tester.pumpWidget(buildFrame(onChanged: onChanged, mediaSize: const Size(800, 600)));
     await tester.tap(find.byType(dropdownButtonType));
     await tester.pumpAndSettle();
     expect(find.byType(ListView), findsOneWidget);
 
-    window.onMetricsChanged();
+    // Show a keyboard (simulate by shortening the height).
+    await tester.pumpWidget(buildFrame(onChanged: onChanged, mediaSize: const Size(800, 300)));
+    await tester.pump();
+    expect(find.byType(ListView, skipOffstage: false), findsOneWidget);
+
+    // Hide a keyboard again (simulate by increasing the height).
+    await tester.pumpWidget(buildFrame(onChanged: onChanged, mediaSize: const Size(800, 600)));
+    await tester.pump();
+    expect(find.byType(ListView, skipOffstage: false), findsOneWidget);
+
+    // Rotate the device (simulate by changing the aspect ratio).
+    await tester.pumpWidget(buildFrame(onChanged: onChanged, mediaSize: const Size(600, 800)));
     await tester.pump();
     expect(find.byType(ListView, skipOffstage: false), findsNothing);
   });

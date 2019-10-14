@@ -1,13 +1,12 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'elevation_overlay.dart';
 import 'theme.dart';
 
 /// Signature for the callback used by ink effects to obtain the rectangle for the effect.
@@ -317,24 +316,6 @@ class Material extends StatefulWidget {
   static const double defaultSplashRadius = 35.0;
 }
 
-// Apply a semi-transparent colorScheme.onSurface to surface colors to
-// indicate the level of elevation.
-Color _elevationOverlayColor(BuildContext context, Color background, double elevation) {
-  final ThemeData theme = Theme.of(context);
-  if (elevation > 0.0 &&
-      theme.applyElevationOverlayColor &&
-      background == theme.colorScheme.surface) {
-
-    // Compute the opacity for the given elevation
-    // This formula matches the values in the spec:
-    // https://material.io/design/color/dark-theme.html#properties
-    final double opacity = (4.5 * math.log(elevation + 1) + 2) / 100.0;
-    final Color overlay = theme.colorScheme.onSurface.withOpacity(opacity);
-    return Color.alphaBlend(overlay, background);
-  }
-  return background;
-}
-
 class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
 
@@ -405,7 +386,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         clipBehavior: widget.clipBehavior,
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
-        color: _elevationOverlayColor(context, backgroundColor, widget.elevation),
+        color: ElevationOverlay.applyOverlay(context, backgroundColor, widget.elevation),
         shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
@@ -773,7 +754,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipBehavior: widget.clipBehavior,
       elevation: elevation,
-      color: _elevationOverlayColor(context, widget.color, elevation),
+      color: ElevationOverlay.applyOverlay(context, widget.color, elevation),
       shadowColor: _shadowColor.evaluate(animation),
     );
   }

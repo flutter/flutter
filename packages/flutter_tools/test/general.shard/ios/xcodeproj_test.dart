@@ -39,9 +39,9 @@ void main() {
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -79,8 +79,8 @@ void main() {
 
     testUsingOsxContext('majorVersion returns major version', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.majorVersion, 8);
+          .thenReturn(ProcessResult(1, 0, 'Xcode 10.3.3\nBuild version 8E3004b', ''));
+      expect(xcodeProjectInterpreter.majorVersion, 10);
     });
 
     testUsingOsxContext('majorVersion is null when version has unexpected format', () {
@@ -188,9 +188,9 @@ void main() {
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -355,9 +355,9 @@ Information about project "Runner":
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 

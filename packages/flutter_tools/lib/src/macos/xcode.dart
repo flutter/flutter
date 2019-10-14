@@ -12,8 +12,8 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../ios/xcodeproj.dart';
 
-const int kXcodeRequiredVersionMajor = 9;
-const int kXcodeRequiredVersionMinor = 0;
+const int kXcodeRequiredVersionMajor = 10;
+const int kXcodeRequiredVersionMinor = 2;
 
 Xcode get xcode => context.get<Xcode>();
 

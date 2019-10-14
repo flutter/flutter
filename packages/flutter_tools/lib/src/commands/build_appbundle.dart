@@ -25,8 +25,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
       ..addMultiOption('target-platform',
         splitCommas: true,
-        defaultsTo: <String>['android-arm', 'android-arm64'],
-        allowed: <String>['android-arm', 'android-arm64'],
+        defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
+        allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
       );
   }
