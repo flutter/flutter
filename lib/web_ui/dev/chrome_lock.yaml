@@ -1,4 +1,0 @@
-# It seems Chrome can't always release from the same build for all operating
-# systems, so we specify per-OS build number.
-Linux: 695653
-Mac: 695656
