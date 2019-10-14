@@ -19,6 +19,12 @@ sk_sp<GrContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
 
   GrContextOptions options = {};
 
+  if (PersistentCache::cache_sksl()) {
+    FML_LOG(INFO) << "Cache SkSL";
+    options.fShaderCacheStrategy = GrContextOptions::ShaderCacheStrategy::kSkSL;
+  }
+  PersistentCache::MarkStrategySet();
+
   options.fPersistentCache = PersistentCache::GetCacheForProcess();
 
   // There is currently a bug with doing GPU YUV to RGB conversions on the IO
