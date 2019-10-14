@@ -65,6 +65,12 @@ source_set("libcxx") {
     "LIBCXX_BUILDING_LIBCXXABI",
   ]
 
+  # While no translation units in Flutter engine enable RTTI, it may be enabled
+  # in one of the third party dependencies. This mirrors the configuration in
+  # libcxxabi.
+  configs -= [ "//build/config/compiler:no_rtti" ]
+  configs += [ "//build/config/compiler:rtti" ]
+
   if (is_clang) {
     # shared_mutex.cpp and debug.cpp are purposefully in violation.
     cflags_cc = [ "-Wno-thread-safety-analysis" ]
