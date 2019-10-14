@@ -536,17 +536,15 @@ class _RenderMenuItem extends RenderProxyBox {
   }
 }
 
-/// An item in a menu created by a [DropdownButton].
-///
-/// The type `T` is the type of the value the entry represents. All the entries
-/// in a given menu must represent values with consistent types.
-class DropdownMenuItem<T> extends StatelessWidget {
+// The container widget for a menu item created by a [DropdownButton]. It
+// provides the default configuration for [DropdownMenuItem]s, as well as a
+// [DropdownButton]'s hint and disabledHint widgets.
+class _DropdownMenuItemContainer extends StatelessWidget {
   /// Creates an item for a dropdown menu.
   ///
   /// The [child] argument is required.
-  const DropdownMenuItem({
+  const _DropdownMenuItemContainer({
     Key key,
-    this.value,
     @required this.child,
   }) : assert(child != null),
        super(key: key);
@@ -556,11 +554,6 @@ class DropdownMenuItem<T> extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  /// The value to return if the user selects this menu item.
-  ///
-  /// Eventually returned in a call to [DropdownButton.onChanged].
-  final T value;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -569,6 +562,26 @@ class DropdownMenuItem<T> extends StatelessWidget {
       child: child,
     );
   }
+}
+
+/// An item in a menu created by a [DropdownButton].
+///
+/// The type `T` is the type of the value the entry represents. All the entries
+/// in a given menu must represent values with consistent types.
+class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
+  /// Creates an item for a dropdown menu.
+  ///
+  /// The [child] argument is required.
+  const DropdownMenuItem({
+    Key key,
+    this.value,
+    @required Widget child,
+  }) : assert(child != null),
+       super(key: key, child: child);
+  /// The value to return if the user selects this menu item.
+  ///
+  /// Eventually returned in a call to [DropdownButton.onChanged].
+  final T value;
 }
 
 /// An inherited widget that causes any descendant [DropdownButton]
@@ -1064,9 +1077,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       }
 
       if (widget.selectedItemBuilder == null) {
-        displayedHint = Container(
-          constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-          alignment: AlignmentDirectional.centerStart,
+        displayedHint = _DropdownMenuItemContainer(
           child: displayedHint,
         );
       }
