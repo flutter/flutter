@@ -58,6 +58,7 @@ skt::ParagraphStyle TxtToSkia(const ParagraphStyle& txt) {
       MakeSkFontStyle(txt.strut_font_weight, txt.strut_font_style));
   strut_style.setFontSize(SkDoubleToScalar(txt.strut_font_size));
   strut_style.setHeight(SkDoubleToScalar(txt.strut_height));
+  strut_style.setHeightOverride(txt.strut_has_height_override);
 
   std::vector<SkString> strut_fonts;
   std::transform(txt.strut_font_families.begin(), txt.strut_font_families.end(),
@@ -154,7 +155,15 @@ void ParagraphBuilderSkia::AddText(const std::u16string& text) {
 }
 
 void ParagraphBuilderSkia::AddPlaceholder(PlaceholderRun& span) {
-  assert(false);
+  skt::PlaceholderStyle placeholder_style;
+  placeholder_style.fHeight = span.height;
+  placeholder_style.fWidth = span.width;
+  placeholder_style.fBaseline = static_cast<skt::TextBaseline>(span.baseline);
+  placeholder_style.fBaselineOffset = span.baseline_offset;
+  placeholder_style.fAlignment =
+      static_cast<skt::PlaceholderAlignment>(span.alignment);
+
+  builder_->addPlaceholder(placeholder_style);
 }
 
 std::unique_ptr<Paragraph> ParagraphBuilderSkia::Build() {
