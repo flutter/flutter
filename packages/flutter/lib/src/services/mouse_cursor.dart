@@ -42,7 +42,7 @@ class MouseCursorDefaultDelegate implements MouseCursorDelegate {
     final Map<String, int> translated = <String, int>{};
     deviceCursors.forEach((int device, int cursor) {
       assert(cursor != MouseCursors.releaseControl,
-        'Mouse cursor ${_cursorToString(cursor)} is not an actual value to be set.');
+        'The specified value ${_cursorToString(cursor)} is a permitted value for mouse cursor.');
       translated[device.toString()] = cursor;
     });
     return channel.invokeMethod<bool>('setCursors', <dynamic>[translated]);
