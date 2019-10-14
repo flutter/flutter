@@ -19,7 +19,7 @@ dynamic getRenderSegmentedControl(WidgetTester tester) {
 }
 
 Rect currentUnscaledThumbRect(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbRect;
-Rect currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale;
+double currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale;
 
 Widget setupSimpleSegmentedControl() {
   final Map<int, Widget> children = <int, Widget>{};
@@ -43,7 +43,6 @@ Widget boilerplate({ Widget child }) {
 }
 
 void main() {
-  /*
   testWidgets('Children and controller and padding arguments can not be null', (WidgetTester tester) async {
     try {
       await tester.pumpWidget(
@@ -455,7 +454,6 @@ void main() {
     expect(getChildOpacityByName('Child 5'), 1);
     expect(getChildOpacityByName('Child 2'), 0.2);
   });
-      */
 
   testWidgets('Long press does not change background color of currently-selected child', (WidgetTester tester) async {
     double getChildOpacityByName(String childName) {
@@ -467,11 +465,12 @@ void main() {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     final Offset center = tester.getCenter(find.text('Child 1'));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pump();
     await tester.pumpAndSettle();
 
     expect(getChildOpacityByName('Child 1'), 1);
+    await gesture.up();
   });
 
   testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
@@ -614,20 +613,17 @@ void main() {
     // highlightedIndex is 1 instead of 0 because of RTL.
     expect(getRenderSegmentedControl(tester).highlightedIndex, 1);
 
-    print('-----------------------------------------');
     await tester.tap(find.text('Child 2'));
     await tester.pump();
 
     expect(getRenderSegmentedControl(tester).highlightedIndex, 0);
 
-    print('-----------------------------------------');
     await tester.tap(find.text('Child 2'));
     await tester.pump();
 
     expect(getRenderSegmentedControl(tester).highlightedIndex, 0);
   });
 
-  /*
   testWidgets('Segmented control semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -886,5 +882,4 @@ void main() {
     // Eventually moves to D.
     expect(currentUnscaledThumbRect(tester).center, tester.getCenter(find.text('D')));
   });
-      */
 }
