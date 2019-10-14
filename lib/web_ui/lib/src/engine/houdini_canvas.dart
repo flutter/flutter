@@ -227,6 +227,12 @@ class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
         _drawParagraphElement(paragraph, offset, transform: currentTransform);
     currentElement.append(paragraphElement);
   }
+
+  @override
+  void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode,
+      ui.PaintData paint) {
+    // TODO(flutter_web): implement.
+  }
 }
 
 class _SaveElementStackEntry {

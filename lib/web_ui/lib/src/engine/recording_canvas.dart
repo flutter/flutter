@@ -356,8 +356,30 @@ class RecordingCanvas {
     _commands.add(PaintDrawShadow(path, color, elevation, transparentOccluder));
   }
 
-  void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
-    throw new UnimplementedError();
+  void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode,
+      ui.Paint paint) {
+    _hasArbitraryPaint = true;
+    _didDraw = true;
+    final Float32List positions = vertices.positions;
+    assert(positions.length >= 2);
+    double minValueX, maxValueX, minValueY, maxValueY;
+    minValueX = maxValueX = positions[0];
+    minValueY = maxValueY = positions[1];
+    for (int i = 2, len = positions.length; i < len; i += 2) {
+      final double x = positions[i];
+      final double y = positions[i + 1];
+      if (x.isNaN || y.isNaN) {
+        // Follows skia implementation that sets bounds to empty
+        // and aborts.
+        return;
+      }
+      minValueX = math.min(minValueX, x);
+      maxValueX = math.max(maxValueX, x);
+      minValueY = math.min(minValueY, y);
+      maxValueY = math.max(maxValueY, y);
+    }
+    _paintBounds.growLTRB(minValueX, minValueY, maxValueX, maxValueY);
+    _commands.add(PaintVertices(vertices, blendMode, paint.webOnlyPaintData));
   }
 
   int saveCount = 1;
@@ -712,6 +734,32 @@ class PaintDrawPaint extends PaintCommand {
   @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[13, _serializePaintToCssPaint(paint)]);
+  }
+}
+
+class PaintVertices extends PaintCommand {
+  final ui.Vertices vertices;
+  final ui.BlendMode blendMode;
+  final ui.PaintData paint;
+  PaintVertices(this.vertices, this.blendMode, this.paint);
+
+  @override
+  void apply(EngineCanvas canvas) {
+    canvas.drawVertices(vertices, blendMode, paint);
+  }
+
+  @override
+  String toString() {
+    if (assertionsEnabled) {
+      return 'drawVertices($vertices, $blendMode, $paint)';
+    } else {
+      return super.toString();
+    }
+  }
+
+  @override
+  void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
+    throw UnimplementedError();
   }
 }
 

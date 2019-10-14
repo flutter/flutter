@@ -59,37 +59,91 @@ enum VertexMode {
 
 /// A set of vertex data used by [Canvas.drawVertices].
 class Vertices {
+  final VertexMode _mode;
+  final Float32List _positions;
+  final Float32List _textureCoordinates;
+  final Int32List _colors;
+  final Uint16List _indices;
+
+  Vertices._(
+      VertexMode mode,
+      List<Offset> positions, {
+        List<Offset> textureCoordinates,
+        List<Color> colors,
+        List<int> indices,
+      }) : assert(mode != null),
+        assert(positions != null),
+        _mode = mode,
+        _colors = Int32List.fromList(colors.map((Color c) => c.value)),
+        _indices = Uint16List.fromList(indices),
+        _positions = _offsetListToInt32List(positions),
+        _textureCoordinates = _offsetListToInt32List(textureCoordinates);
+
   factory Vertices(
-    VertexMode mode,
-    List<Offset> positions, {
-    List<Offset> textureCoordinates,
-    List<Color> colors,
-    List<int> indices,
-  }) {
+      VertexMode mode,
+      List<Offset> positions, {
+        List<Offset> textureCoordinates,
+        List<Color> colors,
+        List<int> indices,
+      }) {
     if (engine.experimentalUseSkia) {
       return engine.SkVertices(mode, positions,
           textureCoordinates: textureCoordinates,
           colors: colors,
           indices: indices);
     }
-    return null;
+    return Vertices._(mode, positions,
+        textureCoordinates: textureCoordinates,
+        colors: colors , indices: indices);
+  }
+
+  Vertices._raw(
+      VertexMode mode,
+      Float32List positions, {
+        Float32List textureCoordinates,
+        Int32List colors,
+        Uint16List indices,
+      })  : assert(mode != null),
+        assert(positions != null),
+        _mode = mode,
+        _positions = positions,
+        _textureCoordinates = textureCoordinates,
+        _colors = colors,
+        _indices = indices;
+
+  static Float32List _offsetListToInt32List(List<Offset> offsetList) {
+    if (offsetList == null) {
+      return null;
+    }
+    final int length = offsetList.length;
+    final floatList = Float32List(length * 2);
+    for (int i = 0, destIndex = 0; i < length; i++, destIndex += 2) {
+      floatList[destIndex] = offsetList[i].dx;
+      floatList[destIndex + 1] = offsetList[i].dx;
+    }
+    return floatList;
   }
 
   factory Vertices.raw(
-    VertexMode mode,
-    Float32List positions, {
-    Float32List textureCoordinates,
-    Int32List colors,
-    Uint16List indices,
-  }) {
+      VertexMode mode,
+      Float32List positions, {
+        Float32List textureCoordinates,
+        Int32List colors,
+        Uint16List indices,
+      }) {
     if (engine.experimentalUseSkia) {
       return engine.SkVertices.raw(mode, positions,
           textureCoordinates: textureCoordinates,
           colors: colors,
           indices: indices);
     }
-    return null;
+    return Vertices._raw(mode, positions,
+        textureCoordinates: textureCoordinates, colors: colors , indices: indices);
   }
+
+  VertexMode get mode => _mode;
+  Int32List get colors => _colors;
+  Float32List get positions => _positions;
 }
 
 /// Records a [Picture] containing a sequence of graphical operations.

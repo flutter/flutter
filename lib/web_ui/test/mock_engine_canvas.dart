@@ -218,4 +218,14 @@ class MockEngineCanvas implements EngineCanvas {
       'offset': offset,
     });
   }
+
+  @override
+  void drawVertices(Vertices vertices, BlendMode blendMode,
+      PaintData paint) {
+    _called('drawVertices', arguments: <String, dynamic>{
+      'vertices': vertices,
+      'blendMode': blendMode,
+      'paint': paint,
+    });
+  }
 }

@@ -65,6 +65,9 @@ abstract class EngineCanvas {
       ui.Image image, ui.Rect src, ui.Rect dst, ui.PaintData paint);
 
   void drawParagraph(EngineParagraph paragraph, ui.Offset offset);
+
+  void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode,
+      ui.PaintData paint);
 }
 
 /// Adds an [offset] transformation to a [transform] matrix and returns the
