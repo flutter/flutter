@@ -111,25 +111,30 @@ Future<int> starter(
     final Directory temp =
         Directory.systemTemp.createTempSync('train_frontend_server');
     try {
-      final String outputTrainingDill = path.join(temp.path, 'app.dill');
-      options = frontend.argParser.parse(<String>[
-        '--incremental',
-        '--sdk-root=$sdkRoot',
-        '--output-dill=$outputTrainingDill',
-        '--target=flutter',
-        '--track-widget-creation',
-      ]);
-      compiler ??= _FlutterFrontendCompiler(output);
+      for (int i = 0; i < 3; i++) {
+        final String outputTrainingDill = path.join(temp.path, 'app.dill');
+        options = frontend.argParser.parse(<String>[
+          '--incremental',
+          '--sdk-root=$sdkRoot',
+          '--output-dill=$outputTrainingDill',
+          '--target=flutter',
+          '--track-widget-creation',
+          '--enable-asserts',
+          '--gen-bytecode',
+          '--bytecode-options=source-positions,local-var-info,debugger-stops,instance-field-initializers,keep-unreachable-code,avoid-closure-call-instructions',
+        ]);
+        compiler ??= _FlutterFrontendCompiler(output);
 
-      await compiler.compile(input, options);
-      compiler.acceptLastDelta();
-      await compiler.recompileDelta();
-      compiler.acceptLastDelta();
-      compiler.resetIncrementalCompiler();
-      await compiler.recompileDelta();
-      compiler.acceptLastDelta();
-      await compiler.recompileDelta();
-      compiler.acceptLastDelta();
+        await compiler.compile(input, options);
+        compiler.acceptLastDelta();
+        await compiler.recompileDelta();
+        compiler.acceptLastDelta();
+        compiler.resetIncrementalCompiler();
+        await compiler.recompileDelta();
+        compiler.acceptLastDelta();
+        await compiler.recompileDelta();
+        compiler.acceptLastDelta();
+      }
       return 0;
     } finally {
       temp.deleteSync(recursive: true);
