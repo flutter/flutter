@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -119,7 +118,7 @@ class _FontWeightTween extends Tween<FontWeight> {
 ///   void initState() {
 ///     super.initState();
 ///     // Print a message whenever the currently selected widget changes.
-///     controller.addListener(() {
+///     controller.addListener(() { print('currently selected ${controller.value}'); });
 ///   }
 ///
 ///   @override
