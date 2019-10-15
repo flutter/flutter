@@ -599,6 +599,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   bool get selectionEnabled => widget.selectionEnabled;
   // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
+  // Disables all directional focus actions inside of a text field, since up and
+  // down shouldn't go to another field, even in a single line text field. We
+  // remap the keys rather than the actions, since someone might want to invoke
+  // a directional navigation action from another key binding.
+  final Map<LogicalKeySet, Intent> _disabledNavigationKeys = <LogicalKeySet, Intent>{
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const Intent(DoNothingAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const Intent(DoNothingAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const Intent(DoNothingAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const Intent(DoNothingAction.key),
+  };
+
   @override
   void initState() {
     super.initState();
@@ -859,48 +870,51 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
-        child: EditableText(
-          key: editableTextKey,
-          controller: controller,
-          readOnly: widget.readOnly,
-          toolbarOptions: widget.toolbarOptions,
-          showCursor: widget.showCursor,
-          showSelectionHandles: _showSelectionHandles,
-          focusNode: _effectiveFocusNode,
-          keyboardType: widget.keyboardType,
-          textInputAction: widget.textInputAction,
-          textCapitalization: widget.textCapitalization,
-          style: textStyle,
-          strutStyle: widget.strutStyle,
-          textAlign: widget.textAlign,
-          autofocus: widget.autofocus,
-          obscureText: widget.obscureText,
-          autocorrect: widget.autocorrect,
-          maxLines: widget.maxLines,
-          minLines: widget.minLines,
-          expands: widget.expands,
-          selectionColor: CupertinoTheme.of(context).primaryColor.withOpacity(0.2),
-          selectionControls: widget.selectionEnabled
-            ? cupertinoTextSelectionControls : null,
-          onChanged: widget.onChanged,
-          onSelectionChanged: _handleSelectionChanged,
-          onEditingComplete: widget.onEditingComplete,
-          onSubmitted: widget.onSubmitted,
-          inputFormatters: formatters,
-          rendererIgnoresPointer: true,
-          cursorWidth: widget.cursorWidth,
-          cursorRadius: widget.cursorRadius,
-          cursorColor: cursorColor,
-          cursorOpacityAnimates: true,
-          cursorOffset: cursorOffset,
-          paintCursorAboveText: true,
-          backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
-          scrollPadding: widget.scrollPadding,
-          keyboardAppearance: keyboardAppearance,
-          dragStartBehavior: widget.dragStartBehavior,
-          scrollController: widget.scrollController,
-          scrollPhysics: widget.scrollPhysics,
-          enableInteractiveSelection: widget.enableInteractiveSelection,
+        child: Shortcuts(
+          shortcuts: _disabledNavigationKeys,
+          child: EditableText(
+            key: editableTextKey,
+            controller: controller,
+            readOnly: widget.readOnly,
+            toolbarOptions: widget.toolbarOptions,
+            showCursor: widget.showCursor,
+            showSelectionHandles: _showSelectionHandles,
+            focusNode: _effectiveFocusNode,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            textCapitalization: widget.textCapitalization,
+            style: textStyle,
+            strutStyle: widget.strutStyle,
+            textAlign: widget.textAlign,
+            autofocus: widget.autofocus,
+            obscureText: widget.obscureText,
+            autocorrect: widget.autocorrect,
+            maxLines: widget.maxLines,
+            minLines: widget.minLines,
+            expands: widget.expands,
+            selectionColor: CupertinoTheme.of(context).primaryColor.withOpacity(0.2),
+            selectionControls: widget.selectionEnabled
+              ? cupertinoTextSelectionControls : null,
+            onChanged: widget.onChanged,
+            onSelectionChanged: _handleSelectionChanged,
+            onEditingComplete: widget.onEditingComplete,
+            onSubmitted: widget.onSubmitted,
+            inputFormatters: formatters,
+            rendererIgnoresPointer: true,
+            cursorWidth: widget.cursorWidth,
+            cursorRadius: widget.cursorRadius,
+            cursorColor: cursorColor,
+            cursorOpacityAnimates: true,
+            cursorOffset: cursorOffset,
+            paintCursorAboveText: true,
+            backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
+            scrollPadding: widget.scrollPadding,
+            keyboardAppearance: keyboardAppearance,
+            dragStartBehavior: widget.dragStartBehavior,
+            scrollController: widget.scrollController,
+            scrollPhysics: widget.scrollPhysics,
+            enableInteractiveSelection: widget.enableInteractiveSelection,
+          ),
         ),
       ),
     );

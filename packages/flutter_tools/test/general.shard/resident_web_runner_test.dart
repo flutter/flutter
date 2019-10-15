@@ -431,11 +431,12 @@ void main() {
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
     _setupMocks();
     bool debugClosed = false;
-    when(mockDebugConnection.close()).thenAnswer((Invocation invocation) async {
+    when(mockWebDevice.stopApp(any)).thenAnswer((Invocation invocation) async {
       if (debugClosed) {
         throw StateError('debug connection closed twice');
       }
       debugClosed = true;
+      return true;
     });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -445,6 +446,8 @@ void main() {
 
     await residentWebRunner.exit();
     await residentWebRunner.exit();
+
+    verifyNever(mockDebugConnection.close());
   }));
 
   test('Prints target and device name on run', () => testbed.run(() async {
@@ -468,6 +471,25 @@ void main() {
     when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
       unawaited(unhandledErrorCompleter.future.then((void value) {
         throw const WebSocketException();
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsA(isInstanceOf<ToolExit>()));
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+  test('Successfully turns AppInstanceId error into ToolExit', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw StateError('Could not connect to application with appInstanceId: c0ae0750-ee91-11e9-cea6-35d95a968356');
       }));
       return ConnectionResult(mockAppConnection, mockDebugConnection);
     });
