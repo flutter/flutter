@@ -1195,11 +1195,6 @@ void main() {
 
   testWidgets('MaterialButton should be enabled when onLongPress is not null.', (WidgetTester tester) async {
 
-    final Finder rawButtonMaterial = find.descendant(
-      of: find.byType(MaterialButton),
-      matching: find.byType(Material),
-    );
-
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1212,8 +1207,8 @@ void main() {
       ),
     );
 
-    final Material material = tester.widget<Material>(rawButtonMaterial);
-    expect(material.color, const Color(0xffff00ff));
+    final MaterialButton button = tester.widget<MaterialButton>(find.byType(MaterialButton));
+    expect(button.enabled, true);
   });
 
   testWidgets('MaterialButton onPressed callback', (WidgetTester tester) async {
