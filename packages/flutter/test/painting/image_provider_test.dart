@@ -18,11 +18,6 @@ import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-
-  final DecoderCallback basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
-  };
-
   group(ImageProvider, () {
     setUpAll(() {
       TestRenderingFlutterBinding(); // initializes the imageCache
@@ -51,7 +46,7 @@ void main() {
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         final MemoryImage imageProvider = MemoryImage(bytes);
         final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
-          imageProvider, () => imageProvider.load(imageProvider, basicDecoder),
+          imageProvider, () => imageProvider.load(imageProvider),
         );
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> completer = Completer<void>();
@@ -200,7 +195,7 @@ void main() {
 
         Future<void> loadNetworkImage() async {
           final NetworkImage networkImage = NetworkImage(nonconst('foo'));
-          final ImageStreamCompleter completer = networkImage.load(networkImage, basicDecoder);
+          final ImageStreamCompleter completer = networkImage.load(networkImage);
           completer.addListener(ImageStreamListener(
             (ImageInfo image, bool synchronousCall) { },
             onError: (dynamic error, StackTrace stackTrace) {
@@ -298,83 +293,6 @@ void main() {
       }, skip: isBrowser);
     });
   });
-
-  test('ResizeImage resizes to the correct dimensions', () async {
-    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MemoryImage imageProvider = MemoryImage(bytes);
-    final Size rawImageSize = await _resolveAndGetSize(imageProvider);
-    expect(rawImageSize, const Size(1, 1));
-
-    const Size resizeDims = Size(14, 7);
-    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round());
-    const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
-    final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
-    expect(resizedImageSize, resizeDims);
-  });
-
-  test('ResizeImage does not resize when no size is passed', () async {
-    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MemoryImage imageProvider = MemoryImage(bytes);
-    final Size rawImageSize = await _resolveAndGetSize(imageProvider);
-    expect(rawImageSize, const Size(1, 1));
-
-    // Cannot pass in two null arguments for cache dimensions, so will use the regular
-    // MemoryImage
-    final MemoryImage resizedImage = MemoryImage(bytes);
-    final Size resizedImageSize = await _resolveAndGetSize(resizedImage);
-    expect(resizedImageSize, const Size(1, 1));
-  });
-
-  test('ResizeImage stores values', () async {
-    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MemoryImage memoryImage = MemoryImage(bytes);
-    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 10, height: 20);
-    expect(resizeImage.width, 10);
-    expect(resizeImage.height, 20);
-    expect(resizeImage.imageProvider, memoryImage);
-
-    expect(memoryImage.resolve(ImageConfiguration.empty) != resizeImage.resolve(ImageConfiguration.empty), true);
-  });
-
-  test('ResizeImage takes one dim', () async {
-    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MemoryImage memoryImage = MemoryImage(bytes);
-    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 10, height: null);
-    expect(resizeImage.width, 10);
-    expect(resizeImage.height, null);
-    expect(resizeImage.imageProvider, memoryImage);
-
-    expect(memoryImage.resolve(ImageConfiguration.empty) != resizeImage.resolve(ImageConfiguration.empty), true);
-  });
-
-  test('ResizeImage forms closure', () async {
-    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MemoryImage memoryImage = MemoryImage(bytes);
-    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
-
-    final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-      expect(cacheWidth, 123);
-      expect(cacheHeight, 321);
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
-    };
-
-    resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
-  });
-}
-
-Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
-    {ImageConfiguration configuration = ImageConfiguration.empty}) async {
-  final ImageStream stream = imageProvider.resolve(configuration);
-  final Completer<Size> completer = Completer<Size>();
-  final ImageStreamListener listener =
-    ImageStreamListener((ImageInfo image, bool synchronousCall) {
-      final int height = image.image.height;
-      final int width = image.image.width;
-      completer.complete(Size(width.toDouble(), height.toDouble()));
-    }
-  );
-  stream.addListener(listener);
-  return await completer.future;
 }
 
 class MockHttpClient extends Mock implements HttpClient {}
