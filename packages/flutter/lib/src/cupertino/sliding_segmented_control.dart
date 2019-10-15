@@ -21,7 +21,9 @@ import 'colors.dart';
 const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(vertical: 2, horizontal: 3);
 
 // The corner radius of the thumb.
-const double _kThumbCornerRadius = 6.93;
+const Radius _kThumbRadius = Radius.circular(6.93);
+// The amount of space by which to expand the thumb from the size of the currently
+// selected child.
 const EdgeInsets _kThumbInsets = EdgeInsets.symmetric(horizontal: 1);
 
 // Minimum height of the segmented control.
@@ -38,38 +40,40 @@ const CupertinoDynamicColor _kThumbColor = CupertinoDynamicColor.withBrightness(
 const EdgeInsets _kSeparatorInset = EdgeInsets.symmetric(vertical: 6);
 const double _kSeparatorWidth = 1;
 const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth/2);
+
+// The minimum scale factor of the thumb, when being pressed on for a sufficient
+// amount of time.
 const double _kMinThumbScale = 0.95;
 
-// The minimal horizontal distance between the edges of the separator and the closest child.
+// The minimum horizontal distance between the edges of the separator and the
+// closest child.
 const double _kSegmentMinPadding = 9.25;
 
 // The threshold value used in hasDraggedTooFar, for checking against the square
-// L2 distance from the location of the current drag pointer, to the nearest
+// L2 distance from the location of the current drag pointer, to the closest
 // vertice of the CupertinoSlidingSegmentedControl's Rect.
 //
 // Both the mechanism and the value are speculated.
 const double _kTouchYDistanceThreshold = 50.0 * 50.0;
 
 // The corner radius of the segmented control.
+//
 // Inspected from iOS 13.2 simulator.
 const double _kCornerRadius = 8;
 
-const SpringDescription _kSegmentedControlSpringDescription = SpringDescription(mass: 1, stiffness: 503.551, damping: 44.8799);
+// The spring animation used when the thumb changes its rect.
 final SpringSimulation _kThumbSpringAnimationSimulation = SpringSimulation(
-  _kSegmentedControlSpringDescription,
+  const SpringDescription(mass: 1, stiffness: 503.551, damping: 44.8799),
   0,
   1,
   0, // Everytime a new spring animation starts the previous animation stops.
 );
-
 
 const Duration _kSpringAnimationDuration = Duration(milliseconds: 412);
 
 const Duration _kOpacityAnimationDuration = Duration(milliseconds: 470);
 
 const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
-
-typedef _IntCallback = void Function(int);
 
 class _FontWeightTween extends Tween<FontWeight> {
   _FontWeightTween({ FontWeight begin, FontWeight end}) : super(begin: begin, end: end);
@@ -80,10 +84,10 @@ class _FontWeightTween extends Tween<FontWeight> {
 
 /// An iOS 13 style segmented control.
 ///
-/// Displays the widgets provided in the [Map] of [children] in a
-/// horizontal list. Used to select between a number of mutually exclusive
-/// options. When one option in the segmented control is selected, the other
-/// options in the segmented control cease to be selected.
+/// Displays the widgets provided in the [Map] of [children] in a horizontal list.
+/// Used to select between a number of mutually exclusive options. When one option
+/// in the segmented control is selected, the other options in the segmented
+/// control cease to be selected.
 ///
 /// A segmented control can feature any [Widget] as one of the values in its
 /// [Map] of [children]. The type T is the type of the keys used
@@ -116,7 +120,7 @@ class _FontWeightTween extends Tween<FontWeight> {
 ///   void initState() {
 ///     super.initState();
 ///     // Print a message whenever the currently selected widget changes.
-///     controller.addListener(() { print('currently selected: ${controller.value}'); });
+///     controller.addListener(() {
 ///   }
 ///
 ///   @override
@@ -206,18 +210,6 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// tapped on.
   final ValueNotifier<T> controller;
 
-  /// The callback that is called when a new option is tapped.
-  ///
-  /// This attribute must not be null.
-  ///
-  /// The segmented control passes the newly selected widget's associated key
-  /// to the callback but does not actually change state until the parent
-  /// widget rebuilds the segmented control with the new [groupValue].
-  ///
-  /// The callback provided to [onValueChanged] should update the state of
-  /// the parent [StatefulWidget] using the [State.setState] method, so that
-  /// the parent gets rebuilt; for example:
-  ///
   /// The color used to paint the rounded rect behind the [children] and the separators.
   ///
   /// The default value is [CupertinoColors.tertiarySystemFill]. Skips painting
@@ -228,7 +220,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// currently selected item.
   ///
   /// The default value is a [CupertinoDynamicColor] that appears white in light
-  /// mode and becomes a gray color.
+  /// mode and becomes a gray color in dark mode.
   final Color thumbColor;
 
   /// The amount of space by which to inset the [children].
@@ -272,7 +264,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       vsync: this,
     )..addListener(() {
       setState(() {
-        // State of background/text colors has changed
+        // The textstyle has changed.
       });
     });
   }
@@ -283,7 +275,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       vsync: this,
     )..addListener(() {
       setState(() {
-        // State of background/text colors has changed
+        // The opacity of the child has changed.
       });
     });
   }
@@ -386,6 +378,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     });
   }
 
+  // Play highlight animation for the child located at _highlightControllers[at].
   void animateHighlightController({ T at, bool forward }) {
     if (at == null)
       return;
@@ -421,10 +414,11 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     controller.value = _highlighted;
   }
 
+  List<T> keys;
+  T indexToKey(int index) => index == null ? null : keys[index];
+
   @override
   Widget build(BuildContext context) {
-    List<T> keys;
-
     switch (textDirection) {
       case TextDirection.ltr:
         keys = widget.children.keys.toList(growable: false);
@@ -467,8 +461,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       children: children,
       selectedIndex: selectedIndex,
       thumbColor: widget.thumbColor,
-      onPressedIndexChange: (int index) { pressed = index == null ? null : keys[index]; },
-      onSelectedIndexChange: (int index) { highlighted = index == null ? null : keys[index]; },
       state: this,
     );
 
@@ -492,9 +484,6 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
     List<Widget> children = const <Widget>[],
     @required this.selectedIndex,
     @required this.thumbColor,
-    @required this.onSelectedIndexChange,
-    @required this.onPressedIndexChange,
-    @required this.didChangeSelectedByGesture,
     @required this.state,
   }) : super(key: key, children: children);
 
@@ -502,17 +491,11 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   final Color thumbColor;
   final _SegmentedControlState<T> state;
 
-  final _IntCallback onSelectedIndexChange;
-  final _IntCallback onPressedIndexChange;
-  final VoidCallback didChangeSelectedByGesture;
-
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSegmentedControl<T>(
       selectedIndex: selectedIndex,
       thumbColor: CupertinoDynamicColor.resolve(thumbColor, context),
-      onPressedIndexChange: onPressedIndexChange,
-      onSelectedIndexChange: onSelectedIndexChange,
       state: state,
     );
   }
@@ -520,8 +503,6 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSegmentedControl<T> renderObject) {
     renderObject
-      ..onPressedIndexChange = onPressedIndexChange
-      ..onSelectedIndexChange = onSelectedIndexChange
       ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)
       ..guardedSetHighlightedIndex(selectedIndex);
   }
@@ -541,7 +522,6 @@ class _ChildAnimationManifest {
   double separatorOpacity;
   Tween<double> separatorTween;
 }
-
 
 class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> { }
 
@@ -583,8 +563,6 @@ class _RenderSegmentedControl<T> extends RenderBox
     @required int selectedIndex,
     @required int pressedIndex,
     @required Color thumbColor,
-    @required this.onSelectedIndexChange,
-    @required this.onPressedIndexChange,
     @required this.state,
   }) : _highlightedIndex = selectedIndex,
        _pressedIndex = pressedIndex,
@@ -612,11 +590,8 @@ class _RenderSegmentedControl<T> extends RenderBox
   double currentThumbScale = 1;
 
   Offset localDragOffset;
+  // The drag gesture startd on a selected segment.
   bool startedOnSelectedSegment;
-
-  _IntCallback onSelectedIndexChange;
-  _IntCallback onPressedIndexChange;
-  VoidCallback didChangeSelectedByGesture;
 
   @override
   void insert(RenderBox child, { RenderBox after }) {
@@ -650,8 +625,8 @@ class _RenderSegmentedControl<T> extends RenderBox
     super.detach();
   }
 
-  // selectedIndex has changed, animations need to be updated.
-  // when true some animation tweens will be updated.
+  // Indicates whether selectedIndex has changed and animations need to be updated.
+  // when true some animation tweens will be updated in paint phase.
   bool _needsThumbAnimationUpdate = false;
 
   int get highlightedIndex => _highlightedIndex;
@@ -673,7 +648,7 @@ class _RenderSegmentedControl<T> extends RenderBox
       curve: Curves.ease,
     );
 
-    onSelectedIndexChange(value);
+    state.highlighted = state.indexToKey(value);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -695,7 +670,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     assert(value == null || (value >= 0 && value < childCount));
 
     _pressedIndex = value;
-    onPressedIndexChange(value);
+    state.pressed = state.indexToKey(value);
   }
 
   Color get thumbColor => _thumbColor;
@@ -975,12 +950,10 @@ class _RenderSegmentedControl<T> extends RenderBox
       currentThumbRect = null;
       childAnimations = null;
 
-      // Paint separators.
       for (int index = 0; index < childCount - 1; index++) {
         _paintSeparator(context, offset, children[index]);
       }
     }
-
 
     for (int index = 0; index < children.length; index++) {
       _paintChild(context, offset, children[index], index);
@@ -1031,30 +1004,20 @@ class _RenderSegmentedControl<T> extends RenderBox
       ),
     ];
 
-    final RRect thumbRRect = RRect.fromRectAndRadius(
-      thumbRect.shift(offset),
-      const Radius.circular(_kThumbCornerRadius),
-    );
+    final RRect thumbRRect = RRect.fromRectAndRadius(thumbRect.shift(offset), _kThumbRadius);
 
     for (BoxShadow shadow in thumbShadow) {
-      context.canvas.drawRRect(
-        thumbRRect.shift(shadow.offset),
-        shadow.toPaint(),
-      );
+      context.canvas.drawRRect(thumbRRect.shift(shadow.offset), shadow.toPaint());
     }
 
     context.canvas.drawRRect(
       thumbRRect.inflate(0.5),
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = const Color(0x0A000000),
+      Paint()..color = const Color(0x0A000000),
     );
 
     context.canvas.drawRRect(
       thumbRRect,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = thumbColor,
+      Paint()..color = thumbColor,
     );
   }
 

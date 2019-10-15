@@ -464,7 +464,7 @@ void main() {
     expect(getChildOpacityByName('Child 2'), 0.2);
   });
 
-  testWidgets('Long press does not change background color of currently-selected child', (WidgetTester tester) async {
+  testWidgets('Long press does not change the opacity of currently-selected child', (WidgetTester tester) async {
     double getChildOpacityByName(String childName) {
       return tester.widget<Opacity>(
         find.ancestor(matching: find.byType(Opacity), of: find.text(childName)),
@@ -474,12 +474,11 @@ void main() {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     final Offset center = tester.getCenter(find.text('Child 1'));
-    final TestGesture gesture = await tester.startGesture(center);
+    await tester.startGesture(center);
     await tester.pump();
     await tester.pumpAndSettle();
 
     expect(getChildOpacityByName('Child 1'), 1);
-    await gesture.up();
   });
 
   testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
