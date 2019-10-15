@@ -176,8 +176,10 @@ void StandardCodecSerializer::WriteValue(const EncodableValue& value,
       const auto& string_value = value.StringValue();
       size_t size = string_value.size();
       WriteSize(size, stream);
-      stream->WriteBytes(reinterpret_cast<const uint8_t*>(string_value.data()),
-                         size);
+      if (size > 0) {
+        stream->WriteBytes(
+            reinterpret_cast<const uint8_t*>(string_value.data()), size);
+      }
       break;
     }
     case EncodableValue::Type::kByteList:
@@ -259,6 +261,9 @@ void StandardCodecSerializer::WriteVector(
     ByteBufferStreamWriter* stream) const {
   size_t count = vector.size();
   WriteSize(count, stream);
+  if (count == 0) {
+    return;
+  }
   uint8_t type_size = static_cast<uint8_t>(sizeof(T));
   if (type_size > 1) {
     stream->WriteAlignment(type_size);
