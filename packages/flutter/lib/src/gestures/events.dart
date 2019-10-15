@@ -5,7 +5,6 @@
 import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -505,7 +504,8 @@ abstract class PointerEvent extends Diagnosticable {
     properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
     properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
     properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
-    properties.add(TransformProperty('transform', transform));
+    //todo(pq): ideally we'd use a TransformProperty but it's defined in painting and importing it introduces a dependency loop.
+    properties.add(DiagnosticsProperty<Matrix4>('transform', transform));
     properties.add(DiagnosticsProperty<PointerEvent>('original', original));
   }
 
