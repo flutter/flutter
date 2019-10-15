@@ -9,6 +9,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
 import 'debug.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
@@ -37,14 +38,14 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+  ImageStreamCompleter load(image_provider.NetworkImage key) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents, decode),
+      codec: _loadAsync(key, chunkEvents),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       informationCollector: () {
@@ -75,7 +76,6 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
-    image_provider.DecoderCallback decode,
   ) async {
     try {
       assert(key == this);
@@ -101,7 +101,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       if (bytes.lengthInBytes == 0)
         throw Exception('NetworkImage is an empty file: $resolved');
 
-      return decode(bytes);
+      return PaintingBinding.instance.instantiateImageCodec(bytes);
     } finally {
       chunkEvents.close();
     }
