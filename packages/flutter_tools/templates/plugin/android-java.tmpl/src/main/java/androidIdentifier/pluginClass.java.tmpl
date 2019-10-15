@@ -29,6 +29,10 @@ public class {{pluginClass}} implements FlutterPlugin, MethodCallHandler {
       result.notImplemented();
     }
   }
+
+  @Override
+  public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+  }
 }
 {{/useAndroidEmbeddingV2}}
 {{^useAndroidEmbeddingV2}}

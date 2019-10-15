@@ -15,7 +15,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 
 /** {{pluginClass}} */
 public class {{pluginClass}}: FlutterPlugin, MethodCallHandler {
-  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPluginBinding) {
+  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "{{projectName}}")
     channel.setMethodCallHandler({{pluginClass}}());
   }
@@ -26,6 +26,9 @@ public class {{pluginClass}}: FlutterPlugin, MethodCallHandler {
     } else {
       result.notImplemented()
     }
+  }
+
+  override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
   }
 }
 {{/useAndroidEmbeddingV2}}
