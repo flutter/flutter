@@ -1014,6 +1014,7 @@ void main() {
     expect(tester.getSemantics(find.byKey(expandedKey)), matchesSemantics(
       label: 'Expanded',
       isButton: true,
+      isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
     ));
@@ -1021,6 +1022,7 @@ void main() {
     expect(tester.getSemantics(find.byKey(collapsedKey)), matchesSemantics(
       label: 'Collapsed',
       isButton: true,
+      isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
     ));

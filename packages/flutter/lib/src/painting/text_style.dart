@@ -340,6 +340,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 ///  * [fontFamily]
 ///  * [fontFamilyFallback] in order of first to last.
+///  * System fallback fonts which will vary depending on platform.
 ///
 /// The glyph used will always be the first matching version in fallback order.
 ///
