@@ -492,6 +492,7 @@ class DebuggingOptions {
     this.traceSkia = false,
     this.traceSystrace = false,
     this.dumpSkpOnShaderCompilation = false,
+    this.cacheSkSL = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
@@ -502,7 +503,7 @@ class DebuggingOptions {
     this.vmserviceOutFile,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname })
+  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -529,6 +530,7 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool traceSystrace;
   final bool dumpSkpOnShaderCompilation;
+  final bool cacheSkSL;
   final bool useTestFonts;
   final bool verboseSystemLogs;
   /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
