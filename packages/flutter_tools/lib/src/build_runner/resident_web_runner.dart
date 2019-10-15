@@ -213,6 +213,13 @@ class ResidentWebRunner extends ResidentRunner {
       throwToolExit('Failed to build application for the Web.');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
+    } on StateError catch (err) {
+      // Handle known state error.
+      final String message = err.toString();
+      if (message.contains('Could not connect to application with appInstanceId')) {
+        throwToolExit(message);
+      }
+      rethrow;
     } finally {
       buildStatus.stop();
     }
