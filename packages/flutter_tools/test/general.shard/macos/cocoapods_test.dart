@@ -314,6 +314,27 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('prints warning, if Podfile is out of date', () async {
+      pretendPodIsInstalled();
+
+      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('Existing Podfile');
+
+      final Directory symlinks = projectUnderTest.ios.symlinks
+        ..createSync(recursive: true);
+      symlinks.childLink('flutter').createSync('cache');
+
+      await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.ios,
+        engineDir: 'engine/path',
+      );
+      expect(testLogger.errorText, contains('Warning: Podfile is out of date'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('throws, if Podfile is missing.', () async {
       pretendPodIsInstalled();
       try {
