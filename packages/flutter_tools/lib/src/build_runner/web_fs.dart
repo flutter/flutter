@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:build_daemon/client.dart';
@@ -17,6 +18,7 @@ import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_proxy/shelf_proxy.dart';
+import 'package:mime/mime.dart' as mime;
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -501,7 +503,16 @@ class DebugAssetServer extends AssetServer {
       final String assetPath = request.url.path.replaceFirst('assets/', '');
       final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
       if (file.existsSync()) {
-        return Response.ok(file.readAsBytesSync());
+        final Uint8List bytes = file.readAsBytesSync();
+        String mimeType = 'text';
+        try {
+          mimeType = mime.lookupMimeType(file.path, headerBytes: bytes);
+        } catch (err) {
+          print(err);
+        }
+        return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+          'Content-Type': mimeType,
+        });
       } else {
         return Response.notFound('');
       }
