@@ -499,6 +499,7 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.browserLaunch = true,
+    this.vmserviceOutFile,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname })
@@ -514,7 +515,8 @@ class DebuggingOptions {
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
       observatoryPort = null,
-      browserLaunch = true;
+      browserLaunch = true,
+      vmserviceOutFile = null;
 
   final bool debuggingEnabled;
 
@@ -535,6 +537,8 @@ class DebuggingOptions {
   final String port;
   final String hostname;
   final bool browserLaunch;
+  /// A file where the vmservice uri should be written after the application is started.
+  final String vmserviceOutFile;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }

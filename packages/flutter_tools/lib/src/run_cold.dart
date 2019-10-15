@@ -114,6 +114,8 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
+    writeVmserviceFile();
+
     if (stayResident && !traceStartup) {
       return waitForAppToFinish();
     }
