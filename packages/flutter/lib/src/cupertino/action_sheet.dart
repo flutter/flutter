@@ -748,7 +748,7 @@ class _RenderCupertinoAlert extends RenderBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('dividerColor', dividerColor));
+    properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: null));
   }
 }
 

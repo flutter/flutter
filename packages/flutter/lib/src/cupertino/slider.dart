@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -211,9 +212,9 @@ class CupertinoSlider extends StatefulWidget {
     properties.add(DoubleProperty('value', value));
     properties.add(DoubleProperty('min', min));
     properties.add(DoubleProperty('max', max));
-    properties.add(DiagnosticsProperty<ValueChanged<double>>('onChanged', onChanged));
-    properties.add(DiagnosticsProperty<ValueChanged<double>>('onChangeStart', onChangeStart));
-    properties.add(DiagnosticsProperty<ValueChanged<double>>('onChangeEnd', onChangeEnd));
+    properties.add(ObjectFlagProperty<ValueChanged>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<ValueChanged>.has('onChangeStart', onChangeStart));
+    properties.add(ObjectFlagProperty<ValueChanged>.has('onChangeEnd', onChangeEnd));
     properties.add(IntProperty('divisions', divisions));
     properties.add(ColorProperty('activeColor', activeColor));
   }
