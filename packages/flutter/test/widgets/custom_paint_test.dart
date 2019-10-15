@@ -132,7 +132,7 @@ void main() {
       isComplex: true,
       painter: TestCustomPainter(log: log),
     ));
-    RenderCustomPaint renderCustom = target.currentContext.findRenderObject();
+    final RenderCustomPaint renderCustom = target.currentContext.findRenderObject();
     FlutterError error;
     try {
       renderCustom.assembleSemanticsNode(

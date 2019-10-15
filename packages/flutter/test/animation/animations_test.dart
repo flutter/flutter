@@ -249,7 +249,7 @@ void main() {
       'FlutterError\n'
       '   Invalid curve endpoint at 0'
     ));
-    expect(error.toStringDeep(), endsWith(
+    expect(error.toStringDeep(), contains(
       '   Curves must map 0.0 to near zero and 1.0 to near one but\n'
       '   BogusCurve mapped 0.0 to 100.0, which is near 100.0.\n')
     );
