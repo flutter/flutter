@@ -108,7 +108,6 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
-    await _connectionResult?.debugConnection?.close();
     await _stdOutSub?.cancel();
     await _webFs?.stop();
     await device.stopApp(null);
