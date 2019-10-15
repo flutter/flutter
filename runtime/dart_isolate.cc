@@ -55,7 +55,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
   // The child isolate preparer is null but will be set when the isolate is
   // being prepared to run.
   auto root_embedder_data = std::make_unique<std::shared_ptr<DartIsolate>>(
-      std::make_shared<DartIsolate>(
+      std::shared_ptr<DartIsolate>(new DartIsolate(
           settings,                     // settings
           std::move(isolate_snapshot),  // isolate snapshot
           std::move(shared_snapshot),   // shared snapshot
@@ -67,7 +67,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
           nullptr,                      // child isolate preparer
           isolate_create_callback,      // isolate create callback
           isolate_shutdown_callback     // isolate shutdown callback
-          ));
+          )));
 
   std::tie(vm_isolate, embedder_isolate) = CreateDartVMAndEmbedderObjectPair(
       advisory_script_uri.c_str(),         // advisory script URI
@@ -702,7 +702,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
 
     // Copy most fields from the parent to the child.
     embedder_isolate = std::make_unique<std::shared_ptr<DartIsolate>>(
-        std::make_shared<DartIsolate>(
+        std::shared_ptr<DartIsolate>(new DartIsolate(
             (*raw_embedder_isolate)->GetSettings(),         // settings
             (*raw_embedder_isolate)->GetIsolateSnapshot(),  // isolate_snapshot
             (*raw_embedder_isolate)->GetSharedSnapshot(),   // shared_snapshot
@@ -714,7 +714,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
             (*raw_embedder_isolate)->child_isolate_preparer_,    // preparer
             (*raw_embedder_isolate)->isolate_create_callback_,   // on create
             (*raw_embedder_isolate)->isolate_shutdown_callback_  // on shutdown
-            )
+            ))
 
     );
   }
