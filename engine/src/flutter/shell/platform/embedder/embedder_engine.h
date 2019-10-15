@@ -18,13 +18,16 @@
 
 namespace flutter {
 
+struct ShellArgs;
+
 // The object that is returned to the embedder as an opaque pointer to the
 // instance of the Flutter engine.
 class EmbedderEngine {
  public:
   EmbedderEngine(std::unique_ptr<EmbedderThreadHost> thread_host,
-                 flutter::TaskRunners task_runners,
-                 flutter::Settings settings,
+                 TaskRunners task_runners,
+                 Settings settings,
+                 RunConfiguration run_configuration,
                  Shell::CreateCallback<PlatformView> on_create_platform_view,
                  Shell::CreateCallback<Rasterizer> on_create_rasterizer,
                  EmbedderExternalTextureGL::ExternalTextureCallback
@@ -32,13 +35,17 @@ class EmbedderEngine {
 
   ~EmbedderEngine();
 
+  bool LaunchShell();
+
+  bool CollectShell();
+
   const TaskRunners& GetTaskRunners() const;
 
   bool NotifyCreated();
 
   bool NotifyDestroyed();
 
-  bool Run(RunConfiguration run_configuration);
+  bool RunRootIsolate();
 
   bool IsValid() const;
 
@@ -76,10 +83,11 @@ class EmbedderEngine {
  private:
   const std::unique_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
+  RunConfiguration run_configuration_;
+  std::unique_ptr<ShellArgs> shell_args_;
   std::unique_ptr<Shell> shell_;
   const EmbedderExternalTextureGL::ExternalTextureCallback
       external_texture_callback_;
-  bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);
 };
