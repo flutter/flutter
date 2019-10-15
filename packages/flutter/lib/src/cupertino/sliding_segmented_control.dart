@@ -170,8 +170,8 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// length of the [children] list must be greater than one.
   ///
   /// Each widget value in the map of [children] must have an associated key
-  /// that uniquely identifies this widget. This key will be the [controller]'s
-  /// new value a new value from the [children] map is selected.
+  /// that uniquely identifies this widget. This key will become the [controller]'s
+  /// new value, when the corresponding child widget from the [children] map is selected.
   ///
   /// The [controller]'s [ValueNotifier.value] is the currently selected value for
   /// the segmented control. If it is null, no widget will appear as selected. The
@@ -553,11 +553,11 @@ class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<Ren
 //    The other is the separator fadein/fadeout animation.
 //
 // 4. A tap down event on the segment pointed to by the current selected
-//    index will trigger a CABasciaAnimation that shrinks the thumb to 95% of its
+//    index will trigger a CABasicAnimation that shrinks the thumb to 95% of its
 //    original size, even if the sliding animation is still playing. The
 ///   corresponding tap up event inverts the process (eyeballed).
 //
-// 5. A tap down event on other segments will trigger a CABasciaAnimation
+// 5. A tap down event on other segments will trigger a CABasicAnimation
 //    (timingFunction = default, duration = 0.47.) that fades out the content,
 //    eventually reducing the alpha of that segment to 20% unless interrupted by
 //    a tap up event or the pointer moves out of the region (either outside of the

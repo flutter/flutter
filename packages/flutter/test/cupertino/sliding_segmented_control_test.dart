@@ -289,7 +289,7 @@ void main() {
 
       await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
 
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
