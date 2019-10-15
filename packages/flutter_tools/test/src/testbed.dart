@@ -699,7 +699,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isNewAndroidEmbeddingEnabled = false,
+    this.isAndroidEmbeddingV2Enabled = false,
 });
 
   @override
@@ -715,7 +715,7 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowsEnabled;
 
   @override
-  final bool isNewAndroidEmbeddingEnabled;
+  final bool isAndroidEmbeddingV2Enabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -728,8 +728,8 @@ class TestFeatureFlags implements FeatureFlags {
         return isMacOSEnabled;
       case flutterWindowsDesktopFeature:
         return isWindowsEnabled;
-      case flutterNewAndroidEmbeddingFeature:
-        return isNewAndroidEmbeddingEnabled;
+      case flutterAndroidEmbeddingV2Feature:
+        return isAndroidEmbeddingV2Enabled;
     }
     return false;
   }

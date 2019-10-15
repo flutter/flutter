@@ -1,6 +1,6 @@
 package {{androidIdentifier}}
 
-{{#useNewAndroidEmbedding}}
+{{#useAndroidEmbeddingV2}}
 {{#androidX}}
 import androidx.annotation.NonNull;
 {{/androidX}}
@@ -28,8 +28,8 @@ public class {{pluginClass}}: FlutterPlugin, MethodCallHandler {
     }
   }
 }
-{{/useNewAndroidEmbedding}}
-{{^useNewAndroidEmbedding}}
+{{/useAndroidEmbeddingV2}}
+{{^useAndroidEmbeddingV2}}
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -53,4 +53,4 @@ class {{pluginClass}}: MethodCallHandler {
     }
   }
 }
-{{/useNewAndroidEmbedding}}
+{{/useAndroidEmbeddingV2}}

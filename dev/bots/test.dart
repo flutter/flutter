@@ -955,12 +955,15 @@ Future<void> _androidPluginTest() async {
     return;
   }
 
-  final Map<String, String> env = <String, String> {
+  final Map<String, String> defaultEnv = <String, String> {
     'ANDROID_HOME': androidSdkRoot,
     'ANDROID_SDK_ROOT': androidSdkRoot,
   };
-
-  await _runDevicelabTest('plugin_test', env: env);
+  await _runDevicelabTest('plugin_test', env: defaultEnv);
+  await _runDevicelabTest('plugin_test', env: <String, String> {
+    ...defaultEnv,
+    'ENABLE_ANDROID_EMBEDDING_V2': 'true',
+  });
 }
 
 Future<void> _androidGradleTests(String subShard) async {
@@ -969,24 +972,37 @@ Future<void> _androidGradleTests(String subShard) async {
     print('No Android SDK detected or on Windows, skipping Android gradle test.');
     return;
   }
-
-  final Map<String, String> env = <String, String> {
+  final Map<String, String> defaultEnv = <String, String>{
     'ANDROID_HOME': androidSdkRoot,
     'ANDROID_SDK_ROOT': androidSdkRoot,
   };
-
+  final Map<String, String> androidEmbeddingV2Env = <String, String>{
+    ...defaultEnv,
+    'ENABLE_ANDROID_EMBEDDING_V2': 'true',
+  };
   if (subShard == 'gradle1') {
-    await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
-    await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
-    await _runDevicelabTest('gradle_r8_test', env: env);
-    await _runDevicelabTest('gradle_non_android_plugin_test', env: env);
-    await _runDevicelabTest('gradle_jetifier_test', env: env);
+    await _runDevicelabTest('gradle_plugin_light_apk_test', env: defaultEnv);
+    await _runDevicelabTest('gradle_plugin_fat_apk_test', env: defaultEnv);
+    await _runDevicelabTest('gradle_r8_test', env: defaultEnv);
+    await _runDevicelabTest('gradle_non_android_plugin_test', env: defaultEnv);
+    await _runDevicelabTest('gradle_jetifier_test', env: defaultEnv);
+
+    await _runDevicelabTest('gradle_plugin_light_apk_test', env: androidEmbeddingV2Env);
+    await _runDevicelabTest('gradle_plugin_fat_apk_test', env: androidEmbeddingV2Env);
+    await _runDevicelabTest('gradle_r8_test', env: androidEmbeddingV2Env);
+    await _runDevicelabTest('gradle_non_android_plugin_test', env: androidEmbeddingV2Env);
+    await _runDevicelabTest('gradle_jetifier_test', env: androidEmbeddingV2Env);
   }
   if (subShard == 'gradle2') {
-    await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
-    await _runDevicelabTest('module_test', env: env);
-    await _runDevicelabTest('module_host_with_custom_build_test', env: env);
-    await _runDevicelabTest('build_aar_module_test', env: env);
+    await _runDevicelabTest('gradle_plugin_bundle_test', env: defaultEnv);
+    await _runDevicelabTest('module_test', env: defaultEnv);
+    await _runDevicelabTest('module_host_with_custom_build_test', env: defaultEnv);
+    await _runDevicelabTest('build_aar_module_test', env: defaultEnv);
+
+    await _runDevicelabTest('gradle_plugin_bundle_test', env: androidEmbeddingV2Env);
+    await _runDevicelabTest('module_test', env: androidEmbeddingV2Env);
+    await _runDevicelabTest('module_host_with_custom_build_test', env: androidEmbeddingV2Env);
+    await _runDevicelabTest('build_aar_module_test', env: androidEmbeddingV2Env);
   }
 }
 
