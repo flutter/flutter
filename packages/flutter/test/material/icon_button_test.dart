@@ -294,8 +294,9 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isButton,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
           ],
           label: 'link',
         ),

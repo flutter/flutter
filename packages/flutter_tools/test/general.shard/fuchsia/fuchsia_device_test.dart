@@ -75,6 +75,7 @@ void main() {
       expect(device.isSupportedForProject(FlutterProject.current()), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('supported for project', () async {
@@ -84,6 +85,7 @@ void main() {
       expect(device.isSupportedForProject(FlutterProject.current()), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('not supported for project', () async {
@@ -92,6 +94,7 @@ void main() {
       expect(device.isSupportedForProject(FlutterProject.current()), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -445,6 +448,7 @@ void main() {
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
@@ -469,6 +473,7 @@ void main() {
       expect(await device.stopApp(app), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
@@ -481,6 +486,7 @@ void main() {
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
@@ -493,6 +499,7 @@ void main() {
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
@@ -505,6 +512,7 @@ void main() {
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
@@ -517,6 +525,7 @@ void main() {
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaSdk: () => MockFuchsiaSdk(devFinder: FailingDevFinder()),
       OperatingSystemUtils: () => osUtils,
@@ -529,6 +538,7 @@ void main() {
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaSdk: () => MockFuchsiaSdk(pm: FailingPM()),
       OperatingSystemUtils: () => osUtils,
@@ -541,6 +551,7 @@ void main() {
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(amber: FailingAmberCtl()),
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
@@ -553,6 +564,7 @@ void main() {
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(tiles: FailingTilesCtl()),
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,

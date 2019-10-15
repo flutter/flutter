@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -213,6 +214,75 @@ void main() {
     );
     expect(material.elevation, 0);
     expect(material.color, null);
+  });
+
+  testWidgets('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
+    const double lightElevation = 5.0;
+    const double darkElevation = 3.0;
+    const Color lightBackgroundColor = Colors.green;
+    const Color darkBackgroundColor = Colors.grey;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData.light().copyWith(
+        bottomSheetTheme: const BottomSheetThemeData(
+          elevation: lightElevation,
+          backgroundColor: lightBackgroundColor,
+        ),
+      ),
+      darkTheme: ThemeData.dark().copyWith(
+        bottomSheetTheme: const BottomSheetThemeData(
+          elevation: darkElevation,
+          backgroundColor: darkBackgroundColor,
+        ),
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                RawMaterialButton(
+                  child: const Text('Show Modal'),
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          child: const Text('This is a modal bottom sheet.'),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+    await tester.tap(find.text('Show Modal'));
+    await tester.pumpAndSettle();
+
+    final Material lightMaterial = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(lightMaterial.elevation, lightElevation);
+    expect(lightMaterial.color, lightBackgroundColor);
+
+    // Simulate the user changing to dark theme
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    await tester.pumpAndSettle();
+
+    final Material darkMaterial = tester.widget<Material>(
+    find.descendant(
+      of: find.byType(BottomSheet),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(darkMaterial.elevation, darkElevation);
+    expect(darkMaterial.color, darkBackgroundColor);
   });
 }
 

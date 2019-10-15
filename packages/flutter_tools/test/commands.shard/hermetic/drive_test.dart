@@ -73,6 +73,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -83,6 +84,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns 1 when app fails to run', () async {
@@ -99,6 +101,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -109,6 +112,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns 1 when app file is outside package', () async {
@@ -118,6 +122,7 @@ void main() {
         '--no-wrap',
         'drive',
         '--target=$appFile',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -130,6 +135,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns 1 when app file is in the root dir', () async {
@@ -139,6 +145,7 @@ void main() {
         '--no-wrap',
         'drive',
         '--target=$appFile',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -152,6 +159,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns 0 when test ends successfully', () async {
@@ -178,11 +186,13 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       await createTestCommandRunner(command).run(args);
       expect(testLogger.errorText, isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns exitCode set by test runner', () async {
@@ -208,6 +218,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -218,6 +229,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     group('findTargetDevice', () {
@@ -232,6 +244,7 @@ void main() {
         expect(device.name, 'specified-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       });
     });
 
@@ -242,6 +255,7 @@ void main() {
         expect(await findTargetDevice(), isNull);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: platform,
       });
 
@@ -254,6 +268,7 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: platform,
       });
 
@@ -285,6 +300,7 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: platform,
       });
     }
@@ -312,6 +328,7 @@ void main() {
         expect(device.name, 'mock-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: macOsPlatform,
       });
     });
@@ -365,6 +382,7 @@ void main() {
         final List<String> args = <String>[
           'drive',
           '--target=$testApp',
+          '--no-pub',
         ];
         try {
           await createTestCommandRunner(command).run(args);
@@ -382,6 +400,7 @@ void main() {
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       });
 
       testUsingContext('does not use pre-built app if --build arg provided', () async {
@@ -391,6 +410,7 @@ void main() {
           'drive',
           '--build',
           '--target=$testApp',
+          '--no-pub',
         ];
         try {
           await createTestCommandRunner(command).run(args);
@@ -408,6 +428,7 @@ void main() {
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       });
 
       testUsingContext('uses prebuilt app if --no-build arg provided', () async {
@@ -417,6 +438,7 @@ void main() {
           'drive',
           '--no-build',
           '--target=$testApp',
+          '--no-pub',
         ];
         try {
           await createTestCommandRunner(command).run(args);
@@ -434,6 +456,7 @@ void main() {
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       });
     });
   });

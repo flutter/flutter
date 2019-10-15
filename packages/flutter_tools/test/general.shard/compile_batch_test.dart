@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart';
@@ -52,7 +53,7 @@ void main() {
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
     final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
-      enableAsserts: true,
+      buildMode: BuildMode.debug,
       trackWidgetCreation: false,
     );
 
@@ -76,7 +77,7 @@ void main() {
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
     final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
-      enableAsserts: true,
+      buildMode: BuildMode.debug,
       trackWidgetCreation: false,
     );
 
@@ -103,7 +104,7 @@ void main() {
     final CompilerOutput output = await kernelCompiler.compile(
       sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
-      enableAsserts: true,
+      buildMode: BuildMode.debug,
       trackWidgetCreation: false,
     );
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);

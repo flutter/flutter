@@ -300,6 +300,41 @@ void main() {
       expect(scope1.focusedChild, isNull);
       expect(parent2.children.contains(child1), isTrue);
     });
+    testWidgets('ancestors and descendants are computed and recomputed properly', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
+      final FocusAttachment scope1Attachment = scope1.attach(context);
+      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final FocusAttachment scope2Attachment = scope2.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'parent2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'child2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+      final FocusNode child3 = FocusNode(debugLabel: 'child3');
+      final FocusAttachment child3Attachment = child3.attach(context);
+      final FocusNode child4 = FocusNode(debugLabel: 'child4');
+      final FocusAttachment child4Attachment = child4.attach(context);
+      scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope1);
+      parent2Attachment.reparent(parent: scope2);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent1);
+      child3Attachment.reparent(parent: parent2);
+      child4Attachment.reparent(parent: parent2);
+      child4.requestFocus();
+      await tester.pump();
+      expect(child4.ancestors, equals(<FocusNode>[parent2, scope2, tester.binding.focusManager.rootScope]));
+      expect(tester.binding.focusManager.rootScope.descendants, equals(<FocusNode>[child1, child2, parent1, scope1, child3, child4, parent2, scope2]));
+      scope2Attachment.reparent(parent: child2);
+      await tester.pump();
+      expect(child4.ancestors, equals(<FocusNode>[parent2, scope2, child2, parent1, scope1, tester.binding.focusManager.rootScope]));
+      expect(tester.binding.focusManager.rootScope.descendants, equals(<FocusNode>[child1, child3, child4, parent2, scope2, child2, parent1, scope1]));
+    });
     testWidgets('Can move focus between scopes and keep focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode();
@@ -555,23 +590,23 @@ void main() {
         description,
         equalsIgnoringHashCodes(
           'FocusManager#00000\n'
-          ' │ primaryFocus: FocusNode#00000\n'
+          ' │ primaryFocus: FocusNode#00000(Child 4)\n'
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← [root]\n'
           ' │\n'
-          ' └─rootScope: FocusScopeNode#00000\n'
+          ' └─rootScope: FocusScopeNode#00000(Root Focus Scope)\n'
           '   │ FOCUSED\n'
           '   │ debugLabel: "Root Focus Scope"\n'
           '   │ focusedChildren: FocusScopeNode#00000\n'
           '   │\n'
-          '   ├─Child 1: FocusScopeNode#00000\n'
+          '   ├─Child 1: FocusScopeNode#00000(Scope 1)\n'
           '   │ │ context: Container-[GlobalKey#00000]\n'
           '   │ │ debugLabel: "Scope 1"\n'
           '   │ │\n'
-          '   │ └─Child 1: FocusNode#00000\n'
+          '   │ └─Child 1: FocusNode#00000(Parent 1)\n'
           '   │   │ context: Container-[GlobalKey#00000]\n'
           '   │   │ debugLabel: "Parent 1"\n'
           '   │   │\n'
-          '   │   ├─Child 1: FocusNode#00000\n'
+          '   │   ├─Child 1: FocusNode#00000(Child 1)\n'
           '   │   │   context: Container-[GlobalKey#00000]\n'
           '   │   │   debugLabel: "Child 1"\n'
           '   │   │\n'
@@ -583,20 +618,45 @@ void main() {
           '     │ FOCUSED\n'
           '     │ focusedChildren: FocusNode#00000(Child 4)\n'
           '     │\n'
-          '     └─Child 1: FocusNode#00000\n'
+          '     └─Child 1: FocusNode#00000(Parent 2)\n'
           '       │ context: Container-[GlobalKey#00000]\n'
           '       │ FOCUSED\n'
           '       │ debugLabel: "Parent 2"\n'
           '       │\n'
-          '       ├─Child 1: FocusNode#00000\n'
+          '       ├─Child 1: FocusNode#00000(Child 3)\n'
           '       │   context: Container-[GlobalKey#00000]\n'
           '       │   debugLabel: "Child 3"\n'
           '       │\n'
-          '       └─Child 2: FocusNode#00000\n'
+          '       └─Child 2: FocusNode#00000(Child 4)\n'
           '           context: Container-[GlobalKey#00000]\n'
           '           FOCUSED\n'
           '           debugLabel: "Child 4"\n'
         ));
     });
+  });
+  testWidgets("Doesn't lose focused child when reparenting if the nearestScope doesn't change.", (WidgetTester tester) async {
+    final BuildContext context = await setupWidget(tester);
+    final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+    final FocusScopeNode parent2 = FocusScopeNode(debugLabel: 'parent2');
+    final FocusAttachment parent1Attachment = parent1.attach(context);
+    final FocusAttachment parent2Attachment = parent2.attach(context);
+    final FocusNode child1 = FocusNode(debugLabel: 'child1');
+    final FocusAttachment child1Attachment = child1.attach(context);
+    final FocusNode child2 = FocusNode(debugLabel: 'child2');
+    final FocusAttachment child2Attachment = child2.attach(context);
+    parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+    child1Attachment.reparent(parent: parent1);
+    child2Attachment.reparent(parent: child1);
+    parent1.autofocus(child2);
+    await tester.pump();
+    parent2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+    parent2.requestFocus();
+    await tester.pump();
+    expect(parent1.focusedChild, equals(child2));
+    child2Attachment.reparent(parent: parent1);
+    expect(parent1.focusedChild, equals(child2));
+    parent1.requestFocus();
+    await tester.pump();
+    expect(parent1.focusedChild, equals(child2));
   });
 }

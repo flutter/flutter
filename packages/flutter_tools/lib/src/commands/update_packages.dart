@@ -253,7 +253,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First we run "pub upgrade" on this generated package:
-        await pubGet(
+        await pub.get(
           context: PubContext.updatePackages,
           directory: tempDir.path,
           upgrade: true,
@@ -264,7 +264,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         // of all the dependencies so that we can figure out the transitive
         // dependencies later. It also remembers which version was selected for
         // each package.
-        await pub(
+        await pub.batch(
           <String>['deps', '--style=compact'],
           context: PubContext.updatePackages,
           directory: tempDir.path,
@@ -324,7 +324,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     int count = 0;
 
     for (Directory dir in packages) {
-      await pubGet(context: PubContext.updatePackages, directory: dir.path, checkLastModified: false);
+      await pub.get(context: PubContext.updatePackages, directory: dir.path, checkLastModified: false);
       count += 1;
     }
 

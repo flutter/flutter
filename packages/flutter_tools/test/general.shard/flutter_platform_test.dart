@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -18,13 +19,13 @@ import '../src/context.dart';
 void main() {
   group('FlutterPlatform', () {
     testUsingContext('ensureConfiguration throws an error if an explicitObservatoryPort is specified and more than one test file', () async {
-      final FlutterPlatform flutterPlatform = FlutterPlatform(shellPath: '/', explicitObservatoryPort: 1234);
+      final FlutterPlatform flutterPlatform = FlutterPlatform(buildMode: BuildMode.debug, shellPath: '/', explicitObservatoryPort: 1234);
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
       expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsA(isA<ToolExit>()));
     });
 
     testUsingContext('ensureConfiguration throws an error if a precompiled entrypoint is specified and more that one test file', () {
-      final FlutterPlatform flutterPlatform = FlutterPlatform(shellPath: '/', precompiledDillPath: 'example.dill');
+      final FlutterPlatform flutterPlatform = FlutterPlatform(buildMode: BuildMode.debug, shellPath: '/', precompiledDillPath: 'example.dill');
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
       expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsA(isA<ToolExit>()));
     });
@@ -86,12 +87,14 @@ void main() {
 
     testUsingContext('installHook creates a FlutterPlatform', () {
       expect(() => installHook(
+        buildMode: BuildMode.debug,
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: true,
       ), throwsA(isA<AssertionError>()));
 
       expect(() => installHook(
+        buildMode: BuildMode.debug,
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: false,
@@ -109,7 +112,7 @@ void main() {
         port: 100,
         precompiledDillPath: 'def',
         precompiledDillFiles: expectedPrecompiledDillFiles,
-        enableAsserts: true,
+        buildMode: BuildMode.debug,
         trackWidgetCreation: true,
         updateGoldens: true,
         buildTestAssets: true,
@@ -131,7 +134,7 @@ void main() {
       expect(flutterPlatform.explicitObservatoryPort, equals(200));
       expect(flutterPlatform.precompiledDillPath, equals('def'));
       expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
-      expect(flutterPlatform.enableAsserts, equals(true));
+      expect(flutterPlatform.buildMode, equals(BuildMode.debug));
       expect(flutterPlatform.trackWidgetCreation, equals(true));
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.buildTestAssets, equals(true));
@@ -153,6 +156,7 @@ class MockHttpServer extends Mock implements HttpServer {}
 // Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterPlatform extends FlutterPlatform {
   TestFlutterPlatform() : super(
+    buildMode: BuildMode.debug,
     shellPath: '/',
     precompiledDillPath: 'example.dill',
     host: InternetAddress.loopbackIPv6,

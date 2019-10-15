@@ -570,6 +570,7 @@ class MockDeviceLogReader extends DeviceLogReader {
 
   void addLine(String line) => _linesController.add(line);
 
+  @override
   void dispose() {
     _linesController.close();
   }
