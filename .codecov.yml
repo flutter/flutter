@@ -1,17 +1,23 @@
 # https://docs.codecov.io/docs/commit-status
 coverage:
   status:
-    project:
+    patch:
       default:
-        # basic
-        target: 0%
-        threshold: 0%
-        base: 0%
-        # advanced
-        branches: null
-        if_no_uploads: error
-        if_not_found: success
-        if_ci_failed: error
+        target: auto # means use coverage % of base commit
+        threshold: null # acceptable drop %
+        base: auto # means compare against PR base on PRs, against parent commit on non-PR commits
         only_pulls: false
-        flags: null
-        paths: null
+        #project:
+        #  default:
+        #    # basic
+        #    target: 0%
+        #    threshold: null
+        #    base: auto
+        #    # advanced
+        #    branches: null
+        #    if_no_uploads: error
+        #    if_not_found: success
+        #    if_ci_failed: error
+        #    only_pulls: false
+        #    flags: null
+        #    paths: null
