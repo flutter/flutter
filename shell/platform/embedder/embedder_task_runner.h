@@ -14,21 +14,72 @@
 
 namespace flutter {
 
+//------------------------------------------------------------------------------
+/// A task runner which delegates responsibility of task execution to an
+/// embedder. This is done by managing a dispatch table to the embedder.
+///
 class EmbedderTaskRunner final : public fml::TaskRunner {
  public:
+  //----------------------------------------------------------------------------
+  /// @brief      A
+  ///
   struct DispatchTable {
+    //--------------------------------------------------------------------------
+    /// Delegates responsibility of deferred task execution to the embedder.
+    /// Once the embedder gets the task, it must call
+    /// `EmbedderTaskRunner::PostTask` with the supplied `task_baton` on the
+    /// correct thread after the tasks `target_time` point expires.
+    ///
     std::function<void(EmbedderTaskRunner* task_runner,
                        uint64_t task_baton,
                        fml::TimePoint target_time)>
         post_task_callback;
+    //--------------------------------------------------------------------------
+    /// Asks the embedder if tasks posted to it on this task task runner via the
+    /// `post_task_callback` will be executed (after task expiry) on the calling
+    /// thread.
+    ///
     std::function<bool(void)> runs_task_on_current_thread_callback;
   };
 
-  EmbedderTaskRunner(DispatchTable table);
+  //----------------------------------------------------------------------------
+  /// @brief      Create a task runner with a dispatch table for delegation of
+  ///             task runner responsibility to the embedder. When embedders
+  ///             specify task runner dispatch tables that service tasks on the
+  ///             same thread, they also must ensure that their
+  ///             `embedder_idetifier`s match. This allows the engine to
+  ///             determine task runner equality without actually posting tasks
+  ///             to the task runner.
+  ///
+  /// @param[in]  table                The task runner dispatch table.
+  /// @param[in]  embedder_identifier  The embedder identifier
+  ///
+  EmbedderTaskRunner(DispatchTable table, size_t embedder_identifier);
 
+  // |fml::TaskRunner|
   ~EmbedderTaskRunner() override;
 
+  //----------------------------------------------------------------------------
+  /// @brief      The unique identifier provided by the embedder for the task
+  ///             runner. Embedders whose dispatch tables service tasks on the
+  ///             same underlying OS thread must ensure that their identifiers
+  ///             match. This allows the engine to determine task runner
+  ///             equality without posting tasks on the thread.
+  ///
+  /// @return     The embedder identifier.
+  ///
+  size_t GetEmbedderIdentifier() const;
+
   bool PostTask(uint64_t baton);
+
+ private:
+  const size_t embedder_identifier_;
+  DispatchTable dispatch_table_;
+  std::mutex tasks_mutex_;
+  uint64_t last_baton_ FML_GUARDED_BY(tasks_mutex_);
+  std::unordered_map<uint64_t, fml::closure> pending_tasks_
+      FML_GUARDED_BY(tasks_mutex_);
+  fml::TaskQueueId placeholder_id_;
 
   // |fml::TaskRunner|
   void PostTask(fml::closure task) override;
@@ -44,14 +95,6 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
 
   // |fml::TaskRunner|
   fml::TaskQueueId GetTaskQueueId() override;
-
- private:
-  DispatchTable dispatch_table_;
-  std::mutex tasks_mutex_;
-  uint64_t last_baton_ FML_GUARDED_BY(tasks_mutex_);
-  std::unordered_map<uint64_t, fml::closure> pending_tasks_
-      FML_GUARDED_BY(tasks_mutex_);
-  fml::TaskQueueId placeholder_id_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTaskRunner);
 };

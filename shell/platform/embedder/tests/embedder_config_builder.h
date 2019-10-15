@@ -61,6 +61,8 @@ class EmbedderConfigBuilder {
 
   void SetPlatformTaskRunner(const FlutterTaskRunnerDescription* runner);
 
+  void SetRenderTaskRunner(const FlutterTaskRunnerDescription* runner);
+
   void SetPlatformMessageCallback(
       std::function<void(const FlutterPlatformMessage*)> callback);
 
@@ -69,6 +71,8 @@ class EmbedderConfigBuilder {
   FlutterCompositor& GetCompositor();
 
   UniqueEngine LaunchEngine() const;
+
+  UniqueEngine InitializeEngine() const;
 
  private:
   EmbedderTestContext& context_;
@@ -80,6 +84,8 @@ class EmbedderConfigBuilder {
   FlutterCustomTaskRunners custom_task_runners_ = {};
   FlutterCompositor compositor_ = {};
   std::vector<std::string> command_line_arguments_;
+
+  UniqueEngine SetupEngine(bool run) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderConfigBuilder);
 };

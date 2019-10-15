@@ -126,7 +126,9 @@ class EmbedderTestTaskRunner {
   using TaskExpiryCallback = std::function<void(FlutterTask)>;
   EmbedderTestTaskRunner(fml::RefPtr<fml::TaskRunner> real_task_runner,
                          TaskExpiryCallback on_task_expired)
-      : real_task_runner_(real_task_runner), on_task_expired_(on_task_expired) {
+      : identifier_(++sEmbedderTaskRunnerIdentifiers),
+        real_task_runner_(real_task_runner),
+        on_task_expired_(on_task_expired) {
     FML_CHECK(real_task_runner_);
     FML_CHECK(on_task_expired_);
 
@@ -150,6 +152,7 @@ class EmbedderTestTaskRunner {
 
       real_task_runner->PostTaskForTime(invoke_task, target_time);
     };
+    task_runner_description_.identifier = identifier_;
   }
 
   const FlutterTaskRunnerDescription& GetFlutterTaskRunnerDescription() {
@@ -157,6 +160,8 @@ class EmbedderTestTaskRunner {
   }
 
  private:
+  static std::atomic_size_t sEmbedderTaskRunnerIdentifiers;
+  const size_t identifier_;
   fml::RefPtr<fml::TaskRunner> real_task_runner_;
   TaskExpiryCallback on_task_expired_;
   FlutterTaskRunnerDescription task_runner_description_ = {};
@@ -164,7 +169,9 @@ class EmbedderTestTaskRunner {
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestTaskRunner);
 };
 
-TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
+std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
+
+TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
   auto& context = GetEmbedderContext();
   fml::AutoResetWaitableEvent latch;
 
@@ -2371,6 +2378,181 @@ TEST_F(EmbedderTest, VerifyB141980393) {
   ASSERT_TRUE(engine.is_valid());
 
   latch.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// Test that an engine can be initialized but not run.
+///
+TEST_F(EmbedderTest, CanCreateInitializedEngine) {
+  EmbedderConfigBuilder builder(GetEmbedderContext());
+  builder.SetSoftwareRendererConfig();
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+  engine.reset();
+}
+
+//------------------------------------------------------------------------------
+/// Test that an initialized engine can be run exactly once.
+///
+TEST_F(EmbedderTest, CanRunInitializedEngine) {
+  EmbedderConfigBuilder builder(GetEmbedderContext());
+  builder.SetSoftwareRendererConfig();
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+  // Cannot re-run an already running engine.
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kInvalidArguments);
+  engine.reset();
+}
+
+//------------------------------------------------------------------------------
+/// Test that an engine can be deinitialized.
+///
+TEST_F(EmbedderTest, CaDeinitializeAnEngine) {
+  EmbedderConfigBuilder builder(GetEmbedderContext());
+  builder.SetSoftwareRendererConfig();
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+  // Cannot re-run an already running engine.
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kInvalidArguments);
+  ASSERT_EQ(FlutterEngineDeinitialize(engine.get()), kSuccess);
+  // It is ok to deinitialize an engine multiple times.
+  ASSERT_EQ(FlutterEngineDeinitialize(engine.get()), kSuccess);
+
+  // Sending events to a deinitalized engine fails.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+  engine.reset();
+}
+
+//------------------------------------------------------------------------------
+/// Asserts that embedders can provide a task runner for the render thread.
+///
+TEST_F(EmbedderTest, CanCreateEmbedderWithCustomRenderTaskRunner) {
+  std::mutex engine_mutex;
+  UniqueEngine engine;
+  fml::AutoResetWaitableEvent task_latch;
+  bool task_executed = false;
+  EmbedderTestTaskRunner render_task_runner(
+      CreateNewThread("custom_render_thread"), [&](FlutterTask task) {
+        std::scoped_lock engine_lock(engine_mutex);
+        if (engine.is_valid()) {
+          ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
+          task_executed = true;
+          task_latch.Signal();
+        }
+      });
+  EmbedderConfigBuilder builder(GetEmbedderContext());
+  builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetRenderTaskRunner(
+      &render_task_runner.GetFlutterTaskRunnerDescription());
+
+  {
+    std::scoped_lock lock(engine_mutex);
+    engine = builder.InitializeEngine();
+  }
+
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  task_latch.Wait();
+  ASSERT_TRUE(task_executed);
+  ASSERT_EQ(FlutterEngineDeinitialize(engine.get()), kSuccess);
+
+  {
+    std::scoped_lock engine_lock(engine_mutex);
+    engine.reset();
+  }
+}
+
+//------------------------------------------------------------------------------
+/// Asserts that the render task runner can be the same as the platform task
+/// runner.
+///
+TEST_F(EmbedderTest,
+       CanCreateEmbedderWithCustomRenderTaskRunnerTheSameAsPlatformTaskRunner) {
+  // A new thread needs to be created for the platform thread because the test
+  // can't wait for assertions to be completed on the same thread that services
+  // platform task runner tasks.
+  auto platform_task_runner = CreateNewThread("platform_thread");
+
+  static std::mutex engine_mutex;
+  static UniqueEngine engine;
+  fml::AutoResetWaitableEvent task_latch;
+  bool task_executed = false;
+  EmbedderTestTaskRunner common_task_runner(
+      platform_task_runner, [&](FlutterTask task) {
+        std::scoped_lock engine_lock(engine_mutex);
+        if (engine.is_valid()) {
+          ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
+          task_executed = true;
+          task_latch.Signal();
+        }
+      });
+
+  platform_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(GetEmbedderContext());
+    builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
+    builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+    builder.SetRenderTaskRunner(
+        &common_task_runner.GetFlutterTaskRunnerDescription());
+    builder.SetPlatformTaskRunner(
+        &common_task_runner.GetFlutterTaskRunnerDescription());
+
+    {
+      std::scoped_lock lock(engine_mutex);
+      engine = builder.InitializeEngine();
+    }
+
+    ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+
+    ASSERT_TRUE(engine.is_valid());
+
+    FlutterWindowMetricsEvent event = {};
+    event.struct_size = sizeof(event);
+    event.width = 800;
+    event.height = 600;
+    ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+              kSuccess);
+  });
+
+  task_latch.Wait();
+
+  // Don't use the task latch because that may be called multiple time
+  // (including during the shutdown process).
+  fml::AutoResetWaitableEvent shutdown_latch;
+
+  platform_task_runner->PostTask([&]() {
+    ASSERT_TRUE(task_executed);
+    ASSERT_EQ(FlutterEngineDeinitialize(engine.get()), kSuccess);
+
+    {
+      std::scoped_lock engine_lock(engine_mutex);
+      engine.reset();
+    }
+    shutdown_latch.Signal();
+  });
+
+  shutdown_latch.Wait();
+
+  {
+    std::scoped_lock engine_lock(engine_mutex);
+    // Engine should have been killed by this point.
+    ASSERT_FALSE(engine.is_valid());
+  }
 }
 
 }  // namespace testing

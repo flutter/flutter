@@ -2,33 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This is why we can't yet export the UI thread to embedders.
 #define FML_USED_ON_EMBEDDER
 
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
+
+#include <algorithm>
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/platform/embedder/embedder_safe_access.h"
 
 namespace flutter {
 
-static fml::RefPtr<EmbedderTaskRunner> CreateEmbedderTaskRunner(
-    const FlutterTaskRunnerDescription* description) {
+//------------------------------------------------------------------------------
+/// @brief      Attempts to create a task runner from an embedder task runner
+///             description. The first boolean in the pair indicate whether the
+///             embedder specified an invalid task runner description. In this
+///             case, engine launch must be aborted. If the embedder did not
+///             specify any task runner, an engine managed task runner and
+///             thread must be selected instead.
+///
+/// @param[in]  description  The description
+///
+/// @return     A pair that returns if the embedder has specified a task runner
+///             (null otherwise) and whether to terminate further engine launch.
+///
+static std::pair<bool, fml::RefPtr<EmbedderTaskRunner>>
+CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
   if (description == nullptr) {
-    return {};
+    // This is not embedder error. The embedder API will just have to create a
+    // plain old task runner (and create a thread for it) instead of using a
+    // task runner provided to us by the embedder.
+    return {true, {}};
   }
 
   if (SAFE_ACCESS(description, runs_task_on_current_thread_callback, nullptr) ==
       nullptr) {
     FML_LOG(ERROR) << "FlutterTaskRunnerDescription.runs_task_on_current_"
                       "thread_callback was nullptr.";
-    return {};
+    return {false, {}};
   }
 
   if (SAFE_ACCESS(description, post_task_callback, nullptr) == nullptr) {
     FML_LOG(ERROR)
         << "FlutterTaskRunnerDescription.post_task_callback was nullptr.";
-    return {};
+    return {false, {}};
   }
 
   auto user_data = SAFE_ACCESS(description, user_data, nullptr);
@@ -57,7 +74,9 @@ static fml::RefPtr<EmbedderTaskRunner> CreateEmbedderTaskRunner(
         return runs_task_on_current_thread_callback_c(user_data);
       }};
 
-  return fml::MakeRefCounted<EmbedderTaskRunner>(task_runner_dispatch_table);
+  return {true, fml::MakeRefCounted<EmbedderTaskRunner>(
+                    task_runner_dispatch_table,
+                    SAFE_ACCESS(description, identifier, 0u))};
 }
 
 std::unique_ptr<EmbedderThreadHost>
@@ -71,9 +90,9 @@ EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
   }
 
   // Only attempt to create the engine managed host if the embedder did not
-  // specify a custom configuration. We don't want to fallback to the engine
-  // managed configuration if the embedder attempted to specify a configuration
-  // but messed up with an incorrect configuration.
+  // specify a custom configuration. Don't fallback to the engine managed
+  // configuration if the embedder attempted to specify a configuration but
+  // messed up with an incorrect configuration.
   if (custom_task_runners == nullptr) {
     auto host = CreateEngineManagedThreadHost();
     if (host && host->IsValid()) {
@@ -82,6 +101,11 @@ EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
   }
 
   return nullptr;
+}
+
+static fml::RefPtr<fml::TaskRunner> GetCurrentThreadTaskRunner() {
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  return fml::MessageLoop::GetCurrent().GetTaskRunner();
 }
 
 constexpr const char* kFlutterThreadName = "io.flutter";
@@ -94,26 +118,64 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
     return nullptr;
   }
 
-  const auto platform_task_runner = CreateEmbedderTaskRunner(
+  // The UI and IO threads are always created by the engine and the embedder has
+  // no opportunity to specify task runners for the same.
+  //
+  // If/when more task runners are exposed, this mask will need to be updated.
+  uint64_t engine_thread_host_mask =
+      ThreadHost::Type::UI | ThreadHost::Type::IO;
+
+  auto platform_task_runner_pair = CreateEmbedderTaskRunner(
       SAFE_ACCESS(custom_task_runners, platform_task_runner, nullptr));
+  auto render_task_runner_pair = CreateEmbedderTaskRunner(
+      SAFE_ACCESS(custom_task_runners, render_task_runner, nullptr));
 
-  // TODO(chinmaygarde): Add more here as we allow more threads to be controlled
-  // by the embedder. Create fallbacks as necessary.
-
-  if (!platform_task_runner) {
+  if (!platform_task_runner_pair.first || !render_task_runner_pair.first) {
+    // User error while supplying a custom task runner. Return an invalid thread
+    // host. This will abort engine initialization. Don't fallback to defaults
+    // if the user wanted to specify a task runner but just messed up instead.
     return nullptr;
   }
 
-  ThreadHost thread_host(kFlutterThreadName, ThreadHost::Type::GPU |
-                                                 ThreadHost::Type::IO |
-                                                 ThreadHost::Type::UI);
+  // If the embedder has not supplied a GPU task runner, one needs to be
+  // created.
+  if (!render_task_runner_pair.second) {
+    engine_thread_host_mask |= ThreadHost::Type::GPU;
+  }
+
+  // If both the platform task runner and the GPU task runner are specified and
+  // have the same identifier, store only one.
+  if (platform_task_runner_pair.second && render_task_runner_pair.second) {
+    if (platform_task_runner_pair.second->GetEmbedderIdentifier() ==
+        render_task_runner_pair.second->GetEmbedderIdentifier()) {
+      render_task_runner_pair.second = platform_task_runner_pair.second;
+    }
+  }
+
+  // Create a thread host with just the threads that need to be managed by the
+  // engine. The embedder has provided the rest.
+  ThreadHost thread_host(kFlutterThreadName, engine_thread_host_mask);
+
+  // If the embedder has supplied a platform task runner, use that. If not, use
+  // the current thread task runner.
+  auto platform_task_runner = platform_task_runner_pair.second
+                                  ? static_cast<fml::RefPtr<fml::TaskRunner>>(
+                                        platform_task_runner_pair.second)
+                                  : GetCurrentThreadTaskRunner();
+
+  // If the embedder has supplied a GPU task runner, use that. If not, use the
+  // one from our thread host.
+  auto render_task_runner = render_task_runner_pair.second
+                                ? static_cast<fml::RefPtr<fml::TaskRunner>>(
+                                      render_task_runner_pair.second)
+                                : thread_host.gpu_thread->GetTaskRunner();
 
   flutter::TaskRunners task_runners(
       kFlutterThreadName,
-      platform_task_runner,                     // platform
-      thread_host.gpu_thread->GetTaskRunner(),  // gpu
-      thread_host.ui_thread->GetTaskRunner(),   // ui
-      thread_host.io_thread->GetTaskRunner()    // io
+      platform_task_runner,                    // platform
+      render_task_runner,                      // gpu
+      thread_host.ui_thread->GetTaskRunner(),  // ui (always engine managed)
+      thread_host.io_thread->GetTaskRunner()   // io (always engine managed)
   );
 
   if (!task_runners.IsValid()) {
@@ -121,7 +183,14 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
   }
 
   std::set<fml::RefPtr<EmbedderTaskRunner>> embedder_task_runners;
-  embedder_task_runners.insert(platform_task_runner);
+
+  if (platform_task_runner_pair.second) {
+    embedder_task_runners.insert(platform_task_runner_pair.second);
+  }
+
+  if (render_task_runner_pair.second) {
+    embedder_task_runners.insert(render_task_runner_pair.second);
+  }
 
   auto embedder_host = std::make_unique<EmbedderThreadHost>(
       std::move(thread_host), std::move(task_runners),
@@ -143,12 +212,10 @@ EmbedderThreadHost::CreateEngineManagedThreadHost() {
                                                  ThreadHost::Type::IO |
                                                  ThreadHost::Type::UI);
 
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-
   // For embedder platforms that don't have native message loop interop, this
   // will reference a task runner that points to a null message loop
   // implementation.
-  auto platform_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  auto platform_task_runner = GetCurrentThreadTaskRunner();
 
   flutter::TaskRunners task_runners(
       kFlutterThreadName,
