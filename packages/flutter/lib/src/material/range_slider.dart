@@ -525,8 +525,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   static const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape();
-//  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = PaddleRangeSliderValueIndicatorShape();
-  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
+  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = PaddleRangeSliderValueIndicatorShape();
+//  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
   static const double _defaultMinThumbSeparation = 8;
 
