@@ -504,11 +504,12 @@ class DebugAssetServer extends AssetServer {
       final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
       if (file.existsSync()) {
         final Uint8List bytes = file.readAsBytesSync();
-        String mimeType = 'text';
+        String mimeType = 'application/octet-stream';
         try {
           mimeType = mime.lookupMimeType(file.path, headerBytes: bytes);
         } catch (err) {
-          print(err);
+          // Do nothing on error, falling back to "application/octet-stream" which
+          // makes no claims as to the structure of the data.
         }
         return Response.ok(file.readAsBytesSync(), headers: <String, String>{
           'Content-Type': mimeType,
