@@ -55,6 +55,7 @@ void main() {
         ),
       );
     },
+    skip: isBrowser, // TODO(yjbanov): implement goldens on the Web: https://github.com/flutter/flutter/issues/40297
   );
 
   testWidgets(
@@ -109,6 +110,7 @@ void main() {
         ),
       );
     },
+    skip: isBrowser, // TODO(yjbanov): implement goldens on the Web: https://github.com/flutter/flutter/issues/40297
   );
 
   testWidgets(
@@ -155,6 +157,7 @@ void main() {
         ),
       );
     },
+    skip: isBrowser, // TODO(yjbanov): implement goldens on the Web: https://github.com/flutter/flutter/issues/40297
   );
 
 }
