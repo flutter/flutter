@@ -276,7 +276,6 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-
   testWidgets('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     final List<String> deletedChipLabels = <String>[];
