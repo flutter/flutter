@@ -321,6 +321,13 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
     testUsingContext('Registrant uses old embedding in module project', () async {
       when(flutterProject.isModule).thenReturn(true);
 
+      final File androidManifest = flutterProject.directory
+        .childDirectory('android')
+        .childFile('AndroidManifest.xml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
+      when(androidProject.appManifestFile).thenReturn(androidManifest);
+
       await injectPlugins(flutterProject);
 
       final File registrant = flutterProject.directory
