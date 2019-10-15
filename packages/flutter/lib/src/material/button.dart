@@ -248,7 +248,8 @@ class RawMaterialButton extends StatefulWidget {
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
-  /// For example, on Android a tap will produce a clicking sound, when feedback is enabled.
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
   ///
   /// See also:
   ///
