@@ -2295,7 +2295,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// The [offset] defaults to [Offset.zero] if not provided, and is ignored if
   /// [size] is not set.
   ///
-  /// The [offset] only offsets the the clipping rectagle, and does not affect
+  /// The [offset] only offsets the clipping rectagle, and does not affect
   /// how the painting or annotation search is propagated to its children.
   final Offset offset;
 
