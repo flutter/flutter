@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -247,6 +246,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   AnimationController separatorOpacityController;
   AnimationController thumbScaleController;
 
+  final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+
   ValueNotifier<T> get controller => _controller;
   ValueNotifier<T> _controller;
   set controller(ValueNotifier<T> newController) {
@@ -363,6 +364,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     thumbScaleController.dispose();
     thumbController.dispose();
     separatorOpacityController.dispose();
+
+    drag.dispose();
 
     super.dispose();
   }
@@ -527,11 +530,12 @@ class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<Ren
 
 // The behavior of a UISegmentedControl as observed on iOS 13.1:
 //
-// 1. Tap up events inside it will set the current selected index to the index of the
+// 1. Tap up inside events will set the current selected index to the index of the
 //    segment at the tap up location instantaneously (there might be animation but
-//    the index change seems to happen before animation finishes), unless the tap down event from the same
-//    touch event didn't happen within the segmented control, in which case the touch event will be ignored
-//    entirely (will be referring to these touch events as invalid touch events below).
+//    the index change seems to happen before animation finishes), unless the tap
+//    down event from the same touch event didn't happen within the segmented
+//    control, in which case the touch event will be ignored entirely (will be
+//    referring to these touch events as invalid touch events below).
 //
 // 2. A valid tap up event will also trigger the sliding CASpringAnimation (even
 //    when it lands on the current segment), starting from the current `frame`
@@ -546,9 +550,8 @@ class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<Ren
 //
 // 4. A tap down event on the segment pointed to by the current selected
 //    index will trigger a CABasciaAnimation that shrinks the thumb to 95% of its
-//    original size, even if the
-//    sliding animation is still playing. The corresponding tap up event will revert
-//    the process (eyeballed).
+//    original size, even if the sliding animation is still playing. The
+///   corresponding tap up event inverts the process (eyeballed).
 //
 // 5. A tap down event on other segments will trigger a CABasciaAnimation
 //    (timingFunction = default, duration = 0.47.) that fades out the content,
@@ -568,7 +571,7 @@ class _RenderSegmentedControl<T> extends RenderBox
        _pressedIndex = pressedIndex,
        _thumbColor = thumbColor,
        assert(state != null) {
-         _drag
+         state.drag
           ..onDown = _onDown
           ..onUpdate = _onUpdate
           ..onEnd = _onEnd
@@ -576,8 +579,6 @@ class _RenderSegmentedControl<T> extends RenderBox
        }
 
   final _SegmentedControlState<T> state;
-
-  final HorizontalDragGestureRecognizer _drag = HorizontalDragGestureRecognizer();
 
   Map<RenderBox, _ChildAnimationManifest> childAnimations = <RenderBox, _ChildAnimationManifest>{};
 
@@ -654,7 +655,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   void guardedSetHighlightedIndex(int value) {
-    // Ignore set highlightedIndex when a valid user gesture is in progress.
+    // Ignore set highlightedIndex when the user is dragging the thumb around.
     if (startedOnSelectedSegment == true)
       return;
     highlightedIndex = value;
@@ -689,7 +690,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent) {
-      _drag.addPointer(event);
+      state.drag.addPointer(event);
     }
   }
 
@@ -703,8 +704,6 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   void _onDown(DragDownDetails details) {
-    if (!state.mounted)
-      return;
     assert(size.contains(details.localPosition));
     localDragOffset = details.localPosition;
     final int index = indexFromLocation(localDragOffset);
@@ -717,8 +716,6 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   void _onUpdate(DragUpdateDetails details) {
-    if (!state.mounted)
-      return;
     localDragOffset = details.localPosition;
     final int newIndex = indexFromLocation(localDragOffset);
 
@@ -731,8 +728,6 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   void _onEnd(DragEndDetails details) {
-    if (!state.mounted)
-      return;
     if (startedOnSelectedSegment) {
       playThumbScaleAnimation(isExpanding: true);
       state.didChangeSelectedViaGesture();
@@ -748,8 +743,6 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   void _onCancel() {
-    if (!state.mounted)
-      return;
     if (startedOnSelectedSegment) {
       playThumbScaleAnimation(isExpanding: true);
     }

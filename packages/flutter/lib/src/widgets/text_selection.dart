@@ -532,8 +532,6 @@ class TextSelectionOverlay {
       renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
     );
 
-    print(editingRegion);
-
     final bool isMultiline = endpoints.last.point.dy - endpoints.first.point.dy >
           renderObject.preferredLineHeight / 2;
 
