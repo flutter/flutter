@@ -54,6 +54,36 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
     (
       cd examples/flutter_gallery
       flutter build ios --release --no-codesign -t lib/main_publish.dart
+
+      # flutter build ios will run CocoaPods script. Check generated locations.
+      if [[ ! -d "ios/Pods" ]]; then
+        echo "Error: pod install failed to setup plugins"
+        exit 1
+      fi
+
+      if [[ ! -d "ios/.symlinks/plugins" ]]; then
+        echo "Error: pod install failed to setup plugin symlinks"
+        exit 1
+      fi
+
+      if [[ -d "ios/.symlinks/flutter" ]]; then
+        echo "Error: pod install created flutter symlink"
+        exit 1
+      fi
+
+      if [[ ! -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets" ]]; then
+        echo "Error: flutter_assets not assembled"
+        exit 1
+      fi
+
+      if [[ 
+        -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/isolate_snapshot_data" ||
+        -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/kernel_blob.bin" ||
+        -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/vm_snapshot_data"
+       ]]; then
+        echo "Error: compiled debug version of app with --release flag"
+        exit 1
+      fi
     )
     echo "iOS Flutter Gallery built"
     if [[ -z "$CIRRUS_PR" ]]; then
