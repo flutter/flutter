@@ -498,7 +498,7 @@ class _SizeAwareCacheKey {
   final int height;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     final _SizeAwareCacheKey typedOther = other;
@@ -554,7 +554,7 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 
   @override
   Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) async {
-    final dynamic providerCacheKey = await imageProvider.obtainKey(configuration);
+    final Object providerCacheKey = await imageProvider.obtainKey(configuration);
     return _SizeAwareCacheKey(providerCacheKey, width, height);
   }
 }

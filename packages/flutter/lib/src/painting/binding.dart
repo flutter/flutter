@@ -77,7 +77,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// Both [cacheWidth] and [cacheHeight] must be positive values greater than or
   /// equal to 1 or null. It is valid to specify only one of [cacheWidth] and
   /// [cacheHeight] with the other remaining null, in which case the omitted
-  /// dimension will decode to its original size.
+  /// dimension will decode to its original size. When both are null or omitted,
+  /// the image will be decoded at its native resolution.
   Future<ui.Codec> instantiateImageCodec(Uint8List bytes, {
     int cacheWidth,
     int cacheHeight,
