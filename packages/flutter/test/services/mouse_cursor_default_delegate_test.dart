@@ -14,18 +14,29 @@ void main() {
     final MethodChannel channel = MethodChannel(channelName , const JSONMethodCodec(),
       messenger);
 
-    Map<String, dynamic> valueInJson;
-    messenger.methodHandlers['setCursors'] = (dynamic args) async {
+    final List<int> logDevices = <int>[];
+    final List<int> logCursors = <int>[];
+    messenger.methodHandlers['setCursor'] = (dynamic args) async {
       final List<dynamic> argList = args;
-      valueInJson = argList[0];
+      logDevices.add(argList[0]);
+      logCursors.add(argList[1]);
       return <dynamic>[true];
     };
 
     final MouseCursorDefaultDelegate delegate =
       MouseCursorDefaultDelegate(channel);
 
-    await delegate.setCursors(<int, int>{1: 1, 2: 3});
-    expect(valueInJson, <String, int>{'1': 1, '2': 3});
+    await delegate.setCursor(1, 2);
+    expect(logDevices, <int>{1});
+    expect(logCursors, <int>{2});
+    logDevices.clear();
+    logCursors.clear();
+
+    await delegate.setCursor(3, 4);
+    expect(logDevices, <int>{3});
+    expect(logCursors, <int>{4});
+    logDevices.clear();
+    logCursors.clear();
   });
 }
 

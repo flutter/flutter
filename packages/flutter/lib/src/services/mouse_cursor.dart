@@ -9,42 +9,45 @@ String _cursorToString(int cursor) {
   return '0x${cursor.toRadixString(16).padLeft(8, '0')}';
 }
 
-/// TODOC
+/// A delegate for communicating with the platform to perform operations related
+/// to mouse cursor.
+///
+/// See also:
+///
+///  * [MouseCursorDefaultDelegate], which is the typical implementation that
+///    communicates with the platform over a method channel.
 abstract class MouseCursorDelegate {
   // This class is only used for implementation.
   MouseCursorDelegate._();
 
-  /// Handles when [MouseCursorDelegate] requests to set cursors of certain devices.
-  /// The returning future resolves true if and only if the entire request is
-  /// successful.
+  /// Requests the platform to change the mouse cursor of certain device. The
+  /// returning future resolves to a boolean that indicates whether the request
+  /// is successful.
   ///
-  /// The `deviceCursors` is a map from device ID to their targer cursors. An
-  /// empty map is does nothing and returns true. It's caller's responsibility
-  /// to avoid sending duplicate requests, since this class does not keep track
-  /// of history requests.
-  Future<bool> setCursors(Map<int, int> deviceCursors);
+  /// It's caller's responsibility to avoid sending duplicate requests, since
+  /// this class does not keep track of history requests.
+  ///
+  /// The `device` must be an existing device. The `cursor` must be a cursor
+  /// that is allowed to be sent to the platform; for example, it must not be
+  /// [MouseCursors.releaseControl].
+  Future<bool> setCursor(int device, int cursor);
 }
 
-/// TODOC
+/// The default implementation of [MouseCursorDelegate], which communitates with
+/// the platform over a [MethodChannel].
 class MouseCursorDefaultDelegate implements MouseCursorDelegate {
-  /// TODOC
-  MouseCursorDefaultDelegate(this.channel);
+  /// Create a [MouseCursorDefaultDelegate] by providing the channel.
+  ///
+  /// The `channel` must not be null.
+  MouseCursorDefaultDelegate(this.channel) : assert(channel != null);
 
-  /// TODOC
+  /// The channel used to send messages. Typically [SystemChannels.mouseCursor].
   final MethodChannel channel;
 
   @override
-  Future<bool> setCursors(Map<int, int> deviceCursors) async {
-    if (deviceCursors.isEmpty) {
-      return true;
-    }
-    // Translate int keys into string keys
-    final Map<String, int> translated = <String, int>{};
-    deviceCursors.forEach((int device, int cursor) {
-      assert(cursor != MouseCursors.releaseControl,
-        'The specified value ${_cursorToString(cursor)} is a permitted value for mouse cursor.');
-      translated[device.toString()] = cursor;
-    });
-    return channel.invokeMethod<bool>('setCursors', <dynamic>[translated]);
+  Future<bool> setCursor(int device, int cursor) async {
+    assert(cursor != MouseCursors.releaseControl,
+      'The specified value ${_cursorToString(cursor)} is a permitted value for mouse cursor.');
+    return channel.invokeMethod<bool>('setCursor', <dynamic>[device, cursor]);
   }
 }

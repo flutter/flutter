@@ -287,11 +287,7 @@ class MouseTracker extends ChangeNotifier {
   // If `performChangeCursor` is provided, this function will be called when this
   // device should change cursor. Otherwise, the default handler is to call
   // `_cursorDelegate.setCursors`.
-  void _checkDeviceUpdates({
-    int device,
-    _MouseState disconnectedMouseState,
-    void Function(int) onChangeCursor,
-  }) {
+  void _checkDeviceUpdates({int device, _MouseState disconnectedMouseState}) {
     final _MouseState mouseState = disconnectedMouseState ?? _mouseStates[device];
     final bool thisDeviceIsConnected = mouseState != disconnectedMouseState;
     assert(mouseState != null);
@@ -312,11 +308,7 @@ class MouseTracker extends ChangeNotifier {
     // Change mouse cursor.
     final int cursor = _findDeviceCursor(nextAnnotations);
     if (cursor != mouseState.cursor) {
-      if (onChangeCursor != null) {
-        onChangeCursor(cursor);
-      } else {
-        _cursorDelegate.setCursors(<int, int>{device: cursor});
-      }
+      _cursorDelegate.setCursor(device, cursor);
     }
 
     mouseState.cursor = cursor;
@@ -331,14 +323,9 @@ class MouseTracker extends ChangeNotifier {
   // This method also calls `_cursorDelegate.setCursors` for all applicable
   // devices in batch.
   void _checkAllDevicesUpdates() {
-    final Map<int, int> changedDeviceCursors = <int, int>{};
     for (final int device in _mouseStates.keys) {
-      _checkDeviceUpdates(
-        device: device,
-        onChangeCursor: (int cursor) { changedDeviceCursors[device] = cursor; }
-      );
+      _checkDeviceUpdates(device: device);
     }
-    _cursorDelegate.setCursors(changedDeviceCursors);
   }
 
   // Find the mouse cursor.
