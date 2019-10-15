@@ -1224,7 +1224,7 @@ void main() {
     final FlatButton button = tester.widget<FlatButton>(find.byType(FlatButton));
     expect(button.enabled, true);
   });
-  
+
   testWidgets('OutlineButton should be enabled when onLongPress is not null.', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -1240,7 +1240,7 @@ void main() {
     final OutlineButton button = tester.widget<OutlineButton>(find.byType(OutlineButton));
     expect(button.enabled, true);
   });
-  
+
   testWidgets('RaisedButton should be enabled when onLongPress is not null.', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
