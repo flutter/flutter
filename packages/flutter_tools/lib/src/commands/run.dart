@@ -41,6 +41,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         negatable: false,
         help: 'Include verbose logging from the flutter engine.',
       )
+      ..addFlag('cache-sksl',
+        negatable: false,
+        help: 'Only cache the shader in SkSL instead of binary or GLSL.',)
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
@@ -59,6 +62,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   }
 
   bool get traceStartup => argResults['trace-startup'];
+  bool get cacheSkSL => argResults['cache-sksl'];
 
   String get route => argResults['route'];
 }
@@ -306,6 +310,7 @@ class RunCommand extends RunCommandBase {
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
         dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
+        cacheSkSL: cacheSkSL,
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
         initializePlatform: argResults['web-initialize-platform'],
