@@ -563,6 +563,9 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
 
   @override
   String valueToString({ TextTreeConfiguration parentConfiguration }) {
+    if (value == null) {
+      return 'null';
+    }
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.
