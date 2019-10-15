@@ -188,8 +188,98 @@ void _expectCheckmarkColor(Finder finder, Color color) {
   );
 }
 
+Future<void> pumpFrames({
+  WidgetTester tester,
+  int frames,
+  Duration duration,
+}) async {
+  int i;
+  for (i = 0; i < frames; i ++) {
+    await tester.pump(duration);
+  }
+}
+
+Widget _chipWithOptionalDeleteButton({
+  UniqueKey deleteButtonKey,
+  UniqueKey labelKey,
+  bool deletable,
+  TextDirection textDirection = TextDirection.ltr,
+}){
+  return _wrapForChip(
+    child: Wrap(
+      children: <Widget>[
+        Directionality(
+          textDirection: textDirection,
+          child: RawChip(
+            onPressed: () {},
+            onDeleted: deletable ? () {} : null,
+            deleteIcon: Icon(Icons.close, key: deleteButtonKey),
+            label: Text(
+              deletable
+                ? 'Chip with Delete Button'
+                : 'Chip without Delete Button',
+              key: labelKey,
+            ),
+            // shape: const StadiumBorder(),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
+bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
+
+// [RipplePattern] matches if there exists at least one ripple
+// With the [expectedCenter] and [expectedRadius].
+// This ensures the existence of a ripple.
+PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
+  return paints
+    ..something((Symbol method, List<dynamic> arguments) {
+      print('$method !@!@ $arguments');
+      if (method != #drawCircle)
+        return false;
+      final Offset center = arguments[0];
+      final double radius = arguments[1];
+      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
+        return true;
+      else
+        return false;
+    }
+    );
+}
+
+// [UniqueRipplePattern] matches if there does not exist ripples
+// Other than ones with the [expectedCenter] and [expectedRadius].
+// This ensures the nonexistence of two different ripples.
+PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
+  return paints
+    ..everything((Symbol method, List<dynamic> arguments) {
+      print('$method !@!@ $arguments');
+      if (method != #drawCircle)
+        return true;
+      final Offset center = arguments[0];
+      final double radius = arguments[1];
+      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
+        return true;
+      throw '''
+            Expected: center == $expectedCenter, radius == $expectedRadius
+            Found: center == $center radius == $radius''';
+    }
+    );
+}
+
+// Finds any container of a tooltip.
+Finder findTooltipContainer(String tooltipText) {
+  return find.ancestor(
+    of: find.text(tooltipText),
+    matching: find.byType(Container),
+  );
+}
+
 void main() {
-  /*
+
   testWidgets('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     final List<String> deletedChipLabels = <String>[];
@@ -924,159 +1014,196 @@ void main() {
     expect(find.byKey(deleteButtonKey), findsNothing);
   }, skip: isBrowser);
 
-
-  */
-  testWidgets('Delete button ripple works correctly', (WidgetTester tester) async {
+  testWidgets('Chip creates centered, unique ripple when label is tapped', (WidgetTester tester) async {
+    // Creates a chip with a delete button.
     final UniqueKey labelKey = UniqueKey();
     final UniqueKey deleteButtonKey = UniqueKey();
-    List<String> responses = <String>[];
-    responses.add('Initial.');
-    Future<void> pushChip({ bool deletable = false }) async {
-      return tester.pumpWidget(
-        _wrapForChip(
-          child: Wrap(
-            children: <Widget>[
-              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return RawChip(
-                  onPressed: () {
-                    responses.add('Chip is pressed.');
-                  },
-                  onDeleted: deletable ? () {
-                    responses.add('Chip is deleted.');
-                  } : null,
-                  deleteIcon: Icon(Icons.beach_access, key: deleteButtonKey),
-                  // deleteIcon: Container(width: 80.0, height: 80.0, key: deleteButtonKey),
-                  label: Text('Supercalifragilisticexpialidocious', key: labelKey),
-                  // shape: const StadiumBorder(),
-                );
-              }),
-            ],
-          ),
-        ),
-      );
-    }
 
-    await pushChip(deletable: true);
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        labelKey: labelKey,
+        deleteButtonKey: deleteButtonKey,
+        deletable: true,
+      ),
+    );
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
-    print('box is $box');
 
-    final Offset tapDownOffset = tester.getTopLeft(find.byType(InkWell));
+    // Taps at a location close to the center of the label.
+    final Offset centerOfLabel = tester.getCenter(find.byKey(labelKey));
+    final Offset tapLocationOfLabel = centerOfLabel + const Offset(-10, -10);
+    final TestGesture gesture = await tester.startGesture(tapLocationOfLabel);
+    await tester.pump();
 
+    // Pumps 5 frames of 20 ms each.
+    await pumpFrames(tester: tester, frames: 5, duration: const Duration(milliseconds: 20));
 
+    // There should be exactly one ink-creating widget.
+    expect(find.byType(InkWell), findsOneWidget);
+    expect(find.byType(InkResponse), findsNothing);
 
-    print('find.byType(RawChip) is ${find.byType(RawChip)}');
+    // There should be one unique, centered ink ripple.
+    expect(box, ripplePattern(const Offset(163.0, 6.0), 20.9));
+    expect(box, uniqueRipplePattern(const Offset(163.0, 6.0), 20.9));
 
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
 
-    //await tester.press(find.byType(InkWell));
-    /*
-    await tester.press(find.byKey(labelKey));
-    print(find.byKey(labelKey));
-    print('pressed');
-    await tester.pump(const Duration(milliseconds: 600));
-    print('pumped');
-    print(responses);
-    */
+    // Pumps 5 more frames of 20 ms each.
+    await pumpFrames(tester: tester, frames: 5, duration: const Duration(milliseconds: 20));
 
+    // The ripple should grow, with the same center.
+    expect(box, ripplePattern(const Offset(163.0, 6.0), 41.8));
+    expect(box, uniqueRipplePattern(const Offset(163.0, 6.0), 41.8));
 
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
 
-    Finder _findTooltipContainer(String tooltipText) {
-      return find.ancestor(
-        of: find.text(tooltipText),
-        matching: find.byType(Container),
-      );
-    }
+    // Waits for a very long time.
+    await tester.pumpAndSettle();
 
+    // There should still be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
 
-
-    final Offset centerOfLabel = tester.getCenter(find.byKey(deleteButtonKey));
-    print('centerOfLabel = $centerOfLabel');
-    final TestGesture gesture = await tester.startGesture(centerOfLabel);
-    await tester.pump(); // start gesture
-    print('pumped');
-
-    int i;
-    for (i = 0; i < 10; i ++) {
-      await tester.pump(const Duration(milliseconds: 20));
-      print('pumping $i...');
-    }
-
-    // tester.pumpAndSettle(const Duration(milliseconds: 10));
-
-    print('waited');
-    print(responses);
-
-    bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
-    bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
-
-    PaintPattern ripplePattern(Offset expectedCenter) {
-      return paints
-        ..something((Symbol method, List<dynamic> arguments) {
-          print('$method !@!@ $arguments');
-          if (method != #drawCircle)
-            return false;
-          return true;
-          throw '''
-            Expected: center == $expectedCenter
-            Found: center == ???''';
-        }
-        );
-    }
-
-    print(tester.getTopLeft(find.byType(InkWell)));
-    print(tester.getSize(find.byType(InkWell)));
-
-    print(find.byType(InkWell).evaluate());
-    print(find.byType(InkResponse).evaluate());
-
-
-    expect(Material.of(tester.element(find.byKey(deleteButtonKey))), ripplePattern(const Offset(0, 0)));
-    // expect(_findTooltipContainer('Delete'), findsNothing);
-
-
-    // await gesture.up();
-
-    return; // Finish.
-
-    // Remove the delete button again
-    await pushChip();
-    // Delete button drawer should start out open.
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)), equals(const Offset(76.0, 12.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
-
-    await tester.pump(const Duration(milliseconds: 20));
-    // Delete button drawer should start contracting.
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(103.8, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(75.8, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
-
-    await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(102.9, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(74.9, 0.1));
-
-    await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(101.0, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(73.0, 0.1));
-
-    await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(97.5, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(69.5, 0.1));
-
-    // Wait for being done with animation, make sure it didn't change
-    // height, and make sure that the delete button is no longer drawn.
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
-    expect(find.byKey(deleteButtonKey), findsNothing);
+    await gesture.up();
   }, skip: isBrowser);
 
-  /*
+  testWidgets('Delete button creates non-centered, unique ripple when tapped', (WidgetTester tester) async {
+    // Creates a chip with a delete button.
+    final UniqueKey labelKey = UniqueKey();
+    final UniqueKey deleteButtonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        labelKey: labelKey,
+        deleteButtonKey: deleteButtonKey,
+        deletable: true,
+      ),
+    );
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+
+    // Taps at a location close to the center of the label.
+    final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
+    final Offset tapLocationOfDeleteButton = centerOfDeleteButton + const Offset(-10, -10);
+    final TestGesture gesture = await tester.startGesture(tapLocationOfDeleteButton);
+    await tester.pump();
+
+    // Pumps 10 frames of 20 ms each.
+    await pumpFrames(tester: tester, frames: 10, duration: const Duration(milliseconds: 20));
+
+    // There should be exactly one ink-creating widget.
+    expect(find.byType(InkWell), findsOneWidget);
+    expect(find.byType(InkResponse), findsNothing);
+
+    // There should be one unique, centered ink ripple.
+    expect(box, ripplePattern(const Offset(3.0, 3.0), 3.5));
+    expect(box, uniqueRipplePattern(const Offset(3.0, 3.0), 3.5));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Pumps 10 more frames of 20 ms each.
+    await pumpFrames(tester: tester, frames: 10, duration: const Duration(milliseconds: 20));
+
+    // The ripple should grow, but the center should move,
+    // Towards the center of the delete icon.
+    expect(box, ripplePattern(const Offset(5.0, 5.0), 10.5));
+    expect(box, uniqueRipplePattern(const Offset(5.0, 5.0), 10.5));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Waits for a very long time.
+    await tester.pumpAndSettle();
+
+    // There should be a tooltip.
+    expect(findTooltipContainer('Delete'), findsOneWidget);
+
+    await gesture.up();
+  }, skip: isBrowser);
+
+  testWidgets('RTL delete button responds to tap on the left of the chip', (WidgetTester tester) async {
+    // Creates an RTL chip with a delete button.
+    final UniqueKey labelKey = UniqueKey();
+    final UniqueKey deleteButtonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        labelKey: labelKey,
+        deleteButtonKey: deleteButtonKey,
+        deletable: true,
+        textDirection: TextDirection.rtl,
+      ),
+    );
+
+    // Taps at a location close to the center of the label.
+    final Offset topLeftOfInkWell = tester.getTopLeft(find.byType(InkWell));
+    final Offset tapLocation = topLeftOfInkWell + const Offset(8, 8);
+    final TestGesture gesture = await tester.startGesture(tapLocation);
+    await tester.pump();
+
+    await tester.pumpAndSettle();
+
+    // The existence of a 'Delete' tooltip indicates the delete icon is tapped.
+    expect(findTooltipContainer('Delete'), findsOneWidget);
+
+    await gesture.up();
+  }, skip: isBrowser);
+
+  testWidgets('Chip without delete button creates correct ripple', (WidgetTester tester) async {
+    // Creates a chip with a delete button.
+    final UniqueKey labelKey = UniqueKey();
+
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        labelKey: labelKey,
+        deletable: false,
+      ),
+    );
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+
+    // Taps at a location close to the bottom-right corner of the chip.
+    final Offset bottomRightOfInkWell = tester.getBottomRight(find.byType(InkWell));
+    final Offset tapLocation = bottomRightOfInkWell + const Offset(-10, -10);
+    final TestGesture gesture = await tester.startGesture(tapLocation);
+    await tester.pump();
+
+    // Pumps 5 frames of 20 ms each.
+    await pumpFrames(tester: tester, frames: 5, duration: const Duration(milliseconds: 20));
+
+    // There should be exactly one ink-creating widget.
+    expect(find.byType(InkWell), findsOneWidget);
+    expect(find.byType(InkResponse), findsNothing);
+
+    // There should be one unique, centered ink ripple.
+    expect(box, ripplePattern(const Offset(378.0, 22.0), 37.9));
+    expect(box, uniqueRipplePattern(const Offset(378.0, 22.0), 37.9));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Pumps 5 more frames of 20 ms each.
+    await pumpFrames(tester: tester, frames: 5, duration: const Duration(milliseconds: 20));
+
+    // The ripple should grow, with the same center,
+    // Showing that there is no delete icon.
+    expect(box, ripplePattern(const Offset(378.0, 22.0), 75.8));
+    expect(box, uniqueRipplePattern(const Offset(378.0, 22.0), 75.8));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Waits for a very long time.
+    await tester.pumpAndSettle();
+
+    // There should still be no tooltip, as there is no delete icon.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    await gesture.up();
+  }, skip: isBrowser);
+
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
@@ -2257,5 +2384,4 @@ void main() {
     );
   });
 
-   */
 }
