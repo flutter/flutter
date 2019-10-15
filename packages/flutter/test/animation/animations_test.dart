@@ -245,11 +245,13 @@ void main() {
       error = e;
     }
     expect(error, isNotNull);
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
-        'FlutterError\n'
-            '   Invalid curve endpoint at 0.0.\n'
-            '   Curves must map 0.0 to near zero and 1.0 to near one but\n'
-            '   BogusCurve mapped 0.0 to 100.0, which is near 100.0.\n')
+    expect(error.toStringDeep(), startsWith(
+      'FlutterError\n'
+      '   Invalid curve endpoint at 0'
+    ));
+    expect(error.toStringDeep(), endsWith(
+      '   Curves must map 0.0 to near zero and 1.0 to near one but\n'
+      '   BogusCurve mapped 0.0 to 100.0, which is near 100.0.\n')
     );
   });
 
