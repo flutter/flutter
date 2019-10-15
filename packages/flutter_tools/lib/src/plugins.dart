@@ -454,10 +454,13 @@ const String _objcPluginRegistryHeaderTemplate = '''//
 
 #import <{{framework}}/{{framework}}.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GeneratedPluginRegistrant : NSObject
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 @end
 
+NS_ASSUME_NONNULL_END
 #endif /* GeneratedPluginRegistrant_h */
 ''';
 
@@ -466,10 +469,15 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 //
 
 #import "GeneratedPluginRegistrant.h"
-{{#plugins}}
-#import <{{name}}/{{class}}.h>
-{{/plugins}}
 
+{{#plugins}}
+#if __has_include(<{{name}}/{{class}}.h>)
+#import <{{name}}/{{class}}.h>
+#else
+@import {{name}};
+#endif
+
+{{/plugins}}
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
