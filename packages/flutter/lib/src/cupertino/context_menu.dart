@@ -108,7 +108,6 @@ class ContextMenu extends StatefulWidget {
     Key key,
     @required this.actions,
     @required this.child,
-    this.onTap,
     this.preview,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(child != null),
@@ -132,10 +131,6 @@ class ContextMenu extends StatefulWidget {
   /// This parameter cannot be null, and items in the List must be
   /// [ContextMenuAction]s.
   final List<ContextMenuAction> actions;
-
-  /// The callback to call when tapping on the child when the [ContextMenu] is
-  /// open.
-  final VoidCallback onTap;
 
   /// The widget to show when the [ContextMenu] is open.
   ///
@@ -242,7 +237,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         sigmaX: 5.0,
         sigmaY: 5.0,
       ),
-      onTap: widget.onTap,
       contextMenuOrientation: _contextMenuOrientation,
       previousChildRect: _decoyChildEndRect,
       builder: (BuildContext context) {
@@ -496,14 +490,12 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     this.barrierLabel,
     WidgetBuilder builder,
     ui.ImageFilter filter,
-    VoidCallback onTap,
     Rect previousChildRect,
     RouteSettings settings,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(contextMenuOrientation != null),
        _actions = actions,
        _builder = builder,
-       _onTap = onTap,
        _contextMenuOrientation = contextMenuOrientation,
        _previousChildRect = previousChildRect,
        super(
@@ -524,7 +516,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   bool _externalOffstage = false;
   bool _internalOffstage = false;
   Orientation _lastOrientation;
-  final VoidCallback _onTap;
   // The Rect of the child at the moment that the ContextMenu opens.
   final Rect _previousChildRect;
   double _scale = 1.0;
@@ -773,7 +764,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
           childGlobalKey: _childGlobalKey,
           contextMenuOrientation: _contextMenuOrientation,
           onDismiss: _onDismiss,
-          onTap: _onTap,
           orientation: orientation,
           sheetGlobalKey: _sheetGlobalKey,
         );
@@ -792,7 +782,6 @@ class _ContextMenuRouteStatic extends StatefulWidget {
     this.childGlobalKey,
     @required this.contextMenuOrientation,
     this.onDismiss,
-    this.onTap,
     @required this.orientation,
     this.sheetGlobalKey,
   }) : assert(contextMenuOrientation != null),
@@ -804,7 +793,6 @@ class _ContextMenuRouteStatic extends StatefulWidget {
   final GlobalKey childGlobalKey;
   final _ContextMenuLocation contextMenuOrientation;
   final _DismissCallback onDismiss;
-  final VoidCallback onTap;
   final Orientation orientation;
   final GlobalKey sheetGlobalKey;
 
@@ -976,14 +964,10 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           widget.orientation,
           widget.contextMenuOrientation,
         ),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.onTap,
-          child: AnimatedBuilder(
-            animation: _moveController,
-            builder: _buildChildAnimation,
-            child: widget.child,
-          ),
+        child: AnimatedBuilder(
+          animation: _moveController,
+          builder: _buildChildAnimation,
+          child: widget.child,
         ),
       ),
     );
