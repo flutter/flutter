@@ -5,7 +5,8 @@
 import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/painting.dart';
+
 import 'package:vector_math/vector_math_64.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
@@ -13,7 +14,7 @@ export 'dart:ui' show Offset, PointerDeviceKind;
 /// The bit of [PointerEvent.buttons] that corresponds to a cross-device
 /// behavior of "primary operation".
 ///
-/// More specifially, it includes:
+/// More specifically, it includes:
 ///
 ///  * [kTouchContact]: The pointer contacts the touch screen.
 ///  * [kStylusContact]: The stylus contacts the screen.
