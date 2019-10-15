@@ -220,7 +220,6 @@ Widget _chipWithOptionalDeleteButton({
                 : 'Chip without Delete Button',
               key: labelKey,
             ),
-            // shape: const StadiumBorder(),
           ),
         ),
       ],
