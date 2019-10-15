@@ -852,26 +852,21 @@ void main() {
     expect(tester.getTopLeft(find.text('Item 1')).dx, 72);
   });
 
-  test('PopupMenuButton takes only child or only icon', () {
-    // [PopupMenuButton] should assert that either child == null, icon == null,
-    // or that both are null because only one of the two can be displayed/used.
-    expect(() => PopupMenuButton<int>(
-      itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
-      child: Container(),
-      icon: const Icon(Icons.error),
-    ), throwsAssertionError);
+  test("PopupMenuButton's child and icon properties cannot be simultaneously defined", () {
+    expect(() {
+      PopupMenuButton<int>(
+        itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
+        child: Container(),
+        icon: const Icon(Icons.error),
+      );
+    }, throwsAssertionError);
   });
 
   testWidgets('PopupMenuButton default tooltip', (WidgetTester tester) async {
-    // If the tooltip parameter for [PopupMenuButton] is not specified,
-    // a default tooltip should be used instead.
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Column(
-            // The default tooltip should be present when
-            // [PopupMenuButton.icon] or [PopupMenuButton.child] is defined
-            // and also when neither of the two is defined.
             children: <Widget>[
               // Default Tooltip should be present when [PopupMenuButton.child]
               // and [PopupMenuButton.child] are undefined.
@@ -924,17 +919,12 @@ void main() {
   });
 
   testWidgets('PopupMenuButton custom tooltip', (WidgetTester tester) async {
-    // A custom tooltip can be provided to [PopupMenuButton.tooltip]
-    // to replace the default tooltip, which is tested in the previous test.
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Column(
-            // The tooltip should be present when
-            // [PopupMenuButton.icon] or [PopupMenuButton.child] is defined
-            // and also when neither of the two is defined.
             children: <Widget>[
-              // Tooltip should be work when [PopupMenuButton.child]
+              // Tooltip should work when [PopupMenuButton.child]
               // and [PopupMenuButton.child] are undefined.
               PopupMenuButton<int>(
                 itemBuilder: (BuildContext context) {
