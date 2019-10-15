@@ -722,11 +722,6 @@ Map<String, String> _initGradleEnvironment() {
 final Map<String, String> gradleEnvironment = _initGradleEnvironment();
 
 Future<void> _runHostOnlyDeviceLabTests() async {
-  if (Platform.isWindows) {
-    // TODO(ianh): remove when https://github.com/flutter/flutter/issues/36311 fixed by https://github.com/flutter/flutter/pull/42709
-    return;
-  }
-
   // Please don't add more tests here. We should not be using the devicelab
   // logic to run tests outside devicelab, that's just confusing.
   // Instead, create tests that are not devicelab tests, and run those.
@@ -817,24 +812,10 @@ void deleteFile(String path) {
     file.deleteSync();
 }
 
-enum CiProviders {
-  cirrus,
-  luci,
-}
-
-Future<void> _processTestOutput(
-  FlutterCompactFormatter formatter,
-  Stream<String> testOutput,
-  bq.TabledataResourceApi tableData,
-) async {
-  final Timer heartbeat = Timer.periodic(const Duration(seconds: 30), (Timer timer) {
-    print('Processing...');
-  });
-
-  await testOutput.forEach(formatter.processRawOutput);
-  heartbeat.cancel();
-  formatter.finish();
-  if (tableData == null || formatter.tests.isEmpty) {
+Future<void> _androidGradleTests(String subShard) async {
+  // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
+  if (androidSdkRoot == null) {
+    print('No Android SDK detected, skipping Android gradle test.');
     return;
   }
   final bq.TableDataInsertAllRequest request = bq.TableDataInsertAllRequest();
