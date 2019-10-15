@@ -94,7 +94,7 @@ class _ManifestAssetBundle implements AssetBundle {
       if (!directory.existsSync()) {
         return true; // directory was deleted.
       }
-      for (File file in directory.listSync()) {
+      for (File file in directory.listSync().whereType<File>()) {
         final DateTime dateTime = file.statSync().modified;
         if (dateTime == null) {
           continue;
