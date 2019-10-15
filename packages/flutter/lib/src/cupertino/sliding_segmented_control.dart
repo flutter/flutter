@@ -98,44 +98,48 @@ class _FontWeightTween extends Tween<FontWeight> {
 /// value to the map key associated with the newly selected widget, causing all
 /// of its listeners to be notified.
 ///
-/// {@tool sample}
+/// {@tool dartpad --template=stateful_widget_material}
+///
+/// This sample shows two [CupertinoSlidingSegmentedControl]s that mirror each other.
 ///
 /// ```dart
-/// class SegmentedControlExample extends StatefulWidget {
-///   @override
-///   State createState() => SegmentedControlExampleState();
+/// final Map<int, Widget> children = const <int, Widget>{
+///   0: Text('Child 1'),
+///   1: Text('Child 2'),
+///   2: Text('Child 3'),
+/// };
+///
+/// final ValueNotifier<int> controller = ValueNotifier<int>(null);
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   // Prints a message whenever the currently selected widget changes.
+///   controller.addListener(() { print('selected: ${controller.value}'); });
 /// }
 ///
-/// class SegmentedControlExampleState extends State<SegmentedControlExample> {
-///   final Map<int, Widget> children = const <int, Widget>{
-///     0: Text('Child 1'),
-///     1: Text('Child 2'),
-///   };
+/// @override
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Column(
+///       children: <Widget>[
+///         CupertinoSlidingSegmentedControl<int>(
+///           children: children,
+///           controller: controller,
+///         ),
+///         CupertinoSlidingSegmentedControl<int>(
+///           children: children,
+///           controller: controller,
+///         ),
+///       ],
+///     ),
+///   );
+/// }
 ///
-///   final ValueNotifier<int> controller = ValueNotifier<int>(0);
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     // Print a message whenever the currently selected widget changes.
-///     controller.addListener(() { print('currently selected ${controller.value}'); });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Container(
-///       child: CupertinoSlidingSegmentedControl<int>(
-///         children: children,
-///         controller: controller,
-///       ),
-///     );
-///   }
-///
-///   @override
-///   void dispose() {
-///     super.dispose();
-///     controller.dispose();
-///   }
+/// @override
+/// void dispose() {
+///   controller.dispose();
+///   super.dispose();
 /// }
 /// ```
 /// {@end-tool}
@@ -319,6 +323,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     super.didChangeDependencies();
 
     textDirection = Directionality.of(context);
+    assert(textDirection != null);
   }
 
   @override
