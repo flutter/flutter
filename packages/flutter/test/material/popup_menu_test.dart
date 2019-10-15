@@ -868,7 +868,7 @@ void main() {
         home: Material(
           child: Column(
             children: <Widget>[
-              // Default Tooltip should be present when [PopupMenuButton.child]
+              // Default Tooltip should be present when [PopupMenuButton.icon]
               // and [PopupMenuButton.child] are undefined.
               PopupMenuButton<int>(
                 itemBuilder: (BuildContext context) {
@@ -924,7 +924,7 @@ void main() {
         home: Material(
           child: Column(
             children: <Widget>[
-              // Tooltip should work when [PopupMenuButton.child]
+              // Tooltip should work when [PopupMenuButton.icon]
               // and [PopupMenuButton.child] are undefined.
               PopupMenuButton<int>(
                 itemBuilder: (BuildContext context) {
