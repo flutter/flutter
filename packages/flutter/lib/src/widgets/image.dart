@@ -333,6 +333,9 @@ class Image extends StatefulWidget {
   /// In the case where the network image is on the Web platform, the [cacheWidth]
   /// and [cacheHeight] parameters are ignored as the web engine delegates
   /// image decoding to the web which does not support custom decode sizes.
+  //
+  // TODO: We should eventually support custom decoding of network images on Web as well,
+  // see https://github.com/flutter/flutter/issues/42789.
   Image.network(
     String src, {
     Key key,
