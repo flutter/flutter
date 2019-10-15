@@ -33,6 +33,9 @@ void main() {
         fs.file(fs.path.join('build', 'flutter_assets', 'foo.png'))
           ..createSync(recursive: true)
           ..writeAsBytesSync(kTransparentImage);
+        fs.file(fs.path.join('build', 'flutter_assets', 'bar'))
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(<int>[1, 2, 3]);
         assetServer = DebugAssetServer(FlutterProject.current(), fs.path.join('main'));
       }
     );
@@ -56,6 +59,16 @@ void main() {
     expect(response.headers, <String, String>{
       'Content-Type': 'image/png',
       'content-length': '64',
+    });
+  }));
+
+  test('can fallback to application/octet-stream', () => testbed.run(() async {
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/assets/bar')));
+
+    expect(response.headers, <String, String>{
+      'Content-Type': 'application/octet-stream',
+      'content-length': '3',
     });
   }));
 
