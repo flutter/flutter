@@ -60,6 +60,7 @@ public class KeyEventChannel {
     message.put("source", event.source);
     message.put("vendorId", event.vendorId);
     message.put("productId", event.productId);
+    message.put("deviceId", event.deviceId);
   }
 
   /**
