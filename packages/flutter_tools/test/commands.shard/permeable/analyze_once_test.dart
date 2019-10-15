@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
@@ -53,7 +54,9 @@ void main() {
         ],
       );
       expect(libMain.existsSync(), isTrue);
-    }, timeout: allowForRemotePubInvocation);
+    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
 
     // Analyze in the current directory - no arguments
     testUsingContext('working directory', () async {
@@ -62,7 +65,9 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>['No issues found!'],
       );
-    }, timeout: allowForSlowAnalyzeTests);
+    }, timeout: allowForSlowAnalyzeTests, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
 
     // Analyze a specific file outside the current directory
     testUsingContext('passing one file throws', () async {
@@ -72,8 +77,9 @@ void main() {
         toolExit: true,
         exitMessageContains: 'is not a directory',
       );
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
     });
-
     // Analyze in the current directory - no arguments
     testUsingContext('working directory with errors', () async {
       // Break the code to produce the "The parameter 'onPressed' is required" hint
@@ -104,7 +110,10 @@ void main() {
         exitMessageContains: '2 issues found.',
         toolExit: true,
       );
-    }, timeout: allowForSlowAnalyzeTests, overrides: noColorTerminalOverride);
+    }, timeout: allowForSlowAnalyzeTests, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+      ...noColorTerminalOverride,
+    });
 
     // Analyze in the current directory - no arguments
     testUsingContext('working directory with local options', () async {
@@ -131,7 +140,10 @@ void main() {
         exitMessageContains: '3 issues found.',
         toolExit: true,
       );
-    }, timeout: allowForSlowAnalyzeTests, overrides: noColorTerminalOverride);
+    }, timeout: allowForSlowAnalyzeTests, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+      ...noColorTerminalOverride
+    });
 
     testUsingContext('no duplicate issues', () async {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
@@ -165,7 +177,10 @@ void bar() {
       } finally {
         tryToDelete(tempDir);
       }
-    }, overrides: noColorTerminalOverride);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+      ...noColorTerminalOverride
+    });
 
     testUsingContext('returns no issues when source is error-free', () async {
       const String contents = '''
@@ -182,7 +197,10 @@ StringBuffer bar = StringBuffer('baz');
       } finally {
         tryToDelete(tempDir);
       }
-    }, overrides: noColorTerminalOverride);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+      ...noColorTerminalOverride
+    });
 
     testUsingContext('returns no issues for todo comments', () async {
       const String contents = '''
@@ -200,7 +218,10 @@ StringBuffer bar = StringBuffer('baz');
       } finally {
         tryToDelete(tempDir);
       }
-    }, overrides: noColorTerminalOverride);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+      ...noColorTerminalOverride
+    });
   });
 }
 

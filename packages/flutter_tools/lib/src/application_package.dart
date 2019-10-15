@@ -506,6 +506,22 @@ class _Attribute extends _Entry {
 class ApkManifestData {
   ApkManifestData._(this._data);
 
+  static bool isAttributeWithValuePresent(_Element baseElement,
+      String childElement, String attributeName, String attributeValue) {
+    final Iterable<_Element> allElements = baseElement.allElements(
+        childElement).cast<_Element>();
+    for (_Element oneElement in allElements) {
+      final String elementAttributeValue = oneElement
+          ?.firstAttribute(attributeName)
+          ?.value;
+      if (elementAttributeValue != null &&
+          elementAttributeValue.startsWith(attributeValue)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static ApkManifestData parseFromXmlDump(String data) {
     if (data == null || data.trim().isEmpty) {
       return null;
@@ -559,21 +575,19 @@ class ApkManifestData {
       }
 
       for (_Element element in intentFilters) {
-        final _Element action = element.firstElement('action');
-        final _Element category = element.firstElement('category');
-        final String actionAttributeValue = action
-            ?.firstAttribute('android:name')
-            ?.value;
-        final String categoryAttributeValue =
-            category?.firstAttribute('android:name')?.value;
-        final bool isMainAction = actionAttributeValue != null &&
-            actionAttributeValue.startsWith('"android.intent.action.MAIN"');
-        final bool isLauncherCategory = categoryAttributeValue != null &&
-            categoryAttributeValue.startsWith('"android.intent.category.LAUNCHER"');
-        if (isMainAction && isLauncherCategory) {
-          launchActivity = activity;
-          break;
+        final bool isMainAction = isAttributeWithValuePresent(
+            element, 'action', 'android:name', '"android.intent.action.MAIN"');
+        if (!isMainAction) {
+          continue;
         }
+        final bool isLauncherCategory = isAttributeWithValuePresent(
+            element, 'category', 'android:name',
+            '"android.intent.category.LAUNCHER"');
+        if (!isLauncherCategory) {
+          continue;
+        }
+        launchActivity = activity;
+        break;
       }
       if (launchActivity != null) {
         break;

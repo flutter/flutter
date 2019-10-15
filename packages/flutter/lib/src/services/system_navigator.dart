@@ -21,10 +21,14 @@ class SystemNavigator {
   /// `dismissViewControllerAnimated:completion:` if the top view
   /// controller is a `FlutterViewController`.
   ///
+  /// The optional `animated` parameter is ignored on all platforms
+  /// except iOS where it is an argument to the aforementioned
+  /// methods.
+  ///
   /// This method should be preferred over calling `dart:io`'s [exit]
   /// method, as the latter may cause the underlying platform to act
   /// as if the application had crashed.
-  static Future<void> pop() async {
-    await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop');
+  static Future<void> pop({bool animated}) async {
+    await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop', animated);
   }
 }
