@@ -1079,7 +1079,7 @@ void main() {
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
 
-    // Taps at a location close to the center of the label.
+    // Taps at a location close to the center of the delete icon.
     final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
     final Offset tapLocationOfDeleteButton = centerOfDeleteButton + const Offset(-10, -10);
     final TestGesture gesture = await tester.startGesture(tapLocationOfDeleteButton);
@@ -1092,7 +1092,7 @@ void main() {
     expect(find.byType(InkWell), findsOneWidget);
     expect(find.byType(InkResponse), findsNothing);
 
-    // There should be one unique, centered ink ripple.
+    // There should be one unique ink ripple.
     expect(box, ripplePattern(const Offset(3.0, 3.0), 3.5));
     expect(box, uniqueRipplePattern(const Offset(3.0, 3.0), 3.5));
 
@@ -1111,6 +1111,7 @@ void main() {
     expect(findTooltipContainer('Delete'), findsNothing);
 
     // Waits for a very long time.
+    // This is pressing and holding the delete button.
     await tester.pumpAndSettle();
 
     // There should be a tooltip.
@@ -1133,7 +1134,8 @@ void main() {
       ),
     );
 
-    // Taps at a location close to the center of the label.
+    // Taps at a location close to the center of the delete icon,
+    // Which is on the left side of the chip.
     final Offset topLeftOfInkWell = tester.getTopLeft(find.byType(InkWell));
     final Offset tapLocation = topLeftOfInkWell + const Offset(8, 8);
     final TestGesture gesture = await tester.startGesture(tapLocation);
@@ -1141,7 +1143,8 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // The existence of a 'Delete' tooltip indicates the delete icon is tapped.
+    // The existence of a 'Delete' tooltip indicates the delete icon is tapped,
+    // Instead of the label.
     expect(findTooltipContainer('Delete'), findsOneWidget);
 
     await gesture.up();
@@ -1183,8 +1186,8 @@ void main() {
     // Pumps 5 more frames of 20 ms each.
     await pumpFrames(tester: tester, frames: 5, duration: const Duration(milliseconds: 20));
 
-    // The ripple should grow, with the same center,
-    // Showing that there is no delete icon.
+    // The ripple should grow, with the same center.
+    // This indicates that the tap is not on a delete icon.
     expect(box, ripplePattern(const Offset(378.0, 22.0), 75.8));
     expect(box, uniqueRipplePattern(const Offset(378.0, 22.0), 75.8));
 
@@ -1194,7 +1197,8 @@ void main() {
     // Waits for a very long time.
     await tester.pumpAndSettle();
 
-    // There should still be no tooltip, as there is no delete icon.
+    // There should still be no tooltip.
+    // This indicates that the tap is not on a delete icon.
     expect(findTooltipContainer('Delete'), findsNothing);
 
     await gesture.up();
