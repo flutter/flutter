@@ -519,9 +519,6 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     assert(!_inkFeatures.contains(feature));
     _inkFeatures.add(feature);
     markNeedsPaint();
-    print('this: $this');
-    print('child: $child');
-    print('ink features: $_inkFeatures');
   }
 
   void _removeFeature(InkFeature feature) {

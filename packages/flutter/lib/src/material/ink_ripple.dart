@@ -258,7 +258,6 @@ class InkRipple extends InteractiveInkFeature {
         canvas.clipRect(rect);
       }
     }
-    print("ink_ripple.dart -> I'm drawing circle $center, ${_radius.value}, $paint");
     canvas.drawCircle(center, _radius.value, paint);
     canvas.restore();
   }
