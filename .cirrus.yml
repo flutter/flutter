@@ -141,7 +141,7 @@ task:
         cpu: 4
         memory: 12G
     - name: tool_coverage-linux
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**/*.dart') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**/*.dart', '.codecov.yml') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
