@@ -42,6 +42,7 @@ class FlutterDevice {
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+         buildMode: buildMode,
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
@@ -66,11 +67,13 @@ class FlutterDevice {
     ResidentCompiler generator;
     if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
+        buildMode: buildMode,
         flutterProject: flutterProject,
       );
     } else {
       generator = ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+        buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
@@ -544,7 +547,7 @@ abstract class ResidentRunner {
        packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
        _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
-          ? fs.systemTempDirectory.createTempSync('_fluttter_tool')
+          ? fs.systemTempDirectory.createTempSync('flutter_tool.')
           : fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle() {
     if (!artifactDirectory.existsSync()) {

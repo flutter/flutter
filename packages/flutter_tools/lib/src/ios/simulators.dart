@@ -453,6 +453,7 @@ class IOSSimulator extends Device {
     return BundleBuilder().build(
       mainPath: mainPath,
       precompiledSnapshot: false,
+      buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
   }

@@ -341,30 +341,29 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
     final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
 
-    final Widget result = Focus(
-      focusNode: widget.focusNode,
-      canRequestFocus: widget.enabled,
-      onFocusChange: _handleFocusedChanged,
-      autofocus: widget.autofocus,
-      child: ConstrainedBox(
-        constraints: widget.constraints,
-        child: Material(
-          elevation: _effectiveElevation,
-          textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
-          shape: effectiveShape,
-          color: widget.fillColor,
-          type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
-          animationDuration: widget.animationDuration,
-          clipBehavior: widget.clipBehavior,
-          child: InkWell(
-            onHighlightChanged: _handleHighlightChanged,
-            splashColor: widget.splashColor,
-            highlightColor: widget.highlightColor,
-            focusColor: widget.focusColor,
-            hoverColor: widget.hoverColor,
-            onHover: _handleHoveredChanged,
-            onTap: widget.onPressed,
-            enableFeedback: widget.enableFeedback,
+    final Widget result = ConstrainedBox(
+      constraints: widget.constraints,
+      child: Material(
+        elevation: _effectiveElevation,
+        textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
+        shape: effectiveShape,
+        color: widget.fillColor,
+        type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
+        animationDuration: widget.animationDuration,
+        clipBehavior: widget.clipBehavior,
+        child: InkWell(
+          focusNode: widget.focusNode,
+          canRequestFocus: widget.enabled,
+          onFocusChange: _handleFocusedChanged,
+          autofocus: widget.autofocus,
+          onHighlightChanged: _handleHighlightChanged,
+          splashColor: widget.splashColor,
+          highlightColor: widget.highlightColor,
+          focusColor: widget.focusColor,
+          hoverColor: widget.hoverColor,
+          onHover: _handleHoveredChanged,
+          onTap: widget.onPressed,
+          enableFeedback: widget.enableFeedback,
             customBorder: effectiveShape,
             child: IconTheme.merge(
               data: IconThemeData(color: effectiveTextColor),
@@ -374,7 +373,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
                   widthFactor: 1.0,
                   heightFactor: 1.0,
                   child: widget.child,
-                ),
+
               ),
             ),
           ),

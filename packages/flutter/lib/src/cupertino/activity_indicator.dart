@@ -9,10 +9,11 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
 const double _kDefaultIndicatorRadius = 10.0;
-// Extracted from the large activity indicators in https://developer.apple.com/design/resources/.
+
+// Extracted from iOS 13.2 Beta.
 const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x99606067),
-  darkColor: Color(0x99EBEBF5),
+  color: Color(0xFF3C3C44),
+  darkColor: Color(0xFFEBEBF5),
 );
 
 /// An iOS-style activity indicator that spins clockwise.
@@ -96,7 +97,10 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
 
 const double _kTwoPI = math.pi * 2.0;
 const int _kTickCount = 12;
-const int _kHalfTickCount = _kTickCount ~/ 2;
+
+// Alpha values extracted from the native component (for both dark and light mode).
+// The list has a length of 12.
+const List<int> _alphaValues = <int>[147, 131, 114, 97, 81, 64, 47, 47, 47, 47, 47, 47];
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
@@ -127,8 +131,8 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     final int activeTick = (_kTickCount * position.value).floor();
 
     for (int i = 0; i < _kTickCount; ++ i) {
-      final double t = (((i + activeTick) % _kTickCount) / _kHalfTickCount).clamp(0.0, 1.0);
-      paint.color = activeColor.withOpacity((t * activeColor.opacity).clamp(0, 1));
+      final int t = (i + activeTick) % _kTickCount;
+      paint.color = activeColor.withAlpha(_alphaValues[t]);
       canvas.drawRRect(tickFundamentalRRect, paint);
       canvas.rotate(-_kTwoPI / _kTickCount);
     }

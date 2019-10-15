@@ -106,6 +106,7 @@ class BundleBuilder {
         mainPath: fs.file(mainPath).absolute.path,
         outputFilePath: applicationKernelFilePath,
         depFilePath: depfilePath,
+        buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
         extraFrontEndOptions: extraFrontEndOptions,
         fileSystemRoots: fileSystemRoots,

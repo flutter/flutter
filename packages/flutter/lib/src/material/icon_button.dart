@@ -320,13 +320,12 @@ class IconButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: onPressed != null,
-      child: Focus(
+      child: InkResponse(
         focusNode: focusNode,
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
-        child: InkResponse(
-          onTap: onPressed,
-          enableFeedback: enableFeedback,
+        onTap: onPressed,
+        enableFeedback: enableFeedback,
           child: result,
           focusColor: focusColor ?? Theme.of(context).focusColor,
           hoverColor: hoverColor ?? Theme.of(context).hoverColor,
@@ -336,7 +335,7 @@ class IconButton extends StatelessWidget {
             Material.defaultSplashRadius,
             (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
             // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
-          ),
+
         ),
       ),
     );

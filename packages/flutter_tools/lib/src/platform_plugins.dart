@@ -5,6 +5,10 @@
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
+import 'base/common.dart';
+import 'base/file_system.dart';
+import 'features.dart';
+
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
   const PluginPlatform();
@@ -17,18 +21,20 @@ abstract class PluginPlatform {
 /// The required fields include: [name] of the plugin, [package] of the plugin and
 /// the [pluginClass] that will be the entry point to the plugin's native code.
 class AndroidPlugin extends PluginPlatform {
-  const AndroidPlugin({
+  AndroidPlugin({
     @required this.name,
     @required this.package,
     @required this.pluginClass,
+    @required this.pluginPath,
   });
 
-  factory AndroidPlugin.fromYaml(String name, YamlMap yaml) {
+  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath) {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
       package: yaml['package'],
       pluginClass: yaml['pluginClass'],
+      pluginPath: pluginPath,
     );
   }
 
@@ -41,9 +47,17 @@ class AndroidPlugin extends PluginPlatform {
 
   static const String kConfigKey = 'android';
 
+  /// The plugin name defined in pubspec.yaml.
   final String name;
+
+  /// The plugin package name defined in pubspec.yaml.
   final String package;
+
+  /// The plugin main class defined in pubspec.yaml.
   final String pluginClass;
+
+  /// The absolute path to the plugin in the pub cache.
+  final String pluginPath;
 
   @override
   Map<String, dynamic> toMap() {
@@ -51,7 +65,61 @@ class AndroidPlugin extends PluginPlatform {
       'name': name,
       'package': package,
       'class': pluginClass,
+      'usesEmbedding2': _embeddingVersion == '2',
     };
+  }
+
+  String _cachedEmbeddingVersion;
+
+  /// Returns the version of the Android embedding.
+  String get _embeddingVersion => _cachedEmbeddingVersion ??= _getEmbeddingVersion();
+
+  String _getEmbeddingVersion() {
+    if (!featureFlags.isNewAndroidEmbeddingEnabled) {
+      return '1';
+    }
+    assert(pluginPath != null);
+    final String baseMainPath = fs.path.join(
+      pluginPath,
+      'android',
+      'src',
+      'main',
+    );
+    File mainPluginClass = fs.file(
+      fs.path.join(
+        baseMainPath,
+        'java',
+        package.replaceAll('.', fs.path.separator),
+        '$pluginClass.java',
+      )
+    );
+    // Check if the plugin is implemented in Kotlin since the plugin's pubspec.yaml
+    // doesn't include this information.
+    if (!mainPluginClass.existsSync()) {
+      mainPluginClass = fs.file(
+        fs.path.join(
+          baseMainPath,
+          'kotlin',
+          package.replaceAll('.', fs.path.separator),
+          '$pluginClass.kt',
+        )
+      );
+    }
+    assert(mainPluginClass.existsSync());
+    String mainClassContent;
+    try {
+      mainClassContent = mainPluginClass.readAsStringSync();
+    } on FileSystemException {
+      throwToolExit(
+        'Couldn\'t read file $mainPluginClass even though it exists. '
+        'Please verify that this file has read permission and try again.'
+      );
+    }
+    if (mainClassContent
+        .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
+      return '2';
+    }
+    return '1';
   }
 }
 

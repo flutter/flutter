@@ -4,6 +4,8 @@
 
 @TestOn('chrome') // Uses web-only Flutter SDK
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -27,6 +29,9 @@ class TestPlugin {
 }
 
 void main() {
+  // Disabling tester emulation because this test relies on real message channel communication.
+  ui.debugEmulateFlutterTesterEnvironment = false; // ignore: undefined_prefixed_name
+
   group('Plugin Registry', () {
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
