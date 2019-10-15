@@ -586,5 +586,5 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-  });
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42772
 }
