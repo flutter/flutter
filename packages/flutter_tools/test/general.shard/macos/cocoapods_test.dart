@@ -186,7 +186,7 @@ void main() {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.getBuildSettings(any, any))
         .thenAnswer((_) async => <String, String>{
-          'SWIFT_VERSION': '4.0',
+          'SWIFT_VERSION': '5.0',
         });
 
       final FlutterProject project = FlutterProject.fromPath('project');
