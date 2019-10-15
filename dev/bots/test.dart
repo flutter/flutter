@@ -443,7 +443,6 @@ Future<void> _runWebTests() async {
     'test/cupertino',
     'test/examples',
     'test/material',
-    'test/rendering',
     'test/widgets',
   ];
 
