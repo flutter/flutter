@@ -53,14 +53,17 @@ class UnpackLinuxDebug extends Target {
     final String basePath = artifacts.getArtifactPath(Artifact.linuxDesktopPath);
     final List<File> inputs = <File>[];
     final List<File> outputs = <File>[];
+    final String outputPrefix = fs.path.join(
+      environment.projectDir.path,
+      'linux',
+      'flutter',
+      'ephemeral',
+    );
     for (String artifact in _kLinuxArtifacts) {
       final String entityPath = fs.path.join(basePath, artifact);
       if (fs.isFileSync(entityPath)) {
         final String outputPath = fs.path.join(
-          environment.projectDir.path,
-          'linux',
-          'flutter',
-          'ephemeral',
+          outputPrefix,
           fs.path.relative(entityPath, from: basePath),
         );
         final File destinationFile = fs.file(outputPath);
@@ -77,10 +80,7 @@ class UnpackLinuxDebug extends Target {
           .listSync(recursive: true)
           .whereType<File>()) {
         final String outputPath = fs.path.join(
-          environment.projectDir.path,
-          'linux',
-          'flutter',
-          'ephemeral',
+          outputPrefix,
           fs.path.relative(input.path, from: basePath),
         );
         final File destinationFile = fs.file(outputPath);
