@@ -531,6 +531,9 @@ void main() {
 
   test('Rethrows unknown exception type from web tooling', () => testbed.run(() async {
     _setupMocks();
+    final DelegateLogger delegateLogger = logger;
+    final MockStatus mockStatus = MockStatus();
+    delegateLogger.status = mockStatus;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Completer<void> unhandledErrorCompleter = Completer<void>();
     when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
@@ -546,6 +549,9 @@ void main() {
 
     unhandledErrorCompleter.complete();
     await expectation;
+    verify(mockStatus.stop()).called(2);
+  }, overrides: <Type, Generator>{
+    Logger: () => DelegateLogger(BufferLogger())
   }));
 }
 
