@@ -32,21 +32,33 @@ Rect _getRect(GlobalKey globalKey) {
 
 // The context menu arranges itself slightly differently based on the location
 // on the screen of [ContextMenu.child] before the [ContextMenu] opens.
-enum _ContextMenuOrientation {
+enum _ContextMenuLocation {
   center,
   left,
   right,
 }
 
-/// A full-screen overlay menu that opens when the child is long-pressed.
+/// A full-screen modal route that opens when the [child] is long-pressed.
 ///
-/// The open menu shows the child or the given [preview] with a list of buttons
-/// specified by [actions].
+/// When open, the ContextMenu shows the child, or [preview] if given, in a
+/// large full-screen Overlay with a list of buttons specified by [actions]. The
+/// child/preview is placed in an Expanded widget so that it will grow to fill
+/// the Overlay if its size is unconstrained.
+///
+/// When closed, the ContextMenu simply displays the child as if the ContextMenu
+/// were not there. Sizing and positioning is unaffected. The menu can be closed
+/// like other [PopupRoute]s, such as by tapping the background or by calling
+/// `Navigator.pop(context)`. Unlike PopupRoute, it can also be closed by
+/// swiping downwards.
+///
+/// The [preview] parameter is most commonly used to display a slight variation
+/// of [child]. See [preview] for an example of rounding the child's corners and
+/// allowing its aspect ratio to expand, similar to the iPhoto app on iOS.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
-/// This sample shows a very simple ContextMenu for an empty Container. To open
-/// it, long press on the red square.
+/// This sample shows a very simple ContextMenu for an empty red 100x100
+/// Container. Simply long press on it to open.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -87,6 +99,11 @@ enum _ContextMenuOrientation {
 ///   * [Apple's HIG for Context Menus](https://developer.apple.com/design/human-interface-guidelines/ios/controls/context-menus/)
 class ContextMenu extends StatefulWidget {
   /// Create a context menu.
+  ///
+  /// [actions] is required and cannot be null. Itmust contain at least one
+  /// [ContextMenuSheetAction].
+  ///
+  /// [child] is required and cannot be null.
   ContextMenu({
     Key key,
     @required this.actions,
@@ -100,11 +117,12 @@ class ContextMenu extends StatefulWidget {
   /// The widget that can be "opened" with the [ContextMenu].
   ///
   /// When the [ContextMenu] is long-pressed, the menu will open and this widget
-  /// (or [preview], if provided) will be moved to the overlay and sized to be
-  /// as wide or tall as possible.
+  /// (or [preview], if provided) will be moved to the [Overlay] and placed
+  /// inside of an [Expanded] widget. This allows the child to resize to fit in
+  /// the full-screen Overlay, if it doesn't size itself.
   ///
   /// When the [ContextMenu] is "closed", this widget acts like a [Container],
-  /// i.e. it does not constrain its child.
+  /// i.e. it does not constrain its child's size or affect its position.
   ///
   /// This parameter cannot be null.
   final Widget child;
@@ -191,9 +209,9 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _decoyController.addStatusListener(_onDecoyAnimationStatusChange);
   }
 
-  // Determine the _ContextMenuOrientation based on the location of the original
+  // Determine the _ContextMenuLocation based on the location of the original
   // child in the screen.
-  _ContextMenuOrientation get _contextMenuOrientation {
+  _ContextMenuLocation get _contextMenuOrientation {
     final Rect childRect = _getRect(_childGlobalKey);
     final double screenWidth = MediaQuery.of(context).size.width;
 
@@ -201,14 +219,14 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     final bool centerDividesChild = childRect.left < center && childRect.right > center;
     final double distanceFromCenter = (center - childRect.center.dx).abs();
     if (centerDividesChild && distanceFromCenter <= childRect.width / 4) {
-      return _ContextMenuOrientation.center;
+      return _ContextMenuLocation.center;
     }
 
     if (childRect.center.dx > center) {
-      return _ContextMenuOrientation.right;
+      return _ContextMenuLocation.right;
     }
 
-    return _ContextMenuOrientation.left;
+    return _ContextMenuLocation.left;
   }
 
   // Push the new route and open the ContextMenu overlay.
@@ -474,7 +492,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Build a _ContextMenuRoute.
   _ContextMenuRoute({
     @required List<ContextMenuSheetAction> actions,
-    @required _ContextMenuOrientation contextMenuOrientation,
+    @required _ContextMenuLocation contextMenuOrientation,
     this.barrierLabel,
     WidgetBuilder builder,
     ui.ImageFilter filter,
@@ -502,7 +520,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   final List<ContextMenuSheetAction> _actions;
   final WidgetBuilder _builder;
   final GlobalKey _childGlobalKey = GlobalKey();
-  final _ContextMenuOrientation _contextMenuOrientation;
+  final _ContextMenuLocation _contextMenuOrientation;
   bool _externalOffstage = false;
   bool _internalOffstage = false;
   Orientation _lastOrientation;
@@ -570,11 +588,11 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   // Get the alignment for the ContextMenuSheet's Transform.scale based on the
   // ContextMenuOrientation.
-  static AlignmentDirectional getSheetAlignment(_ContextMenuOrientation contextMenuOrientation) {
+  static AlignmentDirectional getSheetAlignment(_ContextMenuLocation contextMenuOrientation) {
     switch (contextMenuOrientation) {
-      case _ContextMenuOrientation.center:
+      case _ContextMenuLocation.center:
         return AlignmentDirectional.topCenter;
-      case _ContextMenuOrientation.right:
+      case _ContextMenuLocation.right:
         return AlignmentDirectional.topEnd;
       default:
         return AlignmentDirectional.topStart;
@@ -582,15 +600,15 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   }
 
   // The place to start the sheetRect animation from.
-  static Rect _getSheetRectBegin(Orientation orientation, _ContextMenuOrientation contextMenuOrientation, Rect childRect, Rect sheetRect) {
+  static Rect _getSheetRectBegin(Orientation orientation, _ContextMenuLocation contextMenuOrientation, Rect childRect, Rect sheetRect) {
     switch (contextMenuOrientation) {
-      case _ContextMenuOrientation.center:
+      case _ContextMenuLocation.center:
         final Offset target = orientation == Orientation.portrait
           ? childRect.bottomCenter
           : childRect.topCenter;
         final Offset centered = target - Offset(sheetRect.width / 2, 0.0);
         return centered & sheetRect.size;
-      case _ContextMenuOrientation.right:
+      case _ContextMenuLocation.right:
         final Offset target = orientation == Orientation.portrait
           ? childRect.bottomRight
           : childRect.topRight;
@@ -784,7 +802,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
   final List<ContextMenuSheetAction> actions;
   final Widget child;
   final GlobalKey childGlobalKey;
-  final _ContextMenuOrientation contextMenuOrientation;
+  final _ContextMenuLocation contextMenuOrientation;
   final _DismissCallback onDismiss;
   final VoidCallback onTap;
   final Orientation orientation;
@@ -897,13 +915,13 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     widget.onDismiss(context, _lastScale, _sheetOpacityAnimation.value);
   }
 
-  Alignment _getChildAlignment(Orientation orientation, _ContextMenuOrientation contextMenuOrientation) {
+  Alignment _getChildAlignment(Orientation orientation, _ContextMenuLocation contextMenuOrientation) {
     switch (contextMenuOrientation) {
-      case _ContextMenuOrientation.center:
+      case _ContextMenuLocation.center:
         return orientation == Orientation.portrait
           ? Alignment.bottomCenter
           : Alignment.topRight;
-      case _ContextMenuOrientation.right:
+      case _ContextMenuLocation.right:
         return orientation == Orientation.portrait
           ? Alignment.bottomCenter
           : Alignment.topLeft;
@@ -951,7 +969,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   // The order and alignment of the ContextMenuSheet and the child depend on
   // both the orientation of the screen as well as the position on the screen of
   // the original child.
-  List<Widget> _getChildren(Orientation orientation, _ContextMenuOrientation contextMenuOrientation) {
+  List<Widget> _getChildren(Orientation orientation, _ContextMenuLocation contextMenuOrientation) {
     final Expanded child = Expanded(
       child: Align(
         alignment: _getChildAlignment(
@@ -987,9 +1005,9 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     );
 
     switch (contextMenuOrientation) {
-      case _ContextMenuOrientation.center:
+      case _ContextMenuLocation.center:
         return <Widget>[child, spacer, sheet];
-      case _ContextMenuOrientation.right:
+      case _ContextMenuLocation.right:
         return orientation == Orientation.portrait
           ? <Widget>[child, spacer, sheet]
           : <Widget>[sheet, spacer, child];
@@ -1110,7 +1128,7 @@ class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
     Key key,
     @required this.actions,
-    @required _ContextMenuOrientation contextMenuOrientation,
+    @required _ContextMenuLocation contextMenuOrientation,
     @required Orientation orientation,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(contextMenuOrientation != null),
@@ -1120,7 +1138,7 @@ class _ContextMenuSheet extends StatelessWidget {
        super(key: key);
 
   final List<ContextMenuSheetAction> actions;
-  final _ContextMenuOrientation _contextMenuOrientation;
+  final _ContextMenuLocation _contextMenuOrientation;
   final Orientation _orientation;
 
   // Get the children, whose order depends on orientation and
@@ -1141,7 +1159,7 @@ class _ContextMenuSheet extends StatelessWidget {
     );
 
     switch (_contextMenuOrientation) {
-      case _ContextMenuOrientation.center:
+      case _ContextMenuLocation.center:
         return _orientation == Orientation.portrait
           ? <Widget>[
             const Spacer(
@@ -1158,7 +1176,7 @@ class _ContextMenuSheet extends StatelessWidget {
               flex: 1,
             ),
           ];
-      case _ContextMenuOrientation.right:
+      case _ContextMenuLocation.right:
         return <Widget>[
           const Spacer(
             flex: 1,
