@@ -193,8 +193,7 @@ Future<void> pumpFrames({
   int frames,
   Duration duration,
 }) async {
-  int i;
-  for (i = 0; i < frames; i ++) {
+  for (int i = 0; i < frames; ++i) {
     await tester.pump(duration);
   }
 }

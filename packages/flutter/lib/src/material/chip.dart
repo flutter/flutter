@@ -1805,7 +1805,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         onTapCancel: canTap ? _handleTapCancel : null,
         onHover: canTap ? _handleHover : null,
         splashFactory: _LocationAwareInkRippleFactory(
-            widget.onDeleted != null,
+            hasDeleteButton,
             context,
             deleteIconKey,
         ),
