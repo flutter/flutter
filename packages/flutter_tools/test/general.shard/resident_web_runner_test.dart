@@ -431,11 +431,12 @@ void main() {
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
     _setupMocks();
     bool debugClosed = false;
-    when(mockDebugConnection.close()).thenAnswer((Invocation invocation) async {
+    when(mockWebDevice.stopApp(any)).thenAnswer((Invocation invocation) async {
       if (debugClosed) {
         throw StateError('debug connection closed twice');
       }
       debugClosed = true;
+      return true;
     });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -445,6 +446,8 @@ void main() {
 
     await residentWebRunner.exit();
     await residentWebRunner.exit();
+
+    verifyNever(mockDebugConnection.close());
   }));
 
   test('Prints target and device name on run', () => testbed.run(() async {
