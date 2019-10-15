@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -502,6 +503,34 @@ void main() {
       observer.didPop(nextPageRoute, pageRoute);
       verifyNoMoreInteractions(pageRouteAware);
     });
+  });
+  testWidgets('Can autofocus a TextField nested in a Focus in a route.', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+    await tester.pumpWidget(
+      Material(
+        child: MaterialApp(
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
+                return Focus(
+                  child: TextField(
+                    autofocus: true,
+                    focusNode: focusNode,
+                    controller: controller,
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
   });
 }
 

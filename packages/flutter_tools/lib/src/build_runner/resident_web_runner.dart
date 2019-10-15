@@ -108,7 +108,6 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
-    await _connectionResult?.debugConnection?.close();
     await _stdOutSub?.cancel();
     await _webFs?.stop();
     await device.stopApp(null);
@@ -217,6 +216,13 @@ class ResidentWebRunner extends ResidentRunner {
       throwToolExit('Failed to build application for the Web.');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
+    } on StateError catch (err) {
+      // Handle known state error.
+      final String message = err.toString();
+      if (message.contains('Could not connect to application with appInstanceId')) {
+        throwToolExit(message);
+      }
+      rethrow;
     } finally {
       if (statusActive) {
         buildStatus.stop();

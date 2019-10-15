@@ -227,13 +227,13 @@ void main() {
       expect(parentFocusScope, hasAGoodToStringDeep);
       expect(
         parentFocusScope.toStringDeep(),
-        equalsIgnoringHashCodes('FocusScopeNode#00000\n'
+        equalsIgnoringHashCodes('FocusScopeNode#00000(Parent Scope Node)\n'
             ' │ context: FocusScope\n'
             ' │ FOCUSED\n'
             ' │ debugLabel: "Parent Scope Node"\n'
             ' │ focusedChildren: FocusNode#00000(Child)\n'
             ' │\n'
-            ' └─Child 1: FocusNode#00000\n'
+            ' └─Child 1: FocusNode#00000(Child)\n'
             '     context: Focus\n'
             '     FOCUSED\n'
             '     debugLabel: "Child"\n'),
@@ -242,18 +242,18 @@ void main() {
       expect(WidgetsBinding.instance.focusManager.rootScope, hasAGoodToStringDeep);
       expect(
         WidgetsBinding.instance.focusManager.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
-        equalsIgnoringHashCodes('FocusScopeNode#00000\n'
+        equalsIgnoringHashCodes('FocusScopeNode#00000(Root Focus Scope)\n'
             ' │ FOCUSED\n'
             ' │ debugLabel: "Root Focus Scope"\n'
             ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node)\n'
             ' │\n'
-            ' └─Child 1: FocusScopeNode#00000\n'
+            ' └─Child 1: FocusScopeNode#00000(Parent Scope Node)\n'
             '   │ context: FocusScope\n'
             '   │ FOCUSED\n'
             '   │ debugLabel: "Parent Scope Node"\n'
             '   │ focusedChildren: FocusNode#00000(Child)\n'
             '   │\n'
-            '   └─Child 1: FocusNode#00000\n'
+            '   └─Child 1: FocusNode#00000(Child)\n'
             '       context: Focus\n'
             '       FOCUSED\n'
             '       debugLabel: "Child"\n'),

@@ -1686,10 +1686,10 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get anteMeridiemAbbreviation => r'prijepodne';
 
   @override
-  String get backButtonTooltip => r'Natrag';
+  String get backButtonTooltip => r'Nazad';
 
   @override
-  String get cancelButtonLabel => r'ODUSTANI';
+  String get cancelButtonLabel => r'OTKAŽI';
 
   @override
   String get closeButtonLabel => r'ZATVORI';
@@ -1713,16 +1713,16 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => r'Brisanje';
 
   @override
-  String get dialogLabel => r'Dijalog';
+  String get dialogLabel => r'Dijaloški okvir';
 
   @override
-  String get drawerLabel => r'Navigacijski izbornik';
+  String get drawerLabel => r'Meni za navigaciju';
 
   @override
-  String get expandedIconTapHint => r'Sažmi';
+  String get expandedIconTapHint => r'Suzi';
 
   @override
-  String get hideAccountsLabel => r'Sakrijte račune';
+  String get hideAccountsLabel => r'Sakrij račune';
 
   @override
   String get licensesPageTitle => r'Licence';
@@ -1737,25 +1737,25 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Sljedeća stranica';
 
   @override
-  String get okButtonLabel => r'U REDU';
+  String get okButtonLabel => r'Uredu';
 
   @override
-  String get openAppDrawerTooltip => r'Otvaranje izbornika za navigaciju';
+  String get openAppDrawerTooltip => r'Otvorite meni za navigaciju';
 
   @override
-  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow od $rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow od otprilike $rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow od oko $rowCount';
 
   @override
   String get pasteButtonLabel => r'ZALIJEPI';
 
   @override
-  String get popupMenuLabel => r'Skočni izbornik';
+  String get popupMenuLabel => r'Skočni meni';
 
   @override
-  String get postMeridiemAbbreviation => r'popodne';
+  String get postMeridiemAbbreviation => r'poslijepodne';
 
   @override
   String get previousMonthTooltip => r'Prethodni mjesec';
@@ -1767,16 +1767,16 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => r'Osvježi';
 
   @override
-  String get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
+  String get remainingTextFieldCharacterCountFew => r'Još $remainingCount znaka';
 
   @override
   String get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'Preostao je 1 znak';
+  String get remainingTextFieldCharacterCountOne => r'Još jedan znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
+  String get remainingTextFieldCharacterCountOther => r'Još $remainingCount znakova';
 
   @override
   String get remainingTextFieldCharacterCountTwo => null;
@@ -1785,25 +1785,25 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
-  String get reorderItemDown => r'Pomakni prema dolje';
+  String get reorderItemDown => r'Pomjeri prema dolje';
 
   @override
-  String get reorderItemLeft => r'Pomakni ulijevo';
+  String get reorderItemLeft => r'Pomjeri lijevo';
 
   @override
-  String get reorderItemRight => r'Pomakni udesno';
+  String get reorderItemRight => r'Pomjeri desno';
 
   @override
-  String get reorderItemToEnd => r'Premjesti na kraj';
+  String get reorderItemToEnd => r'Pomjerite na kraj';
 
   @override
-  String get reorderItemToStart => r'Premjesti na početak';
+  String get reorderItemToStart => r'Pomjerite na početak';
 
   @override
-  String get reorderItemUp => r'Pomakni prema gore';
+  String get reorderItemUp => r'Pomjeri prema gore';
 
   @override
-  String get rowsPerPageTitle => r'Redaka po stranici:';
+  String get rowsPerPageTitle => r'Broj redova po stranici:';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -1833,22 +1833,22 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleZero => null;
 
   @override
-  String get showAccountsLabel => r'Prikažite račune';
+  String get showAccountsLabel => r'Prikaži račune';
 
   @override
-  String get showMenuTooltip => r'Prikaz izbornika';
+  String get showMenuTooltip => r'Prikaži meni';
 
   @override
-  String get signedInLabel => r'Prijavljeni korisnik';
+  String get signedInLabel => r'Prijavljeni ste';
 
   @override
-  String get tabLabelRaw => r'Kartica $tabIndex od $tabCount';
+  String get tabLabelRaw => r'$tabIndex. kartica od $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerHourModeAnnouncement => r'Odaberite sate';
+  String get timePickerHourModeAnnouncement => r'Odaberite sat';
 
   @override
   String get timePickerMinuteModeAnnouncement => r'Odaberite minute';
@@ -2553,7 +2553,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Nächste Seite';
 
   @override
-  String get okButtonLabel => r'Ok';
+  String get okButtonLabel => r'OK';
 
   @override
   String get openAppDrawerTooltip => r'Navigationsmenü öffnen';
@@ -3292,6 +3292,48 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnIn({
     String localeName = 'en_IN',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get licensesPageTitle => r'Licences';
+
+  @override
+  String get viewLicensesButtonLabel => r'VIEW LICENCES';
+
+  @override
+  String get popupMenuLabel => r'Pop-up menu';
+
+  @override
+  String get dialogLabel => r'Dialogue';
+
+  @override
+  String get reorderItemLeft => r'Move to the left';
+
+  @override
+  String get reorderItemRight => r'Move to the right';
+}
+
+/// The translations for English, as used in New Zealand (`en_NZ`).
+class MaterialLocalizationEnNz extends MaterialLocalizationEn {
+  /// Create an instance of the translation bundle for English, as used in New Zealand.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationEnNz({
+    String localeName = 'en_NZ',
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
@@ -6807,7 +6849,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Nächste Seite';
 
   @override
-  String get okButtonLabel => r'Ok';
+  String get okButtonLabel => r'OK';
 
   @override
   String get openAppDrawerTooltip => r'Navigationsmenü öffnen';
@@ -17865,19 +17907,19 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   );
 
   @override
-  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
+  String get tabLabelRaw => r'第 $tabIndex 個標籤，總共 $tabCount 個';
 
   @override
   String get showAccountsLabel => r'顯示帳戶';
 
   @override
-  String get modalBarrierDismissLabel => r'關閉';
+  String get modalBarrierDismissLabel => r'拒絕';
 
   @override
   String get hideAccountsLabel => r'隱藏帳戶';
 
   @override
-  String get signedInLabel => r'已登入帳戶';
+  String get signedInLabel => r'已登入';
 
   @override
   String get openAppDrawerTooltip => r'開啟導覽選單';
@@ -17904,16 +17946,16 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get showMenuTooltip => r'顯示選單';
 
   @override
-  String get aboutListTileTitleRaw => r'關於「$applicationName」';
+  String get aboutListTileTitleRaw => r'關於$applicationName';
 
   @override
   String get licensesPageTitle => r'授權';
 
   @override
-  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
+  String get pageRowsInfoTitleRaw => r'第 $firstRow 至 $lastRow 列，共 $rowCount 列';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
 
   @override
   String get rowsPerPageTitle => r'每頁列數：';
@@ -17949,10 +17991,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get viewLicensesButtonLabel => r'查看授權';
 
   @override
-  String get timePickerHourModeAnnouncement => r'選取小時數';
+  String get timePickerHourModeAnnouncement => r'揀選小時';
 
   @override
-  String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
+  String get timePickerMinuteModeAnnouncement => r'揀選分鐘';
 
   @override
   String get drawerLabel => r'導覽選單';
@@ -17964,16 +18006,16 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get dialogLabel => r'對話方塊';
 
   @override
-  String get alertDialogLabel => r'快訊';
+  String get alertDialogLabel => r'通知';
 
   @override
   String get searchFieldLabel => r'搜尋';
 
   @override
-  String get reorderItemToStart => r'移至開頭';
+  String get reorderItemToStart => r'移到開頭';
 
   @override
-  String get reorderItemToEnd => r'移至結尾';
+  String get reorderItemToEnd => r'移到最後';
 
   @override
   String get reorderItemUp => r'向上移';
@@ -17994,10 +18036,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get collapsedIconTapHint => r'展開';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
+  String get remainingTextFieldCharacterCountOne => r'尚餘 1 個字元';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
+  String get remainingTextFieldCharacterCountOther => r'尚餘 $remainingCount 個字元';
 
   @override
   String get refreshIndicatorSemanticLabel => r'重新整理';
@@ -18049,6 +18091,45 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
+
+  @override
+  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
+
+  @override
+  String get modalBarrierDismissLabel => r'關閉';
+
+  @override
+  String get signedInLabel => r'已登入帳戶';
+
+  @override
+  String get aboutListTileTitleRaw => r'關於「$applicationName」';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
+
+  @override
+  String get timePickerHourModeAnnouncement => r'選取小時數';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
+
+  @override
+  String get alertDialogLabel => r'快訊';
+
+  @override
+  String get reorderItemToStart => r'移至開頭';
+
+  @override
+  String get reorderItemToEnd => r'移至結尾';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
 /// The translations for Zulu (`zu`).
@@ -18370,7 +18451,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `da` - Danish
 ///  * `de` - German (plus one country variation)
 ///  * `el` - Modern Greek
-///  * `en` - English (plus 7 country variations)
+///  * `en` - English (plus 8 country variations)
 ///  * `es` - Spanish Castilian (plus 20 country variations)
 ///  * `et` - Estonian
 ///  * `eu` - Basque
@@ -18492,6 +18573,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
           return MaterialLocalizationEnIe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'IN':
           return MaterialLocalizationEnIn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        case 'NZ':
+          return MaterialLocalizationEnNz(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'SG':
           return MaterialLocalizationEnSg(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'ZA':

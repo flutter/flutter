@@ -167,7 +167,7 @@ void main() {
 
   test('Uses provided port number and hostname.', () => testbed.run(() async {
     final FlutterProject flutterProject = FlutterProject.current();
-    await WebFs.start(
+    final WebFs webFs = await WebFs.start(
       skipDwds: false,
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
@@ -177,6 +177,7 @@ void main() {
       port: '1234',
     );
 
+    expect(webFs.uri, contains('foo:1234'));
     expect(lastPort, 1234);
     expect(lastAddress, contains('foo'));
   }));
