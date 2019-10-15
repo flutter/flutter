@@ -9,6 +9,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../codegen.dart';
@@ -234,7 +235,7 @@ class TestCommand extends FastFlutterCommand {
       disableServiceAuthCodes: disableServiceAuthCodes,
       ipv6: argResults['ipv6'],
       machine: machine,
-      enableAsserts: true,
+      buildMode: BuildMode.debug,
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,

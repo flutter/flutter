@@ -72,7 +72,6 @@ class BundleBuilder {
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
     final FlutterProject flutterProject = FlutterProject.current();
-
     await buildWithAssemble(
       buildMode: buildMode ?? BuildMode.debug,
       targetPlatform: platform,

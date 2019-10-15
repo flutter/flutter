@@ -131,7 +131,10 @@ void main() {
         mockArtifacts = MockArtifacts();
         final String artifactPath = fs.path.join(flutterRoot, 'artifact');
         fs.file(artifactPath).createSync(recursive: true);
-        when(mockArtifacts.getArtifactPath(any)).thenReturn(artifactPath);
+        when(mockArtifacts.getArtifactPath(
+          any,
+          mode: anyNamed('mode')
+        )).thenReturn(artifactPath);
 
         when(mockBuildSystem.build(
           any,
