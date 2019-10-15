@@ -236,7 +236,6 @@ bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
 PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..something((Symbol method, List<dynamic> arguments) {
-      print('$method !@!@ $arguments');
       if (method != #drawCircle)
         return false;
       final Offset center = arguments[0];
@@ -255,7 +254,6 @@ PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
 PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..everything((Symbol method, List<dynamic> arguments) {
-      print('$method !@!@ $arguments');
       if (method != #drawCircle)
         return true;
       final Offset center = arguments[0];
