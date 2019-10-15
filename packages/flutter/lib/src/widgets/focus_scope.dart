@@ -262,12 +262,26 @@ class Focus extends StatefulWidget {
   /// [nullOk].
   ///
   /// The [context] and [nullOk] arguments must not be null.
-  static FocusNode of(BuildContext context, { bool nullOk = false }) {
+  static FocusNode of(BuildContext context, { bool nullOk = false, bool scopeOk = false }) {
     assert(context != null);
     assert(nullOk != null);
+    assert(scopeOk != null);
     final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
     final FocusNode node = marker?.notifier;
-    if (node is FocusScopeNode) {
+    if (node == null) {
+      if (!nullOk) {
+        throw FlutterError(
+            'Focus.of() was called with a context that does not contain a Focus widget.\n'
+                'No Focus widget ancestor could be found starting from the context that was passed to '
+                'Focus.of(). This can happen because you are using a widget that looks for a Focus '
+                'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
+                'The context used was:\n'
+                '  $context'
+        );
+      }
+      return null;
+    }
+    if (!scopeOk && node is FocusScopeNode) {
       if (!nullOk) {
         throw FlutterError(
             'Focus.of() was called with a context that does not contain a Focus between the given '
@@ -276,19 +290,6 @@ class Focus extends StatefulWidget {
             'Focus.of() to the point where it found the nearest FocusScope widget. This can happen '
             'because you are using a widget that looks for a Focus ancestor, and do not have a '
             'Focus widget ancestor in the current FocusScope.\n'
-            'The context used was:\n'
-            '  $context'
-        );
-      }
-      return null;
-    }
-    if (node == null) {
-      if (!nullOk) {
-        throw FlutterError(
-            'Focus.of() was called with a context that does not contain a Focus widget.\n'
-            'No Focus widget ancestor could be found starting from the context that was passed to '
-            'Focus.of(). This can happen because you are using a widget that looks for a Focus '
-            'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
             'The context used was:\n'
             '  $context'
         );
