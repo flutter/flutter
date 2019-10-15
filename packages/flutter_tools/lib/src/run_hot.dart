@@ -228,6 +228,7 @@ class HotRunner extends ResidentRunner {
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
       return 0;
     }
+    writeVmserviceFile();
 
     int result = 0;
     if (stayResident) {

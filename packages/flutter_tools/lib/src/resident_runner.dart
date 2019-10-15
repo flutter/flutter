@@ -643,6 +643,20 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
+  @protected
+  void writeVmserviceFile() {
+    if (debuggingOptions.vmserviceOutFile != null) {
+      try {
+        final String address = flutterDevices.first.vmServices.first.wsAddress.toString();
+        final File vmserviceOutFile = fs.file(debuggingOptions.vmserviceOutFile);
+        vmserviceOutFile.createSync(recursive: true);
+        vmserviceOutFile.writeAsStringSync(address);
+      } on FileSystemException {
+        printError('Failed to write vmservice-out-file at ${debuggingOptions.vmserviceOutFile}');
+      }
+    }
+  }
+
   Future<void> exit() async {
     _exited = true;
     await stopEchoingDeviceLog();
