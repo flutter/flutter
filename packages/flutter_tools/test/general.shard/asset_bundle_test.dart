@@ -152,6 +152,8 @@ name: example''')
     // https://github.com/flutter/flutter/issues/42723
     testUsingContext('Test regression for mistyped file', () async {
       fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      // Create a directory in the same path to test that we're only looking at File
+      // objects.
       fs.directory(fs.path.join('assets', 'foo', 'bar')).createSync();
       fs.file('pubspec.yaml')
         ..createSync()
