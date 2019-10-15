@@ -206,20 +206,18 @@ Widget _chipWithOptionalDeleteButton({
   TextDirection textDirection = TextDirection.ltr,
 }){
   return _wrapForChip(
+    textDirection: textDirection,
     child: Wrap(
       children: <Widget>[
-        Directionality(
-          textDirection: textDirection,
-          child: RawChip(
-            onPressed: () {},
-            onDeleted: deletable ? () {} : null,
-            deleteIcon: Icon(Icons.close, key: deleteButtonKey),
-            label: Text(
-              deletable
-                ? 'Chip with Delete Button'
-                : 'Chip without Delete Button',
-              key: labelKey,
-            ),
+        RawChip(
+          onPressed: () {},
+          onDeleted: deletable ? () {} : null,
+          deleteIcon: Icon(Icons.close, key: deleteButtonKey),
+          label: Text(
+            deletable
+              ? 'Chip with Delete Button'
+              : 'Chip without Delete Button',
+            key: labelKey,
           ),
         ),
       ],
@@ -230,7 +228,7 @@ Widget _chipWithOptionalDeleteButton({
 bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
 bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
 
-// [RipplePattern] matches if there exists at least one ripple
+// Ripple pattern matches if there exists at least one ripple
 // With the [expectedCenter] and [expectedRadius].
 // This ensures the existence of a ripple.
 PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
@@ -248,7 +246,7 @@ PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
     );
 }
 
-// [UniqueRipplePattern] matches if there does not exist ripples
+// Unique ripple pattern matches if there does not exist ripples
 // Other than ones with the [expectedCenter] and [expectedRadius].
 // This ensures the nonexistence of two different ripples.
 PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {

@@ -2814,25 +2814,29 @@ class _RenderChip extends RenderBox {
 
 class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
   const _LocationAwareInkRippleFactory(
-      this.hasDeleteButton, this.chipContext, this.deleteIconKey);
+    this.hasDeleteButton,
+    this.chipContext,
+    this.deleteIconKey,
+  );
 
   final bool hasDeleteButton;
   final BuildContext chipContext;
   final GlobalKey deleteIconKey;
 
   @override
-  InteractiveInkFeature create(
-      {MaterialInkController controller,
-      RenderBox referenceBox,
-      Offset position,
-      Color color,
-      TextDirection textDirection,
-      bool containedInkWell = false,
-      RectCallback rectCallback,
-      BorderRadius borderRadius,
-      ShapeBorder customBorder,
-      double radius,
-      VoidCallback onRemoved}) {
+  InteractiveInkFeature create({
+    MaterialInkController controller,
+    RenderBox referenceBox,
+    Offset position,
+    Color color,
+    TextDirection textDirection,
+    bool containedInkWell = false,
+    RectCallback rectCallback,
+    BorderRadius borderRadius,
+    ShapeBorder customBorder,
+    double radius,
+    VoidCallback onRemoved,
+  }) {
 
     final bool tapIsOnDeleteIcon = _tapIsOnDeleteIcon(
       hasDeleteButton: hasDeleteButton,
@@ -2870,11 +2874,12 @@ class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
   }
 }
 
-bool _tapIsOnDeleteIcon(
-    {bool hasDeleteButton,
-    Offset tapPosition,
-    Size chipSize,
-    TextDirection textDirection}) {
+bool _tapIsOnDeleteIcon({
+  bool hasDeleteButton,
+  Offset tapPosition,
+  Size chipSize,
+  TextDirection textDirection,
+}) {
   bool tapIsOnDeleteIcon;
   if (!hasDeleteButton) {
     tapIsOnDeleteIcon = false;
