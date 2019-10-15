@@ -30,9 +30,9 @@ void main() {
           child: Align(
             alignment: alignment,
             child: ContextMenu(
-              actions: <ContextMenuSheetAction>[
-                ContextMenuSheetAction(
-                  child: Text('ContextMenuSheetAction $alignment'),
+              actions: <ContextMenuAction>[
+                ContextMenuAction(
+                  child: Text('ContextMenuAction $alignment'),
                 ),
               ],
               child: child ?? _getChild(),
@@ -221,7 +221,7 @@ void main() {
         screenSize: portraitScreenSize,
         child: child,
       ));
-      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      expect(find.byType(ContextMenuAction), findsNothing);
       Rect childRect = tester.getRect(find.byWidget(child));
       TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pumpAndSettle();
@@ -229,8 +229,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // The position of the action is in the center of the screen.
-      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      final Offset center = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(find.byType(ContextMenuAction), findsOneWidget);
+      final Offset center = tester.getTopLeft(find.byType(ContextMenuAction));
 
       // Close the ContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
@@ -243,7 +243,7 @@ void main() {
         screenSize: portraitScreenSize,
         child: child,
       ));
-      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      expect(find.byType(ContextMenuAction), findsNothing);
       await tester.pumpAndSettle();
       childRect = tester.getRect(find.byWidget(child));
       gesture = await tester.startGesture(childRect.center);
@@ -252,8 +252,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // The position of the action is on the left of the screen.
-      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      final Offset left = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(find.byType(ContextMenuAction), findsOneWidget);
+      final Offset left = tester.getTopLeft(find.byType(ContextMenuAction));
       expect(left.dx, lessThan(center.dx));
 
       // Close the ContextMenu.
@@ -267,7 +267,7 @@ void main() {
         screenSize: portraitScreenSize,
         child: child,
       ));
-      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      expect(find.byType(ContextMenuAction), findsNothing);
       childRect = tester.getRect(find.byWidget(child));
       gesture = await tester.startGesture(childRect.center);
       await tester.pumpAndSettle();
@@ -275,8 +275,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // The position of the action is on the right of the screen.
-      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      final Offset right = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(find.byType(ContextMenuAction), findsOneWidget);
+      final Offset right = tester.getTopLeft(find.byType(ContextMenuAction));
       expect(right.dx, greaterThan(center.dx));
 
       // Set the screen back to its normal size.
@@ -290,7 +290,7 @@ void main() {
         alignment: Alignment.center,
         child: child,
       ));
-      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      expect(find.byType(ContextMenuAction), findsNothing);
       Rect childRect = tester.getRect(find.byWidget(child));
       TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pumpAndSettle();
@@ -299,8 +299,8 @@ void main() {
 
       // Landscape doesn't support a centered action list, so the action is on
       // the left side of the screen.
-      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      final Offset center = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(find.byType(ContextMenuAction), findsOneWidget);
+      final Offset center = tester.getTopLeft(find.byType(ContextMenuAction));
 
       // Close the ContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
@@ -312,7 +312,7 @@ void main() {
         alignment: Alignment.centerLeft,
         child: child,
       ));
-      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      expect(find.byType(ContextMenuAction), findsNothing);
       childRect = tester.getRect(find.byWidget(child));
       gesture = await tester.startGesture(childRect.center);
       await tester.pumpAndSettle();
@@ -321,8 +321,8 @@ void main() {
 
       // The position of the action is on the right of the screen, which is the
       // same as for center aligned children in landscape.
-      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      final Offset left = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(find.byType(ContextMenuAction), findsOneWidget);
+      final Offset left = tester.getTopLeft(find.byType(ContextMenuAction));
       expect(left.dx, equals(center.dx));
 
       // Close the ContextMenu.
@@ -335,7 +335,7 @@ void main() {
         alignment: Alignment.centerRight,
         child: child,
       ));
-      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      expect(find.byType(ContextMenuAction), findsNothing);
       childRect = tester.getRect(find.byWidget(child));
       gesture = await tester.startGesture(childRect.center);
       await tester.pumpAndSettle();
@@ -343,8 +343,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // The position of the action is on the left of the screen.
-      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      final Offset right = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(find.byType(ContextMenuAction), findsOneWidget);
+      final Offset right = tester.getTopLeft(find.byType(ContextMenuAction));
       expect(right.dx, lessThan(left.dx));
     });
   });

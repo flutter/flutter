@@ -11,9 +11,9 @@ import 'colors.dart';
 /// A typical use case is to pass a [Text] as the [child] here, but be sure to
 /// use [TextOverflow.ellipsis] for the [Text.overflow] field if the text may be
 /// long, as without it the text will wrap to the next line.
-class ContextMenuSheetAction extends StatefulWidget {
-  /// Construct a ContextMenuSheetAction.
-  const ContextMenuSheetAction({
+class ContextMenuAction extends StatefulWidget {
+  /// Construct a ContextMenuAction.
+  const ContextMenuAction({
     Key key,
     @required this.child,
     this.isDefaultAction = false,
@@ -50,10 +50,10 @@ class ContextMenuSheetAction extends StatefulWidget {
   final IconData trailingIcon;
 
   @override
-  _ContextMenuSheetActionState createState() => _ContextMenuSheetActionState();
+  _ContextMenuActionState createState() => _ContextMenuActionState();
 }
 
-class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
+class _ContextMenuActionState extends State<ContextMenuAction> {
   static const Color _kBackgroundColor = Color(0xFFEEEEEE);
   static const Color _kBackgroundColorPressed = Color(0xFFDDDDDD);
   static const double _kButtonHeight = 56.0;

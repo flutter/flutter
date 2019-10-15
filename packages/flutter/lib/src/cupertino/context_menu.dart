@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'context_menu_sheet_action.dart';
+import 'context_menu_action.dart';
 
 // The scale of the child at the time that the ContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
@@ -72,14 +72,14 @@ enum _ContextMenuLocation {
 ///           child: Container(
 ///             color: Colors.red,
 ///           ),
-///           actions: <ContextMenuSheetAction>[
-///             ContextMenuSheetAction(
+///           actions: <ContextMenuAction>[
+///             ContextMenuAction(
 ///               child: const Text('Action one'),
 ///               onPressed: () {
 ///                 Navigator.pop(context);
 ///               },
 ///             ),
-///             ContextMenuSheetAction(
+///             ContextMenuAction(
 ///               child: const Text('Action two'),
 ///               onPressed: () {
 ///                 Navigator.pop(context);
@@ -101,7 +101,7 @@ class ContextMenu extends StatefulWidget {
   /// Create a context menu.
   ///
   /// [actions] is required and cannot be null. Itmust contain at least one
-  /// [ContextMenuSheetAction].
+  /// [ContextMenuAction].
   ///
   /// [child] is required and cannot be null.
   ContextMenu({
@@ -130,8 +130,8 @@ class ContextMenu extends StatefulWidget {
   /// The actions that are shown in the menu.
   ///
   /// This parameter cannot be null, and items in the List must be
-  /// [ContextMenuSheetAction]s.
-  final List<ContextMenuSheetAction> actions;
+  /// [ContextMenuAction]s.
+  final List<ContextMenuAction> actions;
 
   /// The callback to call when tapping on the child when the [ContextMenu] is
   /// open.
@@ -173,8 +173,8 @@ class ContextMenu extends StatefulWidget {
   ///           child: Image.asset('assets/photo.jpg'),
   ///         ),
   ///       ),
-  ///       actions: <ContextMenuSheetAction>[
-  ///         ContextMenuSheetAction(
+  ///       actions: <ContextMenuAction>[
+  ///         ContextMenuAction(
   ///           child: const Text('Action one'),
   ///           onPressed: () {},
   ///         ),
@@ -491,7 +491,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
 class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Build a _ContextMenuRoute.
   _ContextMenuRoute({
-    @required List<ContextMenuSheetAction> actions,
+    @required List<ContextMenuAction> actions,
     @required _ContextMenuLocation contextMenuOrientation,
     this.barrierLabel,
     WidgetBuilder builder,
@@ -517,7 +517,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // from a physical device running iOS 13.1.2.
   static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
-  final List<ContextMenuSheetAction> _actions;
+  final List<ContextMenuAction> _actions;
   final WidgetBuilder _builder;
   final GlobalKey _childGlobalKey = GlobalKey();
   final _ContextMenuLocation _contextMenuOrientation;
@@ -799,7 +799,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
        assert(orientation != null),
        super(key: key);
 
-  final List<ContextMenuSheetAction> actions;
+  final List<ContextMenuAction> actions;
   final Widget child;
   final GlobalKey childGlobalKey;
   final _ContextMenuLocation contextMenuOrientation;
@@ -1123,7 +1123,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 }
 
-// A menu of _ContextMenuSheetActions.
+// A menu of _ContextMenuActions.
 class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
     Key key,
@@ -1137,7 +1137,7 @@ class _ContextMenuSheet extends StatelessWidget {
        _orientation = orientation,
        super(key: key);
 
-  final List<ContextMenuSheetAction> actions;
+  final List<ContextMenuAction> actions;
   final _ContextMenuLocation _contextMenuOrientation;
   final Orientation _orientation;
 

@@ -6,15 +6,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 
 void main() {
-  // Constants taken from _ContextMenuSheetActionState.
+  // Constants taken from _ContextMenuActionState.
   const Color _kBackgroundColor = Color(0xFFEEEEEE);
   const Color _kBackgroundColorPressed = Color(0xFFDDDDDD);
 
   Widget _getApp([VoidCallback onPressed]) {
     final UniqueKey actionKey = UniqueKey();
-    final ContextMenuSheetAction action = ContextMenuSheetAction(
+    final ContextMenuAction action = ContextMenuAction(
       key: actionKey,
-      child: const Text('I am a ContextMenuSheetAction'),
+      child: const Text('I am a ContextMenuAction'),
       onPressed: onPressed,
     );
 
@@ -29,7 +29,7 @@ void main() {
 
   BoxDecoration _getDecoration(WidgetTester tester) {
     final Finder finder = find.descendant(
-      of: find.byType(ContextMenuSheetAction),
+      of: find.byType(ContextMenuAction),
       matching: find.byType(Container),
     );
     expect(finder, findsOneWidget);
@@ -44,7 +44,7 @@ void main() {
     }));
 
     expect(wasPressed, false);
-    await tester.tap(find.byType(ContextMenuSheetAction));
+    await tester.tap(find.byType(ContextMenuAction));
     expect(wasPressed, true);
   });
 
@@ -52,7 +52,7 @@ void main() {
     await tester.pumpWidget(_getApp());
     expect(_getDecoration(tester).color, _kBackgroundColor);
 
-    final Offset actionCenter = tester.getCenter(find.byType(ContextMenuSheetAction));
+    final Offset actionCenter = tester.getCenter(find.byType(ContextMenuAction));
     final TestGesture gesture = await tester.startGesture(actionCenter);
     await tester.pump();
     expect(_getDecoration(tester).color, _kBackgroundColorPressed);

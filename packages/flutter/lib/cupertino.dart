@@ -16,7 +16,7 @@ export 'src/cupertino/bottom_tab_bar.dart';
 export 'src/cupertino/button.dart';
 export 'src/cupertino/colors.dart';
 export 'src/cupertino/context_menu.dart';
-export 'src/cupertino/context_menu_sheet_action.dart';
+export 'src/cupertino/context_menu_action.dart';
 export 'src/cupertino/date_picker.dart';
 export 'src/cupertino/dialog.dart';
 export 'src/cupertino/icons.dart';
