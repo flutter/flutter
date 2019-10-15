@@ -1194,12 +1194,10 @@ void main() {
   });
 
   testWidgets('MaterialButton should be enabled when onLongPress is not null.', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: MaterialButton(
-          color: const Color(0xffff00ff),
           onPressed: null,
           onLongPress: () { /* to make sure the button is enabled */ },
           child: const Text('button'),
@@ -1208,6 +1206,70 @@ void main() {
     );
 
     final MaterialButton button = tester.widget<MaterialButton>(find.byType(MaterialButton));
+    expect(button.enabled, true);
+  });
+
+  testWidgets('FlatButton should be enabled when onLongPress is not null.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(
+          onPressed: null,
+          onLongPress: () { /* to make sure the button is enabled */ },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final FlatButton button = tester.widget<FlatButton>(find.byType(FlatButton));
+    expect(button.enabled, true);
+  });
+  
+  testWidgets('OutlineButton should be enabled when onLongPress is not null.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          onPressed: null,
+          onLongPress: () { /* to make sure the button is enabled */ },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final OutlineButton button = tester.widget<OutlineButton>(find.byType(OutlineButton));
+    expect(button.enabled, true);
+  });
+  
+  testWidgets('RaisedButton should be enabled when onLongPress is not null.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          onPressed: null,
+          onLongPress: () { /* to make sure the button is enabled */ },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final RaisedButton button = tester.widget<RaisedButton>(find.byType(RaisedButton));
+    expect(button.enabled, true);
+  });
+
+  testWidgets('RawMaterialButton should be enabled when onLongPress is not null.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RawMaterialButton(
+          onPressed: null,
+          onLongPress: () { /* to make sure the button is enabled */ },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final RawMaterialButton button = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
     expect(button.enabled, true);
   });
 
