@@ -19,7 +19,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(TestImageProvider key) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(ImageInfo(image: TestImage()))
     );

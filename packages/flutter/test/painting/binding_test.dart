@@ -19,9 +19,7 @@ void main() {
 
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage memoryImage = MemoryImage(bytes);
-    memoryImage.load(memoryImage, (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
-    });
+    memoryImage.load(memoryImage);
     expect(binding.instantiateImageCodecCalledCount, 1);
   });
 }
