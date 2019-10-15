@@ -1085,21 +1085,17 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
     if (widget.child != null)
       return Tooltip(
-        message:
-        widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+        message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           child: widget.child,
         ),
       );
 
-    // If there is no child, it does not matter if icon == null because
-    // a default icon will be used if both child and icon are null.
     return IconButton(
       icon: widget.icon ?? _getIcon(Theme.of(context).platform),
       padding: widget.padding,
-      tooltip:
-          widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
     );
   }
