@@ -54,18 +54,6 @@ class DartIsolate : public UIDartState {
       fml::closure isolate_create_callback,
       fml::closure isolate_shutdown_callback);
 
-  DartIsolate(const Settings& settings,
-              fml::RefPtr<const DartSnapshot> isolate_snapshot,
-              fml::RefPtr<const DartSnapshot> shared_snapshot,
-              TaskRunners task_runners,
-              fml::WeakPtr<IOManager> io_manager,
-              fml::WeakPtr<ImageDecoder> image_decoder,
-              std::string advisory_script_uri,
-              std::string advisory_script_entrypoint,
-              ChildIsolatePreparer child_isolate_preparer,
-              fml::closure isolate_create_callback,
-              fml::closure isolate_shutdown_callback);
-
   ~DartIsolate() override;
 
   const Settings& GetSettings() const;
@@ -138,6 +126,18 @@ class DartIsolate : public UIDartState {
   fml::RefPtr<fml::TaskRunner> message_handling_task_runner_;
   const fml::closure isolate_create_callback_;
   const fml::closure isolate_shutdown_callback_;
+
+  DartIsolate(const Settings& settings,
+              fml::RefPtr<const DartSnapshot> isolate_snapshot,
+              fml::RefPtr<const DartSnapshot> shared_snapshot,
+              TaskRunners task_runners,
+              fml::WeakPtr<IOManager> io_manager,
+              fml::WeakPtr<ImageDecoder> image_decoder,
+              std::string advisory_script_uri,
+              std::string advisory_script_entrypoint,
+              ChildIsolatePreparer child_isolate_preparer,
+              fml::closure isolate_create_callback,
+              fml::closure isolate_shutdown_callback);
 
   FML_WARN_UNUSED_RESULT bool Initialize(Dart_Isolate isolate,
                                          bool is_root_isolate);
