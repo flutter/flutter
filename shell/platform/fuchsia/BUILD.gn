@@ -22,6 +22,7 @@ if (using_fuchsia_sdk) {
       "flutter:flutter_aot_${product_suffix}runner",
       "flutter:flutter_jit_${product_suffix}runner",
       "flutter:flutter_runner_tests",
+      "//flutter/shell/testing:testing($host_toolchain)",
     ]
   }
 }

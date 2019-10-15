@@ -112,6 +112,12 @@ def CopyGenSnapshotIfExists(source, destination):
                     destination_base, 'kernel_compiler.snapshot')
 
 
+def CopyFlutterTesterBinIfExists(source, destination):
+  source_root = os.path.join(_out_dir, source)
+  destination_base = os.path.join(destination, 'flutter_binaries')
+  FindFileAndCopyTo('flutter_tester', source_root, destination_base)
+
+
 def CopyToBucketWithMode(source, destination, aot, product, runner_type):
   mode = 'aot' if aot else 'jit'
   product_suff = '_product' if product else ''
@@ -131,6 +137,7 @@ def CopyToBucketWithMode(source, destination, aot, product, runner_type):
   if not os.path.exists(dest_sdk_path):
     CopyPath(patched_sdk_dir, dest_sdk_path)
   CopyGenSnapshotIfExists(source_root, destination)
+  CopyFlutterTesterBinIfExists(source_root, destination)
 
 
 def CopyToBucket(src, dst, product=False):
@@ -185,13 +192,7 @@ def GetRunnerTarget(runner_type, product, aot):
 
 def GetTargetsToBuild(product=False):
   targets_to_build = [
-      # The Flutter Runner.
-      GetRunnerTarget('flutter', product, False),
-      GetRunnerTarget('flutter', product, True),
-      # The Dart Runner.
-      GetRunnerTarget('dart_runner', product, False),
-      GetRunnerTarget('dart_runner', product, True),
-      '%s/dart:kernel_compiler' % _fuchsia_base,
+      'flutter/shell/platform/fuchsia:fuchsia',
   ]
   return targets_to_build
 
