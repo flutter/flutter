@@ -1,4 +1,4 @@
-Signature: 2347665c00c252ed66d9dd660631fd65
+Signature: 57e9fcf9c57b25432b488ea9c31c9314
 
 UNUSED LICENSES:
 
@@ -1455,6 +1455,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/agent.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/include/lib/modular/cpp/agent.h
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/fake_agent.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/fake_component.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/test_harness_builder.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/test_harness_launcher.cc
