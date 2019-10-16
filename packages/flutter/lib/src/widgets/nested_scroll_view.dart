@@ -300,18 +300,21 @@ class _NestedScrollViewState extends State<NestedScrollView> {
 
   @override
   void initState() {
+    print('_NestedScrollViewState.initState');
     widget.coordinator.assign(this, widget.controller, _handleHasScrolledBodyChanged);
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
+    print('_NestedScrollViewState.didChangeDependencies');
     widget.coordinator.setParent(widget.controller);
     super.didChangeDependencies();
   }
 
   @override
   void didUpdateWidget(NestedScrollView oldWidget) {
+    print('_NestedScrollViewState.didUpdateWidget');
     if (oldWidget.coordinator != widget.coordinator)
       widget.coordinator.copy(oldWidget.coordinator);
     if (oldWidget.controller != widget.controller)
@@ -321,6 +324,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
 
   @override
   void dispose() {
+    print('_NestedScrollViewState.dispose');
     widget.coordinator.dispose();
     super.dispose();
   }
@@ -344,6 +348,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
 
   @override
   Widget build(BuildContext context) {
+    print('_NestedScrollViewState.build ${widget.coordinator.innerController}');
     return _InheritedNestedScrollView(
       state: this,
       child: Builder(
@@ -488,6 +493,7 @@ class NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldContr
     final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
     outerController = _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'outer');
     innerController = _NestedScrollController(this, initialScrollOffset: 0.0, debugLabel: 'inner');
+    print('NestedScrollCoordinator.assign $innerController');
   }
 
   void copy(NestedScrollCoordinator coordinator) {
