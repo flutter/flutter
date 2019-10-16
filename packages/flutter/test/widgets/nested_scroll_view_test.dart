@@ -676,27 +676,10 @@ void main() {
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
   });
-
-  testWidgets('NestedScrollView exposed scroll controllers',
-          (WidgetTester tester) async {
-    final NestedScrollView widget = NestedScrollView(
-      body: Container(),
-      headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
-    );
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: widget,
-        ),
-      ),
-    ));
+  
+  testWidgets('NestedScrollView exposed scroll controllers', (WidgetTester tester) async {
+    final NestedScrollView widget = NestedScrollView(body: Container(), headerSliverBuilder: (_, __) => <Widget>[Container()],);
+    await tester.pumpWidget(widget);
     expect(widget.coordinator.innerController, isNotNull);
     expect(widget.coordinator.outerController, isNotNull);
   });
