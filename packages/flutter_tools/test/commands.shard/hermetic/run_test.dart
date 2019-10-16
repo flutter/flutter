@@ -43,7 +43,6 @@ void main() {
       }
     });
 
-
     group('dart-flags option', () {
       setUpAll(() {
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {

@@ -6,6 +6,8 @@ load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 use_frameworks!
 
 target 'Runner' do
+  use_modular_headers!
+  
   install_flutter_engine_pod
   install_flutter_plugin_pods flutter_application_path
 end
