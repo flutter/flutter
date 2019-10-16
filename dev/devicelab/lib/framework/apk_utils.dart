@@ -58,7 +58,7 @@ Future<Iterable<String>> getFilesInApk(String apk) async {
         'Gradle did not produce an output artifact file at: $apk');
   }
   final String files = await eval(_apkAnalyzer, <String>['files', 'list', apk]);
-  return files.split('\n');
+  return files.split('\n').map((String file) => file.substring(1));
 }
 /// Returns the list of files inside an Android App Bundle.
 Future<Iterable<String>> getFilesInAppBundle(String bundle) {
