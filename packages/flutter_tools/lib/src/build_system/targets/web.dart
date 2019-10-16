@@ -112,7 +112,6 @@ class Dart2JSTarget extends Target {
     Source.artifact(Artifact.flutterWebSdk),
     Source.artifact(Artifact.dart2jsSnapshot),
     Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.engineDartSdkPath),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
