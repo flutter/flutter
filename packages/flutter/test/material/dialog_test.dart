@@ -13,26 +13,26 @@ import '../widgets/semantics_tester.dart';
 
 MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
   return MaterialApp(
-      theme: theme,
-      home: Material(
-        child: Builder(
-          builder: (BuildContext context) {
-            return Center(
-              child: RaisedButton(
-                child: const Text('X'),
-                onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return dialog;
-                    },
-                  );
-                },
-              ),
-            );
-          }
-        ),
+    theme: theme,
+    home: Material(
+      child: Builder(
+        builder: (BuildContext context) {
+          return Center(
+            child: RaisedButton(
+              child: const Text('X'),
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return dialog;
+                  },
+                );
+              },
+            ),
+          );
+        },
       ),
+    ),
   );
 }
 

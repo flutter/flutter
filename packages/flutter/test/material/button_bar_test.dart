@@ -144,7 +144,7 @@ void main() {
 
   });
 
-  group('button properies override ButtonTheme', () {
+  group('button properties override ButtonTheme', () {
 
     testWidgets('default button properties override ButtonTheme properties', (WidgetTester tester) async {
       BuildContext capturedContext;
@@ -293,4 +293,83 @@ void main() {
 
   });
 
+  group('isWrapped', () {
+    testWidgets("ButtonBar's children wrap when overflows and isWrapped is set to true", (WidgetTester tester) async {
+      final Key keyOne = UniqueKey();
+      final Key keyTwo = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ButtonBar(
+            isWrapped: true,
+            children: <Widget>[
+              Container(key: keyOne, height: 50.0, width: 800.0),
+              Container(key: keyTwo, height: 50.0, width: 800.0),
+            ],
+          ),
+        )
+      );
+
+      // ButtonBar implements a [Wrap] instead of a [Row] when isWrapped
+      // is true.
+      expect(find.byType(Wrap), findsOneWidget);
+      expect(find.byType(Row), findsNothing);
+
+      // Second [Container] should wrap around since they take up max width
+      // constraint.
+      final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
+      final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
+      expect(containerOneRect.bottom, containerTwoRect.top);
+      expect(containerOneRect.left, containerTwoRect.left);
+    });
+
+    testWidgets("ButtonBar's children lay out side by side there is enough space and isWrapped is set to true", (WidgetTester tester) async {
+      final Key keyOne = UniqueKey();
+      final Key keyTwo = UniqueKey();
+      final Key keyThree = UniqueKey();
+      final Key keyFour = UniqueKey();
+
+      double maxWidth;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              // Lay out [Container]s such that the first two are side-by-side
+              // in the first row. Lay out the subsequent two [Container]s
+              // so that they are side-by-side on the following row.
+
+              // Button padding is 8.0, button bar padding is also 8.0
+              maxWidth = constraints.maxWidth - (8.0 * 2) - 8.0;
+              return ButtonBar(
+                isWrapped: true,
+                children: <Widget>[
+                  Container(key: keyOne, height: 50.0, width: maxWidth / 2.0),
+                  Container(key: keyTwo, height: 50.0, width: maxWidth / 2.0),
+                  Container(key: keyThree, height: 50.0, width: maxWidth / 2.0),
+                  Container(key: keyFour, height: 50.0, width: maxWidth / 2.0),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      // ButtonBar implements a [Wrap] instead of a [Row] when isWrapped
+      // is true.
+      expect(find.byType(Wrap), findsOneWidget);
+      expect(find.byType(Row), findsNothing);
+
+      // Second [Container] should be in same row as first
+      final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
+      final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
+      expect(containerOneRect.bottom, containerTwoRect.bottom);
+      expect(containerOneRect.right + 8.0, containerTwoRect.left); // should be side-by-side (default padding is 8.0)
+
+      // // Third and fourth [Container]s should be in the same, new row
+      final Rect containerThreeRect = tester.getRect(find.byKey(keyThree));
+      final Rect containerFourRect = tester.getRect(find.byKey(keyFour));
+      expect(containerOneRect.bottom, containerThreeRect.top);
+      expect(containerThreeRect.bottom, containerFourRect.bottom);
+      expect(containerThreeRect.right + 8.0, containerFourRect.left);
+    });
+  });
 }
