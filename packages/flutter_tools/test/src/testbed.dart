@@ -734,3 +734,64 @@ class TestFeatureFlags implements FeatureFlags {
     return false;
   }
 }
+
+class DelegateLogger implements Logger {
+  DelegateLogger(this.delegate);
+
+  final Logger delegate;
+  Status status;
+
+  @override
+  bool get quiet => delegate.quiet;
+
+  @override
+  set quiet(bool value) => delegate.quiet;
+
+  @override
+  bool get hasTerminal => delegate.hasTerminal;
+
+  @override
+  bool get isVerbose => delegate.isVerbose;
+
+  @override
+  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
+    delegate.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
+    delegate.printStatus(message,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printTrace(String message) {
+    delegate.printTrace(message);
+  }
+
+  @override
+  void sendNotification(String message, {String progressId}) {
+    delegate.sendNotification(message, progressId: progressId);
+  }
+
+  @override
+  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
+    return status;
+  }
+
+  @override
+  bool get supportsColor => delegate.supportsColor;
+}
