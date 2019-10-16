@@ -704,7 +704,7 @@ class Node {
   /// One or more reasons why a task was invalidated.
   ///
   /// May be empty if the task was skipped.
-  final Set<InvalidedReason> invalidatedReasons = <InvalidedReason>{};
+  final Set<InvalidatedReason> invalidatedReasons = <InvalidatedReason>{};
 
   /// Whether this node needs an action performed.
   bool get dirty => _dirty;
@@ -735,7 +735,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          invalidatedReasons.add(InvalidedReason.inputChanged);
+          invalidatedReasons.add(InvalidatedReason.inputChanged);
           _dirty = true;
         }
       } else {
@@ -749,13 +749,13 @@ class Node {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
-        invalidatedReasons.add(InvalidedReason.outputSetChanged);
+        invalidatedReasons.add(InvalidatedReason.outputSetChanged);
         // if this isn't a current output file there is no reason to compute the hash.
         continue;
       }
       final File file = fs.file(previousOutput);
       if (!file.existsSync()) {
-        invalidatedReasons.add(InvalidedReason.outputMissing);
+        invalidatedReasons.add(InvalidatedReason.outputMissing);
         _dirty = true;
         continue;
       }
@@ -764,7 +764,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          invalidatedReasons.add(InvalidedReason.outputChanged);
+          invalidatedReasons.add(InvalidatedReason.outputChanged);
           _dirty = true;
         }
       } else {
@@ -779,7 +779,7 @@ class Node {
       _dirty = true;
       final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
       printTrace('invalidated build due to missing files: $missingMessage');
-      invalidatedReasons.add(InvalidedReason.inputMissing);
+      invalidatedReasons.add(InvalidatedReason.inputMissing);
     }
 
     // If we have files to hash, compute them asynchronously and then
@@ -787,7 +787,7 @@ class Node {
     if (sourcesToHash.isNotEmpty) {
       final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
       if (dirty.isNotEmpty) {
-        invalidatedReasons.add(InvalidedReason.inputChanged);
+        invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;
       }
     }
@@ -795,8 +795,8 @@ class Node {
   }
 }
 
-/// A description of why a task was rerun.
-enum InvalidedReason {
+/// A description of why a target was rerun.
+enum InvalidatedReason {
   /// An input file that was expected is missing. This can occur when using
   /// depfile dependencies, or if a target is incorrectly specified.
   inputMissing,
