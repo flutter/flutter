@@ -21,6 +21,7 @@
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/asset_font_manager.h"
 #include "txt/typeface_font_asset_provider.h"
+#include "utils/MacUtils.h"
 #include "utils/WindowsUtils.h"
 
 #if !defined(_WIN32)

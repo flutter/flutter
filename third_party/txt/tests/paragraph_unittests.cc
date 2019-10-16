@@ -29,6 +29,7 @@
 #include "txt_test_utils.h"
 
 #define DISABLE_ON_WINDOWS(TEST) DISABLE_TEST_WINDOWS(TEST)
+#define DISABLE_ON_MAC(TEST) DISABLE_TEST_MAC(TEST)
 
 namespace txt {
 
@@ -269,7 +270,7 @@ TEST_F(ParagraphTest, LineMetricsParagraph1) {
       1.0253906);
 }
 
-TEST_F(ParagraphTest, LineMetricsParagraph2) {
+TEST_F(ParagraphTest, DISABLE_ON_MAC(LineMetricsParagraph2)) {
   const char* text = "test string alphabetic";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string alphabetic(icu_text.getBuffer(),
@@ -1010,7 +1011,8 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(InlinePlaceholderMiddleParagraph)) {
 }
 
 TEST_F(ParagraphTest,
-       DISABLE_ON_WINDOWS(InlinePlaceholderIdeographicBaselineParagraph)) {
+       DISABLE_ON_MAC(
+           DISABLE_ON_WINDOWS(InlinePlaceholderIdeographicBaselineParagraph))) {
   const char* text = "給能上目秘使";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
@@ -2242,7 +2244,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyRTL)) {
   }
 }
 
-TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyRTLNewLine)) {
+TEST_F(ParagraphTest, LINUX_ONLY(JustifyRTLNewLine)) {
   const char* text =
       "אאא בּבּבּבּ אאאא\nבּבּ אאא בּבּבּ אאאאא בּבּבּבּ אאאא בּבּבּבּבּ "
       "אאאאא בּבּבּבּבּ אאאבּבּבּבּבּבּאאאאא בּבּבּבּבּבּאאאאאבּבּבּבּבּבּ אאאאא בּבּבּבּבּ "
@@ -3139,7 +3141,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeTight)) {
+TEST_F(ParagraphTest, LINUX_ONLY(GetRectsForRangeTight)) {
   const char* text =
       "(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)("
       "　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)(　´･‿･｀)("
@@ -3870,7 +3872,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeCenterParagraph)) {
 }
 
 TEST_F(ParagraphTest,
-       DISABLE_ON_WINDOWS(GetRectsForRangeCenterParagraphNewlineCentered)) {
+       LINUX_ONLY(GetRectsForRangeCenterParagraphNewlineCentered)) {
   const char* text = "01234\n";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
@@ -4078,7 +4080,7 @@ TEST_F(ParagraphTest,
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeStrut)) {
+TEST_F(ParagraphTest, LINUX_ONLY(GetRectsForRangeStrut)) {
   const char* text = "Chinese 字典";
 
   auto icu_text = icu::UnicodeString::fromUTF8(text);
@@ -4499,7 +4501,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(NewlineParagraph)) {
   EXPECT_DOUBLE_EQ(paragraph->records_[5].offset().x(), 0);
 }
 
-TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(EmojiParagraph)) {
+TEST_F(ParagraphTest, LINUX_ONLY(EmojiParagraph)) {
   const char* text =
       "😀😃😄😁😆😅😂🤣☺😇🙂😍😡😟😢😻👽💩👍👎🙏👌👋👄👁👦👼👨‍🚀👨‍🚒🙋‍♂️👳👨‍👨‍👧‍👧\
       💼👡👠☂🐶🐰🐻🐼🐷🐒🐵🐔🐧🐦🐋🐟🐡🕸🐌🐴🐊🐄🐪🐘🌸🌏🔥🌟🌚🌝💦💧\
@@ -4543,7 +4545,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(EmojiParagraph)) {
   EXPECT_EQ(paragraph->records_[7].line(), 7ull);
 }
 
-TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(EmojiMultiLineRectsParagraph)) {
+TEST_F(ParagraphTest, LINUX_ONLY(EmojiMultiLineRectsParagraph)) {
   // clang-format off
   const char* text =
       "👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧i🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸"
@@ -4990,7 +4992,7 @@ TEST_F(ParagraphTest, ComplexShadow) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, BaselineParagraph) {
+TEST_F(ParagraphTest, DISABLE_ON_MAC(BaselineParagraph)) {
   const char* text =
       "左線読設Byg後碁給能上目秘使約。満毎冠行来昼本可必図将発確年。今属場育"
       "図情闘陰野高備込制詩西校客。審対江置講今固残必託地集済決維駆年策。立得";
@@ -5133,7 +5135,7 @@ TEST_F(ParagraphTest, FontFallbackParagraph) {
               0);
 }
 
-TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutParagraph1)) {
+TEST_F(ParagraphTest, LINUX_ONLY(StrutParagraph1)) {
   // The chinese extra height should be absorbed by the strut.
   const char* text = "01234満毎冠p来É本可\nabcd\n満毎É行p昼本可";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
