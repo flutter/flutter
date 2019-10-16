@@ -1551,9 +1551,13 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// [StatefulWidget] if the dialog needs to update dynamically. The
 /// `pageBuilder` argument can not be null.
 ///
-/// The `context` argument is used to look up the [Navigator] for the dialog.
-/// It is only used when the method is called. Its corresponding widget can
-/// be safely removed from the tree before the dialog is closed.
+/// The `context` argument is used to look up the root [Navigator] for the
+/// dialog. It is only used when the method is called. Its corresponding widget
+/// can be safely removed from the tree before the dialog is closed.
+///
+/// The `navigator` argument defines the [NavigatorState] to use to push the
+/// dialog [Route]. When `navigator` is provided, the root [Navigator] is not
+/// looked up nor used.
 ///
 /// The `barrierDismissible` argument is used to determine whether this route
 /// can be dismissed by tapping the modal barrier. This argument defaults
@@ -1594,10 +1598,11 @@ Future<T> showGeneralDialog<T>({
   Color barrierColor,
   Duration transitionDuration,
   RouteTransitionsBuilder transitionBuilder,
+  NavigatorState navigator,
 }) {
   assert(pageBuilder != null);
   assert(!barrierDismissible || barrierLabel != null);
-  return Navigator.of(context, rootNavigator: true).push<T>(_DialogRoute<T>(
+  return (navigator ?? Navigator.of(context, rootNavigator: true)).push<T>(_DialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,

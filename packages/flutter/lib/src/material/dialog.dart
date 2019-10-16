@@ -655,11 +655,15 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// `showDialog` is originally called from. Use a [StatefulBuilder] or a
 /// custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
-/// The `context` argument is used to look up the [Navigator] and [Theme] for
-/// the dialog. It is only used when the method is called. Its corresponding
+/// The `child` argument is deprecated, and should be replaced with `builder`.
+///
+/// The `context` argument is used to look up the root [Navigator] and [Theme]
+/// for the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
 ///
-/// The `child` argument is deprecated, and should be replaced with `builder`.
+/// The `navigator` argument defines the [NavigatorState] to use to push the
+/// dialog [Route]. When `navigator` is provided, the root [Navigator] is not
+/// looked up nor used.
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
@@ -687,6 +691,7 @@ Future<T> showDialog<T>({
     'is appropriate for widgets built in the dialog.'
   ) Widget child,
   WidgetBuilder builder,
+  NavigatorState navigator,
 }) {
   assert(child == null || builder == null);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -711,5 +716,6 @@ Future<T> showDialog<T>({
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,
+    navigator: navigator,
   );
 }
