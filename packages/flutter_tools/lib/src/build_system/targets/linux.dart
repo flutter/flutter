@@ -59,8 +59,11 @@ class UnpackLinuxDebug extends Target {
       'flutter',
       'ephemeral',
     );
+    // The native linux artifacts are composed of 6 files and a directory (listed above)
+    // which need to be copied to the target directory.
     for (String artifact in _kLinuxArtifacts) {
       final String entityPath = fs.path.join(basePath, artifact);
+      // If this artifact is a file, just copy the source over.
       if (fs.isFileSync(entityPath)) {
         final String outputPath = fs.path.join(
           outputPrefix,
@@ -76,6 +79,8 @@ class UnpackLinuxDebug extends Target {
         outputs.add(destinationFile);
         continue;
       }
+      // If ths artifact is the directory cpp_client_wrapper, recursively
+      // copy every file from it.
       for (File input in fs.directory(entityPath)
           .listSync(recursive: true)
           .whereType<File>()) {
