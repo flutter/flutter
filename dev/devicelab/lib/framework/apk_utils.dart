@@ -53,20 +53,12 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
 
 /// Returns the list of files inside an Android Package Kit.
 Future<Iterable<String>> getFilesInApk(String apk) async {
-  if (!File(apk).existsSync())
+  if (!File(apk).existsSync()) {
     throw TaskResult.failure(
         'Gradle did not produce an output artifact file at: $apk');
-
-  String unzipStdout;
-  if (Platform.isWindows) {
-    unzipStdout = await eval('7za', <String>['l', apk]);
-  } else {
-    unzipStdout = await eval('unzip', <String>['-v', apk]);
   }
-  return unzipStdout
-      .split('\n')
-      .map((String line) => line.split(' ').last)
-      .toList();
+  final String files = await eval(_apkAnalyzer, <String>['files', 'list', apk]);
+  return files.split('\n');
 }
 /// Returns the list of files inside an Android App Bundle.
 Future<Iterable<String>> getFilesInAppBundle(String bundle) {
@@ -130,9 +122,12 @@ String get _androidHome {
   return androidHome;
 }
 
-/// Utility class to analyze the content inside an APK using dexdump,
-/// which is provided by the Android SDK.
-/// https://android.googlesource.com/platform/art/+/master/dexdump/dexdump.cc
+/// The APK analyzer tool.
+String get _apkAnalyzer {
+  return path.join(_androidHome, 'tools', 'bin', 'apkanalyzer');
+}
+
+/// Utility class to analyze the content inside an APK using the APK analyzer.
 class ApkExtractor {
   ApkExtractor(this.apkFile);
 
@@ -141,34 +136,25 @@ class ApkExtractor {
 
   bool _extracted = false;
 
-  Directory _outputDir;
+  Set<String> _classes = const <String>{};
 
-  Future<void> _extractApk() async {
+  Future<void> _extractDex() async {
     if (_extracted) {
       return;
     }
-    _outputDir = apkFile.parent.createTempSync('apk');
-    if (Platform.isWindows) {
-      await eval('7za', <String>['x', apkFile.path], workingDirectory: _outputDir.path);
-    } else {
-      await eval('unzip', <String>[apkFile.path], workingDirectory: _outputDir.path);
-    }
+    final String packages = await eval(
+      _apkAnalyzer,
+      <String>['dex', 'packages', apkFile.path],
+      printStdout: false,
+    );
+    _classes = Set<String>.from(
+      packages
+        .split('\n')
+        .where((String line) => line.startsWith('C'))
+        .map<String>((String line) => line.split('	').last),
+    );
+    assert(_classes.isNotEmpty);
     _extracted = true;
-  }
-
-  /// Returns the full path to the [dexdump] tool.
-  Future<String> _findDexDump() async {
-    String dexdumps;
-    if (Platform.isWindows) {
-      dexdumps = await eval('dir', <String>['/s/b', 'dexdump.exe'],
-          workingDirectory: _androidHome);
-    } else {
-      dexdumps = await eval('find', <String>[_androidHome, '-name', 'dexdump']);
-    }
-    if (dexdumps.isEmpty) {
-      throw Exception('Couldn\'t find a dexdump executable.');
-    }
-    return dexdumps.split('\n').first;
   }
 
   // Removes any temporary directory.
@@ -176,35 +162,24 @@ class ApkExtractor {
     if (!_extracted) {
       return;
     }
-    rmTree(_outputDir);
+    _classes = const <String>{};
     _extracted = true;
   }
 
   /// Returns true if the APK contains a given class.
   Future<bool> containsClass(String className) async {
-    await _extractApk();
-
-    final String dexDump = await _findDexDump();
-    final String classesDex = path.join(_outputDir.path, 'classes.dex');
-
-    if (!File(classesDex).existsSync()) {
-      throw Exception('Couldn\'t find classes.dex in the APK.');
-    }
-    final String classDescriptors = await eval(dexDump,
-        <String>[classesDex], printStdout: false);
-
-    if (classDescriptors.isEmpty) {
-      throw Exception('No descriptors found in classes.dex.');
-    }
-    return classDescriptors.contains(className.replaceAll('.', '/'));
+    await _extractDex();
+    return _classes.contains(className);
   }
 }
 
 /// Gets the content of the `AndroidManifest.xml`.
 Future<String> getAndroidManifest(String apk) {
-  final String apkAnalyzer = path.join(_androidHome, 'tools', 'bin', 'apkanalyzer');
-  return eval(apkAnalyzer, <String>['manifest', 'print', apk],
-      workingDirectory: _androidHome);
+  return eval(
+    _apkAnalyzer,
+    <String>['manifest', 'print', apk],
+    workingDirectory: _androidHome,
+  );
 }
 
  /// Checks that the classes are contained in the APK, throws otherwise.

@@ -60,6 +60,12 @@ Future<void> main() async {
         );
       });
 
+      section('Update proguard rules');
+
+      // Don't obfuscate the input class files, since the test is checking if some classes are in the DEX.
+      final File proguardRules = File(path.join(projectDir.path, 'android', 'app', 'proguard-rules.pro'));
+      proguardRules.writeAsStringSync('-dontobfuscate', flush: true);
+
       section('Build release APK');
 
       await inDirectory(projectDir, () async {
