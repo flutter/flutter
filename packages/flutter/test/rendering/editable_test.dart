@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import 'rendering_tester.dart';
 
-class FakeEditableTextState extends TextSelectionDelegate {
+class FakeEditableTextState with TextSelectionDelegate {
   @override
   TextEditingValue get textEditingValue { return const TextEditingValue(); }
 

@@ -588,7 +588,7 @@ class TextEditingValue {
 
 /// An interface for manipulating the selection, to be used by the implementor
 /// of the toolbar widget.
-abstract class TextSelectionDelegate {
+mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
 
@@ -613,6 +613,9 @@ abstract class TextSelectionDelegate {
 
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
+
+  bool get canExtendSelectionEnd => textEditingValue.selection.end < textEditingValue.text.length;
+  bool get canExtendSelectionBegin => textEditingValue.selection.start > 0;
 }
 
 /// An interface to receive information from [TextInput].
