@@ -259,7 +259,6 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RaisedButton(onPressed: onPressed, onLongPress: onLongPress),
-        ),
       );
     }
 

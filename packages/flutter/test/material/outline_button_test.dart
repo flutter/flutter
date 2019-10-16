@@ -458,7 +458,6 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: OutlineButton(onPressed: onPressed, onLongPress: onLongPress),
-        ),
       );
     }
 

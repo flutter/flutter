@@ -416,7 +416,6 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RawMaterialButton(onPressed: onPressed, onLongPress: onLongPress),
-        ),
       );
     }
 
