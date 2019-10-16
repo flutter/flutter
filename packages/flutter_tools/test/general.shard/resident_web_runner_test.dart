@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart';
@@ -563,63 +562,3 @@ class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
-class DelegateLogger implements Logger {
-  DelegateLogger(this.delegate);
-
-  final Logger delegate;
-  Status status;
-
-  @override
-  bool get quiet => delegate.quiet;
-
-  @override
-  set quiet(bool value) => delegate.quiet;
-
-  @override
-  bool get hasTerminal => delegate.hasTerminal;
-
-  @override
-  bool get isVerbose => delegate.isVerbose;
-
-  @override
-  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
-    delegate.printError(
-      message,
-      stackTrace: stackTrace,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
-    delegate.printStatus(message,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printTrace(String message) {
-    delegate.printTrace(message);
-  }
-
-  @override
-  void sendNotification(String message, {String progressId}) {
-    delegate.sendNotification(message, progressId: progressId);
-  }
-
-  @override
-  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
-    return status;
-  }
-
-  @override
-  bool get supportsColor => delegate.supportsColor;
-}
