@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(() async {
@@ -24,16 +23,17 @@ Future<void> main() async {
           ...flutterAssets,
           ...debugAssets,
           ...baseApkFiles,
-          path.join('lib', 'armeabi-v7a', 'libflutter.so'),
+          'lib/armeabi-v7a/libflutter.so',
           // Debug mode intentionally includes `x86` and `x86_64`.
-          path.join('lib', 'x86', 'libflutter.so'),
-          path.join('lib', 'x86_64', 'libflutter.so'),
+          'lib/x86/libflutter.so',
+          'lib/x86_64/libflutter.so',
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
-          path.join('lib', 'armeabi-v7a', 'libapp.so'),
-          path.join('lib', 'x86', 'libapp.so'),
-          path.join('lib', 'x86_64', 'libapp.so'),
+          'lib/arm64-v8a/libapp.so',
+          'lib/armeabi-v7a/libapp.so',
+          'lib/x86/libapp.so',
+          'lib/x86_64/libapp.so',
         ], apkFiles);
       });
 
@@ -50,14 +50,14 @@ Future<void> main() async {
           ...debugAssets,
           ...baseApkFiles,
           // Debug mode intentionally includes `x86` and `x86_64`.
-          path.join('lib', 'x86', 'libflutter.so'),
-          path.join('lib', 'x86_64', 'libflutter.so'),
+          'lib/x86/libflutter.so',
+          'lib/x86_64/libflutter.so',
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
-          path.join('lib', 'armeabi-v7a', 'libapp.so'),
-          path.join('lib', 'x86', 'libapp.so'),
-          path.join('lib', 'x86_64', 'libapp.so'),
+          'lib/armeabi-v7a/libapp.so',
+          'lib/x86/libapp.so',
+          'lib/x86_64/libapp.so',
         ], apkFiles);
       });
 
@@ -74,14 +74,14 @@ Future<void> main() async {
           ...debugAssets,
           ...baseApkFiles,
           // Debug mode intentionally includes `x86` and `x86_64`.
-          path.join('lib', 'x86', 'libflutter.so'),
-          path.join('lib', 'x86_64', 'libflutter.so'),
+          'lib/x86/libflutter.so',
+          'lib/x86_64/libflutter.so',
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
-          path.join('lib', 'armeabi-v7a', 'libapp.so'),
-          path.join('lib', 'x86', 'libapp.so'),
-          path.join('lib', 'x86_64', 'libapp.so'),
+          'lib/armeabi-v7a/libapp.so',
+          'lib/x86/libapp.so',
+          'lib/x86_64/libapp.so',
         ], apkFiles);
       });
 
@@ -95,14 +95,14 @@ Future<void> main() async {
         checkItContains<String>(<String>[
           ...flutterAssets,
           ...baseApkFiles,
-          path.join('lib', 'armeabi-v7a', 'libflutter.so'),
-          path.join('lib', 'armeabi-v7a', 'libapp.so'),
+          'lib/armeabi-v7a/libflutter.so',
+          'lib/armeabi-v7a/libapp.so',
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
           ...debugAssets,
-          path.join('lib', 'arm64-v8a', 'libflutter.so'),
-          path.join('lib', 'arm64-v8a', 'libapp.so'),
+          'lib/arm64-v8a/libflutter.so',
+          'lib/arm64-v8a/libapp.so',
         ], apkFiles);
       });
 
@@ -116,14 +116,14 @@ Future<void> main() async {
         checkItContains<String>(<String>[
           ...flutterAssets,
           ...baseApkFiles,
-          path.join('lib', 'arm64-v8a', 'libflutter.so'),
-          path.join('lib', 'arm64-v8a', 'libapp.so'),
+          'lib/arm64-v8a/libflutter.so',
+          'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
           ...debugAssets,
-          path.join('lib', 'armeabi-v7a', 'libflutter.so'),
-          path.join('lib', 'armeabi-v7a', 'libapp.so'),
+          'lib/armeabi-v7a/libflutter.so',
+          'lib/armeabi-v7a/libapp.so',
         ], apkFiles);
       });
 

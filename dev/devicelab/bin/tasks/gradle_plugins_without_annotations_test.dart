@@ -11,7 +11,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
 /// Tests that plugins that don't define a `androidx.annotation:annotation:+` or
 /// `com.android.support:support-annotations:+` dependency can be built as AAR.

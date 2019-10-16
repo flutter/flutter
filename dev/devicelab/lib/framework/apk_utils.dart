@@ -10,16 +10,16 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 final List<String> flutterAssets = <String>[
-  path.join('assets', 'flutter_assets', 'AssetManifest.json'),
-  path.join('assets', 'flutter_assets', 'LICENSE'),
-  path.join('assets', 'flutter_assets', 'fonts', 'MaterialIcons-Regular.ttf'),
-  path.join('assets', 'flutter_assets', 'packages', 'cupertino_icons', 'assets', 'CupertinoIcons.ttf'),
+  'assets/flutter_assets/AssetManifest.json',
+  'assets/flutter_assets/LICENSE',
+  'assets/flutter_assets/fonts/MaterialIcons-Regular.ttf',
+  'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
 ];
 
 final List<String> debugAssets = <String>[
-  path.join('assets', 'flutter_assets', 'isolate_snapshot_data'),
-  path.join('assets', 'flutter_assets', 'kernel_blob.bin'),
-  path.join('assets', 'flutter_assets', 'vm_snapshot_data'),
+  'assets/flutter_assets/isolate_snapshot_data',
+  'assets/flutter_assets/kernel_blob.bin',
+  'assets/flutter_assets/vm_snapshot_data',
 ];
 
 final List<String> baseApkFiles = <String> [
@@ -57,8 +57,14 @@ Future<Iterable<String>> getFilesInApk(String apk) async {
     throw TaskResult.failure(
         'Gradle did not produce an output artifact file at: $apk');
   }
-  final String files = await eval(_apkAnalyzer, <String>['files', 'list', apk]);
-  return files.split('\n').map((String file) => file.substring(1));
+  final String files = await _evalApkAnalyzer(
+    <String>[
+      'files',
+      'list',
+      apk,
+    ]
+  );
+  return files.split('\n').map((String file) => file.substring(1).trim());
 }
 /// Returns the list of files inside an Android App Bundle.
 Future<Iterable<String>> getFilesInAppBundle(String bundle) {
@@ -73,7 +79,7 @@ Future<Iterable<String>> getFilesInAar(String aar) {
 void checkItContains<T>(Iterable<T> values, Iterable<T> collection) {
   for (T value in values) {
     if (!collection.contains(value)) {
-      throw TaskResult.failure('Expected to find `$value` in `$collection`.');
+      throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
     }
   }
 }
@@ -122,9 +128,33 @@ String get _androidHome {
   return androidHome;
 }
 
-/// The APK analyzer tool.
-String get _apkAnalyzer {
-  return path.join(_androidHome, 'tools', 'bin', 'apkanalyzer');
+/// Executes an APK analyzer subcommand.
+Future<String> _evalApkAnalyzer(
+  List<String> args, {
+  bool printStdout = true,
+  String workingDirectory,
+}) async {
+  final String javaHome = await findJavaHome();
+  final String javaBinary = path.join(javaHome, 'bin', 'java');
+  assert(canRun(javaBinary));
+
+  final String androidTools = path.join(_androidHome, 'tools');
+  final String libs = path.join(androidTools, 'lib');
+  assert(Directory(libs).existsSync());
+
+  final String classSeparator =  Platform.isWindows ? ';' : ':';
+  return eval(
+    javaBinary,
+    <String>[
+      '-Dcom.android.sdklib.toolsdir=$androidTools',
+      '-classpath',
+      '.$classSeparator$libs${Platform.pathSeparator}*',
+      'com.android.tools.apk.analyzer.ApkAnalyzerCli',
+      ...args,
+    ],
+    printStdout: printStdout,
+    workingDirectory: workingDirectory,
+  );
 }
 
 /// Utility class to analyze the content inside an APK using the APK analyzer.
@@ -142,9 +172,12 @@ class ApkExtractor {
     if (_extracted) {
       return;
     }
-    final String packages = await eval(
-      _apkAnalyzer,
-      <String>['dex', 'packages', apkFile.path],
+    final String packages = await _evalApkAnalyzer(
+      <String>[
+        'dex',
+        'packages',
+        apkFile.path,
+      ],
       printStdout: false,
     );
     _classes = Set<String>.from(
@@ -174,10 +207,13 @@ class ApkExtractor {
 }
 
 /// Gets the content of the `AndroidManifest.xml`.
-Future<String> getAndroidManifest(String apk) {
-  return eval(
-    _apkAnalyzer,
-    <String>['manifest', 'print', apk],
+Future<String> getAndroidManifest(String apk) async {
+  return await _evalApkAnalyzer(
+    <String>[
+      'manifest',
+      'print',
+      apk,
+    ],
     workingDirectory: _androidHome,
   );
 }
@@ -303,7 +339,7 @@ android {
 
   Future<ProcessResult> resultOfFlutterCommand(String command, List<String> options) {
     return Process.run(
-      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      path.join(flutterDirectory.path, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter'),
       <String>[command, ...options],
       workingDirectory: rootPath,
     );
@@ -386,39 +422,14 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
   );
 }
 
-class _Dependencies {
-  _Dependencies(String depfilePath) {
-    // Depfile format:
-    // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
-    final String contents = File(depfilePath).readAsStringSync();
-    final List<String> colonSeparated = contents.split(':');
-    targets = _processList(colonSeparated[0].trim());
-    dependencies = _processList(colonSeparated[1].trim());
-  }
-
-  final RegExp _separatorExpr = RegExp(r'([^\\]) ');
-  final RegExp _escapeExpr = RegExp(r'\\(.)');
-
-  Set<String> _processList(String rawText) {
-    return rawText
-    // Put every file on right-hand side on the separate line
-        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
-        .split('\n')
-    // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
-        .where((String path) => path.isNotEmpty)
-        .toSet();
-  }
-
-  Set<String> targets;
-  Set<String> dependencies;
-}
-
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
 String validateSnapshotDependency(FlutterProject project, String expectedTarget) {
-  final _Dependencies deps = _Dependencies(
+  final File snapshotBlob = File(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
           'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
-  return deps.targets.any((String target) => target.contains(expectedTarget)) ? null :
-  'Dependency file should have $expectedTarget as target. Instead has ${deps.targets}';
+
+  assert(snapshotBlob.existsSync());
+  final String contentSnapshot = snapshotBlob.readAsStringSync();
+  return contentSnapshot.contains('$expectedTarget ')
+    ? null : 'Dependency file should have $expectedTarget as target. Instead found $contentSnapshot';
 }

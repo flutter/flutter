@@ -812,10 +812,24 @@ void deleteFile(String path) {
     file.deleteSync();
 }
 
-Future<void> _androidGradleTests(String subShard) async {
-  // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
-  if (androidSdkRoot == null) {
-    print('No Android SDK detected, skipping Android gradle test.');
+enum CiProviders {
+  cirrus,
+  luci,
+}
+
+Future<void> _processTestOutput(
+  FlutterCompactFormatter formatter,
+  Stream<String> testOutput,
+  bq.TabledataResourceApi tableData,
+) async {
+  final Timer heartbeat = Timer.periodic(const Duration(seconds: 30), (Timer timer) {
+    print('Processing...');
+  });
+
+  await testOutput.forEach(formatter.processRawOutput);
+  heartbeat.cancel();
+  formatter.finish();
+  if (tableData == null || formatter.tests.isEmpty) {
     return;
   }
   final bq.TableDataInsertAllRequest request = bq.TableDataInsertAllRequest();

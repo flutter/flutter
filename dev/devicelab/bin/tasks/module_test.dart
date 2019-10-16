@@ -11,14 +11,13 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
 final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
 Future<void> main() async {
-  print(useAndroidEmbeddingV2);
   await task(() async {
 
     section('Find Java');
@@ -257,10 +256,10 @@ Future<void> main() async {
       checkItContains<String>(<String>[
         ...flutterAssets,
         ...baseApkFiles,
-        path.join('lib', 'arm64-v8a', 'libflutter.so'),
-        path.join('lib', 'arm64-v8a', 'libapp.so'),
-        path.join('lib', 'armeabi-v7a', 'libflutter.so'),
-        path.join('lib', 'armeabi-v7a', 'libapp.so'),
+        'lib/arm64-v8a/libapp.so',
+        'lib/arm64-v8a/libflutter.so',
+        'lib/armeabi-v7a/libapp.so',
+        'lib/armeabi-v7a/libflutter.so',
       ], await getFilesInApk(releaseHostApk));
 
       section('Check release AndroidManifest.xml');

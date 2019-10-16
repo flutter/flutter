@@ -11,7 +11,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
 final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
 
@@ -240,10 +240,10 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        path.join('lib', 'arm64-v8a', 'libflutter.so'),
-        path.join('lib', 'arm64-v8a', 'libapp.so'),
-        path.join('lib', 'armeabi-v7a', 'libflutter.so'),
-        path.join('lib', 'armeabi-v7a', 'libapp.so'),
+        'lib/arm64-v8a/libflutter.so',
+        'lib/arm64-v8a/libapp.so',
+        'lib/armeabi-v7a/libflutter.so',
+        'lib/armeabi-v7a/libapp.so',
       ], await getFilesInApk(demoReleaseApk));
 
       await clean();
@@ -278,10 +278,10 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        path.join('lib', 'arm64-v8a', 'libflutter.so'),
-        path.join('lib', 'arm64-v8a', 'libapp.so'),
-        path.join('lib', 'armeabi-v7a', 'libflutter.so'),
-        path.join('lib', 'armeabi-v7a', 'libapp.so'),
+        'lib/arm64-v8a/libapp.so',
+        'lib/arm64-v8a/libflutter.so',
+        'lib/armeabi-v7a/libapp.so',
+        'lib/armeabi-v7a/libflutter.so',
       ], await getFilesInApk(demoProdApk));
 
       return TaskResult.success(null);

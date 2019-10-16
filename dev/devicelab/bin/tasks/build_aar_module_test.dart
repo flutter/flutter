@@ -11,7 +11,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
 /// Tests that AARs can be built on module projects.
 Future<void> main() async {
@@ -107,8 +107,8 @@ Future<void> main() async {
         <String>[
           ...flutterAssets,
           // AOT snapshots
-          path.join('jni', 'arm64-v8a', 'libapp.so'),
-          path.join('jni', 'armeabi-v7a', 'libapp.so'),
+          'jni/arm64-v8a/libapp.so',
+          'jni/armeabi-v7a/libapp.so',
         ],
         await getFilesInAar(
           path.join(
