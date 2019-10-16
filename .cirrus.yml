@@ -2,7 +2,7 @@ container:
   image: gcr.io/flutter-cirrus/build-flutter-image:latest
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
@@ -296,7 +296,7 @@ task:
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   windows_container:
     image: cirrusci/android-sdk:28-windowsservercore-2019
     os_version: 2019
@@ -349,7 +349,7 @@ task:
         SUBSHARD: integration
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   windows_container:
     image: cirrusci/android-sdk:28-windowsservercore-2019
     os_version: 2019
