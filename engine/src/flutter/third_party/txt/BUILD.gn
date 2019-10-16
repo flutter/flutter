@@ -119,7 +119,9 @@ source_set("txt") {
     "src/txt/typeface_font_asset_provider.h",
     "src/utils/JenkinsHash.cpp",
     "src/utils/JenkinsHash.h",
+    "src/utils/LinuxUtils.h",
     "src/utils/LruCache.h",
+    "src/utils/MacUtils.h",
     "src/utils/TypeHelpers.h",
     "src/utils/WindowsUtils.h",
   ]

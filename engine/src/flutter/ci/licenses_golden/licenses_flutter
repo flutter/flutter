@@ -1216,7 +1216,9 @@ FILE: ../../../flutter/third_party/txt/src/txt/typeface_font_asset_provider.cc
 FILE: ../../../flutter/third_party/txt/src/txt/typeface_font_asset_provider.h
 FILE: ../../../flutter/third_party/txt/src/utils/JenkinsHash.cpp
 FILE: ../../../flutter/third_party/txt/src/utils/JenkinsHash.h
+FILE: ../../../flutter/third_party/txt/src/utils/LinuxUtils.h
 FILE: ../../../flutter/third_party/txt/src/utils/LruCache.h
+FILE: ../../../flutter/third_party/txt/src/utils/MacUtils.h
 FILE: ../../../flutter/third_party/txt/src/utils/TypeHelpers.h
 FILE: ../../../flutter/third_party/txt/src/utils/WindowsUtils.h
 ----------------------------------------------------------------------------------------------------
