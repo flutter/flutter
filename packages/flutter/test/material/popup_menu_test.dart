@@ -851,6 +851,129 @@ void main() {
     expect(tester.getTopLeft(find.text('Item 0')).dx, 72);
     expect(tester.getTopLeft(find.text('Item 1')).dx, 72);
   });
+
+  test("PopupMenuButton's child and icon properties cannot be simultaneously defined", () {
+    expect(() {
+      PopupMenuButton<int>(
+        itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
+        child: Container(),
+        icon: const Icon(Icons.error),
+      );
+    }, throwsAssertionError);
+  });
+
+  testWidgets('PopupMenuButton default tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              // Default Tooltip should be present when [PopupMenuButton.icon]
+              // and [PopupMenuButton.child] are undefined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+              // Default Tooltip should be present when
+              // [PopupMenuButton.child] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                child: const Text('Test text'),
+              ),
+              // Default Tooltip should be present when
+              // [PopupMenuButton.icon] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                icon: const Icon(Icons.check),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // The default tooltip is defined as [MaterialLocalizations.showMenuTooltip]
+    // and it is used when no tooltip is provided.
+    expect(find.byType(Tooltip), findsNWidgets(3));
+    expect(find.byTooltip(const DefaultMaterialLocalizations().showMenuTooltip), findsNWidgets(3));
+  });
+
+  testWidgets('PopupMenuButton custom tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              // Tooltip should work when [PopupMenuButton.icon]
+              // and [PopupMenuButton.child] are undefined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                tooltip: 'Test tooltip',
+              ),
+              // Tooltip should work when
+              // [PopupMenuButton.child] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                tooltip: 'Test tooltip',
+                child: const Text('Test text'),
+              ),
+              // Tooltip should work when
+              // [PopupMenuButton.icon] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                tooltip: 'Test tooltip',
+                icon: const Icon(Icons.check),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNWidgets(3));
+    expect(find.byTooltip('Test tooltip',), findsNWidgets(3));
+  });
 }
 
 class TestApp extends StatefulWidget {
