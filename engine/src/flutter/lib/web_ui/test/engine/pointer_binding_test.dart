@@ -83,6 +83,41 @@ void main() {
       expect(packets[1].data[0].change, equals(ui.PointerChange.down));
       expect(packets[1].data[0].device, equals(2));
     });
+
+    test('creates an add event if the first pointer activity is a hover', () {
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      glassPane.dispatchEvent(html.PointerEvent('pointermove', {
+        'pointerId': 1,
+        'button': 1,
+      }));
+
+      expect(packets, hasLength(1));
+      expect(packets.single.data, hasLength(2));
+
+      expect(packets.single.data[0].change, equals(ui.PointerChange.add));
+      expect(packets.single.data[1].change, equals(ui.PointerChange.hover));
+    });
+
+    test('does not create an add event if got a pointerdown', () {
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      glassPane.dispatchEvent(html.PointerEvent('pointerdown', {
+        'pointerId': 1,
+        'button': 1,
+      }));
+
+      expect(packets, hasLength(1));
+      expect(packets.single.data, hasLength(1));
+
+      expect(packets.single.data[0].change, equals(ui.PointerChange.down));
+    });
   });
 }
 
