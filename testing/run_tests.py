@@ -21,7 +21,6 @@ fonts_dir = os.path.join(buildroot_dir, 'flutter', 'third_party', 'txt', 'third_
 roboto_font_path = os.path.join(fonts_dir, 'Roboto-Regular.ttf')
 dart_tests_dir = os.path.join(buildroot_dir, 'flutter', 'testing', 'dart',)
 
-fonts_dir_flag = '--font-directory=%s' % fonts_dir
 time_sensitve_test_flag = '--gtest_filter="-*TimeSensitiveTest*"'
 
 def IsMac():
@@ -112,7 +111,7 @@ def RunCCTests(build_dir, filter):
 
   # https://github.com/flutter/flutter/issues/36296
   if IsLinux():
-    RunEngineExecutable(build_dir, 'txt_unittests', filter, [ fonts_dir_flag ] + shuffle_flags)
+    RunEngineExecutable(build_dir, 'txt_unittests', filter, shuffle_flags)
 
 
 def RunEngineBenchmarks(build_dir, filter):
@@ -123,7 +122,7 @@ def RunEngineBenchmarks(build_dir, filter):
   RunEngineExecutable(build_dir, 'fml_benchmarks', filter)
 
   if IsLinux():
-    RunEngineExecutable(build_dir, 'txt_benchmarks', filter, [ fonts_dir_flag ])
+    RunEngineExecutable(build_dir, 'txt_benchmarks', filter)
 
 
 

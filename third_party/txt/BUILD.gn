@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import("$flutter_root/common/config.gni")
+import("$flutter_root/testing/testing.gni")
 
 declare_args() {
   flutter_use_fontconfig = false
@@ -185,6 +186,72 @@ source_set("txt_test_utils") {
   ]
 }
 
+test_fixtures("txt_fixtures") {
+  fixtures = [
+    "third_party/fonts/Bold.ttf",
+    "third_party/fonts/Bold.ttx",
+    "third_party/fonts/BoldItalic.ttf",
+    "third_party/fonts/BoldItalic.ttx",
+    "third_party/fonts/ColorEmojiFont.ttf",
+    "third_party/fonts/ColorEmojiFont.ttx",
+    "third_party/fonts/ColorTextMixedEmojiFont.ttf",
+    "third_party/fonts/ColorTextMixedEmojiFont.ttx",
+    "third_party/fonts/DroidSerif.ttf",
+    "third_party/fonts/Emoji.ttf",
+    "third_party/fonts/Emoji.ttx",
+    "third_party/fonts/HomemadeApple.ttf",
+    "third_party/fonts/Italic.ttf",
+    "third_party/fonts/Italic.ttx",
+    "third_party/fonts/Ja.ttf",
+    "third_party/fonts/Ja.ttx",
+    "third_party/fonts/Katibeh-Regular.ttf",
+    "third_party/fonts/Ko.ttf",
+    "third_party/fonts/Ko.ttx",
+    "third_party/fonts/MultiAxis.ttf",
+    "third_party/fonts/MultiAxis.ttx",
+    "third_party/fonts/NoCmapFormat14.ttf",
+    "third_party/fonts/NoCmapFormat14.ttx",
+    "third_party/fonts/NoGlyphFont.ttf",
+    "third_party/fonts/NoGlyphFont.ttx",
+    "third_party/fonts/NotoColorEmoji.ttf",
+    "third_party/fonts/NotoNaskhArabic-Regular.ttf",
+    "third_party/fonts/NotoSansCJK-Regular.ttc",
+    "third_party/fonts/Regular.ttf",
+    "third_party/fonts/Regular.ttx",
+    "third_party/fonts/Roboto-Black.ttf",
+    "third_party/fonts/Roboto-BlackItalic.ttf",
+    "third_party/fonts/Roboto-Bold.ttf",
+    "third_party/fonts/Roboto-BoldItalic.ttf",
+    "third_party/fonts/Roboto-Italic.ttf",
+    "third_party/fonts/Roboto-Light.ttf",
+    "third_party/fonts/Roboto-LightItalic.ttf",
+    "third_party/fonts/Roboto-Medium.ttf",
+    "third_party/fonts/Roboto-MediumItalic.ttf",
+    "third_party/fonts/Roboto-Regular.ttf",
+    "third_party/fonts/Roboto-Thin.ttf",
+    "third_party/fonts/Roboto-ThinItalic.ttf",
+    "third_party/fonts/SourceHanSerifCN-Bold.otf",
+    "third_party/fonts/SourceHanSerifCN-Regular.otf",
+    "third_party/fonts/TextEmojiFont.ttf",
+    "third_party/fonts/TextEmojiFont.ttx",
+    "third_party/fonts/UnicodeBMPOnly.ttf",
+    "third_party/fonts/UnicodeBMPOnly.ttx",
+    "third_party/fonts/UnicodeBMPOnly2.ttf",
+    "third_party/fonts/UnicodeBMPOnly2.ttx",
+    "third_party/fonts/UnicodeUCS4.ttf",
+    "third_party/fonts/UnicodeUCS4.ttx",
+    "third_party/fonts/VariationSelectorTest-Regular.ttf",
+    "third_party/fonts/VariationSelectorTest-Regular.ttx",
+    "third_party/fonts/ZhHans.ttf",
+    "third_party/fonts/ZhHans.ttx",
+    "third_party/fonts/ZhHant.ttf",
+    "third_party/fonts/ZhHant.ttx",
+    "third_party/fonts/ahem.ttf",
+    "third_party/fonts/emoji.xml",
+    "third_party/fonts/itemize.xml",
+  ]
+}
+
 executable("txt_unittests") {
   testonly = true
 
@@ -229,7 +296,8 @@ executable("txt_unittests") {
   deps = [
            ":txt",
            ":txt_test_utils",
-           "//third_party/googletest:gtest",
+           "$flutter_root/testing:testing_lib",
+           ":txt_fixtures",
          ] + txt_common_executable_deps
 }
 
@@ -247,6 +315,8 @@ executable("txt_benchmarks") {
   deps = [
            ":txt",
            ":txt_test_utils",
+           "$flutter_root/testing:testing_lib",
            "//third_party/benchmark",
+           ":txt_fixtures",
          ] + txt_common_executable_deps
 }
