@@ -98,6 +98,10 @@ class ButtonBarThemeData extends Diagnosticable {
   /// constraint or with padding.
   final ButtonBarLayoutBehavior layoutBehavior;
 
+  /// Determines whether or not buttons should wrap to the next row if it
+  /// overflows.
+  ///
+  /// Setting this property to true results in [mainAxisSize] being ignored.
   final bool isWrapped;
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -196,7 +200,7 @@ class ButtonBarThemeData extends Diagnosticable {
         ifTrue: 'dropdown width matches button',
         defaultValue: null));
     properties.add(DiagnosticsProperty<ButtonBarLayoutBehavior>('layoutBehavior', layoutBehavior, defaultValue: null));
-    properties.add(FlagProperty('isWrapped', value: isWrapped, ifTrue: 'buttons wrap to new column when overflow', defaultValue: false));
+    properties.add(FlagProperty('isWrapped', value: isWrapped, ifTrue: 'buttons wrap to new column when they overflow', defaultValue: false));
   }
 }
 

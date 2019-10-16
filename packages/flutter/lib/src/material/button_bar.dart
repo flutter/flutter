@@ -118,6 +118,13 @@ class ButtonBar extends StatelessWidget {
   /// If that is null, it will default [ButtonBarLayoutBehavior.padded].
   final ButtonBarLayoutBehavior layoutBehavior;
 
+  /// Determines whether or not buttons should wrap to the next row if it
+  /// overflows.
+  ///
+  /// Setting this property to true results in [mainAxisSize] being ignored.
+  ///
+  /// If null then it will use the surrounding [ButtonBarTheme.isWrapped].
+  /// If that is null, it will default to false.
   final bool isWrapped;
 
   /// The buttons to arrange horizontally.
@@ -165,40 +172,35 @@ class ButtonBar extends StatelessWidget {
       layoutBehavior: layoutBehavior ?? barTheme.layoutBehavior ?? ButtonBarLayoutBehavior.padded,
     );
 
+    final MainAxisAlignment mainAxisAlignment = alignment ?? barTheme.alignment ?? MainAxisAlignment.end;
     // We divide by 4.0 because we want half of the average of the left and right padding.
     final double paddingUnit = buttonTheme.padding.horizontal / 4.0;
+    final List<Widget> paddedChildren = children.map<Widget>((Widget child) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+        child: child,
+      );
+    }).toList();
 
     Widget child;
     if (isWrapped ?? barTheme.isWrapped ?? false) {
-      final MainAxisAlignment mainAxisAlignment = alignment ?? barTheme.alignment ?? MainAxisAlignment.end;
-      WrapAlignment wrapAlignment = _getWrapAlignment(mainAxisAlignment);
-      child = ButtonTheme.fromButtonThemeData(
-        data: buttonTheme,
-        child: Wrap(
-          alignment: wrapAlignment,
-          children: children.map<Widget>((Widget child) {
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: paddingUnit),
-              child: child,
-            );
-          }).toList(),
-        ),
+      final WrapAlignment wrapAlignment = _getWrapAlignment(mainAxisAlignment);
+      child = Wrap(
+        alignment: wrapAlignment,
+        children: paddedChildren,
       );
     } else {
-      child = ButtonTheme.fromButtonThemeData(
-        data: buttonTheme,
-        child: Row(
-          mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
-          mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
-          children: children.map<Widget>((Widget child) {
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: paddingUnit),
-              child: child,
-            );
-          }).toList(),
-        ),
+      child = Row(
+        mainAxisAlignment: mainAxisAlignment,
+        mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
+        children: paddedChildren,
       );
     }
+
+    child = ButtonTheme.fromButtonThemeData(
+      data: buttonTheme,
+      child: child,
+    );
 
     switch (buttonTheme.layoutBehavior) {
       case ButtonBarLayoutBehavior.padded:

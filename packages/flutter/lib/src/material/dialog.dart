@@ -276,6 +276,11 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
+  /// Determines whether or not the actions should wrap to the next row if it
+  /// overflows.
+  ///
+  /// [ButtonBarTheme.isWrapped] can be set to apply this to all descendants of
+  /// the [ButtonBarTheme] in question.
   final bool areActionsWrapped;
 
   /// {@macro flutter.material.dialog.backgroundColor}
