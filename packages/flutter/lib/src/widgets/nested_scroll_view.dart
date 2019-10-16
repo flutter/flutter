@@ -300,15 +300,14 @@ class NestedScrollView extends StatefulWidget {
 ///
 /// {@tool sample}
 ///
-/// You would store your [GlobalKey] outside of your `build` method and return
-/// your [NestedScrollView] to your build method.
+/// You would access the [NestedScrollViewState] using a [GlobalKey].
 ///
 /// ```dart
-/// // In your state or widget but outside of the build method.
-/// final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
-///
 /// @override
 /// Widget build(BuildContext context) {
+///   // You probably want to declare your GlobalKey outside of your build method.
+///   final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+///
 ///   return NestedScrollView(
 ///     key: globalKey,
 ///     headerSliverBuilder: (context, _) => const [SliverAppBar()],
