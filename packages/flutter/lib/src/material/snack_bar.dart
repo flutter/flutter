@@ -280,7 +280,7 @@ class SnackBar extends StatefulWidget {
   }
 
   @override
-  State createState() => _SnackBarState();
+  State<SnackBar> createState() => _SnackBarState();
 }
 
 
@@ -294,17 +294,31 @@ class _SnackBarState extends State<SnackBar> {
   }
 
   @override
+  void didUpdateWidget(SnackBar oldWidget) {
+    if (widget.animation != oldWidget.animation) {
+      oldWidget.animation.removeStatusListener(_onAnimationStatusChanged);
+      widget.animation.addStatusListener(_onAnimationStatusChanged);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
     super.dispose();
   }
 
   void _onAnimationStatusChanged(AnimationStatus animationStatus) {
-    if (animationStatus == AnimationStatus.completed) {
-      if (widget.onVisible != null && !_wasVisible) {
-        widget.onVisible();
+    switch (animationStatus) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+      case AnimationStatus.completed:
+        if (widget.onVisible != null && !_wasVisible) {
+          widget.onVisible();
+        }
         _wasVisible = true;
-      }
     }
   }
 
