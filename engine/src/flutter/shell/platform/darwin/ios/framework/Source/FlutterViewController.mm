@@ -828,36 +828,14 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     if (update == nil) {
       return;
     }
-    [self performOrientationUpdate:update.unsignedIntegerValue];
-  });
-}
 
-- (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences {
-  if (new_preferences != _orientationPreferences) {
-    _orientationPreferences = new_preferences;
-    [UIViewController attemptRotationToDeviceOrientation];
+    NSUInteger new_preferences = update.unsignedIntegerValue;
 
-    UIInterfaceOrientationMask currentInterfaceOrientation =
-        1 << [[UIApplication sharedApplication] statusBarOrientation];
-    if (!(_orientationPreferences & currentInterfaceOrientation)) {
-      // Force orientation switch if the current orientation is not allowed
-      if (_orientationPreferences & UIInterfaceOrientationMaskPortrait) {
-        // This is no official API but more like a workaround / hack (using
-        // key-value coding on a read-only property). This might break in
-        // the future, but currently it´s the only way to force an orientation change
-        [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationPortrait) forKey:@"orientation"];
-      } else if (_orientationPreferences & UIInterfaceOrientationMaskPortraitUpsideDown) {
-        [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationPortraitUpsideDown)
-                                    forKey:@"orientation"];
-      } else if (_orientationPreferences & UIInterfaceOrientationMaskLandscapeLeft) {
-        [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationLandscapeLeft)
-                                    forKey:@"orientation"];
-      } else if (_orientationPreferences & UIInterfaceOrientationMaskLandscapeRight) {
-        [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationLandscapeRight)
-                                    forKey:@"orientation"];
-      }
+    if (new_preferences != _orientationPreferences) {
+      _orientationPreferences = new_preferences;
+      [UIViewController attemptRotationToDeviceOrientation];
     }
-  }
+  });
 }
 
 - (BOOL)shouldAutorotate {
