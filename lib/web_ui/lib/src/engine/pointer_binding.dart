@@ -14,6 +14,7 @@ class PointerBinding {
   /// The singleton instance of this object.
   static PointerBinding get instance => _instance;
   static PointerBinding _instance;
+
   // Set of pointerIds that are added before routing hover and mouse wheel
   // events.
   //
@@ -61,6 +62,7 @@ class PointerBinding {
     newDetector ??= const PointerSupportDetector();
     // When changing the detector, we need to swap the adapter.
     if (newDetector != _detector) {
+      _activePointerIds.clear();
       _detector = newDetector;
       _adapter?.clearListeners();
       _adapter = _createAdapter();
@@ -213,6 +215,8 @@ class PointerAdapter extends BaseAdapter {
     _addEventListener('pointerdown', (html.Event event) {
       final int pointerButton = _pointerButtonFromHtmlEvent(event);
       final int device = _deviceFromHtmlEvent(event);
+      // The pointerdown event will cause an 'add' event on the framework side.
+      PointerBinding._instance._activePointerIds.add(device);
       if (_isButtonDown(device, pointerButton)) {
         // TODO(flutter_web): Remove this temporary fix for right click
         // on web platform once context guesture is implemented.
@@ -452,6 +456,10 @@ class MouseAdapter extends BaseAdapter {
     html.MouseEvent event,
   ) {
     final List<ui.PointerData> data = <ui.PointerData>[];
+    // The mousedown event will cause an 'add' event on the framework side.
+    if (event.type == 'mousedown') {
+      PointerBinding._instance._activePointerIds.add(_mouseDeviceId);
+    }
     if (event.type == 'mousemove') {
       _ensureMouseDeviceAdded(data, event.client.x, event.client.y,
           event.buttons, event.timeStamp, _mouseDeviceId);
