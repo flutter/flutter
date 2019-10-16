@@ -183,12 +183,14 @@ class ResidentWebRunner extends ResidentRunner {
         );
         // When connecting to a browser, update the message with a seemsSlow notification
         // to handle the case where we fail to connect.
-        if (debuggingOptions.browserLaunch) {
-          buildStatus.stop();
+        buildStatus.stop();
+        statusActive = false;
+        if (debuggingOptions.browserLaunch && supportsServiceProtocol) {
           buildStatus = logger.startProgress(
             'Attempting to connect to browser instance..',
             timeout: const Duration(seconds: 30),
           );
+          statusActive = true;
         }
         await device.startApp(package,
           mainPath: target,
@@ -201,8 +203,10 @@ class ResidentWebRunner extends ResidentRunner {
           _connectionResult = await _webFs.connect(debuggingOptions);
           unawaited(_connectionResult.debugConnection.onDone.whenComplete(() => exit(0)));
         }
-        buildStatus.stop();
-        statusActive = false;
+        if (statusActive) {
+          buildStatus.stop();
+          statusActive = false;
+        }
         appStartedCompleter?.complete();
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
