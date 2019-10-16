@@ -67,4 +67,78 @@ void main() {
     await tester.pump();
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
+
+testWidgets('MaterialButton responds to tap and onLongPress when enabled', (WidgetTester tester) async {
+
+    int pressedCount = 0;
+
+    Widget buildFrame({VoidCallback onLongPress, VoidCallback onPressed}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(onPressed: onPressed, onLongPress: onLongPress),
+        ),
+      );
+    }
+
+    // onPressed null, onLongPress not null.
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: () { pressedCount += 1; }),
+    );
+    expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, true);
+    await tester.longPress(find.byType(MaterialButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 1);
+
+    // onPressed not null, onLongPress null.
+    pressedCount = 0;
+    await tester.pumpWidget(
+      buildFrame(onPressed: () { pressedCount += 1; }, onLongPress: null),
+    );
+    expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, true);
+    await tester.onTap(find.byType(MaterialButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 1);
+
+    // onPressed null, onLongPress null.
+    pressedCount = 0;
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: null),
+    );
+    expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, false);
+    await tester.onTap(find.byType(MaterialButton));
+    await tester.onLongPress(find.byType(MaterialButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 0);
+  });  
+
+  testWidgets('MaterialButton onPressed and onLongPress callbacks are distincly recognized', (WidgetTester tester) async {
+    bool didPressButton = false;
+    bool didLongPressButton = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: () {
+            didPressButton = true;
+          },
+          onLongPress() {
+            didLongPressButton = true;
+          }
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final Finder materialButton = find.byType(MaterialButton);
+    expect(tester.widget<MaterialButton>(materialButton).enabled, true);
+
+    expect(didPressButton, isFalse);
+    await tester.tap(materialButton);
+    expect(didPressButton, isTrue);
+
+    expect(didLongPressButton, isFalse);
+    await tester.longPress(materialButton);
+    expect(didLongPressButton, isTrue);
+  });
 }

@@ -333,6 +333,80 @@ void main() {
         paintsExactlyCountTimes(#clipPath, 0),
     );
   });
+
+  testWidgets('FlatButton responds to tap and onLongPress when enabled', (WidgetTester tester) async {
+
+    int pressedCount = 0;
+
+    Widget buildFrame({VoidCallback onLongPress, VoidCallback onPressed}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(onPressed: onPressed, onLongPress: onLongPress),
+        ),
+      );
+    }
+
+    // onPressed null, onLongPress not null.
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: () { pressedCount += 1; }),
+    );
+    expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, true);
+    await tester.longPress(find.byType(FlatButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 1);
+
+    // onPressed not null, onLongPress null.
+    pressedCount = 0;
+    await tester.pumpWidget(
+      buildFrame(onPressed: () { pressedCount += 1; }, onLongPress: null),
+    );
+    expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, true);
+    await tester.onTap(find.byType(FlatButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 1);
+
+    // onPressed null, onLongPress null.
+    pressedCount = 0;
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: null),
+    );
+    expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, false);
+    await tester.onTap(find.byType(FlatButton));
+    await tester.onLongPress(find.byType(FlatButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 0);
+  });  
+
+  testWidgets('FlatButton onPressed and onLongPress callbacks are distincly recognized', (WidgetTester tester) async {
+    bool didPressButton = false;
+    bool didLongPressButton = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(
+          onPressed: () {
+            didPressButton = true;
+          },
+          onLongPress() {
+            didLongPressButton = true;
+          }
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final Finder flatButton = find.byType(FlatButton);
+    expect(tester.widget<FlatButton>(flatButton).enabled, true);
+
+    expect(didPressButton, isFalse);
+    await tester.tap(flatButton);
+    expect(didPressButton, isTrue);
+
+    expect(didLongPressButton, isFalse);
+    await tester.longPress(flatButton);
+    expect(didLongPressButton, isTrue);
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
