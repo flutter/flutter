@@ -202,6 +202,22 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.select));
       expect(data.keyLabel, isNull);
     });
+    test('Repeat count is passed correctly', () {
+      final RawKeyEvent repeatCountEvent = RawKeyEvent.fromMessage(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 29,
+        'plainCodePoint': 'a'.codeUnitAt(0),
+        'codePoint': 'A'.codeUnitAt(0),
+        'character': 'A',
+        'scanCode': 30,
+        'metaState': 0x0,
+        'source': 0x101, // Keyboard source.
+        'repeatCount': 42,
+      });
+      final RawKeyEventDataAndroid data = repeatCountEvent.data;
+      expect(data.repeatCount, equals(42));
+    });
   });
   group('RawKeyEventDataFuchsia', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
