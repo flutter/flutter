@@ -483,8 +483,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
-//  static const SliderComponentShape _defaultValueIndicatorShape = PaddleSliderValueIndicatorShape();
-  static const SliderComponentShape _defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
+  static const SliderComponentShape _defaultValueIndicatorShape = PaddleSliderValueIndicatorShape();
+//  static const SliderComponentShape _defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
   @override

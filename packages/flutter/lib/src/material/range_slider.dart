@@ -525,8 +525,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   static const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape();
-  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = PaddleRangeSliderValueIndicatorShape();
-//  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
+//  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = PaddleRangeSliderValueIndicatorShape();
+  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
   static const double _defaultMinThumbSeparation = 8;
 
@@ -1212,8 +1212,11 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         isEnabled: isEnabled,
     );
 
+    final bool startThumbSelected = _lastThumbSelection == Thumb.start;
+    final bool endThumbSelected = _lastThumbSelection == Thumb.end;
+
     if (!_overlayAnimation.isDismissed) {
-      if (_lastThumbSelection == Thumb.start) {
+      if (startThumbSelected) {
         _sliderTheme.overlayShape.paint(
           context,
           startThumbCenter,
@@ -1227,7 +1230,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           value: startValue,
         );
       }
-      if (_lastThumbSelection == Thumb.end) {
+      if (endThumbSelected) {
         _sliderTheme.overlayShape.paint(
           context,
           endThumbCenter,
@@ -1313,6 +1316,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: bottomThumb,
+      isSelected: bottomThumb == Thumb.start ? startThumbSelected : endThumbSelected,
     );
 
     if (shouldPaintValueIndicators) {
@@ -1368,6 +1372,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: topThumb,
+      isSelected: topThumb == Thumb.start ? startThumbSelected : endThumbSelected,
     );
   }
 

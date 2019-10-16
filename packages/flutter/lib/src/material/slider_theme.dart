@@ -1219,6 +1219,9 @@ abstract class RangeSliderThumbShape {
   /// left and right thumb.
   ///
   /// {@macro flutter.material.rangeSlider.shape.thumb}
+  ///
+  /// [isSelected] can be used to give the selected thumb additional selected
+  /// or pressed state visual feedback, such as a larger shadow.
   void paint(
     PaintingContext context,
     Offset center, {
@@ -1230,6 +1233,7 @@ abstract class RangeSliderThumbShape {
     TextDirection textDirection,
     SliderThemeData sliderTheme,
     Thumb thumb,
+    bool isSelected,
   });
 }
 
@@ -2394,6 +2398,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     Thumb thumb,
+    bool isSelected,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2445,7 +2450,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
       }
     }
 
-    final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
+    final double evaluatedElevation = isSelected ? elevationTween.evaluate(activationAnimation) : elevation;
     final Path shadowPath = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
     canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
 
@@ -2563,6 +2568,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
     final Canvas canvas = context.canvas;
     final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
     final double scale = activationAnimation.value * textScaleFactor;
+    context.estimatedBounds
     _pathPainter.paint(parentBox, canvas, center, scale, labelPainter, Colors.grey[600], Colors.white);
   }
 }
