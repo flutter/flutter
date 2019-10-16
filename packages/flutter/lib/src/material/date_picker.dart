@@ -1085,8 +1085,8 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// provided by [Directionality]. If both [locale] and [textDirection] are not
 /// null, [textDirection] overrides the direction chosen for the [locale].
 ///
-/// The [context] argument is passed to [showDialog], the documentation for
-/// which discusses how it is used.
+/// The [context] and [navigator] arguments are passed to [showDialog], the
+/// documentation for which discusses how it is used.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -1133,6 +1133,7 @@ Future<DateTime> showDatePicker({
   Locale locale,
   TextDirection textDirection,
   TransitionBuilder builder,
+  NavigatorState navigator,
 }) async {
   assert(initialDate != null);
   assert(firstDate != null);
@@ -1176,5 +1177,6 @@ Future<DateTime> showDatePicker({
     builder: (BuildContext context) {
       return builder == null ? child : builder(context, child);
     },
+    navigator: navigator,
   );
 }
