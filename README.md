@@ -24,7 +24,7 @@ mailing list.
 We think Flutter will help you create beautiful, fast apps, with a productive,
 extensible and open development model.
 
-### Beautiful apps
+### Beautiful user experiences
 
 We want to enable designers to deliver their full creative vision without being
 forced to water it down due to limitations of the underlying framework.
@@ -36,7 +36,7 @@ iOS and Android.
 
 ![Reflectly hero image][Reflectly hero image]
 
-### Fast apps
+### Fast results
 
 Flutter is fast. It's powered by the same hardware-accelerated [Skia] 2D
 graphics library that underpins Chrome and Android. We architected Flutter to
