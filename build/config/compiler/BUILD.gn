@@ -163,7 +163,6 @@ config("compiler") {
       common_mac_flags += [
         "-arch",
         "x86_64",
-        "-march=core2",
       ]
     } else if (current_cpu == "x86") {
       common_mac_flags += [
@@ -210,10 +209,6 @@ config("compiler") {
       ldflags += [ "-m32" ]
       if (is_clang) {
         cflags += [
-          # Else building libyuv gives clang's register allocator issues,
-          # see llvm.org/PR15798 / crbug.com/233709
-          "-momit-leaf-frame-pointer",
-
           # Align the stack on 16-byte boundaries, http://crbug.com/418554.
           "-mstack-alignment=16",
           "-mstackrealign",
@@ -500,6 +495,7 @@ config("compiler_arm_fpu") {
 config("runtime_library") {
   cflags = []
   cflags_cc = []
+  cflags_objcc = []
   defines = []
   ldflags = []
   lib_dirs = []
@@ -521,6 +517,20 @@ config("runtime_library") {
     ]
   }
 
+  if (use_flutter_cxx) {
+    cflags_cc += [ "-nostdinc++" ]
+    cflags_objcc += [ "-nostdinc++" ]
+
+    # Unwind seemes to be in these libraries in Linux.
+    if (!is_linux) {
+      ldflags += [ "-nostdlib++" ]
+    }
+    include_dirs = [
+      "//third_party/libcxx/include",
+      "//third_party/libcxxabi/include",
+    ]
+  }
+
   # Android standard library setup.
   if (is_android) {
     if (is_clang) {
@@ -530,8 +540,6 @@ config("runtime_library") {
         "nan=__builtin_nan",
       ]
     }
-
-    defines += [ "__GNU_SOURCE=1" ]  # Necessary for clone().
 
     # TODO(jdduke) Re-enable on mips after resolving linking
     # issues with libc++ (crbug.com/456380).
@@ -554,11 +562,6 @@ config("runtime_library") {
               "$android_ndk_root/sysroot/usr/include/$android_target_triple",
               root_build_dir),
       "-D__ANDROID_API__=$android_api_level",
-    ]
-
-    include_dirs = [
-      "//third_party/libcxx/include",
-      "//third_party/libcxxabi/include",
     ]
 
     # libunwind and libandroid_support also live in $android_libcpp_root.
@@ -589,13 +592,7 @@ config("runtime_library") {
   # We compile our own libc++ on all Linux targets except i386 (for
   # gen_snapshot) where this is not supported.
   if (is_linux) {
-    if (current_cpu != "x86") {
-      cflags_cc += [ "-nostdinc++" ]
-      include_dirs = [
-        "//third_party/libcxx/include",
-        "//third_party/libcxxabi/include",
-      ]
-    } else {
+    if (!use_flutter_cxx) {
       cflags_cc += [ "-stdlib=libstdc++" ]
       ldflags += [ "-stdlib=libstdc++" ]
       libs += [ "gcc" ]
@@ -638,6 +635,9 @@ if (is_win) {
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
     "-Wno-unused-parameter",  # Unused function parameters.
+    "-Wno-implicit-int-float-conversion",
+    "-Wno-reorder-init-list",
+    "-Wno-c99-designator",
   ]
 
   if (is_mac || is_ios) {
