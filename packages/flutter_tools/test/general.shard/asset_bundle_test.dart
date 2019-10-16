@@ -148,6 +148,35 @@ name: example''')
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
+
+    // https://github.com/flutter/flutter/issues/42723
+    testUsingContext('Test regression for mistyped file', () async {
+      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      // Create a directory in the same path to test that we're only looking at File
+      // objects.
+      fs.directory(fs.path.join('assets', 'foo', 'bar')).createSync();
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - assets/foo/
+''');
+      fs.file('.packages').createSync();
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      expect(bundle.entries.length, 4);
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    });
   });
 
 }

@@ -127,6 +127,7 @@
 				TargetAttributes = {
 					F724F2BD2329B8CC0012DB29 = {
 						CreatedOnToolsVersion = 11.0;
+						LastSwiftMigration = 1100;
 					};
 				};
 			};
@@ -379,7 +380,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.add2app.Host;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -397,7 +398,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.add2app.Host;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
