@@ -84,7 +84,7 @@ if (is_fuchsia_host || is_fuchsia) {
     inputs = frontend_server_files
 
     outputs = [
-      "$root_gen_dir/dart-pkg/frontend_server/pubspec.yaml",
+      "$root_gen_dir/dart-pkg/flutter_frontend_server/pubspec.yaml",
       "$root_gen_dir/dart-pkg/vm/pubspec.yaml",
       "$root_gen_dir/dart-pkg/build_integration/pubspec.yaml",
       "$root_gen_dir/dart-pkg/front_end/pubspec.yaml",
