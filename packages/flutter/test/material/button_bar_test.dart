@@ -372,4 +372,55 @@ void main() {
       expect(containerThreeRect.right + 8.0, containerFourRect.left);
     });
   });
+
+  testWidgets('ButtonBarTheme.isWrapped is properly applied', (WidgetTester tester) async {
+    final Key keyOne = UniqueKey();
+    final Key keyTwo = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ButtonBarTheme(
+          data: const ButtonBarThemeData(isWrapped: true),
+          child: ButtonBar(
+            children: <Widget>[
+              Container(key: keyOne, height: 50.0, width: 800.0),
+              Container(key: keyTwo, height: 50.0, width: 800.0),
+            ],
+          ),
+        ),
+      )
+    );
+
+    // ButtonBar implements a [Wrap] instead of a [Row] when isWrapped
+    // is true.
+    expect(find.byType(Wrap), findsOneWidget);
+    expect(find.byType(Row), findsNothing);
+
+    // Second [Container] should wrap around since they take up max width
+    // constraint.
+    final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
+    final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
+    expect(containerOneRect.bottom, containerTwoRect.top);
+    expect(containerOneRect.left, containerTwoRect.left);
+  });
+
+  testWidgets('ButtonBar.isWrapped overrides ButtonBarTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: ButtonBarTheme(
+          data: ButtonBarThemeData(isWrapped: true),
+          child: ButtonBar(
+            isWrapped: false,
+            children: <Widget>[
+              SizedBox(height: 50.0, width: 50.0),
+              SizedBox(height: 50.0, width: 50.0),
+            ],
+          ),
+        ),
+      )
+    );
+
+    // ButtonBar implements a [Row] instead of a [Wrap] if isWrapped is false
+    expect(find.byType(Wrap), findsNothing);
+    expect(find.byType(Row), findsOneWidget);
+  });
 }
