@@ -200,7 +200,7 @@ class ButtonBarThemeData extends Diagnosticable {
         ifTrue: 'dropdown width matches button',
         defaultValue: null));
     properties.add(DiagnosticsProperty<ButtonBarLayoutBehavior>('layoutBehavior', layoutBehavior, defaultValue: null));
-    properties.add(FlagProperty('isWrapped', value: isWrapped, ifTrue: 'buttons wrap to new column when they overflow', defaultValue: false));
+    properties.add(FlagProperty('isWrapped', value: isWrapped, ifTrue: 'buttons wrap to new column when they overflow', defaultValue: null));
   }
 }
 
