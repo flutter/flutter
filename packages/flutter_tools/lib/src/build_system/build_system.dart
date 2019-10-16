@@ -777,7 +777,9 @@ class Node {
     // always being rerun.
     if (missingInputs.isNotEmpty) {
       _dirty = true;
-      invalidatedReasons.add(InvalidedReason.inputChanged);
+      final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
+      printTrace('invalidated build due to missing files: $missingMessage');
+      invalidatedReasons.add(InvalidedReason.inputMissing);
     }
 
     // If we have files to hash, compute them asynchronously and then
@@ -795,6 +797,10 @@ class Node {
 
 /// A description of why a task was rerun.
 enum InvalidedReason {
+  /// An input file that was expected is missing. This can occur when using
+  /// depfile dependencies, or if a target is incorrectly specified.
+  inputMissing,
+
   /// An input file has an updated hash.
   inputChanged,
 
