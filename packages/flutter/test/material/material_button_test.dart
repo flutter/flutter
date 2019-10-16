@@ -79,22 +79,22 @@ testWidgets('MaterialButton responds to tap and onLongPress when enabled', (Widg
       );
     }
 
-    // onPressed null, onLongPress not null.
-    await tester.pumpWidget(
-      buildFrame(null, () { pressedCount += 1; }),
-    );
-    expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, true);
-    await tester.longPress(find.byType(MaterialButton));
-    await tester.pumpAndSettle();
-    expect(pressedCount, 1);
-
     // onPressed not null, onLongPress null.
-    pressedCount = 0;
     await tester.pumpWidget(
       buildFrame(() { pressedCount += 1; }, null),
     );
     expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, true);
     await tester.onTap(find.byType(MaterialButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 1);
+
+    // onPressed null, onLongPress not null.
+    pressedCount = 0;
+    await tester.pumpWidget(
+      buildFrame(null, () { pressedCount += 1; }),
+    );
+    expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, true);
+    await tester.longPress(find.byType(MaterialButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 1);
 
@@ -104,8 +104,8 @@ testWidgets('MaterialButton responds to tap and onLongPress when enabled', (Widg
       buildFrame(null, null),
     );
     expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, false);
-    await tester.onTap(find.byType(MaterialButton));
-    await tester.onLongPress(find.byType(MaterialButton));
+    await tester.tap(find.byType(MaterialButton));
+    await tester.longPress(find.byType(MaterialButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 0);
   });  
@@ -123,7 +123,7 @@ testWidgets('MaterialButton responds to tap and onLongPress when enabled', (Widg
           },
           onLongPress() {
             didLongPressButton = true;
-          }
+          },
           child: const Text('button'),
         ),
       ),

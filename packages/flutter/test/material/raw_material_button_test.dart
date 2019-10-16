@@ -412,7 +412,7 @@ void main() {
 
     int pressedCount = 0;
 
-    Widget buildFrame({VoidCallback onLongPress, VoidCallback onPressed}) {
+    Widget buildFrame(VoidCallback onLongPress, VoidCallback onPressed) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RawMaterialButton(onPressed: onPressed, onLongPress: onLongPress),
@@ -434,7 +434,7 @@ void main() {
       buildFrame(() { pressedCount += 1; }, null),
     );
     expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).enabled, true);
-    await tester.onTap(find.byType(RawMaterialButton));
+    await tester.tap(find.byType(RawMaterialButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 1);
 
@@ -444,8 +444,8 @@ void main() {
       buildFrame(null, null),
     );
     expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).enabled, false);
-    await tester.onTap(find.byType(RawMaterialButton));
-    await tester.onLongPress(find.byType(RawMaterialButton));
+    await tester.tap(find.byType(RawMaterialButton));
+    await tester.longPress(find.byType(RawMaterialButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 0);
   });  
@@ -463,7 +463,7 @@ void main() {
           },
           onLongPress() {
             didLongPressButton = true;
-          }
+          },
           child: const Text('button'),
         ),
       ),

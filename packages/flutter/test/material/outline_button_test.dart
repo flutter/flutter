@@ -454,29 +454,29 @@ void main() {
 
     int pressedCount = 0;
 
-    Widget buildFrame({VoidCallback onLongPress, VoidCallback onPressed}) {
+    Widget buildFrame(VoidCallback onLongPress, VoidCallback onPressed) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: OutlineButton(onPressed: onPressed, onLongPress: onLongPress),
       );
     }
 
+    // onPressed not null, onLongPress null.
+    await tester.pumpWidget(
+      buildFrame(() { pressedCount += 1; }, null),
+    );
+    expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, true);
+    await tester.tap(find.byType(OutlineButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 1);
+
     // onPressed null, onLongPress not null.
+    pressedCount = 0;
     await tester.pumpWidget(
       buildFrame(null, () { pressedCount += 1; }),
     );
     expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, true);
     await tester.longPress(find.byType(OutlineButton));
-    await tester.pumpAndSettle();
-    expect(pressedCount, 1);
-
-    // onPressed not null, onLongPress null.
-    pressedCount = 0;
-    await tester.pumpWidget(
-      buildFrame(() { pressedCount += 1; }, null),
-    );
-    expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, true);
-    await tester.onTap(find.byType(OutlineButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 1);
 
@@ -486,8 +486,8 @@ void main() {
       buildFrame(null, null),
     );
     expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, false);
-    await tester.onTap(find.byType(OutlineButton));
-    await tester.onLongPress(find.byType(OutlineButton));
+    await tester.tap(find.byType(OutlineButton));
+    await tester.longPress(find.byType(OutlineButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 0);
   });
@@ -837,7 +837,7 @@ void main() {
           },
           onLongPress() {
             didLongPressButton = true;
-          }
+          },
           child: const Text('button'),
         ),
       ),

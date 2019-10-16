@@ -345,22 +345,22 @@ void main() {
       );
     }
 
+    // onPressed not null, onLongPress null.
+    await tester.pumpWidget(
+      buildFrame(() { pressedCount += 1; }, null),
+    );
+    expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, true);
+    await tester.tap(find.byType(FlatButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 1);
+
     // onPressed null, onLongPress not null.
+    pressedCount = 0;
     await tester.pumpWidget(
       buildFrame(null, () { pressedCount += 1; }),
     );
     expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, true);
     await tester.longPress(find.byType(FlatButton));
-    await tester.pumpAndSettle();
-    expect(pressedCount, 1);
-
-    // onPressed not null, onLongPress null.
-    pressedCount = 0;
-    await tester.pumpWidget(
-      buildFrame(() { pressedCount += 1; }, null),
-    );
-    expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, true);
-    await tester.onTap(find.byType(FlatButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 1);
 
@@ -370,8 +370,8 @@ void main() {
       buildFrame(null, null),
     );
     expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, false);
-    await tester.onTap(find.byType(FlatButton));
-    await tester.onLongPress(find.byType(FlatButton));
+    await tester.tap(find.byType(FlatButton));
+    await tester.longPress(find.byType(FlatButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 0);
   });  
@@ -389,7 +389,7 @@ void main() {
           },
           onLongPress() {
             didLongPressButton = true;
-          }
+          },
           child: const Text('button'),
         ),
       ),
