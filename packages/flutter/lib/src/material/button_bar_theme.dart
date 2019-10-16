@@ -38,6 +38,7 @@ class ButtonBarThemeData extends Diagnosticable {
     this.buttonPadding,
     this.buttonAlignedDropdown,
     this.layoutBehavior,
+    this.isWrapped,
   }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
        assert(buttonHeight == null || buttonHeight >= 0.0);
 
@@ -97,6 +98,8 @@ class ButtonBarThemeData extends Diagnosticable {
   /// constraint or with padding.
   final ButtonBarLayoutBehavior layoutBehavior;
 
+  final bool isWrapped;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ButtonBarThemeData copyWith({
@@ -108,6 +111,7 @@ class ButtonBarThemeData extends Diagnosticable {
     EdgeInsetsGeometry buttonPadding,
     bool buttonAlignedDropdown,
     ButtonBarLayoutBehavior layoutBehavior,
+    bool isWrapped,
   }) {
     return ButtonBarThemeData(
       alignment: alignment ?? this.alignment,
@@ -118,6 +122,7 @@ class ButtonBarThemeData extends Diagnosticable {
       buttonPadding: buttonPadding ?? this.buttonPadding,
       buttonAlignedDropdown: buttonAlignedDropdown ?? this.buttonAlignedDropdown,
       layoutBehavior: layoutBehavior ?? this.layoutBehavior,
+      isWrapped: isWrapped ?? this.isWrapped,
     );
   }
 
@@ -139,6 +144,7 @@ class ButtonBarThemeData extends Diagnosticable {
       buttonPadding: EdgeInsets.lerp(a?.buttonPadding, b?.buttonPadding, t),
       buttonAlignedDropdown: t < 0.5 ? a.buttonAlignedDropdown : b.buttonAlignedDropdown,
       layoutBehavior: t < 0.5 ? a.layoutBehavior : b.layoutBehavior,
+      isWrapped: t < 0.5 ? a.isWrapped : b.isWrapped,
     );
   }
 
@@ -153,6 +159,7 @@ class ButtonBarThemeData extends Diagnosticable {
       buttonPadding,
       buttonAlignedDropdown,
       layoutBehavior,
+      isWrapped,
     );
   }
 
@@ -170,7 +177,8 @@ class ButtonBarThemeData extends Diagnosticable {
         && typedOther.buttonHeight == buttonHeight
         && typedOther.buttonPadding == buttonPadding
         && typedOther.buttonAlignedDropdown == buttonAlignedDropdown
-        && typedOther.layoutBehavior == layoutBehavior;
+        && typedOther.layoutBehavior == layoutBehavior
+        && typedOther.isWrapped == isWrapped;
   }
 
   @override
@@ -188,6 +196,7 @@ class ButtonBarThemeData extends Diagnosticable {
         ifTrue: 'dropdown width matches button',
         defaultValue: null));
     properties.add(DiagnosticsProperty<ButtonBarLayoutBehavior>('layoutBehavior', layoutBehavior, defaultValue: null));
+    properties.add(FlagProperty('isWrapped', value: isWrapped, ifTrue: 'buttons wrap to new column when overflow', defaultValue: false));
   }
 }
 

@@ -208,6 +208,7 @@ class AlertDialog extends StatelessWidget {
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.contentTextStyle,
     this.actions,
+    this.areActionsWrapped,
     this.backgroundColor,
     this.elevation,
     this.semanticLabel,
@@ -274,6 +275,8 @@ class AlertDialog extends StatelessWidget {
   /// pixels of padding is added above the [ButtonBar] to separate the [title]
   /// from the [actions].
   final List<Widget> actions;
+
+  final bool areActionsWrapped;
 
   /// {@macro flutter.material.dialog.backgroundColor}
   final Color backgroundColor;
@@ -345,6 +348,7 @@ class AlertDialog extends StatelessWidget {
             ),
           if (actions != null)
             ButtonBar(
+              isWrapped: areActionsWrapped,
               children: actions,
             ),
         ],
