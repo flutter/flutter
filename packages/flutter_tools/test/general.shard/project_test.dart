@@ -531,7 +531,12 @@ Future<FlutterProject> someProject() async {
   final Directory directory = fs.directory('some_project');
   directory.childFile('.packages').createSync(recursive: true);
   directory.childDirectory('ios').createSync(recursive: true);
-  directory.childDirectory('android').createSync(recursive: true);
+  final Directory androidDirectory = directory
+      .childDirectory('android')
+      ..createSync(recursive: true);
+  androidDirectory
+    .childFile('AndroidManifest.xml')
+    .writeAsStringSync('<manifest></manifest>');
   return FlutterProject.fromDirectory(directory);
 }
 

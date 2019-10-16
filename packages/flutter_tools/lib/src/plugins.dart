@@ -360,9 +360,6 @@ List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String typ
 /// Returns the version of the Android embedding that the current
 /// [project] is using.
 String _getAndroidEmbeddingVersion(FlutterProject project) {
-  if (!featureFlags.isNewAndroidEmbeddingEnabled) {
-    return '1';
-  }
   assert(project.android != null);
   final File androidManifest = project.android.appManifestFile;
   assert(androidManifest.existsSync());
