@@ -255,7 +255,7 @@ void main() {
 
     int pressedCount = 0;
 
-    Widget buildFrame({VoidCallback onLongPress, VoidCallback onPressed}) {
+    Widget buildFrame(VoidCallback onLongPress, VoidCallback onPressed) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RaisedButton(onPressed: onPressed, onLongPress: onLongPress),
@@ -264,7 +264,7 @@ void main() {
 
     // onPressed null, onLongPress not null.
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { pressedCount += 1; }),
+      buildFrame(null, () { pressedCount += 1; }),
     );
     expect(tester.widget<RaisedButton>(find.byType(RaisedButton)).enabled, true);
     await tester.longPress(find.byType(RaisedButton));
@@ -274,7 +274,7 @@ void main() {
     // onPressed not null, onLongPress null.
     pressedCount = 0;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { pressedCount += 1; }, onLongPress: null),
+      buildFrame(() { pressedCount += 1; }, null),
     );
     expect(tester.widget<RaisedButton>(find.byType(RaisedButton)).enabled, true);
     await tester.onTap(find.byType(RaisedButton));
@@ -284,7 +284,7 @@ void main() {
     // onPressed null, onLongPress null.
     pressedCount = 0;
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: null),
+      buildFrame(null, null),
     );
     expect(tester.widget<FlatButton>(find.byType(RaisedButton)).enabled, false);
     await tester.onTap(find.byType(RaisedButton));
