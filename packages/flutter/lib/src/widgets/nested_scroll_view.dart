@@ -317,10 +317,9 @@ class NestedScrollView extends StatefulWidget {
 ///     ),
 ///   );
 /// }
-///
-/// double get innerScrollPosition =>
-///     globalKey.currentState.innerController.position.pixels;
 /// ```
+///
+/// Now, you can access the inner scroll controller using `globalKey.currentState.innerController`.
 /// {@end-tool}
 ///
 /// Alternatively, you could also visit child elements of your parent widget to obtain
