@@ -40,7 +40,7 @@ class SkVertices implements ui.Vertices {
     List<int> indices,
   })  : assert(mode != null),
         assert(positions != null),
-        _colors = Int32List.fromList(colors.map((ui.Color c) => c.value)),
+        _colors = Int32List.fromList(colors.map((ui.Color c) => c.value).toList()),
         _positions = _offsetListToInt32List(positions),
         _mode = mode {
     if (textureCoordinates != null &&
