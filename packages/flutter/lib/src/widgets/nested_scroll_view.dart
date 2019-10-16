@@ -296,7 +296,32 @@ class NestedScrollView extends StatefulWidget {
 ///
 /// If you want to access the inner scroll controller of your nested scroll view,
 /// you can get its [NestedScrollViewState] by supplying a `GlobalKey<NestedScrollViewState>`
-/// to your [NestedScrollView] widget (the `key` parameter). See [GlobalKey].
+/// to your [NestedScrollView] widget (the `key` parameter).
+///
+/// {@tool sample}
+///
+/// You would store your [GlobalKey] outside of your `build` method and return
+/// your [NestedScrollView] to your build method.
+///
+/// ```dart
+/// // In your state or widget but outside of the build method.
+/// final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return NestedScrollView(
+///     key: globalKey,
+///     headerSliverBuilder: (context, _) => const [SliverAppBar()],
+///     body: const CustomScrollView(
+///       // ...
+///     ),
+///   );
+/// }
+///
+/// double get innerScrollPosition =>
+///     globalKey.currentState.innerController.position.pixels;
+/// ```
+/// {@end-tool}
 ///
 /// Alternatively, you could also visit child elements of your parent widget to obtain
 /// the state if you know exactly that the widget is a direct descendant.
