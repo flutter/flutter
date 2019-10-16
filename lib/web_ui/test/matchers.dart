@@ -23,7 +23,7 @@ import 'package:ui/src/engine.dart';
 ///
 /// Surfaces are returned in a depth-first order.
 Iterable<PersistedSurface> enumerateSurfaces([PersistedSurface root]) {
-  root ??= SceneBuilder.debugLastFrameScene;
+  root ??= SurfaceSceneBuilder.debugLastFrameScene;
   final List<PersistedSurface> surfaces = <PersistedSurface>[root];
 
   root.visitChildren((PersistedSurface surface) {
@@ -37,7 +37,7 @@ Iterable<PersistedSurface> enumerateSurfaces([PersistedSurface root]) {
 ///
 /// If [root] is `null` returns all pictures from the last rendered scene.
 Iterable<PersistedPicture> enumeratePictures([PersistedSurface root]) {
-  root ??= SceneBuilder.debugLastFrameScene;
+  root ??= SurfaceSceneBuilder.debugLastFrameScene;
   return enumerateSurfaces(root).whereType<PersistedPicture>();
 }
 
@@ -45,7 +45,7 @@ Iterable<PersistedPicture> enumeratePictures([PersistedSurface root]) {
 ///
 /// If [root] is `null` returns all pictures from the last rendered scene.
 Iterable<PersistedOffset> enumerateOffsets([PersistedSurface root]) {
-  root ??= SceneBuilder.debugLastFrameScene;
+  root ??= SurfaceSceneBuilder.debugLastFrameScene;
   return enumerateSurfaces(root).whereType<PersistedOffset>();
 }
 
@@ -459,7 +459,7 @@ String get currentHtml {
 class SceneTester {
   SceneTester(this.scene);
 
-  final Scene scene;
+  final SurfaceScene scene;
 
   void expectSceneHtml(String expectedHtml) {
     expectHtml(scene.webOnlyRootElement, expectedHtml,

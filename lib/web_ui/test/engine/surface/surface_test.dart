@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 void main() {
   group('Surface', () {
     setUp(() {
-      SceneBuilder.debugForgetFrameScene();
+      SurfaceSceneBuilder.debugForgetFrameScene();
     });
 
     test('is created', () {

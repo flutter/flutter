@@ -82,6 +82,7 @@ part 'engine/surface/opacity.dart';
 part 'engine/surface/picture.dart';
 part 'engine/surface/platform_view.dart';
 part 'engine/surface/scene.dart';
+part 'engine/surface/scene_builder.dart';
 part 'engine/surface/surface.dart';
 part 'engine/surface/transform.dart';
 part 'engine/test_embedding.dart';

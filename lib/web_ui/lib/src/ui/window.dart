@@ -974,21 +974,7 @@ abstract class Window {
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  void render(Scene scene) {
-    if (engine.experimentalUseSkia) {
-      final engine.LayerScene layerScene = scene;
-      _rasterizer.draw(layerScene.layerTree);
-    } else {
-      engine.domRenderer.renderScene(scene.webOnlyRootElement);
-    }
-  }
-
-  final engine.Rasterizer _rasterizer = engine.experimentalUseSkia
-      ? engine.Rasterizer(engine.Surface((engine.SkCanvas canvas) {
-          engine.domRenderer.renderScene(canvas.htmlCanvas);
-          canvas.skSurface.callMethod('flush');
-        }))
-      : null;
+  void render(Scene scene);
 
   String get initialLifecycleState => _initialLifecycleState;
 
