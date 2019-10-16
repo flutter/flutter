@@ -676,6 +676,33 @@ void main() {
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets('NestedScrollView exposes scroll controllers',
+          (WidgetTester tester) async {
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: NestedScrollView(
+            key: globalKey,
+            body: Container(),
+            headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
+          ),
+        ),
+      ),
+    ));
+
+    expect(globalKey.currentState.innerController, isNotNull);
+    expect(globalKey.currentState.outerController, isNotNull);
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {

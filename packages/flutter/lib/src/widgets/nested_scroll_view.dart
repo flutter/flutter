@@ -284,11 +284,50 @@ class NestedScrollView extends StatefulWidget {
   }
 
   @override
-  _NestedScrollViewState createState() => _NestedScrollViewState();
+  NestedScrollViewState createState() => NestedScrollViewState();
 }
 
-class _NestedScrollViewState extends State<NestedScrollView> {
+/// This is the [State] for [NestedScrollView]. It allows you to obtain the scroll
+/// position of the children of your nested scroll view.
+///
+/// You can access the inner scroll controller via [innerController] and the outer
+/// controller with [outerController], however, notice that the outer scroll position
+/// can also be obtained using [NestedScrollView.controller].
+///
+/// If you want to access the inner scroll controller of your nested scroll view,
+/// you can get its [NestedScrollViewState] by supplying a `GlobalKey<NestedScrollViewState>`
+/// to your [NestedScrollView] widget (the `key` parameter).
+///
+/// {@tool sample}
+///
+/// You would store your [GlobalKey] outside of your `build` method and return
+/// your [NestedScrollView] to your build method.
+///
+/// ```dart
+/// // In your state or widget but outside of the build method.
+/// final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+///
+/// // In your build method.
+/// NestedScrollView(
+///   key: globalKey,
+///   // ...
+/// );
+///
+/// // When you want to access the inner scroll position.
+/// globalKey.currentState.innerController;
+/// ```
+/// {@end-tool}
+///
+/// Alternatively, you could also visit child elements of your parent widget to obtain
+/// the state if you know exactly that the widget is a direct descendant.
+class NestedScrollViewState extends State<NestedScrollView> {
   final SliverOverlapAbsorberHandle _absorberHandle = SliverOverlapAbsorberHandle();
+
+  /// This controls the scroll of the scroll view in [NestedScrollView.body].
+  ScrollController get innerController => _coordinator._innerController;
+
+  /// This controls the scroll of the scroll view in [NestedScrollView.headerSliverBuilder].
+  ScrollController get outerController => _coordinator._outerController;
 
   _NestedScrollCoordinator _coordinator;
 
@@ -409,7 +448,7 @@ class _InheritedNestedScrollView extends InheritedWidget {
        assert(child != null),
        super(key: key, child: child);
 
-  final _NestedScrollViewState state;
+  final NestedScrollViewState state;
 
   @override
   bool updateShouldNotify(_InheritedNestedScrollView old) => state != old.state;
@@ -472,7 +511,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _innerController = _NestedScrollController(this, initialScrollOffset: 0.0, debugLabel: 'inner');
   }
 
-  final _NestedScrollViewState _state;
+  final NestedScrollViewState _state;
   ScrollController _parent;
   final VoidCallback _onHasScrolledBodyChanged;
 
