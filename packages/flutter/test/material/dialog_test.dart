@@ -645,4 +645,27 @@ void main() {
     await tester.pumpWidget(buildFrame(UniqueKey()));
     await tester.pump();
   });
+
+  testWidgets('AlertDialog.areActionsWrapped wraps actions when overflows', (WidgetTester tester) async {
+    final Key keyOne = UniqueKey();
+    final Key keyTwo = UniqueKey();
+    final AlertDialog dialog = AlertDialog(
+      areActionsWrapped: true,
+      actions: <Widget>[
+        Container(key: keyOne, height: 50),
+        Container(key: keyTwo, height: 50),
+      ],
+    );
+
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Second [Container] should wrap to next line
+    final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
+    final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
+    expect(containerOneRect.bottom, containerTwoRect.top);
+    expect(containerOneRect.left, containerTwoRect.left);
+  });
 }
