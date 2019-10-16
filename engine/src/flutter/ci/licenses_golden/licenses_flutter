@@ -415,6 +415,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/opacity.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/platform_view.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/scene.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/scene_builder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/surface.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/transform.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/test_embedding.dart

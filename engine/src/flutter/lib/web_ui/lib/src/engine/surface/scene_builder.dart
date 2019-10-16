@@ -2,114 +2,61 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of ui;
+part of engine;
 
-/// An opaque object representing a composited scene.
-///
-/// To create a Scene object, use a [SceneBuilder].
-///
-/// Scene objects can be displayed on the screen using the
-/// [Window.render] method.
-abstract class Scene {
-  /// Creates a raster image representation of the current state of the scene.
-  /// This is a slow operation that is performed on a background thread.
-  Future<Image> toImage(int width, int height);
+class SurfaceSceneBuilder implements ui.SceneBuilder {
+  SurfaceSceneBuilder() {
+    _surfaceStack.add(PersistedScene(_lastFrameScene));
+  }
 
-  /// Releases the resources used by this scene.
+  final List<PersistedContainerSurface> _surfaceStack =
+      <PersistedContainerSurface>[];
+
+  /// The scene built by this scene builder.
   ///
-  /// After calling this function, the scene is cannot be used further.
-  void dispose();
-}
+  /// This getter should only be called after all surfaces are built.
+  PersistedScene get _persistedScene {
+    assert(() {
+      if (_surfaceStack.length != 1) {
+        final String surfacePrintout = _surfaceStack
+            .map<Type>((PersistedContainerSurface surface) =>
+                surface.runtimeType)
+            .toList()
+            .join(', ');
+        throw Exception('Incorrect sequence of push/pop operations while '
+            'building scene surfaces. After building the scene the persisted '
+            'surface stack must contain a single element which corresponds '
+            'to the scene itself (_PersistedScene). All other surfaces '
+            'should have been popped off the stack. Found the following '
+            'surfaces in the stack:\n$surfacePrintout');
+      }
+      return true;
+    }());
+    return _surfaceStack.first;
+  }
 
-/// An opaque handle to a transform engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushTransform].
-///
-/// {@template dart.ui.sceneBuilder.oldLayerCompatibility}
-/// `oldLayer` parameter in [SceneBuilder] methods only accepts objects created
-/// by the engine. [SceneBuilder] will throw an [AssertionError] if you pass it
-/// a custom implementation of this class.
-/// {@endtemplate}
-abstract class TransformEngineLayer implements EngineLayer {}
+  /// The surface currently being built.
+  PersistedContainerSurface get _currentSurface => _surfaceStack.last;
 
-/// An opaque handle to an offset engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushOffset].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-abstract class OffsetEngineLayer implements EngineLayer {}
-
-/// An opaque handle to a clip rect engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushClipRect].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-abstract class ClipRectEngineLayer implements EngineLayer {}
-
-/// An opaque handle to a clip rounded rect engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushClipRRect].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-abstract class ClipRRectEngineLayer implements EngineLayer {}
-
-/// An opaque handle to a clip path engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushClipPath].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-abstract class ClipPathEngineLayer implements EngineLayer {}
-
-/// An opaque handle to an opacity engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushOpacity].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-abstract class OpacityEngineLayer implements EngineLayer {}
-
-/// An opaque handle to a color filter engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushColorFilter].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-abstract class ColorFilterEngineLayer implements EngineLayer {}
-
-/// An opaque handle to a backdrop filter engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushBackdropFilter].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-abstract class BackdropFilterEngineLayer implements EngineLayer {}
-
-/// An opaque handle to a shader mask engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushShaderMask].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-abstract class ShaderMaskEngineLayer implements EngineLayer {}
-
-/// An opaque handle to a physical shape engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushPhysicalShape].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-abstract class PhysicalShapeEngineLayer implements EngineLayer {}
-
-/// Builds a [Scene] containing the given visuals.
-///
-/// A [Scene] can then be rendered using [Window.render].
-///
-/// To draw graphical operations onto a [Scene], first create a
-/// [Picture] using a [PictureRecorder] and a [Canvas], and then add
-/// it to the scene using [addPicture].
-abstract class SceneBuilder {
-  /// Creates an empty [SceneBuilder] object.
-  factory SceneBuilder() {
-    if (engine.experimentalUseSkia) {
-      return engine.LayerSceneBuilder();
-    } else {
-      return engine.SurfaceSceneBuilder();
+  ui.EngineLayer _pushSurface(PersistedContainerSurface surface) {
+    // Only attempt to update if the update is requested and the surface is in
+    // the live tree.
+    if (surface.oldLayer != null) {
+      assert(surface.oldLayer.runtimeType == surface.runtimeType);
+      assert(surface.oldLayer.isActive);
+      surface.oldLayer.state = PersistedSurfaceState.pendingUpdate;
     }
+    _adoptSurface(surface);
+    _surfaceStack.add(surface);
+    return surface;
+  }
+
+  void _addSurface(PersistedSurface surface) {
+    _adoptSurface(surface);
+  }
+
+  void _adoptSurface(PersistedSurface surface) {
+    _currentSurface.appendChild(surface);
   }
 
   /// Pushes an offset operation onto the operation stack.
@@ -117,16 +64,28 @@ abstract class SceneBuilder {
   /// This is equivalent to [pushTransform] with a matrix with only translation.
   ///
   /// See [pop] for details about the operation stack.
-  OffsetEngineLayer pushOffset(double dx, double dy,
-      {OffsetEngineLayer oldLayer});
+  @override
+  ui.OffsetEngineLayer pushOffset(double dx, double dy,
+      {ui.OffsetEngineLayer oldLayer}) {
+    return _pushSurface(PersistedOffset(oldLayer, dx, dy));
+  }
 
   /// Pushes a transform operation onto the operation stack.
   ///
   /// The objects are transformed by the given matrix before rasterization.
   ///
   /// See [pop] for details about the operation stack.
-  TransformEngineLayer pushTransform(Float64List matrix4,
-      {TransformEngineLayer oldLayer});
+  @override
+  ui.TransformEngineLayer pushTransform(Float64List matrix4,
+      {ui.TransformEngineLayer oldLayer}) {
+    if (matrix4 == null) {
+      throw ArgumentError('"matrix4" argument cannot be null');
+    }
+    if (matrix4.length != 16) {
+      throw ArgumentError('"matrix4" must have 16 entries.');
+    }
+    return _pushSurface(PersistedTransform(oldLayer, matrix4));
+  }
 
   /// Pushes a rectangular clip operation onto the operation stack.
   ///
@@ -134,24 +93,38 @@ abstract class SceneBuilder {
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
   /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
-  ClipRectEngineLayer pushClipRect(Rect rect,
-      {Clip clipBehavior = Clip.antiAlias, ClipRectEngineLayer oldLayer});
+  @override
+  ui.ClipRectEngineLayer pushClipRect(ui.Rect rect,
+      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.ClipRectEngineLayer oldLayer}) {
+    assert(clipBehavior != null);
+    assert(clipBehavior != ui.Clip.none);
+    return _pushSurface(PersistedClipRect(oldLayer, rect));
+  }
 
   /// Pushes a rounded-rectangular clip operation onto the operation stack.
   ///
   /// Rasterization outside the given rounded rectangle is discarded.
   ///
   /// See [pop] for details about the operation stack.
-  ClipRRectEngineLayer pushClipRRect(RRect rrect,
-      {Clip clipBehavior, ClipRRectEngineLayer oldLayer});
+  @override
+  ui.ClipRRectEngineLayer pushClipRRect(ui.RRect rrect,
+      {ui.Clip clipBehavior, ui.ClipRRectEngineLayer oldLayer}) {
+    return _pushSurface(
+        PersistedClipRRect(oldLayer, rrect, clipBehavior));
+  }
 
   /// Pushes a path clip operation onto the operation stack.
   ///
   /// Rasterization outside the given path is discarded.
   ///
   /// See [pop] for details about the operation stack.
-  ClipPathEngineLayer pushClipPath(Path path,
-      {Clip clipBehavior = Clip.antiAlias, ClipPathEngineLayer oldLayer});
+  @override
+  ui.ClipPathEngineLayer pushClipPath(ui.Path path,
+      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.ClipPathEngineLayer oldLayer}) {
+    assert(clipBehavior != null);
+    assert(clipBehavior != ui.Clip.none);
+    return _pushSurface(PersistedClipPath(oldLayer, path, clipBehavior));
+  }
 
   /// Pushes an opacity operation onto the operation stack.
   ///
@@ -161,8 +134,11 @@ abstract class SceneBuilder {
   /// opacity).
   ///
   /// See [pop] for details about the operation stack.
-  OpacityEngineLayer pushOpacity(int alpha,
-      {Offset offset = Offset.zero, OpacityEngineLayer oldLayer});
+  @override
+  ui.OpacityEngineLayer pushOpacity(int alpha,
+      {ui.Offset offset = ui.Offset.zero, ui.OpacityEngineLayer oldLayer}) {
+    return _pushSurface(PersistedOpacity(oldLayer, alpha, offset));
+  }
 
   /// Pushes a color filter operation onto the operation stack.
   ///
@@ -174,8 +150,12 @@ abstract class SceneBuilder {
   /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
   ///
   /// See [pop] for details about the operation stack.
-  ColorFilterEngineLayer pushColorFilter(ColorFilter filter,
-      {ColorFilterEngineLayer oldLayer});
+  @override
+  ui.ColorFilterEngineLayer pushColorFilter(ui.ColorFilter filter,
+      {ui.ColorFilterEngineLayer oldLayer}) {
+    assert(filter != null);
+    throw UnimplementedError();
+  }
 
   /// Pushes a backdrop filter operation onto the operation stack.
   ///
@@ -183,8 +163,11 @@ abstract class SceneBuilder {
   /// rasterizing the given objects.
   ///
   /// See [pop] for details about the operation stack.
-  BackdropFilterEngineLayer pushBackdropFilter(ImageFilter filter,
-      {BackdropFilterEngineLayer oldLayer});
+  @override
+  ui.BackdropFilterEngineLayer pushBackdropFilter(ui.ImageFilter filter,
+      {ui.BackdropFilterEngineLayer oldLayer}) {
+    return _pushSurface(PersistedBackdropFilter(oldLayer, filter));
+  }
 
   /// Pushes a shader mask operation onto the operation stack.
   ///
@@ -192,9 +175,12 @@ abstract class SceneBuilder {
   /// rectangle using the given blend mode.
   ///
   /// See [pop] for details about the operation stack.
-  ShaderMaskEngineLayer pushShaderMask(
-      Shader shader, Rect maskRect, BlendMode blendMode,
-      {ShaderMaskEngineLayer oldLayer});
+  @override
+  ui.ShaderMaskEngineLayer pushShaderMask(
+      ui.Shader shader, ui.Rect maskRect, ui.BlendMode blendMode,
+      {ui.ShaderMaskEngineLayer oldLayer}) {
+    throw UnimplementedError();
+  }
 
   /// Pushes a physical layer operation for an arbitrary shape onto the
   /// operation stack.
@@ -208,14 +194,24 @@ abstract class SceneBuilder {
   /// color of the layer background.
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
-  PhysicalShapeEngineLayer pushPhysicalShape({
-    Path path,
+  @override
+  ui.PhysicalShapeEngineLayer pushPhysicalShape({
+    ui.Path path,
     double elevation,
-    Color color,
-    Color shadowColor,
-    Clip clipBehavior = Clip.none,
-    PhysicalShapeEngineLayer oldLayer,
-  });
+    ui.Color color,
+    ui.Color shadowColor,
+    ui.Clip clipBehavior = ui.Clip.none,
+    ui.PhysicalShapeEngineLayer oldLayer,
+  }) {
+    return _pushSurface(PersistedPhysicalShape(
+      oldLayer,
+      path,
+      elevation,
+      color.value,
+      shadowColor?.value ?? 0xFF000000,
+      clipBehavior,
+    ));
+  }
 
   /// Add a retained engine layer subtree from previous frames.
   ///
@@ -225,7 +221,13 @@ abstract class SceneBuilder {
   /// Therefore, when implementing a subclass of the [Layer] concept defined in
   /// the rendering layer of Flutter's framework, once this is called, there's
   /// no need to call [addToScene] for its children layers.
-  void addRetained(EngineLayer retainedLayer);
+  @override
+  void addRetained(ui.EngineLayer retainedLayer) {
+    final PersistedContainerSurface retainedSurface = retainedLayer;
+    assert(retainedSurface.isActive || retainedSurface.isReleased);
+    retainedSurface.tryRetain();
+    _adoptSurface(retainedSurface);
+  }
 
   /// Ends the effect of the most recently pushed operation.
   ///
@@ -233,7 +235,11 @@ abstract class SceneBuilder {
   /// operations in the stack applies to each of the objects added to the scene.
   /// Calling this function removes the most recently added operation from the
   /// stack.
-  void pop();
+  @override
+  void pop() {
+    assert(_surfaceStack.isNotEmpty);
+    _surfaceStack.removeLast();
+  }
 
   /// Adds an object to the scene that displays performance statistics.
   ///
@@ -258,27 +264,69 @@ abstract class SceneBuilder {
   ///
   /// See also the [PerformanceOverlayOption] enum in the rendering library.
   /// for more details.
-  void addPerformanceOverlay(int enabledOptions, Rect bounds);
+  @override
+  void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
+    _addPerformanceOverlay(
+        enabledOptions, bounds.left, bounds.right, bounds.top, bounds.bottom);
+  }
+
+  /// Whether we've already warned the user about the lack of the performance
+  /// overlay or not.
+  ///
+  /// We use this to avoid spamming the console with redundant warning messages.
+  static bool _webOnlyDidWarnAboutPerformanceOverlay = false;
+
+  void _addPerformanceOverlay(int enabledOptions, double left, double right,
+      double top, double bottom) {
+    if (!_webOnlyDidWarnAboutPerformanceOverlay) {
+      _webOnlyDidWarnAboutPerformanceOverlay = true;
+      html.window.console
+          .warn('The performance overlay isn\'t supported on the web');
+    }
+  }
 
   /// Adds a [Picture] to the scene.
   ///
   /// The picture is rasterized at the given offset.
+  @override
   void addPicture(
-    Offset offset,
-    Picture picture, {
+    ui.Offset offset,
+    ui.Picture picture, {
     bool isComplexHint = false,
     bool willChangeHint = false,
-  });
+  }) {
+    int hints = 0;
+    if (isComplexHint) {
+      hints |= 1;
+    }
+    if (willChangeHint) {
+      hints |= 2;
+    }
+    _addSurface(
+        persistedPictureFactory(offset.dx, offset.dy, picture, hints));
+  }
 
   /// Adds a backend texture to the scene.
   ///
   /// The texture is scaled to the given size and rasterized at the given
   /// offset.
+  @override
   void addTexture(int textureId,
-      {Offset offset = Offset.zero,
+      {ui.Offset offset = ui.Offset.zero,
       double width = 0.0,
       double height = 0.0,
-      bool freeze = false});
+      bool freeze = false}) {
+    assert(offset != null, 'Offset argument was null');
+    _addTexture(offset.dx, offset.dy, width, height, textureId);
+  }
+
+  void _addTexture(
+      double dx, double dy, double width, double height, int textureId) {
+    // In test mode, allow this to be a no-op.
+    if (!ui.debugEmulateFlutterTesterEnvironment) {
+      throw UnimplementedError('Textures are not supported in Flutter Web');
+    }
+  }
 
   /// Adds a platform view (e.g an iOS UIView) to the scene.
   ///
@@ -296,21 +344,43 @@ abstract class SceneBuilder {
   /// With a platform view in the scene, Quartz has to composite the two Flutter surfaces and the
   /// embedded UIView. In addition to that, on iOS versions greater than 9, the Flutter frames are
   /// synchronized with the UIView frames adding additional performance overhead.
+  @override
   void addPlatformView(
     int viewId, {
-    Offset offset = Offset.zero,
+    ui.Offset offset = ui.Offset.zero,
     double width = 0.0,
     double height = 0.0,
-  });
+  }) {
+    assert(offset != null, 'Offset argument was null');
+    _addPlatformView(offset.dx, offset.dy, width, height, viewId);
+  }
+
+  void _addPlatformView(
+    double dx,
+    double dy,
+    double width,
+    double height,
+    int viewId,
+  ) {
+    _addSurface(PersistedPlatformView(viewId, dx, dy, width, height));
+  }
 
   /// (Fuchsia-only) Adds a scene rendered by another application to the scene
   /// for this application.
+  @override
   void addChildScene(
-      {Offset offset = Offset.zero,
+      {ui.Offset offset = ui.Offset.zero,
       double width = 0.0,
       double height = 0.0,
-      SceneHost sceneHost,
-      bool hitTestable = true});
+      ui.SceneHost sceneHost,
+      bool hitTestable = true}) {
+    _addChildScene(offset.dx, offset.dy, width, height, sceneHost, hitTestable);
+  }
+
+  void _addChildScene(double dx, double dy, double width, double height,
+      ui.SceneHost sceneHost, bool hitTestable) {
+    throw UnimplementedError();
+  }
 
   /// Sets a threshold after which additional debugging information should be
   /// recorded.
@@ -319,7 +389,8 @@ abstract class SceneBuilder {
   /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
   /// We'll hopefully be able to figure out how to make this feature more useful
   /// to you.
-  void setRasterizerTracingThreshold(int frameInterval);
+  @override
+  void setRasterizerTracingThreshold(int frameInterval) {}
 
   /// Sets whether the raster cache should checkerboard cached entries. This is
   /// only useful for debugging purposes.
@@ -337,13 +408,48 @@ abstract class SceneBuilder {
   ///
   /// Currently this interface is difficult to use by end-developers. If you're
   /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
-  void setCheckerboardRasterCacheImages(bool checkerboard);
+  @override
+  void setCheckerboardRasterCacheImages(bool checkerboard) {}
 
   /// Sets whether the compositor should checkerboard layers that are rendered
   /// to offscreen bitmaps.
   ///
   /// This is only useful for debugging purposes.
-  void setCheckerboardOffscreenLayers(bool checkerboard);
+  @override
+  void setCheckerboardOffscreenLayers(bool checkerboard) {}
+
+  /// The scene recorded in the last frame.
+  ///
+  /// This is a surface tree that holds onto the DOM elements that can be reused
+  /// on the next frame.
+  static PersistedScene _lastFrameScene;
+
+  /// Returns the computed persisted scene graph recorded in the last frame.
+  ///
+  /// This is only available in debug mode. It returns `null` in profile and
+  /// release modes.
+  static PersistedScene get debugLastFrameScene {
+    PersistedScene result;
+    assert(() {
+      result = _lastFrameScene;
+      return true;
+    }());
+    return result;
+  }
+
+  /// Discards information about previously rendered frames, including DOM
+  /// elements and cached canvases.
+  ///
+  /// After calling this function new canvases will be created for the
+  /// subsequent scene. This is useful when tests need predictable canvas
+  /// sizes. If the cache is not cleared, then canvases allocated in one test
+  /// may be reused in another test.
+  static void debugForgetFrameScene() {
+    _lastFrameScene?.rootElement?.remove();
+    _lastFrameScene = null;
+    _clipIdCounter = 0;
+    _recycledCanvases.clear();
+  }
 
   /// Finishes building the scene.
   ///
@@ -353,57 +459,24 @@ abstract class SceneBuilder {
   ///
   /// After calling this function, the scene builder object is invalid and
   /// cannot be used further.
-  Scene build();
-
-  /// Set properties on the linked scene.  These properties include its bounds,
-  /// as well as whether it can be the target of focus events or not.
-  void setProperties(double width, double height, double insetTop,
-      double insetRight, double insetBottom, double insetLeft, bool focusable);
-}
-
-/// A handle for the framework to hold and retain an engine layer across frames.
-class EngineLayer {}
-
-//// (Fuchsia-only) Hosts content provided by another application.
-class SceneHost {
-  /// Creates a host for a child scene's content.
-  ///
-  /// The ViewHolder token is bound to a ViewHolder scene graph node which acts
-  /// as a container for the child's content.  The creator of the SceneHost is
-  /// responsible for sending the corresponding ViewToken to the child.
-  ///
-  /// The ViewHolder token is a dart:zircon Handle, but that type isn't
-  /// available here. This is called by ChildViewConnection in
-  /// //topaz/public/dart/fuchsia_scenic_flutter/.
-  ///
-  /// The SceneHost takes ownership of the provided ViewHolder token.
-  SceneHost(
-      dynamic viewHolderToken,
-      void Function() viewConnectedCallback,
-      void Function() viewDisconnectedCallback,
-      void Function(bool) viewStateChangedCallback);
-
-  SceneHost.fromViewHolderToken(
-      dynamic viewHolderToken,
-      void Function() viewConnectedCallback,
-      void Function() viewDisconnectedCallback,
-      void Function(bool) viewStateChangedCallback);
-
-  /// Releases the resources associated with the SceneHost.
-  ///
-  /// After calling this function, the SceneHost cannot be used further.
-  void dispose() {}
-
-  /// Set properties on the linked scene.  These properties include its bounds,
-  /// as well as whether it can be the target of focus events or not.
-  void setProperties(double width, double height, double insetTop,
-      double insetRight, double insetBottom, double insetLeft, bool focusable) {
-    throw UnimplementedError();
+  @override
+  SurfaceScene build() {
+    _persistedScene.preroll();
+    if (_lastFrameScene == null) {
+      _persistedScene.build();
+    } else {
+      _persistedScene.update(_lastFrameScene);
+    }
+    commitScene(_persistedScene);
+    _lastFrameScene = _persistedScene;
+    return SurfaceScene(_persistedScene.rootElement);
   }
 
-  /// Set the opacity of the linked scene.  This opacity value is applied only
-  /// once, when the child scene is composited into our own.
-  void setOpacity(double opacity) {
+  /// Set properties on the linked scene.  These properties include its bounds,
+  /// as well as whether it can be the target of focus events or not.
+  @override
+  void setProperties(double width, double height, double insetTop,
+      double insetRight, double insetBottom, double insetLeft, bool focusable) {
     throw UnimplementedError();
   }
 }

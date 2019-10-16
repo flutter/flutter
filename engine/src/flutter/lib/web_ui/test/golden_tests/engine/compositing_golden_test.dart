@@ -18,14 +18,14 @@ void main() async {
   debugShowClipLayers = true;
 
   setUp(() {
-    SceneBuilder.debugForgetFrameScene();
+    SurfaceSceneBuilder.debugForgetFrameScene();
     for (html.Node scene in html.document.querySelectorAll('flt-scene')) {
       scene.remove();
     }
   });
 
   test('pushClipRect', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushClipRect(
       const Rect.fromLTRB(10, 10, 60, 60),
     );
@@ -38,7 +38,7 @@ void main() async {
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('pushClipRect with offset and transform', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
 
     builder.pushOffset(0, 60);
     builder.pushTransform(
@@ -58,7 +58,7 @@ void main() async {
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('pushClipRRect', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushClipRRect(
       RRect.fromLTRBR(10, 10, 60, 60, const Radius.circular(5)),
     );
@@ -71,7 +71,7 @@ void main() async {
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('pushPhysicalShape', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushPhysicalShape(
       path: Path()..addRect(const Rect.fromLTRB(10, 10, 60, 60)),
       clipBehavior: Clip.hardEdge,
@@ -204,7 +204,7 @@ void _testCullRectComputation() {
   // Draw a picture inside a layer clip but fill all available space inside it.
   // Verify that the cull rect is equal to the layer clip.
   test('fills layer clip rect', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushClipRect(
       const Rect.fromLTWH(10, 10, 60, 60),
     );
@@ -232,7 +232,7 @@ void _testCullRectComputation() {
   // paint bounds overflow the layer clip. Verify that the cull rect is the
   // intersection between the layer clip and paint bounds.
   test('intersects layer clip rect and paint bounds', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushClipRect(
       const Rect.fromLTWH(10, 10, 60, 60),
     );
@@ -260,7 +260,7 @@ void _testCullRectComputation() {
   // an offset layer. Verify that the cull rect is the intersection between the
   // layer clip and the offset paint bounds.
   test('offsets picture inside layer clip rect', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushClipRect(
       const Rect.fromLTWH(10, 10, 60, 60),
     );
@@ -320,7 +320,7 @@ void _testCullRectComputation() {
   // Draw a picture inside a rotated clip. Verify that the cull rect is big
   // enough to fit the rotated clip.
   test('rotates clip and the picture', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushOffset(80, 50);
 
     builder.pushTransform(
@@ -364,7 +364,7 @@ void _testCullRectComputation() {
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('pushClipPath', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     final Path path = Path();
     path..addRect(const Rect.fromLTRB(10, 10, 60, 60));
     builder.pushClipPath(
@@ -381,9 +381,10 @@ void _testCullRectComputation() {
   // Draw a picture inside a rotated clip. Verify that the cull rect is big
   // enough to fit the rotated clip.
   test('clips correctly when using 3d transforms', () async {
-    final SceneBuilder builder = SceneBuilder();
-    final double screenWidth = html.window.innerWidth.toDouble();
-    final double screenHeight = html.window.innerHeight.toDouble();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    // TODO(yjbanov): see the TODO below.
+    // final double screenWidth = html.window.innerWidth.toDouble();
+    // final double screenHeight = html.window.innerHeight.toDouble();
 
     final Matrix4 scaleTransform = Matrix4.identity().scaled(0.5, 0.2);
     builder.pushTransform(

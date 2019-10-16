@@ -185,7 +185,7 @@ void testLayerLifeCycle(
     TestLayerBuilder layerBuilder, ExpectedHtmlGetter expectedHtmlGetter) {
   // Force scene builder to start from scratch. This guarantees that the first
   // scene starts from the "build" phase.
-  SceneBuilder.debugForgetFrameScene();
+  SurfaceSceneBuilder.debugForgetFrameScene();
 
   // Build: builds a brand new layer.
   SceneBuilder sceneBuilder = SceneBuilder();
