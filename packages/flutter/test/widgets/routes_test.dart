@@ -764,11 +764,9 @@ void main() {
 
       // Replace with a different route while push is ongoing to trigger
       // TrainHopping.
-      ProxyAnimation animationPageThree;
       navigator.currentState.pushReplacement(
         TestPageRouteBuilder(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            animationPageThree = animation;
             return const Text('Page Three');
           },
         ),
