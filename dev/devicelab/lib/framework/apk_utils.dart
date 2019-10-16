@@ -151,7 +151,7 @@ class ApkExtractor {
       packages
         .split('\n')
         .where((String line) => line.startsWith('C'))
-        .map<String>((String line) => line.split('	').last),
+        .map<String>((String line) => line.split('\t').last),
     );
     assert(_classes.isNotEmpty);
     _extracted = true;
