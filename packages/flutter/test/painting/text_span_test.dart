@@ -251,12 +251,12 @@ void main() {
     }
     expect(error, isNotNull);
     expect(error.toStringDeep(),
-        'FlutterError\n'
-            '   TextSpan contains a null child.\n'
-            '   A TextSpan object with a non-null child list should not have any\n'
-            '   nulls in its child list.\n'
-            '   The full text in question was:\n'
-            '     TextSpan("foo bar")\n'
+      'FlutterError\n'
+      '   TextSpan contains a null child.\n'
+      '   A TextSpan object with a non-null child list should not have any\n'
+      '   nulls in its child list.\n'
+      '   The full text in question was:\n'
+      '     TextSpan("foo bar")\n'
     );
   });
 

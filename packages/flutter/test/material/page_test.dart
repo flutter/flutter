@@ -471,9 +471,9 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isInstanceOf<FlutterError>());
     expect(exception.toStringDeep(), equalsIgnoringHashCodes(
-        'FlutterError\n'
-            '   The builder for route "broken" returned null.\n'
-            '   Route builders must never return null.\n'
+      'FlutterError\n'
+      '   The builder for route "broken" returned null.\n'
+      '   Route builders must never return null.\n'
     ));
   });
 

@@ -253,17 +253,20 @@ void main() {
     }
     expect(error, isNotNull);
     expect(error.toStringDeep(),
-        'FlutterError\n'
-            '   ImageDecoration.matchTextDirection can only be used when a\n'
-            '   TextDirection is available.\n'
-            '   When DecorationImagePainter.paint() was called, there was no text\n'
-            '   direction provided in the ImageConfiguration object to match.\n'
-            '   The DecorationImage was:\n'
-            '     DecorationImage(SynchronousTestImageProvider(), center, match\n'
-            '     text direction)\n'
-            '   The ImageConfiguration was:\n'
-            '     ImageConfiguration(size: Size(100.0, 100.0))\n'
+      'FlutterError\n'
+      '   ImageDecoration.matchTextDirection can only be used when a\n'
+      '   TextDirection is available.\n'
+      '   When DecorationImagePainter.paint() was called, there was no text\n'
+      '   direction provided in the ImageConfiguration object to match.\n'
+      '   The DecorationImage was:\n'
+      '     DecorationImage(SynchronousTestImageProvider(), center, match\n'
+      '     text direction)\n'
+      '   The ImageConfiguration was:\n'
+      '     ImageConfiguration(size: Size(100.0, 100.0))\n'
     );
+    expect(error.diagnostics.length, 4);
+    expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<DecorationImage>>());
+    expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ImageConfiguration>>());
   });
 
   test('BoxDecoration.lerp - shapes', () {
