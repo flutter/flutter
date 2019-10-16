@@ -213,7 +213,6 @@ class InputConnectionAdaptor extends BaseInputConnection {
                         mEditable.delete(selStart, selEnd);
                     mEditable.insert(selStart, String.valueOf((char) character));
                     setSelection(selStart + 1, selStart + 1);
-                    updateEditingState();
                 }
                 return true;
             }
