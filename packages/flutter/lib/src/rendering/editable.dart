@@ -350,16 +350,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       .contains(endOffset + effectiveOffset);
   }
 
-  static const int _kLeftArrowCode = 21;
-  static const int _kRightArrowCode = 22;
-  static const int _kUpArrowCode = 19;
-  static const int _kDownArrowCode = 20;
-  static const int _kXKeyCode = 52;
-  static const int _kCKeyCode = 31;
-  static const int _kVKeyCode = 50;
-  static const int _kAKeyCode = 29;
-  static const int _kDelKeyCode = 112;
-
   // The extent offset of the current selection
   int _extentOffset = -1;
 
@@ -416,34 +406,36 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (keyEvent is RawKeyUpEvent)
       return;
 
+    if (selection.isCollapsed) {
+      _extentOffset = selection.extentOffset;
+      _baseOffset = selection.baseOffset;
+    }
+
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
     final LogicalKeyboardKey key = keyEvent.logicalKey;
 
+    print('Handling key event $key, with pressed keys $keysPressed');
     if (keysPressed.length > 2 || !_nonModifierKeys.contains(key) ||
         keysPressed.difference(_interestingKeys).isNotEmpty) {
       // If there are too many keys, or keys other than the ones we're
       // interested in pressed, just ignore the keypress.
+      print('Rejecting $key');
       return;
     }
 
     // Update current key states
     final bool shift = keysPressed.contains(LogicalKeyboardKey.shift);
     final bool control = keysPressed.contains(LogicalKeyboardKey.control);
+    final bool isMovementKey = _movementKeys.contains(key);
+    final bool isDeleteKey = key == LogicalKeyboardKey.delete;
 
-    final bool arrow = _movementKeys.contains(key);
-
-    if ((!shift && !control && !arrow) || (arrow && keysPressed.length > 1)) {
-      // Some nonsense combination is down, like "KEY_A+KEY_C" or "DEL+UP_ARROW".
+    if (!control && !isMovementKey && !isDeleteKey) {
+      // Some nonsense combination is down, like "keyA + keyC".
       return;
     }
 
-    if (selection.isCollapsed) {
-      _extentOffset = selection.extentOffset;
-      _baseOffset = selection.baseOffset;
-    }
-
     // We will only move select or move the caret if an arrow is pressed.
-    if (arrow) {
+    if (isMovementKey) {
       int newOffset = _extentOffset;
       final bool rightArrow = key == LogicalKeyboardKey.arrowRight;
       final bool leftArrow = key == LogicalKeyboardKey.arrowLeft;
@@ -465,7 +457,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(keyEvent);
-    } else if (key == LogicalKeyboardKey.delete) {
+    } else if (isDeleteKey) {
       _handleDelete();
     }
   }

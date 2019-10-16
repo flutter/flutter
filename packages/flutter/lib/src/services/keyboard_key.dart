@@ -245,7 +245,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// [controlRight] and [controlLeft] and convert that set to contain just
   /// [control], so that the question "is any control key down?" can be asked.
   static Set<LogicalKeyboardKey> collapseSynonyms(Set<LogicalKeyboardKey> input) {
-    Set<LogicalKeyboardKey> result = <LogicalKeyboardKey>{};
+    final Set<LogicalKeyboardKey> result = <LogicalKeyboardKey>{};
     for (LogicalKeyboardKey key in input) {
       final LogicalKeyboardKey synonym = _synonyms[key];
       result.add(synonym ?? key);
