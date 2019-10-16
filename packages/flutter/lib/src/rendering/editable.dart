@@ -374,9 +374,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // selects all the way to the end or the beginning of a field.
   bool _resetCursor = false;
 
-  static const int _kShiftMask = 1; // https://developer.android.com/reference/android/view/KeyEvent.html#META_SHIFT_ON
-  static const int _kControlMask = 1 << 12; // https://developer.android.com/reference/android/view/KeyEvent.html#META_CTRL_ON
-
   // Call through to onSelectionChanged only if the given nextSelection is
   // different from the existing selection.
   void _handlePotentialSelectionChange(
@@ -389,60 +386,88 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     onSelectionChanged(nextSelection, this, cause);
   }
 
-  // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
-  void _handleKeyEvent(RawKeyEvent keyEvent) {
-    // Only handle key events on Android.
-    if (keyEvent.data is! RawKeyEventDataAndroid)
-      return;
+  static final Set<LogicalKeyboardKey> _movementKeys = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.arrowRight,
+    LogicalKeyboardKey.arrowLeft,
+    LogicalKeyboardKey.arrowUp,
+    LogicalKeyboardKey.arrowDown,
+  };
 
+  static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.keyA,
+    LogicalKeyboardKey.keyC,
+    LogicalKeyboardKey.keyV,
+    LogicalKeyboardKey.keyX,
+    LogicalKeyboardKey.delete,
+  };
+
+  static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
+    ..._shortcutKeys,
+    ..._movementKeys,
+  };
+
+  static final Set<LogicalKeyboardKey> _interestingKeys = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.shift,
+    LogicalKeyboardKey.control,
+    ..._nonModifierKeys,
+  };
+
+  void _handleKeyEvent(RawKeyEvent keyEvent) {
     if (keyEvent is RawKeyUpEvent)
       return;
 
-    final RawKeyEventDataAndroid rawAndroidEvent = keyEvent.data;
-    final int pressedKeyCode = rawAndroidEvent.keyCode;
-    final int pressedKeyMetaState = rawAndroidEvent.metaState;
+    final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
+    final LogicalKeyboardKey key = keyEvent.logicalKey;
+
+    if (keysPressed.length > 2 || !_nonModifierKeys.contains(key) ||
+        keysPressed.difference(_interestingKeys).isNotEmpty) {
+      // If there are too many keys, or keys other than the ones we're
+      // interested in pressed, just ignore the keypress.
+      return;
+    }
+
+    // Update current key states
+    final bool shift = keysPressed.contains(LogicalKeyboardKey.shift);
+    final bool control = keysPressed.contains(LogicalKeyboardKey.control);
+
+    final bool arrow = _movementKeys.contains(key);
+
+    if ((!shift && !control && !arrow) || (arrow && keysPressed.length > 1)) {
+      // Some nonsense combination is down, like "KEY_A+KEY_C" or "DEL+UP_ARROW".
+      return;
+    }
 
     if (selection.isCollapsed) {
       _extentOffset = selection.extentOffset;
       _baseOffset = selection.baseOffset;
     }
 
-    // Update current key states
-    final bool shift = pressedKeyMetaState & _kShiftMask > 0;
-    final bool ctrl = pressedKeyMetaState & _kControlMask > 0;
-
-    final bool rightArrow = pressedKeyCode == _kRightArrowCode;
-    final bool leftArrow = pressedKeyCode == _kLeftArrowCode;
-    final bool upArrow = pressedKeyCode == _kUpArrowCode;
-    final bool downArrow = pressedKeyCode == _kDownArrowCode;
-    final bool arrow = leftArrow || rightArrow || upArrow || downArrow;
-    final bool aKey = pressedKeyCode == _kAKeyCode;
-    final bool xKey = pressedKeyCode == _kXKeyCode;
-    final bool vKey = pressedKeyCode == _kVKeyCode;
-    final bool cKey = pressedKeyCode == _kCKeyCode;
-    final bool del = pressedKeyCode == _kDelKeyCode;
-
-    // We will only move select or more the caret if an arrow is pressed
+    // We will only move select or move the caret if an arrow is pressed.
     if (arrow) {
       int newOffset = _extentOffset;
+      final bool rightArrow = key == LogicalKeyboardKey.arrowRight;
+      final bool leftArrow = key == LogicalKeyboardKey.arrowLeft;
+      final bool upArrow = key == LogicalKeyboardKey.arrowUp;
+      final bool downArrow = key == LogicalKeyboardKey.arrowDown;
 
-      // Because the user can use multiple keys to change how he selects
+      // Because the user can use multiple keys to change how they select,
       // the new offset variable is threaded through these four functions
       // and potentially changes after each one.
-      if (ctrl)
-        newOffset = _handleControl(rightArrow, leftArrow, ctrl, newOffset);
+      if (control)
+        newOffset = _handleControl(rightArrow, leftArrow, control, newOffset);
       newOffset = _handleHorizontalArrows(rightArrow, leftArrow, shift, newOffset);
       if (downArrow || upArrow)
         newOffset = _handleVerticalArrows(upArrow, downArrow, shift, newOffset);
       newOffset = _handleShift(rightArrow, leftArrow, shift, newOffset);
 
       _extentOffset = newOffset;
-    } else if (ctrl && (xKey || vKey || cKey || aKey)) {
-      // _handleShortcuts depends on being started in the same stack invocation as the _handleKeyEvent method
-      _handleShortcuts(pressedKeyCode);
-    }
-    if (del)
+    } else if (control && _shortcutKeys.contains(key)) {
+      // _handleShortcuts depends on being started in the same stack invocation
+      // as the _handleKeyEvent method
+      _handleShortcuts(keyEvent);
+    } else if (key == LogicalKeyboardKey.delete) {
       _handleDelete();
+    }
   }
 
   // Handles full word traversal using control.
@@ -557,54 +582,55 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   // Handles shortcut functionality including cut, copy, paste and select all
   // using control + (X, C, V, A).
-  Future<void> _handleShortcuts(int pressedKeyCode) async {
-    switch (pressedKeyCode) {
-      case _kCKeyCode:
-        if (!selection.isCollapsed) {
-          Clipboard.setData(
+  Future<void> _handleShortcuts(RawKeyEvent key) async {
+    assert(_shortcutKeys.contains(key.logicalKey), 'shortcut key ${key.logicalKey} not recognized.');
+    if (key.logicalKey == LogicalKeyboardKey.keyC) {
+      if (!selection.isCollapsed) {
+        Clipboard.setData(
             ClipboardData(text: selection.textInside(text.toPlainText())));
-        }
-        break;
-      case _kXKeyCode:
-        if (!selection.isCollapsed) {
-          Clipboard.setData(
+      }
+      return;
+    }
+    if (key.logicalKey == LogicalKeyboardKey.keyX) {
+      if (!selection.isCollapsed) {
+        Clipboard.setData(
             ClipboardData(text: selection.textInside(text.toPlainText())));
-          textSelectionDelegate.textEditingValue = TextEditingValue(
-            text: selection.textBefore(text.toPlainText())
+        textSelectionDelegate.textEditingValue = TextEditingValue(
+          text: selection.textBefore(text.toPlainText())
               + selection.textAfter(text.toPlainText()),
-            selection: TextSelection.collapsed(offset: selection.start),
-          );
-        }
-        break;
-      case _kVKeyCode:
-        // Snapshot the input before using `await`.
-        // See https://github.com/flutter/flutter/issues/11427
-        final TextEditingValue value = textSelectionDelegate.textEditingValue;
-        final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
-        if (data != null) {
-          textSelectionDelegate.textEditingValue = TextEditingValue(
-            text: value.selection.textBefore(value.text)
+          selection: TextSelection.collapsed(offset: selection.start),
+        );
+      }
+      return;
+    }
+    if (key.logicalKey == LogicalKeyboardKey.keyV) {
+      // Snapshot the input before using `await`.
+      // See https://github.com/flutter/flutter/issues/11427
+      final TextEditingValue value = textSelectionDelegate.textEditingValue;
+      final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+      if (data != null) {
+        textSelectionDelegate.textEditingValue = TextEditingValue(
+          text: value.selection.textBefore(value.text)
               + data.text
               + value.selection.textAfter(value.text),
-            selection: TextSelection.collapsed(
+          selection: TextSelection.collapsed(
               offset: value.selection.start + data.text.length
-            ),
-          );
-        }
-        break;
-      case _kAKeyCode:
-        _baseOffset = 0;
-        _extentOffset = textSelectionDelegate.textEditingValue.text.length;
-        _handlePotentialSelectionChange(
-          TextSelection(
-            baseOffset: 0,
-            extentOffset: textSelectionDelegate.textEditingValue.text.length,
           ),
-          SelectionChangedCause.keyboard,
         );
-        break;
-      default:
-        assert(false);
+      }
+      return;
+    }
+    if (key.logicalKey == LogicalKeyboardKey.keyA) {
+      _baseOffset = 0;
+      _extentOffset = textSelectionDelegate.textEditingValue.text.length;
+      _handlePotentialSelectionChange(
+        TextSelection(
+          baseOffset: 0,
+          extentOffset: textSelectionDelegate.textEditingValue.text.length,
+        ),
+        SelectionChangedCause.keyboard,
+      );
+      return;
     }
   }
 
