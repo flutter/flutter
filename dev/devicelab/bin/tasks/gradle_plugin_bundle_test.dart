@@ -10,6 +10,9 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> main() async {
+  final String Function(String) addBase = (String file) => path.join('base', file);
+  final List<String> baseAabFiles = baseApkFiles.map(addBase);
+  final List<String> flutterAabAssets = flutterAssets.map(addBase);
   await task(() async {
     try {
       await runProjectTest((FlutterProject project) async {
@@ -26,12 +29,12 @@ Future<void> main() async {
           'app-release.aab',
         );
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
-          'base/lib/arm64-v8a/libapp.so',
-          'base/lib/arm64-v8a/libflutter.so',
-          'base/lib/armeabi-v7a/libapp.so',
-          'base/lib/armeabi-v7a/libflutter.so',
+          ...baseAabFiles,
+          ...flutterAabAssets,
+          path.join('base', 'lib', 'arm64-v8a', 'libapp.so'),
+          path.join('base', 'lib', 'arm64-v8a', 'libflutter.so'),
+          path.join('base', 'lib', 'armeabi-v7a', 'libapp.so'),
+          path.join('base', 'lib', 'armeabi-v7a', 'libflutter.so'),
         ], await getFilesInAppBundle(releaseBundle));
       });
 
@@ -57,12 +60,12 @@ Future<void> main() async {
           'app-production-release.aab',
         );
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
-          'base/lib/arm64-v8a/libapp.so',
-          'base/lib/arm64-v8a/libflutter.so',
-          'base/lib/armeabi-v7a/libapp.so',
-          'base/lib/armeabi-v7a/libflutter.so',
+          ...baseAabFiles,
+          ...flutterAabAssets,
+          path.join('base', 'lib', 'arm64-v8a', 'libapp.so'),
+          path.join('base', 'lib', 'arm64-v8a', 'libflutter.so'),
+          path.join('base', 'lib', 'armeabi-v7a', 'libapp.so'),
+          path.join('base', 'lib', 'armeabi-v7a', 'libflutter.so'),
         ], await getFilesInAppBundle(bundleFromGradlePath));
 
         section('Build app bundle using the flutter tool - flavor: flavor_underscore');
@@ -93,12 +96,12 @@ Future<void> main() async {
           'app-flavor_underscore-release.aab',
         );
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
-          'base/lib/arm64-v8a/libapp.so',
-          'base/lib/arm64-v8a/libflutter.so',
-          'base/lib/armeabi-v7a/libapp.so',
-          'base/lib/armeabi-v7a/libflutter.so',
+          ...baseAabFiles,
+          ...flutterAabAssets,
+          path.join('base', 'lib', 'arm64-v8a', 'libapp.so'),
+          path.join('base', 'lib', 'arm64-v8a', 'libflutter.so'),
+          path.join('base', 'lib', 'armeabi-v7a', 'libapp.so'),
+          path.join('base', 'lib', 'armeabi-v7a', 'libflutter.so'),
         ], await getFilesInAppBundle(flavorUnderscoreBundlePath));
 
         section('Build app bundle using the flutter tool - flavor: production');
@@ -128,12 +131,12 @@ Future<void> main() async {
           'app-production-release.aab',
         );
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
-          'base/lib/arm64-v8a/libapp.so',
-          'base/lib/arm64-v8a/libflutter.so',
-          'base/lib/armeabi-v7a/libapp.so',
-          'base/lib/armeabi-v7a/libflutter.so',
+          ...baseAabFiles,
+          ...flutterAabAssets,
+          path.join('base', 'lib', 'arm64-v8a', 'libapp.so'),
+          path.join('base', 'lib', 'arm64-v8a', 'libflutter.so'),
+          path.join('base', 'lib', 'armeabi-v7a', 'libapp.so'),
+          path.join('base', 'lib', 'armeabi-v7a', 'libflutter.so'),
         ], await getFilesInAppBundle(productionBundlePath));
       });
 
@@ -153,17 +156,16 @@ Future<void> main() async {
         );
 
         final Iterable<String> bundleFiles = await getFilesInAppBundle(releaseBundle);
-
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
-          'base/lib/armeabi-v7a/libapp.so',
-          'base/lib/armeabi-v7a/libflutter.so',
+          ...baseAabFiles,
+          ...flutterAabAssets,
+          path.join('base', 'lib', 'armeabi-v7a', 'libapp.so'),
+          path.join('base', 'lib', 'armeabi-v7a', 'libflutter.so'),
         ], bundleFiles);
 
         checkItDoesNotContain<String>(<String>[
-          'base/lib/arm64-v8a/libapp.so',
-          'base/lib/arm64-v8a/libflutter.so',
+          path.join('base', 'lib', 'arm64-v8a', 'libapp.so'),
+          path.join('base', 'lib', 'arm64-v8a', 'libflutter.so'),
         ], bundleFiles);
       });
       return TaskResult.success(null);

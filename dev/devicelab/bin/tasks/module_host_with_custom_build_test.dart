@@ -125,9 +125,7 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
+        ...debugAssets,
       ], await getFilesInApk(demoDebugApk));
 
       await clean();
@@ -170,9 +168,7 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
+        ...debugAssets,
       ], await getFilesInApk(demoDebugApk2));
 
       await clean();
@@ -207,9 +203,7 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
+        ...debugAssets,
       ], await getFilesInApk(demoStagingApk));
 
       await clean();
@@ -246,10 +240,10 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        'lib/arm64-v8a/libapp.so',
-        'lib/arm64-v8a/libflutter.so',
-        'lib/armeabi-v7a/libapp.so',
-        'lib/armeabi-v7a/libflutter.so',
+        path.join('lib', 'arm64-v8a', 'libflutter.so'),
+        path.join('lib', 'arm64-v8a', 'libapp.so'),
+        path.join('lib', 'armeabi-v7a', 'libflutter.so'),
+        path.join('lib', 'armeabi-v7a', 'libapp.so'),
       ], await getFilesInApk(demoReleaseApk));
 
       await clean();
@@ -284,10 +278,10 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        'lib/arm64-v8a/libapp.so',
-        'lib/arm64-v8a/libflutter.so',
-        'lib/armeabi-v7a/libapp.so',
-        'lib/armeabi-v7a/libflutter.so',
+        path.join('lib', 'arm64-v8a', 'libflutter.so'),
+        path.join('lib', 'arm64-v8a', 'libapp.so'),
+        path.join('lib', 'armeabi-v7a', 'libflutter.so'),
+        path.join('lib', 'armeabi-v7a', 'libapp.so'),
       ], await getFilesInApk(demoProdApk));
 
       return TaskResult.success(null);

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -11,10 +10,21 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 final List<String> flutterAssets = <String>[
-  'assets/flutter_assets/AssetManifest.json',
-  'assets/flutter_assets/LICENSE',
-  'assets/flutter_assets/fonts/MaterialIcons-Regular.ttf',
-  'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
+  path.join('assets', 'flutter_assets', 'AssetManifest.json'),
+  path.join('assets', 'flutter_assets', 'LICENSE'),
+  path.join('assets', 'flutter_assets', 'fonts', 'MaterialIcons-Regular.ttf'),
+  path.join('assets', 'flutter_assets', 'packages', 'cupertino_icons', 'assets', 'CupertinoIcons.ttf'),
+];
+
+final List<String> debugAssets = <String>[
+  path.join('assets', 'flutter_assets', 'isolate_snapshot_data'),
+  path.join('assets', 'flutter_assets', 'kernel_blob.bin'),
+  path.join('assets', 'flutter_assets', 'vm_snapshot_data'),
+];
+
+final List<String> baseApkFiles = <String> [
+  'classes.dex',
+  'AndroidManifest.xml',
 ];
 
 /// Runs the given [testFunction] on a freshly generated Flutter project.
@@ -47,14 +57,14 @@ Future<Iterable<String>> getFilesInApk(String apk) async {
     throw TaskResult.failure(
         'Gradle did not produce an output artifact file at: $apk');
 
-  final Process unzip = await startProcess(
-    'unzip',
-    <String>['-v', apk],
-    isBot: false, // we just want to test the output, not have any debugging info
-  );
-  return unzip.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+  String unzipStdout;
+  if (Platform.isWindows) {
+    unzipStdout = await eval('7za', <String>['l', apk]);
+  } else {
+    unzipStdout = await eval('unzip', <String>['-v', apk]);
+  }
+  return unzipStdout
+      .split('\n')
       .map((String line) => line.split(' ').last)
       .toList();
 }

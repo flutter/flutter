@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(() async {
@@ -21,20 +22,18 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-          'lib/armeabi-v7a/libflutter.so',
+          ...debugAssets,
+          ...baseApkFiles,
+          path.join('lib', 'armeabi-v7a', 'libflutter.so'),
           // Debug mode intentionally includes `x86` and `x86_64`.
-          'lib/x86/libflutter.so',
-          'lib/x86_64/libflutter.so',
+          path.join('lib', 'x86', 'libflutter.so'),
+          path.join('lib', 'x86_64', 'libflutter.so'),
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
-          'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
-          'lib/x86_64/libapp.so',
+          path.join('lib', 'armeabi-v7a', 'libapp.so'),
+          path.join('lib', 'x86', 'libapp.so'),
+          path.join('lib', 'x86_64', 'libapp.so'),
         ], apkFiles);
       });
 
@@ -48,19 +47,17 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
+          ...debugAssets,
+          ...baseApkFiles,
           // Debug mode intentionally includes `x86` and `x86_64`.
-          'lib/x86/libflutter.so',
-          'lib/x86_64/libflutter.so',
+          path.join('lib', 'x86', 'libflutter.so'),
+          path.join('lib', 'x86_64', 'libflutter.so'),
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
-          'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
-          'lib/x86_64/libapp.so',
+          path.join('lib', 'armeabi-v7a', 'libapp.so'),
+          path.join('lib', 'x86', 'libapp.so'),
+          path.join('lib', 'x86_64', 'libapp.so'),
         ], apkFiles);
       });
 
@@ -74,19 +71,17 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
+          ...debugAssets,
+          ...baseApkFiles,
           // Debug mode intentionally includes `x86` and `x86_64`.
-          'lib/x86/libflutter.so',
-          'lib/x86_64/libflutter.so',
+          path.join('lib', 'x86', 'libflutter.so'),
+          path.join('lib', 'x86_64', 'libflutter.so'),
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
-          'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
-          'lib/x86_64/libapp.so',
+          path.join('lib', 'armeabi-v7a', 'libapp.so'),
+          path.join('lib', 'x86', 'libapp.so'),
+          path.join('lib', 'x86_64', 'libapp.so'),
         ], apkFiles);
       });
 
@@ -99,17 +94,15 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'lib/armeabi-v7a/libflutter.so',
-          'lib/armeabi-v7a/libapp.so',
+          ...baseApkFiles,
+          path.join('lib', 'armeabi-v7a', 'libflutter.so'),
+          path.join('lib', 'armeabi-v7a', 'libapp.so'),
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
+          ...debugAssets,
+          path.join('lib', 'arm64-v8a', 'libflutter.so'),
+          path.join('lib', 'arm64-v8a', 'libapp.so'),
         ], apkFiles);
       });
 
@@ -122,17 +115,15 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
+          ...baseApkFiles,
+          path.join('lib', 'arm64-v8a', 'libflutter.so'),
+          path.join('lib', 'arm64-v8a', 'libapp.so'),
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
-          'lib/armeabi-v7a/libflutter.so',
-          'lib/armeabi-v7a/libapp.so',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
+          ...debugAssets,
+          path.join('lib', 'armeabi-v7a', 'libflutter.so'),
+          path.join('lib', 'armeabi-v7a', 'libapp.so'),
         ], apkFiles);
       });
 

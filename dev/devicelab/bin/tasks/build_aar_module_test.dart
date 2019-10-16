@@ -107,8 +107,8 @@ Future<void> main() async {
         <String>[
           ...flutterAssets,
           // AOT snapshots
-          'jni/arm64-v8a/libapp.so',
-          'jni/armeabi-v7a/libapp.so',
+          path.join('jni', 'arm64-v8a', 'libapp.so'),
+          path.join('jni', 'armeabi-v7a', 'libapp.so'),
         ],
         await getFilesInAar(
           path.join(
@@ -182,10 +182,7 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        // JIT snapshots.
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
+        ...debugAssets,
       ], debugAar);
 
       return TaskResult.success(null);
