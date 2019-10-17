@@ -1,4 +1,4 @@
-Signature: 3178bf571f986600088464186bdabb2d
+Signature: feed451951a2c4dfdddeedaa2d327580
 
 UNUSED LICENSES:
 
@@ -1413,9 +1413,11 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl-async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/envelope_frames.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal_callable_traits.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/txn_header.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/visitor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/internal.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/txn_header.c
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/event_sender.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/member_connector.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/service_connector.h
