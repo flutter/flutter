@@ -71,8 +71,15 @@ class LayerTree {
     checkerboard_offscreen_layers_ = checkerboard;
   }
 
+  void set_device_pixel_ratio(double device_pixel_ratio) {
+    device_pixel_ratio_ = device_pixel_ratio;
+  }
+
+  double device_pixel_ratio() const { return device_pixel_ratio_; }
+
  private:
   SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
+  double device_pixel_ratio_ = 1.0;
   std::shared_ptr<Layer> root_layer_;
   fml::TimePoint build_start_;
   fml::TimePoint build_finish_;
