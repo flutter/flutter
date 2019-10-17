@@ -652,7 +652,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -744,7 +743,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -836,7 +834,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -1128,7 +1125,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -1306,7 +1302,6 @@ TEST_F(EmbedderTest,
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -1427,7 +1422,6 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
     event.struct_size = sizeof(event);
     event.width = 800;
     event.height = 600;
-    event.pixel_ratio = 1.0;
 
     ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
               kSuccess);
@@ -1506,7 +1500,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -1619,7 +1612,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -1803,7 +1795,6 @@ TEST_F(EmbedderTest,
   // Flutter still thinks it is 800 x 600. Only the root surface is rotated.
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -1838,7 +1829,6 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
@@ -1881,7 +1871,6 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
   // Flutter still thinks it is 800 x 600.
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
@@ -1916,7 +1905,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
@@ -1959,7 +1947,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
   // Flutter still thinks it is 800 x 600.
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
@@ -1994,7 +1981,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
@@ -2038,7 +2024,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
   // Flutter still thinks it is 800 x 600.
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
@@ -2149,7 +2134,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
@@ -2269,7 +2253,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
   // Flutter still thinks it is 800 x 600.
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
@@ -2389,7 +2372,7 @@ TEST_F(EmbedderTest, VerifyB141980393) {
   // achieved via a root surface transformation.
   event.width = flutter_application_rect.width();
   event.height = flutter_application_rect.height();
-  event.pixel_ratio = 1.0;
+
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
@@ -2442,7 +2425,6 @@ TEST_F(EmbedderTest, CaDeinitializeAnEngine) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kInvalidArguments);
   engine.reset();
@@ -2484,7 +2466,6 @@ TEST_F(EmbedderTest, CanCreateEmbedderWithCustomRenderTaskRunner) {
   event.struct_size = sizeof(event);
   event.width = 800;
   event.height = 600;
-  event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   task_latch.Wait();
@@ -2544,7 +2525,6 @@ TEST_F(EmbedderTest,
     event.struct_size = sizeof(event);
     event.width = 800;
     event.height = 600;
-    event.pixel_ratio = 1.0;
     ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
               kSuccess);
   });
@@ -2573,182 +2553,6 @@ TEST_F(EmbedderTest,
     // Engine should have been killed by this point.
     ASSERT_FALSE(engine.is_valid());
   }
-}
-
-TEST_F(EmbedderTest,
-       CompositorMustBeAbleToRenderKnownScenePixelRatioOnSurface) {
-  auto& context = GetEmbedderContext();
-
-  EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
-  builder.SetCompositor();
-  builder.SetDartEntrypoint("can_display_platform_view_with_pixel_ratio");
-
-  context.GetCompositor().SetRenderTargetType(
-      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
-
-  fml::AutoResetWaitableEvent latch;
-  context.GetCompositor().SetNextPresentCallback(
-      [&](const FlutterLayer** layers, size_t layers_count) {
-        ASSERT_EQ(layers_count, 3u);
-
-        // Layer 0 (Root)
-        {
-          FlutterBackingStore backing_store = *layers[0]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
-          backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
-
-          FlutterLayer layer = {};
-          layer.struct_size = sizeof(layer);
-          layer.type = kFlutterLayerContentTypeBackingStore;
-          layer.backing_store = &backing_store;
-          layer.size = FlutterSizeMake(800.0, 600.0);
-          layer.offset = FlutterPointMake(0.0, 0.0);
-
-          ASSERT_EQ(*layers[0], layer);
-        }
-
-        // Layer 1
-        {
-          FlutterPlatformView platform_view = {};
-          platform_view.struct_size = sizeof(platform_view);
-          platform_view.identifier = 42;
-
-          FlutterLayer layer = {};
-          layer.struct_size = sizeof(layer);
-          layer.type = kFlutterLayerContentTypePlatformView;
-          layer.platform_view = &platform_view;
-          layer.size = FlutterSizeMake(800.0, 560.0);
-          layer.offset = FlutterPointMake(0.0, 40.0);
-
-          ASSERT_EQ(*layers[1], layer);
-        }
-
-        // Layer 2
-        {
-          FlutterBackingStore backing_store = *layers[2]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
-          backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
-
-          FlutterLayer layer = {};
-          layer.struct_size = sizeof(layer);
-          layer.type = kFlutterLayerContentTypeBackingStore;
-          layer.backing_store = &backing_store;
-          layer.size = FlutterSizeMake(800.0, 600.0);
-          layer.offset = FlutterPointMake(0.0, 0.0);
-
-          ASSERT_EQ(*layers[2], layer);
-        }
-
-        latch.Signal();
-      });
-
-  auto engine = builder.LaunchEngine();
-
-  // Send a window metrics events so frames may be scheduled.
-  FlutterWindowMetricsEvent event = {};
-  event.struct_size = sizeof(event);
-  event.width = 400;
-  event.height = 300;
-  event.pixel_ratio = 2.0;
-  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
-            kSuccess);
-  ASSERT_TRUE(engine.is_valid());
-
-  latch.Wait();
-}
-
-TEST_F(
-    EmbedderTest,
-    CompositorMustBeAbleToRenderKnownScenePixelRatioOnSurfaceWithRootSurfaceXformation) {
-  auto& context = GetEmbedderContext();
-
-  EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
-  builder.SetCompositor();
-  builder.SetDartEntrypoint("can_display_platform_view_with_pixel_ratio");
-
-  context.GetCompositor().SetRenderTargetType(
-      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
-
-  const auto root_surface_transformation =
-      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
-
-  context.SetRootSurfaceTransformation(root_surface_transformation);
-
-  fml::AutoResetWaitableEvent latch;
-  context.GetCompositor().SetNextPresentCallback(
-      [&](const FlutterLayer** layers, size_t layers_count) {
-        ASSERT_EQ(layers_count, 3u);
-
-        // Layer 0 (Root)
-        {
-          FlutterBackingStore backing_store = *layers[0]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
-          backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
-
-          FlutterLayer layer = {};
-          layer.struct_size = sizeof(layer);
-          layer.type = kFlutterLayerContentTypeBackingStore;
-          layer.backing_store = &backing_store;
-          layer.size = FlutterSizeMake(600.0, 800.0);
-          layer.offset = FlutterPointMake(0.0, 0.0);
-
-          ASSERT_EQ(*layers[0], layer);
-        }
-
-        // Layer 1
-        {
-          FlutterPlatformView platform_view = {};
-          platform_view.struct_size = sizeof(platform_view);
-          platform_view.identifier = 42;
-
-          FlutterLayer layer = {};
-          layer.struct_size = sizeof(layer);
-          layer.type = kFlutterLayerContentTypePlatformView;
-          layer.platform_view = &platform_view;
-          layer.size = FlutterSizeMake(560.0, 800.0);
-          layer.offset = FlutterPointMake(40.0, 0.0);
-
-          ASSERT_EQ(*layers[1], layer);
-        }
-
-        // Layer 2
-        {
-          FlutterBackingStore backing_store = *layers[2]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
-          backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
-
-          FlutterLayer layer = {};
-          layer.struct_size = sizeof(layer);
-          layer.type = kFlutterLayerContentTypeBackingStore;
-          layer.backing_store = &backing_store;
-          layer.size = FlutterSizeMake(600.0, 800.0);
-          layer.offset = FlutterPointMake(0.0, 0.0);
-
-          ASSERT_EQ(*layers[2], layer);
-        }
-
-        latch.Signal();
-      });
-
-  auto engine = builder.LaunchEngine();
-
-  // Send a window metrics events so frames may be scheduled.
-  FlutterWindowMetricsEvent event = {};
-  event.struct_size = sizeof(event);
-  event.width = 400;
-  event.height = 300;
-  event.pixel_ratio = 2.0;
-  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
-            kSuccess);
-  ASSERT_TRUE(engine.is_valid());
-
-  latch.Wait();
 }
 
 }  // namespace testing

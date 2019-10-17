@@ -979,12 +979,6 @@ FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
   metrics.physical_height = SAFE_ACCESS(flutter_metrics, height, 0.0);
   metrics.device_pixel_ratio = SAFE_ACCESS(flutter_metrics, pixel_ratio, 1.0);
 
-  if (metrics.device_pixel_ratio <= 0.0) {
-    FML_LOG(ERROR) << "Device pixel ratio invalid: "
-                   << metrics.device_pixel_ratio;
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
-  }
-
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)->SetViewportMetrics(
              std::move(metrics))
              ? kSuccess

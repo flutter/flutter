@@ -438,7 +438,6 @@ void Engine::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
     return;
 
   layer_tree->set_frame_size(frame_size);
-  layer_tree->set_device_pixel_ratio(viewport_metrics_.device_pixel_ratio);
   animator_->Render(std::move(layer_tree));
 }
 
