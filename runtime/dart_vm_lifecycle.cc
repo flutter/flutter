@@ -12,8 +12,8 @@ namespace flutter {
 // critical section. All accesses (not just const members) to the global VM
 // object weak pointer are behind this mutex.
 static std::mutex gVMMutex;
-static std::weak_ptr<DartVM> gVM FML_GUARDED_BY(gVMMutex);
-static std::shared_ptr<DartVM>* gVMLeak FML_GUARDED_BY(gVMMutex);
+static std::weak_ptr<DartVM> gVM;
+static std::shared_ptr<DartVM>* gVMLeak;
 
 // We are going to be modifying more than just the control blocks of the
 // following weak pointers (in the |Create| case where an old VM could not be
@@ -21,12 +21,9 @@ static std::shared_ptr<DartVM>* gVMLeak FML_GUARDED_BY(gVMMutex);
 // but that is only available since C++20. We don't expect contention on these
 // locks so we just use one mutex for all.
 static std::mutex gVMDependentsMutex;
-static std::weak_ptr<const DartVMData> gVMData
-    FML_GUARDED_BY(gVMDependentsMutex);
-static std::weak_ptr<ServiceProtocol> gVMServiceProtocol
-    FML_GUARDED_BY(gVMDependentsMutex);
-static std::weak_ptr<IsolateNameServer> gVMIsolateNameServer
-    FML_GUARDED_BY(gVMDependentsMutex);
+static std::weak_ptr<const DartVMData> gVMData;
+static std::weak_ptr<ServiceProtocol> gVMServiceProtocol;
+static std::weak_ptr<IsolateNameServer> gVMIsolateNameServer;
 
 DartVMRef::DartVMRef(std::shared_ptr<DartVM> vm) : vm_(vm) {}
 

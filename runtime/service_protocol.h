@@ -14,7 +14,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/atomic_object.h"
 #include "flutter/fml/synchronization/shared_mutex.h"
-#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/task_runner.h"
 #include "rapidjson/document.h"
 

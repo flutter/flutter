@@ -150,7 +150,7 @@ bool ManualResetWaitableEvent::WaitWithTimeout(TimeDelta timeout) {
   // holding |mutex_|.
   bool rv = WaitWithTimeoutImpl(
       &locker, &cv_,
-      [this, last_signal_id]() FML_NO_THREAD_SAFETY_ANALYSIS {
+      [this, last_signal_id]() {
         // Also check |signaled_| in case we're already signaled.
         return signaled_ || signal_id_ != last_signal_id;
       },

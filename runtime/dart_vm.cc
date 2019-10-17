@@ -17,7 +17,6 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/size.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
-#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/io/dart_io.h"

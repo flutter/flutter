@@ -18,7 +18,6 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/message_loop_task_queues.h"
-#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/fml/wakeable.h"
 

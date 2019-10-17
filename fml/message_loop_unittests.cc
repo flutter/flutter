@@ -7,6 +7,7 @@
 #include <iostream>
 #include <thread>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"

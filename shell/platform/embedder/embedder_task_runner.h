@@ -9,7 +9,6 @@
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/task_runner.h"
 
 namespace flutter {
@@ -76,9 +75,8 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
   const size_t embedder_identifier_;
   DispatchTable dispatch_table_;
   std::mutex tasks_mutex_;
-  uint64_t last_baton_ FML_GUARDED_BY(tasks_mutex_);
-  std::unordered_map<uint64_t, fml::closure> pending_tasks_
-      FML_GUARDED_BY(tasks_mutex_);
+  uint64_t last_baton_;
+  std::unordered_map<uint64_t, fml::closure> pending_tasks_;
   fml::TaskQueueId placeholder_id_;
 
   // |fml::TaskRunner|
