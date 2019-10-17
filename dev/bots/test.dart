@@ -925,8 +925,6 @@ Future<void> _runIntegrationTests() async {
 // TODO(jmagman): Re-enable once flakiness is resolved.
 //        await _runDevicelabTest('module_test_ios');
       }
-      // This does less work if the subshard isn't Android.
-      await _androidPluginTest();
   }
 }
 
@@ -949,44 +947,30 @@ String get androidSdkRoot {
   return androidSdkRoot;
 }
 
-Future<void> _androidPluginTest() async {
-  if (androidSdkRoot == null) {
-    print('No Android SDK detected, skipping Android Plugin test.');
-    return;
-  }
-
-  final Map<String, String> env = <String, String> {
-    'ANDROID_HOME': androidSdkRoot,
-    'ANDROID_SDK_ROOT': androidSdkRoot,
-  };
-
-  await _runDevicelabTest('plugin_test', env: env);
-}
-
 Future<void> _androidGradleTests(String subShard) async {
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
   if (androidSdkRoot == null || Platform.isWindows) {
     print('No Android SDK detected or on Windows, skipping Android gradle test.');
     return;
   }
-
-  final Map<String, String> env = <String, String> {
+  final Map<String, String> defaultEnv = <String, String>{
     'ANDROID_HOME': androidSdkRoot,
     'ANDROID_SDK_ROOT': androidSdkRoot,
+    'ENABLE_ANDROID_EMBEDDING_V2': Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] ?? '',
   };
-
   if (subShard == 'gradle1') {
-    await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
-    await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
-    await _runDevicelabTest('gradle_r8_test', env: env);
-    await _runDevicelabTest('gradle_non_android_plugin_test', env: env);
-    await _runDevicelabTest('gradle_jetifier_test', env: env);
+    await _runDevicelabTest('gradle_plugin_light_apk_test', env: defaultEnv);
+    await _runDevicelabTest('gradle_plugin_fat_apk_test', env: defaultEnv);
+    await _runDevicelabTest('gradle_r8_test', env: defaultEnv);
+    await _runDevicelabTest('gradle_non_android_plugin_test', env: defaultEnv);
+    await _runDevicelabTest('gradle_jetifier_test', env: defaultEnv);
   }
   if (subShard == 'gradle2') {
-    await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
-    await _runDevicelabTest('module_test', env: env);
-    await _runDevicelabTest('module_host_with_custom_build_test', env: env);
-    await _runDevicelabTest('build_aar_module_test', env: env);
+    await _runDevicelabTest('gradle_plugin_bundle_test', env: defaultEnv);
+    await _runDevicelabTest('module_test', env: defaultEnv);
+    await _runDevicelabTest('module_host_with_custom_build_test', env: defaultEnv);
+    await _runDevicelabTest('build_aar_module_test', env: defaultEnv);
+    await _runDevicelabTest('plugin_test', env: defaultEnv);
   }
 }
 
