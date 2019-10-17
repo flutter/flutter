@@ -377,7 +377,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection && cause != SelectionChangedCause.keyboard) {
       return;
     }
-    print('Selection changed to $nextSelection');
     onSelectionChanged(nextSelection, this, cause);
   }
 
@@ -417,7 +416,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
     final LogicalKeyboardKey key = keyEvent.logicalKey;
-    print('Handling key $key with other keys pressed: ${keysPressed.difference(<LogicalKeyboardKey>{key})}');
 
     if (!_nonModifierKeys.contains(key) ||
         keysPressed.difference(_modifierKeys).length > 1 ||
@@ -543,17 +541,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (key == LogicalKeyboardKey.keyC) {
       if (!selection.isCollapsed) {
         Clipboard.setData(
-            ClipboardData(text: selection.textInside(text.toPlainText())));
+            ClipboardData(text: selection.textInside(text.text)));
       }
       return;
     }
     if (key == LogicalKeyboardKey.keyX) {
       if (!selection.isCollapsed) {
-        Clipboard.setData(
-            ClipboardData(text: selection.textInside(text.toPlainText())));
+        Clipboard.setData(ClipboardData(text: selection.textInside(text.text)));
         textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: selection.textBefore(text.toPlainText())
-              + selection.textAfter(text.toPlainText()),
+          text: selection.textBefore(text.text)
+              + selection.textAfter(text.text),
           selection: TextSelection.collapsed(offset: selection.start),
         );
       }
