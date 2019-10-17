@@ -28,7 +28,7 @@ void main() {
     FlutterError error;
     try {
       ticker.start();
-    } on FlutterError catch(e) {
+    } on FlutterError catch (e) {
       error = e;
     }
     expect(error, isNotNull);

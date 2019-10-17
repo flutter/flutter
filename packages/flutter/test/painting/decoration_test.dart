@@ -248,7 +248,7 @@ void main() {
     try {
       boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(
           size: Size(100.0, 100.0), textDirection: null));
-    } on FlutterError catch(e) {
+    } on FlutterError catch (e) {
       error = e;
     }
     expect(error, isNotNull);

@@ -143,7 +143,7 @@ void main() {
     FlutterError error;
     try {
       tester.binding.scheduleFrameCallback(null, rescheduling: true);
-    } on FlutterError catch(e) {
+    } on FlutterError catch (e) {
       error = e;
     }
     expect(error, isNotNull);

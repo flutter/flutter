@@ -472,7 +472,7 @@ void main() {
     FlutterError error;
     try {
       decoratedBox.paint(context, const Offset(0, 0));
-    } on FlutterError catch(e) {
+    } on FlutterError catch (e) {
       error = e;
     }
     expect(error, isNotNull);
