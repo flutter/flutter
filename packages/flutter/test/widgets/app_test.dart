@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'routes_test.dart';
-
 void main() {
   testWidgets('WidgetsApp with builder only', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
