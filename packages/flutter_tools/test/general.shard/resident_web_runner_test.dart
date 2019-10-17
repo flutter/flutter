@@ -176,6 +176,7 @@ void main() {
 
   test('Can hot reload after attaching', () => testbed.run(() async {
     _setupMocks();
+    final BufferLogger bufferLogger = logger;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -189,6 +190,7 @@ void main() {
     });
     final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
+    expect(bufferLogger.statusText, contains('Reloaded application in'));
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
@@ -206,6 +208,7 @@ void main() {
 
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
+    final BufferLogger bufferLogger = logger;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -219,6 +222,7 @@ void main() {
     });
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
+    expect(bufferLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{

@@ -302,7 +302,8 @@ class ResidentWebRunner extends ResidentRunner {
         final vmservice.Response reloadResponse = fullRestart
            ? await _vmService.callServiceExtension('fullReload')
            : await _vmService.callServiceExtension('hotRestart');
-        printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+        final String verb = fullRestart ? 'Restarted' : 'Reloaded';
+        printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
 
         // Send timing analytics for full restart and for refresh.
         final bool wasSuccessful = reloadResponse.type == 'Success';
