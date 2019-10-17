@@ -842,7 +842,7 @@ class VM extends ServiceObjectOwner {
       default:
         // If we don't have a model object for this service object type, as a
         // fallback return a ServiceMap object.
-        final serviceObject = ServiceMap._empty(owner);
+        final ServiceObject serviceObject = ServiceMap._empty(owner);
         // We have now constructed an empty service object, call update to populate it.
         serviceObject.updateFromMap(map);
         return serviceObject;
