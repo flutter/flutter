@@ -120,8 +120,8 @@ class ResidentWebRunner extends ResidentRunner {
       return printHelpDetails();
     }
     const String fire = '🔥';
-    const String rawMessage =
-        '  To hot restart (and rebuild state), press "r" or "R".';
+    String rawMessage = '  To hot reload changes while running, press "r". '
+      'To hot restart (and rebuild state), press "R".';
     final String message = terminal.color(
       fire + terminal.bolden(rawMessage),
       TerminalColor.red,
@@ -299,7 +299,9 @@ class ResidentWebRunner extends ResidentRunner {
       final Duration recompileDuration = timer.elapsed;
       flutterUsage.sendTiming('hot', 'web-recompile', recompileDuration);
       try {
-        final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
+        final vmservice.Response reloadResponse = fullRestart
+           ? await _vmService.callServiceExtension('fullReload')
+           : await _vmService.callServiceExtension('hotRestart');
         printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
 
         // Send timing analytics for full restart and for refresh.
@@ -307,8 +309,10 @@ class ResidentWebRunner extends ResidentRunner {
         if (!wasSuccessful) {
           return OperationResult(1, reloadResponse.toString());
         }
-        flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
-        flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+        if (!fullRestart) {
+          flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
+          flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+        }
         return OperationResult.ok;
       } on vmservice.RPCError {
         return OperationResult(1, 'Page requires refresh.');
