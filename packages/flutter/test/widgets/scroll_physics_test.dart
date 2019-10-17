@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -190,5 +192,47 @@ void main() {
       expect(smallListOverscrollApplied, greaterThan(1.0));
       expect(smallListOverscrollApplied, lessThan(20.0));
     });
+  });
+
+  test('ClampingScrollPhysics assertion test', () {
+    const ClampingScrollPhysics physics = ClampingScrollPhysics();
+    const double pixels = 500;
+    final ScrollMetrics position = FixedScrollMetrics(
+      pixels: pixels,
+      minScrollExtent: 0,
+      maxScrollExtent: 1000,
+      viewportDimension: 0,
+      axisDirection: AxisDirection.down,
+    );
+    expect(position.pixels, pixels);
+    FlutterError error;
+    try {
+      physics.applyBoundaryConditions(position, pixels);
+    } on FlutterError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error.toStringDeep(), equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   ClampingScrollPhysics.applyBoundaryConditions() was called\n'
+        '   redundantly.\n'
+        '   The proposed new position, 500.0, is exactly equal to the current\n'
+        '   position of the given FixedScrollMetrics, 500.0.\n'
+        '   The applyBoundaryConditions method should only be called when the\n'
+        '   value is going to actually change the pixels, otherwise it is\n'
+        '   redundant.\n'
+        '   The physics object in question was:\n'
+        '     ClampingScrollPhysics\n'
+        '   The position object in question was:\n'
+        '     FixedScrollMetrics(500.0..[0.0]..500.0)\n',
+      ));
+      expect(error.diagnostics.length, 4);
+      expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<ScrollPhysics>>());
+      expect(error.diagnostics[2].style, DiagnosticsTreeStyle.errorProperty);
+      expect(error.diagnostics[2].value, physics);
+      expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ScrollMetrics>>());
+      expect(error.diagnostics[3].style, DiagnosticsTreeStyle.errorProperty);
+      expect(error.diagnostics[3].value, position);
+    }
   });
 }

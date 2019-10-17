@@ -661,7 +661,6 @@ void main() {
   testWidgets('scheduleBuild during debugBuildingDirtyElements is true', (WidgetTester tester) async {
     // ignore: invalid_use_of_protected_member
     tester.binding.debugBuildingDirtyElements = true;
-    
     FlutterError error;
     try {
       tester.binding.buildOwner.scheduleBuildFor(
