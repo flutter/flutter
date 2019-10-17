@@ -168,11 +168,15 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
   fml::AutoResetWaitableEvent latch;
 
   std::unique_ptr<IOManager> io_manager;
-  std::unique_ptr<ImageDecoder> image_decoder;
 
+  auto release_io_manager = [&]() {
+    io_manager.reset();
+    latch.Signal();
+  };
   auto decode_image = [&]() {
-    image_decoder = std::make_unique<ImageDecoder>(
-        runners, loop->GetTaskRunner(), io_manager->GetWeakIOManager());
+    std::unique_ptr<ImageDecoder> image_decoder =
+        std::make_unique<ImageDecoder>(runners, loop->GetTaskRunner(),
+                                       io_manager->GetWeakIOManager());
 
     ImageDecoder::ImageDescriptor image_descriptor;
     image_descriptor.data = OpenFixtureAsSkData("DashInNooglerHat.jpg");
@@ -183,7 +187,7 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
     ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
       ASSERT_TRUE(image.get());
-      latch.Signal();
+      runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
     image_decoder->Decode(std::move(image_descriptor), callback);
   };
@@ -210,12 +214,17 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
   fml::AutoResetWaitableEvent latch;
 
   std::unique_ptr<IOManager> io_manager;
-  std::unique_ptr<ImageDecoder> image_decoder;
+
+  auto release_io_manager = [&]() {
+    io_manager.reset();
+    latch.Signal();
+  };
 
   SkISize decoded_size = SkISize::MakeEmpty();
   auto decode_image = [&]() {
-    image_decoder = std::make_unique<ImageDecoder>(
-        runners, loop->GetTaskRunner(), io_manager->GetWeakIOManager());
+    std::unique_ptr<ImageDecoder> image_decoder =
+        std::make_unique<ImageDecoder>(runners, loop->GetTaskRunner(),
+                                       io_manager->GetWeakIOManager());
 
     ImageDecoder::ImageDescriptor image_descriptor;
     image_descriptor.data = OpenFixtureAsSkData("Horizontal.jpg");
@@ -227,7 +236,7 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
       ASSERT_TRUE(image.get());
       decoded_size = image.get()->dimensions();
-      latch.Signal();
+      runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
     image_decoder->Decode(std::move(image_descriptor), callback);
   };
@@ -257,11 +266,16 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
   fml::AutoResetWaitableEvent latch;
 
   std::unique_ptr<IOManager> io_manager;
-  std::unique_ptr<ImageDecoder> image_decoder;
+
+  auto release_io_manager = [&]() {
+    io_manager.reset();
+    latch.Signal();
+  };
 
   auto decode_image = [&]() {
-    image_decoder = std::make_unique<ImageDecoder>(
-        runners, loop->GetTaskRunner(), io_manager->GetWeakIOManager());
+    std::unique_ptr<ImageDecoder> image_decoder =
+        std::make_unique<ImageDecoder>(runners, loop->GetTaskRunner(),
+                                       io_manager->GetWeakIOManager());
 
     ImageDecoder::ImageDescriptor image_descriptor;
     image_descriptor.data = OpenFixtureAsSkData("DashInNooglerHat.jpg");
@@ -272,7 +286,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
     ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
       ASSERT_TRUE(image.get());
-      latch.Signal();
+      runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
     image_decoder->Decode(std::move(image_descriptor), callback);
   };
@@ -355,6 +369,20 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
   ASSERT_EQ(decoded_size(100, {}), SkISize::Make(100, 133));
   ASSERT_EQ(decoded_size({}, 100), SkISize::Make(75, 100));
   ASSERT_EQ(decoded_size(100, 100), SkISize::Make(100, 100));
+
+  // Destroy the IO manager
+  runners.GetIOTaskRunner()->PostTask([&]() {
+    io_manager.reset();
+    latch.Signal();
+  });
+  latch.Wait();
+
+  // Destroy the image decoder
+  runners.GetUITaskRunner()->PostTask([&]() {
+    image_decoder.reset();
+    latch.Signal();
+  });
+  latch.Wait();
 }
 
 TEST_F(ImageDecoderFixtureTest, CanResizeWithoutDecode) {
@@ -441,6 +469,20 @@ TEST_F(ImageDecoderFixtureTest, CanResizeWithoutDecode) {
   ASSERT_EQ(decoded_size(100, {}), SkISize::Make(100, 133));
   ASSERT_EQ(decoded_size({}, 100), SkISize::Make(75, 100));
   ASSERT_EQ(decoded_size(100, 100), SkISize::Make(100, 100));
+
+  // Destroy the IO manager
+  runners.GetIOTaskRunner()->PostTask([&]() {
+    io_manager.reset();
+    latch.Signal();
+  });
+  latch.Wait();
+
+  // Destroy the image decoder
+  runners.GetUITaskRunner()->PostTask([&]() {
+    image_decoder.reset();
+    latch.Signal();
+  });
+  latch.Wait();
 }
 
 }  // namespace testing

@@ -127,7 +127,14 @@ static void TestSimulatedInputEvents(
   });
 
   simulation.wait();
-  shell.reset();
+
+  TaskRunners task_runners = fixture->GetTaskRunnersForFixture();
+  fml::AutoResetWaitableEvent latch;
+  task_runners.GetPlatformTaskRunner()->PostTask([&shell, &latch]() mutable {
+    shell.reset();
+    latch.Signal();
+  });
+  latch.Wait();
 
   // Make sure that all events have been consumed so
   // https://github.com/flutter/flutter/issues/40863 won't happen again.

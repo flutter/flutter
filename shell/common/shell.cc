@@ -90,6 +90,13 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   std::promise<fml::WeakPtr<ShellIOManager>> weak_io_manager_promise;
   auto weak_io_manager_future = weak_io_manager_promise.get_future();
   auto io_task_runner = shell->GetTaskRunners().GetIOTaskRunner();
+
+  // TODO(gw280): The WeakPtr here asserts that we are derefing it on the
+  // same thread as it was created on. We are currently on the IO thread
+  // inside this lambda but we need to deref the PlatformView, which was
+  // constructed on the platform thread.
+  //
+  // https://github.com/flutter/flutter/issues/42948
   fml::TaskRunner::RunNowOrPostTask(
       io_task_runner,
       [&io_manager_promise,                          //
@@ -99,7 +106,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
         auto io_manager = std::make_unique<ShellIOManager>(
-            platform_view->CreateResourceContext(), io_task_runner);
+            platform_view.getUnsafe()->CreateResourceContext(), io_task_runner);
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
         io_manager_promise.set_value(std::move(io_manager));
       });
@@ -277,10 +284,20 @@ Shell::Shell(DartVMRef vm, TaskRunners task_runners, Settings settings)
     : task_runners_(std::move(task_runners)),
       settings_(std::move(settings)),
       vm_(std::move(vm)),
-      weak_factory_(this) {
+      weak_factory_(this),
+      weak_factory_gpu_(nullptr) {
   FML_CHECK(vm_) << "Must have access to VM to create a shell.";
   FML_DCHECK(task_runners_.IsValid());
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  // Generate a WeakPtrFactory for use with the GPU thread. This does not need
+  // to wait on a latch because it can only ever be used from the GPU thread
+  // from this class, so we have ordering guarantees.
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetGPUTaskRunner(), fml::MakeCopyable([this]() mutable {
+        this->weak_factory_gpu_ =
+            std::make_unique<fml::WeakPtrFactory<Shell>>(this);
+      }));
 
   // Install service protocol handlers.
 
@@ -331,11 +348,13 @@ Shell::~Shell() {
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetGPUTaskRunner(),
-      fml::MakeCopyable(
-          [rasterizer = std::move(rasterizer_), &gpu_latch]() mutable {
-            rasterizer.reset();
-            gpu_latch.Signal();
-          }));
+      fml::MakeCopyable([rasterizer = std::move(rasterizer_),
+                         weak_factory_gpu = std::move(weak_factory_gpu_),
+                         &gpu_latch]() mutable {
+        rasterizer.reset();
+        weak_factory_gpu.reset();
+        gpu_latch.Signal();
+      }));
   gpu_latch.Wait();
 
   fml::TaskRunner::RunNowOrPostTask(
@@ -393,9 +412,6 @@ void Shell::RunEngine(RunConfiguration run_configuration,
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  if (!weak_engine_) {
-    result(Engine::RunStatus::Failure);
-  }
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
       fml::MakeCopyable(
@@ -486,8 +502,13 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   PersistentCache::GetCacheForProcess()->SetIsDumpingSkp(
       settings_.dump_skp_on_shader_compilation);
 
-  // Shell::Setup is running on the UI thread so we can do the following.
-  display_refresh_rate_ = weak_engine_->GetDisplayRefreshRate();
+  // TODO(gw280): The WeakPtr here asserts that we are derefing it on the
+  // same thread as it was created on. Shell is constructed on the platform
+  // thread but we need to call into the Engine on the UI thread, so we need
+  // to use getUnsafe() here to avoid failing the assertion.
+  //
+  // https://github.com/flutter/flutter/issues/42947
+  display_refresh_rate_ = weak_engine_.getUnsafe()->GetDisplayRefreshRate();
 
   return true;
 }
@@ -1069,7 +1090,7 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
     // never be reported until the next animation starts.
     frame_timings_report_scheduled_ = true;
     task_runners_.GetGPUTaskRunner()->PostDelayedTask(
-        [self = weak_factory_.GetWeakPtr()]() {
+        [self = weak_factory_gpu_->GetWeakPtr()]() {
           if (!self.get()) {
             return;
           }
