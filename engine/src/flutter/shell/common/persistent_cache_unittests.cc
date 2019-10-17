@@ -87,7 +87,7 @@ TEST_F(ShellTest, CacheSkSLWorks) {
   settings.dump_skp_on_shader_compilation = true;
   auto normal_config = RunConfiguration::InferFromSettings(settings);
   normal_config.SetEntrypoint("emptyMain");
-  shell.reset();
+  DestroyShell(std::move(shell));
   shell = CreateShell(settings);
   PlatformViewNotifyCreated(shell.get());
   RunEngine(shell.get(), std::move(normal_config));
@@ -120,6 +120,7 @@ TEST_F(ShellTest, CacheSkSLWorks) {
     return true;
   };
   fml::VisitFiles(dir.fd(), remove_visitor);
+  DestroyShell(std::move(shell));
 }
 
 }  // namespace testing

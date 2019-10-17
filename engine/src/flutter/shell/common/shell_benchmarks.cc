@@ -78,7 +78,15 @@ static void StartupAndShutdownShell(benchmark::State& state,
 
   {
     benchmarking::ScopedPauseTiming pause(state, !measure_shutdown);
-    shell.reset();  // Shutdown is synchronous.
+    // Shutdown must occur synchronously on the platform thread.
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        thread_host->platform_thread->GetTaskRunner(),
+        [&shell, &latch]() mutable {
+          shell.reset();
+          latch.Signal();
+        });
+    latch.Wait();
     thread_host.reset();
   }
 

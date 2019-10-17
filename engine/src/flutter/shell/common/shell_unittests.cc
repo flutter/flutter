@@ -75,7 +75,7 @@ TEST_F(ShellTest, InitializeWithDifferentThreads) {
   auto shell = CreateShell(std::move(settings), std::move(task_runners));
   ASSERT_TRUE(ValidateShell(shell.get()));
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
-  shell.reset();
+  DestroyShell(std::move(shell), std::move(task_runners));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
@@ -87,10 +87,10 @@ TEST_F(ShellTest, InitializeWithSingleThread) {
   auto task_runner = thread_host.platform_thread->GetTaskRunner();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
                            task_runner);
-  auto shell = CreateShell(std::move(settings), std::move(task_runners));
+  auto shell = CreateShell(std::move(settings), task_runners);
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   ASSERT_TRUE(ValidateShell(shell.get()));
-  shell.reset();
+  DestroyShell(std::move(shell), std::move(task_runners));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
@@ -101,10 +101,10 @@ TEST_F(ShellTest, InitializeWithSingleThreadWhichIsTheCallingThread) {
   auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
                            task_runner);
-  auto shell = CreateShell(std::move(settings), std::move(task_runners));
+  auto shell = CreateShell(std::move(settings), task_runners);
   ASSERT_TRUE(ValidateShell(shell.get()));
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
-  shell.reset();
+  DestroyShell(std::move(shell), std::move(task_runners));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
@@ -132,7 +132,7 @@ TEST_F(ShellTest,
       });
   ASSERT_TRUE(ValidateShell(shell.get()));
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
-  shell.reset();
+  DestroyShell(std::move(shell), std::move(task_runners));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
@@ -152,7 +152,7 @@ TEST_F(ShellTest, InitializeWithGPUAndPlatformThreadsTheSame) {
   auto shell = CreateShell(std::move(settings), std::move(task_runners));
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   ASSERT_TRUE(ValidateShell(shell.get()));
-  shell.reset();
+  DestroyShell(std::move(shell), std::move(task_runners));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
@@ -174,7 +174,7 @@ TEST_F(ShellTest, FixturesAreFunctional) {
   RunEngine(shell.get(), std::move(configuration));
   main_latch.Wait();
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
-  shell.reset();
+  DestroyShell(std::move(shell));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
@@ -198,7 +198,7 @@ TEST_F(ShellTest, SecondaryIsolateBindingsAreSetupViaShellSettings) {
   latch.Wait();
 
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
-  shell.reset();
+  DestroyShell(std::move(shell));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
@@ -281,6 +281,7 @@ TEST_F(ShellTest, NoNeedToReportTimingsByDefault) {
   // positive in any tests. Otherwise those tests will be flaky as the clearing
   // of unreported timings is unpredictive.
   ASSERT_EQ(UnreportedTimingsCount(shell.get()), 0);
+  DestroyShell(std::move(shell));
 }
 
 TEST_F(ShellTest, NeedsReportTimingsIsSetWithCallback) {
@@ -296,6 +297,7 @@ TEST_F(ShellTest, NeedsReportTimingsIsSetWithCallback) {
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
   ASSERT_TRUE(GetNeedsReportTimings(shell.get()));
+  DestroyShell(std::move(shell));
 }
 
 static void CheckFrameTimings(const std::vector<FrameTiming>& timings,
@@ -350,7 +352,7 @@ TEST_F(ShellTest, ReportTimingsIsCalled) {
   }
 
   reportLatch.Wait();
-  shell.reset();
+  DestroyShell(std::move(shell));
 
   fml::TimePoint finish = fml::TimePoint::Now();
   ASSERT_TRUE(timestamps.size() > 0);
@@ -420,6 +422,7 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   int64_t build_start =
       timing.Get(FrameTiming::kBuildStart).ToEpochDelta().ToMicroseconds();
   ASSERT_EQ(build_start, begin_frame);
+  DestroyShell(std::move(shell));
 }
 
 TEST(SettingsTest, FrameTimingSetsAndGetsProperly) {
@@ -474,7 +477,7 @@ TEST_F(ShellTest, ReportTimingsIsCalledSoonerInNonReleaseMode) {
   PumpOneFrame(shell.get());
 
   reportLatch.Wait();
-  shell.reset();
+  DestroyShell(std::move(shell));
 
   fml::TimePoint finish = fml::TimePoint::Now();
   fml::TimeDelta ellapsed = finish - start;
@@ -518,7 +521,7 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   }
 
   reportLatch.Wait();
-  shell.reset();
+  DestroyShell(std::move(shell));
 
   // Check for the immediate callback of the first frame that doesn't wait for
   // the other 9 frames to be rasterized.
@@ -570,6 +573,7 @@ TEST_F(ShellTest, WaitForFirstFrame) {
   fml::Status result =
       shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1000));
   ASSERT_TRUE(result.ok());
+  DestroyShell(std::move(shell));
 }
 
 TEST_F(ShellTest, WaitForFirstFrameTimeout) {
@@ -586,6 +590,7 @@ TEST_F(ShellTest, WaitForFirstFrameTimeout) {
   fml::Status result =
       shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(10));
   ASSERT_EQ(result.code(), fml::StatusCode::kDeadlineExceeded);
+  DestroyShell(std::move(shell));
 }
 
 TEST_F(ShellTest, WaitForFirstFrameMultiple) {
@@ -607,6 +612,7 @@ TEST_F(ShellTest, WaitForFirstFrameMultiple) {
     result = shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1));
     ASSERT_TRUE(result.ok());
   }
+  DestroyShell(std::move(shell));
 }
 
 /// Makes sure that WaitForFirstFrame works if we rendered a frame with the
@@ -635,6 +641,7 @@ TEST_F(ShellTest, WaitForFirstFrameInlined) {
     event.Signal();
   });
   ASSERT_FALSE(event.WaitWithTimeout(fml::TimeDelta::FromMilliseconds(1000)));
+  DestroyShell(std::move(shell), std::move(task_runners));
 }
 
 static size_t GetRasterizerResourceCacheBytesSync(Shell& shell) {
@@ -699,6 +706,7 @@ TEST_F(ShellTest, SetResourceCacheSize) {
   PumpOneFrame(shell.get());
 
   EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell), 10000U);
+  DestroyShell(std::move(shell), std::move(task_runners));
 }
 
 TEST_F(ShellTest, SetResourceCacheSizeEarly) {
@@ -727,6 +735,7 @@ TEST_F(ShellTest, SetResourceCacheSizeEarly) {
 
   EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
             static_cast<size_t>(3840000U));
+  DestroyShell(std::move(shell), std::move(task_runners));
 }
 
 TEST_F(ShellTest, SetResourceCacheSizeNotifiesDart) {
@@ -765,6 +774,7 @@ TEST_F(ShellTest, SetResourceCacheSizeNotifiesDart) {
 
   EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
             static_cast<size_t>(10000U));
+  DestroyShell(std::move(shell), std::move(task_runners));
 }
 
 TEST_F(ShellTest, CanCreateImagefromDecompressedBytes) {
@@ -798,6 +808,7 @@ TEST_F(ShellTest, CanCreateImagefromDecompressedBytes) {
   RunEngine(shell.get(), std::move(configuration));
 
   latch.Wait();
+  DestroyShell(std::move(shell), std::move(task_runners));
 }
 
 class MockTexture : public Texture {
@@ -872,6 +883,7 @@ TEST_F(ShellTest, TextureFrameMarkedAvailableAndUnregister) {
   latch->Wait();
 
   EXPECT_EQ(mockTexture->unregistered(), true);
+  DestroyShell(std::move(shell), std::move(task_runners));
 }
 
 TEST_F(ShellTest, IsolateCanAccessPersistentIsolateData) {
@@ -910,6 +922,7 @@ TEST_F(ShellTest, IsolateCanAccessPersistentIsolateData) {
   });
 
   message_latch.Wait();
+  DestroyShell(std::move(shell), std::move(task_runners));
 }
 
 }  // namespace testing

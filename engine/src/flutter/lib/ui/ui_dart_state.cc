@@ -79,10 +79,16 @@ const TaskRunners& UIDartState::GetTaskRunners() const {
 }
 
 fml::RefPtr<flutter::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
-  if (!io_manager_) {
+  // TODO(gw280): The WeakPtr here asserts that we are derefing it on the
+  // same thread as it was created on. As we can't guarantee that currently
+  // we're being called from the IO thread (construction thread), we need
+  // to use getUnsafe() here to avoid failing the assertion.
+  //
+  // https://github.com/flutter/flutter/issues/42946
+  if (!io_manager_.getUnsafe()) {
     return nullptr;
   }
-  return io_manager_->GetSkiaUnrefQueue();
+  return io_manager_.getUnsafe()->GetSkiaUnrefQueue();
 }
 
 void UIDartState::ScheduleMicrotask(Dart_Handle closure) {
@@ -114,6 +120,7 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
 }
 
 fml::WeakPtr<GrContext> UIDartState::GetResourceContext() const {
+  FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
   if (!io_manager_) {
     return {};
   }

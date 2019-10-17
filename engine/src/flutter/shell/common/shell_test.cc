@@ -245,6 +245,21 @@ std::unique_ptr<Shell> ShellTest::CreateShell(Settings settings,
       });
 }
 
+void ShellTest::DestroyShell(std::unique_ptr<Shell> shell) {
+  DestroyShell(std::move(shell), GetTaskRunnersForFixture());
+}
+
+void ShellTest::DestroyShell(std::unique_ptr<Shell> shell,
+                             TaskRunners task_runners) {
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(task_runners.GetPlatformTaskRunner(),
+                                    [&shell, &latch]() mutable {
+                                      shell.reset();
+                                      latch.Signal();
+                                    });
+  latch.Wait();
+}
+
 // |testing::ThreadTest|
 void ShellTest::SetUp() {
   ThreadTest::SetUp();
