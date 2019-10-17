@@ -67,12 +67,9 @@ static SkISize TransformedSurfaceSize(const SkISize& size,
 
 // |ExternalViewEmbedder|
 void EmbedderExternalViewEmbedder::BeginFrame(SkISize frame_size,
-                                              GrContext* context,
-                                              double device_pixel_ratio) {
+                                              GrContext* context) {
   Reset();
-
   pending_frame_size_ = frame_size;
-  pending_device_pixel_ratio_ = device_pixel_ratio;
   pending_surface_transformation_ = GetSurfaceTransformation();
 
   const auto surface_size = TransformedSurfaceSize(
@@ -158,8 +155,7 @@ SkCanvas* EmbedderExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
 static FlutterLayer MakeBackingStoreLayer(
     const SkISize& frame_size,
     const FlutterBackingStore* store,
-    const SkMatrix& surface_transformation,
-    double device_pixel_ratio) {
+    const SkMatrix& surface_transformation) {
   FlutterLayer layer = {};
 
   layer.struct_size = sizeof(layer);
@@ -170,9 +166,7 @@ static FlutterLayer MakeBackingStoreLayer(
       SkRect::MakeWH(frame_size.width(), frame_size.height());
 
   const auto transformed_layer_bounds =
-      SkMatrix::Concat(surface_transformation,
-                       SkMatrix::MakeScale(device_pixel_ratio))
-          .mapRect(layer_bounds);
+      surface_transformation.mapRect(layer_bounds);
 
   layer.offset.x = transformed_layer_bounds.x();
   layer.offset.y = transformed_layer_bounds.y();
@@ -196,8 +190,7 @@ static FlutterPlatformView MakePlatformView(
 static FlutterLayer MakePlatformViewLayer(
     const EmbeddedViewParams& params,
     const FlutterPlatformView& platform_view,
-    const SkMatrix& surface_transformation,
-    double device_pixel_ratio) {
+    const SkMatrix& surface_transformation) {
   FlutterLayer layer = {};
 
   layer.struct_size = sizeof(layer);
@@ -211,9 +204,7 @@ static FlutterLayer MakePlatformViewLayer(
   );
 
   const auto transformed_layer_bounds =
-      SkMatrix::Concat(surface_transformation,
-                       SkMatrix::MakeScale(device_pixel_ratio))
-          .mapRect(layer_bounds);
+      surface_transformation.mapRect(layer_bounds);
 
   layer.offset.x = transformed_layer_bounds.x();
   layer.offset.y = transformed_layer_bounds.y();
@@ -244,11 +235,8 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
   {
     // The root surface is expressed as a layer.
     presented_layers.push_back(MakeBackingStoreLayer(
-        pending_frame_size_,                     // frame size
-        root_render_target_->GetBackingStore(),  // backing store
-        pending_surface_transformation_,         // surface transformation
-        pending_device_pixel_ratio_              // device pixel ratio
-        ));
+        pending_frame_size_, root_render_target_->GetBackingStore(),
+        pending_surface_transformation_));
   }
 
   const auto surface_size = TransformedSurfaceSize(
@@ -274,12 +262,9 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
     // The layers presented to the embedder will contain a back pointer to this
     // struct. It is safe to deallocate when the embedder callback is done.
     presented_platform_views[view_id] = MakePlatformView(view_id);
-    presented_layers.push_back(MakePlatformViewLayer(
-        params,                                // embedded view params
-        presented_platform_views.at(view_id),  // platform view
-        pending_surface_transformation_,       // surface transformation
-        pending_device_pixel_ratio_            // device pixel ratio
-        ));
+    presented_layers.push_back(
+        MakePlatformViewLayer(params, presented_platform_views.at(view_id),
+                              pending_surface_transformation_));
 
     if (!pending_canvas_spies_.at(view_id)->DidDrawIntoCanvas()) {
       // Nothing was drawn into the overlay canvas, we don't need to composite
@@ -327,11 +312,8 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
     // Indicate a layer for the backing store containing contents rendered by
     // Flutter.
     presented_layers.push_back(MakeBackingStoreLayer(
-        pending_frame_size_,               // frame size
-        render_target->GetBackingStore(),  // backing store
-        pending_surface_transformation_,   // surface transformation
-        pending_device_pixel_ratio_        // device pixel ratio
-        ));
+        pending_frame_size_, render_target->GetBackingStore(),
+        pending_surface_transformation_));
   }
 
   {

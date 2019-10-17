@@ -230,8 +230,7 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
 
   if (external_view_embedder != nullptr) {
     external_view_embedder->BeginFrame(layer_tree.frame_size(),
-                                       surface_->GetContext(),
-                                       layer_tree.device_pixel_ratio());
+                                       surface_->GetContext());
     embedder_root_surface = external_view_embedder->GetRootSurface();
   }
 
