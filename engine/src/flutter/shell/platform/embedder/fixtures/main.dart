@@ -430,3 +430,16 @@ void verify_b141980393() {
   };
   window.scheduleFrame();
 }
+
+@pragma('vm:entry-point')
+void can_display_platform_view_with_pixel_ratio() {
+  window.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 20.0);
+    builder.addPlatformView(42, width: 400.0, height: 280.0);
+    builder.addPicture(Offset(0.0, 0.0), CreateSimplePicture());
+    builder.pop();
+    window.render(builder.build());
+  };
+  window.scheduleFrame();
+}
