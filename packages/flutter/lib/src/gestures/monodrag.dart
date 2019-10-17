@@ -68,10 +68,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   /// Configure the behavior of offsets sent to [onStart].
   ///
-  /// If set to [DragStartBehavior.start], the [onStart] callback will be called
-  /// at the time and position when this gesture recognizer wins the arena. If
-  /// [DragStartBehavior.down], [onStart] will be called at the time and
-  /// position when a down event was first detected.
+  /// If set to [DragStartBehavior.start], the [onStart] callback will be called at the time and
+  /// position when the gesture detector wins the arena. If [DragStartBehavior.down],
+  /// [onStart] will be called at the time and position when a down event was
+  /// first detected.
   ///
   /// For more information about the gesture arena:
   /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
@@ -80,9 +80,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// ## Example:
   ///
-  /// A finger presses down on the screen with offset (500.0, 500.0), and then
-  /// moves to position (510.0, 500.0) before winning the arena. With
-  /// [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
+  /// A finger presses down on the screen with offset (500.0, 500.0),
+  /// and then moves to position (510.0, 500.0) before winning the arena.
+  /// With [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
   /// callback will be called at the time corresponding to the touch's position
   /// at (500.0, 500.0). If it is instead set to [DragStartBehavior.start],
   /// [onStart] will be called at the time corresponding to the touch's position
@@ -469,10 +469,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 ///    track each touch point independently.
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 
-  /// The distance a touch has to travel for the framework to be confident that
-  /// the gesture is a scroll gesture. Defaults to [kTouchSlop].
-  final double touchSlop;
-
   /// Create a gesture recognizer for interactions in the vertical axis.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
@@ -481,6 +477,10 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     PointerDeviceKind kind,
     this.touchSlop = kTouchSlop,
   }) : super(debugOwner: debugOwner, kind: kind);
+
+  /// The distance a touch has to travel for the framework to be confident that
+  /// the gesture is a scroll gesture. Defaults to [kTouchSlop].
+  final double touchSlop;
 
   @override
   bool isFlingGesture(VelocityEstimate estimate) {
@@ -514,10 +514,6 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 
-  /// The distance a touch has to travel for the framework to be confident that
-  /// the gesture is a scroll gesture. Defaults to [kTouchSlop].
-  final double touchSlop;
-
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
@@ -526,6 +522,10 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     PointerDeviceKind kind,
     this.touchSlop = kTouchSlop,
   }) : super(debugOwner: debugOwner, kind: kind);
+
+  /// The distance a touch has to travel for the framework to be confident that
+  /// the gesture is a scroll gesture. Defaults to [kTouchSlop].
+  final double touchSlop;
 
   @override
   bool isFlingGesture(VelocityEstimate estimate) {
