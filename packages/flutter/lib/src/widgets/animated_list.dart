@@ -94,10 +94,11 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///     );
 ///   }
 ///
-///   // Used to build an item after it has been removed from the list. This method is
-///   // needed because a removed item remains  visible until its animation has
-///   // completed (even though it's gone as far this ListModel is concerned).
-///   // The widget will be used by the [AnimatedListState.removeItem] method's
+///   // Used to build an item after it has been removed from the list. This
+///   // method is needed because a removed item remains  visible until its
+///   // animation has completed (even though it's gone as far this ListModel is
+///   // concerned). The widget will be used by the
+///   // [AnimatedListState.removeItem] method's
 ///   // [AnimatedListRemovedItemBuilder] parameter.
 ///   Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
 ///     return CardItem(
@@ -158,13 +159,13 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// /// Keeps a Dart List in sync with an AnimatedList.
 /// ///
-/// /// The [insert] and [removeAt] methods apply to both the internal list and the
-/// /// animated list that belongs to [listKey].
+/// /// The [insert] and [removeAt] methods apply to both the internal list and
+/// /// the animated list that belongs to [listKey].
 /// ///
 /// /// This class only exposes as much of the Dart List API as is needed by the
-/// /// sample app. More list methods are easily added, however methods that mutate the
-/// /// list must make the same changes to the animated list in terms of
-/// /// [AnimatedListState.insertItem] and [AnimatedList.removeItem].
+/// /// sample app. More list methods are easily added, however methods that
+/// /// mutate the list must make the same changes to the animated list in terms
+/// /// of [AnimatedListState.insertItem] and [AnimatedList.removeItem].
 /// class ListModel<E> {
 ///   ListModel({
 ///     @required this.listKey,
@@ -204,9 +205,9 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 /// }
 ///
 /// /// Displays its integer item as 'item N' on a Card whose color is based on
-/// /// the item's value. The text is displayed in bright green if selected is true.
-/// /// This widget's height is based on the animation parameter, it varies
-/// /// from 0 to 128 as the animation varies from 0.0 to 1.0.
+/// /// the item's value. The text is displayed in bright green if selected is
+/// /// true. This widget's height is based on the animation parameter, it
+/// /// varies from 0 to 128 as the animation varies from 0.0 to 1.0.
 /// class CardItem extends StatelessWidget {
 ///   const CardItem({
 ///     Key key,
@@ -376,8 +377,8 @@ class AnimatedList extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// This method is typically used by [AnimatedList] item widgets that insert or
-  /// remove items in response to user input.
+  /// This method is typically used by [AnimatedList] item widgets that insert
+  /// or remove items in response to user input.
   ///
   /// ```dart
   /// AnimatedListState animatedList = AnimatedList.of(context);
@@ -497,7 +498,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///
 /// ```dart
 /// void main() => runApp(SliverAnimatedListSample());
-/// 
+///
 /// class SliverAnimatedListSample extends StatefulWidget {
 ///   @override
 ///   _SliverAnimatedListSampleState createState() => _SliverAnimatedListSampleState();
