@@ -58,7 +58,10 @@ class _LinuxBinding implements PlatformBinding {
 
 class _MacBinding implements PlatformBinding {
   @override
-  int getChromeBuild(YamlMap browserLock) => browserLock['Mac'];
+  int getChromeBuild(YamlMap browserLock) {
+    final YamlMap chromeMap = browserLock['chrome'];
+    return chromeMap['Mac'];
+  }
 
   @override
   String getChromeDownloadUrl(String version) =>

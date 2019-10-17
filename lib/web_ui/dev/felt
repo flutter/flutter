@@ -44,24 +44,37 @@ then
   ninja -C $HOST_DEBUG_UNOPT_DIR
 fi
 
-# Invalidate cache if:
-#  * SNAPSHOT_PATH is not a file, or
-#  * STAMP_PATH is not a file with nonzero size, or
-#  * Contents of STAMP_PATH is not our local git HEAD revision, or
-#  * pubspec.yaml last modified after pubspec.lock
-#
-# To force invalidate the cache run `felt clean` or `rm .dart_tool/felt.shapshot.stamp`
-if [[ ! -f $SNAPSHOT_PATH || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$REVISION" || "$WEB_UI_DIR/pubspec.yaml" -nt "$WEB_UI_DIR/pubspec.lock" ]]; then
-  echo "Snapshotting the felt tool for faster subsequent runs."
+install_deps() {
   echo "Running \`pub get\` in 'engine/src/flutter/lib/web_ui'"
   (cd "$WEB_UI_DIR"; $DART_SDK_DIR/bin/pub get)
 
   echo "Running \`pub get\` in 'engine/src/flutter/web_sdk/web_engine_tester'"
   (cd "$FLUTTER_DIR/web_sdk/web_engine_tester"; $DART_SDK_DIR/bin/pub get)
-  mkdir -p $DART_TOOL_DIR
+}
 
-  "$DART_SDK_DIR/bin/dart" --snapshot="$SNAPSHOT_PATH" --packages="$WEB_UI_DIR/.packages" "$SCRIPT_PATH"
-  echo "$REVISION" > "$STAMP_PATH"
+if [[ "$FELT_USE_SNAPSHOT" == "false" || "$FELT_USE_SNAPSHOT" == "0" ]]; then
+  echo "[Snapshot mode: off]"
+  # Running without snapshot means there is high likelyhood of local changes. In
+  # that case, let's clear the snapshot to avoid any surprises.
+  rm -f "$SNAPSHOT_PATH"
+  rm -f "$STAMP_PATH"
+  install_deps
+  $DART_SDK_DIR/bin/dart "$DEV_DIR/felt.dart" $@
+else
+  # Create a new snapshot if any of the following is true:
+  #  * SNAPSHOT_PATH is not a file, or
+  #  * STAMP_PATH is not a file with nonzero size, or
+  #  * Contents of STAMP_PATH is not our local git HEAD revision, or
+  #  * pubspec.yaml last modified after pubspec.lock
+  if [[ ! -f $SNAPSHOT_PATH || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$REVISION" || "$WEB_UI_DIR/pubspec.yaml" -nt "$WEB_UI_DIR/pubspec.lock" ]]; then
+    echo "[Snapshot mode: on] (creating a new snapshot)"
+    install_deps
+    mkdir -p $DART_TOOL_DIR
+
+    "$DART_SDK_DIR/bin/dart" --snapshot="$SNAPSHOT_PATH" --packages="$WEB_UI_DIR/.packages" "$SCRIPT_PATH"
+    echo "$REVISION" > "$STAMP_PATH"
+  fi
+
+  $DART_SDK_DIR/bin/dart --packages="$WEB_UI_DIR/.packages" "$SNAPSHOT_PATH" $@
 fi
 
-$DART_SDK_DIR/bin/dart --packages="$WEB_UI_DIR/.packages" "$SNAPSHOT_PATH" $@
