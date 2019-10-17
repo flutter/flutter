@@ -156,15 +156,19 @@ class AnsiTerminal {
 
   set singleCharMode(bool value) {
     final Stream<List<int>> stdin = io.stdin;
-    if (stdin is io.Stdin && stdin.hasTerminal) {
-      // The order of setting lineMode and echoMode is important on Windows.
-      if (value) {
-        stdin.echoMode = false;
-        stdin.lineMode = false;
-      } else {
-        stdin.lineMode = true;
-        stdin.echoMode = true;
+    try {
+      if (stdin is io.Stdin && stdin.hasTerminal) {
+        // The order of setting lineMode and echoMode is important on Windows.
+        if (value) {
+          stdin.echoMode = false;
+          stdin.lineMode = false;
+        } else {
+          stdin.lineMode = true;
+          stdin.echoMode = true;
+        }
       }
+    } on io.StdinException {
+      // Do nothing if we're not connected to a terminal.
     }
   }
 
