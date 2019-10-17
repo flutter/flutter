@@ -72,7 +72,7 @@ testWidgets('MaterialButton responds to tap and onLongPress when enabled', (Widg
 
     int pressedCount = 0;
 
-    Widget buildFrame(VoidCallback onLongPress, VoidCallback onPressed) {
+    Widget buildFrame({VoidCallback onPressed, VoidCallback onLongPress}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MaterialButton(onPressed: onPressed, onLongPress: onLongPress),
@@ -81,17 +81,17 @@ testWidgets('MaterialButton responds to tap and onLongPress when enabled', (Widg
 
     // onPressed not null, onLongPress null.
     await tester.pumpWidget(
-      buildFrame(() { pressedCount += 1; }, null),
+      buildFrame(onPressed: () { pressedCount += 1; }, onLongPress: null),
     );
     expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, true);
-    await tester.onTap(find.byType(MaterialButton));
+    await tester.tap(find.byType(MaterialButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 1);
 
     // onPressed null, onLongPress not null.
     pressedCount = 0;
     await tester.pumpWidget(
-      buildFrame(null, () { pressedCount += 1; }),
+      buildFrame(onPressed: null, onLongPress: () { pressedCount += 1; }),
     );
     expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, true);
     await tester.longPress(find.byType(MaterialButton));
@@ -101,7 +101,7 @@ testWidgets('MaterialButton responds to tap and onLongPress when enabled', (Widg
     // onPressed null, onLongPress null.
     pressedCount = 0;
     await tester.pumpWidget(
-      buildFrame(null, null),
+      buildFrame(onPressed: null, onLongPress: null),
     );
     expect(tester.widget<MaterialButton>(find.byType(MaterialButton)).enabled, false);
     await tester.tap(find.byType(MaterialButton));
@@ -121,7 +121,7 @@ testWidgets('MaterialButton responds to tap and onLongPress when enabled', (Widg
           onPressed: () {
             didPressButton = true;
           },
-          onLongPress() {
+          onLongPress: () {
             didLongPressButton = true;
           },
           child: const Text('button'),
