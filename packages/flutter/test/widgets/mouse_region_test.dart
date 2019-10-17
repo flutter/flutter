@@ -836,7 +836,7 @@ void main() {
       // Move to the overlapping area
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['enterA', 'enterC', 'enterB']);
+      expect(logs, <String>['enterA', 'enterB', 'enterC']);
       logs.clear();
 
       // Move to the B only area
@@ -866,7 +866,7 @@ void main() {
       // Move out
       await gesture.moveTo(const Offset(160, 160));
       await tester.pumpAndSettle();
-      expect(logs, <String>['exitA', 'exitB', 'exitC']);
+      expect(logs, <String>['exitC', 'exitB', 'exitA']);
     });
 
     testWidgets('an opaque one should prevent MouseRegions behind it receiving pointers', (WidgetTester tester) async {
@@ -890,13 +890,13 @@ void main() {
       // Move to the B only area
       await gesture.moveTo(const Offset(25, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['enterB', 'exitC']);
+      expect(logs, <String>['exitC', 'enterB']);
       logs.clear();
 
       // Move back to the overlapping area
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['enterC', 'exitB']);
+      expect(logs, <String>['exitB', 'enterC']);
       logs.clear();
 
       // Move to the C only area
@@ -914,7 +914,7 @@ void main() {
       // Move out
       await gesture.moveTo(const Offset(160, 160));
       await tester.pumpAndSettle();
-      expect(logs, <String>['exitA', 'exitC']);
+      expect(logs, <String>['exitC', 'exitA']);
     });
 
     testWidgets('opaque should default to true', (WidgetTester tester) async {
@@ -938,7 +938,7 @@ void main() {
       // Move out
       await gesture.moveTo(const Offset(160, 160));
       await tester.pumpAndSettle();
-      expect(logs, <String>['exitA', 'exitC']);
+      expect(logs, <String>['exitC', 'exitA']);
     });
   });
 

@@ -108,7 +108,6 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
-    await _connectionResult?.debugConnection?.close();
     await _stdOutSub?.cancel();
     await _webFs?.stop();
     await device.stopApp(null);
@@ -165,11 +164,13 @@ class ResidentWebRunner extends ResidentRunner {
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     printStatus('Launching ${getDisplayPath(target)} on ${device.name} in $modeName mode...');
     Status buildStatus;
+    bool statusActive = false;
     try {
       // dwds does not handle uncaught exceptions from its servers. To work
       // around this, we need to catch all uncaught exceptions and determine if
       // they are fatal or not.
       buildStatus = logger.startProgress('Building application for the web...', timeout: null);
+      statusActive = true;
       final int result = await asyncGuard(() async {
         _webFs = await webFsFactory(
           target: target,
@@ -182,12 +183,14 @@ class ResidentWebRunner extends ResidentRunner {
         );
         // When connecting to a browser, update the message with a seemsSlow notification
         // to handle the case where we fail to connect.
-        if (debuggingOptions.browserLaunch) {
-          buildStatus.stop();
+        buildStatus.stop();
+        statusActive = false;
+        if (debuggingOptions.browserLaunch && supportsServiceProtocol) {
           buildStatus = logger.startProgress(
             'Attempting to connect to browser instance..',
             timeout: const Duration(seconds: 30),
           );
+          statusActive = true;
         }
         await device.startApp(package,
           mainPath: target,
@@ -199,6 +202,10 @@ class ResidentWebRunner extends ResidentRunner {
         if (supportsServiceProtocol) {
           _connectionResult = await _webFs.connect(debuggingOptions);
           unawaited(_connectionResult.debugConnection.onDone.whenComplete(() => exit(0)));
+        }
+        if (statusActive) {
+          buildStatus.stop();
+          statusActive = false;
         }
         appStartedCompleter?.complete();
         return attach(
@@ -213,8 +220,17 @@ class ResidentWebRunner extends ResidentRunner {
       throwToolExit('Failed to build application for the Web.');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
+    } on StateError catch (err) {
+      // Handle known state error.
+      final String message = err.toString();
+      if (message.contains('Could not connect to application with appInstanceId')) {
+        throwToolExit(message);
+      }
+      rethrow;
     } finally {
-      buildStatus.stop();
+      if (statusActive) {
+        buildStatus.stop();
+      }
     }
     return 1;
   }

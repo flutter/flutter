@@ -2,7 +2,7 @@ container:
   image: gcr.io/flutter-cirrus/build-flutter-image:latest
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
@@ -182,6 +182,36 @@ task:
       container:
         cpu: 4
         memory: 12G
+    - name: web_tests-linux-shard-3
+      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+      env:
+        SHARD: web_tests
+        WEB_SHARD: 3
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: web_tests-linux-shard-4
+      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+      env:
+        SHARD: web_tests
+        WEB_SHARD: 4
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: web_tests-linux-shard-5
+      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+      env:
+        SHARD: web_tests
+        WEB_SHARD: 5
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
     - name: build_tests-linux
       env:
         SHARD: build_tests
@@ -205,45 +235,41 @@ task:
       container:
         cpu: 4
         memory: 12G
-    - name: integration_tests_gradle1-linux
+    - name: gradle_tests-linux-shard-1
       env:
         SHARD: integration_tests
         SUBSHARD: gradle1
       test_script:
-        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
-        # might include non-ASCII characters which makes Gradle crash.
-        # See: https://github.com/flutter/flutter/issues/24935
-        # This is a temporary workaround until we figure how to properly configure
-        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
-        # TODO(amirh): Set the locale to UTF8.
-        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
-        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
-        - export CIRRUS_CHANGE_MESSAGE=""
-        - export CIRRUS_COMMIT_MESSAGE=""
         - dart --enable-asserts ./dev/bots/test.dart
-        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
-        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
       container:
         cpu: 4
         memory: 12G
-    - name: integration_tests_gradle2-linux
+    - name: gradle_tests-linux-shard-2
       env:
         SHARD: integration_tests
         SUBSHARD: gradle2
       test_script:
-        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
-        # might include non-ASCII characters which makes Gradle crash.
-        # See: https://github.com/flutter/flutter/issues/24935
-        # This is a temporary workaround until we figure how to properly configure
-        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
-        # TODO(amirh): Set the locale to UTF8.
-        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
-        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
-        - export CIRRUS_CHANGE_MESSAGE=""
-        - export CIRRUS_COMMIT_MESSAGE=""
         - dart --enable-asserts ./dev/bots/test.dart
-        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
-        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
+      container:
+        cpu: 4
+        memory: 12G
+    - name: gradle_embedding_v2_tests-linux-shard-1
+      env:
+        SHARD: integration_tests
+        SUBSHARD: gradle1
+        ENABLE_ANDROID_EMBEDDING_V2: 'true'
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: gradle_embedding_v2_tests-linux-shard-2
+      env:
+        SHARD: integration_tests
+        SUBSHARD: gradle2
+        ENABLE_ANDROID_EMBEDDING_V2: 'true'
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
@@ -266,7 +292,7 @@ task:
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   windows_container:
     image: cirrusci/android-sdk:28-windowsservercore-2019
     os_version: 2019
@@ -319,7 +345,7 @@ task:
         SUBSHARD: integration
 
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   windows_container:
     image: cirrusci/android-sdk:28-windowsservercore-2019
     os_version: 2019
@@ -403,7 +429,7 @@ task:
         - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
         - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
         - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
-    - name: integration_tests_gradle1-windows
+    - name: gradle_tests-windows-shard-1
       env:
         SHARD: integration_tests
         SUBSHARD: gradle1
@@ -412,10 +438,30 @@ task:
       container:
         cpu: 4
         memory: 12G
-    - name: integration_tests_gradle2-windows
+    - name: gradle_tests-windows-shard-2
       env:
         SHARD: integration_tests
         SUBSHARD: gradle2
+      test_script:
+        - dart --enable-asserts dev\bots\test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: gradle_embedding_v2_tests-windows-shard-1
+      env:
+        SHARD: integration_tests
+        SUBSHARD: gradle1
+        ENABLE_ANDROID_EMBEDDING_V2: 'true'
+      test_script:
+        - dart --enable-asserts dev\bots\test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: gradle_embedding_v2_tests-windows-shard-2
+      env:
+        SHARD: integration_tests
+        SUBSHARD: gradle2
+        ENABLE_ANDROID_EMBEDDING_V2: 'true'
       test_script:
         - dart --enable-asserts dev\bots\test.dart
       container:
@@ -440,7 +486,7 @@ task:
     # Apple Certificates Match Passphrase
     MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
   osx_instance:
-    image: mojave-xcode-10.1
+    image: mojave-xcode-10.2
   # occasionally the clock on these machines is out of sync
   # with the actual time - this should help to verify
   print_date_script:
@@ -460,7 +506,7 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
-    image: mojave-xcode-10.1
+    image: mojave-xcode-10.2
   depends_on:
     - analyze
   env:
@@ -597,8 +643,14 @@ docker_builder:
     - tool_tests_integration-linux
     - build_tests-linux
     - integration_tests-linux
-    - integration_tests_gradle1-linux
-    - integration_tests_gradle2-linux
+    - gradle_tests-linux-shard-1
+    - gradle_tests-linux-shard-2
+    - gradle_embedding_v2_tests-linux-shard-1
+    - gradle_embedding_v2_tests-linux-shard-2
+    - gradle_tests-windows-shard-1
+    - gradle_tests-windows-shard-2
+    - gradle_embedding_v2_tests-windows-shard-1
+    - gradle_embedding_v2_tests-windows-shard-2
     - release_smoke_tests
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"

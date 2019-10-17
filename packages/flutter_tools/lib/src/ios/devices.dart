@@ -324,6 +324,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.traceSkia) '--trace-skia',
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
+      if (debuggingOptions.cacheSkSL) '--cache-sksl',
       if (platformArgs['trace-startup'] ?? false) '--trace-startup',
     ];
 

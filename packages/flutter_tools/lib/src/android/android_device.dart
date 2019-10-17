@@ -326,8 +326,9 @@ class AndroidDevice extends Device {
       }
 
       return true;
-    } catch (e) {
+    } catch (e, stacktrace) {
       printError('Unexpected failure from adb: $e');
+      printError('Stacktrace: $stacktrace');
       return false;
     }
   }
@@ -574,6 +575,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'trace-systrace', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
+      if (debuggingOptions.cacheSkSL)
+      ...<String>['--ez', 'cache-sksl', 'true'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],

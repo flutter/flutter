@@ -56,6 +56,7 @@ void main() {
       expect(MacOSDevice().isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('isSupportedForProject is false with no host app', () async {
@@ -66,6 +67,7 @@ void main() {
       expect(MacOSDevice().isSupportedForProject(flutterProject), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('executablePathForDevice uses the correct package executable', () async {
@@ -82,6 +84,7 @@ void main() {
       expect(MacOSDevice().executablePathForDevice(mockApp, BuildMode.release), releasePath);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 }

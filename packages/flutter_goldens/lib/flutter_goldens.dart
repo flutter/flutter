@@ -43,7 +43,7 @@ Future<void> main(FutureOr<void> testMain()) async {
 /// different [FlutterGoldenFileComparator]s, depending on the current testing
 /// environment.
 ///
-///   * The [FlutterSkiaGoldFileComparator] is utilized during pre-submit
+///   * The [FlutterSkiaGoldFileComparator] is utilized during post-submit
 ///     testing, after a pull request has landed on the master branch. This
 ///     comparator uses the [SkiaGoldClient] and the `goldctl` tool to upload
 ///     tests to the [Flutter Gold dashboard](https://flutter-gold.skia.org).
@@ -57,7 +57,8 @@ Future<void> main(FutureOr<void> testMain()) async {
 ///     compares the current test image to the baseline images using the
 ///     standard [GoldenFileComparator.compareLists] to detect any pixel
 ///     difference. The [SkiaGoldClient] is also used here to check the active
-///     ignores from the dashboard, in order to allow changes to pass tests.
+///     ignores from the dashboard, in order to allow intended changes to pass
+///     tests.
 ///
 ///   * The [FlutterLocalFileComparator] is used for any other tests run outside
 ///     of the above conditions. Similar to the
