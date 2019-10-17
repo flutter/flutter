@@ -9,25 +9,34 @@ const bool _debugPrintPlatformMessages = false;
 
 /// The Web implementation of [ui.Window].
 class EngineWindow extends ui.Window {
-
   EngineWindow() {
     _addBrightnessMediaQueryListener();
   }
 
   @override
-  double get devicePixelRatio => _devicePixelRatio;
+  double get devicePixelRatio {
+    if (_debugDevicePixelRatio != null) {
+      return _debugDevicePixelRatio;
+    }
+
+    if (experimentalUseSkia) {
+      return html.window.devicePixelRatio;
+    } else {
+      return 1.0;
+    }
+  }
 
   /// Overrides the default device pixel ratio.
   ///
   /// This is useful in tests to emulate screens of different dimensions.
   void debugOverrideDevicePixelRatio(double value) {
     assert(() {
-      _devicePixelRatio = value;
+      _debugDevicePixelRatio = value;
       return true;
     }());
   }
 
-  double _devicePixelRatio = 1.0;
+  double _debugDevicePixelRatio;
 
   @override
   ui.Size get physicalSize {
@@ -42,15 +51,16 @@ class EngineWindow extends ui.Window {
     }());
 
     if (!override) {
-      final int windowInnerWidth = html.window.innerWidth;
-      final int windowInnerHeight = html.window.innerHeight;
+      final double windowInnerWidth = html.window.innerWidth * devicePixelRatio;
+      final double windowInnerHeight =
+          html.window.innerHeight * devicePixelRatio;
       if (windowInnerWidth != _lastKnownWindowInnerWidth ||
           windowInnerHeight != _lastKnownWindowInnerHeight) {
         _lastKnownWindowInnerWidth = windowInnerWidth;
         _lastKnownWindowInnerHeight = windowInnerHeight;
         _physicalSize = ui.Size(
-          windowInnerWidth.toDouble(),
-          windowInnerHeight.toDouble(),
+          windowInnerWidth,
+          windowInnerHeight,
         );
       }
     }
@@ -59,8 +69,8 @@ class EngineWindow extends ui.Window {
   }
 
   ui.Size _physicalSize = ui.Size.zero;
-  int _lastKnownWindowInnerWidth = -1;
-  int _lastKnownWindowInnerHeight = -1;
+  double _lastKnownWindowInnerWidth = -1;
+  double _lastKnownWindowInnerHeight = -1;
 
   /// Overrides the value of [physicalSize] in tests.
   ui.Size webOnlyDebugPhysicalSizeOverride;
@@ -216,12 +226,12 @@ class EngineWindow extends ui.Window {
     _platformBrightness = newPlatformBrightness;
 
     if (previousPlatformBrightness != _platformBrightness &&
-        onPlatformBrightnessChanged != null)
-      onPlatformBrightnessChanged();
+        onPlatformBrightnessChanged != null) onPlatformBrightnessChanged();
   }
 
   /// Reference to css media query that indicates the user theme preference on the web.
-  final html.MediaQueryList _brightnessMediaQuery = html.window.matchMedia('(prefers-color-scheme: dark)');
+  final html.MediaQueryList _brightnessMediaQuery =
+      html.window.matchMedia('(prefers-color-scheme: dark)');
 
   /// A callback that is invoked whenever [_brightnessMediaQuery] changes value.
   ///
@@ -230,11 +240,14 @@ class EngineWindow extends ui.Window {
 
   /// Set the callback function for listening changes in [_brightnessMediaQuery] value.
   void _addBrightnessMediaQueryListener() {
-    _updatePlatformBrightness(_brightnessMediaQuery.matches ? ui.Brightness.dark : ui.Brightness.light);
+    _updatePlatformBrightness(_brightnessMediaQuery.matches
+        ? ui.Brightness.dark
+        : ui.Brightness.light);
 
     _brightnessMediaQueryListener = (html.Event event) {
       final html.MediaQueryListEvent mqEvent = event;
-      _updatePlatformBrightness(mqEvent.matches ? ui.Brightness.dark : ui.Brightness.light);
+      _updatePlatformBrightness(
+          mqEvent.matches ? ui.Brightness.dark : ui.Brightness.light);
     };
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
     registerHotRestartListener(() {
