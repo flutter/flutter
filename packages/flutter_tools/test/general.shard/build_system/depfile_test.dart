@@ -67,4 +67,40 @@ C:\\a.txt: C:\\b.txt
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
   }));
+
+  test('Resillient to weird whitespace', () => testbed.run(() {
+    final FileSystem fs = MemoryFileSystem();
+    final File depfileSource = fs.file('example.d')..writeAsStringSync(r'''
+a.txt
+  : b.txt    c.txt
+
+
+''');
+    final Depfile depfile = Depfile.parse(depfileSource);
+
+    expect(depfile.inputs, hasLength(2));
+    expect(depfile.outputs.single.path, 'a.txt');
+  }));
+
+  test('Resillient to duplicate files', () => testbed.run(() {
+    final FileSystem fs = MemoryFileSystem();
+    final File depfileSource = fs.file('example.d')..writeAsStringSync(r'''
+a.txt: b.txt b.txt
+''');
+    final Depfile depfile = Depfile.parse(depfileSource);
+
+    expect(depfile.inputs.single.path, 'b.txt');
+    expect(depfile.outputs.single.path, 'a.txt');
+  }));
+
+  test('Resillient to malformed file, missing :', () => testbed.run(() {
+    final FileSystem fs = MemoryFileSystem();
+    final File depfileSource = fs.file('example.d')..writeAsStringSync(r'''
+a.text b.txt
+''');
+    final Depfile depfile = Depfile.parse(depfileSource);
+
+    expect(depfile.inputs, isEmpty);
+    expect(depfile.outputs, isEmpty);
+  }));
 }
