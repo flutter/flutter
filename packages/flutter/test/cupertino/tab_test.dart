@@ -206,7 +206,7 @@ void main() {
 
   testWidgets('Throws FlutterError when onUnknownRoute returns null', (
       WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey();
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(

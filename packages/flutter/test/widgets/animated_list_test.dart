@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -179,5 +180,38 @@ void main() {
     expect(itemBottom(1), 100.0);
     expect(itemTop(2), 100.0);
     expect(itemBottom(2), 200.0);
+  });
+
+  testWidgets('AnimatedList.of() called with a context that does not contain AnimatedList',
+    (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(Container(key: key));
+    FlutterError error;
+    try {
+      AnimatedList.of(key.currentContext);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(
+      error.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   AnimatedList.of() called with a context that does not contain an\n'
+        '   AnimatedList.\n'
+        '   No AnimatedList ancestor could be found starting from the context\n'
+        '   that was passed to AnimatedList.of().\n'
+        '   This can happen when the context provided is from the same\n'
+        '   StatefulWidget that built the AnimatedList. Please see the\n'
+        '   AnimatedList documentation for examples of how to refer to an\n'
+        '   AnimatedListState object:\n'
+        '   https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
+        '   The context used was:\n'
+        '     Container-[GlobalKey#32cc6]\n'
+      ),
+    );
+    expect(error.diagnostics.length, 4);
+    expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+    expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Element>>());
   });
 }
