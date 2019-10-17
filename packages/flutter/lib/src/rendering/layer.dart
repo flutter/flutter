@@ -325,7 +325,15 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     AnnotationResult<S> result,
     Offset localPosition, {
     @required bool onlyFirst,
-  });
+  }) {
+    debugPrint(
+      'This layer did not implement Layer.findAnnotations. If this is a custom '
+      'layer class and has overridden find and findAll, '
+      'please change to overriding Layer.findAnnotations instead '
+      'to avoid unexpected behavior. '
+      'See https://github.com/flutter/flutter/pull/37424 for details.');
+    return false;
+  }
 
   /// Search this layer and its subtree for the first annotation of type `S`
   /// under the point described by `localPosition`.
