@@ -100,7 +100,7 @@ void IOSSurfaceGL::CancelFrame() {
 }
 
 // |ExternalViewEmbedder|
-void IOSSurfaceGL::BeginFrame(SkISize frame_size, GrContext* context) {
+void IOSSurfaceGL::BeginFrame(SkISize frame_size, GrContext* context, double device_pixel_ratio) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
   platform_views_controller->SetFrameSize(frame_size);
