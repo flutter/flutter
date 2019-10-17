@@ -31,6 +31,8 @@ class Surface {
   Surface(this.submitFunction);
 
   /// Acquire a frame of the given [size] containing a drawable canvas.
+  ///
+  /// The given [size] is in physical pixels.
   SurfaceFrame acquireFrame(ui.Size size) {
     final SkCanvas canvas = canvasCache.acquireCanvas(size);
     return SurfaceFrame(submitFunction, canvas);
@@ -47,9 +49,14 @@ class _CanvasCache {
     if (size == _canvas?.size) {
       return _canvas;
     }
+    final ui.Size logicalSize = size / ui.window.devicePixelRatio;
     final html.CanvasElement htmlCanvas =
         html.CanvasElement(width: size.width.ceil(), height: size.height.ceil())
           ..id = 'flt-sk-canvas';
+    htmlCanvas.style
+      ..position = 'absolute'
+      ..width = '${logicalSize.width.ceil()}px'
+      ..height = '${logicalSize.height.ceil()}px';
     domRenderer.renderScene(htmlCanvas);
     final js.JsObject surface =
         canvasKit.callMethod('MakeCanvasSurface', <String>['flt-sk-canvas']);
