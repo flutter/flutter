@@ -21,6 +21,6 @@ abstract class WebRunnerFactory {
     String target,
     @required FlutterProject flutterProject,
     @required bool ipv6,
-    @required DebuggingOptions debuggingOptions
+    @required DebuggingOptions debuggingOptions,
   });
 }

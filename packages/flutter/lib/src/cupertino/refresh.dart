@@ -379,9 +379,9 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
                 opacity: opacityCurve.transform(
                   min(pulledExtent / refreshTriggerPullDistance, 1.0)
                 ),
-                child: const Icon(
+                child: Icon(
                   CupertinoIcons.down_arrow,
-                  color: CupertinoColors.inactiveGray,
+                  color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
                   size: 36.0,
                 ),
               )

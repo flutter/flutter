@@ -90,8 +90,10 @@ class AndroidBuildInfo {
     this.targetArchs = const <AndroidArch>[
       AndroidArch.armeabi_v7a,
       AndroidArch.arm64_v8a,
+      AndroidArch.x86_64,
     ],
     this.splitPerAbi = false,
+    this.shrink = false,
   });
 
   // The build info containing the mode and flavor.
@@ -103,6 +105,9 @@ class AndroidBuildInfo {
   /// build artifact. When this is true, multiple build artifacts (one per ABI)
   /// will be produced.
   final bool splitPerAbi;
+
+  /// Whether to enable code shrinking on release mode.
+  final bool shrink;
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
@@ -148,6 +153,9 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
+    if (tmpBuildNumber.isEmpty) {
+      return null;
+    }
     final List<String> segments = tmpBuildNumber
         .split('.')
         .where((String segment) => segment.isNotEmpty)
@@ -192,6 +200,9 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
+    if (tmpBuildName.isEmpty) {
+      return null;
+    }
     final List<String> segments = tmpBuildName
         .split('.')
         .where((String segment) => segment.isNotEmpty)
@@ -410,12 +421,15 @@ String getPlatformNameForAndroidArch(AndroidArch arch) {
 }
 
 HostPlatform getCurrentHostPlatform() {
-  if (platform.isMacOS)
+  if (platform.isMacOS) {
     return HostPlatform.darwin_x64;
-  if (platform.isLinux)
+  }
+  if (platform.isLinux) {
     return HostPlatform.linux_x64;
-  if (platform.isWindows)
+  }
+  if (platform.isWindows) {
     return HostPlatform.windows_x64;
+  }
 
   printError('Unsupported host platform, defaulting to Linux');
 
@@ -426,8 +440,9 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || config == null)
+  if (context == null || config == null) {
     return 'build';
+  }
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {

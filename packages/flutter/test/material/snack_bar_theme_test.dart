@@ -59,7 +59,7 @@ void main() {
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff123456))',
       'elevation: 2.0',
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
-      'behavior: SnackBarBehavior.floating'
+      'behavior: SnackBarBehavior.floating',
     ]);
   });
 

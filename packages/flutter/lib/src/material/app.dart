@@ -81,7 +81,7 @@ enum ThemeMode {
 /// This example shows how to create a [MaterialApp] that disables the "debug"
 /// banner with a [home] route that will be displayed when the app is launched.
 ///
-/// ![A screenshot of the MaterialApp class with a home Scaffold](https://flutter.github.io/assets-for-api-docs/assets/material/basic_material_app.png)
+/// ![The MaterialApp displays a Scaffold ](https://flutter.github.io/assets-for-api-docs/assets/material/basic_material_app.png)
 ///
 /// ```dart
 /// MaterialApp(
@@ -125,7 +125,7 @@ enum ThemeMode {
 /// This example shows how to create a [MaterialApp] that defines a [theme] that
 /// will be used for material widgets in the app.
 ///
-/// ![A screenshot of the MaterialApp class with a custom theme](https://flutter.github.io/assets-for-api-docs/assets/material/theme_material_app.png)
+/// ![The MaterialApp displays a Scaffold with a dark background and a blue / grey AppBar at the top](https://flutter.github.io/assets-for-api-docs/assets/material/theme_material_app.png)
 ///
 /// ```dart
 /// MaterialApp(

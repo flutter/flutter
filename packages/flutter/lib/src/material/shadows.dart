@@ -17,9 +17,13 @@ import 'package:flutter/painting.dart';
 /// Each entry has three shadows which must be combined to obtain the defined
 /// effect for that elevation.
 ///
+/// This is useful when simulating a shadow with a [BoxDecoration] or other
+/// class that uses a list of [BoxShadow] objects.
+///
 /// See also:
 ///
-///  * [Material]
+///  * [Material], which takes an arbitrary double for its elevation and generates
+///    a shadow dynamically.
 ///  * <https://material.io/design/environment/elevation.html>
 const Map<int, List<BoxShadow>> kElevationToShadow = _elevationToShadow; // to hide the literal from the docs
 

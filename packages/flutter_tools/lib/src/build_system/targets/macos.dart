@@ -15,12 +15,11 @@ import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart';
 import '../../macos/xcode.dart';
-import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
 import 'dart.dart';
 
-const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/ephemeral/FlutterMacOS.framework';
+const String _kOutputPrefix = '{OUTPUT_DIR}/FlutterMacOS.framework';
 
 /// The copying logic for flutter assets in macOS.
 // TODO(jonahwilliams): remove once build planning lands.
@@ -51,8 +50,7 @@ class MacOSAssetBehavior extends SourceBehavior {
       manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
       packagesPath: environment.projectDir.childFile('.packages').path,
     );
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-    final String prefix = fs.path.join(flutterProject.macos.ephemeralDirectory.path,
+    final String prefix = fs.path.join(environment.outputDir.path,
         'App.framework', 'Versions', 'A', 'Resources', 'flutter_assets');
     final List<File> results = <File>[];
     for (String key in assetBundle.entries.keys) {
@@ -65,7 +63,7 @@ class MacOSAssetBehavior extends SourceBehavior {
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
-/// This class is abstract to share logic between the three conrete
+/// This class is abstract to share logic between the three concrete
 /// implementations. The shelling out is done to avoid complications with
 /// preserving special files (e.g., symbolic links) in the framework structure.
 ///
@@ -115,20 +113,18 @@ abstract class UnpackMacOS extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-    final Directory targetDirectory = flutterProject.macos
-      .ephemeralDirectory
+    final Directory targetDirectory = environment
+      .outputDir
       .childDirectory('FlutterMacOS.framework');
     if (targetDirectory.existsSync()) {
       targetDirectory.deleteSync(recursive: true);
     }
-
     final ProcessResult result = await processManager
         .run(<String>['cp', '-R', basePath, targetDirectory.path]);
     if (result.exitCode != 0) {
@@ -194,7 +190,7 @@ class DebugMacOSFramework extends Target {
   String get name => 'debug_macos_framework';
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     final File outputFile = fs.file(fs.path.join(
         environment.buildDir.path, 'App.framework', 'App'));
     outputFile.createSync(recursive: true);
@@ -239,7 +235,7 @@ class CompileMacOSFramework extends Target {
   String get name => 'compile_macos_framework';
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
@@ -247,7 +243,6 @@ class CompileMacOSFramework extends Target {
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
       buildMode: buildMode,
@@ -255,7 +250,7 @@ class CompileMacOSFramework extends Target {
       outputPath: environment.buildDir.path,
       platform: TargetPlatform.darwin_x64,
       darwinArch: DarwinArch.x86_64,
-      packagesPath: flutterProject.packagesFile.path
+      packagesPath: environment.projectDir.childFile('.packages').path,
     );
     if (result != 0) {
       throw Exception('gen shapshot failed.');
@@ -292,28 +287,28 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    Source.behavior(MacOSAssetBehavior())
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.behavior(MacOSAssetBehavior()),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.behavior(MacOSAssetBehavior()),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/App'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/Info.plist'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/LICENSE'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/App'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/Info.plist'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.json'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/LICENSE'),
   ];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-    final Directory frameworkRootDirectory = flutterProject.macos
-        .ephemeralDirectory
+    final Directory frameworkRootDirectory = environment
+        .outputDir
         .childDirectory('App.framework');
     final Directory outputDirectory = frameworkRootDirectory
         .childDirectory('Versions')
@@ -330,11 +325,6 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final Directory assetDirectory = outputDirectory
       .childDirectory('Resources')
       .childDirectory('flutter_assets');
-    // We're not smart enough to only remove assets that are removed. If
-    // anything changes blow away the whole directory.
-    if (assetDirectory.existsSync()) {
-      assetDirectory.deleteSync(recursive: true);
-    }
     assetDirectory.createSync(recursive: true);
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int result = await assetBundle.build(
@@ -346,7 +336,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     }
     // Limit number of open files to avoid running out of file descriptors.
     try {
-      final Pool pool = Pool(64);
+      final Pool pool = Pool(kMaxOpenFiles);
       await Future.wait<void>(
         assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
           final PoolResource resource = await pool.request();
@@ -420,8 +410,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       if (!currentVersion.existsSync()) {
         final String linkPath = fs.path.relative(outputDirectory.path,
             from: outputDirectory.parent.path);
-         print(linkPath);
-        currentVersion.createSync('$linkPath${fs.path.separator}');
+        currentVersion.createSync(linkPath);
       }
       // Create symlink to current resources.
       final Link currentResources = frameworkRootDirectory
@@ -429,7 +418,6 @@ abstract class MacOSBundleFlutterAssets extends Target {
       if (!currentResources.existsSync()) {
         final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'Resources'),
             from: frameworkRootDirectory.path);
-        print(linkPath);
         currentResources.createSync(linkPath);
       }
       // Create symlink to current binary.
@@ -438,12 +426,11 @@ abstract class MacOSBundleFlutterAssets extends Target {
       if (!currentFramework.existsSync()) {
         final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'App'),
             from: frameworkRootDirectory.path);
-         print(linkPath);
         currentFramework.createSync(linkPath);
       }
     } on FileSystemException {
       throw Exception('Failed to create symlinks for framework. try removing '
-        'the "${flutterProject.macos.ephemeralDirectory.path}" directory and rerunning');
+        'the "${environment.outputDir.path}" directory and rerunning');
     }
   }
 }
@@ -473,9 +460,9 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   @override
   List<Source> get outputs => <Source>[
     ...super.outputs,
-    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
-    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
-    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
   ];
 }
 

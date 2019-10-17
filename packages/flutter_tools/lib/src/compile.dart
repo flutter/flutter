@@ -15,6 +15,7 @@ import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
+import 'build_info.dart';
 import 'codegen.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -101,7 +102,6 @@ class StdoutHandler {
   bool _badState = false;
 
   void handler(String message) {
-    printTrace('-> $message');
     if (_badState) {
       return;
     }
@@ -239,6 +239,31 @@ class PackageUriMapper {
   }
 }
 
+List<String> _buildModeOptions(BuildMode mode) {
+  switch (mode) {
+    case BuildMode.debug:
+      return <String>[
+        '-Ddart.vm.profile=false',
+        '-Ddart.vm.product=false',
+        '--bytecode-options=source-positions,local-var-info,debugger-stops,instance-field-initializers,keep-unreachable-code,avoid-closure-call-instructions',
+        '--enable-asserts',
+      ];
+    case BuildMode.profile:
+      return <String>[
+        '-Ddart.vm.profile=true',
+        '-Ddart.vm.product=false',
+        '--bytecode-options=source-positions',
+      ];
+    case BuildMode.release:
+      return <String>[
+        '-Ddart.vm.profile=false',
+        '-Ddart.vm.product=true',
+        '--bytecode-options=source-positions',
+      ];
+  }
+  throw Exception('Unknown BuildMode: $mode');
+}
+
 class KernelCompiler {
   const KernelCompiler();
 
@@ -248,14 +273,15 @@ class KernelCompiler {
     String outputFilePath,
     String depFilePath,
     TargetModel targetModel = TargetModel.flutter,
+    @required BuildMode buildMode,
     bool linkPlatformKernelIn = false,
     bool aot = false,
+    bool causalAsyncStacks = true,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    bool targetProductVm = false,
     String initializeFromDill,
     String platformDill,
   }) async {
@@ -270,6 +296,15 @@ class KernelCompiler {
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
+    Uri mainUri;
+    if (packagesPath != null) {
+      mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
+    }
+    // TODO(jonahwilliams): The output file must already exist, but this seems
+    // unnecessary.
+    if (outputFilePath != null && !fs.isFileSync(outputFilePath)) {
+      fs.file(outputFilePath).createSync(recursive: true);
+    }
     final List<String> command = <String>[
       engineDartPath,
       frontendServer,
@@ -277,52 +312,46 @@ class KernelCompiler {
       sdkRoot,
       '--strong',
       '--target=$targetModel',
+      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
+      ..._buildModeOptions(buildMode),
+      if (trackWidgetCreation) '--track-widget-creation',
+      if (!linkPlatformKernelIn) '--no-link-platform',
+      if (aot) ...<String>[
+        '--aot',
+        '--tfa',
+      ],
+      if (packagesPath != null) ...<String>[
+        '--packages',
+        packagesPath,
+      ],
+      if (outputFilePath != null) ...<String>[
+        '--output-dill',
+        outputFilePath,
+      ],
+      if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) ...<String>[
+        '--depfile',
+        depFilePath,
+      ],
+      if (fileSystemRoots != null)
+        for (String root in fileSystemRoots) ...<String>[
+          '--filesystem-root',
+          root,
+        ],
+      if (fileSystemScheme != null) ...<String>[
+        '--filesystem-scheme',
+        fileSystemScheme,
+      ],
+      if (initializeFromDill != null) ...<String>[
+        '--initialize-from-dill',
+        initializeFromDill,
+      ],
+      if (platformDill != null) ...<String>[
+        '--platform',
+        platformDill,
+      ],
+      ...?extraFrontEndOptions,
+      mainUri?.toString() ?? mainPath,
     ];
-    if (trackWidgetCreation)
-      command.add('--track-widget-creation');
-    if (!linkPlatformKernelIn)
-      command.add('--no-link-platform');
-    if (aot) {
-      command.add('--aot');
-      command.add('--tfa');
-    }
-    // If we're not targeting product (release) mode and we're still aot, then
-    // target profile mode.
-    if (targetProductVm) {
-      command.add('-Ddart.vm.product=true');
-    } else if (aot) {
-      command.add('-Ddart.vm.profile=true');
-    }
-    Uri mainUri;
-    if (packagesPath != null) {
-      command.addAll(<String>['--packages', packagesPath]);
-      mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
-    }
-    if (outputFilePath != null) {
-      command.addAll(<String>['--output-dill', outputFilePath]);
-    }
-    if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
-      command.addAll(<String>['--depfile', depFilePath]);
-    }
-    if (fileSystemRoots != null) {
-      for (String root in fileSystemRoots) {
-        command.addAll(<String>['--filesystem-root', root]);
-      }
-    }
-    if (fileSystemScheme != null) {
-      command.addAll(<String>['--filesystem-scheme', fileSystemScheme]);
-    }
-    if (initializeFromDill != null) {
-      command.addAll(<String>['--initialize-from-dill', initializeFromDill]);
-    }
-    if (platformDill != null) {
-      command.addAll(<String>[ '--platform', platformDill]);
-    }
-
-    if (extraFrontEndOptions != null)
-      command.addAll(extraFrontEndOptions);
-
-    command.add(mainUri?.toString() ?? mainPath);
 
     printTrace(command.join(' '));
     final Process server = await processManager
@@ -419,6 +448,8 @@ class _RejectRequest extends _CompilationRequest {
 class ResidentCompiler {
   ResidentCompiler(
     this._sdkRoot, {
+    @required BuildMode buildMode,
+    bool causalAsyncStacks = true,
     bool trackWidgetCreation = false,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -429,6 +460,8 @@ class ResidentCompiler {
     bool unsafePackageSerialization,
     List<String> experimentalFlags,
   }) : assert(_sdkRoot != null),
+       _buildMode = buildMode,
+       _causalAsyncStacks = causalAsyncStacks,
        _trackWidgetCreation = trackWidgetCreation,
        _packagesPath = packagesPath,
        _fileSystemRoots = fileSystemRoots,
@@ -440,10 +473,13 @@ class ResidentCompiler {
        _unsafePackageSerialization = unsafePackageSerialization,
        _experimentalFlags = experimentalFlags {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
-    if (!_sdkRoot.endsWith('/'))
+    if (!_sdkRoot.endsWith('/')) {
       _sdkRoot = '$_sdkRoot/';
+    }
   }
 
+  final BuildMode _buildMode;
+  final bool _causalAsyncStacks;
   final bool _trackWidgetCreation;
   final String _packagesPath;
   final TargetModel _targetModel;
@@ -517,7 +553,6 @@ class ResidentCompiler {
     printTrace('<- recompile $mainUri$inputKey');
     for (Uri fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
-      printTrace('<- ${_mapFileUri(fileUri.toString(), packageUriMapper)}');
     }
     _server.stdin.writeln(inputKey);
     printTrace('<- $inputKey');
@@ -558,36 +593,37 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=$_targetModel',
+      '-Ddart.developer.causal_async_stacks=$_causalAsyncStacks',
+      if (outputPath != null) ...<String>[
+        '--output-dill',
+        outputPath,
+      ],
+      if (packagesFilePath != null) ...<String>[
+        '--packages',
+        packagesFilePath,
+      ] else if (_packagesPath != null) ...<String>[
+        '--packages',
+        _packagesPath,
+      ],
+      ..._buildModeOptions(_buildMode),
+      if (_trackWidgetCreation) '--track-widget-creation',
+      if (_fileSystemRoots != null)
+        for (String root in _fileSystemRoots) ...<String>[
+          '--filesystem-root',
+          root,
+        ],
+      if (_fileSystemScheme != null) ...<String>[
+        '--filesystem-scheme',
+        _fileSystemScheme,
+      ],
+      if (_initializeFromDill != null) ...<String>[
+        '--initialize-from-dill',
+        _initializeFromDill,
+      ],
+      if (_unsafePackageSerialization == true) '--unsafe-package-serialization',
+      if ((_experimentalFlags != null) && _experimentalFlags.isNotEmpty)
+        '--enable-experiment=${_experimentalFlags.join(',')}',
     ];
-    if (outputPath != null) {
-      command.addAll(<String>['--output-dill', outputPath]);
-    }
-    if (packagesFilePath != null) {
-      command.addAll(<String>['--packages', packagesFilePath]);
-    } else if (_packagesPath != null) {
-      command.addAll(<String>['--packages', _packagesPath]);
-    }
-    if (_trackWidgetCreation) {
-      command.add('--track-widget-creation');
-    }
-    if (_fileSystemRoots != null) {
-      for (String root in _fileSystemRoots) {
-        command.addAll(<String>['--filesystem-root', root]);
-      }
-    }
-    if (_fileSystemScheme != null) {
-      command.addAll(<String>['--filesystem-scheme', _fileSystemScheme]);
-    }
-    if (_initializeFromDill != null) {
-      command.addAll(<String>['--initialize-from-dill', _initializeFromDill]);
-    }
-    if (_unsafePackageSerialization == true) {
-      command.add('--unsafe-package-serialization');
-    }
-    if ((_experimentalFlags != null) && _experimentalFlags.isNotEmpty) {
-      final String expFlags = _experimentalFlags.join(',');
-      command.add('--enable-experiment=$expFlags');
-    }
     printTrace(command.join(' '));
     _server = await processManager.start(command);
     _server.stdout
@@ -646,8 +682,9 @@ class ResidentCompiler {
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.
-    if (_server == null)
+    if (_server == null) {
       return null;
+    }
 
     final String inputKey = Uuid().generateV4();
     _server.stdin.writeln('compile-expression $inputKey');
@@ -723,8 +760,9 @@ class ResidentCompiler {
   String _doMapFilename(String filename, PackageUriMapper packageUriMapper) {
     if (packageUriMapper != null) {
       final Uri packageUri = packageUriMapper.map(filename);
-      if (packageUri != null)
+      if (packageUri != null) {
         return packageUri.toString();
+      }
     }
 
     if (_fileSystemRoots != null) {

@@ -51,8 +51,14 @@ class CleanCommand extends FlutterCommand {
     final Directory iosEphemeralDirectory = flutterProject.ios.ephemeralDirectory;
     deleteFile(iosEphemeralDirectory);
 
+    final Directory linuxEphemeralDirectory = flutterProject.linux.ephemeralDirectory;
+    deleteFile(linuxEphemeralDirectory);
+
     final Directory macosEphemeralDirectory = flutterProject.macos.ephemeralDirectory;
     deleteFile(macosEphemeralDirectory);
+
+    final Directory windowsEphemeralDirectory = flutterProject.windows.ephemeralDirectory;
+    deleteFile(windowsEphemeralDirectory);
 
     return const FlutterCommandResult(ExitStatus.success);
   }

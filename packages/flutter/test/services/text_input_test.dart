@@ -88,44 +88,5 @@ void main() {
       expect(signed.hashCode == signedDecimal.hashCode, false);
       expect(decimal.hashCode == signedDecimal.hashCode, false);
     });
-
-    test('The framework TextInputConnection closes when the platform loses its input connection', () async {
-      // Assemble a TextInputConnection so we can verify its change in state.
-      final TextInputClient client = NoOpTextInputClient();
-      const TextInputConfiguration configuration = TextInputConfiguration();
-      final TextInputConnection textInputConnection = TextInput.attach(client, configuration);
-
-      // Verify that TextInputConnection think its attached to a client. This is
-      // an intermediate verification of expected state.
-      expect(textInputConnection.attached, true);
-
-      // Pretend that the platform has lost its input connection.
-      final ByteData messageBytes = const JSONMessageCodec().encodeMessage(
-          <String, dynamic>{
-            'args': <dynamic>[1],
-            'method': 'TextInputClient.onConnectionClosed',
-          }
-      );
-      ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/textinput',
-        messageBytes,
-        (ByteData _) {},
-      );
-
-      // Verify that textInputConnection no longer think its attached to an input
-      // connection. This is the critical verification of this test.
-      expect(textInputConnection.attached, false);
-    });
   });
-}
-
-class NoOpTextInputClient extends TextInputClient {
-  @override
-  void performAction(TextInputAction action) {}
-
-  @override
-  void updateEditingValue(TextEditingValue value) {}
-
-  @override
-  void updateFloatingCursor(RawFloatingCursorPoint point) {}
 }

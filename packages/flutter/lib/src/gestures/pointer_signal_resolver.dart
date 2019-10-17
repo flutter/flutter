@@ -49,7 +49,7 @@ class PointerSignalResolver {
     }
     assert((_currentEvent.original ?? _currentEvent) == event);
     try {
-    _firstRegisteredCallback(_currentEvent);
+      _firstRegisteredCallback(_currentEvent);
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,

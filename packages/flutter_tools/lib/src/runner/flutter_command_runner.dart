@@ -121,8 +121,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
               'Defaults to \$$kFlutterRootEnvironmentVariableName if set, otherwise uses the parent '
               'of the directory that the "flutter" script itself is in.');
 
-    if (verboseHelp)
+    if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
+    }
 
     argParser.addOption('local-engine-src-path',
         hide: !verboseHelp,
@@ -138,8 +139,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
               'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
               'This path is relative to --local-engine-src-path/out.');
 
-    if (verboseHelp)
+    if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
+    }
 
     argParser.addOption('record-to',
         hide: !verboseHelp,
@@ -179,11 +181,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   static String get defaultFlutterRoot {
-    if (platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
+    if (platform.environment.containsKey(kFlutterRootEnvironmentVariableName)) {
       return platform.environment[kFlutterRootEnvironmentVariableName];
+    }
     try {
-      if (platform.script.scheme == 'data')
+      if (platform.script.scheme == 'data') {
         return '../..'; // we're running as a test
+      }
 
       if (platform.script.scheme == 'package') {
         final String packageConfigPath = Uri.parse(platform.packageConfig).toFilePath();
@@ -191,16 +195,20 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
 
       final String script = platform.script.toFilePath();
-      if (fs.path.basename(script) == kSnapshotFileName)
+      if (fs.path.basename(script) == kSnapshotFileName) {
         return fs.path.dirname(fs.path.dirname(fs.path.dirname(script)));
-      if (fs.path.basename(script) == kFlutterToolsScriptFileName)
+      }
+      if (fs.path.basename(script) == kFlutterToolsScriptFileName) {
         return fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(script))));
+      }
 
       // If run from a bare script within the repo.
-      if (script.contains('flutter/packages/'))
+      if (script.contains('flutter/packages/')) {
         return script.substring(0, script.indexOf('flutter/packages/') + 8);
-      if (script.contains('flutter/examples/'))
+      }
+      if (script.contains('flutter/examples/')) {
         return script.substring(0, script.indexOf('flutter/examples/') + 8);
+      }
     } catch (error) {
       // we don't have a logger at the time this is run
       // (which is why we don't use printTrace here)
@@ -236,8 +244,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
   Future<void> run(Iterable<String> args) {
     // Have an invocation of 'build' print out it's sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
-    if (args.length == 1 && args.first == 'build')
+    if (args.length == 1 && args.first == 'build') {
       args = <String>['build', '-h'];
+    }
 
     return super.run(args);
   }
@@ -318,8 +327,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     if (recordTo != null) {
       recordTo = recordTo.trim();
-      if (recordTo.isEmpty)
+      if (recordTo.isEmpty) {
         throwToolExit(userMessages.runnerNoRecordTo);
+      }
       contextOverrides.addAll(<Type, dynamic>{
         ProcessManager: getRecordingProcessManager(recordTo),
         FileSystem: getRecordingFileSystem(recordTo),
@@ -330,8 +340,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     if (replayFrom != null) {
       replayFrom = replayFrom.trim();
-      if (replayFrom.isEmpty)
+      if (replayFrom.isEmpty) {
         throwToolExit(userMessages.runnerNoReplayFrom);
+      }
       contextOverrides.addAll(<Type, dynamic>{
         ProcessManager: await getReplayProcessManager(replayFrom),
         FileSystem: getReplayFileSystem(replayFrom),
@@ -360,11 +371,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
       body: () async {
         logger.quiet = topLevelResults['quiet'];
 
-        if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
+        if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
           await Cache.lock();
+        }
 
-        if (topLevelResults['suppress-analytics'])
+        if (topLevelResults['suppress-analytics']) {
           flutterUsage.suppressAnalytics = true;
+        }
 
         _checkFlutterCopy();
         try {
@@ -378,8 +391,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
           await FlutterVersion.instance.checkFlutterVersionFreshness();
         }
 
-        if (topLevelResults.wasParsed('packages'))
+        if (topLevelResults.wasParsed('packages')) {
           PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(topLevelResults['packages']));
+        }
 
         // See if the user specified a specific device.
         deviceManager.specifiedDeviceId = topLevelResults['device-id'];
@@ -405,8 +419,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   String _tryEnginePath(String enginePath) {
-    if (fs.isDirectorySync(fs.path.join(enginePath, 'out')))
+    if (fs.isDirectorySync(fs.path.join(enginePath, 'out'))) {
       return enginePath;
+    }
     return null;
   }
 
@@ -505,8 +520,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   static List<String> _gatherProjectPaths(String rootPath) {
-    if (fs.isFileSync(fs.path.join(rootPath, '.dartignore')))
+    if (fs.isFileSync(fs.path.join(rootPath, '.dartignore'))) {
       return <String>[];
+    }
 
 
     final List<String> projectPaths = fs.directory(rootPath)
@@ -519,8 +535,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
       })
       .toList();
 
-    if (fs.isFileSync(fs.path.join(rootPath, 'pubspec.yaml')))
+    if (fs.isFileSync(fs.path.join(rootPath, 'pubspec.yaml'))) {
       projectPaths.add(rootPath);
+    }
 
     return projectPaths;
   }
@@ -541,8 +558,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
 
       final String parent = fs.path.dirname(directory);
-      if (parent == directory)
+      if (parent == directory) {
         break;
+      }
       directory = parent;
     }
 

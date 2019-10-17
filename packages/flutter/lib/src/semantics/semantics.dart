@@ -197,6 +197,8 @@ class SemanticsData extends Diagnosticable {
     @required this.scrollExtentMax,
     @required this.scrollExtentMin,
     @required this.platformViewId,
+    @required this.maxValueLength,
+    @required this.currentValueLength,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -309,6 +311,26 @@ class SemanticsData extends Diagnosticable {
   ///  * [UiKitView], which is the platform view for iOS.
   final int platformViewId;
 
+  /// The maximum number of characters that can be entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [SemanticsFlag.isTextField] is set. Defaults
+  /// to null, which means no limit is imposed on the text field.
+  final int maxValueLength;
+
+  /// The current number of characters that have been entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [SemanticsFlag.isTextField] is set. This must
+  /// be set when [maxValueLength] is set.
+  final int currentValueLength;
+
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
 
@@ -363,22 +385,22 @@ class SemanticsData extends Diagnosticable {
     properties.add(TransformProperty('transform', transform, showName: false, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
-    final List<String> actionSummary = <String>[];
-    for (SemanticsAction action in SemanticsAction.values.values) {
-      if ((actions & action.index) != 0)
-        actionSummary.add(describeEnum(action));
-    }
+    final List<String> actionSummary = <String>[
+      for (SemanticsAction action in SemanticsAction.values.values)
+        if ((actions & action.index) != 0)
+          describeEnum(action),
+    ];
     final List<String> customSemanticsActionSummary = customSemanticsActionIds
       .map<String>((int actionId) => CustomSemanticsAction.getAction(actionId).label)
       .toList();
     properties.add(IterableProperty<String>('actions', actionSummary, ifEmpty: null));
     properties.add(IterableProperty<String>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
-    final List<String> flagSummary = <String>[];
-    for (SemanticsFlag flag in SemanticsFlag.values.values) {
-      if ((flags & flag.index) != 0)
-        flagSummary.add(describeEnum(flag));
-    }
+    final List<String> flagSummary = <String>[
+      for (SemanticsFlag flag in SemanticsFlag.values.values)
+        if ((flags & flag.index) != 0)
+          describeEnum(flag),
+    ];
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(StringProperty('label', label, defaultValue: ''));
     properties.add(StringProperty('value', value, defaultValue: ''));
@@ -389,6 +411,8 @@ class SemanticsData extends Diagnosticable {
     if (textSelection?.isValid == true)
       properties.add(MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
+    properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
+    properties.add(IntProperty('currentValueLength', currentValueLength, defaultValue: null));
     properties.add(IntProperty('scrollChildren', scrollChildCount, defaultValue: null));
     properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
@@ -418,6 +442,8 @@ class SemanticsData extends Diagnosticable {
         && typedOther.scrollExtentMax == scrollExtentMax
         && typedOther.scrollExtentMin == scrollExtentMin
         && typedOther.platformViewId == platformViewId
+        && typedOther.maxValueLength == maxValueLength
+        && typedOther.currentValueLength == currentValueLength
         && typedOther.transform == transform
         && typedOther.elevation == elevation
         && typedOther.thickness == thickness
@@ -445,10 +471,12 @@ class SemanticsData extends Diagnosticable {
         scrollExtentMax,
         scrollExtentMin,
         platformViewId,
+        maxValueLength,
+        currentValueLength,
         transform,
-        elevation,
-        thickness,
       ),
+      elevation,
+      thickness,
       ui.hashList(customSemanticsActionIds),
     );
   }
@@ -563,9 +591,11 @@ class SemanticsProperties extends DiagnosticableTree {
     this.selected,
     this.toggled,
     this.button,
+    this.link,
     this.header,
     this.textField,
     this.readOnly,
+    this.focusable,
     this.focused,
     this.inMutuallyExclusiveGroup,
     this.hidden,
@@ -575,6 +605,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.namesRoute,
     this.image,
     this.liveRegion,
+    this.maxValueLength,
+    this.currentValueLength,
     this.label,
     this.value,
     this.increasedValue,
@@ -640,6 +672,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// is focused.
   final bool button;
 
+  /// If non-null, indicates that this subtree represents a link.
+  ///
+  /// iOS's VoiceOver provides users with a unique hint when a link is focused.
+  /// Android's Talkback will announce a link hint the same way it does a
+  /// button.
+  final bool link;
+
   /// If non-null, indicates that this subtree represents a header.
   ///
   /// A header divides into sections. For example, an address book application
@@ -660,14 +699,25 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack/VoiceOver will treat it as non-editable text field.
   final bool readOnly;
 
+  /// If non-null, whether the node is able to hold input focus.
+  ///
+  /// If [focusable] is set to false, then [focused] must not be true.
+  ///
+  /// Input focus indicates that the node will receive keyboard events. It is not
+  /// to be confused with accessibility focus. Accessibility focus is the
+  /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
+  /// element it is reading, and is separate from input focus.
+  final bool focusable;
+
   /// If non-null, whether the node currently holds input focus.
   ///
-  /// At most one node in the tree should hold input focus at any point in time.
+  /// At most one node in the tree should hold input focus at any point in time,
+  /// and it should not be set to true if [focusable] is false.
   ///
-  /// Input focus (indicates that the node will receive keyboard events) is not
+  /// Input focus indicates that the node will receive keyboard events. It is not
   /// to be confused with accessibility focus. Accessibility focus is the
-  /// green/black rectangular that TalkBack/VoiceOver on the screen and is
-  /// separate from input focus.
+  /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
+  /// element it is reading, and is separate from input focus.
   final bool focused;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
@@ -759,6 +809,26 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
   ///  * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
   final bool liveRegion;
+
+  /// The maximum number of characters that can be entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [textField] is true. Defaults to null,
+  /// which means no limit is imposed on the text field.
+  final int maxValueLength;
+
+  /// The current number of characters that have been entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [textField] is true. Must be set when
+  /// [maxValueLength] is set.
+  final int currentValueLength;
 
   /// Provides a textual description of the widget.
   ///
@@ -1316,7 +1386,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
             ErrorSummary('Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.'),
             ErrorHint('Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'),
             ErrorDescription('Error details:'),
-            ...mutationErrors
+            ...mutationErrors,
           ]);
         }
       }
@@ -1512,6 +1582,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _actionsAsBits != config._actionsAsBits ||
         indexInParent != config.indexInParent ||
         platformViewId != config.platformViewId ||
+        _maxValueLength != config._maxValueLength ||
+        _currentValueLength != config._currentValueLength ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
 
@@ -1729,6 +1801,28 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   int get platformViewId => _platformViewId;
   int _platformViewId;
 
+  /// The maximum number of characters that can be entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [SemanticsFlag.isTextField] is set. Defaults
+  /// to null, which means no limit is imposed on the text field.
+  int get maxValueLength => _maxValueLength;
+  int _maxValueLength;
+
+  /// The current number of characters that have been entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [SemanticsFlag.isTextField] is set. Must be
+  /// set when [maxValueLength] is set.
+  int get currentValueLength => _currentValueLength;
+  int _currentValueLength;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
@@ -1779,6 +1873,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _scrollIndex = config.scrollIndex;
     indexInParent = config.indexInParent;
     _platformViewId = config._platformViewId;
+    _maxValueLength = config._maxValueLength;
+    _currentValueLength = config._currentValueLength;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
@@ -1814,6 +1910,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     double scrollExtentMax = _scrollExtentMax;
     double scrollExtentMin = _scrollExtentMin;
     int platformViewId = _platformViewId;
+    int maxValueLength = _maxValueLength;
+    int currentValueLength = _currentValueLength;
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
@@ -1849,6 +1947,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         scrollExtentMax ??= node._scrollExtentMax;
         scrollExtentMin ??= node._scrollExtentMin;
         platformViewId ??= node._platformViewId;
+        maxValueLength ??= node._maxValueLength;
+        currentValueLength ??= node._currentValueLength;
         if (value == '' || value == null)
           value = node._value;
         if (increasedValue == '' || increasedValue == null)
@@ -1919,6 +2019,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
       platformViewId: platformViewId,
+      maxValueLength: maxValueLength,
+      currentValueLength: currentValueLength,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
     );
   }
@@ -1975,6 +2077,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
       platformViewId: data.platformViewId ?? -1,
+      maxValueLength: data.maxValueLength ?? -1,
+      currentValueLength: data.currentValueLength ?? -1,
       scrollChildren: data.scrollChildCount ?? 0,
       scrollIndex: data.scrollIndex ?? 0 ,
       scrollPosition: data.scrollPosition ?? double.nan,
@@ -2118,6 +2222,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     if (_textSelection?.isValid == true)
       properties.add(MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
+    properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
+    properties.add(IntProperty('currentValueLength', currentValueLength, defaultValue: null));
     properties.add(IntProperty('scrollChildren', scrollChildCount, defaultValue: null));
     properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
@@ -3188,6 +3294,40 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// The maximum number of characters that can be entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [isTextField] is true. Defaults to null,
+  /// which means no limit is imposed on the text field.
+  int get maxValueLength => _maxValueLength;
+  int _maxValueLength;
+  set maxValueLength(int value) {
+    if (value == maxValueLength)
+      return;
+    _maxValueLength = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The current number of characters that have been entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [isTextField] is true. Must be set when
+  /// [maxValueLength] is set.
+  int get currentValueLength => _currentValueLength;
+  int _currentValueLength;
+  set currentValueLength(int value) {
+    if (value == currentValueLength)
+      return;
+    _currentValueLength = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the semantic information provided by the owning [RenderObject] and
   /// all of its descendants should be treated as one logical entity.
   ///
@@ -3483,7 +3623,13 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isInMutuallyExclusiveGroup, value);
   }
 
-  /// Whether the owning [RenderObject] currently holds the user's focus.
+  /// Whether the owning [RenderObject] can hold the input focus.
+  bool get isFocusable => _hasFlag(SemanticsFlag.isFocusable);
+  set isFocusable(bool value) {
+    _setFlag(SemanticsFlag.isFocusable, value);
+  }
+
+  /// Whether the owning [RenderObject] currently holds the input focus.
   bool get isFocused => _hasFlag(SemanticsFlag.isFocused);
   set isFocused(bool value) {
     _setFlag(SemanticsFlag.isFocused, value);
@@ -3493,6 +3639,12 @@ class SemanticsConfiguration {
   bool get isButton => _hasFlag(SemanticsFlag.isButton);
   set isButton(bool value) {
     _setFlag(SemanticsFlag.isButton, value);
+  }
+
+  /// Whether the owning [RenderObject] is a link (true) or not (false).
+  bool get isLink => _hasFlag(SemanticsFlag.isLink);
+  set isLink(bool value) {
+    _setFlag(SemanticsFlag.isLink, value);
   }
 
   /// Whether the owning [RenderObject] is a header (true) or not (false).
@@ -3690,6 +3842,12 @@ class SemanticsConfiguration {
     if (_platformViewId != null && other._platformViewId != null) {
       return false;
     }
+    if (_maxValueLength != null && other._maxValueLength != null) {
+      return false;
+    }
+    if (_currentValueLength != null && other._currentValueLength != null) {
+      return false;
+    }
     if (_value != null && _value.isNotEmpty && other._value != null && other._value.isNotEmpty)
       return false;
     return true;
@@ -3725,6 +3883,8 @@ class SemanticsConfiguration {
     _scrollIndex ??= child._scrollIndex;
     _scrollChildCount ??= child._scrollChildCount;
     _platformViewId ??= child._platformViewId;
+    _maxValueLength ??= child._maxValueLength;
+    _currentValueLength ??= child._currentValueLength;
 
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
@@ -3781,6 +3941,8 @@ class SemanticsConfiguration {
       .._scrollIndex = _scrollIndex
       .._scrollChildCount = _scrollChildCount
       .._platformViewId = _platformViewId
+      .._maxValueLength = _maxValueLength
+      .._currentValueLength = _currentValueLength
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions);
   }

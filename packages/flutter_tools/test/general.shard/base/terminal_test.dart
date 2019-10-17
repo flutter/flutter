@@ -151,7 +151,7 @@ void main() {
     });
 
     testUsingContext('default character choice without displayAcceptedCharacters', () async {
-       terminalUnderTest.usesTerminalUi = true;
+      terminalUnderTest.usesTerminalUi = true;
       mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
         Future<String>.value('\n'), // Not in accepted list
       ]).asBroadcastStream();

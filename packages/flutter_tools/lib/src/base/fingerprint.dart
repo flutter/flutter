@@ -61,15 +61,18 @@ class Fingerprinter {
     }
     try {
       final File fingerprintFile = fs.file(fingerprintPath);
-      if (!fingerprintFile.existsSync())
+      if (!fingerprintFile.existsSync()) {
         return false;
+      }
 
-      if (!_depfilePaths.every(fs.isFileSync))
+      if (!_depfilePaths.every(fs.isFileSync)) {
         return false;
+      }
 
       final List<String> paths = _getPaths();
-      if (!paths.every(fs.isFileSync))
+      if (!paths.every(fs.isFileSync)) {
         return false;
+      }
 
       final Fingerprint oldFingerprint = Fingerprint.fromJson(fingerprintFile.readAsStringSync());
       final Fingerprint newFingerprint = buildFingerprint();
@@ -110,8 +113,9 @@ class Fingerprint {
   Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
     final Iterable<File> files = inputPaths.map<File>(fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
-    if (missingInputs.isNotEmpty)
+    if (missingInputs.isNotEmpty) {
       throw ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
+    }
 
     _checksums = <String, String>{};
     for (File file in files) {
@@ -129,8 +133,9 @@ class Fingerprint {
     final Map<String, dynamic> content = json.decode(jsonData);
 
     final String version = content['version'];
-    if (version != FlutterVersion.instance.frameworkRevision)
+    if (version != FlutterVersion.instance.frameworkRevision) {
       throw ArgumentError('Incompatible fingerprint version: $version');
+    }
     _checksums = content['files']?.cast<String,String>() ?? <String, String>{};
     _properties = content['properties']?.cast<String,String>() ?? <String, String>{};
   }
@@ -146,10 +151,12 @@ class Fingerprint {
 
   @override
   bool operator==(dynamic other) {
-    if (identical(other, this))
+    if (identical(other, this)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     final Fingerprint typedOther = other;
     return _equalMaps(typedOther._checksums, _checksums)
         && _equalMaps(typedOther._properties, _properties);

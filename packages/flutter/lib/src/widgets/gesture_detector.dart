@@ -126,19 +126,41 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
 ///
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/gesture_detector.mp4}
+///
 /// {@tool sample}
 ///
-/// This example makes a rectangle react to being tapped by setting the
-/// `_lights` field:
+/// This example turns the light bulb yellow when the "turn lights on" button is
+/// tapped by setting the `_lights` field:
 ///
 /// ```dart
-/// GestureDetector(
-///   onTap: () {
-///     setState(() { _lights = true; });
-///   },
-///   child: Container(
-///     color: Colors.yellow,
-///     child: Text('TURN LIGHTS ON'),
+/// Container(
+///   alignment: FractionalOffset.center,
+///   color: Colors.white,
+///   child: Column(
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: <Widget>[
+///       Padding(
+///         padding: const EdgeInsets.all(8.0),
+///         child: Icon(
+///           Icons.lightbulb_outline,
+///           color: _lights ? Colors.yellow.shade600 : Colors.black,
+///           size: 60,
+///         ),
+///       ),
+///       GestureDetector(
+///         onTap: () {
+///           setState(() {
+///             _lights = true;
+///           });
+///         },
+///         child: Container(
+///           color: Colors.yellow.shade600,
+///           padding: const EdgeInsets.all(8),
+///           child: const Text('TURN LIGHTS ON'),
+///         ),
+///       ),
+///     ],
 ///   ),
 /// )
 /// ```

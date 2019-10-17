@@ -406,6 +406,8 @@ void main() {
         ),
       ),
     );
+
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
@@ -497,6 +499,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     // Base elevation
     Material material = tester.widget<Material>(rawButtonMaterial);
@@ -562,9 +565,10 @@ void main() {
             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
-              SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
               SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocusable,
             ],
           ),
         ],
@@ -602,12 +606,13 @@ void main() {
             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
-              SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
               SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocusable,
             ],
           ),
-        ]
+        ],
       ),
       ignoreId: true,
     ));
@@ -886,9 +891,10 @@ void main() {
               SemanticsAction.tap,
             ],
             flags: <SemanticsFlag>[
-              SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
               SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocusable,
             ],
           ),
         ],
@@ -917,8 +923,9 @@ void main() {
             transform: expectedButtonTransform,
             label: 'Button',
             flags: <SemanticsFlag>[
-              SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
+              SemanticsFlag.isFocusable,
             ],
           ),
         ],

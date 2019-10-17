@@ -39,7 +39,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
     await expectLater(
       find.byType(RepaintBoundary).first,

@@ -5,7 +5,6 @@
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/file_hash_store.dart';
-import 'package:flutter_tools/src/build_system/filecache.pb.dart' as pb;
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -18,6 +17,7 @@ void main() {
     testbed = Testbed(setup: () {
       fs.directory('build').createSync();
       environment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
       );
       environment.buildDir.createSync(recursive: true);
@@ -33,39 +33,52 @@ void main() {
 
     final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
-    final pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(buffer);
+    final FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files, isEmpty);
-    expect(fileStorage.version, 1);
+    expect(fileStorage.version, 2);
   }));
 
-  test('saves and restores to file cache', () => testbed.run(() {
+  test('saves and restores to file cache', () => testbed.run(() async {
     final File file = fs.file('foo.dart')
       ..createSync()
       ..writeAsStringSync('hello');
     final FileHashStore fileCache = FileHashStore(environment);
     fileCache.initialize();
-    fileCache.hashFiles(<File>[file]);
+    await fileCache.hashFiles(<File>[file]);
     fileCache.persist();
-    final String currentHash =  fileCache.currentHashes[file.resolveSymbolicLinksSync()];
+    final String currentHash =  fileCache.currentHashes[file.path];
     final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
-    pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(buffer);
+    FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
-    expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
+    expect(fileStorage.files.single.path, file.path);
 
 
     final FileHashStore newFileCache = FileHashStore(environment);
     newFileCache.initialize();
     expect(newFileCache.currentHashes, isEmpty);
-    expect(newFileCache.previousHashes[fs.path.absolute('foo.dart')],  currentHash);
+    expect(newFileCache.previousHashes['foo.dart'],  currentHash);
     newFileCache.persist();
 
     // Still persisted correctly.
-    fileStorage = pb.FileStorage.fromBuffer(buffer);
+    fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
-    expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
+    expect(fileStorage.files.single.path, file.path);
+  }));
+
+  test('handles persisting with a missing build directory', () => testbed.run(() async {
+    final File file = fs.file('foo.dart')
+      ..createSync()
+      ..writeAsStringSync('hello');
+    final FileHashStore fileCache = FileHashStore(environment);
+    fileCache.initialize();
+    environment.buildDir.deleteSync(recursive: true);
+
+    await fileCache.hashFiles(<File>[file]);
+    // Does not throw.
+    fileCache.persist();
   }));
 }

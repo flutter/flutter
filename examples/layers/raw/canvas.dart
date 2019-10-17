@@ -46,7 +46,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   // Clips the current transform
   canvas.clipRect(
     ui.Rect.fromLTRB(0, radius + 50, logicalSize.width, logicalSize.height),
-    clipOp: ui.ClipOp.difference
+    clipOp: ui.ClipOp.difference,
   );
 
   // Shifts the coordinate space of and rotates the current transform

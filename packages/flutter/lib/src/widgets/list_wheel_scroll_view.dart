@@ -263,15 +263,14 @@ class FixedExtentScrollController extends ScrollController {
       return;
     }
 
-    final List<Future<void>> futures = <Future<void>>[];
-    for (_FixedExtentScrollPosition position in positions) {
-      futures.add(position.animateTo(
-        itemIndex * position.itemExtent,
-        duration: duration,
-        curve: curve,
-      ));
-    }
-    await Future.wait<void>(futures);
+    await Future.wait<void>(<Future<void>>[
+      for (_FixedExtentScrollPosition position in positions)
+        position.animateTo(
+          itemIndex * position.itemExtent,
+          duration: duration,
+          curve: curve,
+        ),
+    ]);
   }
 
   /// Changes which item index is centered in the controlled scroll view.

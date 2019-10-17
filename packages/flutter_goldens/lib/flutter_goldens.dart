@@ -153,7 +153,7 @@ class FlutterGoldensRepositoryFileComparator extends FlutterGoldenFileComparator
       throw TestFailure('Could not be compared against non-existent file: "$golden"');
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    final ComparisonResult result = GoldenFileComparator.compareLists<Uint8List>(imageBytes, goldenBytes);
+    final ComparisonResult result = GoldenFileComparator.compareLists(imageBytes, goldenBytes);
     return result.passed;
   }
 

@@ -103,9 +103,9 @@ void main() {
               splashColor: const Color(0xffff0000),
               focusColor: const Color(0xff0000ff),
               highlightColor: const Color(0xf00fffff),
-              onTap: () {},
-              onLongPress: () {},
-              onHover: (bool hover) {}
+              onTap: () { },
+              onLongPress: () { },
+              onHover: (bool hover) { },
             ),
           ),
         ),
@@ -121,6 +121,42 @@ void main() {
   });
 
   testWidgets('ink response changes color on focus', (WidgetTester tester) async {
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                focusNode: focusNode,
+                hoverColor: const Color(0xff00ff00),
+                splashColor: const Color(0xffff0000),
+                focusColor: const Color(0xff0000ff),
+                highlightColor: const Color(0xf00fffff),
+                onTap: () { },
+                onLongPress: () { },
+                onHover: (bool hover) { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paints
+      ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+  });
+
+  testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(Material(
       child: Directionality(
@@ -132,13 +168,13 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                hoverColor: const Color(0xff00ff00),
-                splashColor: const Color(0xffff0000),
-                focusColor: const Color(0xff0000ff),
-                highlightColor: const Color(0xf00fffff),
-                onTap: () {},
-                onLongPress: () {},
-                onHover: (bool hover) {}
+                  hoverColor: const Color(0xff00ff00),
+                  splashColor: const Color(0xffff0000),
+                  focusColor: const Color(0xff0000ff),
+                  highlightColor: const Color(0xf00fffff),
+                  onTap: () { },
+                  onLongPress: () { },
+                  onHover: (bool hover) { },
               ),
             ),
           ),
@@ -150,8 +186,7 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints
-      ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
   });
 
   group('feedback', () {
@@ -171,8 +206,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
             ),
           ),
         ),
@@ -199,8 +234,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
               enableFeedback: false,
             ),
           ),
@@ -266,7 +301,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Material(
         child: InkWell(
-          onTap: () {},
+          onTap: () { },
           child: const Text('Button'),
         ),
       ),
@@ -277,7 +312,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Material(
         child: InkWell(
-          onTap: () {},
+          onTap: () { },
           child: const Text('Button'),
           excludeFromSemantics: true,
         ),

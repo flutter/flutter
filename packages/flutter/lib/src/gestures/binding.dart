@@ -252,7 +252,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     library: library,
     context: context,
     informationCollector: informationCollector,
-    silent: silent
+    silent: silent,
   );
 
   /// The pointer event that was being routed when the exception was raised.

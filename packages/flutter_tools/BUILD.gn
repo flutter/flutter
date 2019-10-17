@@ -43,6 +43,7 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/quiver",
     "//third_party/dart-pkg/pub/shelf_packages_handler",
     "//third_party/dart-pkg/pub/shelf_static",
+    "//third_party/dart-pkg/pub/shelf_proxy",
     "//third_party/dart-pkg/pub/stack_trace",
     "//third_party/dart-pkg/pub/test",
     "//third_party/dart-pkg/pub/usage",

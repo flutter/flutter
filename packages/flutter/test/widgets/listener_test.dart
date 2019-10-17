@@ -34,7 +34,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('X'));
@@ -58,7 +58,7 @@ void main() {
               events.add(event);
             },
             onPointerUp: (PointerUpEvent event) {
-            events.add(event);
+              events.add(event);
             },
             onPointerMove: (PointerMoveEvent event) {
               events.add(event);
@@ -352,6 +352,50 @@ void main() {
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
     });
+  });
+
+  testWidgets('RenderPointerListener\'s debugFillProperties when default', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    RenderPointerListener().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'parentData: MISSING',
+      'constraints: MISSING',
+      'size: MISSING',
+      'behavior: deferToChild',
+      'listeners: <none>',
+    ]);
+  });
+
+  testWidgets('RenderPointerListener\'s debugFillProperties when full', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    RenderPointerListener(
+      onPointerDown: (PointerDownEvent event) {},
+      onPointerUp: (PointerUpEvent event) {},
+      onPointerMove: (PointerMoveEvent event) {},
+      onPointerCancel: (PointerCancelEvent event) {},
+      onPointerSignal: (PointerSignalEvent event) {},
+      behavior: HitTestBehavior.opaque,
+      child: RenderErrorBox(),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'parentData: MISSING',
+      'constraints: MISSING',
+      'size: MISSING',
+      'behavior: opaque',
+      'listeners: down, move, up, cancel, signal',
+    ]);
   });
 }
 

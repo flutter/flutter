@@ -253,14 +253,14 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   }
 
   Future<Object> testExtension(String name, Map<String, String> arguments) async {
-    expect(extensions.containsKey(name), isTrue);
+    expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service
     // extension where only JSON is allowed.
     return json.decode(json.encode(await extensions[name](arguments)))['result'];
   }
 
   Future<String> testBoolExtension(String name, Map<String, String> arguments) async {
-    expect(extensions.containsKey(name), isTrue);
+    expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service
     // extension where only JSON is allowed.
     return json.decode(json.encode(await extensions[name](arguments)))['enabled'];
@@ -371,7 +371,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final InspectorSelection selection = getInspectorState().selection;
       expect(paragraphText(selection.current), equals('TOP'));
       final RenderObject topButton = find.byKey(topButtonKey).evaluate().first.renderObject;
-      expect(selection.candidates.contains(topButton), isTrue);
+      expect(selection.candidates, contains(topButton));
 
       await tester.tap(find.text('TOP'));
       expect(log, equals(<String>['top']));
@@ -906,7 +906,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         final List<DiagnosticsNode> children = node.getChildren();
         expect(children.length, 1);
         final ErrorDescription child = children[0];
-        expect(child.valueToString().contains(Uri.parse(pubRootTest).path), true);
+        expect(child.valueToString(), contains(Uri.parse(pubRootTest).path));
       } else {
         expect(nodes[2].runtimeType, ErrorDescription);
         final ErrorDescription node = nodes[2];
@@ -967,7 +967,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         final List<DiagnosticsNode> children = node.getChildren();
         expect(children.length, 1);
         final ErrorDescription child = children[0];
-        expect(child.valueToString().contains(Uri.parse(pubRootTest).path), true);
+        expect(child.valueToString(), contains(Uri.parse(pubRootTest).path));
       } else {
         expect(nodes[1].runtimeType, ErrorDescription);
         final ErrorDescription node = nodes[1];
@@ -1264,7 +1264,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         for (Map<String, Object> propertyJson in propertiesJson) {
           final Object property = service.toObject(propertyJson['objectId']);
           expect(property, isInstanceOf<DiagnosticsNode>());
-          expect(expectedProperties.contains(property), isTrue);
+          expect(expectedProperties, contains(property));
         }
       }
     });
@@ -1297,12 +1297,27 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         expect(service.toObject(childJson['valueId']), equals(children[i].value));
         expect(service.toObject(childJson['objectId']), isInstanceOf<DiagnosticsNode>());
         final List<Object> propertiesJson = childJson['properties'];
+        for (Map<String, Object> propertyJson in propertiesJson) {
+          expect(propertyJson, isNot(contains('children')));
+        }
         final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']);
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
         for (Map<String, Object> propertyJson in propertiesJson) {
           final Object property = service.toObject(propertyJson['objectId']);
           expect(property, isInstanceOf<DiagnosticsNode>());
-          expect(expectedProperties.contains(property), isTrue);
+          expect(expectedProperties, contains(property));
+        }
+      }
+
+      final Map<String, Object> deepSubtreeJson = await service.testExtension(
+        'getDetailsSubtree',
+        <String, String>{'arg': id, 'objectGroup': group, 'subtreeDepth': '3'},
+      );
+      final List<Object> deepChildrenJson = deepSubtreeJson['children'];
+      for(Map<String, Object> childJson in deepChildrenJson) {
+        final List<Object> propertiesJson = childJson['properties'];
+        for (Map<String, Object> propertyJson in propertiesJson) {
+          expect(propertyJson, contains('children'));
         }
       }
     });
@@ -1319,15 +1334,15 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final String id = service.toId(diagnostic, group);
       final Map<String, Object> subtreeJson = await service.testExtension('getDetailsSubtree', <String, String>{'arg': id, 'objectGroup': group});
       expect(subtreeJson['objectId'], equals(id));
-      expect(subtreeJson.containsKey('children'), isTrue);
+      expect(subtreeJson, contains('children'));
       final List<Object> propertiesJson = subtreeJson['properties'];
       expect(propertiesJson.length, equals(1));
       final Map<String, Object> relatedProperty = propertiesJson.first;
       expect(relatedProperty['name'], equals('related'));
       expect(relatedProperty['description'], equals('CyclicDiagnostic-b'));
-      expect(relatedProperty.containsKey('isDiagnosticableValue'), isTrue);
-      expect(relatedProperty.containsKey('children'), isFalse);
-      expect(relatedProperty.containsKey('properties'), isTrue);
+      expect(relatedProperty, contains('isDiagnosticableValue'));
+      expect(relatedProperty, isNot(contains('children')));
+      expect(relatedProperty, contains('properties'));
       final List<Object> relatedWidgetProperties = relatedProperty['properties'];
       expect(relatedWidgetProperties.length, equals(1));
       final Map<String, Object> nestedRelatedProperty = relatedWidgetProperties.first;
@@ -1336,9 +1351,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // which we already included as the root node as that would indicate a
       // cycle.
       expect(nestedRelatedProperty['description'], equals('CyclicDiagnostic-a'));
-      expect(nestedRelatedProperty.containsKey('isDiagnosticableValue'), isTrue);
-      expect(nestedRelatedProperty.containsKey('properties'), isFalse);
-      expect(nestedRelatedProperty.containsKey('children'), isFalse);
+      expect(nestedRelatedProperty, contains('isDiagnosticableValue'));
+      expect(nestedRelatedProperty, isNot(contains('properties')));
+      expect(nestedRelatedProperty, isNot(contains('children')));
     });
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
@@ -1682,7 +1697,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         final int count = data[i + 1];
         totalCount += count;
         maxCount = max(maxCount, count);
-        expect(knownLocations.containsKey(id), isTrue);
+        expect(knownLocations, contains(id));
       }
       expect(totalCount, equals(27));
       // The creation locations that were rebuilt the most were rebuilt 6 times
@@ -1701,7 +1716,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(event['startTime'], isInstanceOf<int>());
       data = event['events'];
       // No new locations were rebuilt.
-      expect(event.containsKey('newLocations'), isFalse);
+      expect(event, isNot(contains('newLocations')));
 
       // There were two rebuilds: one for the ClockText element itself and one
       // for its child.
@@ -1737,7 +1752,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(event['startTime'], isInstanceOf<int>());
       data = event['events'];
       // No new locations were rebuilt.
-      expect(event.containsKey('newLocations'), isFalse);
+      expect(event, isNot(contains('newLocations')));
 
       expect(data.length, equals(4));
       id = data[0];
@@ -1771,7 +1786,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(event['startTime'], isInstanceOf<int>());
       data = event['events'];
       // No new locations were rebuilt.
-      expect(event.containsKey('newLocations'), isFalse);
+      expect(event, isNot(contains('newLocations')));
 
       expect(data.length, equals(4));
       id = data[0];
@@ -1795,13 +1810,13 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       count = data[3];
       expect(count, equals(1));
       // Verify the rebuild location is new.
-      expect(knownLocations.containsKey(id), isFalse);
+      expect(knownLocations, isNot(contains(id)));
       addToKnownLocationsMap(
         knownLocations: knownLocations,
         newLocations: newLocations,
       );
       // Verify the rebuild location was included in the newLocations data.
-      expect(knownLocations.containsKey(id), isTrue);
+      expect(knownLocations, contains(id));
 
       // Turn off rebuild counts.
       expect(
@@ -1884,7 +1899,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         final int count = data[i + 1];
         totalCount += count;
         maxCount = max(maxCount, count);
-        expect(knownLocations.containsKey(id), isTrue);
+        expect(knownLocations, contains(id));
       }
       expect(totalCount, equals(34));
       // The creation locations that were rebuilt the most were rebuilt 6 times
@@ -1903,7 +1918,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(event['startTime'], isInstanceOf<int>());
       data = event['events'];
       // No new locations were rebuilt.
-      expect(event.containsKey('newLocations'), isFalse);
+      expect(event, isNot(contains('newLocations')));
 
       // Triggering a a rebuild of one widget in this app causes the whole app
       // to repaint.
@@ -2657,7 +2672,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         }
       }
       visitChildren(detailedChildren);
-      expect(appBars.single.containsKey('children'), isFalse);
+      expect(appBars.single, isNot(contains('children')));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
   }
 }

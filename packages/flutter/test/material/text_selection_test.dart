@@ -23,7 +23,7 @@ void main() {
           style: const TextStyle(),
           cursorColor: Colors.black,
           backgroundCursorColor: Colors.black,
-        )
+        ),
       );
     }
 

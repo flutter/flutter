@@ -175,7 +175,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool snippet --template=stateful_widget_scaffold}
+  /// {@tool snippet --template=stateful_widget_scaffold_center}
   ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
@@ -231,7 +231,7 @@ abstract class DeletableChipAttributes {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return Center(child: CastList());
+  ///   return CastList();
   /// }
   /// ```
   /// {@end-tool}
@@ -243,6 +243,38 @@ abstract class DeletableChipAttributes {
 
   /// The message to be used for the chip's delete button tooltip.
   String get deleteButtonTooltipMessage;
+}
+
+/// An interface for material design chips that can have check marks.
+///
+/// The defaults mentioned in the documentation for each attribute are what
+/// the implementing classes typically use for defaults (but this class doesn't
+/// provide or enforce them).
+///
+/// See also:
+///
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
+///  * [FilterChip], uses tags or descriptive words as a way to filter content.
+///  * <https://material.io/design/components/chips.html>
+abstract class CheckmarkableChipAttributes {
+  // This class is intended to be used as an interface, and should not be
+  // extended directly.
+  factory CheckmarkableChipAttributes._() => null;
+
+  /// Whether or not to show a check mark when [selected] is true.
+  ///
+  /// Defaults to true.
+  bool get showCheckmark;
+
+  /// [Color] of the chip's check mark when a check mark is visible.
+  ///
+  /// This will override the color set by the platform's brightness setting.
+  ///
+  /// If null, it will defer to a color selected by the platform's brightness
+  /// setting.
+  Color get checkmarkColor;
 }
 
 /// An interface for material design chips that can be selected.
@@ -640,6 +672,7 @@ class InputChip extends StatelessWidget
         ChipAttributes,
         DeletableChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
   /// Creates an [InputChip].
@@ -679,6 +712,8 @@ class InputChip extends StatelessWidget
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
+    this.showCheckmark,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(isEnabled != null),
@@ -742,6 +777,10 @@ class InputChip extends StatelessWidget
   @override
   final Color selectedShadowColor;
   @override
+  final bool showCheckmark;
+  @override
+  final Color checkmarkColor;
+  @override
   final ShapeBorder avatarBorder;
 
   @override
@@ -774,6 +813,8 @@ class InputChip extends StatelessWidget
       elevation: elevation,
       shadowColor: shadowColor,
       selectedShadowColor: selectedShadowColor,
+      showCheckmark: showCheckmark,
+      checkmarkColor: checkmarkColor,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
       avatarBorder: avatarBorder,
     );
@@ -1044,6 +1085,7 @@ class FilterChip extends StatelessWidget
     implements
         ChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
@@ -1072,6 +1114,8 @@ class FilterChip extends StatelessWidget
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
+    this.showCheckmark,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(label != null),
@@ -1122,6 +1166,10 @@ class FilterChip extends StatelessWidget
   @override
   final Color selectedShadowColor;
   @override
+  final bool showCheckmark;
+  @override
+  final Color checkmarkColor;
+  @override
   final ShapeBorder avatarBorder;
 
   @override
@@ -1152,6 +1200,8 @@ class FilterChip extends StatelessWidget
       elevation: elevation,
       shadowColor: shadowColor,
       selectedShadowColor: selectedShadowColor,
+      showCheckmark: showCheckmark,
+      checkmarkColor: checkmarkColor,
       avatarBorder: avatarBorder,
     );
   }
@@ -1333,6 +1383,7 @@ class RawChip extends StatefulWidget
         ChipAttributes,
         DeletableChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
   /// Creates a RawChip
@@ -1360,7 +1411,6 @@ class RawChip extends StatefulWidget
     this.pressElevation,
     this.tapEnabled = true,
     this.selected = false,
-    this.showCheckmark = true,
     this.isEnabled = true,
     this.disabledColor,
     this.selectedColor,
@@ -1374,6 +1424,8 @@ class RawChip extends StatefulWidget
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
+    this.showCheckmark = true,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(label != null),
        assert(isEnabled != null),
@@ -1438,15 +1490,11 @@ class RawChip extends StatefulWidget
   @override
   final Color selectedShadowColor;
   @override
-  final CircleBorder avatarBorder;
-
-  /// Whether or not to show a check mark when [selected] is true.
-  ///
-  /// For instance, the [ChoiceChip] sets this to false so that it can be
-  /// be selected without showing the check mark.
-  ///
-  /// Defaults to true.
   final bool showCheckmark;
+  @override
+  final Color checkmarkColor;
+  @override
+  final CircleBorder avatarBorder;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -1719,76 +1767,78 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
     final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? _defaultShadowColor;
     final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
+    final Color checkmarkColor = widget.checkmarkColor ?? chipTheme.checkmarkColor;
+    final bool showCheckmark = widget.showCheckmark ?? chipTheme.showCheckmark ?? true;
 
     final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
     final Color resolvedLabelColor =  MaterialStateProperty.resolveAs<Color>(effectiveLabelStyle?.color, _states);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle?.copyWith(color: resolvedLabelColor);
 
-    Widget result = Focus(
-      onFocusChange: _handleFocus,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      child: Material(
-        elevation: isTapping ? pressElevation : elevation,
-        shadowColor: widget.selected ? selectedShadowColor : shadowColor,
-        animationDuration: pressedAnimationDuration,
-        shape: shape,
-        clipBehavior: widget.clipBehavior,
-        child: InkWell(
-          onTap: canTap ? _handleTap : null,
-          onTapDown: canTap ? _handleTapDown : null,
-          onTapCancel: canTap ? _handleTapCancel : null,
-          onHover: canTap ? _handleHover : null,
-          customBorder: shape,
-          child: AnimatedBuilder(
-            animation: Listenable.merge(<Listenable>[selectController, enableController]),
-            builder: (BuildContext context, Widget child) {
-              return Container(
-                decoration: ShapeDecoration(
-                  shape: shape,
-                  color: getBackgroundColor(chipTheme),
-                ),
-                child: child,
-              );
-            },
-            child: _wrapWithTooltip(
-              widget.tooltip,
-              widget.onPressed,
-              _ChipRenderWidget(
-                theme: _ChipRenderTheme(
-                  label: DefaultTextStyle(
-                    overflow: TextOverflow.fade,
-                    textAlign: TextAlign.start,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: resolvedLabelStyle,
-                    child: widget.label,
-                  ),
-                  avatar: AnimatedSwitcher(
-                    child: widget.avatar,
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  deleteIcon: AnimatedSwitcher(
-                    child: _buildDeleteIcon(context, theme, chipTheme),
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  brightness: chipTheme.brightness,
-                  padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
-                  labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
-                  showAvatar: hasAvatar,
-                  showCheckmark: widget.showCheckmark,
-                  canTapBody: canTap,
-                ),
-                value: widget.selected,
-                checkmarkAnimation: checkmarkAnimation,
-                enableAnimation: enableAnimation,
-                avatarDrawerAnimation: avatarDrawerAnimation,
-                deleteDrawerAnimation: deleteDrawerAnimation,
-                isEnabled: widget.isEnabled,
-                avatarBorder: widget.avatarBorder,
+    Widget result = Material(
+      elevation: isTapping ? pressElevation : elevation,
+      shadowColor: widget.selected ? selectedShadowColor : shadowColor,
+      animationDuration: pressedAnimationDuration,
+      shape: shape,
+      clipBehavior: widget.clipBehavior,
+      child: InkWell(
+        onFocusChange: _handleFocus,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        canRequestFocus: widget.isEnabled,
+        onTap: canTap ? _handleTap : null,
+        onTapDown: canTap ? _handleTapDown : null,
+        onTapCancel: canTap ? _handleTapCancel : null,
+        onHover: canTap ? _handleHover : null,
+        customBorder: shape,
+        child: AnimatedBuilder(
+          animation: Listenable.merge(<Listenable>[selectController, enableController]),
+          builder: (BuildContext context, Widget child) {
+            return Container(
+              decoration: ShapeDecoration(
+                shape: shape,
+                color: getBackgroundColor(chipTheme),
               ),
+              child: child,
+            );
+          },
+          child: _wrapWithTooltip(
+            widget.tooltip,
+            widget.onPressed,
+            _ChipRenderWidget(
+              theme: _ChipRenderTheme(
+                label: DefaultTextStyle(
+                  overflow: TextOverflow.fade,
+                  textAlign: TextAlign.start,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: resolvedLabelStyle,
+                  child: widget.label,
+                ),
+                avatar: AnimatedSwitcher(
+                  child: widget.avatar,
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                deleteIcon: AnimatedSwitcher(
+                  child: _buildDeleteIcon(context, theme, chipTheme),
+                  duration: _kDrawerDuration,
+                  switchInCurve: Curves.fastOutSlowIn,
+                ),
+                brightness: chipTheme.brightness,
+                padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
+                labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
+                showAvatar: hasAvatar,
+                showCheckmark: showCheckmark,
+                checkmarkColor: checkmarkColor,
+                canTapBody: canTap,
+              ),
+              value: widget.selected,
+              checkmarkAnimation: checkmarkAnimation,
+              enableAnimation: enableAnimation,
+              avatarDrawerAnimation: avatarDrawerAnimation,
+              deleteDrawerAnimation: deleteDrawerAnimation,
+              isEnabled: widget.isEnabled,
+              avatarBorder: widget.avatarBorder,
             ),
           ),
         ),
@@ -2047,6 +2097,7 @@ class _ChipRenderTheme {
     @required this.labelPadding,
     @required this.showAvatar,
     @required this.showCheckmark,
+    @required this.checkmarkColor,
     @required this.canTapBody,
   });
 
@@ -2058,6 +2109,7 @@ class _ChipRenderTheme {
   final EdgeInsets labelPadding;
   final bool showAvatar;
   final bool showCheckmark;
+  final Color checkmarkColor;
   final bool canTapBody;
 
   @override
@@ -2077,6 +2129,7 @@ class _ChipRenderTheme {
         && typedOther.labelPadding == labelPadding
         && typedOther.showAvatar == showAvatar
         && typedOther.showCheckmark == showCheckmark
+        && typedOther.checkmarkColor == checkmarkColor
         && typedOther.canTapBody == canTapBody;
   }
 
@@ -2091,6 +2144,7 @@ class _ChipRenderTheme {
       labelPadding,
       showAvatar,
       showCheckmark,
+      checkmarkColor,
       canTapBody,
     );
   }
@@ -2583,13 +2637,17 @@ class _RenderChip extends RenderBox {
 
   void _paintCheck(Canvas canvas, Offset origin, double size) {
     Color paintColor;
-    switch (theme.brightness) {
-      case Brightness.light:
-        paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha);
-        break;
-      case Brightness.dark:
-        paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha);
-        break;
+    if (theme.checkmarkColor != null) {
+      paintColor = theme.checkmarkColor;
+    } else {
+      switch (theme.brightness) {
+        case Brightness.light:
+          paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha);
+          break;
+        case Brightness.dark:
+          paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha);
+          break;
+      }
     }
 
     final ColorTween fadeTween = ColorTween(begin: Colors.transparent, end: paintColor);
@@ -2716,23 +2774,22 @@ class _RenderChip extends RenderBox {
 
   @override
   void debugPaint(PaintingContext context, Offset offset) {
-    assert(!_debugShowTapTargetOutlines ||
-        () {
-          // Draws a rect around the tap targets to help with visualizing where
-          // they really are.
-          final Paint outlinePaint = Paint()
-            ..color = const Color(0xff800000)
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
-          if (deleteIconShowing) {
-            context.canvas.drawRect(deleteButtonRect.shift(offset), outlinePaint);
-          }
-          context.canvas.drawRect(
-            pressRect.shift(offset),
-            outlinePaint..color = const Color(0xff008000),
-          );
-          return true;
-        }());
+    assert(!_debugShowTapTargetOutlines || () {
+      // Draws a rect around the tap targets to help with visualizing where
+      // they really are.
+      final Paint outlinePaint = Paint()
+        ..color = const Color(0xff800000)
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      if (deleteIconShowing) {
+        context.canvas.drawRect(deleteButtonRect.shift(offset), outlinePaint);
+      }
+      context.canvas.drawRect(
+        pressRect.shift(offset),
+        outlinePaint..color = const Color(0xff008000),
+      );
+      return true;
+    }());
   }
 
   @override

@@ -91,12 +91,13 @@ class AnalysisServer {
         final dynamic params = response['params'];
 
         if (params is Map<dynamic, dynamic>) {
-          if (event == 'server.status')
+          if (event == 'server.status') {
             _handleStatus(response['params']);
-          else if (event == 'analysis.errors')
+          } else if (event == 'analysis.errors') {
             _handleAnalysisIssues(response['params']);
-          else if (event == 'server.error')
+          } else if (event == 'server.error') {
             _handleServerError(response['params']);
+          }
         }
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
@@ -135,8 +136,9 @@ class AnalysisServer {
         .map<Map<String, dynamic>>(castStringKeyedMap)
         .map<AnalysisError>((Map<String, dynamic> json) => AnalysisError(json))
         .toList();
-    if (!_errorsController.isClosed)
+    if (!_errorsController.isClosed) {
       _errorsController.add(FileAnalysisErrors(file, errors));
+    }
   }
 
   Future<bool> dispose() async {
@@ -203,15 +205,18 @@ class AnalysisError implements Comparable<AnalysisError> {
   @override
   int compareTo(AnalysisError other) {
     // Sort in order of file path, error location, severity, and message.
-    if (file != other.file)
+    if (file != other.file) {
       return file.compareTo(other.file);
+    }
 
-    if (offset != other.offset)
+    if (offset != other.offset) {
       return offset - other.offset;
+    }
 
     final int diff = other._severityLevel.index - _severityLevel.index;
-    if (diff != 0)
+    if (diff != 0) {
       return diff;
+    }
 
     return message.compareTo(other.message);
   }

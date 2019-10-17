@@ -866,7 +866,7 @@ void main() {
             ],
           ),
         ],
-      )
+      ),
     );
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 10.0)));
@@ -886,7 +886,7 @@ void main() {
             ],
           ),
         ],
-      )
+      ),
     );
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 30.0)));

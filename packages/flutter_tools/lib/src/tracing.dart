@@ -57,8 +57,9 @@ class Tracing {
             break;
           }
         }
-        if (!done)
+        if (!done) {
           await whenFirstFrameRendered.future;
+        }
       } catch (exception) {
         status.cancel();
         rethrow;
@@ -138,8 +139,9 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
     final int timeToFirstFrameMicros = firstFrameBuiltTimestampMicros - engineEnterTimestampMicros;
     traceInfo['timeToFirstFrameMicros'] = timeToFirstFrameMicros;
     message = 'Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.';
-    if (frameworkInitTimestampMicros != null)
+    if (frameworkInitTimestampMicros != null) {
       traceInfo['timeAfterFrameworkInitMicros'] = firstFrameBuiltTimestampMicros - frameworkInitTimestampMicros;
+    }
   }
 
   traceInfoFile.writeAsStringSync(toPrettyJson(traceInfo));

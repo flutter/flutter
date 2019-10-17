@@ -66,8 +66,9 @@ class VsCode {
         fs.path.join(installPath, 'resources', 'app', 'package.json');
     final String versionString = _getVersionFromPackageJson(packageJsonPath);
     Version version;
-    if (versionString != null)
+    if (versionString != null) {
       version = Version.parse(versionString);
+    }
     return VsCode._(installPath, extensionDirectory, version: version, edition: edition);
   }
 
@@ -86,15 +87,17 @@ class VsCode {
   Iterable<ValidationMessage> get validationMessages => _validationMessages;
 
   static List<VsCode> allInstalled() {
-    if (platform.isMacOS)
+    if (platform.isMacOS) {
       return _installedMacOS();
-    else if (platform.isWindows)
+    }
+    if (platform.isWindows) {
       return _installedWindows();
-    else if (platform.isLinux)
+    }
+    if (platform.isLinux) {
       return _installedLinux();
-    else
-      // VS Code isn't supported on the other platforms.
-      return <VsCode>[];
+    }
+    // VS Code isn't supported on the other platforms.
+    return <VsCode>[];
   }
 
   // macOS:
@@ -216,8 +219,9 @@ class VsCode {
       'VS Code ($version)${_extensionVersion != Version.unknown ? ', Flutter ($_extensionVersion)' : ''}';
 
   static String _getVersionFromPackageJson(String packageJsonPath) {
-    if (!fs.isFileSync(packageJsonPath))
+    if (!fs.isFileSync(packageJsonPath)) {
       return null;
+    }
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
     final Map<String, dynamic> jsonObject = json.decode(jsonString);
     return jsonObject['version'];

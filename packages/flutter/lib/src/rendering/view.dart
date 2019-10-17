@@ -74,7 +74,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The configuration is initially set by the `configuration` argument
   /// passed to the constructor.
   ///
-  /// Always call [scheduleInitialFrame] before changing the configuration.
+  /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     assert(value != null);
     if (configuration == value)
@@ -110,16 +110,28 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// Bootstrap the rendering pipeline by scheduling the first frame.
   ///
+  /// Deprecated. Call [prepareInitialFrame] followed by a call to
+  /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
+  @Deprecated('Call prepareInitialFrame followed by owner.requestVisualUpdate() instead.')
+  void scheduleInitialFrame() {
+    prepareInitialFrame();
+    owner.requestVisualUpdate();
+  }
+
+  /// Bootstrap the rendering pipeline by preparing the first frame.
+  ///
   /// This should only be called once, and must be called before changing
   /// [configuration]. It is typically called immediately after calling the
   /// constructor.
-  void scheduleInitialFrame() {
+  ///
+  /// This does not actually schedule the first frame. Call
+  /// [PipelineOwner.requestVisualUpdate] on [owner] to do that.
+  void prepareInitialFrame() {
     assert(owner != null);
     assert(_rootTransform == null);
     scheduleInitialLayout();
     scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
     assert(_rootTransform != null);
-    owner.requestVisualUpdate();
   }
 
   Matrix4 _rootTransform;
@@ -184,7 +196,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels
     // here.
-    return layer.findAll<MouseTrackerAnnotation>(position * configuration.devicePixelRatio);
+    return layer.findAll<MouseTrackerAnnotation>(
+      position * configuration.devicePixelRatio
+    ).annotations;
   }
 
   @override
@@ -229,12 +243,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     final Rect bounds = paintBounds;
     final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
     final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
-    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
+    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top)?.annotation;
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
+        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom)?.annotation;
         break;
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:

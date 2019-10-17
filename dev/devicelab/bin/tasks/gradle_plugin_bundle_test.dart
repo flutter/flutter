@@ -23,7 +23,7 @@ Future<void> main() async {
           'outputs',
           'bundle',
           'release',
-          'app.aab',
+          'app-release.aab',
         );
         checkItContains<String>(<String>[
           'base/manifest/AndroidManifest.xml',
@@ -54,7 +54,7 @@ Future<void> main() async {
           'outputs',
           'bundle',
           'productionRelease',
-          'app.aab',
+          'app-production-release.aab',
         );
         checkItContains<String>(<String>[
           'base/manifest/AndroidManifest.xml',
@@ -90,7 +90,7 @@ Future<void> main() async {
           'outputs',
           'bundle',
           'flavor_underscoreRelease',
-          'app.aab',
+          'app-flavor_underscore-release.aab',
         );
         checkItContains<String>(<String>[
           'base/manifest/AndroidManifest.xml',
@@ -125,7 +125,7 @@ Future<void> main() async {
           'outputs',
           'bundle',
           'productionRelease',
-          'app.aab',
+          'app-production-release.aab',
         );
         checkItContains<String>(<String>[
           'base/manifest/AndroidManifest.xml',
@@ -149,7 +149,7 @@ Future<void> main() async {
           'outputs',
           'bundle',
           'release',
-          'app.aab',
+          'app-release.aab',
         );
 
         final Iterable<String> bundleFiles = await getFilesInAppBundle(releaseBundle);

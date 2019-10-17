@@ -37,7 +37,8 @@ void main() {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
-      unawaited(runZoned<Future<void>>(() {
+      unawaited(runZoned<Future<void>>(
+        () {
           unawaited(runner.run(
             <String>['test'],
             <FlutterCommand>[
@@ -52,7 +53,8 @@ void main() {
         onError: (Object error) {
           expect(error, 'test exit');
           completer.complete();
-        }));
+        },
+      ));
       await completer.future;
 
       // This is the main check of this test.
@@ -69,6 +71,7 @@ void main() {
         'FLUTTER_ROOT': '/',
       }),
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Usage: () => CrashingUsage(),
     });
   });
@@ -134,13 +137,26 @@ class CrashingUsage implements Usage {
       _impl.sendCommand(command, parameters: parameters);
 
   @override
-  void sendEvent(String category, String parameter, {
-    Map<String, String> parameters
-  }) => _impl.sendEvent(category, parameter, parameters: parameters);
+  void sendEvent(
+    String category,
+    String parameter, {
+    String label,
+    int value,
+    Map<String, String> parameters,
+  }) => _impl.sendEvent(
+    category,
+    parameter,
+    label: label,
+    value: value,
+    parameters: parameters,
+  );
 
   @override
-  void sendTiming(String category, String variableName, Duration duration, {
-    String label
+  void sendTiming(
+    String category,
+    String variableName,
+    Duration duration, {
+    String label,
   }) => _impl.sendTiming(category, variableName, duration, label: label);
 
   @override

@@ -335,19 +335,21 @@ class FlutterDriverExtension {
   }
 
   Finder _createAncestorFinder(Ancestor arguments) {
-    return find.ancestor(
+    final Finder finder = find.ancestor(
       of: _createFinder(arguments.of),
       matching: _createFinder(arguments.matching),
       matchRoot: arguments.matchRoot,
     );
+    return arguments.firstMatchOnly ? finder.first : finder;
   }
 
   Finder _createDescendantFinder(Descendant arguments) {
-    return find.descendant(
+    final Finder finder = find.descendant(
       of: _createFinder(arguments.of),
       matching: _createFinder(arguments.matching),
       matchRoot: arguments.matchRoot,
     );
+    return arguments.firstMatchOnly ? finder.first : finder;
   }
 
   Finder _createFinder(SerializableFinder finder) {
@@ -426,7 +428,11 @@ class FlutterDriverExtension {
   Future<GetSemanticsIdResult> _getSemanticsId(Command command) async {
     final GetSemanticsId semanticsCommand = command;
     final Finder target = await _waitForElement(_createFinder(semanticsCommand.finder));
-    final Element element = target.evaluate().single;
+    final Iterable<Element> elements = target.evaluate();
+    if (elements.length > 1) {
+      throw StateError('Found more than one element with the same ID: $elements');
+    }
+    final Element element = elements.single;
     RenderObject renderObject = element.renderObject;
     SemanticsNode node;
     while (renderObject != null && node == null) {

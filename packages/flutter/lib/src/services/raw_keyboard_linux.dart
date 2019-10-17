@@ -113,7 +113,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 
   @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
-   return keyHelper.isModifierPressed(key, modifiers, side: side);
+    return keyHelper.isModifierPressed(key, modifiers, side: side);
   }
 
   @override
@@ -206,13 +206,13 @@ class GLFWKeyHelper with KeyHelper {
   bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any}) {
     switch (key) {
       case ModifierKey.controlModifier:
-      return modifiers & modifierControl != 0;
+        return modifiers & modifierControl != 0;
       case ModifierKey.shiftModifier:
-            return modifiers & modifierShift != 0;
+        return modifiers & modifierShift != 0;
       case ModifierKey.altModifier:
-            return modifiers & modifierAlt != 0;
+        return modifiers & modifierAlt != 0;
       case ModifierKey.metaModifier:
-            return modifiers & modifierMeta != 0;
+        return modifiers & modifierMeta != 0;
       case ModifierKey.capsLockModifier:
         return modifiers & modifierCapsLock != 0;
       case ModifierKey.numLockModifier:
@@ -233,15 +233,15 @@ class GLFWKeyHelper with KeyHelper {
       case ModifierKey.shiftModifier:
       case ModifierKey.altModifier:
       case ModifierKey.metaModifier:
-       // Neither GLFW or X11 provide a distinction between left and right modifiers, so defaults to KeyboardSide.any.
-       // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
-       return KeyboardSide.any;
+        // Neither GLFW or X11 provide a distinction between left and right modifiers, so defaults to KeyboardSide.any.
+        // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
+        return KeyboardSide.any;
       case ModifierKey.capsLockModifier:
       case ModifierKey.numLockModifier:
       case ModifierKey.functionModifier:
       case ModifierKey.symbolModifier:
       case ModifierKey.scrollLockModifier:
-       return KeyboardSide.all;
+        return KeyboardSide.all;
     }
     assert(false, 'Not handling $key type properly.');
     return null;
@@ -254,6 +254,6 @@ class GLFWKeyHelper with KeyHelper {
 
   @override
   LogicalKeyboardKey logicalKey(int keyCode) {
-      return kGlfwToLogicalKey[keyCode];
+    return kGlfwToLogicalKey[keyCode];
   }
 }

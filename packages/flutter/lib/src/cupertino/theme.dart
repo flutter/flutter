@@ -82,7 +82,7 @@ class CupertinoTheme extends StatelessWidget {
       child: IconTheme(
         data: IconThemeData(color: data.primaryColor),
         child: child,
-      )
+      ),
     );
   }
 }
@@ -248,7 +248,7 @@ class CupertinoThemeData extends Diagnosticable {
   /// It will be called in [CupertinoTheme.of].
   @protected
   CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
-    Color convertColor(Color color) => color == null ? null : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     return copyWith(
       primaryColor: convertColor(primaryColor),
@@ -329,9 +329,7 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
 
   @override
   _NoDefaultCupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
-    Color convertColor(Color color) => color == null
-      ? null
-      : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     return _NoDefaultCupertinoThemeData(
       brightness,
@@ -350,7 +348,7 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
     Color primaryContrastingColor,
     CupertinoTextThemeData textTheme,
     Color barBackgroundColor ,
-    Color scaffoldBackgroundColor
+    Color scaffoldBackgroundColor,
   }) {
     return _NoDefaultCupertinoThemeData(
       brightness ?? this.brightness,

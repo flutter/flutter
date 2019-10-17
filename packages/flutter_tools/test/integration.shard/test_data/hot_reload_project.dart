@@ -24,7 +24,7 @@ class HotReloadProject extends Project {
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
 
-  void main() => runApp(new MyApp());
+  void main() => runApp(MyApp());
 
   int count = 1;
 

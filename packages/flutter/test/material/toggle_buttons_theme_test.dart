@@ -25,6 +25,7 @@ void main() {
   test('ToggleButtonsThemeData defaults', () {
     const ToggleButtonsThemeData themeData = ToggleButtonsThemeData();
     expect(themeData.textStyle, null);
+    expect(themeData.constraints, null);
     expect(themeData.color, null);
     expect(themeData.selectedColor, null);
     expect(themeData.disabledColor, null);
@@ -41,6 +42,7 @@ void main() {
 
     const ToggleButtonsTheme theme = ToggleButtonsTheme(data: ToggleButtonsThemeData());
     expect(theme.data.textStyle, null);
+    expect(theme.data.constraints, null);
     expect(theme.data.color, null);
     expect(theme.data.selectedColor, null);
     expect(theme.data.disabledColor, null);
@@ -56,7 +58,7 @@ void main() {
     expect(theme.data.borderWidth, null);
   });
 
-   testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData().debugFillProperties(builder);
 
@@ -72,6 +74,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData(
       textStyle: TextStyle(fontSize: 10),
+      constraints: BoxConstraints(minHeight: 10.0, maxHeight: 20.0),
       color: Color(0xfffffff0),
       selectedColor: Color(0xfffffff1),
       disabledColor: Color(0xfffffff2),
@@ -87,14 +90,15 @@ void main() {
       borderWidth: 2.0,
     ).debugFillProperties(builder);
 
-     final List<String> description = builder.properties
+    final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-     expect(description, <String>[
+    expect(description, <String>[
       'textStyle.inherit: true',
       'textStyle.size: 10.0',
+      'constraints: BoxConstraints(0.0<=w<=Infinity, 10.0<=h<=20.0)',
       'color: Color(0xfffffff0)',
       'selectedColor: Color(0xfffffff1)',
       'disabledColor: Color(0xfffffff2)',
@@ -154,9 +158,93 @@ void main() {
     expect(textStyle.color, isNot(Colors.orange));
   });
 
+  testWidgets('Custom BoxConstraints', (WidgetTester tester) async {
+    // Test for minimum constraints
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            data: const ToggleButtonsThemeData(
+              constraints: BoxConstraints(
+                minWidth: 50.0,
+                minHeight: 60.0,
+              ),
+            ),
+            child: ToggleButtons(
+              isSelected: const <bool>[false, false, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Icon(Icons.check),
+                Icon(Icons.access_alarm),
+                Icon(Icons.cake),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Rect firstRect = tester.getRect(find.byType(RawMaterialButton).at(0));
+    expect(firstRect.width, 50.0);
+    expect(firstRect.height, 60.0);
+    Rect secondRect = tester.getRect(find.byType(RawMaterialButton).at(1));
+    expect(secondRect.width, 50.0);
+    expect(secondRect.height, 60.0);
+    Rect thirdRect = tester.getRect(find.byType(RawMaterialButton).at(2));
+    expect(thirdRect.width, 50.0);
+    expect(thirdRect.height, 60.0);
+
+    // Test for maximum constraints
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            data: const ToggleButtonsThemeData(
+              constraints: BoxConstraints(
+                maxWidth: 20.0,
+                maxHeight: 10.0,
+              ),
+            ),
+            child: ToggleButtons(
+              isSelected: const <bool>[false, false, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Icon(Icons.check),
+                Icon(Icons.access_alarm),
+                Icon(Icons.cake),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    firstRect = tester.getRect(find.byType(RawMaterialButton).at(0));
+    expect(firstRect.width, 20.0);
+    expect(firstRect.height, 10.0);
+    secondRect = tester.getRect(find.byType(RawMaterialButton).at(1));
+    expect(secondRect.width, 20.0);
+    expect(secondRect.height, 10.0);
+    thirdRect = tester.getRect(find.byType(RawMaterialButton).at(2));
+    expect(thirdRect.width, 20.0);
+    expect(thirdRect.height, 10.0);
+  });
+
   testWidgets(
     'Theme text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
+      TextStyle buttonTextStyle(String text) {
+        return tester.widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(RawMaterialButton, text),
+          matching: find.byType(DefaultTextStyle),
+        )).style;
+      }
+      IconTheme iconTheme(IconData icon) {
+        return tester.widget(find.descendant(
+          of: find.widgetWithIcon(RawMaterialButton, icon),
+          matching: find.byType(IconTheme),
+        ));
+      }
       final ThemeData theme = ThemeData();
       const Color enabledColor = Colors.lime;
       const Color selectedColor = Colors.green;
@@ -184,20 +272,10 @@ void main() {
           ),
         ),
       );
-
-      DefaultTextStyle textStyle;
-      IconTheme iconTheme;
-
-      // custom theme enabled color
+      // Custom theme enabled color
       expect(theme.colorScheme.onSurface, isNot(enabledColor));
-      textStyle = tester.firstWidget<DefaultTextStyle>(
-        find.widgetWithText(DefaultTextStyle, 'First child'),
-      );
-      expect(textStyle.style.color, enabledColor);
-      iconTheme = tester.firstWidget<IconTheme>(
-        find.widgetWithIcon(IconTheme, Icons.check),
-      );
-      expect(iconTheme.data.color, enabledColor);
+      expect(buttonTextStyle('First child').color, enabledColor);
+      expect(iconTheme(Icons.check).data.color, enabledColor);
 
       await tester.pumpWidget(
         Material(
@@ -222,16 +300,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      // custom theme selected color
+      // Custom theme selected color
       expect(theme.colorScheme.primary, isNot(selectedColor));
-      textStyle = tester.firstWidget<DefaultTextStyle>(
-        find.widgetWithText(DefaultTextStyle, 'First child'),
-      );
-      expect(textStyle.style.color, selectedColor);
-      iconTheme = tester.firstWidget<IconTheme>(
-        find.widgetWithIcon(IconTheme, Icons.check),
-      );
-      expect(iconTheme.data.color, selectedColor);
+      expect(buttonTextStyle('First child').color, selectedColor);
+      expect(iconTheme(Icons.check).data.color, selectedColor);
 
       await tester.pumpWidget(
         Material(
@@ -255,16 +327,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      // custom theme disabled color
+      // Custom theme disabled color
       expect(theme.disabledColor, isNot(disabledColor));
-      textStyle = tester.firstWidget<DefaultTextStyle>(
-        find.widgetWithText(DefaultTextStyle, 'First child'),
-      );
-      expect(textStyle.style.color, disabledColor);
-      iconTheme = tester.firstWidget<IconTheme>(
-        find.widgetWithIcon(IconTheme, Icons.check),
-      );
-      expect(iconTheme.data.color, disabledColor);
+      expect(buttonTextStyle('First child').color, disabledColor);
+      expect(iconTheme(Icons.check).data.color, disabledColor);
     },
   );
 
@@ -289,12 +355,10 @@ void main() {
       ),
     );
 
-    final Material material = tester.firstWidget<Material>(
-      find.descendant(
-        of: find.byType(RawMaterialButton),
-        matching: find.byType(Material),
-      ),
-    );
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(RawMaterialButton),
+      matching: find.byType(Material),
+    ));
     expect(material.color, customFillColor);
     expect(material.type, MaterialType.button);
   });

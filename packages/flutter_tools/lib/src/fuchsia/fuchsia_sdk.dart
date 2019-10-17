@@ -61,8 +61,7 @@ class FuchsiaSdk {
   Stream<String> syslogs(String id) {
     Process process;
     try {
-      final StreamController<String> controller =
-          StreamController<String>(onCancel: () {
+      final StreamController<String> controller = StreamController<String>(onCancel: () {
         process.kill();
       });
       if (fuchsiaArtifacts.sshConfig == null ||
@@ -77,7 +76,7 @@ class FuchsiaSdk {
         '-F',
         fuchsiaArtifacts.sshConfig.absolute.path,
         id,
-        remoteCommand
+        remoteCommand,
       ];
       processManager.start(cmd).then((Process newProcess) {
         if (controller.isClosed) {

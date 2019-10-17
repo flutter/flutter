@@ -71,7 +71,7 @@ Future<Process> _run({@required Device device, @required List<String> command, @
   await inDirectory(appDir, () async {
   runner = await startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['--suppress-analytics', '-d', device.deviceId] + command,
+      <String>['--suppress-analytics', '-d', device.deviceId, ...command],
       isBot: false, // we just want to test the output, not have any debugging info
     );
     final StreamController<String> stdout = StreamController<String>.broadcast();

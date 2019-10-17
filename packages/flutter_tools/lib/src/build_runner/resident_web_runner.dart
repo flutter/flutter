@@ -4,13 +4,15 @@
 
 import 'dart:async';
 
-import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../application_package.dart';
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -19,7 +21,10 @@ import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../resident_runner.dart';
+import '../web/chrome.dart';
+import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'web_fs.dart';
 
@@ -31,7 +36,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     String target,
     @required FlutterProject flutterProject,
     @required bool ipv6,
-    @required DebuggingOptions debuggingOptions
+    @required DebuggingOptions debuggingOptions,
   }) {
     return ResidentWebRunner(
       device,
@@ -43,11 +48,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   }
 }
 
-// TODO(jonahwilliams): remove this constant when the error message is removed.
-// The web engine is currently spamming this message on certain pages. Filter it out
-// until we remove it entirely. See flutter/flutter##37625.
-const String _kBadError = 'WARNING: 3D transformation matrix was passed to BitmapCanvas.';
-
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(this.device, {
@@ -57,7 +57,7 @@ class ResidentWebRunner extends ResidentRunner {
     @required DebuggingOptions debuggingOptions,
   }) : super(
           <FlutterDevice>[],
-          target: target,
+          target: target ?? fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: true,
@@ -68,13 +68,17 @@ class ResidentWebRunner extends ResidentRunner {
 
   // Only the debug builds of the web support the service protocol.
   @override
-  bool get supportsServiceProtocol => isRunningDebug;
+  bool get supportsServiceProtocol => isRunningDebug && device is! WebServerDevice;
+
+  @override
+  bool get debuggingEnabled => isRunningDebug && device is! WebServerDevice;
 
   WebFs _webFs;
-  DebugConnection _debugConnection;
+  ConnectionResult _connectionResult;
   StreamSubscription<vmservice.Event> _stdOutSub;
+  bool _exited = false;
 
-  vmservice.VmService get _vmService => _debugConnection.vmService;
+  vmservice.VmService get _vmService => _connectionResult?.debugConnection?.vmService;
 
   @override
   bool get canHotRestart {
@@ -101,9 +105,13 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   Future<void> _cleanup() async {
-    await _debugConnection?.close();
+    if (_exited) {
+      return;
+    }
     await _stdOutSub?.cancel();
     await _webFs?.stop();
+    await device.stopApp(null);
+    _exited = true;
   }
 
   @override
@@ -113,7 +121,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
     const String fire = '🔥';
     const String rawMessage =
-        '  To hot restart (and rebuild state), press "R".';
+        '  To hot restart (and rebuild state), press "r" or "R".';
     final String message = terminal.color(
       fire + terminal.bolden(rawMessage),
       TerminalColor.red,
@@ -141,7 +149,7 @@ class ResidentWebRunner extends ResidentRunner {
     );
     if (package == null) {
       printError('No application found for TargetPlatform.web_javascript.');
-      printError('To add web support to a project, run `flutter create --web .`.');
+      printError('To add web support to a project, run `flutter create .`.');
       return 1;
     }
     if (!fs.isFileSync(mainPath)) {
@@ -153,30 +161,78 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
+    final String modeName = debuggingOptions.buildInfo.friendlyModeName;
+    printStatus('Launching ${getDisplayPath(target)} on ${device.name} in $modeName mode...');
     Status buildStatus;
+    bool statusActive = false;
     try {
+      // dwds does not handle uncaught exceptions from its servers. To work
+      // around this, we need to catch all uncaught exceptions and determine if
+      // they are fatal or not.
       buildStatus = logger.startProgress('Building application for the web...', timeout: null);
-      _webFs = await webFsFactory(
-        target: target,
-        flutterProject: flutterProject,
-        buildInfo: debuggingOptions.buildInfo,
-      );
-      if (supportsServiceProtocol) {
-        _debugConnection = await _webFs.runAndDebug();
-        unawaited(_debugConnection.onDone.whenComplete(exit));
+      statusActive = true;
+      final int result = await asyncGuard(() async {
+        _webFs = await webFsFactory(
+          target: target,
+          flutterProject: flutterProject,
+          buildInfo: debuggingOptions.buildInfo,
+          initializePlatform: debuggingOptions.initializePlatform,
+          hostname: debuggingOptions.hostname,
+          port: debuggingOptions.port,
+          skipDwds: device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
+        );
+        // When connecting to a browser, update the message with a seemsSlow notification
+        // to handle the case where we fail to connect.
+        buildStatus.stop();
+        statusActive = false;
+        if (debuggingOptions.browserLaunch && supportsServiceProtocol) {
+          buildStatus = logger.startProgress(
+            'Attempting to connect to browser instance..',
+            timeout: const Duration(seconds: 30),
+          );
+          statusActive = true;
+        }
+        await device.startApp(package,
+          mainPath: target,
+          debuggingOptions: debuggingOptions,
+          platformArgs: <String, Object>{
+            'uri': _webFs.uri,
+          },
+        );
+        if (supportsServiceProtocol) {
+          _connectionResult = await _webFs.connect(debuggingOptions);
+          unawaited(_connectionResult.debugConnection.onDone.whenComplete(() => exit(0)));
+        }
+        if (statusActive) {
+          buildStatus.stop();
+          statusActive = false;
+        }
+        appStartedCompleter?.complete();
+        return attach(
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+        );
+      });
+      return result;
+    } on WebSocketException {
+      throwToolExit('Failed to connect to WebSocket.');
+    } on BuildException {
+      throwToolExit('Failed to build application for the Web.');
+    } on SocketException catch (err) {
+      throwToolExit(err.toString());
+    } on StateError catch (err) {
+      // Handle known state error.
+      final String message = err.toString();
+      if (message.contains('Could not connect to application with appInstanceId')) {
+        throwToolExit(message);
       }
-    } catch (err, stackTrace) {
-      printError(err.toString());
-      printError(stackTrace.toString());
-      throwToolExit('Failed to build application for the web.');
+      rethrow;
     } finally {
-      buildStatus.stop();
+      if (statusActive) {
+        buildStatus.stop();
+      }
     }
-    appStartedCompleter?.complete();
-    return attach(
-      connectionInfoCompleter: connectionInfoCompleter,
-      appStartedCompleter: appStartedCompleter,
-    );
+    return 1;
   }
 
   @override
@@ -184,31 +240,31 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async {
-    // Cleanup old subscriptions. These will throw if there isn't anything
-    // listening, which is fine because that is what we want to ensure.
-    try {
-      await _debugConnection?.vmService?.streamCancel('Stdout');
-    } on vmservice.RPCError {
-      // Ignore this specific error.
-    }
-    try {
-      await _debugConnection?.vmService?.streamListen('Stdout');
-    } on vmservice.RPCError  {
-      // Ignore this specific error.
-    }
     Uri websocketUri;
     if (supportsServiceProtocol) {
-      _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
+      // Cleanup old subscriptions. These will throw if there isn't anything
+      // listening, which is fine because that is what we want to ensure.
+      try {
+        await _vmService.streamCancel('Stdout');
+      } on vmservice.RPCError {
+        // Ignore this specific error.
+      }
+      try {
+        await _vmService.streamListen('Stdout');
+      } on vmservice.RPCError  {
+        // Ignore this specific error.
+      }
+      _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
         final String message = utf8.decode(base64.decode(log.bytes)).trim();
-        // TODO(jonahwilliams): remove this error once it is gone from the engine #37625.
-        if (!message.contains(_kBadError)) {
-          printStatus(message);
-        }
+        printStatus(message);
       });
-      websocketUri = Uri.parse(_debugConnection.uri);
+      unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
+      websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
+      // Always run main after connecting because start paused doesn't work yet.
+      _connectionResult.appConnection.runMain();
     }
     if (websocketUri != null) {
-      printStatus('Debug service listening on $websocketUri.');
+      printStatus('Debug service listening on $websocketUri');
     }
     connectionInfoCompleter?.complete(
       DebugConnectionInfo(wsUri: websocketUri)
@@ -225,9 +281,6 @@ class ResidentWebRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
-    if (!fullRestart) {
-      return OperationResult(1, 'hot reload not supported on the web.');
-    }
     final Stopwatch timer = Stopwatch()..start();
     final Status status = logger.startProgress(
       'Performing hot restart...',
@@ -242,22 +295,51 @@ class ResidentWebRunner extends ResidentRunner {
       return OperationResult(1, 'Failed to recompile application.');
     }
     if (supportsServiceProtocol) {
+      // Send an event for only recompilation.
+      final Duration recompileDuration = timer.elapsed;
+      flutterUsage.sendTiming('hot', 'web-recompile', recompileDuration);
       try {
         final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
         printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        return reloadResponse.type == 'Success'
-            ? OperationResult.ok
-            : OperationResult(1, reloadResponse.toString());
+
+        // Send timing analytics for full restart and for refresh.
+        final bool wasSuccessful = reloadResponse.type == 'Success';
+        if (!wasSuccessful) {
+          return OperationResult(1, reloadResponse.toString());
+        }
+        flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
+        flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+        return OperationResult.ok;
       } on vmservice.RPCError {
-        await _webFs.hardRefresh();
-        return OperationResult(1, 'Page requires full reload');
+        return OperationResult(1, 'Page requires refresh.');
       } finally {
         status.stop();
+        HotEvent('restart',
+          targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
+          sdkName: await device.sdkNameAndVersion,
+          emulator: false,
+          fullRestart: true,
+          reason: reason,
+        ).send();
       }
     }
-    // If we're not in hot mode, the only way to restart is to reload the tab.
-    await _webFs.hardRefresh();
+    // Allows browser refresh hot restart on non-debug builds.
+    if (device is ChromeDevice && debuggingOptions.browserLaunch) {
+      try {
+        final Chrome chrome = await ChromeLauncher.connectedInstance;
+        final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+          return chromeTab.url.contains(debuggingOptions.hostname);
+        });
+        final WipConnection wipConnection = await chromeTab.connect();
+        await wipConnection.sendCommand('Page.reload');
+        status.stop();
+        return OperationResult.ok;
+      } catch (err) {
+        // Ignore error and continue with posted message;
+      }
+    }
     status.stop();
+    printStatus('Recompile complete. Page requires refresh.');
     return OperationResult.ok;
   }
 

@@ -7,201 +7,82 @@ import 'dart:async';
 import 'dart:io' as io; // ignore: dart_io_import
 
 import 'package:build/build.dart';
+import 'package:build_daemon/client.dart';
+import 'package:build_daemon/data/build_status.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
-import 'package:build_runner_core/src/asset_graph/graph.dart';
-import 'package:build_runner_core/src/asset_graph/node.dart';
-import 'package:build_runner_core/src/generate/build_impl.dart';
-import 'package:build_runner_core/src/generate/options.dart';
 import 'package:glob/glob.dart';
-import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:watcher/watcher.dart';
 
-import '../artifacts.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
-import '../compile.dart';
+import '../build_info.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
-import '../globals.dart';
+import '../platform_plugins.dart';
+import '../plugins.dart';
+import '../project.dart';
 import '../web/compile.dart';
-import 'build_script.dart';
+import 'web_fs.dart';
 
 /// A build_runner specific implementation of the [WebCompilationProxy].
 class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   BuildRunnerWebCompilationProxy();
 
-  core.PackageGraph _packageGraph;
-  BuildImpl _builder;
-  PackageUriMapper _packageUriMapper;
-
   @override
   Future<bool> initialize({
     Directory projectDirectory,
     String testOutputDir,
-    bool release = false,
+    BuildMode mode,
+    String projectName,
+    bool initializePlatform,
   }) async {
     // Create the .dart_tool directory if it doesn't exist.
-    projectDirectory.childDirectory('.dart_tool').createSync();
-    final Directory generatedDirectory = projectDirectory
+    projectDirectory
       .childDirectory('.dart_tool')
-      .childDirectory('build')
-      .childDirectory('generated');
-
-    // Override the generated output directory so this does not conflict with
-    // other build_runner output.
-    core.overrideGeneratedOutputDirectory('flutter_web');
-    _packageUriMapper = PackageUriMapper(
-        path.absolute('lib/main.dart'), PackageMap.globalPackagesPath, null, null);
-    _packageGraph = core.PackageGraph.forPath(projectDirectory.path);
-    final core.BuildEnvironment buildEnvironment = core.OverrideableEnvironment(
-        core.IOEnvironment(_packageGraph), onLog: (LogRecord record) {
-      if (record.level == Level.SEVERE || record.level == Level.SHOUT) {
-        printError(record.message);
-      } else {
-        printTrace(record.message);
-      }
-    }, reader: MultirootFileBasedAssetReader(_packageGraph, generatedDirectory));
-    final LogSubscription logSubscription = LogSubscription(
-      buildEnvironment,
-      verbose: false,
-      logLevel: Level.FINE,
-    );
-    final BuildOptions buildOptions = await BuildOptions.create(
-      logSubscription,
-      packageGraph: _packageGraph,
-      skipBuildScriptCheck: true,
-      trackPerformance: false,
-      deleteFilesByDefault: true,
-      enableLowResourcesMode: platform.environment['FLUTTER_LOW_RESOURCE_MODE']?.toLowerCase() == 'true',
-    );
-    final Set<core.BuildDirectory> buildDirs = <core.BuildDirectory>{
-      if (testOutputDir != null)
-        core.BuildDirectory(
-          'test',
-          outputLocation: core.OutputLocation(
-            testOutputDir,
-            useSymlinks: !platform.isWindows,
-          ),
-      ),
-    };
-    core.BuildResult result;
-    try {
-      result = await _runBuilder(
-        buildEnvironment,
-        buildOptions,
-        release,
-        buildDirs,
-      );
-      return result.status == core.BuildStatus.success;
-    } on core.BuildConfigChangedException {
-      await _cleanAssets(projectDirectory);
-      result = await _runBuilder(
-        buildEnvironment,
-        buildOptions,
-        release,
-        buildDirs,
-      );
-      return result.status == core.BuildStatus.success;
-    } on core.BuildScriptChangedException {
-      await _cleanAssets(projectDirectory);
-      result = await _runBuilder(
-        buildEnvironment,
-        buildOptions,
-        release,
-        buildDirs,
-      );
-      return result.status == core.BuildStatus.success;
-    }
-  }
-
-  @override
-  Future<bool> invalidate({@required List<Uri> inputs}) async {
-    final Status status =
-        logger.startProgress('Recompiling sources...', timeout: null);
-    final Map<AssetId, ChangeType> updates = <AssetId, ChangeType>{};
-    for (Uri input in inputs) {
-      final AssetId assetId = AssetId.resolve(_packageUriMapper.map(input.toFilePath()).toString());
-      updates[assetId] = ChangeType.MODIFY;
-    }
-    core.BuildResult result;
-    try {
-      result = await _builder.run(updates);
-    } finally {
-      status.cancel();
-    }
-    return result.status == core.BuildStatus.success;
-  }
-
-  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment, BuildOptions buildOptions, bool release, Set<core.BuildDirectory> buildDirs) async {
-    _builder = await BuildImpl.create(
-      buildOptions,
-      buildEnvironment,
-      builders,
-      <String, Map<String, dynamic>>{
-        'flutter_tools:ddc': <String, dynamic>{
-          'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
-        },
-        'flutter_tools:entrypoint': <String, dynamic>{
-          'release': release,
-          'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
-        },
-        'flutter_tools:test_entrypoint': <String, dynamic>{
-          'release': release,
-        },
-      },
-      isReleaseBuild: false,
-    );
-    return _builder.run(
-      const <AssetId, ChangeType>{},
-      buildDirs: buildDirs,
-    );
-  }
-
-  Future<void> _cleanAssets(Directory projectDirectory) async {
-    final File assetGraphFile = fs.file(core.assetGraphPath);
-    AssetGraph assetGraph;
-    try {
-      assetGraph = AssetGraph.deserialize(await assetGraphFile.readAsBytes());
-    } catch (_) {
-      printTrace('Failed to clean up asset graph.');
-    }
-    final core.PackageGraph packageGraph = core.PackageGraph.forThisPackage();
-    await _cleanUpSourceOutputs(assetGraph, packageGraph);
-    final Directory cacheDirectory = fs.directory(fs.path.join(
+      .createSync();
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
+    final bool hasWebPlugins = findPlugins(flutterProject)
+        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+    final BuildDaemonClient client = await buildDaemonCreator.startBuildDaemon(
       projectDirectory.path,
-      '.dart_tool',
-      'build',
-      'flutter_web',
-    ));
-    if (assetGraphFile.existsSync()) {
-      assetGraphFile.deleteSync();
+      release: mode == BuildMode.release,
+      profile: mode == BuildMode.profile,
+      hasPlugins: hasWebPlugins,
+      includeTests: true,
+      initializePlatform: initializePlatform,
+    );
+    client.startBuild();
+    bool success = true;
+    await for (BuildResults results in client.buildResults) {
+      final BuildResult result = results.results.firstWhere((BuildResult result) {
+        return result.target == 'web';
+      });
+      if (result.status == BuildStatus.failed) {
+        success = false;
+        break;
+      }
+      if (result.status == BuildStatus.succeeded) {
+        break;
+      }
     }
-    if (cacheDirectory.existsSync()) {
-      cacheDirectory.deleteSync(recursive: true);
-    }
-  }
+    if (success && testOutputDir != null) {
+      final Directory rootDirectory = projectDirectory
+        .childDirectory('.dart_tool')
+        .childDirectory('build')
+        .childDirectory('flutter_web');
 
-  Future<void> _cleanUpSourceOutputs(AssetGraph assetGraph, core.PackageGraph packageGraph) async {
-    final core.FileBasedAssetWriter writer = core.FileBasedAssetWriter(packageGraph);
-    if (assetGraph?.outputs == null) {
-      return;
-    }
-    for (AssetId id in assetGraph.outputs) {
-      if (id.package != packageGraph.root.name) {
-        continue;
+      final Iterable<Directory> childDirectories = rootDirectory
+        .listSync()
+        .whereType<Directory>();
+      for (Directory childDirectory in childDirectories) {
+        final String path = fs.path.join(testOutputDir, 'packages',
+            fs.path.basename(childDirectory.path));
+        copyDirectorySync(childDirectory.childDirectory('lib'), fs.directory(path));
       }
-      final GeneratedAssetNode node = assetGraph.get(id);
-      if (node.wasOutput) {
-        // Note that this does a file.exists check in the root package and
-        // only tries to delete the file if it exists. This way we only
-        // actually delete to_source outputs, without reading in the build
-        // actions.
-        await writer.delete(id);
-      }
+      final Directory outputDirectory = rootDirectory
+          .childDirectory(projectName)
+          .childDirectory('test');
+      copyDirectorySync(outputDirectory, fs.directory(fs.path.join(testOutputDir)));
     }
+    return success;
   }
 }
 
@@ -244,20 +125,18 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   @override
   Stream<AssetId> findAssets(Glob glob, {String package}) async* {
     if (package == null || packageGraph.root.name == package) {
+      final String generatedRoot = fs.path.join(generatedDirectory.path, packageGraph.root.name);
       await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
-        if (entity is io.File && _isNotHidden(entity)) {
+        if (entity is io.File && _isNotHidden(entity) && !fs.path.isWithin(generatedRoot, entity.path)) {
           yield _fileToAssetId(entity, packageGraph.root);
         }
       }
-      final String generatedRoot = fs.path.join(
-        generatedDirectory.path, packageGraph.root.name
-      );
       if (!fs.isDirectorySync(generatedRoot)) {
         return;
       }
       await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
         if (entity is io.File && _isNotHidden(entity)) {
-          yield _fileToAssetId(entity, packageGraph.root, generatedRoot);
+          yield _fileToAssetId(entity, packageGraph.root, fs.path.relative(generatedRoot), true);
         }
       }
       return;
@@ -280,9 +159,14 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   }
 
   /// Creates an [AssetId] for [file], which is a part of [packageNode].
-  AssetId _fileToAssetId(io.File file, core.PackageNode packageNode, [String root]) {
+  AssetId _fileToAssetId(io.File file, core.PackageNode packageNode, [String root, bool generated = false]) {
     final String filePath = path.normalize(file.absolute.path);
-    final String relativePath = path.relative(filePath, from: root ?? packageNode.path);
+    String relativePath;
+    if (generated) {
+      relativePath = filePath.substring(root.length + 2);
+    } else {
+      relativePath = path.relative(filePath, from: packageNode.path);
+    }
     return AssetId(packageNode.name, relativePath);
   }
 }

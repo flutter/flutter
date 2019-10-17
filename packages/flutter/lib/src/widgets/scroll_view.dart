@@ -768,8 +768,8 @@ abstract class BoxScrollView extends ScrollView {
 /// [new ListView] constructor's `children` argument corresponds to the
 /// [childrenDelegate] being a [SliverChildListDelegate] with that same
 /// argument. The [new ListView.builder] constructor's `itemBuilder` and
-/// `childCount` arguments correspond to the [childrenDelegate] being a
-/// [SliverChildBuilderDelegate] with the matching arguments.
+/// `itemCount` arguments correspond to the [childrenDelegate] being a
+/// [SliverChildBuilderDelegate] with the equivalent arguments.
 ///
 /// The [padding] property corresponds to having a [SliverPadding] in the
 /// [CustomScrollView.slivers] property instead of the list itself, and having
@@ -1290,7 +1290,7 @@ class ListView extends BoxScrollView {
 /// children are spaced apart using the [crossAxisSpacing] and [mainAxisSpacing]
 /// properties.
 ///
-/// ![A screenshot of a GridView](https://flutter.github.io/assets-for-api-docs/assets/widgets/grid_view.png)
+/// ![The GridView displays six children with different background colors arranged in two columns](https://flutter.github.io/assets-for-api-docs/assets/widgets/grid_view.png)
 ///
 /// ```dart
 /// GridView.count(
@@ -1339,7 +1339,7 @@ class ListView extends BoxScrollView {
 /// This example shows how to create the same grid as the previous example
 /// using a [CustomScrollView] and a [SliverGrid].
 ///
-/// ![A screenshot of a CustomScrollView with a SliverGrid](https://flutter.github.io/assets-for-api-docs/assets/widgets/grid_view_custom_scroll.png)
+/// ![The CustomScrollView contains a SliverGrid that displays six children with different background colors arranged in two columns](https://flutter.github.io/assets-for-api-docs/assets/widgets/grid_view_custom_scroll.png)
 ///
 /// ```dart
 /// CustomScrollView(

@@ -37,7 +37,10 @@ void main() {
     final VoidCallback listener = () { log.add('listener'); };
     final VoidCallback listener1 = () { log.add('listener1'); };
     final VoidCallback listener2 = () { log.add('listener2'); };
-    final VoidCallback badListener = () { log.add('badListener'); throw null; };
+    final VoidCallback badListener = () {
+      log.add('badListener');
+      throw null;
+    };
 
     final TestNotifier test = TestNotifier();
 

@@ -35,8 +35,7 @@ const Map<String, String> localEngineDebugBuildModeRelease = <String, String>{
 };
 
 // Can't use a debug build with a profile engine.
-const Map<String, String> localEngineProfileBuildeModeRelease =
-    <String, String>{
+const Map<String, String> localEngineProfileBuildeModeRelease = <String, String>{
   'SOURCE_ROOT': '../../../examples/hello_world',
   'FLUTTER_ROOT': '../../..',
   'LOCAL_ENGINE': '/engine/src/out/ios_profile',

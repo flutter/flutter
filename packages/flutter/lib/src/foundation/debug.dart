@@ -52,7 +52,10 @@ bool debugInstrumentationEnabled = false;
 ///    implicitly add any timeline events.
 Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
   bool instrument = false;
-  assert(() { instrument = debugInstrumentationEnabled; return true; }());
+  assert(() {
+    instrument = debugInstrumentationEnabled;
+    return true;
+  }());
   if (instrument) {
     final Stopwatch stopwatch = Stopwatch()..start();
     return action().whenComplete(() {

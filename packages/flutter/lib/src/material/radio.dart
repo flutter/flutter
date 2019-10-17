@@ -27,7 +27,7 @@ const double _kInnerRadius = 4.5;
 /// will respond to [onChanged] by calling [State.setState] to update the
 /// radio button's [groupValue].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// Here is an example of Radio widgets wrapped in ListTiles, which is similar
 /// to what you could get with the RadioListTile widget.
@@ -52,31 +52,29 @@ const double _kInnerRadius = 4.5;
 /// SingingCharacter _character = SingingCharacter.lafayette;
 ///
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: Column(
-///       children: <Widget>[
-///         ListTile(
-///           title: const Text('Lafayette'),
-///           leading: Radio(
-///             value: SingingCharacter.lafayette,
-///             groupValue: _character,
-///             onChanged: (SingingCharacter value) {
-///               setState(() { _character = value; });
-///             },
-///           ),
+///   return Column(
+///     children: <Widget>[
+///       ListTile(
+///         title: const Text('Lafayette'),
+///         leading: Radio(
+///           value: SingingCharacter.lafayette,
+///           groupValue: _character,
+///           onChanged: (SingingCharacter value) {
+///             setState(() { _character = value; });
+///           },
 ///         ),
-///         ListTile(
-///           title: const Text('Thomas Jefferson'),
-///           leading: Radio(
-///             value: SingingCharacter.jefferson,
-///             groupValue: _character,
-///             onChanged: (SingingCharacter value) {
-///               setState(() { _character = value; });
-///             },
-///           ),
+///       ),
+///       ListTile(
+///         title: const Text('Thomas Jefferson'),
+///         leading: Radio(
+///           value: SingingCharacter.jefferson,
+///           groupValue: _character,
+///           onChanged: (SingingCharacter value) {
+///             setState(() { _character = value; });
+///           },
 ///         ),
-///       ],
-///     ),
+///       ),
+///     ],
 ///   );
 /// }
 /// ```

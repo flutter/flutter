@@ -23,7 +23,7 @@ void main() {
             );
           },
         ),
-      )
+      ),
     );
 
     final Element builderElement = tester.element(find.byKey(builderKey));

@@ -70,14 +70,76 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   ImageCache createImageCache() => ImageCache();
 
   /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
-  Future<ui.Codec> instantiateImageCodec(Uint8List list) {
-    return ui.instantiateImageCodec(list);
+  ///
+  /// The [cacheWidth] and [cacheHeight] parameters, when specified, indicate the
+  /// size to decode the image to.
+  ///
+  /// Both [cacheWidth] and [cacheHeight] must be positive values greater than or
+  /// equal to 1 or null. It is valid to specify only one of [cacheWidth] and
+  /// [cacheHeight] with the other remaining null, in which case the omitted
+  /// dimension will decode to its original size. When both are null or omitted,
+  /// the image will be decoded at its native resolution.
+  Future<ui.Codec> instantiateImageCodec(Uint8List bytes, {
+    int cacheWidth,
+    int cacheHeight,
+  }) {
+    assert(cacheWidth == null || cacheWidth > 0);
+    assert(cacheHeight == null || cacheHeight > 0);
+    return ui.instantiateImageCodec(
+      bytes,
+      targetWidth: cacheWidth,
+      targetHeight: cacheHeight,
+    );
   }
 
   @override
   void evict(String asset) {
     super.evict(asset);
     imageCache.clear();
+  }
+
+  /// Listenable that notifies when the available fonts on the system have
+  /// changed.
+  ///
+  /// System fonts can change when the system installs or removes new font. To
+  /// correctly reflect the change, it is important to relayout text related
+  /// widgets when this happens.
+  ///
+  /// Objects that show text and/or measure text (e.g. via [TextPainter] or
+  /// [Paragraph]) should listen to this and redraw/remeasure.
+  Listenable get systemFonts => _systemFonts;
+  final _SystemFontsNotifier _systemFonts = _SystemFontsNotifier();
+
+  @override
+  Future<void> handleSystemMessage(Object systemMessage) async {
+    await super.handleSystemMessage(systemMessage);
+    final Map<String, dynamic> message = systemMessage;
+    final String type = message['type'];
+    switch (type) {
+      case 'fontsChange':
+        _systemFonts.notifyListeners();
+        break;
+    }
+    return;
+  }
+}
+
+class _SystemFontsNotifier extends Listenable {
+  final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
+
+  void notifyListeners () {
+    for (VoidCallback callback in _systemFontsCallbacks) {
+      callback();
+    }
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    _systemFontsCallbacks.add(listener);
+  }
+  @override
+  void removeListener(VoidCallback listener) {
+    _systemFontsCallbacks.remove(listener);
   }
 }
 

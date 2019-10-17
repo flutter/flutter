@@ -4703,7 +4703,9 @@
       ],
       "english": "Meta Left",
       "chromium": "metaLeft",
-      "glfw": null
+      "glfw": [
+        "LEFT_SUPER"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -4719,7 +4721,9 @@
       "android": [
         117
       ],
-      "glfw": null
+      "glfw": [
+        343
+      ]
     }
   },
   "controlRight": {
@@ -4823,7 +4827,9 @@
       ],
       "english": "Meta Right",
       "chromium": "metaRight",
-      "glfw": null
+      "glfw": [
+        "RIGHT_SUPER"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -4839,7 +4845,9 @@
       "android": [
         118
       ],
-      "glfw": null
+      "glfw": [
+        347
+      ]
     }
   },
   "info": {
@@ -6377,7 +6385,7 @@
         256,
         288
       ],
-      "usb": 341761,
+      "usb": 392961,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6405,7 +6413,7 @@
         257,
         289
       ],
-      "usb": 341762,
+      "usb": 392962,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6433,7 +6441,7 @@
         258,
         290
       ],
-      "usb": 341763,
+      "usb": 392963,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6461,7 +6469,7 @@
         259,
         291
       ],
-      "usb": 341764,
+      "usb": 392964,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6489,7 +6497,7 @@
         260,
         292
       ],
-      "usb": 341765,
+      "usb": 392965,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6517,7 +6525,7 @@
         261,
         293
       ],
-      "usb": 341766,
+      "usb": 392966,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6545,7 +6553,7 @@
         262,
         294
       ],
-      "usb": 341767,
+      "usb": 392967,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6573,7 +6581,7 @@
         263,
         295
       ],
-      "usb": 341768,
+      "usb": 392968,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6601,7 +6609,7 @@
         264,
         296
       ],
-      "usb": 341769,
+      "usb": 392969,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6629,7 +6637,7 @@
         265,
         297
       ],
-      "usb": 341770,
+      "usb": 392970,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6657,7 +6665,7 @@
         266,
         298
       ],
-      "usb": 341771,
+      "usb": 392971,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6685,7 +6693,7 @@
         267,
         299
       ],
-      "usb": 341772,
+      "usb": 392972,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6713,7 +6721,7 @@
         268,
         300
       ],
-      "usb": 341773,
+      "usb": 392973,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6741,7 +6749,7 @@
         269,
         301
       ],
-      "usb": 341774,
+      "usb": 392974,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6769,7 +6777,7 @@
         270,
         302
       ],
-      "usb": 341775,
+      "usb": 392975,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6797,7 +6805,7 @@
         271,
         303
       ],
-      "usb": 341776,
+      "usb": 392976,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6824,7 +6832,7 @@
       "android": [
         304
       ],
-      "usb": 341777,
+      "usb": 392977,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6851,7 +6859,7 @@
       "android": [
         305
       ],
-      "usb": 341778,
+      "usb": 392978,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6878,7 +6886,7 @@
       "android": [
         306
       ],
-      "usb": 341779,
+      "usb": 392979,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6905,7 +6913,7 @@
       "android": [
         310
       ],
-      "usb": 341780,
+      "usb": 392980,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6932,7 +6940,7 @@
       "android": [
         312
       ],
-      "usb": 341781,
+      "usb": 392981,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6959,7 +6967,7 @@
       "android": [
         316
       ],
-      "usb": 341782,
+      "usb": 392982,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -6986,7 +6994,7 @@
       "android": [
         311
       ],
-      "usb": 341783,
+      "usb": 392983,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -7013,7 +7021,7 @@
       "android": [
         313
       ],
-      "usb": 341784,
+      "usb": 392984,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -7040,7 +7048,7 @@
       "android": [
         314
       ],
-      "usb": 341785,
+      "usb": 392985,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -7067,7 +7075,7 @@
       "android": [
         315
       ],
-      "usb": 341786,
+      "usb": 392986,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -7094,7 +7102,7 @@
       "android": [
         317
       ],
-      "usb": 341787,
+      "usb": 392987,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -7121,7 +7129,7 @@
       "android": [
         318
       ],
-      "usb": 341788,
+      "usb": 392988,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -7148,7 +7156,7 @@
       "android": [
         307
       ],
-      "usb": 341789,
+      "usb": 392989,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -7175,7 +7183,7 @@
       "android": [
         308
       ],
-      "usb": 341790,
+      "usb": 392990,
       "linux": null,
       "xkb": null,
       "windows": null,
@@ -7202,7 +7210,7 @@
       "android": [
         309
       ],
-      "usb": 341791,
+      "usb": 392991,
       "linux": null,
       "xkb": null,
       "windows": null,

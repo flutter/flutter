@@ -4,17 +4,13 @@
 
 import 'dart:async';
 
-import '../android/aar.dart';
-import '../base/context.dart';
+import '../android/android_builder.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
-
-/// The AAR builder in the current context.
-AarBuilder get aarBuilder => context.get<AarBuilder>() ?? AarBuilderImpl();
 
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({bool verboseHelp = false}) {
@@ -24,7 +20,7 @@ class BuildAarCommand extends BuildSubCommand {
     argParser
       ..addMultiOption('target-platform',
         splitCommas: true,
-        defaultsTo: <String>['android-arm', 'android-arm64'],
+        defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the project is compiled.',
       )
@@ -57,12 +53,6 @@ class BuildAarCommand extends BuildSubCommand {
   }
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-    DevelopmentArtifact.android,
-  };
-
-  @override
   final String description = 'Build a repository containing an AAR and a POM file.\n\n'
       'The POM file is used to include the dependencies that the AAR was compiled against.\n\n'
       'To learn more about how to use these artifacts, see '
@@ -74,7 +64,7 @@ class BuildAarCommand extends BuildSubCommand {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(buildInfo,
         targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName));
 
-    await aarBuilder.build(
+    await androidBuilder.buildAar(
       project: _getProject(),
       target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,

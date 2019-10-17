@@ -506,7 +506,7 @@ void main() {
                         content: Text('A'),
                       ),
                     ],
-                  )
+                  ),
                 ),
                 const Step(
                   title: Text('Step 1'),

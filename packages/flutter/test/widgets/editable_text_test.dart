@@ -311,7 +311,7 @@ void main() {
     final TextEditingController controller = TextEditingController.fromValue(
         const TextEditingValue(
           text: 'initial value',
-        )
+        ),
     );
     Future<void> pumpEditableTextWithTextStyle(TextStyle style) async {
       await tester.pumpWidget(
@@ -534,6 +534,13 @@ void main() {
         equals('TextInputAction.done'));
   });
 
+  /// Toolbar is not used in Flutter Web. Skip this check.
+  ///
+  /// Web is using native dom elements (it is also used as platform input)
+  /// to enable clipboard functionality of the toolbar: copy, paste, select,
+  /// cut. It might also provide additional functionality depending on the
+  /// browser (such as translation). Due to this, in browsers, we should not
+  /// show a Flutter toolbar for the editable text elements.
   testWidgets('can show toolbar when there is text and a selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -577,7 +584,7 @@ void main() {
     expect(state.showToolbar(), true);
     await tester.pump();
     expect(find.text('PASTE'), findsOneWidget);
-  });
+  }, skip: isBrowser);
 
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35998.
@@ -649,6 +656,72 @@ void main() {
     expect(state.showToolbar(), true);
     await tester.pump();
     expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+  });
+
+  testWidgets('can dynamically disable select all option in toolbar - cupertino', (WidgetTester tester) async {
+    // Regression test: https://github.com/flutter/flutter/issues/40711
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          toolbarOptions: const ToolbarOptions(
+            selectAll: false,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: cupertinoTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('Select All'), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+  });
+
+  testWidgets('can dynamically disable select all option in toolbar - material', (WidgetTester tester) async {
+    // Regression test: https://github.com/flutter/flutter/issues/40711
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            selectAll: false,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select something. Doesn't really matter what.
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('SELECT ALL'), findsNothing);
     expect(find.text('COPY'), findsOneWidget);
     expect(find.text('PASTE'), findsNothing);
     expect(find.text('CUT'), findsNothing);
@@ -999,21 +1072,22 @@ void main() {
     await tester.pumpWidget(builder());
     await tester.pump(); // An extra pump to allow focus request to go through.
 
-    await tester.showKeyboard(find.byType(EditableText));
-
-    // Verify TextInput.setEditingState is fired with updated text when controller is replaced.
     final List<MethodCall> log = <MethodCall>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
+
+    await tester.showKeyboard(find.byType(EditableText));
+
+    // Verify TextInput.setEditingState and TextInput.setEditableSizeAndTransform are
+    // both fired with updated text when controller is replaced.
     setState(() {
       currentController = controller2;
     });
     await tester.pump();
 
-    expect(log, hasLength(1));
     expect(
-      log.single,
+      log.lastWhere((MethodCall m) => m.method == 'TextInput.setEditingState'),
       isMethodCall(
         'TextInput.setEditingState',
         arguments: const <String, dynamic>{
@@ -1024,6 +1098,17 @@ void main() {
           'selectionIsDirectional': false,
           'composingBase': -1,
           'composingExtent': -1,
+        },
+      ),
+    );
+    expect(
+      log.lastWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform'),
+      isMethodCall(
+        'TextInput.setEditableSizeAndTransform',
+        arguments: <String, dynamic>{
+          'width': 800,
+          'height': 14,
+          'transform': Matrix4.translationValues(0.0, 293.0, 0.0).storage.toList(),
         },
       ),
     );
@@ -1790,7 +1875,7 @@ void main() {
                       actions: <SemanticsAction>[
                         SemanticsAction.moveCursorBackwardByCharacter,
                         SemanticsAction.setSelection,
-                        SemanticsAction.moveCursorBackwardByWord
+                        SemanticsAction.moveCursorBackwardByWord,
                       ],
                       value: expectedValue,
                       textDirection: TextDirection.ltr,
@@ -2091,6 +2176,284 @@ void main() {
     final MethodCall setClient = log.first;
     expect(setClient.method, 'TextInput.setClient');
     expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+  });
+
+  testWidgets('location of widget is sent on show keyboard', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+            devicePixelRatio: 1.0
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography(platform: TargetPlatform.android).black.subhead,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+        'width': 800,
+        'height': 600,
+        'transform': Matrix4.identity().storage.toList(),
+      }),
+    );
+  });
+
+  testWidgets('transform and size is reset when text connection opens', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller2 = TextEditingController();
+    controller1.text = 'Text1';
+    controller2.text = 'Text2';
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+            devicePixelRatio: 1.0
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:  <Widget>[
+              EditableText(
+                key: ValueKey<String>(controller1.text),
+                controller: controller1,
+                focusNode: FocusNode(),
+                style: Typography(platform: TargetPlatform.android).black.subhead,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+              ),
+              const SizedBox(height: 200.0),
+              EditableText(
+                key: ValueKey<String>(controller2.text),
+                controller: controller2,
+                focusNode: FocusNode(),
+                style: Typography(platform: TargetPlatform.android).black.subhead,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                minLines: 10,
+                maxLines: 20,
+              ),
+              const SizedBox(height: 100.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byKey(ValueKey<String>(controller1.text)));
+    final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+        'width': 800,
+        'height': 14,
+        'transform': Matrix4.identity().storage.toList(),
+      }),
+    );
+
+    log.clear();
+
+    // Move to the next editable text.
+    await tester.showKeyboard(find.byKey(ValueKey<String>(controller2.text)));
+    final MethodCall methodCall2 = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+    expect(
+      methodCall2,
+      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+        'width': 800,
+        'height': 140.0,
+        'transform': <double>[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 214.0, 0.0, 1.0],
+      }),
+    );
+
+    log.clear();
+
+    // Move back to the first editable text.
+    await tester.showKeyboard(find.byKey(ValueKey<String>(controller1.text)));
+    final MethodCall methodCall3 = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+    expect(
+      methodCall3,
+      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+        'width': 800,
+        'height': 14,
+        'transform': Matrix4.identity().storage.toList(),
+      }),
+    );
+  });
+
+  testWidgets('size and transform are sent when they change', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    const Offset offset = Offset(10.0, 20.0);
+    const Key transformButtonKey = Key('transformButton');
+    await tester.pumpWidget(
+      const TransformedEditableText(
+        offset: offset,
+        transformButtonKey: transformButtonKey,
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+        'width': 800,
+        'height': 14,
+        'transform': Matrix4.identity().storage.toList(),
+      }),
+    );
+
+    log.clear();
+    await tester.tap(find.byKey(transformButtonKey));
+    await tester.pumpAndSettle();
+
+    // There should be a new platform message updating the transform.
+    methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+        'width': 800,
+        'height': 14,
+        'transform': Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage.toList(),
+      }),
+    );
+  });
+
+  testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: EditableText(
+          textDirection: TextDirection.rtl,
+          controller: controller,
+          focusNode: FocusNode(),
+          style: const TextStyle(
+            fontSize: 20.0,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w600,
+          ),
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
+    expect(
+      setStyle,
+      isMethodCall('TextInput.setStyle', arguments: <String, dynamic>{
+        'fontSize': 20.0,
+        'fontFamily': 'Roboto',
+        'fontWeightIndex': 5,
+        'textAlignIndex': 4,
+        'textDirectionIndex': 0,
+      }),
+    );
+  });
+
+  testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    StateSetter setState;
+    const TextStyle textStyle1 = TextStyle(
+      fontSize: 20.0,
+      fontFamily: 'RobotoMono',
+      fontWeight: FontWeight.w600,
+    );
+    const TextStyle textStyle2 = TextStyle(
+      fontSize: 20.0,
+      fontFamily: 'Raleway',
+      fontWeight: FontWeight.w700,
+    );
+    TextStyle currentTextStyle = textStyle1;
+
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      backgroundCursorColor: Colors.grey,
+                      key: editableTextKey,
+                      controller: controller,
+                      focusNode: FocusNode(),
+                      style: currentTextStyle,
+                      cursorColor: Colors.blue,
+                      selectionControls: materialTextSelectionControls,
+                      keyboardType: TextInputType.text,
+                      onChanged: (String value) {},
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.showKeyboard(find.byType(EditableText));
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    setState(() {
+      currentTextStyle = textStyle2;
+    });
+    await tester.pump();
+
+    // Updated styling information should be sent via TextInput.setStyle method.
+    final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
+    expect(
+      setStyle,
+      isMethodCall('TextInput.setStyle', arguments: <String, dynamic>{
+        'fontSize': 20.0,
+        'fontFamily': 'Raleway',
+        'fontWeightIndex': 6,
+        'textAlignIndex': 4,
+        'textDirectionIndex': 1,
+      }),
+    );
   });
 
   testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {
@@ -2656,6 +3019,57 @@ class CustomStyleEditableTextState extends EditableTextState {
     return TextSpan(
       style: const TextStyle(fontStyle: FontStyle.italic),
       text: widget.controller.value.text,
+    );
+  }
+}
+
+class TransformedEditableText extends StatefulWidget {
+  const TransformedEditableText({ this.offset, this.transformButtonKey });
+
+  final Offset offset;
+  final Key transformButtonKey;
+
+  @override
+  _TransformedEditableTextState createState() => _TransformedEditableTextState();
+}
+
+class _TransformedEditableTextState extends State<TransformedEditableText> {
+  bool _isTransformed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: const MediaQueryData(
+          devicePixelRatio: 1.0
+      ),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Transform.translate(
+              offset: _isTransformed ? widget.offset : Offset.zero,
+              child: EditableText(
+                controller: TextEditingController(),
+                focusNode: FocusNode(),
+                style: Typography(platform: TargetPlatform.android).black.subhead,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+              ),
+            ),
+            RaisedButton(
+              key: widget.transformButtonKey,
+              onPressed: () {
+                setState(() {
+                  _isTransformed = !_isTransformed;
+                });
+              },
+              child: const Text('Toggle Transform'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

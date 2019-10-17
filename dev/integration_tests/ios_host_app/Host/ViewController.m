@@ -1,9 +1,15 @@
 #import "ViewController.h"
-#import <Flutter/Flutter.h>
-#import <FlutterPluginRegistrant/GeneratedPluginRegistrant.h>
+
+@import Flutter;
+@import FlutterPluginRegistrant;
+
+// Prove plugins can be module-imported from the host app.
+@import device_info;
+@import google_maps_flutter;
 
 @implementation ViewController
 
+// Boiler-plate add-to-app demo. Not integration tested anywhere.
 - (void)viewDidLoad {
     [super viewDidLoad];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];

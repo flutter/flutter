@@ -201,7 +201,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
-      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / 3);
+      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.window.devicePixelRatio);
       return image.toByteData();
     });
 
@@ -260,7 +260,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       }
 
-      if (_isNodeOffScreen(paintBounds)) {
+      if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
         return result;
       }
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
@@ -302,13 +302,14 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   // Returns a rect that is entirely on screen, or null if it is too far off.
   //
-  // Given an 1800 * 2400 pixel buffer, can we actually get all the data from
-  // this node? allow a small delta overlap before culling the node.
-  bool _isNodeOffScreen(Rect paintBounds) {
+  // Given a pixel buffer based on the physical window size, can we actually
+  // get all the data from this node? allow a small delta overlap before
+  // culling the node.
+  bool _isNodeOffScreen(Rect paintBounds, ui.Window window) {
     return paintBounds.top < -50.0
       || paintBounds.left <  -50.0
-      || paintBounds.bottom > 2400.0 + 50.0
-      || paintBounds.right > 1800.0 + 50.0;
+      || paintBounds.bottom > (window.physicalSize.height * window.devicePixelRatio) + 50.0
+      || paintBounds.right > (window.physicalSize.width * window.devicePixelRatio)  + 50.0;
   }
 
   List<int> _subsetToRect(ByteData data, Rect paintBounds, int width, int height) {

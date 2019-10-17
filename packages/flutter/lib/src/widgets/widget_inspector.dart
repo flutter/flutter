@@ -57,10 +57,14 @@ class _ProxyLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => _layer.find(regionOffset);
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
+  @protected
+  bool findAnnotations<S>(
+    AnnotationResult<S> result,
+    Offset localPosition, {
+    @required bool onlyFirst,
+  }) {
+    return _layer.findAnnotations(result, localPosition, onlyFirst: onlyFirst);
+  }
 }
 
 /// A [Canvas] that multicasts all method calls to a main canvas and a
@@ -947,7 +951,10 @@ mixin WidgetInspectorService {
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
-    assert(() { _debugServiceExtensionsRegistered = true; return true; }());
+    assert(() {
+      _debugServiceExtensionsRegistered = true;
+      return true;
+    }());
 
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
@@ -1089,9 +1096,19 @@ mixin WidgetInspectorService {
       name: 'getRootWidgetSummaryTree',
       callback: _getRootWidgetSummaryTree,
     );
-    _registerServiceExtensionWithArg(
+    registerServiceExtension(
       name: 'getDetailsSubtree',
-      callback: _getDetailsSubtree,
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('objectGroup'));
+        final String subtreeDepth = parameters['subtreeDepth'];
+        return <String, Object>{
+          'result': _getDetailsSubtree(
+            parameters['arg'],
+            parameters['objectGroup'],
+            subtreeDepth != null ? int.parse(subtreeDepth) : 2,
+          ),
+        };
+      },
     );
     _registerServiceExtensionWithArg(
       name: 'getSelectedRenderObject',
@@ -1603,15 +1620,27 @@ mixin WidgetInspectorService {
   /// [DiagnosticsNode] object that `diagnosticsNodeId` references providing
   /// information needed for the details subtree view.
   ///
+  /// The number of levels of the subtree that should be returned is specified
+  /// by the [subtreeDepth] parameter. This value defaults to 2 for backwards
+  /// compatibility.
+  ///
   /// See also:
   ///
   ///  * [getChildrenDetailsSubtree], a method to get children of a node
   ///    in the details subtree.
-  String getDetailsSubtree(String id, String groupName) {
-    return _safeJsonEncode(_getDetailsSubtree( id, groupName));
+  String getDetailsSubtree(
+    String id,
+    String groupName, {
+    int subtreeDepth = 2,
+  }) {
+    return _safeJsonEncode(_getDetailsSubtree( id, groupName, subtreeDepth));
   }
 
-  Map<String, Object> _getDetailsSubtree(String id, String groupName) {
+  Map<String, Object> _getDetailsSubtree(
+    String id,
+    String groupName,
+    int subtreeDepth,
+  ) {
     final DiagnosticsNode root = toObject(id);
     if (root == null) {
       return null;
@@ -1621,7 +1650,7 @@ mixin WidgetInspectorService {
       _SerializationDelegate(
         groupName: groupName,
         summaryTree: false,
-        subtreeDepth: 2,  // TODO(jacobr): make subtreeDepth configurable.
+        subtreeDepth: subtreeDepth,
         includeProperties: true,
         service: this,
       ),
@@ -2083,7 +2112,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   final GlobalKey _ignorePointerKey = GlobalKey();
 
-  /// Distance from the edge of of the bounding box for an element to consider
+  /// Distance from the edge of the bounding box for an element to consider
   /// as selecting the edge of the bounding box.
   static const double _edgeHitMargin = 2.0;
 
@@ -2245,30 +2274,29 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-    children.add(GestureDetector(
-      onTap: _handleTap,
-      onPanDown: _handlePanDown,
-      onPanEnd: _handlePanEnd,
-      onPanUpdate: _handlePanUpdate,
-      behavior: HitTestBehavior.opaque,
-      excludeFromSemantics: true,
-      child: IgnorePointer(
-        ignoring: isSelectMode,
-        key: _ignorePointerKey,
-        ignoringSemantics: false,
-        child: widget.child,
+    return Stack(children: <Widget>[
+      GestureDetector(
+        onTap: _handleTap,
+        onPanDown: _handlePanDown,
+        onPanEnd: _handlePanEnd,
+        onPanUpdate: _handlePanUpdate,
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: true,
+        child: IgnorePointer(
+          ignoring: isSelectMode,
+          key: _ignorePointerKey,
+          ignoringSemantics: false,
+          child: widget.child,
+        ),
       ),
-    ));
-    if (!isSelectMode && widget.selectButtonBuilder != null) {
-      children.add(Positioned(
-        left: _kInspectButtonMargin,
-        bottom: _kInspectButtonMargin,
-        child: widget.selectButtonBuilder(context, _handleEnableSelect),
-      ));
-    }
-    children.add(_InspectorOverlay(selection: selection));
-    return Stack(children: children);
+      if (!isSelectMode && widget.selectButtonBuilder != null)
+        Positioned(
+          left: _kInspectButtonMargin,
+          bottom: _kInspectButtonMargin,
+          child: widget.selectButtonBuilder(context, _handleEnableSelect),
+        ),
+      _InspectorOverlay(selection: selection),
+    ]);
   }
 }
 
@@ -2480,7 +2508,7 @@ class _InspectorOverlayLayer extends Layer {
         ErrorSummary(
           'The inspector should never be used in production mode due to the '
           'negative performance impact.'
-        )
+        ),
       ]);
     }
   }
@@ -2638,10 +2666,14 @@ class _InspectorOverlayLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
+  @protected
+  bool findAnnotations<S>(
+    AnnotationResult<S> result,
+    Offset localPosition, {
+    bool onlyFirst,
+  }) {
+    return false;
+  }
 }
 
 const double _kScreenEdgeMargin = 10.0;
@@ -2774,23 +2806,25 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
     ];
   }
   final List<DiagnosticsNode> nodes = <DiagnosticsNode>[];
-  element.visitAncestorElements((Element ancestor) {
+  bool processElement(Element target) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
-    if (_isLocalCreationLocation(ancestor)) {
+    if (_isLocalCreationLocation(target)) {
       nodes.add(
         DiagnosticsBlock(
-          name: 'User-created ancestor of the error-causing widget was',
+          name: 'The relevant error-causing widget was',
           children: <DiagnosticsNode>[
-            ErrorDescription('${ancestor.widget.toStringShort()} ${_describeCreationLocation(ancestor)}'),
+            ErrorDescription('${target.widget.toStringShort()} ${_describeCreationLocation(target)}'),
           ],
-        )
+        ),
       );
       nodes.add(ErrorSpacer());
       return false;
     }
     return true;
-  });
+  }
+  if (processElement(element))
+    element.visitAncestorElements(processElement);
   return nodes;
 }
 

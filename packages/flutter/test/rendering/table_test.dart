@@ -176,15 +176,21 @@ void main() {
     final RenderBox child2 = RenderPositionedBox();
     final RenderBox child3 = RenderPositionedBox();
     table = RenderTable(textDirection: TextDirection.ltr);
-    table.setFlatChildren(3, <RenderBox>[child1, RenderPositionedBox(), child2,
-                                         RenderPositionedBox(), child3, RenderPositionedBox()]);
+    table.setFlatChildren(3, <RenderBox>[
+      child1, RenderPositionedBox(), child2,
+      RenderPositionedBox(), child3, RenderPositionedBox(),
+    ]);
     expect(table.rows, equals(2));
     layout(table);
-    table.setFlatChildren(3, <RenderBox>[RenderPositionedBox(), child1, RenderPositionedBox(),
-                                         child2, RenderPositionedBox(), child3]);
+    table.setFlatChildren(3, <RenderBox>[
+      RenderPositionedBox(), child1, RenderPositionedBox(),
+      child2, RenderPositionedBox(), child3,
+    ]);
     pumpFrame();
-    table.setFlatChildren(3, <RenderBox>[RenderPositionedBox(), child1, RenderPositionedBox(),
-                                         child2, RenderPositionedBox(), child3]);
+    table.setFlatChildren(3, <RenderBox>[
+      RenderPositionedBox(), child1, RenderPositionedBox(),
+      child2, RenderPositionedBox(), child3,
+    ]);
     pumpFrame();
     expect(table.columns, equals(3));
     expect(table.rows, equals(2));
@@ -208,12 +214,16 @@ void main() {
     table.setFlatChildren(2, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox() ]);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path());
-    table.setFlatChildren(2, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox(),
-                                          RenderPositionedBox(), RenderPositionedBox() ]);
+    table.setFlatChildren(2, <RenderBox>[
+      RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(), RenderPositionedBox(),
+    ]);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path()..path());
-    table.setFlatChildren(3, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
-                                          RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox() ]);
+    table.setFlatChildren(3, <RenderBox>[
+      RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
+    ]);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path()..path());
   });

@@ -43,7 +43,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
-    _mouseTracker = _createMouseTracker();
+    initMouseTracker();
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -96,7 +96,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           }
           debugCheckElevationsEnabled = value;
           return _forceRepaint();
-        }
+        },
       );
       registerSignalServiceExtension(
         name: 'debugDumpLayerTree',
@@ -138,14 +138,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// Creates a [RenderView] object to be the root of the
   /// [RenderObject] rendering tree, and initializes it so that it
-  /// will be rendered when the engine is next ready to display a
-  /// frame.
+  /// will be rendered when the next frame is requested.
   ///
   /// Called automatically when the binding is created.
   void initRenderView() {
     assert(renderView == null);
     renderView = RenderView(configuration: createViewConfiguration(), window: window);
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
   }
 
   /// The object that manages state about currently connected mice, for hover
@@ -239,10 +238,14 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   SemanticsHandle _semanticsHandle;
 
-  // Creates a [MouseTracker] which manages state about currently connected
-  // mice, for hover notification.
-  MouseTracker _createMouseTracker() {
-    return MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
+  /// Creates a [MouseTracker] which manages state about currently connected
+  /// mice, for hover notification.
+  ///
+  /// Used by testing framework to reinitialize the mouse tracker between tests.
+  @visibleForTesting
+  void initMouseTracker([MouseTracker tracker]) {
+    _mouseTracker?.dispose();
+    _mouseTracker = tracker ?? MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
   }
 
   void _handleSemanticsEnabledChanged() {
@@ -405,7 +408,7 @@ void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
 /// that layer's binding.
 ///
 /// See also [BindingBase].
-class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, SemanticsBinding, RendererBinding {
+class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, SemanticsBinding, PaintingBinding, RendererBinding {
   /// Creates a binding for the rendering layer.
   ///
   /// The `root` render box is attached directly to the [renderView] and is

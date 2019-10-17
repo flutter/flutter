@@ -25,7 +25,7 @@ void main() {
       overrides: <Type, Generator>{
         Platform: () => linux,
         FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      }
+      },
     );
   });
 

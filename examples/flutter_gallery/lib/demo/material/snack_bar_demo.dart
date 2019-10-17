@@ -88,7 +88,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         tooltip: 'Create',
         onPressed: () {
           print('Floating Action Button was pressed');
-        }
+        },
       ),
     );
   }

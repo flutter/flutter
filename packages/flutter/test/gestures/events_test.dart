@@ -57,8 +57,27 @@ void main() {
       tilt: 1.1,
       synthesized: true,
     );
+    const PointerEvent move = PointerMoveEvent(
+      timeStamp: Duration(days: 1),
+      kind: PointerDeviceKind.unknown,
+      device: 10,
+      position: Offset(101.0, 202.0),
+      buttons: 7,
+      obscured: true,
+      pressureMax: 2.1,
+      pressureMin: 1.1,
+      distanceMax: 110,
+      size: 11,
+      radiusMajor: 11,
+      radiusMinor: 9,
+      radiusMin: 1.1,
+      radiusMax: 22,
+      orientation: 1.1,
+      tilt: 1.1,
+      synthesized: true,
+    );
 
-    test('PointerEnterEvent.fromMouseEvent', () {
+    test('PointerEnterEvent.fromMouseEvent(hover)', () {
       final PointerEnterEvent event = PointerEnterEvent.fromMouseEvent(hover);
       const PointerEnterEvent empty = PointerEnterEvent();
       expect(event.timeStamp,   hover.timeStamp);
@@ -85,7 +104,7 @@ void main() {
       expect(event.synthesized, hover.synthesized);
     });
 
-    test('PointerExitEvent.fromMouseEvent', () {
+    test('PointerExitEvent.fromMouseEvent(hover)', () {
       final PointerExitEvent event = PointerExitEvent.fromMouseEvent(hover);
       const PointerExitEvent empty = PointerExitEvent();
       expect(event.timeStamp,   hover.timeStamp);
@@ -110,6 +129,60 @@ void main() {
       expect(event.orientation, hover.orientation);
       expect(event.tilt,        hover.tilt);
       expect(event.synthesized, hover.synthesized);
+    });
+
+    test('PointerEnterEvent.fromMouseEvent(move)', () {
+      final PointerEnterEvent event = PointerEnterEvent.fromMouseEvent(move);
+      const PointerEnterEvent empty = PointerEnterEvent();
+      expect(event.timeStamp,   move.timeStamp);
+      expect(event.pointer,     empty.pointer);
+      expect(event.kind,        move.kind);
+      expect(event.device,      move.device);
+      expect(event.position,    move.position);
+      expect(event.buttons,     move.buttons);
+      expect(event.down,        move.down);
+      expect(event.obscured,    move.obscured);
+      expect(event.pressure,    empty.pressure);
+      expect(event.pressureMin, move.pressureMin);
+      expect(event.pressureMax, move.pressureMax);
+      expect(event.distance,    move.distance);
+      expect(event.distanceMax, move.distanceMax);
+      expect(event.distanceMax, move.distanceMax);
+      expect(event.size,        move.size);
+      expect(event.radiusMajor, move.radiusMajor);
+      expect(event.radiusMinor, move.radiusMinor);
+      expect(event.radiusMin,   move.radiusMin);
+      expect(event.radiusMax,   move.radiusMax);
+      expect(event.orientation, move.orientation);
+      expect(event.tilt,        move.tilt);
+      expect(event.synthesized, move.synthesized);
+    });
+
+    test('PointerExitEvent.fromMouseEvent(move)', () {
+      final PointerExitEvent event = PointerExitEvent.fromMouseEvent(move);
+      const PointerExitEvent empty = PointerExitEvent();
+      expect(event.timeStamp,   move.timeStamp);
+      expect(event.pointer,     empty.pointer);
+      expect(event.kind,        move.kind);
+      expect(event.device,      move.device);
+      expect(event.position,    move.position);
+      expect(event.buttons,     move.buttons);
+      expect(event.down,        move.down);
+      expect(event.obscured,    move.obscured);
+      expect(event.pressure,    empty.pressure);
+      expect(event.pressureMin, move.pressureMin);
+      expect(event.pressureMax, move.pressureMax);
+      expect(event.distance,    move.distance);
+      expect(event.distanceMax, move.distanceMax);
+      expect(event.distanceMax, move.distanceMax);
+      expect(event.size,        move.size);
+      expect(event.radiusMajor, move.radiusMajor);
+      expect(event.radiusMinor, move.radiusMinor);
+      expect(event.radiusMin,   move.radiusMin);
+      expect(event.radiusMax,   move.radiusMax);
+      expect(event.orientation, move.orientation);
+      expect(event.tilt,        move.tilt);
+      expect(event.synthesized, move.synthesized);
     });
   });
 

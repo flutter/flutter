@@ -25,7 +25,7 @@ void main() {
       const FlipWidget(
         left: DecoratedBox(decoration: kBoxDecorationA),
         right: DecoratedBox(decoration: kBoxDecorationB),
-      )
+      ),
     );
 
     checkTree(kBoxDecorationA);
@@ -34,7 +34,7 @@ void main() {
       const FlipWidget(
         left: DecoratedBox(decoration: kBoxDecorationB),
         right: DecoratedBox(decoration: kBoxDecorationA),
-      )
+      ),
     );
 
     checkTree(kBoxDecorationB);
@@ -49,7 +49,7 @@ void main() {
       const FlipWidget(
         left: DecoratedBox(decoration: kBoxDecorationA),
         right: DecoratedBox(decoration: kBoxDecorationB),
-      )
+      ),
     );
 
     checkTree(kBoxDecorationB);
@@ -61,7 +61,7 @@ void main() {
         key: const Key('rebuild test'),
         left: TestBuildCounter(),
         right: const DecoratedBox(decoration: kBoxDecorationB),
-      )
+      ),
     );
 
     expect(TestBuildCounter.buildCount, equals(1));

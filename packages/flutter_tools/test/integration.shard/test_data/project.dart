@@ -28,8 +28,9 @@ abstract class Project {
 
   int lineContaining(String contents, String search) {
     final int index = contents.split('\n').indexWhere((String l) => l.contains(search));
-    if (index == -1)
+    if (index == -1) {
       throw Exception("Did not find '$search' inside the file");
+    }
     return index + 1; // first line is line 1, not line 0
   }
 }

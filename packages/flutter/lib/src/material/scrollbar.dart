@@ -76,7 +76,10 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    assert((() { _useCupertinoScrollbar = null; return true; })());
+    assert((() {
+      _useCupertinoScrollbar = null;
+      return true;
+    })());
     final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.iOS:

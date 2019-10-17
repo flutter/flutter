@@ -58,8 +58,7 @@ class FuchsiaPM {
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
   /// is set up to be the file `meta/package` created by [init].
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,
@@ -118,7 +117,7 @@ class FuchsiaPM {
       '-l',
       '$host:$port',
     ];
-    final Process process = await runCommand(command);
+    final Process process = await processUtils.start(command);
     process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -151,8 +150,8 @@ class FuchsiaPM {
     if (fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
-    final List<String> command = <String>[fuchsiaArtifacts.pm.path] + args;
-    final RunResult result = await runAsync(command);
+    final List<String> command = <String>[fuchsiaArtifacts.pm.path, ...args];
+    final RunResult result = await processUtils.run(command);
     return result.exitCode == 0;
   }
 }

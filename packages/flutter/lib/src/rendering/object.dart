@@ -1027,7 +1027,10 @@ class PipelineOwner {
       Timeline.startSync('Semantics');
     }
     assert(_semanticsOwner != null);
-    assert(() { _debugDoingSemantics = true; return true; }());
+    assert(() {
+      _debugDoingSemantics = true;
+      return true;
+    }());
     try {
       final List<RenderObject> nodesToProcess = _nodesNeedingSemantics.toList()
         ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
@@ -1039,7 +1042,10 @@ class PipelineOwner {
       _semanticsOwner.sendSemanticsUpdate();
     } finally {
       assert(_nodesNeedingSemantics.isEmpty);
-      assert(() { _debugDoingSemantics = false; return true; }());
+      assert(() {
+        _debugDoingSemantics = false;
+        return true;
+      }());
       if (!kReleaseMode) {
         Timeline.finishSync();
       }
@@ -1276,7 +1282,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         // users. Inspector users can see the full tree by clicking on the
         // render object so this may not be that useful.
         yield describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
-      }
+      },
     ));
   }
 
@@ -1681,14 +1687,23 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return true;
     }());
     if (sizedByParent) {
-      assert(() { _debugDoingThisResize = true; return true; }());
+      assert(() {
+        _debugDoingThisResize = true;
+        return true;
+      }());
       try {
         performResize();
-        assert(() { debugAssertDoesMeetConstraints(); return true; }());
+        assert(() {
+          debugAssertDoesMeetConstraints();
+          return true;
+        }());
       } catch (e, stack) {
         _debugReportException('performResize', e, stack);
       }
-      assert(() { _debugDoingThisResize = false; return true; }());
+      assert(() {
+        _debugDoingThisResize = false;
+        return true;
+      }());
     }
     RenderObject debugPreviousActiveLayout;
     assert(() {
@@ -1700,7 +1715,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     try {
       performLayout();
       markNeedsSemanticsUpdate();
-      assert(() { debugAssertDoesMeetConstraints(); return true; }());
+      assert(() {
+        debugAssertDoesMeetConstraints();
+        return true;
+      }());
     } catch (e, stack) {
       _debugReportException('performLayout', e, stack);
     }
@@ -2143,7 +2161,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           ErrorDescription(
             'Since this typically indicates an infinite recursion, it is '
             'disallowed.'
-          )
+          ),
         ]);
       }
       return true;
@@ -2175,7 +2193,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           ),
           ErrorHint(
             'This usually indicates an error in the Flutter framework itself.'
-          )
+          ),
         ]);
       }
       return true;
@@ -2860,7 +2878,7 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
             'was created by',
             child.debugCreator,
             style: DiagnosticsTreeStyle.errorProperty,
-          )
+          ),
         ]);
       }
       return true;
@@ -3213,6 +3231,40 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   }
 }
 
+/// Mixin for [RenderObject] that will call [systemFontsDidChange] whenever the
+/// system fonts change.
+///
+/// System fonts can change when the OS install or remove a font. Use this mixin if
+/// the [RenderObject] uses [TextPainter] or [Paragraph] to correctly update the
+/// text when it happens.
+mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
+
+  /// A callback that is called when system fonts have changed.
+  ///
+  /// By default, [markNeedsLayout] is called on the [RenderObject]
+  /// implementing this mixin.
+  ///
+  /// Subclass should override this method to clear any extra cache that depend
+  /// on font-related metrics.
+  @protected
+  @mustCallSuper
+  void systemFontsDidChange() {
+    markNeedsLayout();
+  }
+
+  @override
+  void attach(covariant Object owner) {
+    super.attach(owner);
+    PaintingBinding.instance.systemFonts.addListener(systemFontsDidChange);
+  }
+
+  @override
+  void detach() {
+    PaintingBinding.instance.systemFonts.removeListener(systemFontsDidChange);
+    super.detach();
+  }
+}
+
 /// Variant of [FlutterErrorDetails] with extra fields for the rendering
 /// library.
 class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
@@ -3235,7 +3287,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     library: library,
     context: context,
     informationCollector: informationCollector,
-    silent: silent
+    silent: silent,
   );
 
   /// The RenderObject that was being processed when the exception was caught.
@@ -3779,11 +3831,11 @@ class _SemanticsGeometry {
 class DiagnosticsDebugCreator extends DiagnosticsProperty<Object> {
   /// Create a [DiagnosticsProperty] with its [value] initialized to input
   /// [RenderObject.debugCreator].
-  DiagnosticsDebugCreator(Object value):
-    assert(value != null),
-    super(
-      'debugCreator',
-      value,
-      level: DiagnosticLevel.hidden
-    );
+  DiagnosticsDebugCreator(Object value)
+    : assert(value != null),
+      super(
+        'debugCreator',
+        value,
+        level: DiagnosticLevel.hidden,
+      );
 }

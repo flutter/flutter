@@ -76,7 +76,7 @@ void main() {
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(tab2.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab2.text.style.color.value, 0xFF999999);
 
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
@@ -86,7 +86,7 @@ void main() {
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
     ));
-    expect(tab1.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab1.text.style.color.value, 0xFF999999);
     tab2 = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
@@ -373,12 +373,12 @@ void main() {
       matching: find.byType(RichText),
     ));
     // Tab 2 should still be selected after changing theme.
-    expect(tab1.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab1.text.style.color.value, 0xFF757575);
     final RichText tab2 = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(tab2.text.style.color, CupertinoColors.destructiveRed);
+    expect(tab2.text.style.color.value, CupertinoColors.systemRed.darkColor.value);
   });
 
   testWidgets('Tab contents are padded when there are view insets', (WidgetTester tester) async {
@@ -443,7 +443,7 @@ void main() {
         tabBuilder: (BuildContext context, int index) {
           return const Placeholder();
         },
-      )
+      ),
     );
 
     await tester.pumpWidget(
@@ -452,7 +452,7 @@ void main() {
           data: const MediaQueryData(
             viewInsets: EdgeInsets.only(bottom: 20.0),
           ),
-          child: child
+          child: child,
         ),
       ),
     );
@@ -554,7 +554,7 @@ void main() {
             return Text('Different page ${index + 1}');
           },
         ),
-      )
+      ),
     );
 
     expect(tabsBuilt, const <int>[0, 1]);
@@ -653,7 +653,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       expect(tabsPainted, const <int> [0]);
@@ -675,7 +675,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       expect(tabsPainted, const <int> [0, 0]);
@@ -739,7 +739,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) => const Placeholder()
+          tabBuilder: (BuildContext context, int index) => const Placeholder(),
         ),
       ),
     );
@@ -756,7 +756,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) => const Placeholder()
+          tabBuilder: (BuildContext context, int index) => const Placeholder(),
         ),
       ),
     );
@@ -867,12 +867,12 @@ void main() {
                         onPaint: () => tabsPainted0.add(index)
                       )
                     );
-                  }
+                  },
                 ),
-              ]
-            )
-          )
-        )
+              ],
+            ),
+          ),
+        ),
       );
       expect(tabsPainted0, const <int>[2, 0, 1, 2]);
       expect(tabsPainted1, const <int>[2, 0]);
@@ -892,7 +892,7 @@ void main() {
             controller: controller,
             tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
           ),
-        )
+        ),
       );
     } on AssertionError catch (e) {
       expect(e.toString(), contains('controller.index < tabBar.items.length'));
@@ -907,7 +907,7 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
         ),
-      )
+      ),
     );
 
     expect(tester.takeException(), null);
@@ -918,6 +918,55 @@ void main() {
     final String message = tester.takeException().toString();
     expect(message, contains('current index ${controller.index}'));
     expect(message, contains('with 3 tabs'));
+  });
+
+  testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+
+    final List<FocusScopeNode> scopes = List<FocusScopeNode>(5);
+    await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+            ),
+            controller: controller,
+            tabBuilder: (BuildContext context, int index) {
+              scopes[index] = FocusScope.of(context);
+              return Container();
+            },
+          ),
+        ),
+    );
+
+    for (int i = 0; i < 3; i++) {
+      controller.index = i;
+      await tester.pump();
+    }
+    await tester.pump();
+
+    final List<FocusScopeNode> newScopes = List<FocusScopeNode>(5);
+    await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(5, tabGenerator),
+            ),
+            controller: controller,
+            tabBuilder: (BuildContext context, int index) {
+              newScopes[index] = FocusScope.of(context);
+              return Container();
+            },
+          ),
+        ),
+    );
+    for (int i = 0; i < 5; i++) {
+      controller.index = i;
+      await tester.pump();
+    }
+    await tester.pump();
+
+    expect(scopes.sublist(0, 3), equals(newScopes.sublist(0, 3)));
   });
 
   testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
@@ -992,7 +1041,7 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i'))
+                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i')),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),
