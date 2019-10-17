@@ -209,7 +209,8 @@ class PerfTest {
         '-d',
         deviceId,
       ]);
-      final Map<String, dynamic> data = json.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync());
+      final Map<String, dynamic> data = json.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json')
+        .readAsStringSync());
 
       if (data['frame_count'] < 5) {
         return TaskResult.failure(
