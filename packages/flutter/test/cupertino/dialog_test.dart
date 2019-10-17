@@ -1055,6 +1055,36 @@ void main() {
     expect(find.byKey(const Key('option_2')), findsOneWidget);
     expect(find.byKey(const Key('option_3')), findsNothing);
   });
+
+  testWidgets('Dialog widget insets by MediaQuery viewInsets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(viewInsets: EdgeInsets.zero),
+          child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
+        ),
+      ),
+    );
+
+    final Rect placeholderRectWithoutInsets = tester.getRect(find.byType(Placeholder));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(viewInsets: EdgeInsets.fromLTRB(40.0, 30.0, 20.0, 10.0)),
+          child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
+        ),
+      ),
+    );
+
+    // no change yet because padding is animated
+    expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    // once animation settles the dialog is padded by the new viewInsets
+    expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
