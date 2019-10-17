@@ -3363,6 +3363,7 @@ mixin Diagnosticable {
   /// Used by [toDiagnosticsNode] and [toString].
   @protected
   @mustCallSuper
+  @visibleForTesting
   void debugFillProperties(DiagnosticPropertiesBuilder properties) { }
 }
 

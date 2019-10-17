@@ -476,7 +476,7 @@ class MaterialApp extends StatefulWidget {
   ///   return WidgetsApp(
   ///     shortcuts: <LogicalKeySet, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
-  ///       LogicalKeySet(LogicalKeyboardKey.select): const Intent(ActivateAction.key),
+  ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
   ///     builder: (BuildContext context, Widget child) {
@@ -502,12 +502,12 @@ class MaterialApp extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return WidgetsApp(
-  ///     actions: <LocalKey, ActionFactory>{
+  ///     actions: <Type, Action<Intent>>{
   ///       ... WidgetsApp.defaultActions,
-  ///       ActivateAction.key: () => CallbackAction(
-  ///         ActivateAction.key,
-  ///         onInvoke: (FocusNode focusNode, Intent intent) {
+  ///       ActivateAction: CallbackAction(
+  ///         onInvoke: (Intent intent) {
   ///           // Do something here...
+  ///           return null;
   ///         },
   ///       ),
   ///     },
@@ -520,7 +520,7 @@ class MaterialApp extends StatefulWidget {
   /// ```
   /// {@end-tool}
   /// {@macro flutter.widgets.widgetsApp.actions.seeAlso}
-  final Map<LocalKey, ActionFactory> actions;
+  final Map<Type, Action<Intent>> actions;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.

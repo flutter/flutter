@@ -284,8 +284,12 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// The optional `keysPressed` argument provides an override to keys that the
   /// [RawKeyboard] reports. If not specified, uses [RawKeyboard.keysPressed]
   /// instead.
+  ///
+  /// If a key mapping is found, then the associated action will be invoked
+  /// using the [Intent] that the [LogicalKeySet] maps to, and the currently
+  /// focused widget's context (from [FocusManager.primaryFocus]).
   @protected
-  bool handleKeypress(
+  Object handleKeypress(
     BuildContext context,
     RawKeyEvent event, {
     LogicalKeySet keysPressed,
@@ -314,12 +318,10 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     }
     if (matchedIntent != null) {
       final BuildContext primaryContext = primaryFocus?.context;
-      if (primaryContext == null) {
-        return false;
-      }
+      assert (primaryContext != null);
       return Actions.invoke(primaryContext, matchedIntent, nullOk: true);
     }
-    return false;
+    return null;
   }
 
   @override
@@ -456,7 +458,7 @@ class _ShortcutsState extends State<Shortcuts> {
     if (node.context == null) {
       return false;
     }
-    return manager.handleKeypress(node.context, event) || manager.modal;
+    return manager.handleKeypress(node.context, event) != null || manager.modal;
   }
 
   @override
