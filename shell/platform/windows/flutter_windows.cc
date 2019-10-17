@@ -20,6 +20,7 @@
 #include "flutter/shell/platform/windows/platform_handler.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
 #include "flutter/shell/platform/windows/win32_flutter_window.h"
+#include "flutter/shell/platform/windows/win32_task_runner.h"
 #include "flutter/shell/platform/windows/window_state.h"
 
 static_assert(FLUTTER_ENGINE_VERSION == 1, "");
@@ -30,13 +31,16 @@ static_assert(FLUTTER_ENGINE_VERSION == 1, "");
 // the necessary callbacks for rendering within a win32window (if one is
 // provided).
 //
-// Returns a caller-owned pointer to the engine.
-static FLUTTER_API_SYMBOL(FlutterEngine)
-    RunFlutterEngine(flutter::Win32FlutterWindow* window,
-                     const char* assets_path,
-                     const char* icu_data_path,
-                     const char** arguments,
-                     size_t arguments_count) {
+// Returns the state object for the engine, or null on failure to start the
+// engine.
+static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
+    flutter::Win32FlutterWindow* window,
+    const char* assets_path,
+    const char* icu_data_path,
+    const char** arguments,
+    size_t arguments_count) {
+  auto state = std::make_unique<FlutterDesktopEngineState>();
+
   // FlutterProjectArgs is expecting a full argv, so when processing it for
   // flags the first item is treated as the executable and ignored. Add a dummy
   // value so that all provided arguments are used.
@@ -47,9 +51,8 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
 
   window->CreateRenderSurface();
 
-  FlutterRendererConfig config = {};
-
   // Provide the necessary callbacks for rendering within a win32 child window.
+  FlutterRendererConfig config = {};
   config.type = kOpenGL;
   config.open_gl.struct_size = sizeof(config.open_gl);
   config.open_gl.make_current = [](void* user_data) -> bool {
@@ -74,6 +77,33 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
     return host->MakeResourceCurrent();
   };
 
+  // Configure task runner interop.
+  auto state_ptr = state.get();
+  state->task_runner = std::make_unique<flutter::Win32TaskRunner>(
+      GetCurrentThreadId(), [state_ptr](const auto* task) {
+        if (FlutterEngineRunTask(state_ptr->engine, task) != kSuccess) {
+          std::cerr << "Could not post an engine task." << std::endl;
+        }
+      });
+  FlutterTaskRunnerDescription platform_task_runner = {};
+  platform_task_runner.struct_size = sizeof(FlutterTaskRunnerDescription);
+  platform_task_runner.user_data = state->task_runner.get();
+  platform_task_runner.runs_task_on_current_thread_callback =
+      [](void* user_data) -> bool {
+    return reinterpret_cast<flutter::Win32TaskRunner*>(user_data)
+        ->RunsTasksOnCurrentThread();
+  };
+  platform_task_runner.post_task_callback = [](FlutterTask task,
+                                               uint64_t target_time_nanos,
+                                               void* user_data) -> void {
+    reinterpret_cast<flutter::Win32TaskRunner*>(user_data)->PostTask(
+        task, target_time_nanos);
+  };
+
+  FlutterCustomTaskRunners custom_task_runners = {};
+  custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
+  custom_task_runners.platform_task_runner = &platform_task_runner;
+
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
   args.assets_path = assets_path;
@@ -86,8 +116,7 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
     auto window = reinterpret_cast<flutter::Win32FlutterWindow*>(user_data);
     return window->HandlePlatformMessage(engine_message);
   };
-
-  // args.custom_task_runners = custom_task_runners; TODO
+  args.custom_task_runners = &custom_task_runners;
 
   FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
   auto result =
@@ -97,8 +126,8 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
               << std::endl;
     return nullptr;
   }
-
-  return engine;
+  state->engine = engine;
+  return state;
 }
 
 FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
@@ -112,30 +141,29 @@ FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
       flutter::Win32FlutterWindow::CreateWin32FlutterWindow(initial_width,
                                                             initial_height);
 
-  auto engine = RunFlutterEngine(state->view.get(), assets_path, icu_data_path,
-                                 arguments, argument_count);
+  auto engine_state = RunFlutterEngine(
+      state->view.get(), assets_path, icu_data_path, arguments, argument_count);
 
-  if (engine == nullptr) {
+  if (!engine_state) {
     return nullptr;
   }
-
-  state->view->SetState(engine);
-  state->engine = engine;
-
+  state->view->SetState(engine_state->engine);
+  state->engine_state = std::move(engine_state);
   return state;
 }
 
-void FlutterDesktopProcessMessages() {
-  __FlutterEngineFlushPendingTasksNow();
+uint64_t FlutterDesktopProcessMessages(
+    FlutterDesktopViewControllerRef controller) {
+  return controller->engine_state->task_runner->ProcessTasks().count();
 }
 
 HWND FlutterDesktopGetHWND(FlutterDesktopViewControllerRef controller) {
-  return (controller)->view->GetWindowHandle();
+  return controller->view->GetWindowHandle();
 }
 
 void FlutterDesktopDestroyViewController(
     FlutterDesktopViewControllerRef controller) {
-  FlutterEngineShutdown(controller->engine);
+  FlutterEngineShutdown(controller->engine_state->engine);
   delete controller;
 }
 
@@ -155,12 +183,7 @@ FlutterDesktopEngineRef FlutterDesktopRunEngine(const char* assets_path,
                                                 size_t argument_count) {
   auto engine = RunFlutterEngine(nullptr, assets_path, icu_data_path, arguments,
                                  argument_count);
-  if (engine == nullptr) {
-    return nullptr;
-  }
-  auto engine_state = new FlutterDesktopEngineState();
-  engine_state->engine = engine;
-  return engine_state;
+  return engine.release();
 }
 
 bool FlutterDesktopShutDownEngine(FlutterDesktopEngineRef engine_ref) {

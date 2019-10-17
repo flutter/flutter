@@ -44,8 +44,8 @@ HWND FlutterViewController::GetNativeWindow() {
   return FlutterDesktopGetHWND(controller_);
 }
 
-void FlutterViewController::ProcessMessages() {
-  FlutterDesktopProcessMessages();
+std::chrono::nanoseconds FlutterViewController::ProcessMessages() {
+  return std::chrono::nanoseconds(FlutterDesktopProcessMessages(controller_));
 }
 
 FlutterDesktopPluginRegistrarRef FlutterViewController::GetRegistrarForPlugin(

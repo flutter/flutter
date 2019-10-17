@@ -55,6 +55,8 @@ source_set("flutter_windows_source") {
     "win32_dpi_helper.h",
     "win32_flutter_window.cc",
     "win32_flutter_window.h",
+    "win32_task_runner.cc",
+    "win32_task_runner.h",
     "win32_window.cc",
     "win32_window.h",
     "window_state.h",
