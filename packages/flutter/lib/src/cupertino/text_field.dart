@@ -796,6 +796,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 _effectiveController.clear();
                 if (widget.onChanged != null && textChanged)
                   widget.onChanged(_effectiveController.text);
+                _requestKeyboard();
               } : null,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6.0),
