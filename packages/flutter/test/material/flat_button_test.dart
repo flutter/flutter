@@ -374,7 +374,7 @@ void main() {
     await tester.longPress(find.byType(FlatButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 0);
-  });  
+  });
 
   testWidgets('FlatButton onPressed and onLongPress callbacks are distincly recognized', (WidgetTester tester) async {
     bool didPressButton = false;

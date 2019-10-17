@@ -448,7 +448,7 @@ void main() {
     await tester.longPress(find.byType(RawMaterialButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 0);
-  });  
+  });
 
   testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distincly recognized', (WidgetTester tester) async {
     bool didPressButton = false;

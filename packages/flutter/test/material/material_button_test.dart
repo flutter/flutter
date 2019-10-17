@@ -108,7 +108,7 @@ testWidgets('MaterialButton responds to tap and onLongPress when enabled', (Widg
     await tester.longPress(find.byType(MaterialButton));
     await tester.pumpAndSettle();
     expect(pressedCount, 0);
-  });  
+  });
 
   testWidgets('MaterialButton onPressed and onLongPress callbacks are distincly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
