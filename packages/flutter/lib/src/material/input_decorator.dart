@@ -497,6 +497,7 @@ class _Decoration {
     this.counter,
     this.container,
     this.alignLabelWithHint,
+    this.isDense,
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
@@ -509,6 +510,7 @@ class _Decoration {
   final InputBorder border;
   final _InputBorderGap borderGap;
   final bool alignLabelWithHint;
+  final bool isDense;
   final Widget icon;
   final Widget input;
   final Widget label;
@@ -1038,16 +1040,19 @@ class _RenderDecoration extends RenderBox {
       + fixBelowInput
       + contentPadding.bottom,
     );
+    final double minContainerHeight = decoration.isDense || expands
+      ? 0.0
+      : kMinInteractiveDimension;
     final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
     final double containerHeight = expands
       ? maxContainerHeight
-      : math.min(math.max(contentHeight, kMinInteractiveDimension), maxContainerHeight);
+      : contentHeight.clamp(minContainerHeight, maxContainerHeight);
 
     // Ensure the text is vertically centered in cases where the content is
     // shorter than kMinInteractiveDimension.
-    final double interactiveAdjustment = expands || contentHeight > kMinInteractiveDimension
-      ? 0.0
-      : (kMinInteractiveDimension - contentHeight) / 2.0;
+    final double interactiveAdjustment = minContainerHeight > contentHeight
+      ? (minContainerHeight - contentHeight) / 2.0
+      : 0.0;
 
     // Try to consider the prefix/suffix as part of the text when aligning it.
     // If the prefix/suffix overflows however, allow it to extend outside of the
@@ -2267,6 +2272,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         input: widget.child,
         label: label,
         alignLabelWithHint: decoration.alignLabelWithHint,
+        isDense: decoration.isDense,
         hint: hint,
         prefix: prefix,
         suffix: suffix,
