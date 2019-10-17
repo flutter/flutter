@@ -620,6 +620,12 @@ void main() {
               '   Just use the scale gesture recognizer.\n',
           );
           expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+          expect(
+            error.diagnostics.last.toStringDeep(),
+            equalsIgnoringHashCodes(
+              'Just use the scale gesture recognizer.\n',
+            )
+          );
         }
       });
 
@@ -681,6 +687,15 @@ void main() {
             '   GestureDetector object.\n',
           );
           expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+          expect(
+            error.diagnostics.last.toStringDeep(),
+            equalsIgnoringHashCodes(
+              'To set the gesture recognizers at other times, trigger a new\n'
+              'build using setState() and provide the new gesture recognizers as\n'
+              'constructor arguments to the corresponding RawGestureDetector or\n'
+              'GestureDetector object.\n'
+            ),
+          );
         }
       });
     });

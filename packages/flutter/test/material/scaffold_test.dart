@@ -1721,7 +1721,31 @@ void main() {
       );
       expect(error.diagnostics.length, 5);
       expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[2].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'There are several ways to avoid this problem. The simplest is to\n'
+          'use a Builder to get a context that is "under" the Scaffold. For\n'
+          'an example of this, please see the documentation for\n'
+          'Scaffold.of():\n'
+          '  https://api.flutter.dev/flutter/material/Scaffold/of.html\n',
+        ),
+      );
       expect(error.diagnostics[3].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[3].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'A more efficient solution is to split your build function into\n'
+          'several widgets. This introduces a new context from which you can\n'
+          'obtain the Scaffold. In this solution, you would have an outer\n'
+          'widget that creates the Scaffold populated by instances of your\n'
+          'new inner widgets, and then in these inner widgets you would use\n'
+          'Scaffold.of().\n'
+          'A less elegant but more expedient solution is assign a GlobalKey\n'
+          'to the Scaffold, then use the key.currentState property to obtain\n'
+          'the ScaffoldState rather than using the Scaffold.of() function.\n',
+        ),
+      );
       expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
     });
 
@@ -1764,7 +1788,28 @@ void main() {
       );
       expect(error.diagnostics.length, 5);
       expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[2].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'There are several ways to avoid this problem. The simplest is to\n'
+          'use a Builder to get a context that is "under" the Scaffold. For\n'
+          'an example of this, please see the documentation for\n'
+          'Scaffold.of():\n'
+          '  https://api.flutter.dev/flutter/material/Scaffold/of.html\n',
+        ),
+      );
       expect(error.diagnostics[3].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[3].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'A more efficient solution is to split your build function into\n'
+          'several widgets. This introduces a new context from which you can\n'
+          'obtain the Scaffold. In this solution, you would have an outer\n'
+          'widget that creates the Scaffold populated by instances of your\n'
+          'new inner widgets, and then in these inner widgets you would use\n'
+          'Scaffold.geometryOf().\n',
+        ),
+      );
       expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
     });
   });

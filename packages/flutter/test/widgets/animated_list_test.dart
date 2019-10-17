@@ -212,6 +212,16 @@ void main() {
     );
     expect(error.diagnostics.length, 4);
     expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[2].toStringDeep(),
+      equalsIgnoringHashCodes(
+        'This can happen when the context provided is from the same\n'
+        'StatefulWidget that built the AnimatedList. Please see the\n'
+        'AnimatedList documentation for examples of how to refer to an\n'
+        'AnimatedListState object:\n'
+        'https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
+      ),
+    );
     expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Element>>());
   });
 }

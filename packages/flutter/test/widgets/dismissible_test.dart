@@ -787,5 +787,13 @@ void main() {
         '   handler has fired.\n',
     );
     expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics.last.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'Make sure to implement the onDismissed handler and to immediately\n'
+        'remove the Dismissible widget from the application once that\n'
+        'handler has fired.\n',
+      ),
+    );
   });
 }

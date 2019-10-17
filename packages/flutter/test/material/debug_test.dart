@@ -32,6 +32,14 @@ void main() {
     );
     expect(error.diagnostics.length, 5);
     expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[2].toStringDeep(),
+      equalsIgnoringHashCodes(
+        'To introduce a Material widget, you can either directly include\n'
+        'one, or use a widget that contains Material itself, such as a\n'
+        'Card, Dialog, Drawer, or Scaffold.\n',
+      ),
+    );
     expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[4], isInstanceOf<DiagnosticsBlock>());
   });
@@ -60,6 +68,14 @@ void main() {
     );
     expect(error.diagnostics.length, 6);
     expect(error.diagnostics[3].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[3].toStringDeep(),
+      equalsIgnoringHashCodes(
+        'To introduce a MaterialLocalizations, either use a  MaterialApp\n'
+        'at the root of your application to include them automatically, or\n'
+        'add a Localization widget with a MaterialLocalizations delegate.\n',
+      ),
+    );
     expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[5], isInstanceOf<DiagnosticsBlock>());
   });
@@ -153,5 +169,12 @@ void main() {
     expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[3], isInstanceOf<DiagnosticsBlock>());
     expect(error.diagnostics[4].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[4].toStringDeep(),
+      equalsIgnoringHashCodes(
+        'Typically, the Scaffold widget is introduced by the MaterialApp\n'
+        'or WidgetsApp widget at the top of your application widget tree.\n',
+      ),
+    );
   });
 }

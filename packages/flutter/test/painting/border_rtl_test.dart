@@ -141,6 +141,13 @@ void main() {
     ));
     expect(error.diagnostics.length, 3);
     expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[2].toStringDeep(),
+      equalsIgnoringHashCodes(
+        'For a more general interpolation method, consider using\n'
+        'ShapeBorder.lerp instead.\n',
+      ),
+    );
   });
 
   test('BoxBorder.getInnerPath / BoxBorder.getOuterPath', () {

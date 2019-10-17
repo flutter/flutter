@@ -157,9 +157,17 @@ void main() {
       '   and only then if the callback itself is entirely synchronous.\n'
       '   If this is the initial registration of the callback, or if the\n'
       '   callback is asynchronous, then do not use the "rescheduling"\n'
-      '   argument.\n',
+      '   argument.\n'
     );
     expect(error.diagnostics.length, 3);
     expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics.last.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'If this is the initial registration of the callback, or if the\n'
+        'callback is asynchronous, then do not use the "rescheduling"\n'
+        'argument.\n'
+      ),
+    );
   });
 }
