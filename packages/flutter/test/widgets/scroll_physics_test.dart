@@ -212,20 +212,21 @@ void main() {
       error = e;
     } finally {
       expect(error, isNotNull);
-      expect(error.toStringDeep(), equalsIgnoringHashCodes(
-        'FlutterError\n'
-        '   ClampingScrollPhysics.applyBoundaryConditions() was called\n'
-        '   redundantly.\n'
-        '   The proposed new position, 500.0, is exactly equal to the current\n'
-        '   position of the given FixedScrollMetrics, 500.0.\n'
-        '   The applyBoundaryConditions method should only be called when the\n'
-        '   value is going to actually change the pixels, otherwise it is\n'
-        '   redundant.\n'
-        '   The physics object in question was:\n'
-        '     ClampingScrollPhysics\n'
-        '   The position object in question was:\n'
-        '     FixedScrollMetrics(500.0..[0.0]..500.0)\n',
-      ));
+      expect(error.toStringDeep(), matches(RegExp(
+        r'''FlutterError
+   ClampingScrollPhysics\.applyBoundaryConditions\(\) was called
+   redundantly\.
+   The proposed new position\, 500(\.\d*)?, is exactly equal to the current
+   position of the given FixedScrollMetrics, 500(\.\d*)?\.
+   The applyBoundaryConditions method should only be called when the
+   value is going to actually change the pixels, otherwise it is
+   redundant\.
+   The physics object in question was\:
+     ClampingScrollPhysics
+   The position object in question was\:
+     FixedScrollMetrics\(500(\.\d*)?..\[0(\.\d*)?\]..500(\.\d*)?\)
+''',
+      )));
       expect(error.diagnostics.length, 4);
       expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<ScrollPhysics>>());
       expect(error.diagnostics[2].style, DiagnosticsTreeStyle.errorProperty);
