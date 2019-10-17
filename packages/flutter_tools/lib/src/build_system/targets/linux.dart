@@ -79,7 +79,7 @@ class UnpackLinuxDebug extends Target {
         outputs.add(destinationFile);
         continue;
       }
-      // If ths artifact is the directory cpp_client_wrapper, recursively
+      // If the artifact is the directory cpp_client_wrapper, recursively
       // copy every file from it.
       for (File input in fs.directory(entityPath)
           .listSync(recursive: true)
