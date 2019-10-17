@@ -48,14 +48,16 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
 ///
-/// {@tool sample}
+/// {@tool snippet --template=freeform}
 /// This sample application uses an [AnimatedList] to create an effect when
 /// items are removed or added to the list.
 ///
-/// ```dart
+/// ```dart imports
 /// import 'package:flutter/foundation.dart';
 /// import 'package:flutter/material.dart';
+/// ```
 ///
+/// ```dart
 /// class AnimatedListSample extends StatefulWidget {
 ///   @override
 ///   _AnimatedListSampleState createState() => _AnimatedListSampleState();
@@ -484,14 +486,16 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 /// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
 /// input callback.
 ///
-/// {@tool sample}
+/// {@tool snippet --template=freeform}
 /// This sample application uses a [SliverAnimatedList] to create an animated
 /// effect when items are removed or added to the list.
 ///
-/// ```dart
+/// ```dart imports
 /// import 'package:flutter/foundation.dart';
 /// import 'package:flutter/material.dart';
+/// ```
 ///
+/// ```dart
 /// void main() => runApp(SliverAnimatedListSample());
 /// 
 /// class SliverAnimatedListSample extends StatefulWidget {
