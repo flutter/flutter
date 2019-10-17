@@ -861,7 +861,7 @@ flutter:
     });
   });
 
-  group('Gradle HTTP failures', () {
+  group('Gradle failures', () {
     MemoryFileSystem fs;
     Directory tempDir;
     Directory gradleWrapperDirectory;
@@ -960,6 +960,85 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
         1,
       );
       when(mockProcessManager.run(cmd, environment: anyNamed('environment'), workingDirectory: null))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws toolExit if gradle is missing execute permissions. ', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        'Permission denied\nCommand: /home/android/gradlew -v',
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: 'does not have permission to execute by your user'));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws toolExit if gradle times out waiting for exclusive access to zip', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached waiting for exclusive access to file: /User/documents/gradle-5.6.2-all.zip
+	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:61)
+	at org.gradle.wrapper.Install.createDist(Install.java:48)
+	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+     testUsingContext('throws toolExit if gradle exits abnormally', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+ProcessException: Process exited abnormally:
+Exception in thread "main" java.lang.NullPointerException
+	at org.gradle.wrapper.BootstrapMainStarter.findLauncherJar(BootstrapMainStarter.java:34)
+	at org.gradle.wrapper.BootstrapMainStarter.start(BootstrapMainStarter.java:25)
+	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:129)
+	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
         .thenThrow(exception);
       await expectLater(() async {
         await checkGradleDependencies();
