@@ -7257,4 +7257,36 @@ void main() {
     // visible.
     expect(scrollController.offset, 48.0);
   });
+
+  group('height', () {
+    testWidgets('By default, TextField is at least kMinInteractiveDimension high', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(),
+        home: const Scaffold(
+          body: Center(
+            child: TextField(),
+          ),
+        ),
+      ));
+
+      final RenderBox renderBox = tester.renderObject(find.byType(TextField));
+      expect(renderBox.size.height, greaterThanOrEqualTo(kMinInteractiveDimension));
+    });
+
+    testWidgets('When text is very small, TextField still doesn\'t go below kMinInteractiveDimension height', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(),
+        home: const Scaffold(
+          body: Center(
+            child: TextField(
+              style: TextStyle(fontSize: 2.0),
+            ),
+          ),
+        ),
+      ));
+
+      final RenderBox renderBox = tester.renderObject(find.byType(TextField));
+      expect(renderBox.size.height, kMinInteractiveDimension);
+    });
+  });
 }
