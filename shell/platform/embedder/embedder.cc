@@ -411,9 +411,12 @@ CreateEmbedderRenderTarget(const FlutterCompositor* compositor,
   auto c_create_callback = compositor->create_backing_store_callback;
   auto c_collect_callback = compositor->collect_backing_store_callback;
 
-  if (!c_create_callback(&config, &backing_store, compositor->user_data)) {
-    FML_LOG(ERROR) << "Could not create the embedder backing store.";
-    return nullptr;
+  {
+    TRACE_EVENT0("flutter", "FlutterCompositorCreateBackingStore");
+    if (!c_create_callback(&config, &backing_store, compositor->user_data)) {
+      FML_LOG(ERROR) << "Could not create the embedder backing store.";
+      return nullptr;
+    }
   }
 
   if (backing_store.struct_size != sizeof(backing_store)) {
@@ -427,6 +430,7 @@ CreateEmbedderRenderTarget(const FlutterCompositor* compositor,
   // render target is eventually released.
   fml::ScopedCleanupClosure collect_callback(
       [c_collect_callback, backing_store, user_data = compositor->user_data]() {
+        TRACE_EVENT0("flutter", "FlutterCompositorCollectBackingStore");
         c_collect_callback(&backing_store, user_data);
       });
 
@@ -496,6 +500,7 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor) {
   flutter::EmbedderExternalViewEmbedder::PresentCallback present_callback =
       [c_present_callback,
        user_data = compositor->user_data](const auto& layers) {
+        TRACE_EVENT0("flutter", "FlutterCompositorPresentLayers");
         return c_present_callback(
             const_cast<const FlutterLayer**>(layers.data()), layers.size(),
             user_data);
