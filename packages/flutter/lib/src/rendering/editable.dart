@@ -377,7 +377,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection && cause != SelectionChangedCause.keyboard) {
       return;
     }
-    onSelectionChanged(nextSelection, this, cause);
+    if (onSelectionChanged != null) {
+      onSelectionChanged(nextSelection, this, cause);
+    }
   }
 
   static final Set<LogicalKeyboardKey> _movementKeys = <LogicalKeyboardKey>{
@@ -410,8 +412,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     ..._nonModifierKeys,
   };
 
+  // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
+  // This is because some of this code depends upon counting the length of the
+  // string using Unicode scalar values, rather than using the number of
+  // extended grapheme clusters (a.k.a. "characters" in the end user's mind).
   void _handleKeyEvent(RawKeyEvent keyEvent) {
-    if (keyEvent is RawKeyUpEvent)
+    if (keyEvent is! RawKeyDownEvent || onSelectionChanged == null)
       return;
 
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
@@ -442,9 +448,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       @required bool control,
       @required bool shift,
     }) {
-    if (onSelectionChanged == null) {
-      return;
-    }
     TextSelection newSelection = selection;
 
     final bool rightArrow = key == LogicalKeyboardKey.arrowRight;
@@ -541,16 +544,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (key == LogicalKeyboardKey.keyC) {
       if (!selection.isCollapsed) {
         Clipboard.setData(
-            ClipboardData(text: selection.textInside(text.text)));
+            ClipboardData(text: selection.textInside(text.toPlainText())));
       }
       return;
     }
     if (key == LogicalKeyboardKey.keyX) {
       if (!selection.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection.textInside(text.text)));
+        Clipboard.setData(ClipboardData(text: selection.textInside(text.toPlainText())));
         textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: selection.textBefore(text.text)
-              + selection.textAfter(text.text),
+          text: selection.textBefore(text.toPlainText())
+              + selection.textAfter(text.toPlainText()),
           selection: TextSelection.collapsed(offset: selection.start),
         );
       }
