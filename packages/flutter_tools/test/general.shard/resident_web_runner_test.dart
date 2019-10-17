@@ -296,11 +296,11 @@ void main() {
     expect(result.message, contains('Page requires refresh'));
   }));
 
-  test('printHelp without details is spoopy', () => testbed.run(() async {
+  test('printHelp without details has web warning', () => testbed.run(() async {
     residentWebRunner.printHelp(details: false);
     final BufferLogger bufferLogger = logger;
 
-    expect(bufferLogger.statusText, contains('👻'));
+    expect(bufferLogger.statusText, contains('Warning'));
   }));
 
   test('debugDumpApp', () => testbed.run(() async {
