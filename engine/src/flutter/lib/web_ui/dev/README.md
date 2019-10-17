@@ -50,3 +50,18 @@ repo. Screenshot tests are compared with the golden files at that revision.
 When making engine changes that affect screenshots, first submit a PR to
 flutter/goldens updating the screenshots. Then update this file pointing to
 the new revision.
+
+## Developing the `felt` tool
+If you are making changes in the `felt` tool itself, you need to be aware of Dart snapshots. We create a Dart snapshot of the `felt` tool to make the startup faster.
+
+To make sure you are running the `felt` tool with your changes included, you would need to stop using the snapshot. This can be achived through the environment variable `FELT_USE_SNAPSHOT`:
+
+```
+FELT_USE_SNAPSHOT=false felt <command>
+```
+or
+```
+FELT_USE_SNAPSHOT=0 felt <command>
+```
+
+_**Note**: if `FELT_USE_SNAPSHOT` is omitted or has any value other than "false" or "0", the snapshot mode will be enabled._
