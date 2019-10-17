@@ -172,6 +172,11 @@ class UserMessages {
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
+  String cocoaPodsBrokenInstall(String consequence, String reinstallInstructions) =>
+      'CocoaPods installed but not working.\n'
+      '$consequence\n'
+      'To re-install CocoaPods, run:\n'
+      '$reinstallInstructions';
 
   // Messages used in VsCodeValidator
   String vsCodeVersion(String version) => 'version $version';
