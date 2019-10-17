@@ -1046,7 +1046,7 @@ class _RenderDecoration extends RenderBox {
     final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
     final double containerHeight = expands
       ? maxContainerHeight
-      : contentHeight.clamp(minContainerHeight, maxContainerHeight);
+      : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
 
     // Ensure the text is vertically centered in cases where the content is
     // shorter than kMinInteractiveDimension.

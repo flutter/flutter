@@ -2137,7 +2137,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled
     // (dx) - 12 = (text offset)x.
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 52.0));
     final double dx = tester.getRect(find.byType(InputDecorator)).right;
     expect(tester.getRect(find.text('test')).right, dx - 12.0);
   });
@@ -2158,7 +2158,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled and top left offset is (0, 0)
     // 0 + 12 = 12.
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 52.0));
     expect(tester.getRect(find.text('test')).left, 12.0);
   });
 
@@ -2312,14 +2312,14 @@ void main() {
     // The only difference from normal layout for this case is that the
     // padding above and below the prefix, input text, suffix, is 8 instead of 12.
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 32 bumped up to minimum.
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 32.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.text('p')).height, 16.0);
     expect(tester.getSize(find.text('s')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
-    expect(tester.getTopLeft(find.text('p')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 8.0);
+    expect(tester.getTopLeft(find.text('p')).dy, 8.0);
     expect(tester.getTopLeft(find.text('p')).dx, 12.0);
-    expect(tester.getTopLeft(find.text('s')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('s')).dy, 8.0);
     expect(tester.getTopRight(find.text('s')).dx, 788.0);
 
     // layout is a row: [p text s]
@@ -2327,7 +2327,7 @@ void main() {
     expect(tester.getTopRight(find.text('p')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
 
-    expect(getBorderBottom(tester), 48.0);
+    expect(getBorderBottom(tester), 32.0);
     expect(getBorderWeight(tester), 2.0);
   });
 
