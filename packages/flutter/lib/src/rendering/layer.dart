@@ -327,11 +327,13 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     @required bool onlyFirst,
   }) {
     debugPrint(
-      'This layer did not implement Layer.findAnnotations. If this is a custom '
-      'layer class and has overridden find and findAll, '
-      'please change to overriding Layer.findAnnotations instead '
-      'to avoid unexpected behavior. '
-      'See https://github.com/flutter/flutter/pull/37424 for details.');
+      'Layer $runtimeType has not implemented Layer.findAnnotations. '
+      'If the layer class does not care about annotations, override '
+      'findAnnotations with a simple "return false". '
+      'If it overrides find and findAll to add custom behaviors, '
+      'please change to overriding Layer.findAnnotations instead, '
+      'otherwise these behaviors will no longer take effect. '
+      'See https://github.com/flutter/flutter/pull/37896 for details.');
     return false;
   }
 
