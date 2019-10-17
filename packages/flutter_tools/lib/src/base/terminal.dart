@@ -155,20 +155,16 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? clear : '\n\n';
 
   set singleCharMode(bool value) {
-    final Stream<List<int>> stdin = io.stdin;
-    try {
-      if (stdin is io.Stdin && stdin.hasTerminal) {
-        // The order of setting lineMode and echoMode is important on Windows.
-        if (value) {
-          stdin.echoMode = false;
-          stdin.lineMode = false;
-        } else {
-          stdin.lineMode = true;
-          stdin.echoMode = true;
-        }
+    if (io.stdio.hasTerminal) {
+      final io.Stdin stdin = io.stdin;
+      // The order of setting lineMode and echoMode is important on Windows.
+      if (value) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      } else {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
       }
-    } on io.StdinException {
-      // Do nothing if we're not connected to a terminal.
     }
   }
 
