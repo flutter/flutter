@@ -400,11 +400,11 @@ class ResidentWebRunner extends ResidentRunner {
       if (nextPlatform == null) {
         return;
       }
-      printStatus('Switched operating system to $nextPlatform');
       await _vmService.callServiceExtension(
         'ext.flutter.platformOverride', args: <String, Object>{
           'value': nextPlatform,
         });
+      printStatus('Switched operating system to $nextPlatform');
     } on vmservice.RPCError {
       return;
     }
