@@ -42,6 +42,7 @@ void main() {
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
+    expect(chromeDevice.getLogReader(), isInstanceOf<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
   });
 

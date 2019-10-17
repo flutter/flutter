@@ -12,6 +12,7 @@ import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'fuchsia/fuchsia_device.dart';
@@ -473,6 +474,11 @@ abstract class Device {
   static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(printStatus);
   }
+
+  /// Clean up resources allocated by device
+  ///
+  /// For example log readers or port forwarders.
+  void dispose() {}
 }
 
 class DebuggingOptions {
@@ -486,6 +492,7 @@ class DebuggingOptions {
     this.traceSkia = false,
     this.traceSystrace = false,
     this.dumpSkpOnShaderCompilation = false,
+    this.cacheSkSL = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
@@ -493,9 +500,10 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.browserLaunch = true,
+    this.vmserviceOutFile,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname })
+  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -508,7 +516,8 @@ class DebuggingOptions {
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
       observatoryPort = null,
-      browserLaunch = true;
+      browserLaunch = true,
+      vmserviceOutFile = null;
 
   final bool debuggingEnabled;
 
@@ -521,6 +530,7 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool traceSystrace;
   final bool dumpSkpOnShaderCompilation;
+  final bool cacheSkSL;
   final bool useTestFonts;
   final bool verboseSystemLogs;
   /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
@@ -529,6 +539,8 @@ class DebuggingOptions {
   final String port;
   final String hostname;
   final bool browserLaunch;
+  /// A file where the vmservice uri should be written after the application is started.
+  final String vmserviceOutFile;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }
@@ -564,6 +576,15 @@ class ForwardedPort {
 
   @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
+
+  /// Kill subprocess (if present) used in forwarding.
+  void dispose() {
+    final Process process = context;
+
+    if (process != null) {
+      process.kill();
+    }
+  }
 }
 
 /// Forward ports from the host machine to the device.
@@ -579,6 +600,9 @@ abstract class DevicePortForwarder {
 
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
+
+  /// Cleanup allocated resources, like forwardedPorts
+  Future<void> dispose() async { }
 }
 
 /// Read the log for a particular device.
@@ -593,6 +617,9 @@ abstract class DeviceLogReader {
 
   /// Process ID of the app on the device.
   int appPid;
+
+  // Clean up resources allocated by log reader e.g. subprocesses
+  void dispose() { }
 }
 
 /// Describes an app running on the device.
@@ -614,6 +641,9 @@ class NoOpDeviceLogReader implements DeviceLogReader {
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();
+
+  @override
+  void dispose() { }
 }
 
 // A portforwarder which does not support forwarding ports.
@@ -628,4 +658,7 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async { }
+
+  @override
+  Future<void> dispose() async { }
 }

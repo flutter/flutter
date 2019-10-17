@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -20,6 +21,7 @@ import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
+import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -43,6 +45,7 @@ void main() {
       Platform: () => mockPlatform,
       FlutterVersion: () => MockFlutterVersion(),
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      Pub: () => MockPub(),
     });
   });
 
@@ -88,7 +91,9 @@ void main() {
   }));
 
   test('Builds a web bundle - end to end', () => testbed.run(() async {
-    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
+    final BuildCommand buildCommand = BuildCommand();
+    applyMocksToCommand(buildCommand);
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     final List<String> dependencies = <String>[
       fs.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
       fs.path.join('bin', 'cache', 'flutter_web_sdk'),
@@ -142,7 +147,6 @@ class UrlLauncherPlugin {}
     when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
       return BuildResult(success: true);
     });
-
     await runner.run(<String>['build', 'web']);
 
     expect(fs.file(fs.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
@@ -176,3 +180,4 @@ class MockFlutterVersion extends Mock implements FlutterVersion {
   @override
   bool get isMaster => true;
 }
+class MockPub extends Mock implements Pub {}

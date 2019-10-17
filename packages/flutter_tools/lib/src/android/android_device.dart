@@ -326,8 +326,9 @@ class AndroidDevice extends Device {
       }
 
       return true;
-    } catch (e) {
+    } catch (e, stacktrace) {
       printError('Unexpected failure from adb: $e');
+      printError('Stacktrace: $stacktrace');
       return false;
     }
   }
@@ -574,24 +575,24 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'trace-systrace', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
-      if (debuggingOptions.debuggingEnabled)
-        ...<String>[
-          if (debuggingOptions.buildInfo.isDebug)
-            ...<String>[
-              ...<String>['--ez', 'enable-checked-mode', 'true'],
-              ...<String>['--ez', 'verify-entry-points', 'true'],
-            ],
-          if (debuggingOptions.startPaused)
-            ...<String>['--ez', 'start-paused', 'true'],
-          if (debuggingOptions.disableServiceAuthCodes)
-            ...<String>['--ez', 'disable-service-auth-codes', 'true'],
-          if (debuggingOptions.dartFlags.isNotEmpty)
-            ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
-          if (debuggingOptions.useTestFonts)
-            ...<String>['--ez', 'use-test-fonts', 'true'],
-          if (debuggingOptions.verboseSystemLogs)
-            ...<String>['--ez', 'verbose-logging', 'true'],
+      if (debuggingOptions.cacheSkSL)
+      ...<String>['--ez', 'cache-sksl', 'true'],
+      if (debuggingOptions.debuggingEnabled) ...<String>[
+        if (debuggingOptions.buildInfo.isDebug) ...<String>[
+          ...<String>['--ez', 'enable-checked-mode', 'true'],
+          ...<String>['--ez', 'verify-entry-points', 'true'],
         ],
+        if (debuggingOptions.startPaused)
+          ...<String>['--ez', 'start-paused', 'true'],
+        if (debuggingOptions.disableServiceAuthCodes)
+          ...<String>['--ez', 'disable-service-auth-codes', 'true'],
+        if (debuggingOptions.dartFlags.isNotEmpty)
+          ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
+        if (debuggingOptions.useTestFonts)
+          ...<String>['--ez', 'use-test-fonts', 'true'],
+        if (debuggingOptions.verboseSystemLogs)
+          ...<String>['--ez', 'verbose-logging', 'true'],
+      ],
       apk.launchActivity,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
