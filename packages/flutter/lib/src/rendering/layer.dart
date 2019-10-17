@@ -18,8 +18,7 @@ import 'debug.dart';
 ///
 /// See also:
 ///
-///  * [Layer.find], [Layer.findAll], and [Layer.findAnnotations], which create
-///    and use objects of this class.
+///  * [Layer.findAnnotations], which create and use objects of this class.
 @immutable
 class AnnotationEntry<T> {
   /// Create an entry of found annotation by providing the oject and related
@@ -48,8 +47,8 @@ class AnnotationEntry<T> {
 /// See also:
 ///
 ///  * [AnnotationEntry], which are members of this class.
-///  * [Layer.findAll], and [Layer.findAnnotations], which create and use an
-///    object of this class.
+///  * [Layer.findAllAnnotations], and [Layer.findAnnotations], which create and
+///    use an object of this class.
 class AnnotationResult<T> {
   final List<AnnotationEntry<T>> _entries = <AnnotationEntry<T>>[];
 
@@ -334,8 +333,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Returns null if no matching annotations are found.
   ///
   /// By default this method simply calls [findAnnotations] with `onlyFirst:
-  /// true` and returns the first result. It is encouraged to override
-  /// [findAnnotations] instead of this method.
+  /// true` and returns the annotation of the first result. It is encouraged to
+  /// override [findAnnotations] instead of this method.
   ///
   /// ## About layer annotations
   ///
@@ -346,10 +345,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [findAll], which is similar but returns all annotations found at the
   ///    given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  AnnotationEntry<S> find<S>(Offset localPosition) {
+  S find<S>(Offset localPosition) {
     final AnnotationResult<S> result = AnnotationResult<S>();
     findAnnotations<S>(result, localPosition, onlyFirst: true);
-    return result.entries.isEmpty ? null : result.entries.first;
+    return result.entries.isEmpty ? null : result.entries.first.annotation;
   }
 
   /// Search this layer and its subtree for all annotations of type `S` under
@@ -358,8 +357,12 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Returns a result with empty entries if no matching annotations are found.
   ///
   /// By default this method simply calls [findAnnotations] with `onlyFirst:
-  /// false` and returns its result. It is encouraged to override
-  /// [findAnnotations] instead of this method.
+  /// false` and returns the annotations of its result. It is encouraged to
+  /// override [findAnnotations] instead of this method.
+  ///
+  /// This method is similar to [findAllAnnotations], except that it returns a
+  /// list of annotations instead of an [AnnotationResult], which contains less
+  /// information. It is recommended to use [findAllAnnotations] over this one.
   ///
   /// ## About layer annotations
   ///
@@ -369,8 +372,41 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   ///  * [find], which is similar but returns the first annotation found at the
   ///    given position.
+  ///  * [findAllAnnotations], which is similar but returns an
+  ///    [AnnotationResult], which contains more information, such as the local
+  ///    position of the event related to each annotation, and is equally fast,
+  ///    hence is preferred over [findAll].
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  AnnotationResult<S> findAll<S>(Offset localPosition) {
+  Iterable<S> findAll<S>(Offset localPosition) {
+    final AnnotationResult<S> result = findAllAnnotations(localPosition);
+    return result.entries.map((AnnotationEntry<S> entry) => entry.annotation);
+  }
+
+  /// Search this layer and its subtree for all annotations of type `S` under
+  /// the point described by `localPosition`.
+  ///
+  /// Returns a result with empty entries if no matching annotations are found.
+  ///
+  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// false` and returns the annotations of its result. It is encouraged to
+  /// override [findAnnotations] instead of this method.
+  ///
+  /// This method is similar to [findAll], except that it
+  ///
+  /// ## About layer annotations
+  ///
+  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
+  ///
+  /// See also:
+  ///
+  ///  * [find], which is similar but returns the first annotation found at the
+  ///    given position.
+  ///  * [findAll], which is similar but returns a list of annotations.
+  ///    The [findAllAnnotations] returns an [AnnotationResult] that contains
+  ///    more information, such as the local position of the event related to
+  ///    each annotation, and is equally fast, hence is preferred over [findAll].
+  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
+  AnnotationResult<S> findAllAnnotations<S>(Offset localPosition) {
     final AnnotationResult<S> result = AnnotationResult<S>();
     findAnnotations<S>(result, localPosition, onlyFirst: false);
     return result;
