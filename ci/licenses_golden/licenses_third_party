@@ -1,4 +1,4 @@
-Signature: 554074c6c51e9b6506f3b234ec8f9a4d
+Signature: 29bc5036a61422d1b88d18fe434e1dcc
 
 UNUSED LICENSES:
 
@@ -7477,6 +7477,9 @@ FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/dart.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/dart.h
 FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/main.cc
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/tree_map.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/isolate_group.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/isolate_group.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/isolate_group.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/timeline_base.dart
 FILE: ../../../third_party/dart/runtime/platform/elf.h
 FILE: ../../../third_party/dart/runtime/platform/thread_sanitizer.h
