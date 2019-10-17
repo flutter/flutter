@@ -16,7 +16,7 @@ void _emptyCallback(dynamic _) {}
 void _setStaticStyleAttributes(html.HtmlElement domElement) {
   final html.CssStyleDeclaration elementStyle = domElement.style;
   elementStyle
-    ..whiteSpace = 'pre'
+    ..whiteSpace = 'pre-wrap'
     ..alignContent = 'center'
     ..position = 'absolute'
     ..top = '0'
