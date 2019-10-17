@@ -11,7 +11,6 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/synchronization/thread_annotations.h"
 
 namespace fml {
 

@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/synchronization/thread_annotations.h"
 #include "third_party/tonic/logging/dart_error.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -36,7 +35,7 @@ Dart_NativeFunction TestDartNativeResolver::ResolveCallback(
 
 static std::mutex gIsolateResolversMutex;
 static std::map<Dart_Isolate, std::weak_ptr<TestDartNativeResolver>>
-    gIsolateResolvers FML_GUARDED_BY(gIsolateResolversMutex);
+    gIsolateResolvers;
 
 Dart_NativeFunction TestDartNativeResolver::DartNativeEntryResolverCallback(
     Dart_Handle dart_name,

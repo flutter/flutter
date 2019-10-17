@@ -66,7 +66,7 @@ class PlatformViewIOS final : public PlatformView {
   // Since the `ios_surface_` is created on the platform thread but
   // used on the GPU thread we need to protect it with a mutex.
   std::mutex ios_surface_mutex_;
-  std::unique_ptr<IOSSurface> ios_surface_ FML_GUARDED_BY(ios_surface_mutex_);
+  std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSGLContext> gl_context_;
   PlatformMessageRouter platform_message_router_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;

@@ -18,7 +18,6 @@
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/status.h"
-#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"

@@ -50,7 +50,6 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
 
 std::mutex DartServiceIsolate::callbacks_mutex_;
 
-FML_GUARDED_BY(DartServiceIsolate::callbacks_mutex_)
 std::set<std::unique_ptr<DartServiceIsolate::ObservatoryServerStateCallback>>
     DartServiceIsolate::callbacks_;
 

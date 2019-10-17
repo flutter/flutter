@@ -14,7 +14,6 @@
 #include <mutex>
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/time/time_delta.h"
 
 namespace fml {

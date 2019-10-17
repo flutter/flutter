@@ -10,7 +10,6 @@
 #include <set>
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/unique_fd.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
@@ -66,8 +65,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   static std::string cache_base_path_;
 
   static std::mutex instance_mutex_;
-  static std::unique_ptr<PersistentCache> gPersistentCache
-      FML_GUARDED_BY(instance_mutex_);
+  static std::unique_ptr<PersistentCache> gPersistentCache;
 
   // Mutable static switch that can be set before GetCacheForProcess is called
   // and GrContextOptions.fShaderCacheStrategy is set. If true, it means that
@@ -83,8 +81,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   const std::shared_ptr<fml::UniqueFD> cache_directory_;
   const std::shared_ptr<fml::UniqueFD> sksl_cache_directory_;
   mutable std::mutex worker_task_runners_mutex_;
-  std::multiset<fml::RefPtr<fml::TaskRunner>> worker_task_runners_
-      FML_GUARDED_BY(worker_task_runners_mutex_);
+  std::multiset<fml::RefPtr<fml::TaskRunner>> worker_task_runners_;
 
   bool stored_new_shaders_ = false;
   bool is_dumping_skp_ = false;
