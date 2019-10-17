@@ -51,8 +51,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -65,8 +65,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -80,16 +80,16 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
   testUsingContext('licensesAccepted works for all licenses accepted', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
-       '[=======================================] 100% Computing updates...             ',
-       'All SDK package licenses accepted.',
+      '[=======================================] 100% Computing updates...             ',
+      'All SDK package licenses accepted.',
     ]);
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
@@ -98,8 +98,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -117,8 +117,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -136,8 +136,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -149,8 +149,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -162,8 +162,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -175,8 +175,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -188,8 +188,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -201,8 +201,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -218,8 +218,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 
@@ -272,8 +272,8 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
   });
 

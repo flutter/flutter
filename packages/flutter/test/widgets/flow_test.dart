@@ -78,7 +78,7 @@ void main() {
           buildBox(5),
           buildBox(6),
         ],
-      )
+      ),
     );
 
     await tester.tap(find.text('0'));
@@ -108,7 +108,7 @@ void main() {
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
         ],
-      )
+      ),
     );
     ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;
     while (layer != null && !(layer is OpacityLayer))

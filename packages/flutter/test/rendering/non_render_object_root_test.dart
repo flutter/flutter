@@ -50,7 +50,7 @@ void main() {
       child = RenderPositionedBox(
         alignment: Alignment.center,
         child: RenderSizedBox(const Size(100.0, 100.0)),
-      )
+      ),
     );
     root.attach(PipelineOwner());
 

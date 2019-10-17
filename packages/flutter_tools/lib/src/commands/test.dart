@@ -9,6 +9,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../codegen.dart';
@@ -50,7 +51,7 @@ class TestCommand extends FastFlutterCommand {
         defaultsTo: false,
         negatable: false,
         help: 'No longer require an authentication code to connect to the VM '
-              'service (not recommended).'
+              'service (not recommended).',
       )
       ..addFlag('coverage',
         defaultsTo: false,
@@ -87,7 +88,7 @@ class TestCommand extends FastFlutterCommand {
         abbr: 'j',
         defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
         help: 'The number of concurrent test processes to run.',
-        valueHelp: 'jobs'
+        valueHelp: 'jobs',
       )
       ..addFlag('test-assets',
         defaultsTo: true,
@@ -98,7 +99,7 @@ class TestCommand extends FastFlutterCommand {
       ..addOption('platform',
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
-        help: 'The platform to run the unit tests on. Defaults to "tester".'
+        help: 'The platform to run the unit tests on. Defaults to "tester".',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
@@ -131,7 +132,7 @@ class TestCommand extends FastFlutterCommand {
         'directory (or one of its subdirectories).');
     }
     if (shouldRunPub) {
-      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+      await pub.get(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
     final bool buildTestAssets = argResults['test-assets'];
     final List<String> names = argResults['name'];
@@ -164,8 +165,9 @@ class TestCommand extends FastFlutterCommand {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like like "hit_test.dart" don't get run.
       workDir = fs.directory('test');
-      if (!workDir.existsSync())
+      if (!workDir.existsSync()) {
         throwToolExit('Test directory "${workDir.path}" not found.');
+      }
       files = _findTests(workDir).toList();
       if (files.isEmpty) {
         throwToolExit(
@@ -179,7 +181,7 @@ class TestCommand extends FastFlutterCommand {
           if (fs.isDirectorySync(path))
             ..._findTests(fs.directory(path))
           else
-            path
+            path,
       ];
     }
 
@@ -233,6 +235,7 @@ class TestCommand extends FastFlutterCommand {
       disableServiceAuthCodes: disableServiceAuthCodes,
       ipv6: argResults['ipv6'],
       machine: machine,
+      buildMode: BuildMode.debug,
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
@@ -242,13 +245,18 @@ class TestCommand extends FastFlutterCommand {
     );
 
     if (collector != null) {
-      if (!await collector.collectCoverageData(
-          argResults['coverage-path'], mergeCoverageData: argResults['merge-coverage']))
+      final bool collectionResult = await collector.collectCoverageData(
+        argResults['coverage-path'],
+        mergeCoverageData: argResults['merge-coverage'],
+      );
+      if (!collectionResult) {
         throwToolExit(null);
+      }
     }
 
-    if (result != 0)
+    if (result != 0) {
       throwToolExit(null);
+    }
     return const FlutterCommandResult(ExitStatus.success);
   }
 

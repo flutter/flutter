@@ -124,9 +124,12 @@ abstract class WidgetsBindingObserver {
   /// }
   ///
   /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
+  ///   Size _lastSize;
+  ///
   ///   @override
   ///   void initState() {
   ///     super.initState();
+  ///     _lastSize = WidgetsBinding.instance.window.physicalSize;
   ///     WidgetsBinding.instance.addObserver(this);
   ///   }
   ///
@@ -135,8 +138,6 @@ abstract class WidgetsBindingObserver {
   ///     WidgetsBinding.instance.removeObserver(this);
   ///     super.dispose();
   ///   }
-  ///
-  ///   Size _lastSize;
   ///
   ///   @override
   ///   void didChangeMetrics() {
@@ -246,7 +247,7 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
+mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -259,7 +260,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
-    SystemChannels.system.setMessageHandler(_handleSystemMessage);
     FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
 
@@ -558,7 +558,9 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       observer.didHaveMemoryPressure();
   }
 
-  Future<void> _handleSystemMessage(Object systemMessage) async {
+  @override
+  Future<void> handleSystemMessage(Object systemMessage) async {
+    await super.handleSystemMessage(systemMessage);
     final Map<String, dynamic> message = systemMessage;
     final String type = message['type'];
     switch (type) {
@@ -876,7 +878,10 @@ void runApp(Widget app) {
 void debugDumpApp() {
   assert(WidgetsBinding.instance != null);
   String mode = 'RELEASE MODE';
-  assert(() { mode = 'CHECKED MODE'; return true; }());
+  assert(() {
+    mode = 'CHECKED MODE';
+    return true;
+  }());
   debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.renderViewElement != null) {
     debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());

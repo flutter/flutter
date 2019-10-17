@@ -288,7 +288,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.pattern('{BUILD_DIR}/App.framework/App'),
-    Source.behavior(MacOSAssetBehavior())
+    Source.behavior(MacOSAssetBehavior()),
   ];
 
   @override
@@ -336,7 +336,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     }
     // Limit number of open files to avoid running out of file descriptors.
     try {
-      final Pool pool = Pool(64);
+      final Pool pool = Pool(kMaxOpenFiles);
       await Future.wait<void>(
         assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
           final PoolResource resource = await pool.request();

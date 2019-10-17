@@ -85,12 +85,7 @@ class AdaptiveContainer extends StatelessWidget {
   }
 }
 
-List<String> _initNames() {
-  final List<String> names = <String>[];
-  for (int i = 0; i < 30; i++)
-    names.add('Item $i');
-  return names;
-}
+List<String> _initNames() => List<String>.generate(30, (int i) => 'Item $i');
 
 final List<String> _kNames = _initNames();
 

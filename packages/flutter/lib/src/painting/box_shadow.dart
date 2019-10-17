@@ -104,15 +104,12 @@ class BoxShadow extends ui.Shadow {
       return null;
     a ??= <BoxShadow>[];
     b ??= <BoxShadow>[];
-    final List<BoxShadow> result = <BoxShadow>[];
     final int commonLength = math.min(a.length, b.length);
-    for (int i = 0; i < commonLength; i += 1)
-      result.add(BoxShadow.lerp(a[i], b[i], t));
-    for (int i = commonLength; i < a.length; i += 1)
-      result.add(a[i].scale(1.0 - t));
-    for (int i = commonLength; i < b.length; i += 1)
-      result.add(b[i].scale(t));
-    return result;
+    return <BoxShadow>[
+      for (int i = 0; i < commonLength; i += 1) BoxShadow.lerp(a[i], b[i], t),
+      for (int i = commonLength; i < a.length; i += 1) a[i].scale(1.0 - t),
+      for (int i = commonLength; i < b.length; i += 1) b[i].scale(t),
+    ];
   }
 
   @override

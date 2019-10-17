@@ -136,7 +136,7 @@ void main() {
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
         ),
-      )
+      ),
     );
     expect(log, equals(<String>['getClip']));
 
@@ -156,7 +156,7 @@ void main() {
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
         ),
-      )
+      ),
     );
     expect(log, equals(<String>[]));
 
@@ -179,7 +179,7 @@ void main() {
             onTap: () { log.add('tap'); },
           ),
         ),
-      )
+      ),
     );
     expect(log, equals(<String>[]));
 
@@ -207,7 +207,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     expect(log, equals(<String>['a']));
 
@@ -231,7 +231,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     expect(log, equals(<String>['a', 'tap']));
 
@@ -249,7 +249,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     expect(log, equals(<String>['a', 'tap', 'a']));
 
@@ -267,7 +267,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     expect(log, equals(<String>['a', 'tap', 'a']));
 
@@ -285,7 +285,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     expect(log, equals(<String>['a', 'tap', 'a', 'b']));
 
@@ -303,7 +303,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     expect(log, equals(<String>['a', 'tap', 'a', 'b', 'c']));
 

@@ -927,7 +927,7 @@ void main() {
 
       // Should not crash.
       expect(find.text('CRASHHH'), findsOneWidget);
-    }
+    },
   );
 
   // TODO(ianh): Test handling of TableCell object

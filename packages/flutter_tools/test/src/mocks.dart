@@ -26,7 +26,11 @@ import 'package:process/process.dart';
 
 import 'common.dart';
 
-final Generator kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Generator kNoColorTerminalPlatform = () {
+  return FakePlatform.fromPlatform(
+    const LocalPlatform()
+  )..stdoutSupportsAnsi = false;
+};
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
@@ -36,7 +40,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
-    iOS: BuildableIOSApp(MockIosProject())
+    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId),
   );
 }
 
@@ -77,8 +81,9 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
       _createSdkFile(dir, 'build-tools/19.1.0/aapt$exe');
       _createSdkFile(dir, 'build-tools/22.0.1/aapt$exe');
       _createSdkFile(dir, 'build-tools/23.0.2/aapt$exe');
-      if (withAndroidN)
+      if (withAndroidN) {
         _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt$exe');
+      }
     }
 
     _createSdkFile(dir, 'platforms/android-22/android.jar');
@@ -88,8 +93,9 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
       _createSdkFile(dir, 'platforms/android-N/build.prop', contents: _buildProp);
     }
 
-    if (withSdkManager)
+    if (withSdkManager) {
       _createSdkFile(dir, 'tools/bin/sdkmanager$bat');
+    }
 
     if (withNdkDir != null) {
       final String ndkToolchainBin = fs.path.join(
@@ -186,12 +192,12 @@ class MockProcessManager extends Mock implements ProcessManager {
 /// a given number of times before succeeding. The returned processes will
 /// fail after a delay if one is supplied.
 ProcessFactory flakyProcessFactory({
-    int flakes,
-    bool Function(List<String> command) filter,
-    Duration delay,
-    Stream<List<int>> Function() stdout,
-    Stream<List<int>> Function() stderr,
-  }) {
+  int flakes,
+  bool Function(List<String> command) filter,
+  Duration delay,
+  Stream<List<int>> Function() stdout,
+  Stream<List<int>> Function() stderr,
+}) {
   int flakesLeft = flakes;
   stdout ??= () => const Stream<List<int>>.empty();
   stderr ??= () => const Stream<List<int>>.empty();
@@ -307,8 +313,9 @@ class PromptingProcess implements Process {
     // Echo stdin to stdout.
     _stdoutController.add(bytesOnStdin);
     if (bytesOnStdin[0] == utf8.encode('y')[0]) {
-      for (final String line in outputLines)
+      for (final String line in outputLines) {
         _stdoutController.add(utf8.encode('$line\n'));
+      }
     }
     await _stdoutController.close();
   }
@@ -343,8 +350,9 @@ class CompleterIOSink extends MemoryIOSink {
 
   @override
   void add(List<int> data) {
-    if (!_completer.isCompleted)
+    if (!_completer.isCompleted) {
       _completer.complete(data);
+    }
     super.add(data);
   }
 }
@@ -434,8 +442,9 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
 
   @override
   int get terminalColumns {
-    if (_terminalColumns != null)
+    if (_terminalColumns != null) {
       return _terminalColumns;
+    }
     throw const io.StdoutException('unspecified mock value');
   }
   set terminalColumns(int value) => _terminalColumns = value;
@@ -443,8 +452,9 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
 
   @override
   int get terminalLines {
-    if (_terminalLines != null)
+    if (_terminalLines != null) {
       return _terminalLines;
+    }
     throw const io.StdoutException('unspecified mock value');
   }
   set terminalLines(int value) => _terminalLines = value;
@@ -507,8 +517,10 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
 }
 
 class MockIosProject extends Mock implements IosProject {
+  static const String bundleId = 'com.example.test';
+
   @override
-  String get productBundleIdentifier => 'com.example.test';
+  Future<String> get productBundleIdentifier async => bundleId;
 
   @override
   String get hostAppBundleName => 'Runner.app';
@@ -558,6 +570,7 @@ class MockDeviceLogReader extends DeviceLogReader {
 
   void addLine(String line) => _linesController.add(line);
 
+  @override
   void dispose() {
     _linesController.close();
   }

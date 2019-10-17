@@ -302,8 +302,9 @@ class CalcExpression {
           assert(false);
       }
     }
-    final List<ExpressionToken> outList = <ExpressionToken>[];
-    outList.add(ResultToken(currentTermValue));
+    final List<ExpressionToken> outList = <ExpressionToken>[
+      ResultToken(currentTermValue),
+    ];
     return CalcExpression(outList, ExpressionState.Result);
   }
 

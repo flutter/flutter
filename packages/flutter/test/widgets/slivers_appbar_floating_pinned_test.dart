@@ -142,7 +142,7 @@ void main() {
                       flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ],
@@ -229,7 +229,7 @@ void main() {
                       flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ],

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../convert.dart';
 import '../globals.dart';
+import 'common.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -126,10 +127,12 @@ class RunResult {
   @override
   String toString() {
     final StringBuffer out = StringBuffer();
-    if (processResult.stdout.isNotEmpty)
+    if (processResult.stdout.isNotEmpty) {
       out.writeln(processResult.stdout);
-    if (processResult.stderr.isNotEmpty)
+    }
+    if (processResult.stderr.isNotEmpty) {
       out.writeln(processResult.stderr);
+    }
     return out.toString().trimRight();
   }
 
@@ -436,14 +439,16 @@ class _DefaultProcessUtils implements ProcessUtils {
       .transform<String>(const LineSplitter())
       .where((String line) => filter == null || filter.hasMatch(line))
       .listen((String line) {
-        if (mapFunction != null)
+        if (mapFunction != null) {
           line = mapFunction(line);
+        }
         if (line != null) {
           final String message = '$prefix$line';
-          if (trace)
+          if (trace) {
             printTrace(message);
-          else
+          } else {
             printStatus(message, wrap: false);
+          }
         }
       });
     final StreamSubscription<String> stderrSubscription = process.stderr
@@ -451,10 +456,12 @@ class _DefaultProcessUtils implements ProcessUtils {
       .transform<String>(const LineSplitter())
       .where((String line) => filter == null || filter.hasMatch(line))
       .listen((String line) {
-        if (mapFunction != null)
+        if (mapFunction != null) {
           line = mapFunction(line);
-        if (line != null)
+        }
+        if (line != null) {
           printError('$prefix$line', wrap: false);
+        }
       });
 
     // Wait for stdout to be fully processed
@@ -464,10 +471,13 @@ class _DefaultProcessUtils implements ProcessUtils {
       stderrSubscription.asFuture<void>(),
     ]);
 
-    await waitGroup<void>(<Future<void>>[
-      stdoutSubscription.cancel(),
-      stderrSubscription.cancel(),
-    ]);
+    // The streams as futures have already completed, so waiting for the
+    // potentially async stream cancellation to complete likely has no benefit.
+    // Further, some Stream implementations commonly used in tests don't
+    // complete the Future returned here, which causes tests using
+    // mocks/FakeAsync to fail when these Futures are awaited.
+    unawaited(stdoutSubscription.cancel());
+    unawaited(stderrSubscription.cancel());
 
     return await process.exitCode;
   }
@@ -504,10 +514,11 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String> environment,
   ]) {
     if (allowReentrantFlutter) {
-      if (environment == null)
+      if (environment == null) {
         environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'};
-      else
+      } else {
         environment['FLUTTER_ALREADY_LOCKED'] = 'true';
+      }
     }
 
     return environment;

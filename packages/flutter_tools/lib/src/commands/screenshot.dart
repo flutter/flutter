@@ -81,8 +81,9 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     File outputFile;
-    if (argResults.wasParsed(_kOut))
+    if (argResults.wasParsed(_kOut)) {
       outputFile = fs.file(argResults[_kOut]);
+    }
 
     switch (argResults[_kType]) {
       case _kDeviceType:

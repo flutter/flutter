@@ -82,7 +82,7 @@ class CupertinoTheme extends StatelessWidget {
       child: IconTheme(
         data: IconThemeData(color: data.primaryColor),
         child: child,
-      )
+      ),
     );
   }
 }
@@ -348,7 +348,7 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
     Color primaryContrastingColor,
     CupertinoTextThemeData textTheme,
     Color barBackgroundColor ,
-    Color scaffoldBackgroundColor
+    Color scaffoldBackgroundColor,
   }) {
     return _NoDefaultCupertinoThemeData(
       brightness ?? this.brightness,

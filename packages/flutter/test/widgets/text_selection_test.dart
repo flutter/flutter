@@ -83,9 +83,9 @@ void main() {
       MaterialApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
-          child: FakeEditableText(key: editableTextKey)
-        )
-      )
+          child: FakeEditableText(key: editableTextKey),
+        ),
+      ),
     );
   }
 
@@ -284,7 +284,7 @@ void main() {
         pressure: 0.0,
         pressureMin: 0,
         pressureMax: 1,
-      )
+      ),
     );
     await tester.pump(const Duration(milliseconds: 50));
     await gesture.up();
@@ -551,8 +551,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/37032.
-  testWidgets("selection handle's GestureDetector should not cover the entire screen",
-    (WidgetTester tester) async {
+  testWidgets("selection handle's GestureDetector should not cover the entire screen", (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final TextEditingController controller = TextEditingController(text: 'a');
 

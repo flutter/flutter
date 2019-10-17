@@ -412,7 +412,7 @@ void main() {
     expect(
       find.byType(CupertinoSlider),
       // First line it paints is blue.
-      paints..rrect(color: CupertinoColors.activeBlue),
+      paints..rrect(color: CupertinoColors.systemBlue.color),
     );
 
     await tester.pumpWidget(
@@ -426,9 +426,11 @@ void main() {
         ),
       ),
     );
+
+    const CupertinoDynamicColor orange = CupertinoColors.activeOrange;
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoColors.activeOrange),
+      paints..rrect(color: orange.darkColor),
     );
   });
 
@@ -447,7 +449,7 @@ void main() {
     );
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoColors.activeGreen),
+      paints..rrect(color: CupertinoColors.systemGreen.darkColor),
     );
   });
 
@@ -552,6 +554,54 @@ void main() {
     expect(
       find.byType(CupertinoSlider),
       isNot(paints..rrect(color: _kSystemFill.color)),
+    );
+  });
+
+  testWidgets('Thumb color can be overridden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSlider(
+            thumbColor: CupertinoColors.systemPurple,
+            onChanged: (double value) { },
+            value: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(CupertinoSlider),
+      paints
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect(color: CupertinoColors.systemPurple.color)
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSlider(
+            thumbColor: CupertinoColors.activeOrange,
+            onChanged: (double value) { },
+            value: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+        find.byType(CupertinoSlider),
+        paints
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect(color: CupertinoColors.activeOrange.color)
     );
   });
 }

@@ -93,27 +93,26 @@ class PackagesGetCommand extends FlutterCommand {
   Future<void> _runPubGet(String directory) async {
     final Stopwatch pubGetTimer = Stopwatch()..start();
     try {
-      await pubGet(context: PubContext.pubGet,
+      await pub.get(context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade ,
         offline: argResults['offline'],
         checkLastModified: false,
       );
       pubGetTimer.stop();
-      PubGetEvent(success: true).send();
-      flutterUsage.sendTiming('packages-pub-get', 'success', pubGetTimer.elapsed);
+      flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
     } catch (_) {
       pubGetTimer.stop();
-      PubGetEvent(success: false).send();
-      flutterUsage.sendTiming('packages-pub-get', 'failure', pubGetTimer.elapsed);
+      flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'failure');
       rethrow;
     }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.length > 1)
+    if (argResults.rest.length > 1) {
       throwToolExit('Too many arguments.\n$usage');
+    }
 
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
     final String target = findProjectRoot(workingDirectory);
@@ -165,7 +164,7 @@ class PackagesTestCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pub(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
+    await pub.batch(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
     return null;
   }
 }
@@ -206,7 +205,7 @@ class PackagesPublishCommand extends FlutterCommand {
       if (argResults['force']) '--force',
     ];
     Cache.releaseLockEarly();
-    await pubInteractively(<String>['publish', ...args]);
+    await pub.interactively(<String>['publish', ...args]);
     return null;
   }
 }
@@ -237,7 +236,7 @@ class PackagesForwardCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pubInteractively(<String>[_commandName, ...argResults.rest]);
+    await pub.interactively(<String>[_commandName, ...argResults.rest]);
     return null;
   }
 
@@ -265,7 +264,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pubInteractively(argResults.rest);
+    await pub.interactively(argResults.rest);
     return null;
   }
 }

@@ -522,7 +522,10 @@ class RenderCustomPaint extends RenderProxyBox {
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
     int debugPreviousCanvasSaveCount;
     canvas.save();
-    assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; }());
+    assert(() {
+      debugPreviousCanvasSaveCount = canvas.getSaveCount();
+      return true;
+    }());
     if (offset != Offset.zero)
       canvas.translate(offset.dx, offset.dy);
     painter.paint(canvas, size);
@@ -828,11 +831,17 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.button != null) {
       config.isButton = properties.button;
     }
+    if (properties.link != null) {
+      config.isLink = properties.link;
+    }
     if (properties.textField != null) {
       config.isTextField = properties.textField;
     }
     if (properties.readOnly != null) {
       config.isReadOnly = properties.readOnly;
+    }
+    if (properties.focusable != null) {
+      config.isFocusable = properties.focusable;
     }
     if (properties.focused != null) {
       config.isFocused = properties.focused;
@@ -863,6 +872,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.liveRegion != null) {
       config.liveRegion = properties.liveRegion;
+    }
+    if (properties.maxValueLength != null) {
+      config.maxValueLength = properties.maxValueLength;
+    }
+    if (properties.currentValueLength != null) {
+      config.currentValueLength = properties.currentValueLength;
     }
     if (properties.toggled != null) {
       config.isToggled = properties.toggled;

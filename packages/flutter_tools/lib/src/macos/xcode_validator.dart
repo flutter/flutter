@@ -24,8 +24,9 @@ class XcodeValidator extends DoctorValidator {
       messages.add(ValidationMessage(userMessages.xcodeLocation(xcode.xcodeSelectPath)));
 
       xcodeVersionInfo = xcode.versionText;
-      if (xcodeVersionInfo.contains(','))
+      if (xcodeVersionInfo.contains(',')) {
         xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
+      }
       messages.add(ValidationMessage(xcode.versionText));
 
       if (!xcode.isInstalledAndMeetsVersionCheck) {

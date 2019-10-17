@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/semantics.dart';
 
 class TestFocus extends StatefulWidget {
   const TestFocus({
@@ -24,6 +27,7 @@ class TestFocus extends StatefulWidget {
 class TestFocusState extends State<TestFocus> {
   FocusNode focusNode;
   String _label;
+  bool built = false;
 
   @override
   void dispose() {
@@ -50,6 +54,7 @@ class TestFocusState extends State<TestFocus> {
 
   @override
   Widget build(BuildContext context) {
+    built = true;
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(focusNode);
@@ -222,13 +227,13 @@ void main() {
       expect(parentFocusScope, hasAGoodToStringDeep);
       expect(
         parentFocusScope.toStringDeep(),
-        equalsIgnoringHashCodes('FocusScopeNode#00000\n'
+        equalsIgnoringHashCodes('FocusScopeNode#00000(Parent Scope Node)\n'
             ' │ context: FocusScope\n'
             ' │ FOCUSED\n'
             ' │ debugLabel: "Parent Scope Node"\n'
-            ' │ focusedChild: FocusNode#00000\n'
+            ' │ focusedChildren: FocusNode#00000(Child)\n'
             ' │\n'
-            ' └─Child 1: FocusNode#00000\n'
+            ' └─Child 1: FocusNode#00000(Child)\n'
             '     context: Focus\n'
             '     FOCUSED\n'
             '     debugLabel: "Child"\n'),
@@ -237,18 +242,18 @@ void main() {
       expect(WidgetsBinding.instance.focusManager.rootScope, hasAGoodToStringDeep);
       expect(
         WidgetsBinding.instance.focusManager.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
-        equalsIgnoringHashCodes('FocusScopeNode#00000\n'
+        equalsIgnoringHashCodes('FocusScopeNode#00000(Root Focus Scope)\n'
             ' │ FOCUSED\n'
             ' │ debugLabel: "Root Focus Scope"\n'
-            ' │ focusedChild: FocusScopeNode#00000\n'
+            ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node)\n'
             ' │\n'
-            ' └─Child 1: FocusScopeNode#00000\n'
+            ' └─Child 1: FocusScopeNode#00000(Parent Scope Node)\n'
             '   │ context: FocusScope\n'
             '   │ FOCUSED\n'
             '   │ debugLabel: "Parent Scope Node"\n'
-            '   │ focusedChild: FocusNode#00000\n'
+            '   │ focusedChildren: FocusNode#00000(Child)\n'
             '   │\n'
-            '   └─Child 1: FocusNode#00000\n'
+            '   └─Child 1: FocusNode#00000(Child)\n'
             '       context: Focus\n'
             '       FOCUSED\n'
             '       debugLabel: "Child"\n'),
@@ -499,6 +504,7 @@ void main() {
 
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
       expect(FocusScope.of(keyA.currentContext), equals(childFocusScope));
+      expect(Focus.of(keyA.currentContext, scopeOk: true), equals(childFocusScope));
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
       await tester.pumpAndSettle();
@@ -733,8 +739,8 @@ void main() {
 
       await tester.pump();
 
-      expect(keyB.currentState.focusNode.hasFocus, isFalse);
-      expect(find.text('b'), findsOneWidget);
+      expect(keyB.currentState.focusNode.hasFocus, isTrue);
+      expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
     testWidgets("Removing unpinned focused scope doesn't move focus to focused widget within next FocusScope", (WidgetTester tester) async {
@@ -814,8 +820,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(keyB.currentState.focusNode.hasFocus, isFalse);
-      expect(find.text('b'), findsOneWidget);
+      expect(keyB.currentState.focusNode.hasFocus, isTrue);
+      expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
     testWidgets('Moving widget from one scope to another retains focus', (WidgetTester tester) async {
@@ -1289,5 +1295,49 @@ void main() {
     await tester.pumpWidget(Container());
 
     expect(WidgetsBinding.instance.focusManager.rootScope.descendants, isEmpty);
+  });
+  testWidgets('Focus widgets set Semantics information about focus', (WidgetTester tester) async {
+    final GlobalKey<TestFocusState> key = GlobalKey();
+
+    await tester.pumpWidget(
+      TestFocus(key: key, name: 'a'),
+    );
+
+    final SemanticsNode semantics = tester.getSemantics(find.byKey(key));
+
+    expect(key.currentState.focusNode.hasFocus, isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
+
+    FocusScope.of(key.currentContext).requestFocus(key.currentState.focusNode);
+    await tester.pumpAndSettle();
+
+    expect(key.currentState.focusNode.hasFocus, isTrue);
+    expect(semantics.hasFlag(SemanticsFlag.isFocused), isTrue);
+    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
+
+    key.currentState.focusNode.canRequestFocus = false;
+    await tester.pumpAndSettle();
+
+    expect(key.currentState.focusNode.hasFocus, isFalse);
+    expect(key.currentState.focusNode.canRequestFocus, isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isFalse);
+  });
+  testWidgets('Setting canRequestFocus on focus node causes update.', (WidgetTester tester) async {
+    final GlobalKey<TestFocusState> key = GlobalKey();
+
+    final TestFocus testFocus = TestFocus(key: key, name: 'a');
+    await tester.pumpWidget(
+      testFocus,
+    );
+
+    await tester.pumpAndSettle();
+    key.currentState.built = false;
+    key.currentState.focusNode.canRequestFocus = false;
+    await tester.pumpAndSettle();
+    key.currentState.built = true;
+
+    expect(key.currentState.focusNode.canRequestFocus, isFalse);
   });
 }

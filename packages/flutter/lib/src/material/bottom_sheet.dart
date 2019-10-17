@@ -343,9 +343,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.isDismissible = true,
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
+       assert(isDismissible != null),
        super(settings: settings);
 
   final WidgetBuilder builder;
@@ -355,12 +357,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final bool isDismissible;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
 
   @override
-  bool get barrierDismissible => true;
+  bool get barrierDismissible => isDismissible;
 
   @override
   final String barrierLabel;
@@ -380,6 +383,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    final BottomSheetThemeData sheetTheme = theme?.bottomSheetTheme ?? Theme.of(context).bottomSheetTheme;
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
     Widget bottomSheet = MediaQuery.removePadding(
@@ -387,11 +391,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       removeTop: true,
       child: _ModalBottomSheet<T>(
         route: this,
-        backgroundColor: backgroundColor,
-        elevation: elevation,
+        backgroundColor: backgroundColor ?? sheetTheme?.modalBackgroundColor ?? sheetTheme?.backgroundColor,
+        elevation: elevation ?? sheetTheme?.modalElevation ?? sheetTheme?.elevation,
         shape: shape,
         clipBehavior: clipBehavior,
-        isScrollControlled: isScrollControlled
+        isScrollControlled: isScrollControlled,
       ),
     );
     if (theme != null)
@@ -427,6 +431,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// that a modal [BottomSheet] needs to be displayed above all other content
 /// but the caller is inside another [Navigator].
 ///
+/// The [isDismissible] parameter specifies whether the bottom sheet will be
+/// dismissed when user taps on the scrim.
+///
 /// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
@@ -452,25 +459,26 @@ Future<T> showModalBottomSheet<T>({
   Clip clipBehavior,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
+  bool isDismissible = true,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
   assert(useRootNavigator != null);
+  assert(isDismissible != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
-
-  final BottomSheetThemeData theme = Theme.of(context).bottomSheetTheme;
 
   return Navigator.of(context, rootNavigator: useRootNavigator).push(_ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    backgroundColor: backgroundColor ?? theme?.modalBackgroundColor ?? theme?.backgroundColor,
-    elevation: elevation ?? theme?.modalElevation ?? theme?.elevation,
+    backgroundColor: backgroundColor,
+    elevation: elevation,
     shape: shape,
     clipBehavior: clipBehavior,
+    isDismissible: isDismissible,
   ));
 }
 

@@ -42,14 +42,15 @@ void main() {
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
+    expect(chromeDevice.getLogReader(), isInstanceOf<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
   });
 
   test('Server defaults', () async {
     final WebServerDevice device = WebServerDevice();
 
-    expect(device.name, 'Server');
-    expect(device.id, 'web');
+    expect(device.name, 'Headless Server');
+    expect(device.id, 'headless-server');
     expect(device.supportsHotReload, true);
     expect(device.supportsHotRestart, true);
     expect(device.supportsStartPaused, true);
@@ -58,6 +59,36 @@ void main() {
     expect(await device.isLocalEmulator, false);
     expect(device.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
     expect(await device.portForwarder.forward(1), 1);
+  });
+
+  testUsingContext('Chrome device is listed when Chrome is available', () async {
+    when(mockChromeLauncher.canFindChrome()).thenReturn(true);
+
+    final WebDevices deviceDiscoverer = WebDevices();
+    final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
+    expect(devices, contains(isInstanceOf<ChromeDevice>()));
+  }, overrides: <Type, Generator>{
+    ChromeLauncher: () => mockChromeLauncher,
+  });
+
+  testUsingContext('Chrome device is not listed when Chrome is not available', () async {
+    when(mockChromeLauncher.canFindChrome()).thenReturn(false);
+
+    final WebDevices deviceDiscoverer = WebDevices();
+    final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
+    expect(devices, isNot(contains(isInstanceOf<ChromeDevice>())));
+  }, overrides: <Type, Generator>{
+    ChromeLauncher: () => mockChromeLauncher,
+  });
+
+  testUsingContext('Web Server device is listed even when Chrome is not available', () async {
+    when(mockChromeLauncher.canFindChrome()).thenReturn(false);
+
+    final WebDevices deviceDiscoverer = WebDevices();
+    final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
+    expect(devices, contains(isInstanceOf<WebServerDevice>()));
+  }, overrides: <Type, Generator>{
+    ChromeLauncher: () => mockChromeLauncher,
   });
 
   testUsingContext('Chrome invokes version command on non-Windows platforms', () async{

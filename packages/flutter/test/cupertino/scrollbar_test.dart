@@ -8,6 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
+const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x59000000),
+  darkColor:Color(0x80FFFFFF),
+);
+
 void main() {
   const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
   const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
@@ -31,14 +36,14 @@ void main() {
     // Scrollbar fully showing
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: const Color(0x99777777),
+      color: _kScrollbarColor.color,
     ));
 
     await tester.pump(const Duration(seconds: 3));
     await tester.pump(const Duration(seconds: 3));
     // Still there.
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: const Color(0x99777777),
+      color: _kScrollbarColor.color,
     ));
 
     await gesture.up();
@@ -47,7 +52,44 @@ void main() {
 
     // Opacity going down now.
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: const Color(0x77777777),
+      color: _kScrollbarColor.color.withAlpha(69),
+    ));
+  });
+
+  testWidgets('Scrollbar dark mode', (WidgetTester tester) async {
+    Brightness brightness = Brightness.light;
+    StateSetter setState;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MediaQuery(
+              data: MediaQueryData(platformBrightness: brightness),
+              child: const CupertinoScrollbar(
+                child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, 10.0));
+    await tester.pump();
+    // Scrollbar fully showing
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
+
+    setState(() { brightness = Brightness.dark; });
+    await tester.pump();
+
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.darkColor,
     ));
   });
 
@@ -81,7 +123,7 @@ void main() {
     // Scrollbar thumb is fully showing and scroll offset has moved by
     // scrollAmount.
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: const Color(0x99777777),
+      color: _kScrollbarColor.color,
     ));
     expect(scrollController.offset, scrollAmount);
     await scrollGesture.up();
@@ -111,7 +153,7 @@ void main() {
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
     // The scrollbar thumb is still fully visible.
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: const Color(0x99777777),
+      color: _kScrollbarColor.color,
     ));
 
     // Let the thumb fade out so all timers have resolved.
@@ -149,7 +191,7 @@ void main() {
     // Scrollbar thumb is fully showing and scroll offset has moved by
     // scrollAmount.
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: const Color(0x99777777),
+      color: _kScrollbarColor.color,
     ));
     expect(scrollController.offset, scrollAmount);
     await scrollGesture.up();
@@ -182,7 +224,7 @@ void main() {
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
     // The scrollbar thumb is still fully visible.
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: const Color(0x99777777),
+      color: _kScrollbarColor.color,
     ));
 
     // Let the thumb fade out so all timers have resolved.

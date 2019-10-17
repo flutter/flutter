@@ -19,31 +19,23 @@ void main() {
     when(devFinder.absolute).thenReturn(devFinder);
     when(sshConfig.absolute).thenReturn(sshConfig);
 
-    testUsingContext(
-        'can not list and launch devices if there is not ssh config and dev finder',
-        () {
+    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
       expect(fuchsiaWorkflow.canLaunchDevices, false);
       expect(fuchsiaWorkflow.canListDevices, false);
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () =>
-          FuchsiaArtifacts(devFinder: null, sshConfig: null),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: null, sshConfig: null),
     });
 
-    testUsingContext(
-        'can not list and launch devices if there is not ssh config and dev finder',
-        () {
+    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
       expect(fuchsiaWorkflow.canLaunchDevices, false);
       expect(fuchsiaWorkflow.canListDevices, true);
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () =>
-          FuchsiaArtifacts(devFinder: devFinder, sshConfig: null),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: devFinder, sshConfig: null),
     });
 
-    testUsingContext(
-        'can list and launch devices supported with sufficient SDK artifacts',
-        () {
+    testUsingContext('can list and launch devices supported with sufficient SDK artifacts', () {
       expect(fuchsiaWorkflow.canLaunchDevices, true);
       expect(fuchsiaWorkflow.canListDevices, true);
       expect(fuchsiaWorkflow.canListEmulators, false);

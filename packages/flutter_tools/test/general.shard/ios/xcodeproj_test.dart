@@ -39,9 +39,9 @@ void main() {
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -79,8 +79,8 @@ void main() {
 
     testUsingOsxContext('majorVersion returns major version', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.majorVersion, 8);
+          .thenReturn(ProcessResult(1, 0, 'Xcode 10.3.3\nBuild version 8E3004b', ''));
+      expect(xcodeProjectInterpreter.majorVersion, 10);
     });
 
     testUsingOsxContext('majorVersion is null when version has unexpected format', () {
@@ -145,13 +145,13 @@ void main() {
       expect(xcodeProjectInterpreter.isInstalled, isTrue);
     });
 
-    testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () {
+    testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () async {
       when(mockProcessManager.runSync(
                argThat(contains(xcodebuild)),
                workingDirectory: anyNamed('workingDirectory'),
                environment: anyNamed('environment')))
           .thenReturn(ProcessResult(0, 1, '', ''));
-      expect(xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+      expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
     });
 
     testUsingContext('build settings flakes', () async {
@@ -160,7 +160,7 @@ void main() {
         flakes: 1,
         delay: delay + const Duration(seconds: 1),
       );
-      expect(await xcodeProjectInterpreter.getBuildSettingsAsync(
+      expect(await xcodeProjectInterpreter.getBuildSettings(
                  '', '', timeout: delay),
              const <String, String>{});
       // build settings times out and is killed once, then succeeds.
@@ -173,6 +173,57 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
   });
+
+  group('xcodebuild -list', () {
+    mocks.MockProcessManager mockProcessManager;
+    FakePlatform macOS;
+    FileSystem fs;
+
+    setUp(() {
+      mockProcessManager = mocks.MockProcessManager();
+      macOS = fakePlatform('macos');
+      fs = MemoryFileSystem();
+      fs.file(xcodebuild).createSync(recursive: true);
+    });
+
+    void testUsingOsxContext(String description, dynamic testMethod()) {
+      testUsingContext(description, testMethod, overrides: <Type, Generator>{
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
+      });
+    }
+
+    testUsingOsxContext('getInfo returns something when xcodebuild -list succeeds', () async {
+      const String workingDirectory = '/';
+      when(mockProcessManager.run(
+        <String>[xcodebuild, '-list'],
+        environment: anyNamed('environment'),
+        workingDirectory: workingDirectory),
+      ).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(1, 0, '', ''));
+      });
+      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
+      expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
+    });
+
+    testUsingOsxContext('getInfo throws a tool exit when it is unable to find a project', () async {
+      const String workingDirectory = '/';
+      const String stderr = 'Useful Xcode failure message about missing project.';
+      when(mockProcessManager.run(
+        <String>[xcodebuild, '-list'],
+        environment: anyNamed('environment'),
+        workingDirectory: workingDirectory),
+      ).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(1, 66, '', stderr));
+      });
+      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
+      expect(
+          () async => await xcodeProjectInterpreter.getInfo(workingDirectory),
+          throwsToolExit(message: stderr));
+    });
+  });
+
   group('Xcode project properties', () {
     test('properties from default project can be parsed', () {
       const String output = '''
@@ -304,9 +355,9 @@ Information about project "Runner":
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -580,6 +631,23 @@ flutter:
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
+      );
+    });
+
+    testUsingOsxContext('default build name and number when version is missing', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
+      await checkBuildVersion(
+        manifestString: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.0',
+        expectedBuildNumber: '1',
       );
     });
   });

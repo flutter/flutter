@@ -35,7 +35,7 @@ const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
 final List<String> kWindowsPrefixes = <String>[
   platform.environment['LOCALAPPDATA'],
   platform.environment['PROGRAMFILES'],
-  platform.environment['PROGRAMFILES(X86)']
+  platform.environment['PROGRAMFILES(X86)'],
 ];
 
 /// Find the chrome executable on the current platform.
@@ -71,6 +71,16 @@ class ChromeLauncher {
 
   static final Completer<Chrome> _currentCompleter = Completer<Chrome>();
 
+  /// Whether we can locate the chrome executable.
+  bool canFindChrome() {
+    final String chrome = findChromeExecutable();
+    try {
+      return processManager.canRun(chrome);
+    } on ArgumentError {
+      return false;
+    }
+  }
+
   /// Launch the chrome browser to a particular `host` page.
   ///
   /// `headless` defaults to false, and controls whether we open a headless or
@@ -79,7 +89,7 @@ class ChromeLauncher {
   /// `skipCheck` does not attempt to make a devtools connection before returning.
   Future<Chrome> launch(String url, { bool headless = false, bool skipCheck = false }) async {
     final String chromeExecutable = findChromeExecutable();
-    final Directory dataDir = fs.systemTempDirectory.createTempSync('flutter_tool_');
+    final Directory dataDir = fs.systemTempDirectory.createTempSync('flutter_tool.');
     final int port = await os.findFreePort();
     final List<String> args = <String>[
       chromeExecutable,
@@ -143,10 +153,6 @@ class ChromeLauncher {
     _currentCompleter.complete(chrome);
     return chrome;
   }
-
-  /// Connects to an instance of Chrome with an open debug port.
-  static Future<Chrome> fromExisting(int port) async =>
-      _connect(Chrome._(port, ChromeConnection('localhost', port)), false);
 
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
 

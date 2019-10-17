@@ -401,7 +401,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           _firstRowIndex + widget.rowsPerPage,
           _rowCount,
           _rowCountApproximate,
-        )
+        ),
       ),
       Container(width: 32.0),
       IconButton(

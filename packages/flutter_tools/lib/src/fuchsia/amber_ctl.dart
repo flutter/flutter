@@ -92,8 +92,7 @@ class FuchsiaAmberCtl {
 
   /// Instructs the pkg_resolver instance running on [device] to prefetch the
   /// package [packageName].
-  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server,
-                             String packageName) async {
+  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
     final String packageUrl = 'fuchsia-pkg://${server.name}/$packageName';
     final RunResult result = await device.shell('pkgctl resolve $packageUrl');
     return result.exitCode == 0;

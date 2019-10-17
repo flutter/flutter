@@ -54,7 +54,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     await expectLater(
       find.byType(ColorFiltered),

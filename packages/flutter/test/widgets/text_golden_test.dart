@@ -229,7 +229,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
     );
 
     await expectLater(
@@ -482,7 +482,7 @@ void main() {
         TextDecoration.underline,
         TextDecoration.overline,
         TextDecoration.lineThrough,
-      ]
+      ],
     );
 
     await tester.pumpWidget(
@@ -523,7 +523,7 @@ void main() {
         TextDecoration.underline,
         TextDecoration.overline,
         TextDecoration.lineThrough,
-      ]
+      ],
     );
 
     await tester.pumpWidget(
@@ -604,10 +604,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -619,19 +619,19 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           child: Checkbox(value: false, onChanged: null),
                           alignment: PlaceholderAlignment.baseline,
-                          baseline: TextBaseline.alphabetic
+                          baseline: TextBaseline.alphabetic,
                         ),
                         WidgetSpan(
                           child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           child: Text('embedded'),
@@ -754,10 +754,10 @@ void main() {
                                                     decoration: BoxDecoration(
                                                       color: Color(0xff5f00f0),
                                                     ),
-                                                  )
+                                                  ),
                                                 ),
                                               ),
-                                            )
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -780,10 +780,10 @@ void main() {
                                             decoration: BoxDecoration(
                                               color: Color(0xff5f0000),
                                             ),
-                                          )
+                                          ),
                                         ),
                                       ),
-                                    )
+                                    ),
                                   ),
                                 ),
                               ],
@@ -810,10 +810,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xff0000ff),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                       ],
@@ -831,7 +831,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile(
         'text_golden.TextInlineWidgetNest.1.png',
-        version: 2,
+        version: 3,
       ),
     );
   });
@@ -885,10 +885,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -904,7 +904,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
@@ -918,7 +918,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
@@ -995,10 +995,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -1014,7 +1014,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
@@ -1028,7 +1028,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
@@ -1105,10 +1105,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -1124,7 +1124,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
@@ -1138,7 +1138,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
@@ -1215,10 +1215,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -1234,7 +1234,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
@@ -1248,7 +1248,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
@@ -1325,10 +1325,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -1344,7 +1344,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
@@ -1358,7 +1358,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,

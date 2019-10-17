@@ -33,9 +33,18 @@ void main() {
         .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
-          stdout.add(line);
-          if (line.contains('To quit, press "q".'))
+          if (
+            !line.startsWith('Building flutter tool...') &&
+            !line.startsWith('Running "flutter pub get" in ui...') &&
+            !line.startsWith('Initializing gradle...') &&
+            !line.contains('settings_aar.gradle') &&
+            !line.startsWith('Resolving dependencies...')
+          ) {
+            stdout.add(line);
+          }
+          if (line.contains('To quit, press "q".')) {
             ready.complete();
+          }
         });
       run.stderr
         .transform<String>(utf8.decoder)
@@ -46,36 +55,31 @@ void main() {
         });
       run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
-      if (runExitCode != null)
+      if (runExitCode != null) {
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';
+      }
       run.stdin.write('q');
+
       await run.exitCode;
-      if (stderr.isNotEmpty)
+
+      if (stderr.isNotEmpty) {
         throw 'flutter run --release had output on standard error.';
-      if (stdout.first.startsWith('Building flutter tool...'))
-        stdout.removeAt(0);
-      if (stdout.first.startsWith('Running "flutter pub get" in ui...'))
-        stdout.removeAt(0);
-      if (stdout.first.startsWith('Initializing gradle...'))
-        stdout.removeAt(0);
-      // TODO(blasten): Remove this and the one below once the migration to AAR is completed.
-      if (stdout.first.contains('settings_aar.gradle'))
-        stdout.removeAt(0);
-      if (stdout.first.contains('settings_aar.gradle'))
-        stdout.removeAt(0);
-      if (stdout.first.startsWith('Resolving dependencies...'))
-        stdout.removeAt(0);
-      if (!(stdout.first.startsWith('Launching lib/main.dart on ') && stdout.first.endsWith(' in release mode...')))
+      }
+      if (!(stdout.first.startsWith('Launching lib/main.dart on ') && stdout.first.endsWith(' in release mode...'))){
         throw 'flutter run --release had unexpected first line: ${stdout.first}';
+      }
       stdout.removeAt(0);
-      if (!stdout.first.startsWith('Running Gradle task \'assembleRelease\'...'))
+      if (!stdout.first.startsWith('Running Gradle task \'assembleRelease\'...')) {
         throw 'flutter run --release had unexpected second line: ${stdout.first}';
+      }
       stdout.removeAt(0);
-      if (!(stdout.first.startsWith('Built build/app/outputs/apk/release/app-release.apk (') && stdout.first.endsWith('MB).')))
+      if (!(stdout.first.startsWith('Built build/app/outputs/apk/release/app-release.apk (') && stdout.first.endsWith('MB).'))) {
         throw 'flutter run --release had unexpected third line: ${stdout.first}';
+      }
       stdout.removeAt(0);
-      if (stdout.first.startsWith('Installing build/app/outputs/apk/app.apk...'))
+      if (stdout.first.startsWith('Installing build/app/outputs/apk/app.apk...')) {
         stdout.removeAt(0);
+      }
       if (stdout.join('\n') != '\nTo quit, press "q".\n\nApplication finished.') {
         throw 'flutter run --release had unexpected output after third line:\n'
             '${stdout.join('\n')}';

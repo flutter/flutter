@@ -17,7 +17,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder title = find.text('X');
@@ -38,7 +38,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     center = tester.getCenter(title);

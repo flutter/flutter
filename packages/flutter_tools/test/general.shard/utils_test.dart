@@ -157,10 +157,11 @@ baz=qux
       final Completer<Duration> completer = Completer<Duration>();
       DateTime firstTime;
       poller = Poller(() async {
-        if (firstTime == null)
+        if (firstTime == null) {
           firstTime = DateTime.now();
-        else
+        } else {
           completer.complete(DateTime.now().difference(firstTime));
+        }
 
         // introduce a delay
         await Future<void>.delayed(kShortDelay);

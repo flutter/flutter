@@ -35,21 +35,24 @@ import 'image_provider.dart';
 ///
 /// {@tool sample}
 ///
-/// The following example uses the [Container] widget from the widgets layer to
-/// draw an image with a border:
+/// The following applies a [BoxDecoration] to a [Container] widget to draw an
+/// [image] of an owl with a thick black [border] and rounded corners.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_decoration.png)
 ///
 /// ```dart
 /// Container(
 ///   decoration: BoxDecoration(
 ///     color: const Color(0xff7c94b6),
-///     image: DecorationImage(
-///       image: ExactAssetImage('images/flowers.jpeg'),
+///     image: const DecorationImage(
+///       image: NetworkImage('https:///flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
 ///       fit: BoxFit.cover,
 ///     ),
 ///     border: Border.all(
 ///       color: Colors.black,
-///       width: 8.0,
+///       width: 8,
 ///     ),
+///     borderRadius: BorderRadius.circular(12),
 ///   ),
 /// )
 /// ```

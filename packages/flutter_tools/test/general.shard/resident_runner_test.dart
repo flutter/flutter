@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -11,8 +12,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
@@ -35,6 +38,9 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
+      fs.file(fs.path.join('build', 'app.dill'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('ABC');
       residentRunner = HotRunner(
         <FlutterDevice>[
           mockFlutterDevice,
@@ -78,7 +84,7 @@ void main() {
     });
     when(mockFlutterDevice.devFS).thenReturn(mockDevFS);
     when(mockFlutterDevice.views).thenReturn(<FlutterView>[
-      mockFlutterView
+      mockFlutterView,
     ]);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
@@ -90,7 +96,7 @@ void main() {
     when(mockFlutterDevice.connect(
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
-      compileExpression: anyNamed('compileExpression')
+      compileExpression: anyNamed('compileExpression'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {
@@ -193,6 +199,10 @@ void main() {
     Usage: () => MockUsage(),
   }));
 
+  test('ResidentRunner copies dill file from build output into temp directory', () => testbed.run(() async {
+    expect(residentRunner.artifactDirectory.childFile('app.dill').readAsStringSync(), 'ABC');
+  }));
+
   test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
@@ -216,7 +226,7 @@ void main() {
     expect(verify(flutterUsage.sendEvent('hot', 'reload',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm))
+                   getNameForTargetPlatform(TargetPlatform.android_arm)),
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
@@ -246,7 +256,7 @@ void main() {
     expect(verify(flutterUsage.sendEvent('hot', 'restart',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm))
+                   getNameForTargetPlatform(TargetPlatform.android_arm)),
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
@@ -299,7 +309,7 @@ void main() {
   }));
 
   test('ResidentRunner uses temp directory when there is no output dill path', () => testbed.run(() {
-    expect(residentRunner.artifactDirectory.path, contains('_fluttter_tool'));
+    expect(residentRunner.artifactDirectory.path, contains('flutter_tool.'));
 
     final ResidentRunner otherRunner = HotRunner(
       <FlutterDevice>[
@@ -341,10 +351,10 @@ void main() {
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
-        .thenAnswer((Invocation invocation) async {
-      final File file = invocation.positionalArguments.first;
-      file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
-    });
+      .thenAnswer((Invocation invocation) async {
+        final File file = invocation.positionalArguments.first;
+        file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
+      });
     final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);
@@ -403,10 +413,10 @@ void main() {
     );
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
-        .thenAnswer((Invocation invocation) async {
-      final File file = invocation.positionalArguments.first;
-      file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
-    });
+      .thenAnswer((Invocation invocation) async {
+        final File file = invocation.positionalArguments.first;
+        file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
+      });
     final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);
@@ -525,6 +535,70 @@ void main() {
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.toggleProfileWidgetBuilds()).called(1);
   }));
+
+  test('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+    );
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    await residentRunner.run();
+
+    expect(await fs.file('foo').readAsString(), testUri.toString());
+  }));
+
+  test('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
+    final BufferLogger bufferLogger = logger;
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+    );
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    await residentRunner.run();
+
+    expect(bufferLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem()),
+  }));
+
+
+  test('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = ColdRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo'),
+    );
+    when(mockFlutterDevice.runCold(
+      coldRunner: anyNamed('coldRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    await residentRunner.run();
+
+    expect(await fs.file('foo').readAsString(), testUri.toString());
+  }));
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
@@ -543,3 +617,14 @@ class TestFlutterDevice extends FlutterDevice {
   final List<FlutterView> views;
 }
 
+class ThrowingForwardingFileSystem extends ForwardingFileSystem {
+  ThrowingForwardingFileSystem(FileSystem delegate) : super(delegate);
+
+  @override
+  File file(dynamic path) {
+    if (path == 'foo') {
+      throw const FileSystemException();
+    }
+    return delegate.file(path);
+  }
+}

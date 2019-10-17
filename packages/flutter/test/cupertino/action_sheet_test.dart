@@ -83,7 +83,7 @@ void main() {
         find.descendant(
           of: find.widgetWithText(CupertinoActionSheetAction, text),
           matching: find.byType(DefaultTextStyle),
-        )
+        ),
       ).style;
     }
 
@@ -313,7 +313,7 @@ void main() {
             ),
           );
         }),
-      )
+      ),
     );
 
     await tester.tap(find.text('Go'));

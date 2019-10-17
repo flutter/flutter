@@ -11,7 +11,10 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
+import 'build_system/build_system.dart';
+import 'build_system/targets/dart.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
@@ -69,6 +72,7 @@ class BundleBuilder {
     List<String> extraGenSnapshotOptions = const <String>[],
     List<String> fileSystemRoots,
     String fileSystemScheme,
+    bool shouldBuildWithAssemble = false,
   }) async {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
@@ -77,10 +81,24 @@ class BundleBuilder {
     applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
     final FlutterProject flutterProject = FlutterProject.current();
 
+    if (shouldBuildWithAssemble) {
+      await buildWithAssemble(
+        buildMode: buildMode ?? BuildMode.debug,
+        targetPlatform: platform,
+        mainPath: mainPath,
+        flutterProject: flutterProject,
+        outputDir: assetDirPath,
+        depfilePath: depfilePath,
+        precompiled: precompiledSnapshot,
+      );
+      return;
+    }
+
     DevFSContent kernelContent;
     if (!precompiledSnapshot) {
-      if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+      if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty) {
         printTrace('Extra front-end options: $extraFrontEndOptions');
+      }
       ensureDirectoryExists(applicationKernelFilePath);
       final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
       final CompilerOutput compilerOutput = await kernelCompiler.compile(
@@ -88,6 +106,7 @@ class BundleBuilder {
         mainPath: fs.file(mainPath).absolute.path,
         outputFilePath: applicationKernelFilePath,
         depFilePath: depfilePath,
+        buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
         extraFrontEndOptions: extraFrontEndOptions,
         fileSystemRoots: fileSystemRoots,
@@ -109,8 +128,9 @@ class BundleBuilder {
       packagesPath: packagesPath,
       reportLicensedPackages: reportLicensedPackages,
     );
-    if (assets == null)
+    if (assets == null) {
       throwToolExit('Error building assets', exitCode: 1);
+    }
 
     await assemble(
       buildMode: buildMode,
@@ -119,6 +139,69 @@ class BundleBuilder {
       privateKeyPath: privateKeyPath,
       assetDirPath: assetDirPath,
     );
+  }
+}
+
+/// Build an application bundle using flutter assemble.
+///
+/// This is a temporary shim to migrate the build implementations.
+Future<void> buildWithAssemble({
+  @required FlutterProject flutterProject,
+  @required BuildMode buildMode,
+  @required TargetPlatform targetPlatform,
+  @required String mainPath,
+  @required String outputDir,
+  @required String depfilePath,
+  @required bool precompiled,
+}) async {
+  // If the precompiled flag was not passed, force us into debug mode.
+  buildMode = precompiled ? buildMode : BuildMode.debug;
+  final Environment environment = Environment(
+    projectDir: flutterProject.directory,
+    outputDir: fs.directory(outputDir),
+    buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
+    defines: <String, String>{
+      kTargetFile: mainPath,
+      kBuildMode: getNameForBuildMode(buildMode),
+      kTargetPlatform: getNameForTargetPlatform(targetPlatform),
+    },
+  );
+  final Target target = buildMode == BuildMode.debug
+    ? const CopyFlutterBundle()
+    : const ReleaseCopyFlutterBundle();
+  final BuildResult result = await buildSystem.build(target, environment);
+
+  if (!result.success) {
+    for (ExceptionMeasurement measurement in result.exceptions.values) {
+      printError(measurement.exception.toString());
+      printError(measurement.stackTrace.toString());
+    }
+    throwToolExit('Failed to build bundle.');
+  }
+
+  // Output depfile format:
+  final StringBuffer buffer = StringBuffer();
+  buffer.write('flutter_bundle');
+  _writeFilesToBuffer(result.outputFiles, buffer);
+  buffer.write(': ');
+  _writeFilesToBuffer(result.inputFiles, buffer);
+
+  final File depfile = fs.file(depfilePath);
+  if (!depfile.parent.existsSync()) {
+    depfile.parent.createSync(recursive: true);
+  }
+  depfile.writeAsStringSync(buffer.toString());
+}
+
+void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
+  for (File outputFile in files) {
+    if (platform.isWindows) {
+      // Paths in a depfile have to be escaped on windows.
+      final String escapedPath = outputFile.path.replaceAll(r'\', r'\\');
+      buffer.write(' $escapedPath');
+    } else {
+      buffer.write(' ${outputFile.path}');
+    }
   }
 }
 
@@ -141,8 +224,9 @@ Future<AssetBundle> buildAssets({
     includeDefaultFonts: includeDefaultFonts,
     reportLicensedPackages: reportLicensedPackages,
   );
-  if (result != 0)
+  if (result != 0) {
     return null;
+  }
 
   return assetBundle;
 }
@@ -177,8 +261,9 @@ Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
 ) async {
-  if (bundleDir.existsSync())
+  if (bundleDir.existsSync()) {
     bundleDir.deleteSync(recursive: true);
+  }
   bundleDir.createSync(recursive: true);
 
   // Limit number of open files to avoid running out of file descriptors.

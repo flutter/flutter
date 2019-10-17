@@ -21,7 +21,7 @@ void main() {
       boilerplate(child: const CupertinoButton(
         child: Text('X', style: testStyle),
         onPressed: null,
-      ))
+      )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -38,7 +38,7 @@ void main() {
         child: Text('X', style: testStyle),
         onPressed: null,
         minSize: minSize,
-      ))
+      )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -53,7 +53,7 @@ void main() {
       boilerplate(child: const CupertinoButton(
         child: Text('XXXX', style: testStyle),
         onPressed: null,
-      ))
+      )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -247,7 +247,7 @@ void main() {
           color: bgColor,
           disabledColor: inactive,
           onPressed: () { },
-        ))
+        )),
       ),
     );
 
@@ -265,7 +265,7 @@ void main() {
           color: bgColor,
           disabledColor: inactive,
           onPressed: null,
-        ))
+        )),
       ),
     );
 
@@ -311,7 +311,7 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration;
     expect(decoration.color, CupertinoColors.activeBlue);
 
@@ -327,7 +327,7 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color, CupertinoColors.activeOrange);
+    expect(textStyle.color.value, CupertinoColors.activeOrange.darkColor.value);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -346,9 +346,9 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration;
-    expect(decoration.color, CupertinoColors.activeOrange);
+    expect(decoration.color.value, CupertinoColors.activeOrange.darkColor.value);
   });
 }
 

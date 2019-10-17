@@ -12,6 +12,7 @@ import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'fuchsia/fuchsia_device.dart';
@@ -81,8 +82,9 @@ class DeviceManager {
 
   /// A user-specified device ID.
   String get specifiedDeviceId {
-    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') {
       return null;
+    }
     return _specifiedDeviceId;
   }
 
@@ -115,8 +117,9 @@ class DeviceManager {
     }
 
     // Match on a id or name starting with [deviceId].
-    for (Device device in devices.where(startsWithDeviceId))
+    for (Device device in devices.where(startsWithDeviceId)) {
       yield device;
+    }
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
@@ -177,7 +180,7 @@ class DeviceManager {
         for (Device device in devices)
           if (await device.targetPlatform != TargetPlatform.fuchsia &&
               await device.targetPlatform != TargetPlatform.web_javascript)
-            device
+            device,
       ];
     }
 
@@ -188,7 +191,7 @@ class DeviceManager {
       devices = <Device>[
         for (Device device in devices)
           if (isDeviceSupportedForProject(device, flutterProject))
-            device
+            device,
       ];
     } else if (devices.length == 1 &&
              !hasSpecifiedDeviceId &&
@@ -421,10 +424,12 @@ abstract class Device {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other is! Device)
+    }
+    if (other is! Device) {
       return false;
+    }
     return id == other.id;
   }
 
@@ -432,8 +437,9 @@ abstract class Device {
   String toString() => name;
 
   static Stream<String> descriptions(List<Device> devices) async* {
-    if (devices.isEmpty)
+    if (devices.isEmpty) {
       return;
+    }
 
     // Extract device information
     final List<List<String>> table = <List<String>>[];
@@ -468,6 +474,11 @@ abstract class Device {
   static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(printStatus);
   }
+
+  /// Clean up resources allocated by device
+  ///
+  /// For example log readers or port forwarders.
+  void dispose() {}
 }
 
 class DebuggingOptions {
@@ -481,14 +492,18 @@ class DebuggingOptions {
     this.traceSkia = false,
     this.traceSystrace = false,
     this.dumpSkpOnShaderCompilation = false,
+    this.cacheSkSL = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
+    this.initializePlatform = true,
     this.hostname,
     this.port,
+    this.browserLaunch = true,
+    this.vmserviceOutFile,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo)
+  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -500,9 +515,9 @@ class DebuggingOptions {
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
-      hostname = null,
-      port = null,
-      observatoryPort = null;
+      observatoryPort = null,
+      browserLaunch = true,
+      vmserviceOutFile = null;
 
   final bool debuggingEnabled;
 
@@ -515,11 +530,17 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool traceSystrace;
   final bool dumpSkpOnShaderCompilation;
+  final bool cacheSkSL;
   final bool useTestFonts;
   final bool verboseSystemLogs;
+  /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
+  final bool initializePlatform;
   final int observatoryPort;
   final String port;
   final String hostname;
+  final bool browserLaunch;
+  /// A file where the vmservice uri should be written after the application is started.
+  final String vmserviceOutFile;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }
@@ -538,8 +559,9 @@ class LaunchResult {
   @override
   String toString() {
     final StringBuffer buf = StringBuffer('started=$started');
-    if (observatoryUri != null)
+    if (observatoryUri != null) {
       buf.write(', observatory=$observatoryUri');
+    }
     return buf.toString();
   }
 }
@@ -554,6 +576,15 @@ class ForwardedPort {
 
   @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
+
+  /// Kill subprocess (if present) used in forwarding.
+  void dispose() {
+    final Process process = context;
+
+    if (process != null) {
+      process.kill();
+    }
+  }
 }
 
 /// Forward ports from the host machine to the device.
@@ -569,6 +600,9 @@ abstract class DevicePortForwarder {
 
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
+
+  /// Cleanup allocated resources, like forwardedPorts
+  Future<void> dispose() async { }
 }
 
 /// Read the log for a particular device.
@@ -583,6 +617,9 @@ abstract class DeviceLogReader {
 
   /// Process ID of the app on the device.
   int appPid;
+
+  // Clean up resources allocated by log reader e.g. subprocesses
+  void dispose() { }
 }
 
 /// Describes an app running on the device.
@@ -604,6 +641,9 @@ class NoOpDeviceLogReader implements DeviceLogReader {
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();
+
+  @override
+  void dispose() { }
 }
 
 // A portforwarder which does not support forwarding ports.
@@ -618,4 +658,7 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async { }
+
+  @override
+  Future<void> dispose() async { }
 }

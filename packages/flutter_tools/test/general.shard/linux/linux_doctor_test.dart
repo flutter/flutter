@@ -96,7 +96,7 @@ void main() {
       expect(result.type, ValidationType.missing);
       expect(result.messages, <ValidationMessage>[
         ValidationMessage('clang++ 4.0.1'),
-        ValidationMessage.error('make is not installed')
+        ValidationMessage.error('make is not installed'),
       ]);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,

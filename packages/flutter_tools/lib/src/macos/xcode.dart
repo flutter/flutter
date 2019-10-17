@@ -12,8 +12,8 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../ios/xcodeproj.dart';
 
-const int kXcodeRequiredVersionMajor = 9;
-const int kXcodeRequiredVersionMinor = 0;
+const int kXcodeRequiredVersionMajor = 10;
+const int kXcodeRequiredVersionMinor = 2;
 
 Xcode get xcode => context.get<Xcode>();
 
@@ -37,8 +37,9 @@ class Xcode {
   }
 
   bool get isInstalled {
-    if (xcodeSelectPath == null || xcodeSelectPath.isEmpty)
+    if (xcodeSelectPath == null || xcodeSelectPath.isEmpty) {
       return false;
+    }
     return xcodeProjectInterpreter.isInstalled;
   }
 
@@ -90,12 +91,15 @@ class Xcode {
   }
 
   bool get isVersionSatisfactory {
-    if (!xcodeProjectInterpreter.isInstalled)
+    if (!xcodeProjectInterpreter.isInstalled) {
       return false;
-    if (majorVersion > kXcodeRequiredVersionMajor)
+    }
+    if (majorVersion > kXcodeRequiredVersionMajor) {
       return true;
-    if (majorVersion == kXcodeRequiredVersionMajor)
+    }
+    if (majorVersion == kXcodeRequiredVersionMajor) {
       return minorVersion >= kXcodeRequiredVersionMinor;
+    }
     return false;
   }
 
@@ -125,8 +129,9 @@ class Xcode {
   }
 
   String getSimulatorPath() {
-    if (xcodeSelectPath == null)
+    if (xcodeSelectPath == null) {
       return null;
+    }
     final List<String> searchPaths = <String>[
       fs.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
     ];

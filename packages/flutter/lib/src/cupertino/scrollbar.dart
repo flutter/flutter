@@ -8,19 +8,25 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
+
 // All values eyeballed.
-const Color _kScrollbarColor = Color(0x99777777);
 const double _kScrollbarMinLength = 36.0;
 const double _kScrollbarMinOverscrollLength = 8.0;
-const Radius _kScrollbarRadius = Radius.circular(1.5);
-const Radius _kScrollbarRadiusDragging = Radius.circular(4.0);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
 const Duration _kScrollbarResizeDuration = Duration(milliseconds: 150);
 
-// These values are measured using screenshots from an iPhone XR 13.0 simulator.
-const double _kScrollbarThickness = 2.5;
+// Extracted from iOS 13.1 beta using Debug View Hierarchy.
+const Color _kScrollbarColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x59000000),
+  darkColor: Color(0x80FFFFFF),
+);
+const double _kScrollbarThickness = 3;
 const double _kScrollbarThicknessDragging = 8.0;
+const Radius _kScrollbarRadius = Radius.circular(1.5);
+const Radius _kScrollbarRadiusDragging = Radius.circular(4.0);
+
 // This is the amount of space from the top of a vertical scrollbar to the
 // top edge of the scrollable, measured when the vertical scrollbar overscrolls
 // to the top.
@@ -101,7 +107,6 @@ class CupertinoScrollbar extends StatefulWidget {
 class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProviderStateMixin {
   final GlobalKey _customPaintKey = GlobalKey();
   ScrollbarPainter _painter;
-  TextDirection _textDirection;
 
   AnimationController _fadeoutAnimationController;
   Animation<double> _fadeoutOpacityAnimation;
@@ -141,15 +146,22 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _textDirection = Directionality.of(context);
-    _painter = _buildCupertinoScrollbarPainter();
+    if (_painter == null) {
+      _painter = _buildCupertinoScrollbarPainter(context);
+    }
+    else {
+      _painter
+        ..textDirection = Directionality.of(context)
+        ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
+        ..padding = MediaQuery.of(context).padding;
+    }
   }
 
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
-  ScrollbarPainter _buildCupertinoScrollbarPainter() {
+  ScrollbarPainter _buildCupertinoScrollbarPainter(BuildContext context) {
     return ScrollbarPainter(
-      color: _kScrollbarColor,
-      textDirection: _textDirection,
+      color: CupertinoDynamicColor.resolve(_kScrollbarColor, context),
+      textDirection: Directionality.of(context),
       thickness: _thickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       mainAxisMargin: _kScrollbarMainAxisMargin,
@@ -353,9 +365,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
           child: CustomPaint(
             key: _customPaintKey,
             foregroundPainter: _painter,
-            child: RepaintBoundary(
-              child: widget.child,
-            ),
+            child: RepaintBoundary(child: widget.child),
           ),
         ),
       ),

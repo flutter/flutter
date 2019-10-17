@@ -10,6 +10,13 @@ import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+final List<String> flutterAssets = <String>[
+  'assets/flutter_assets/AssetManifest.json',
+  'assets/flutter_assets/LICENSE',
+  'assets/flutter_assets/fonts/MaterialIcons-Regular.ttf',
+  'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
+];
+
 /// Runs the given [testFunction] on a freshly generated Flutter project.
 Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) async {
   final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
@@ -73,6 +80,20 @@ void checkItDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
   for (T value in values) {
     if (collection.contains(value)) {
       throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
+    }
+  }
+}
+
+///  Checks that [str] contains the specified [Pattern]s, otherwise throws
+/// a [TaskResult].
+void checkFileContains(List<Pattern> patterns, String filePath) {
+  final String fileContent = File(filePath).readAsStringSync();
+  for (Pattern pattern in patterns) {
+    if (!fileContent.contains(pattern)) {
+      throw TaskResult.failure(
+        'Expected to find `$pattern` in `$filePath` '
+        'instead it found:\n$fileContent'
+      );
     }
   }
 }
@@ -382,25 +403,29 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 
 class _Dependencies {
   _Dependencies(String depfilePath) {
-    final RegExp _separatorExpr = RegExp(r'([^\\]) ');
-    final RegExp _escapeExpr = RegExp(r'\\(.)');
-
     // Depfile format:
     // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
     final String contents = File(depfilePath).readAsStringSync();
-    final List<String> colonSeparated = contents.split(': ');
-    target = colonSeparated[0].trim();
-    dependencies = colonSeparated[1]
-        // Put every file on right-hand side on the separate line
+    final List<String> colonSeparated = contents.split(':');
+    targets = _processList(colonSeparated[0].trim());
+    dependencies = _processList(colonSeparated[1].trim());
+  }
+
+  final RegExp _separatorExpr = RegExp(r'([^\\]) ');
+  final RegExp _escapeExpr = RegExp(r'\\(.)');
+
+  Set<String> _processList(String rawText) {
+    return rawText
+    // Put every file on right-hand side on the separate line
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
-        // Expand escape sequences, so that '\ ', for example,ß becomes ' '
+    // Expand escape sequences, so that '\ ', for example,ß becomes ' '
         .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
         .toSet();
   }
 
-  String target;
+  Set<String> targets;
   Set<String> dependencies;
 }
 
@@ -409,6 +434,6 @@ String validateSnapshotDependency(FlutterProject project, String expectedTarget)
   final _Dependencies deps = _Dependencies(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
           'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
-  return deps.target == expectedTarget ? null :
-    'Dependency file should have $expectedTarget as target. Instead has ${deps.target}';
+  return deps.targets.any((String target) => target.contains(expectedTarget)) ? null :
+  'Dependency file should have $expectedTarget as target. Instead has ${deps.targets}';
 }

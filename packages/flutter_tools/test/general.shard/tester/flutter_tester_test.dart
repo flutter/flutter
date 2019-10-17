@@ -39,6 +39,7 @@ void main() {
       expect(app.packagesFile.path, fs.path.join(projectPath, '.packages'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -108,8 +109,8 @@ void main() {
       final Map<Type, Generator> startOverrides = <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: 'linux'),
         FileSystem: () => fs,
-        Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         ProcessManager: () => mockProcessManager,
+        Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         KernelCompilerFactory: () => FakeKernelCompilerFactory(mockKernelCompiler),
         Artifacts: () => mockArtifacts,
       };
@@ -133,7 +134,10 @@ void main() {
         mockArtifacts = MockArtifacts();
         final String artifactPath = fs.path.join(flutterRoot, 'artifact');
         fs.file(artifactPath).createSync(recursive: true);
-        when(mockArtifacts.getArtifactPath(any)).thenReturn(artifactPath);
+        when(mockArtifacts.getArtifactPath(
+          any,
+          mode: anyNamed('mode')
+        )).thenReturn(artifactPath);
 
         mockKernelCompiler = MockKernelCompiler();
       });
@@ -156,8 +160,7 @@ void main() {
 
       testUsingContext('start', () async {
         final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
-        mockProcess = MockProcess(
-            stdout: Stream<List<int>>.fromIterable(<List<int>>[
+        mockProcess = MockProcess(stdout: Stream<List<int>>.fromIterable(<List<int>>[
           '''
 Observatory listening on $observatoryUri
 Hello!
@@ -170,6 +173,7 @@ Hello!
           mainPath: anyNamed('mainPath'),
           outputFilePath: anyNamed('outputFilePath'),
           depFilePath: anyNamed('depFilePath'),
+          buildMode: BuildMode.debug,
           trackWidgetCreation: anyNamed('trackWidgetCreation'),
           extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
           fileSystemRoots: anyNamed('fileSystemRoots'),

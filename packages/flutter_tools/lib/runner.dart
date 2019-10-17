@@ -93,10 +93,12 @@ Future<int> _handleToolError(
     // Argument error exit code.
     return _exit(64);
   } else if (error is ToolExit) {
-    if (error.message != null)
+    if (error.message != null) {
       printError(error.message);
-    if (verbose)
+    }
+    if (verbose) {
       printError('\n$stackTrace\n');
+    }
     return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
     // We've caught an exit code.
@@ -213,8 +215,9 @@ Future<String> _doctorText() async {
 }
 
 Future<int> _exit(int code) async {
-  if (flutterUsage.isFirstRun)
+  if (flutterUsage.isFirstRun) {
     flutterUsage.printWelcome();
+  }
 
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).

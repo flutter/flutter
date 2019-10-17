@@ -20,6 +20,7 @@ import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
@@ -110,7 +111,7 @@ class IMobileDevice {
     _isInstalled ??= processUtils.exitsHappySync(
       <String>[
         _ideviceIdPath,
-        '-h'
+        '-h',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[cache.dyLdLibEntry]
@@ -140,7 +141,7 @@ class IMobileDevice {
       <String>[
         _ideviceinfoPath,
         '-u',
-        fakeIphoneId
+        fakeIphoneId,
       ],
       environment: executionEnv,
     )).processResult;
@@ -175,14 +176,15 @@ class IMobileDevice {
       final ProcessResult result = await processManager.run(
         <String>[
           _ideviceIdPath,
-          '-l'
+          '-l',
         ],
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry]
         ),
       );
-      if (result.exitCode != 0)
+      if (result.exitCode != 0) {
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
+      }
       return result.stdout;
     } on ProcessException {
       throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
@@ -197,14 +199,15 @@ class IMobileDevice {
           '-u',
           deviceID,
           '-k',
-          key
+          key,
         ],
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry]
         ),
       );
-      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
+      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found')) {
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}. Try unlocking attached devices.');
+      }
       if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
         if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
           throw const IOSDeviceNotTrustedError(
@@ -219,8 +222,9 @@ class IMobileDevice {
           );
         }
       }
-      if (result.exitCode != 0)
+      if (result.exitCode != 0) {
         throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
+      }
       return result.stdout.trim();
     } on ProcessException {
       throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
@@ -246,7 +250,7 @@ class IMobileDevice {
     return processUtils.run(
       <String>[
         _idevicescreenshotPath,
-        outputFile.path
+        outputFile.path,
       ],
       throwOnError: true,
       environment: Map<String, String>.fromEntries(
@@ -265,11 +269,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign = true,
 
 }) async {
-  if (!upgradePbxProjWithFlutterAssets(app.project))
+  if (!upgradePbxProjWithFlutterAssets(app.project)) {
     return XcodeBuildResult(success: false);
+  }
 
-  if (!_checkXcodeVersion())
+  if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
+  }
 
 
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
@@ -316,6 +322,25 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('');
     printError('4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.');
     return XcodeBuildResult(success: false);
+  }
+
+  final FlutterManifest manifest = app.project.parent.manifest;
+  final String buildName = parsedBuildName(manifest: manifest, buildInfo: buildInfo);
+  final bool buildNameIsMissing = buildName == null || buildName.isEmpty;
+
+  if (buildNameIsMissing) {
+    printStatus('Warning: Missing build name (CFBundleShortVersionString).');
+  }
+
+  final String buildNumber = parsedBuildNumber(manifest: manifest, buildInfo: buildInfo);
+  final bool buildNumberIsMissing = buildNumber == null || buildNumber.isEmpty;
+
+  if (buildNumberIsMissing) {
+    printStatus('Warning: Missing build number (CFBundleVersion).');
+  }
+  if (buildNameIsMissing || buildNumberIsMissing) {
+    printError('Action Required: You must set a build name and number in the pubspec.yaml '
+      'file version field before submitting to the App Store.');
   }
 
   Map<String, String> autoSigningConfigs;
@@ -391,7 +416,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         'CODE_SIGNING_ALLOWED=NO',
         'CODE_SIGNING_REQUIRED=NO',
         'CODE_SIGNING_IDENTITY=""',
-      ]
+      ],
     );
   }
 
@@ -545,8 +570,9 @@ String readGeneratedXcconfig(String appPath) {
   final String generatedXcconfigPath =
       fs.path.join(fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
   final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
-  if (!generatedXcconfigFile.existsSync())
+  if (!generatedXcconfigFile.existsSync()) {
     return null;
+  }
   return generatedXcconfigFile.readAsStringSync();
 }
 
@@ -636,8 +662,9 @@ class XcodeBuildExecution {
 const String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
-  if (!platform.isMacOS)
+  if (!platform.isMacOS) {
     return false;
+  }
   if (!xcodeProjectInterpreter.isInstalled) {
     printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
@@ -711,8 +738,9 @@ bool upgradePbxProjWithFlutterAssets(IosProject project) {
   for (final String line in lines) {
     final Match match = oldAssets.firstMatch(line);
     if (match != null) {
-      if (printedStatuses.add(match.group(1)))
+      if (printedStatuses.add(match.group(1))) {
         printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
+      }
     } else {
       buffer.writeln(line);
     }

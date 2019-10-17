@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
@@ -130,6 +131,7 @@ class UpgradeCommandRunner {
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
+      environment: Map<String, String>.of(platform.environment),
     );
     if (code != 0) {
       throwToolExit(null, exitCode: code);
@@ -248,6 +250,7 @@ class UpgradeCommandRunner {
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
+      environment: Map<String, String>.of(platform.environment),
     );
     if (code != 0) {
       throwToolExit(null, exitCode: code);
@@ -261,7 +264,7 @@ class UpgradeCommandRunner {
     final String projectRoot = findProjectRoot();
     if (projectRoot != null) {
       printStatus('');
-      await pubGet(context: PubContext.pubUpgrade, directory: projectRoot, upgrade: true, checkLastModified: false);
+      await pub.get(context: PubContext.pubUpgrade, directory: projectRoot, upgrade: true, checkLastModified: false);
     }
   }
 

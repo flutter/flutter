@@ -11,14 +11,11 @@ import 'test_widgets.dart';
 
 void main() {
   testWidgets('simultaneously dispose a widget and end the scroll animation', (WidgetTester tester) async {
-    final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 250; i++)
-      textWidgets.add(Text('$i'));
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: FlipWidget(
-          left: ListView(children: textWidgets),
+          left: ListView(children: List<Widget>.generate(250, (int i) => Text('$i'))),
           right: Container(),
         ),
       ),
@@ -87,7 +84,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Container(),
-      )
+      ),
     );
     await tester.pumpAndSettle();
     expect(controller.hasClients, isFalse);

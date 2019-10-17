@@ -177,7 +177,7 @@ Future<void> _checkForTrailingSpaces() async {
       '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '*.yml',
     ];
     final EvalResult changedFilesResult = await _evalCommand(
-      'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--'] + fileTypes,
+      'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--', ...fileTypes],
       workingDirectory: flutterRoot,
     );
     if (changedFilesResult.stdout == null || changedFilesResult.stdout.trim().isEmpty) {
@@ -195,9 +195,10 @@ Future<void> _checkForTrailingSpaces() async {
           '--line-number',
           '--extended-regexp',
           r'[[:blank:]]$',
-        ] + changedFiles,
+          ...changedFiles,
+        ],
         workingDirectory: flutterRoot,
-        failureMessage: '${red}Whitespace detected at the end of source code lines.$reset\nPlease remove:',
+        failureMessage: '${red}Detected trailing whitespace in the file[s] listed above.$reset\nPlease remove them from the offending line[s].',
         expectNonZeroExit: true, // Just means a non-zero exit code is expected.
         expectedExitCode: 1, // Indicates that zero lines were found.
       );

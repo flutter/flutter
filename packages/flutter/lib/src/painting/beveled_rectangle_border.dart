@@ -125,7 +125,7 @@ class BeveledRectangleBorder extends ShapeBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-      final Path path = getOuterPath(rect, textDirection: textDirection)
+        final Path path = getOuterPath(rect, textDirection: textDirection)
           ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
         canvas.drawPath(path, side.toPaint());
         break;

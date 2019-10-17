@@ -25,6 +25,7 @@ void main() {
     );
 
     expect(tester.testTextInput.isVisible, isTrue);
+    expect(focusNode.hasPrimaryFocus, isTrue);
 
     final BuildContext context = tester.element(find.byType(TextField));
 
@@ -40,11 +41,7 @@ void main() {
     Navigator.of(tester.element(find.text('Dialog'))).pop();
     await tester.pump();
 
-    expect(tester.testTextInput.isVisible, isFalse);
-
-    await tester.tap(find.byType(TextField));
-    await tester.idle();
-
+    expect(focusNode.hasPrimaryFocus, isTrue);
     expect(tester.testTextInput.isVisible, isTrue);
 
     await tester.pumpWidget(Container());
