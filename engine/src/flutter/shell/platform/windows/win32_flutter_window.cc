@@ -59,9 +59,6 @@ void Win32FlutterWindow::SetState(FLUTTER_API_SYMBOL(FlutterEngine) eng) {
   platform_handler_ = std::make_unique<flutter::PlatformHandler>(
       internal_plugin_messenger, this);
 
-  auto state = std::make_unique<FlutterDesktopViewControllerState>();
-  state->engine = engine_;
-
   process_events_ = true;
 }
 

@@ -1039,6 +1039,8 @@ FILE: ../../../flutter/shell/platform/windows/win32_dpi_helper.cc
 FILE: ../../../flutter/shell/platform/windows/win32_dpi_helper.h
 FILE: ../../../flutter/shell/platform/windows/win32_flutter_window.cc
 FILE: ../../../flutter/shell/platform/windows/win32_flutter_window.h
+FILE: ../../../flutter/shell/platform/windows/win32_task_runner.cc
+FILE: ../../../flutter/shell/platform/windows/win32_task_runner.h
 FILE: ../../../flutter/shell/platform/windows/win32_window.cc
 FILE: ../../../flutter/shell/platform/windows/win32_window.h
 FILE: ../../../flutter/shell/platform/windows/win32_window_unittests.cc
