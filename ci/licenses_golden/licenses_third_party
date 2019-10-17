@@ -1,4 +1,4 @@
-Signature: e2192a22480240acd49efc74e2fd9b85
+Signature: 554074c6c51e9b6506f3b234ec8f9a4d
 
 UNUSED LICENSES:
 
@@ -9770,6 +9770,8 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_scope_builder.h + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_scope_builder.h
+FILE: ../../../third_party/dart/sdk/lib/io/network_profiling.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/network_profiling.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors. Please see the AUTHORS file
 for details. All rights reserved.
