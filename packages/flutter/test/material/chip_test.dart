@@ -1080,7 +1080,8 @@ void main() {
     await tester.pump();
 
     // Pumps 10 frames of 20 ms each.
-    await pumpFrames(tester: tester, frames: 10, duration: const Duration(milliseconds: 20));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
 
     // There should be exactly one ink-creating widget.
     expect(find.byType(InkWell), findsOneWidget);
