@@ -26,6 +26,28 @@ class Depfile {
     return Depfile(inputs, outputs);
   }
 
+  /// Parse the output of dart2js's used dependencies.
+  ///
+  /// The [file] contains a list of newline separated file URIs. The output
+  /// file must be manually specified.
+  factory Depfile.parseDart2js(File file, File output) {
+    final List<File> inputs = <File>[];
+    for (String rawUri in file.readAsLinesSync()) {
+      if (rawUri.trim().isEmpty) {
+        continue;
+      }
+      final Uri fileUri = Uri.tryParse(rawUri);
+      if (fileUri == null) {
+        continue;
+      }
+      if (fileUri.scheme != 'file') {
+        continue;
+      }
+      inputs.add(fs.file(fileUri));
+    }
+    return Depfile(inputs, <File>[output]);
+  }
+
   /// The input files for this depfile.
   final List<File> inputs;
 

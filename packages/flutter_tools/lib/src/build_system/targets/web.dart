@@ -12,6 +12,7 @@ import '../../dart/package_map.dart';
 import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
+import '../depfile.dart';
 import 'assets.dart';
 import 'dart.dart';
 
@@ -114,12 +115,12 @@ class Dart2JSTarget extends Target {
     Source.artifact(Artifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
+    Source.depfile('dart2js.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/main.dart.js'),
+    Source.depfile('dart2js.d'),
   ];
 
   @override
@@ -130,6 +131,7 @@ class Dart2JSTarget extends Target {
     final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
       ? PackageMap.globalGeneratedPackagesPath
       : PackageMap.globalPackagesPath;
+    final File outputFile = environment.buildDir.childFile('main.dart.js');
     final ProcessResult result = await processManager.run(<String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
@@ -141,7 +143,7 @@ class Dart2JSTarget extends Target {
       else
         '-O4',
       '-o',
-      environment.buildDir.childFile('main.dart.js').path,
+      outputFile.path,
       '--packages=$packageFile',
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
@@ -152,6 +154,18 @@ class Dart2JSTarget extends Target {
     if (result.exitCode != 0) {
       throw Exception(result.stdout + result.stderr);
     }
+    final File dart2jsDeps = environment.buildDir
+      .childFile('main.dart.js.deps');
+    if (!dart2jsDeps.existsSync()) {
+      printError('Warning: dart2js did not produced expected deps list at '
+        '${dart2jsDeps.path}');
+      return;
+    }
+    final Depfile depfile = Depfile.parseDart2js(
+      environment.buildDir.childFile('main.dart.js.deps'),
+      outputFile,
+    );
+    depfile.writeToFile(environment.buildDir.childFile('dart2js.d'));
   }
 }
 

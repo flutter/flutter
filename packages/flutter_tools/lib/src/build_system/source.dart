@@ -206,9 +206,6 @@ abstract class Source {
   /// environment variables.
   const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
 
-  /// This source is produced by invoking the provided function.
-  const factory Source.function(InputFunction function) = _FunctionSource;
-
   /// This source is produced by the [SourceBehavior] class.
   const factory Source.behavior(SourceBehavior behavior) = _SourceBehavior;
 
@@ -259,18 +256,6 @@ class _SourceBehavior implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitBehavior(value);
-
-  @override
-  bool get implicit => true;
-}
-
-class _FunctionSource implements Source {
-  const _FunctionSource(this.value);
-
-  final InputFunction value;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitFunction(value);
 
   @override
   bool get implicit => true;
