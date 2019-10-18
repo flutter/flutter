@@ -7,17 +7,17 @@ coverage:
         threshold: null # acceptable drop %
         base: auto # means compare against PR base on PRs, against parent commit on non-PR commits
         only_pulls: false
-        #project:
-        #  default:
-        #    # basic
-        #    target: 0%
-        #    threshold: null
-        #    base: auto
-        #    # advanced
-        #    branches: null
-        #    if_no_uploads: error
-        #    if_not_found: success
-        #    if_ci_failed: error
-        #    only_pulls: false
-        #    flags: null
-        #    paths: null
+      project:
+        default:
+          # basic
+          target: 0%
+          threshold: null
+          base: auto
+          # advanced
+          branches: null
+          if_no_uploads: error
+          if_not_found: success
+          if_ci_failed: error
+          only_pulls: false
+          flags: null
+          paths: null
