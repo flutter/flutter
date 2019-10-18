@@ -279,8 +279,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// location described by `localPosition`.
   ///
   /// This method is called by the default implementation of [find] and
-  /// [findAll]. Override this method to customize how the layer should search
-  /// for annotations, or if the layer has its own annotations to add.
+  /// [findAllAnnotations]. Override this method to customize how the layer
+  /// should search for annotations, or if the layer has its own annotations to
+  /// add.
   ///
   /// ## About layer annotations
   ///
@@ -326,14 +327,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     Offset localPosition, {
     @required bool onlyFirst,
   }) {
-    debugPrint(
-      'Layer $runtimeType has not implemented Layer.findAnnotations. '
-      'If the layer class does not care about annotations, override '
-      'findAnnotations with a simple "return false". '
-      'If it overrides find and findAll to add custom behaviors, '
-      'please change to overriding Layer.findAnnotations instead, '
-      'otherwise these behaviors will no longer take effect. '
-      'See https://github.com/flutter/flutter/pull/37896 for details.');
     return false;
   }
 
@@ -352,8 +345,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// See also:
   ///
-  ///  * [findAll], which is similar but returns all annotations found at the
-  ///    given position.
+  ///  * [findAllAnnotations], which is similar but returns all annotations found
+  ///    at the given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   S find<S>(Offset localPosition) {
     final AnnotationResult<S> result = AnnotationResult<S>();
@@ -370,10 +363,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// false` and returns the annotations of its result. It is encouraged to
   /// override [findAnnotations] instead of this method.
   ///
-  /// This method is similar to [findAllAnnotations], except that it returns a
-  /// list of annotations instead of an [AnnotationResult], which contains less
-  /// information. It is recommended to use [findAllAnnotations] over this one.
-  ///
   /// ## About layer annotations
   ///
   /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
@@ -387,6 +376,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///    position of the event related to each annotation, and is equally fast,
   ///    hence is preferred over [findAll].
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
+  @Deprecated('Use findAllAnnotations instead. This API will be removed in early 2020.')
   Iterable<S> findAll<S>(Offset localPosition) {
     final AnnotationResult<S> result = findAllAnnotations(localPosition);
     return result.entries.map((AnnotationEntry<S> entry) => entry.annotation);
@@ -401,8 +391,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// false` and returns the annotations of its result. It is encouraged to
   /// override [findAnnotations] instead of this method.
   ///
-  /// This method is similar to [findAll], except that it
-  ///
   /// ## About layer annotations
   ///
   /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
@@ -411,10 +399,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   ///  * [find], which is similar but returns the first annotation found at the
   ///    given position.
-  ///  * [findAll], which is similar but returns a list of annotations.
-  ///    The [findAllAnnotations] returns an [AnnotationResult] that contains
-  ///    more information, such as the local position of the event related to
-  ///    each annotation, and is equally fast, hence is preferred over [findAll].
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   AnnotationResult<S> findAllAnnotations<S>(Offset localPosition) {
     final AnnotationResult<S> result = AnnotationResult<S>();
@@ -2293,10 +2277,10 @@ class FollowerLayer extends ContainerLayer {
 /// layer to the tree is the common way of adding an annotation.
 ///
 /// An annotation is an optional object of any type that, when attached with a
-/// layer, can be retrieved using [Layer.find] or [Layer.findAll] with a
-/// position. The search process is done recursively, controlled by a concept
-/// of being opaque to a type of annotation, explained in the document of
-/// [Layer.findAnnotations].
+/// layer, can be retrieved using [Layer.find] or [Layer.findAllAnnotations]
+/// with a position. The search process is done recursively, controlled by a
+/// concept of being opaque to a type of annotation, explained in the document
+/// of [Layer.findAnnotations].
 ///
 /// When an annotation search arrives, this layer defers the same search to each
 /// of this layer's children, respecting their opacity. Then it adds this

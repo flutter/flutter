@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import '../flutter_test_alternative.dart';
 
 void main() {
-  group('AnnotatedRegion find', () {
+  group('$AnnotatedRegion find', () {
     test('finds the first value in a OffsetLayer when sized', () {
       final ContainerLayer containerLayer = ContainerLayer();
       final List<OffsetLayer> layers = <OffsetLayer>[
