@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 final Key blockKey = UniqueKey();
 const double expandedAppbarHeight = 250.0;
-final Key appbarContainerKey = UniqueKey();
+final Key finderKey = UniqueKey();
 
 void main() {
   testWidgets('FlexibleSpaceBar stretch mode default zoomBackground', (WidgetTester tester) async {
@@ -25,7 +25,7 @@ void main() {
                 stretch: true,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
-                    key: appbarContainerKey,
+                    key: finderKey,
                   ),
                 ),
               ),
@@ -36,7 +36,7 @@ void main() {
       ),
     );
 
-    final Finder appbarContainer = find.byKey(appbarContainerKey);
+    final Finder appbarContainer = find.byKey(finderKey);
     final Size sizeBeforeScroll = tester.getSize(appbarContainer);
     await slowDrag(tester, blockKey, const Offset(0.0, 100.0));
     final Size sizeAfterScroll = tester.getSize(appbarContainer);
@@ -84,77 +84,84 @@ void main() {
     );
 
   });
-//
-//  testWidgets('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
-//    await tester.pumpWidget(
-//      MaterialApp(
-//        home: Scaffold(
-//          body: CustomScrollView(
-//            physics: const BouncingScrollPhysics(),
-//            key: blockKey,
-//            slivers: <Widget>[
-//              SliverAppBar(
-//                expandedHeight: expandedAppbarHeight,
-//                pinned: true,
-//                stretch: true,
-//                flexibleSpace: FlexibleSpaceBar(
-//                  stretchModes: const <StretchMode>[StretchMode.fadeTitle],
-//                  background: Container(key: appbarContainerKey),
-//                  title: const Text('Title'),
-//                ),
-//              ),
-//              SliverToBoxAdapter(child: Container(height: 10000.0)),
-//            ],
-//          ),
-//        ),
-//      ),
-//    );
-//
-////    final Finder appbarContainer = find.byKey(appbarContainerKey);
-////    final Offset topBeforeScroll = tester.getTopLeft(appbarContainer);
-////    await slowDrag(tester, blockKey, const Offset(0.0, -100.0));
-////    final Offset topAfterScroll = tester.getTopLeft(appbarContainer);
-////
-////    expect(topBeforeScroll.dy, equals(0.0));
-////    expect(topAfterScroll.dy, lessThan(10.0));
-////    expect(topAfterScroll.dy, greaterThan(-50.0));
-//  });
-//
-//  testWidgets('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (WidgetTester tester) async {
-//    await tester.pumpWidget(
-//      MaterialApp(
-//        home: Scaffold(
-//          body: CustomScrollView(
-//            physics: const ClampingScrollPhysics(),
-//            key: blockKey,
-//            slivers: <Widget>[
-//              SliverAppBar(
-//                expandedHeight: expandedAppbarHeight,
-//                stretch: true,
-//                pinned: true,
-//                flexibleSpace: FlexibleSpaceBar(
-//                  stretchModes: const <StretchMode>[StretchMode.blurBackground],
-//                  background: Container(
-//                    key: appbarContainerKey,
-//                  ),
-//                ),
-//              ),
-//              SliverToBoxAdapter(child: Container(height: 10000.0)),
-//            ],
-//          ),
-//        ),
-//      ),
-//    );
-//
-////    final Finder appbarContainer = find.byKey(appbarContainerKey);
-////    final Offset topBeforeScroll = tester.getTopLeft(appbarContainer);
-////    await slowDrag(tester, blockKey, const Offset(0.0, -100.0));
-////    final Offset topAfterScroll = tester.getTopLeft(appbarContainer);
-////
-////    expect(topBeforeScroll.dy, equals(0.0));
-////    expect(topAfterScroll.dy, lessThan(10.0));
-////    expect(topAfterScroll.dy, greaterThan(-50.0));
-//  });
+
+  testWidgets('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            key: blockKey,
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: expandedAppbarHeight,
+                pinned: true,
+                stretch: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  stretchModes: const <StretchMode>[StretchMode.fadeTitle],
+                  title: Text(
+                    'Title',
+                    key: finderKey,
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(child: Container(height: 10000.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+    await slowDrag(tester, blockKey, const Offset(0.0, 10.0));
+    Opacity opacityWidget = tester.widget<Opacity>(
+      find.ancestor(
+        of: find.text('Title'),
+        matching: find.byType(Opacity),
+      ).first,
+    );
+    expect(opacityWidget.opacity.round(), equals(1));
+    await slowDrag(tester, blockKey, const Offset(0.0, 100.0));
+    opacityWidget = tester.widget<Opacity>(
+      find.ancestor(
+        of: find.text('Title'),
+        matching: find.byType(Opacity),
+      ).first,
+    );
+    expect(opacityWidget.opacity, equals(0.0));
+  });
+
+  testWidgets('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            physics: const ClampingScrollPhysics(),
+            key: blockKey,
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: expandedAppbarHeight,
+                stretch: true,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  stretchModes: const <StretchMode>[StretchMode.blurBackground],
+                  background: Container(
+                    key: finderKey,
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(child: Container(height: 10000.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder appbarContainer = find.byKey(finderKey);
+    final Size sizeBeforeScroll = tester.getSize(appbarContainer);
+    await slowDrag(tester, blockKey, const Offset(0.0, 100.0));
+    final Size sizeAfterScroll = tester.getSize(appbarContainer);
+
+    expect(sizeBeforeScroll.height, equals(sizeAfterScroll.height));
+  });
 }
 
 Future<void> slowDrag(WidgetTester tester, Key widget, Offset offset) async {

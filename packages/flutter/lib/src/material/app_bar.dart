@@ -932,6 +932,7 @@ class SliverAppBar extends StatefulWidget {
        assert(snap != null),
        assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
+       assert(stretchTriggerOffset > 0.0),
        super(key: key);
 
   /// A widget to display before the [title].

@@ -85,7 +85,7 @@ enum StretchMode {
 ///                 StretchMode.fadeTitle,
 ///               ],
 ///               centerTitle: true,
-///               title: const Text('FlexibleSpaceBar'),
+///               title: const Text('Flight Report'),
 ///               background: Stack(
 ///                 fit: StackFit.expand,
 ///                 children: [

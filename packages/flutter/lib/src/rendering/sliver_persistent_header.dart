@@ -199,12 +199,10 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       parentUsesSize: true,
     );
 
-    if (
-      stretchConfiguration != null &&
+    if (stretchConfiguration != null &&
       stretchConfiguration.onStretchTrigger != null &&
       stretchOffset >= stretchConfiguration.stretchTriggerOffset &&
-      _lastStretchOffset <= stretchConfiguration.stretchTriggerOffset
-    ) {
+      _lastStretchOffset <= stretchConfiguration.stretchTriggerOffset) {
       stretchConfiguration.onStretchTrigger();
     }
     _lastStretchOffset = stretchOffset;
