@@ -42,7 +42,7 @@ const Map<String, _HardwareType> _kKnownHardware = <String, _HardwareType>{
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
   'samsungexynos9810': _HardwareType.physical,
-  'samsungexynos7570':  _HardwareType.physical,
+  'samsungexynos7570': _HardwareType.physical,
 };
 
 bool allowHeapCorruptionOnWindows(int exitCode) {
