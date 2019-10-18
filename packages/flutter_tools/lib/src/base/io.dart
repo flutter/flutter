@@ -206,7 +206,7 @@ class Stdio {
       ioStdin.echoMode = !currentEchoMode;
       ioStdin.echoMode = currentEchoMode;
     } on io.StdinException {
-        return _stdinHasTerminal = false;
+      return _stdinHasTerminal = false;
     }
     return _stdinHasTerminal = true;
   }
