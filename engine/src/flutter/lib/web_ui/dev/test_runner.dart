@@ -230,7 +230,6 @@ class TestCommand extends Command<bool> {
     @required bool expectFailure,
   }) async {
     final List<String> testArgs = <String>[
-      '--no-color',
       ...<String>['-r', 'compact'],
       '--concurrency=$concurrency',
       if (isDebug) '--pause-after-load',
