@@ -228,29 +228,47 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       final Animation<double> current = _secondaryAnimation.parent;
       if (current != null) {
-        if (current is TrainHoppingAnimation) {
+        final Animation<double> currentTrain = current is TrainHoppingAnimation ? current.currentTrain : current;
+        final Animation<double> nextTrain = nextRoute._animation;
+        if (currentTrain.value == nextTrain.value) {
+          _setSecondaryAnimation(nextTrain, nextRoute.completed);
+        } else {
           TrainHoppingAnimation newAnimation;
           newAnimation = TrainHoppingAnimation(
-            current.currentTrain,
-            nextRoute._animation,
+            currentTrain,
+            nextTrain,
             onSwitchedTrain: () {
               assert(_secondaryAnimation.parent == newAnimation);
               assert(newAnimation.currentTrain == nextRoute._animation);
-              _secondaryAnimation.parent = newAnimation.currentTrain;
+              _setSecondaryAnimation(newAnimation.currentTrain, nextRoute.completed);
               newAnimation.dispose();
             },
           );
-          _secondaryAnimation.parent = newAnimation;
+          _setSecondaryAnimation(newAnimation, nextRoute.completed);
+        }
+        if (current is TrainHoppingAnimation) {
           current.dispose();
-        } else {
-          _secondaryAnimation.parent = TrainHoppingAnimation(current, nextRoute._animation);
         }
       } else {
-        _secondaryAnimation.parent = nextRoute._animation;
+        _setSecondaryAnimation(nextRoute._animation, nextRoute.completed);
       }
     } else {
-      _secondaryAnimation.parent = kAlwaysDismissedAnimation;
+      _setSecondaryAnimation(kAlwaysDismissedAnimation);
     }
+  }
+
+  void _setSecondaryAnimation(Animation<double> animation, [Future<dynamic> disposed]) {
+    _secondaryAnimation.parent = animation;
+    // Release the reference to the next route's animation when that route
+    // is disposed.
+    disposed?.then((dynamic _) {
+      if (_secondaryAnimation.parent == animation) {
+        _secondaryAnimation.parent = kAlwaysDismissedAnimation;
+        if (animation is TrainHoppingAnimation) {
+          animation.dispose();
+        }
+      }
+    });
   }
 
   /// Returns true if this route supports a transition animation that runs
