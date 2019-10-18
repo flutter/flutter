@@ -113,6 +113,8 @@ file:///Users/foo/canonicalized_map.dart
       fs.path.absolute(fs.path.join('Users', 'foo', 'canonicalized_map.dart')),
     ]);
     expect(depfile.outputs.single.path, 'foo.dart.js');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.posix)
   }));
 
   test('Can parse handle invalid uri', () => testbed.run(() {
@@ -129,5 +131,8 @@ file:///Users/foo/canonicalized_map.dart
       fs.path.absolute(fs.path.join('Users', 'foo', 'canonicalized_map.dart')),
     ]);
     expect(depfile.outputs.single.path, 'foo.dart.js');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.posix)
   }));
 }
+
