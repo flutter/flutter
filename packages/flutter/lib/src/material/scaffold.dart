@@ -1965,7 +1965,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (widget.bottomSheet != oldWidget.bottomSheet) {
       assert(() {
         if (widget.bottomSheet != null && _currentBottomSheet?._isLocalHistoryEntry == true) {
-          // TODO(albertusangga): create unit test for this because it's hard to test
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
