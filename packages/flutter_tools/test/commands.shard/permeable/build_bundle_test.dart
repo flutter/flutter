@@ -75,7 +75,7 @@ void main() {
 
     expect(await command.usageValues,
         containsPair(CustomDimensions.commandBuildBundleIsModule, 'true'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('bundle getUsage indicate that project is not a module', () async {
     final String projectPath = await createProject(tempDir,
@@ -85,7 +85,7 @@ void main() {
 
     expect(await command.usageValues,
         containsPair(CustomDimensions.commandBuildBundleIsModule, 'false'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('bundle getUsage indicate the target platform', () async {
     final String projectPath = await createProject(tempDir,
@@ -95,7 +95,7 @@ void main() {
 
     expect(await command.usageValues,
         containsPair(CustomDimensions.commandBuildBundleTargetPlatform, 'android-arm'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('bundle fails to build for Windows if feature is disabled', () async {
     fs.file('lib/main.dart').createSync(recursive: true);
