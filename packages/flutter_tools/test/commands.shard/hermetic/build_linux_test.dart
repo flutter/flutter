@@ -83,6 +83,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
@@ -97,6 +98,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
@@ -110,6 +112,27 @@ void main() {
       const <String>['build', 'linux']
     );
     expect(fs.file('linux/flutter/ephemeral/generated_config.mk').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => mockProcessManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Handles argument error from missing make', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    when(mockProcessManager.start(<String>[
+      'make',
+      '-C',
+      '/linux',
+      'BUILD=release',
+    ])).thenThrow(ArgumentError());
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'linux']
+    ), throwsToolExit(message: 'make not found. Run \'flutter doctor\' for more information.'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
@@ -164,6 +187,7 @@ BINARY_NAME=fizz_bar
     expect(makefileExecutableName(flutterProject.linux), 'fizz_bar');
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 

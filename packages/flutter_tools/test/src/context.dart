@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -29,8 +30,11 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import 'common.dart';
+import 'fake_process_manager.dart';
+import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
+export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>();
@@ -50,6 +54,14 @@ void testUsingContext(
   String testOn,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
+  if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
+    throw StateError(
+      'If you override the FileSystem context you must also provide a ProcessManager, '
+      'otherwise the processes you launch will not be dealing with the same file system '
+      'that you are dealing with in your test.'
+    );
+  }
+
   // Ensure we don't rely on the default [Config] constructor which will
   // leak a sticky $HOME/.flutter_settings behind!
   Directory configDir;
@@ -92,6 +104,7 @@ void testUsingContext(
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
+          Pub: () => ThrowingPub() // prevent accidentally using pub.
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -330,10 +343,10 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 9.2';
+  String get versionText => 'Xcode 10.2';
 
   @override
-  int get majorVersion => 9;
+  int get majorVersion => 10;
 
   @override
   int get minorVersion => 2;

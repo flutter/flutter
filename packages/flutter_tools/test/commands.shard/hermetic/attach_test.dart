@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -99,6 +100,7 @@ void main() {
         await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Logger: () => logger,
       });
 
@@ -116,6 +118,7 @@ void main() {
                throwsA(isA<ToolExit>()));
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Logger: () => logger,
       });
 
@@ -195,6 +198,7 @@ void main() {
         expect(flutterDevice.fileSystemRoots, const <String>[filesystemRoot]);
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       });
 
       testUsingContext('exits when ipv6 is specified and debug-port is not', () async {
@@ -218,6 +222,7 @@ void main() {
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       },);
 
       testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
@@ -241,6 +246,7 @@ void main() {
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       },);
     });
 
@@ -302,6 +308,7 @@ void main() {
       )).called(1);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     group('forwarding to given port', () {
@@ -344,6 +351,7 @@ void main() {
         await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Logger: () => logger,
       });
 
@@ -367,6 +375,7 @@ void main() {
         await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Logger: () => logger,
       });
 
@@ -397,6 +406,7 @@ void main() {
         await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Logger: () => logger,
       });
 
@@ -428,6 +438,7 @@ void main() {
         await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Logger: () => logger,
       });
     });
@@ -441,6 +452,7 @@ void main() {
       expect(testLogger.statusText, contains('No supported devices connected'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('exits when multiple devices connected', () async {
@@ -465,6 +477,7 @@ void main() {
       expect(testLogger.statusText, contains('yy2'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 }

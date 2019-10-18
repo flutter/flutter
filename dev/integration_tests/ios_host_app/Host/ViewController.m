@@ -1,6 +1,11 @@
 #import "ViewController.h"
-#import <Flutter/Flutter.h>
-#import <FlutterPluginRegistrant/GeneratedPluginRegistrant.h>
+
+@import Flutter;
+@import FlutterPluginRegistrant;
+
+// Prove plugins can be module-imported from the host app.
+@import device_info;
+@import google_maps_flutter;
 
 @implementation ViewController
 

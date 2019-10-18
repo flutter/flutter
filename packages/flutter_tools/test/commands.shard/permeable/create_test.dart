@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -77,7 +78,9 @@ void main() {
       ],
     );
     return _runFlutterTest(projectDir);
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('can create a default project if empty directory exists', () async {
     await projectDir.create(recursive: true);
@@ -93,7 +96,9 @@ void main() {
         'ios/Runner/GeneratedPluginRegistrant.h',
       ],
     );
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('creates a module project correctly', () async {
     await _createAndAnalyzeProject(projectDir, <String>[
@@ -114,7 +119,9 @@ void main() {
     ]);
     return _runFlutterTest(projectDir);
   },
-    timeout: allowForRemotePubInvocation,
+    timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    },
   );
 
   testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
@@ -131,7 +138,10 @@ void main() {
           '.ios/',
         ]),
       throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
-  }, timeout: allowForRemotePubInvocation, overrides: noColorTerminalOverride);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+    ...noColorTerminalOverride,
+  });
 
   testUsingContext('Will create an app project if non-empty non-project directory exists without .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
@@ -154,7 +164,9 @@ void main() {
         '.ios/',
       ],
     );
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('detects and recreates an app project correctly', () async {
     await projectDir.absolute.childDirectory('lib').create(recursive: true);
@@ -177,7 +189,9 @@ void main() {
         '.ios/',
       ],
     );
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('detects and recreates a plugin project correctly', () async {
     await projectDir.create(recursive: true);
@@ -200,7 +214,9 @@ void main() {
         'lib/flutter_project.dart',
       ],
     );
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('detects and recreates a package project correctly', () async {
     await projectDir.create(recursive: true);
@@ -229,7 +245,9 @@ void main() {
         'test/widget_test.dart',
       ],
     );
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('kotlin/swift legacy app project', () async {
     return _createProject(
@@ -249,7 +267,9 @@ void main() {
         'ios/Runner/main.m',
       ],
     );
-  }, timeout: allowForCreateFlutterProject);
+  }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('can create a package project', () async {
     await _createAndAnalyzeProject(
@@ -277,7 +297,9 @@ void main() {
       ],
     );
     return _runFlutterTest(projectDir);
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('can create a plugin project', () async {
     await _createAndAnalyzeProject(
@@ -297,7 +319,9 @@ void main() {
       ],
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('kotlin/swift plugin project', () async {
     return _createProject(
@@ -380,7 +404,9 @@ void main() {
       <String>['--with-driver-test', '--template=app'],
       <String>['lib/main.dart'],
     );
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
@@ -413,7 +439,9 @@ void main() {
       'android/',
       'ios/',
     ]);
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
 
   testUsingContext('androidx is used by default in an app project', () async {
@@ -902,7 +930,9 @@ void main() {
         '.android/app/src/main/java/com/bar/foo/flutter_project/host/MainActivity.java',
       ],
     );
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('can re-gen module .ios/ folder, reusing custom org', () async {
     await _createProject(
@@ -917,7 +947,9 @@ void main() {
       await project.ios.productBundleIdentifier,
       'com.bar.foo.flutterProject',
     );
-  }, timeout: allowForRemotePubInvocation);
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('can re-gen app android/ folder, reusing custom org', () async {
     await _createProject(
@@ -1070,6 +1102,8 @@ void main() {
         'ios/Runner/GeneratedPluginRegistrant.h',
       ],
     );
+  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
   });
 
   testUsingContext('fails when invalid package name', () async {
@@ -1097,6 +1131,7 @@ void main() {
     timeout: allowForCreateFlutterProject,
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
+      Pub: () => const Pub(),
     },
   );
 
@@ -1115,6 +1150,7 @@ void main() {
     timeout: allowForCreateFlutterProject,
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
+      Pub: () => const Pub(),
     },
   );
 

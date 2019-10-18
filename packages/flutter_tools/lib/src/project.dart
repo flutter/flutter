@@ -288,6 +288,9 @@ abstract class XcodeBasedProject {
 
   /// True if the host app project is using Swift.
   Future<bool> get isSwift;
+
+  /// Directory containing symlinks to pub cache plugins source generated on `pod install`.
+  Directory get symlinks;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -349,6 +352,9 @@ class IosProject implements XcodeBasedProject {
 
   /// The 'Info.plist' file of the host app.
   File get hostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
+
+  @override
+  Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
   Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppBundleName.xcodeproj');
@@ -741,6 +747,9 @@ class MacOSProject implements XcodeBasedProject {
 
   @override
   Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
+
+  @override
+  Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
 
   @override
   Future<bool> get isSwift async => true;

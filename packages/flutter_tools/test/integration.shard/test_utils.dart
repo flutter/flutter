@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -47,11 +46,8 @@ Future<void> getPackages(String folder) async {
     'pub',
     'get',
   ];
-  final Process process = await processManager.start(command, workingDirectory: folder);
-  final StringBuffer errorOutput = StringBuffer();
-  process.stderr.transform(utf8.decoder).listen(errorOutput.write);
-  final int exitCode = await process.exitCode;
-  if (exitCode != 0) {
-    throw Exception('flutter pub get failed: $errorOutput');
+  final ProcessResult result = await processManager.run(command, workingDirectory: folder);
+  if (result.exitCode != 0) {
+    throw Exception('flutter pub get failed: ${result.stderr}\n${result.stdout}');
   }
 }

@@ -777,7 +777,7 @@ void main() {
     expect(appBarHeight(tester), kTextTabBarHeight);
 
     // Drag the scrollable up and down. The app bar should not snap open, the
-    // bottof of the appbar should just track the drag offset.
+    // bottom of the appbar should just track the drag offset.
     TestGesture gesture = await tester.startGesture(const Offset(50.0, 200.0));
     await gesture.moveBy(const Offset(0.0, 100.0));
     await tester.pump();

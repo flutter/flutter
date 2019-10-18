@@ -434,26 +434,35 @@ Future<void> _runTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
+// TODO(yjbanov): we're getting rid of these blacklists as part of https://github.com/flutter/flutter/projects/60
+const List<String> kWebTestDirectoryBlacklist = <String>[
+  'test/cupertino',
+  'test/examples',
+  'test/material',
+];
+const List<String> kWebTestFileBlacklist = <String>[
+  'test/widgets/heroes_test.dart',
+  'test/widgets/text_test.dart',
+  'test/widgets/selectable_text_test.dart',
+  'test/widgets/color_filter_test.dart',
+  'test/widgets/editable_text_cursor_test.dart',
+  'test/widgets/shadow_test.dart',
+  'test/widgets/raw_keyboard_listener_test.dart',
+  'test/widgets/editable_text_test.dart',
+  'test/widgets/widget_inspector_test.dart',
+  'test/widgets/draggable_test.dart',
+  'test/widgets/shortcuts_test.dart',
+];
+
 Future<void> _runWebTests() async {
   final Directory flutterPackageDir = Directory(path.join(flutterRoot, 'packages', 'flutter'));
   final Directory testDir = Directory(path.join(flutterPackageDir.path, 'test'));
-
-  // TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
-  const List<String> kBlacklist = <String>[
-    'test/cupertino',
-    'test/examples',
-    'test/material',
-    'test/painting',
-    'test/rendering',
-    'test/semantics',
-    'test/widgets',
-  ];
 
   final List<String> directories = testDir
     .listSync()
     .whereType<Directory>()
     .map<String>((Directory dir) => path.relative(dir.path, from: flutterPackageDir.path))
-    .where((String relativePath) => !kBlacklist.contains(relativePath))
+    .where((String relativePath) => !kWebTestDirectoryBlacklist.contains(relativePath))
     .toList();
 
   await _runFlutterWebTest(flutterPackageDir.path, tests: directories);
@@ -686,19 +695,40 @@ class EvalResult {
   final int exitCode;
 }
 
+/// The number of Cirrus jobs that run web tests in parallel.
+///
+/// WARNING: if you change this number, also change .cirrus.yml
+/// and make sure it runs _all_ shards.
+const int _kWebShardCount = 6;
+
 Future<void> _runFlutterWebTest(String workingDirectory, {
   List<String> tests,
 }) async {
-  final List<String> allTests = <String>[];
+  List<String> allTests = <String>[];
   for (String testDirPath in tests) {
     final Directory testDir = Directory(path.join(workingDirectory, testDirPath));
     allTests.addAll(
       testDir.listSync(recursive: true)
         .whereType<File>()
         .where((File file) => file.path.endsWith('_test.dart'))
-        .map((File file) => path.relative(file.path, from: workingDirectory))
+        .map<String>((File file) => path.relative(file.path, from: workingDirectory))
+        .where((String filePath) => !kWebTestFileBlacklist.contains(filePath)),
     );
   }
+
+  // If a shard is specified only run tests in that shard.
+  final int webShard = int.tryParse(Platform.environment['WEB_SHARD'] ?? 'n/a');
+  if (webShard != null) {
+    if (webShard >= _kWebShardCount) {
+      throw 'WEB_SHARD must be <= _kWebShardCount, but was $webShard';
+    }
+    final List<String> shard = <String>[];
+    for (int i = webShard; i < allTests.length; i += _kWebShardCount) {
+      shard.add(allTests[i]);
+    }
+    allTests = shard;
+  }
+
   print(allTests.join('\n'));
   print('${allTests.length} tests total');
 
@@ -956,6 +986,7 @@ Future<void> _androidGradleTests(String subShard) async {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
     await _runDevicelabTest('module_host_with_custom_build_test', env: env);
+    await _runDevicelabTest('build_aar_module_test', env: env);
   }
 }
 

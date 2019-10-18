@@ -228,6 +228,7 @@ class HotRunner extends ResidentRunner {
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
       return 0;
     }
+    writeVmserviceFile();
 
     int result = 0;
     if (stayResident) {
@@ -1031,6 +1032,9 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async {
+    for (FlutterDevice flutterDevice in flutterDevices) {
+      flutterDevice.device.dispose();
+    }
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
   }
@@ -1066,7 +1070,8 @@ class ProjectFileInvalidator {
     final List<Uri> invalidatedFiles = <Uri>[];
     for (final Uri uri in urisToScan) {
       final DateTime updatedAt = fs.statSync(
-          uri.toFilePath(windows: platform.isWindows)).modified;
+        uri.toFilePath(windows: platform.isWindows),
+      ).modified;
       if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
         invalidatedFiles.add(uri);
       }

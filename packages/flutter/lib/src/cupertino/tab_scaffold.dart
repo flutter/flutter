@@ -512,7 +512,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
         tabFocusNodes.addAll(
           List<FocusScopeNode>.generate(
             widget.tabCount - tabFocusNodes.length,
-              (int index) => FocusScopeNode(debugLabel: '${describeIdentity(widget)} Tab ${index + tabFocusNodes.length}'),
+              (int index) => FocusScopeNode(debugLabel: '$CupertinoTabScaffold Tab ${index + tabFocusNodes.length}'),
           ),
         );
       }
