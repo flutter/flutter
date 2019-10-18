@@ -385,6 +385,34 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<void> debugTogglePlatform() async {
+    try {
+      final vmservice.Response response = await _vmService.callServiceExtension(
+          'ext.flutter.platformOverride');
+      final String currentPlatform = response.json['value'];
+      String nextPlatform;
+      switch (currentPlatform) {
+        case 'android':
+          nextPlatform = 'iOS';
+          break;
+        case 'iOS':
+          nextPlatform = 'android';
+          break;
+      }
+      if (nextPlatform == null) {
+        return;
+      }
+      await _vmService.callServiceExtension(
+        'ext.flutter.platformOverride', args: <String, Object>{
+          'value': nextPlatform,
+        });
+      printStatus('Switched operating system to $nextPlatform');
+    } on vmservice.RPCError {
+      return;
+    }
+  }
+
+  @override
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     try {
       await _vmService.callServiceExtension(
