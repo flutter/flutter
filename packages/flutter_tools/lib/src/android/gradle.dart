@@ -356,7 +356,7 @@ Future<String> _initializeGradle(FlutterProject project) async {
       throwToolExit(
         '$gradle does not have permission to execute by your user.\n'
         'You should change the ownership of the project directory to your user'
-        ', or move the project to a directory with execute permissions.'
+        ', or move the project to a directory with execute permissions.\n$error'
       );
     }
     // No idea what went wrong but we can't do anything about it.
