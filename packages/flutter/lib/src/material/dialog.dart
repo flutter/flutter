@@ -74,7 +74,7 @@ class Dialog extends StatelessWidget {
   /// The curve to use for the animation shown when the system keyboard intrudes
   /// into the space that the dialog is placed in.
   ///
-  /// Defaults to [Curves.fastOutSlowIn].
+  /// Defaults to [Curves.decelerate].
   final Curve insetAnimationCurve;
 
   /// {@template flutter.material.dialog.shape}
