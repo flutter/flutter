@@ -43,8 +43,9 @@ Future<int> runProcess(
     executable,
     arguments,
     workingDirectory: workingDirectory,
+    mode: io.ProcessStartMode.inheritStdio,
   );
-  final int exitCode = await _forwardIOAndWait(process);
+  final int exitCode = await process.exitCode;
   if (mustSucceed && exitCode != 0) {
     throw ProcessException(
       description: 'Sub-process failed.',
@@ -80,16 +81,6 @@ Future<String> evalProcess(
     );
   }
   return result.stdout;
-}
-
-Future<int> _forwardIOAndWait(io.Process process) {
-  final StreamSubscription stdoutSub = process.stdout.listen(io.stdout.add);
-  final StreamSubscription stderrSub = process.stderr.listen(io.stderr.add);
-  return process.exitCode.then<int>((int exitCode) {
-    stdoutSub.cancel();
-    stderrSub.cancel();
-    return exitCode;
-  });
 }
 
 @immutable
