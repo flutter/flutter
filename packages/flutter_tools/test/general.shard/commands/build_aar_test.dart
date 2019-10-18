@@ -57,7 +57,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-    });
+    }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate that project is a plugin', () async {
       final String projectPath = await createProject(tempDir,
@@ -69,7 +69,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-    });
+    }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate the target platform', () async {
       final String projectPath = await createProject(tempDir,
@@ -82,7 +82,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-    });
+    }, timeout: allowForCreateFlutterProject);
   });
 
   group('Gradle', () {
