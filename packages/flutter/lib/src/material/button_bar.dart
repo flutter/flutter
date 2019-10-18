@@ -242,8 +242,20 @@ class RenderButtonBarRow extends RenderFlex {
   void performLayout() {
     super.performLayout();
     if (size.width > constraints.minWidth) {
-      setDirectionWithoutLayout(Axis.vertical);
-      super.performLayout();
+      RenderBox child = firstChild;
+      double currentHeight = 0.0;
+      while (child != null) {
+        final FlexParentData childParentData = child.parentData;
+        assert(child.parentData == childParentData);
+
+        childParentData.offset = Offset(0, currentHeight);
+        currentHeight += child.size.height;
+        child.layout(constraints, parentUsesSize: true);
+
+        child = childParentData.nextSibling;
+      }
+
+      size = constraints.constrain(Size(constraints.minWidth, currentHeight));
     }
   }
 }
