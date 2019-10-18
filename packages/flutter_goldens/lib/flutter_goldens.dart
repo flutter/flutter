@@ -204,11 +204,10 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
     );
-    if (baseDirectory.existsSync()) {
-      // Cleaning up and prior test output.
-      baseDirectory.deleteSync(recursive: true);
+
+    if(!baseDirectory.existsSync()) {
+      baseDirectory.createSync(recursive: true);
     }
-    baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.auth();
@@ -290,11 +289,10 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
     );
-    if (baseDirectory.existsSync()) {
-      // Cleaning up and prior test output.
-      baseDirectory.deleteSync(recursive: true);
+
+    if(!baseDirectory.existsSync()) {
+      baseDirectory.createSync(recursive: true);
     }
-    baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.getExpectations();
@@ -397,11 +395,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       platform,
     );
 
-    if (baseDirectory.existsSync()) {
-     // Cleaning up and prior test output.
-     baseDirectory.deleteSync(recursive: true);
+    if(!baseDirectory.existsSync()) {
+      baseDirectory.createSync(recursive: true);
     }
-    baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.getExpectations();
@@ -414,7 +410,6 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     final List<String> testExpectations = skiaClient.expectations[testName];
-
     if (testExpectations == null) {
       // There is no baseline for this test
       print('No expectations provided by Skia Gold for test: $golden. '
@@ -427,6 +422,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     }
 
     ComparisonResult result;
+    final Map<String, ComparisonResult> validFailures = <String, ComparisonResult>{};
     for (String expectation in testExpectations) {
       final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
 
@@ -438,10 +434,12 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       if (result.passed) {
         return true;
       } else if (await skiaClient.isValidDigestForExpectation(expectation, golden.path)) {
-        break;
+        validFailures[expectation] = result;
       }
     }
-    generateFailureOutput(result, golden, basedir);
+    validFailures.forEach((String expectation, ComparisonResult result) {
+      generateFailureOutput(result, golden, basedir, key: expectation);
+    });
     return false;
   }
 }

@@ -124,14 +124,23 @@ class LocalComparisonOutput {
   /// Writes out diffs from the [ComparisonResult] of a golden file test.
   ///
   /// Will throw an error if a null result is provided.
-  void generateFailureOutput(ComparisonResult result, Uri golden, Uri basedir) {
+  void generateFailureOutput(
+    ComparisonResult result,
+    Uri golden,
+    Uri basedir, {
+    String key = '',
+  }) {
     String additionalFeedback = '';
     if (result.diffs != null) {
       additionalFeedback = '\nFailure feedback can be found at '
         '${path.join(basedir.path, 'failures')}';
       final Map<String, Image> diffs = result.diffs;
       diffs.forEach((String name, Image image) {
-        final File output = getFailureFile(name, golden, basedir);
+        final File output = getFailureFile(
+          key.isEmpty ? name : name + '_' + key,
+          golden,
+          basedir,
+        );
         output.parent.createSync(recursive: true);
         output.writeAsBytesSync(encodePng(image));
       });
