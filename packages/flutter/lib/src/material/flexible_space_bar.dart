@@ -74,7 +74,8 @@ enum StretchMode {
 ///           SliverAppBar(
 ///             stretch: true,
 ///             onStretchTrigger: () {
-///               print('Stretched!');
+///               // Function callback for stretch
+///               return;
 ///             },
 ///             expandedHeight: 300.0,
 ///             flexibleSpace: FlexibleSpaceBar(
