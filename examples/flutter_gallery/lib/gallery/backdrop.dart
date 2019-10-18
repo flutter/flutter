@@ -66,9 +66,13 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
 
   @override
   Widget build(BuildContext context) {
-    return AbsorbPointer(
-      absorbing: !_active,
-      child: widget.child,
+    return FocusScope(
+      canRequestFocus: _active,
+      debugLabel: '$_TappableWhileStatusIs',
+      child: AbsorbPointer(
+        absorbing: !_active,
+        child: widget.child,
+      ),
     );
   }
 }
@@ -239,11 +243,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       _controller.fling(velocity: _controller.value < 0.5 ? -2.0 : 2.0);
   }
 
-  void _toggleFrontLayer() {
-    final AnimationStatus status = _controller.status;
-    final bool isOpen = status == AnimationStatus.completed || status == AnimationStatus.forward;
-    _controller.fling(velocity: isOpen ? -2.0 : 2.0);
-  }
+  bool get _isOpen => _controller.status == AnimationStatus.completed || _controller.status == AnimationStatus.forward;
+
+  void _toggleFrontLayer() => _controller.fling(velocity: _isOpen ? -2.0 : 2.0);
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     final Animation<RelativeRect> frontRelativeRect = _controller.drive(RelativeRectTween(
@@ -275,10 +277,14 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               ),
             ),
             Expanded(
-              child: Visibility(
-                child: widget.backLayer,
-                visible: _controller.status != AnimationStatus.completed,
-                maintainState: true,
+              child: _TappableWhileStatusIs(
+                AnimationStatus.dismissed,
+                controller: _controller,
+                child: Visibility(
+                  child: widget.backLayer,
+                  visible: _controller.status != AnimationStatus.completed,
+                  maintainState: true,
+                ),
               ),
             ),
           ],
