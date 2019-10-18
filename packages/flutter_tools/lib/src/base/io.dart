@@ -194,21 +194,21 @@ class Stdio {
     if (_stdinHasTerminal != null) {
       return _stdinHasTerminal;
     }
-    if (stdin is io.Stdin) {
-      final io.Stdin ioStdin = stdin;
-      if (!ioStdin.hasTerminal) {
-        return _stdinHasTerminal = false;
-      }
-      try {
-        final bool currentEchoMode = ioStdin.echoMode;
-        ioStdin.echoMode = !currentEchoMode;
-        ioStdin.echoMode = currentEchoMode;
-      } on io.StdinException {
-         return _stdinHasTerminal = false;
-      }
-      return _stdinHasTerminal = true;
+    if (stdin is! io.Stdin) {
+      return _stdinHasTerminal = false;
     }
-    return _stdinHasTerminal = false;
+    final io.Stdin ioStdin = stdin;
+    if (!ioStdin.hasTerminal) {
+      return _stdinHasTerminal = false;
+    }
+    try {
+      final bool currentEchoMode = ioStdin.echoMode;
+      ioStdin.echoMode = !currentEchoMode;
+      ioStdin.echoMode = currentEchoMode;
+    } on io.StdinException {
+        return _stdinHasTerminal = false;
+    }
+    return _stdinHasTerminal = true;
   }
 
   int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
@@ -220,6 +220,7 @@ Stdio get stdio => context.get<Stdio>() ?? const Stdio();
 io.Stdout get stdout => stdio.stdout;
 Stream<List<int>> get stdin => stdio.stdin;
 io.IOSink get stderr => stdio.stderr;
+bool get stdinHasTerminal => stdio.stdinHasTerminal;
 
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {
