@@ -9,8 +9,6 @@ import("clang.gni")
 # compile with these so may want to remove this config.
 config("extra_warnings") {
   cflags = [
-    "-Wheader-hygiene",
-
     # Warns when a const char[] is converted to bool.
     "-Wstring-conversion",
 
