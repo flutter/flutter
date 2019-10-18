@@ -88,11 +88,11 @@ class _FontWeightTween extends Tween<FontWeight> {
 /// control cease to be selected.
 ///
 /// A segmented control can feature any [Widget] as one of the values in its
-/// [Map] of [children]. The type T is the type of the keys used
-/// to identify each widget and determine which widget is selected. As
-/// required by the [Map] class, keys must be of consistent types
-/// and must be comparable. The ordering of the keys will determine the order
-/// of the widgets in the segmented control.
+/// [Map] of [children]. The type T is the type of the keys used to identify each
+/// widget and determine which widget is selected. As required by the [Map] class,
+/// keys must be of consistent types and must be comparable. The [children] argument
+/// must be an ordered [Map] such as a [LinkedHashMap], the ordering of the keys
+/// will determine the order of the widgets in the segmented control.
 ///
 /// When the state of the segmented control changes, the widget changes [controller]'s
 /// value to the map key associated with the newly selected widget, causing all
@@ -238,12 +238,13 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     with TickerProviderStateMixin<CupertinoSlidingSegmentedControl<T>> {
 
   final Map<T, AnimationController> _highlightControllers = <T, AnimationController>{};
-  final Tween<FontWeight> highlightTween = _FontWeightTween(begin: FontWeight.normal, end: FontWeight.w600);
+  final Tween<FontWeight> _highlightTween = _FontWeightTween(begin: FontWeight.normal, end: FontWeight.w600);
 
   final Map<T, AnimationController> _pressControllers = <T, AnimationController>{};
-  final Tween<double> pressTween = Tween<double>(begin: 1, end: 0.2);
+  final Tween<double> _pressTween = Tween<double>(begin: 1, end: 0.2);
 
-  TextDirection textDirection;
+  List<T> keys;
+  TextDirection _textDirection;
 
   AnimationController thumbController;
   AnimationController separatorOpacityController;
@@ -263,7 +264,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     newController.addListener(_didChangeControllerValue);
   }
 
-  AnimationController createHighlightAnimationController({ bool isCompleted = false }) {
+  AnimationController _createHighlightAnimationController({ bool isCompleted = false }) {
     return AnimationController(
       duration: _kHighlightAnimationDuration,
       value: isCompleted ? 1 : 0,
@@ -275,7 +276,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     });
   }
 
-  AnimationController createFadeoutAnimationController() {
+  AnimationController _createFadeoutAnimationController() {
     return AnimationController(
       duration: _kOpacityAnimationDuration,
       vsync: this,
@@ -291,6 +292,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     super.initState();
 
     final GestureArenaTeam team = GestureArenaTeam();
+    // If the long press or horizontal drag recognizer gets accepted, we know for
+    // sure the gesture is meant for the segmented control. Hand everything to
+    // the drag gesture recognizer.
     longPress.team = team;
     drag.team = team;
     team.captain = drag;
@@ -318,10 +322,10 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     );
 
     for (T currentKey in widget.children.keys) {
-      _highlightControllers[currentKey] = createHighlightAnimationController(
+      _highlightControllers[currentKey] = _createHighlightAnimationController(
         isCompleted: currentKey == controller.value,  // Highlight the current selection.
       );
-      _pressControllers[currentKey] = createFadeoutAnimationController();
+      _pressControllers[currentKey] = _createFadeoutAnimationController();
     }
   }
 
@@ -329,8 +333,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    textDirection = Directionality.of(context);
-    assert(textDirection != null);
+    _textDirection = Directionality.of(context);
+    assert(_textDirection != null);
   }
 
   @override
@@ -350,8 +354,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 
     for (T newKey in widget.children.keys) {
       if (!_highlightControllers.keys.contains(newKey)) {
-        _highlightControllers[newKey] = createHighlightAnimationController();
-        _pressControllers[newKey] = createFadeoutAnimationController();
+        _highlightControllers[newKey] = _createHighlightAnimationController();
+        _pressControllers[newKey] = _createFadeoutAnimationController();
       }
     }
 
@@ -395,7 +399,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 
   // Play highlight animation for the child located at _highlightControllers[at].
-  void animateHighlightController({ T at, bool forward }) {
+  void _animateHighlightController({ T at, bool forward }) {
     if (at == null)
       return;
     final AnimationController controller = _highlightControllers[at];
@@ -407,8 +411,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   set highlighted(T newValue) {
     if (_highlighted == newValue)
       return;
-    animateHighlightController(at: newValue, forward: true);
-    animateHighlightController(at: _highlighted, forward: false);
+    _animateHighlightController(at: newValue, forward: true);
+    _animateHighlightController(at: _highlighted, forward: false);
     _highlighted = newValue;
   }
 
@@ -430,12 +434,11 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     controller.value = _highlighted;
   }
 
-  List<T> keys;
   T indexToKey(int index) => index == null ? null : keys[index];
 
   @override
   Widget build(BuildContext context) {
-    switch (textDirection) {
+    switch (_textDirection) {
       case TextDirection.ltr:
         keys = widget.children.keys.toList(growable: false);
         break;
@@ -447,7 +450,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     final List<Widget> children = <Widget>[];
     for (T currentKey in keys) {
       final TextStyle textStyle = DefaultTextStyle.of(context).style.copyWith(
-        fontWeight: highlightTween.evaluate(_highlightControllers[currentKey]),
+        fontWeight: _highlightTween.evaluate(_highlightControllers[currentKey]),
       );
 
       final Widget child = DefaultTextStyle(
@@ -458,7 +461,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           inMutuallyExclusiveGroup: true,
           selected: controller.value == currentKey,
           child: Opacity(
-            opacity: pressTween.evaluate(_pressControllers[currentKey]),
+            opacity: _pressTween.evaluate(_pressControllers[currentKey]),
             // Expand the hitTest area to be as large as the Opacity widget.
             child: MetaData(
               behavior: HitTestBehavior.opaque,
@@ -483,7 +486,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     return UnconstrainedBox(
       constrainedAxis: Axis.horizontal,
       child: Container(
-        padding: widget.padding.resolve(textDirection),
+        padding: widget.padding.resolve(_textDirection),
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
           color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
@@ -577,11 +580,9 @@ class _RenderSegmentedControl<T> extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedControl({
     @required int selectedIndex,
-    @required int pressedIndex,
     @required Color thumbColor,
     @required this.state,
   }) : _highlightedIndex = selectedIndex,
-       _pressedIndex = pressedIndex,
        _thumbColor = thumbColor,
        assert(state != null) {
          state.drag
@@ -591,40 +592,40 @@ class _RenderSegmentedControl<T> extends RenderBox
           ..onCancel = _onCancel;
 
          state.tap.onTapUp = _onTapUp;
-         // No op to enable the long press recognizer.
+         // Empty callback to enable the long press recognizer.
          state.longPress.onLongPress = () { };
        }
 
   final _SegmentedControlState<T> state;
 
-  Map<RenderBox, _ChildAnimationManifest> childAnimations = <RenderBox, _ChildAnimationManifest>{};
+  Map<RenderBox, _ChildAnimationManifest> _childAnimations = <RenderBox, _ChildAnimationManifest>{};
 
   // The current **Unscaled** Thumb Rect.
   Rect currentThumbRect;
 
-  Tween<Rect> currentThumbTween;
+  Tween<Rect> _currentThumbTween;
 
-  Tween<double> thumbScaleTween = Tween<double>(begin: _kMinThumbScale, end: 1);
+  Tween<double> _thumbScaleTween = Tween<double>(begin: _kMinThumbScale, end: 1);
   double currentThumbScale = 1;
 
-  Offset localDragOffset;
+  Offset _localDragOffset;
   // The drag gesture startd on a selected segment.
-  bool startedOnSelectedSegment;
+  bool _startedOnSelectedSegment;
 
   @override
   void insert(RenderBox child, { RenderBox after }) {
     super.insert(child, after: after);
-    if (childAnimations == null)
+    if (_childAnimations == null)
       return;
 
-    assert(childAnimations[child] == null);
-    childAnimations[child] = _ChildAnimationManifest(separatorOpacity: 1);
+    assert(_childAnimations[child] == null);
+    _childAnimations[child] = _ChildAnimationManifest(separatorOpacity: 1);
   }
 
   @override
   void remove(RenderBox child) {
     super.remove(child);
-    childAnimations?.remove(child);
+    _childAnimations?.remove(child);
   }
 
   @override
@@ -673,7 +674,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   void guardedSetHighlightedIndex(int value) {
     // Ignore set highlightedIndex when the user is dragging the thumb around.
-    if (startedOnSelectedSegment == true)
+    if (_startedOnSelectedSegment == true)
       return;
     highlightedIndex = value;
   }
@@ -729,31 +730,31 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   void _onDown(DragDownDetails details) {
     assert(size.contains(details.localPosition));
-    localDragOffset = details.localPosition;
-    final int index = indexFromLocation(localDragOffset);
-    startedOnSelectedSegment = index == highlightedIndex;
+    _localDragOffset = details.localPosition;
+    final int index = indexFromLocation(_localDragOffset);
+    _startedOnSelectedSegment = index == highlightedIndex;
     pressedIndex = index;
 
-    if (startedOnSelectedSegment) {
-      playThumbScaleAnimation(isExpanding: false);
+    if (_startedOnSelectedSegment) {
+      _playThumbScaleAnimation(isExpanding: false);
     }
   }
 
   void _onUpdate(DragUpdateDetails details) {
-    localDragOffset = details.localPosition;
-    final int newIndex = indexFromLocation(localDragOffset);
+    _localDragOffset = details.localPosition;
+    final int newIndex = indexFromLocation(_localDragOffset);
 
-    if (startedOnSelectedSegment) {
+    if (_startedOnSelectedSegment) {
       highlightedIndex = newIndex;
       pressedIndex = newIndex;
     } else {
-      pressedIndex = hasDraggedTooFar(details) ? null : newIndex;
+      pressedIndex = _hasDraggedTooFar(details) ? null : newIndex;
     }
   }
 
   void _onEnd(DragEndDetails details) {
-    if (startedOnSelectedSegment) {
-      playThumbScaleAnimation(isExpanding: true);
+    if (_startedOnSelectedSegment) {
+      _playThumbScaleAnimation(isExpanding: true);
       state.didChangeSelectedViaGesture();
     }
 
@@ -762,28 +763,28 @@ class _RenderSegmentedControl<T> extends RenderBox
       state.didChangeSelectedViaGesture();
     }
     pressedIndex = null;
-    localDragOffset = null;
-    startedOnSelectedSegment = null;
+    _localDragOffset = null;
+    _startedOnSelectedSegment = null;
   }
 
   void _onCancel() {
-    if (startedOnSelectedSegment) {
-      playThumbScaleAnimation(isExpanding: true);
+    if (_startedOnSelectedSegment) {
+      _playThumbScaleAnimation(isExpanding: true);
     }
 
-    localDragOffset = null;
+    _localDragOffset = null;
     pressedIndex = null;
-    startedOnSelectedSegment = null;
+    _startedOnSelectedSegment = null;
   }
 
-  void playThumbScaleAnimation({ @required bool isExpanding }) {
+  void _playThumbScaleAnimation({ @required bool isExpanding }) {
     assert(isExpanding != null);
 
-    thumbScaleTween = Tween<double>(begin: currentThumbScale, end: isExpanding ? 1 : _kMinThumbScale);
+    _thumbScaleTween = Tween<double>(begin: currentThumbScale, end: isExpanding ? 1 : _kMinThumbScale);
     state.thumbScaleController.animateWith(_kThumbSpringAnimationSimulation);
   }
 
-  bool hasDraggedTooFar(DragUpdateDetails details) {
+  bool _hasDraggedTooFar(DragUpdateDetails details) {
     final Offset offCenter = details.localPosition - Offset(size.width/2, size.height/2);
     return math.pow(math.max(0, offCenter.dx.abs() - size.width/2), 2) + math.pow(math.max(0, offCenter.dy.abs() - size.height/2), 2) > _kTouchYDistanceThreshold;
   }
@@ -907,14 +908,14 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     // Paint thumb if highlightedIndex is not null.
     if (highlightedIndex != null) {
-      if (childAnimations == null) {
-        childAnimations = <RenderBox, _ChildAnimationManifest> { };
+      if (_childAnimations == null) {
+        _childAnimations = <RenderBox, _ChildAnimationManifest> { };
         for (int i = 0; i < childCount - 1; i++) {
           // The separator associated with the last child will not be painted (unless
           // a new trailing segment is added), and its opacity will always be 1.
           final bool shouldFadeOut = i == highlightedIndex || i == highlightedIndex - 1;
           final RenderBox child = children[i];
-          childAnimations[child] = _ChildAnimationManifest(separatorOpacity: shouldFadeOut ? 0 : 1);
+          _childAnimations[child] = _ChildAnimationManifest(separatorOpacity: shouldFadeOut ? 0 : 1);
         }
       }
 
@@ -926,14 +927,14 @@ class _RenderSegmentedControl<T> extends RenderBox
       // Update related Tweens before animation update phase.
       if (_needsThumbAnimationUpdate) {
         // Needs to ensure _currentThumbRect is valid.
-        currentThumbTween = RectTween(begin: currentThumbRect ?? unscaledThumbTargetRect, end: unscaledThumbTargetRect);
+        _currentThumbTween = RectTween(begin: currentThumbRect ?? unscaledThumbTargetRect, end: unscaledThumbTargetRect);
 
         for (int i = 0; i < childCount - 1; i++) {
           // The separator associated with the last child will not be painted (unless
           // a new segment is appended to the child list), and its opacity will always be 1.
           final bool shouldFadeOut = i == highlightedIndex || i == highlightedIndex - 1;
           final RenderBox child = children[i];
-          final _ChildAnimationManifest manifest = childAnimations[child];
+          final _ChildAnimationManifest manifest = _childAnimations[child];
           assert(manifest != null);
           manifest.separatorTween = Tween<double>(
             begin: manifest.separatorOpacity,
@@ -942,18 +943,18 @@ class _RenderSegmentedControl<T> extends RenderBox
         }
 
         _needsThumbAnimationUpdate = false;
-      } else if (currentThumbTween != null && unscaledThumbTargetRect != currentThumbTween.begin) {
-        currentThumbTween = RectTween(begin: currentThumbTween.begin, end: unscaledThumbTargetRect);
+      } else if (_currentThumbTween != null && unscaledThumbTargetRect != _currentThumbTween.begin) {
+        _currentThumbTween = RectTween(begin: _currentThumbTween.begin, end: unscaledThumbTargetRect);
       }
 
       for (int index = 0; index < childCount - 1; index++) {
         _paintSeparator(context, offset, children[index]);
       }
 
-      currentThumbRect = currentThumbTween?.evaluate(state.thumbController)
+      currentThumbRect = _currentThumbTween?.evaluate(state.thumbController)
                         ?? unscaledThumbTargetRect;
 
-      currentThumbScale = thumbScaleTween.evaluate(state.thumbScaleController);
+      currentThumbScale = _thumbScaleTween.evaluate(state.thumbScaleController);
 
       final Rect thumbRect = Rect.fromCenter(
         center: currentThumbRect.center,
@@ -965,7 +966,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     } else {
       // Reset all animations when there's no thumb.
       currentThumbRect = null;
-      childAnimations = null;
+      _childAnimations = null;
 
       for (int index = 0; index < childCount - 1; index++) {
         _paintSeparator(context, offset, children[index]);
@@ -984,7 +985,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     final Paint paint = Paint();
 
-    final _ChildAnimationManifest manifest = childAnimations == null ? null : childAnimations[child];
+    final _ChildAnimationManifest manifest = _childAnimations == null ? null : _childAnimations[child];
     final double opacity = manifest?.separatorTween?.evaluate(state.separatorOpacityController) ?? 1;
     manifest?.separatorOpacity = opacity;
     paint.color = _kSeparatorColor.withOpacity(_kSeparatorColor.opacity * opacity);
