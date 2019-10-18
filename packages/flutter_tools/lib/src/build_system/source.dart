@@ -9,10 +9,6 @@ import '../globals.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
-/// An input function produces a list of additional input files for an
-/// [Environment].
-typedef InputFunction = List<File> Function(Environment environment);
-
 /// A set of source files.
 abstract class ResolvedFiles {
   /// Whether any of the sources we evaluated contained a missing depfile.
@@ -44,13 +40,6 @@ class SourceVisitor implements ResolvedFiles {
   @override
   bool get containsNewDepfile => _containsNewDepfile;
   bool _containsNewDepfile = false;
-
-  /// Visit a [Source] which contains a function.
-  ///
-  /// The function is expected to produce a list of [FileSystemEntities]s.
-  void visitFunction(InputFunction function) {
-    sources.addAll(function(environment));
-  }
 
   /// Visit a depfile which contains both input and output files.
   ///
