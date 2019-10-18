@@ -61,6 +61,7 @@ public class KeyEventChannel {
     message.put("vendorId", event.vendorId);
     message.put("productId", event.productId);
     message.put("deviceId", event.deviceId);
+    message.put("repeatCount", event.repeatCount);
   }
 
   /**
@@ -79,6 +80,7 @@ public class KeyEventChannel {
     public final int source;
     public final int vendorId;
     public final int productId;
+    public final int repeatCount;
 
     public FlutterKeyEvent(
         @NonNull KeyEvent androidKeyEvent
@@ -99,7 +101,8 @@ public class KeyEventChannel {
           complexCharacter,
           androidKeyEvent.getScanCode(),
           androidKeyEvent.getMetaState(),
-          androidKeyEvent.getSource()
+          androidKeyEvent.getSource(),
+          androidKeyEvent.getRepeatCount()
       );
     }
 
@@ -112,7 +115,8 @@ public class KeyEventChannel {
         @Nullable Character complexCharacter,
         int scanCode,
         int metaState,
-        int source
+        int source,
+        int repeatCount
     ) {
       this.deviceId = deviceId;
       this.flags = flags;
@@ -123,6 +127,7 @@ public class KeyEventChannel {
       this.scanCode = scanCode;
       this.metaState = metaState;
       this.source = source;
+      this.repeatCount = repeatCount;
       InputDevice device = InputDevice.getDevice(deviceId);
       if (device != null) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
