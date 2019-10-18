@@ -4,10 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
-import 'package:flutter_tools/src/project.dart';
-
 import '../artifacts.dart';
 import '../base/build.dart';
 import '../base/common.dart';
@@ -18,10 +14,13 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/targets/dart.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
