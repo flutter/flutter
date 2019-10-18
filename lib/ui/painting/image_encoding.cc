@@ -211,21 +211,16 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
       tonic::DartState::Current(), callback_handle);
 
   const auto& task_runners = UIDartState::Current()->GetTaskRunners();
-  auto context = UIDartState::Current()->GetResourceContext();
 
-  task_runners.GetIOTaskRunner()->PostTask(
-      fml::MakeCopyable([callback = std::move(callback),                   //
-                         image = canvas_image->image(),                    //
-                         context = std::move(context),                     //
-                         ui_task_runner = task_runners.GetUITaskRunner(),  //
-                         image_format                                      //
-  ]() mutable {
-        EncodeImageAndInvokeDataCallback(std::move(callback),        //
-                                         std::move(image),           //
-                                         context.get(),              //
-                                         std::move(ui_task_runner),  //
-                                         image_format                //
-        );
+  task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
+      [callback = std::move(callback), image = canvas_image->image(),
+       io_manager = UIDartState::Current()->GetIOManager(),
+       ui_task_runner = task_runners.GetUITaskRunner(),
+       image_format]() mutable {
+        EncodeImageAndInvokeDataCallback(std::move(callback), std::move(image),
+                                         io_manager->GetResourceContext().get(),
+                                         std::move(ui_task_runner),
+                                         image_format);
       }));
 
   return Dart_Null();

@@ -48,9 +48,9 @@ class UIDartState : public tonic::DartState {
 
   void FlushMicrotasksNow();
 
-  fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const;
+  fml::WeakPtr<IOManager> GetIOManager() const;
 
-  fml::WeakPtr<GrContext> GetResourceContext() const;
+  fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const;
 
   fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
 

@@ -78,6 +78,10 @@ const TaskRunners& UIDartState::GetTaskRunners() const {
   return task_runners_;
 }
 
+fml::WeakPtr<IOManager> UIDartState::GetIOManager() const {
+  return io_manager_;
+}
+
 fml::RefPtr<flutter::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
   // TODO(gw280): The WeakPtr here asserts that we are derefing it on the
   // same thread as it was created on. As we can't guarantee that currently
@@ -117,14 +121,6 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
   } else {
     remove_callback_(reinterpret_cast<intptr_t>(this));
   }
-}
-
-fml::WeakPtr<GrContext> UIDartState::GetResourceContext() const {
-  FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
-  if (!io_manager_) {
-    return {};
-  }
-  return io_manager_->GetResourceContext();
 }
 
 fml::WeakPtr<ImageDecoder> UIDartState::GetImageDecoder() const {

@@ -168,11 +168,11 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
       [callback = std::make_unique<DartPersistentValue>(
            tonic::DartState::Current(), callback_handle),
        this, trace_id, ui_task_runner = task_runners.GetUITaskRunner(),
-       queue = UIDartState::Current()->GetSkiaUnrefQueue(),
-       context = dart_state->GetResourceContext()]() mutable {
-        GetNextFrameAndInvokeCallback(std::move(callback),
-                                      std::move(ui_task_runner), context,
-                                      std::move(queue), trace_id);
+       io_manager = dart_state->GetIOManager()]() mutable {
+        GetNextFrameAndInvokeCallback(
+            std::move(callback), std::move(ui_task_runner),
+            io_manager->GetResourceContext(), io_manager->GetSkiaUnrefQueue(),
+            trace_id);
       }));
 
   return Dart_Null();
