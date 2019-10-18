@@ -172,7 +172,7 @@ void main() {
 
     testUsingContext('Does not set single char mode when a terminal is not attached', () {
       when(stdio.stdin).thenThrow(StateError('This should not be called'));
-      when(stdio.hasTerminal).thenReturn(false);
+      when(stdio.stdinHasTerminal).thenReturn(false);
 
       terminal.singleCharMode = true;
     }, overrides: <Type, Generator>{
