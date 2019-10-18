@@ -169,14 +169,14 @@ class PersistedStandardPicture extends PersistedPicture {
       return 1.0;
     } else {
       final BitmapCanvas oldCanvas = existingSurface._canvas;
-      if (!_doesCanvasFitBounds(oldCanvas, _exactLocalCullRect)) {
+      if (!oldCanvas.doesFitBounds(_exactLocalCullRect)) {
         // The canvas needs to be resized before painting.
         return 1.0;
       } else {
-        final double newPixelCount =
-            _exactLocalCullRect.size.width * _exactLocalCullRect.size.height;
-        final double oldPixelCount =
-            oldCanvas.size.width * oldCanvas.size.height;
+        final int newPixelCount = oldCanvas._widthToPhysical(_exactLocalCullRect.width)
+             * oldCanvas._heightToPhysical(_exactLocalCullRect.height);
+        final int oldPixelCount =
+            oldCanvas.widthInBitmapPixels * oldCanvas.heightInBitmapPixels;
 
         if (oldPixelCount == 0) {
           return 1.0;
@@ -223,18 +223,9 @@ class PersistedStandardPicture extends PersistedPicture {
     picture.recordingCanvas.apply(_canvas);
   }
 
-  static bool _doesCanvasFitBounds(BitmapCanvas canvas, ui.Rect newBounds) {
-    assert(canvas != null);
-    assert(newBounds != null);
-    final ui.Rect canvasBounds = canvas.bounds;
-    assert(canvasBounds != null);
-    return canvasBounds.width >= newBounds.width &&
-        canvasBounds.height >= newBounds.height;
-  }
-
   void _applyBitmapPaint(EngineCanvas oldCanvas) {
     if (oldCanvas is BitmapCanvas &&
-        _doesCanvasFitBounds(oldCanvas, _optimalLocalCullRect) &&
+        oldCanvas.doesFitBounds(_optimalLocalCullRect) &&
         oldCanvas.isReusable()) {
       if (_debugShowCanvasReuseStats) {
         DebugCanvasReuseOverlay.instance.keptCount++;
@@ -295,7 +286,7 @@ class PersistedStandardPicture extends PersistedPicture {
       final double candidatePixelCount =
           candidateSize.width * candidateSize.height;
 
-      final bool fits = _doesCanvasFitBounds(candidate, bounds);
+      final bool fits = candidate.doesFitBounds(bounds);
       final bool isSmaller = candidatePixelCount < lastPixelCount;
       if (fits && isSmaller) {
         bestRecycledCanvas = candidate;
