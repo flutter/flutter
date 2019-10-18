@@ -136,7 +136,7 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
   auto unref_queue = dart_state->GetSkiaUnrefQueue();
   auto ui_task_runner = dart_state->GetTaskRunners().GetUITaskRunner();
   auto io_task_runner = dart_state->GetTaskRunners().GetIOTaskRunner();
-  fml::WeakPtr<GrContext> resource_context = dart_state->GetResourceContext();
+  fml::WeakPtr<IOManager> io_manager = dart_state->GetIOManager();
 
   // We can't create an image on this task runner because we don't have a
   // graphics context. Even if we did, it would be slow anyway. Also, this
@@ -173,9 +173,9 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
 
   fml::TaskRunner::RunNowOrPostTask(io_task_runner, [ui_task_runner, picture,
                                                      picture_bounds, ui_task,
-                                                     resource_context] {
+                                                     io_manager] {
     sk_sp<SkSurface> surface =
-        MakeSnapshotSurface(picture_bounds, resource_context);
+        MakeSnapshotSurface(picture_bounds, io_manager->GetResourceContext());
     sk_sp<SkImage> raster_image = MakeRasterSnapshot(picture, surface);
 
     fml::TaskRunner::RunNowOrPostTask(
