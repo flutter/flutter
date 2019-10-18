@@ -217,7 +217,7 @@ void main() {
     ProcessManager: () => MockProcessManager(),
   }));
 
-  test('Dart2JSTarget produces expected depfille', () => testbed.run(() async {
+  test('Dart2JSTarget produces expected depfile', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     when(processManager.run(any)).thenAnswer((Invocation invocation) async {
       environment.buildDir.childFile('main.dart.js.deps')
