@@ -291,7 +291,7 @@ class IOSDevice extends Device {
         await diagnoseXcodeBuildFailure(buildResult);
         printError('');
         return LaunchResult.failed();
-      }else{
+      } else {
         final String plistPath = fs.path.join(buildResult.output, 'Info.plist');
         packageId = PlistParser.instance.getValueFromFile(
           plistPath,
