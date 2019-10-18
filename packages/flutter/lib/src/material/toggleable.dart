@@ -322,13 +322,13 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// origin is the center point of the reaction (usually distinct from the
   /// point at which the user interacted with the control, which is handled
   /// automatically).
-  void paintRadialReaction(Canvas canvas, Offset offset, Offset origin) {
+  void paintRadialReaction(Canvas canvas, Offset offset, Offset origin, {int alpha, Color color, double radius}) {
     if (!_reaction.isDismissed) {
       // TODO(abarth): We should have a different reaction color when position is zero.
-      final Paint reactionPaint = Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
+      final Paint reactionPaint = Paint()..color = color ?? activeColor.withAlpha(alpha ?? kRadialReactionAlpha);
       final Offset center = Offset.lerp(_downPosition ?? origin, origin, _reaction.value);
-      final double radius = _kRadialReactionRadiusTween.evaluate(_reaction);
-      canvas.drawCircle(center + offset, radius, reactionPaint);
+      final double reactionRadius = radius ?? _kRadialReactionRadiusTween.evaluate(_reaction);
+      canvas.drawCircle(center + offset, reactionRadius, reactionPaint);
     }
   }
 
