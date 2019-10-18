@@ -1017,7 +1017,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final RenderBox box = getMaterialBox(tester);
 
     // Taps at a location close to the center of the label.
     final Offset centerOfLabel = tester.getCenter(find.byKey(labelKey));
@@ -1071,7 +1071,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final RenderBox box = getMaterialBox(tester);
 
     // Taps at a location close to the center of the delete icon.
     final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
@@ -1155,7 +1155,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final RenderBox box = getMaterialBox(tester);
 
     // Taps at a location close to the bottom-right corner of the chip.
     final Offset bottomRightOfInkWell = tester.getBottomRight(find.byType(InkWell));
