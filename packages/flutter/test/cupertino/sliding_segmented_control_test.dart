@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -920,5 +921,86 @@ void main() {
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
       offsetMoreOrLessEquals(tester.getCenter(find.text('D')), epsilon: 0.01),
     );
+  });
+
+  testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+    final ValueNotifier<int> controller = ValueNotifier<int>(0);
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: scrollController,
+          children: <Widget>[
+            const SizedBox(height: 100),
+            CupertinoSlidingSegmentedControl<int>(
+              children: children,
+              controller: controller,
+            ),
+            const SizedBox(height: 1000),
+          ],
+        ),
+      ),
+    );
+
+    // Tapping still works.
+    await tester.tap(find.text('Child 2'));
+    await tester.pump();
+
+    expect(controller.value, 1);
+
+    // Vertical drag works for the scroll view.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Child 1')));
+    // The first moveBy doesn't actually move the scrollable. It's there to make
+    // sure VerticalDragGestureRecognizer wins the arena. This is due to
+    // startBehavior being set to DragStartBehavior.start.
+    await gesture.moveBy(const Offset(0, -100));
+    await gesture.moveBy(const Offset(0, -100));
+    await tester.pump();
+
+    expect(scrollController.offset, 100);
+
+    // Does not affect the segmented control.
+    expect(controller.value, 1);
+
+    await gesture.moveBy(const Offset(0, 100));
+    await gesture.up();
+    await tester.pump();
+
+    expect(scrollController.offset, 0);
+    expect(controller.value, 1);
+
+    // Long press vertical drag is recognized by the segmented control.
+    await gesture.down(tester.getCenter(find.text('Child 1')));
+    await tester.pump(const Duration(milliseconds: 600));
+    await gesture.moveBy(const Offset(0, -100));
+    await gesture.moveBy(const Offset(0, -100));
+    await tester.pump();
+
+    // Should not scroll.
+    expect(scrollController.offset, 0);
+    expect(controller.value, 1);
+
+    await gesture.moveBy(const Offset(0, 100));
+    await gesture.moveBy(const Offset(0, 100));
+    await gesture.up();
+    await tester.pump();
+
+    expect(scrollController.offset, 0);
+    expect(controller.value, 0);
+
+    // Horizontal drag is recognized by the segmentedControl.
+    await gesture.down(tester.getCenter(find.text('Child 1')));
+    await gesture.moveBy(const Offset(50, 0));
+    await gesture.moveTo(tester.getCenter(find.text('Child 2')));
+    await gesture.up();
+    await tester.pump();
+
+    expect(scrollController.offset, 0);
+    expect(controller.value, 1);
   });
 }

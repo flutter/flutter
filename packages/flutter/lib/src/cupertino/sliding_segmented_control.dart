@@ -249,7 +249,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   AnimationController separatorOpacityController;
   AnimationController thumbScaleController;
 
+  final TapGestureRecognizer tap = TapGestureRecognizer();
   final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+  final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
 
   ValueNotifier<T> get controller => _controller;
   ValueNotifier<T> _controller;
@@ -287,6 +289,11 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   @override
   void initState() {
     super.initState();
+
+    final GestureArenaTeam team = GestureArenaTeam();
+    longPress.team = team;
+    drag.team = team;
+    team.captain = drag;
 
     _controller = widget.controller;
     controller.addListener(_didChangeControllerValue);
@@ -370,6 +377,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     separatorOpacityController.dispose();
 
     drag.dispose();
+    tap.dispose();
+    longPress.dispose();
 
     super.dispose();
   }
@@ -580,6 +589,10 @@ class _RenderSegmentedControl<T> extends RenderBox
           ..onUpdate = _onUpdate
           ..onEnd = _onEnd
           ..onCancel = _onCancel;
+
+         state.tap.onTapUp = _onTapUp;
+         // No op to enable the long press recognizer.
+         state.longPress.onLongPress = () { };
        }
 
   final _SegmentedControlState<T> state;
@@ -694,6 +707,8 @@ class _RenderSegmentedControl<T> extends RenderBox
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent) {
+      state.tap.addPointer(event);
+      state.longPress.addPointer(event);
       state.drag.addPointer(event);
     }
   }
@@ -702,9 +717,14 @@ class _RenderSegmentedControl<T> extends RenderBox
     return childCount == 0
       ? null
       // This assumes all children have the same width.
-      : (localDragOffset.dx / (size.width / childCount))
+      : (location.dx / (size.width / childCount))
         .floor()
         .clamp(0, childCount - 1);
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    highlightedIndex = indexFromLocation(details.localPosition);
+    state.didChangeSelectedViaGesture();
   }
 
   void _onDown(DragDownDetails details) {
@@ -751,8 +771,8 @@ class _RenderSegmentedControl<T> extends RenderBox
       playThumbScaleAnimation(isExpanding: true);
     }
 
-    pressedIndex = null;
     localDragOffset = null;
+    pressedIndex = null;
     startedOnSelectedSegment = null;
   }
 
