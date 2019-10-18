@@ -516,6 +516,8 @@ class FocusScope extends Focus {
     @required Widget child,
     bool autofocus = false,
     ValueChanged<bool> onFocusChange,
+    bool canRequestFocus,
+    bool skipTraversal,
     FocusOnKeyCallback onKey,
     String debugLabel,
   })  : assert(child != null),
@@ -526,6 +528,8 @@ class FocusScope extends Focus {
           focusNode: node,
           autofocus: autofocus,
           onFocusChange: onFocusChange,
+          canRequestFocus: canRequestFocus,
+          skipTraversal: skipTraversal,
           onKey: onKey,
           debugLabel: debugLabel,
         );
@@ -552,6 +556,8 @@ class _FocusScopeState extends _FocusState {
   FocusScopeNode _createNode() {
     return FocusScopeNode(
       debugLabel: widget.debugLabel,
+      canRequestFocus: widget.canRequestFocus ?? true,
+      skipTraversal: widget.skipTraversal ?? false,
     );
   }
 
