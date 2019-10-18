@@ -57,6 +57,7 @@ part 'engine/platform_views.dart';
 part 'engine/plugins.dart';
 part 'engine/pointer_binding.dart';
 part 'engine/recording_canvas.dart';
+part 'engine/render_vertices.dart';
 part 'engine/rrect_renderer.dart';
 part 'engine/semantics/accessibility.dart';
 part 'engine/semantics/checkable.dart';

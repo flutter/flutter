@@ -30,7 +30,7 @@ void main() async {
       html.document.body.append(sceneElement);
       // Set rate to 0.66% for webGL difference across platforms.
       await matchGoldenFile('$fileName.png', region: region, write: write,
-          maxDiffRate: 0.66 / 100.0);
+          maxDiffRate: 1.5 / 100.0);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // golden screenshot.
@@ -40,6 +40,7 @@ void main() async {
 
   setUp(() async {
     debugEmulateFlutterTesterEnvironment = true;
+    disposeWebGl();
     await webOnlyInitializePlatform();
     webOnlyFontCollection.debugRegisterTestFonts();
     await webOnlyFontCollection.ensureFontsLoaded();
