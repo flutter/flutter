@@ -237,10 +237,7 @@ PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
         return false;
       final Offset center = arguments[0];
       final double radius = arguments[1];
-      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
-        return true;
-      else
-        return false;
+      return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
     }
     );
 }
