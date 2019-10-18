@@ -126,11 +126,9 @@ class ResidentWebRunner extends ResidentRunner {
       fire + terminal.bolden(rawMessage),
       TerminalColor.red,
     );
-    const String warning = '👻 ';
-    printStatus(warning * 20);
-    printStatus('Warning: Flutter\'s support for building web applications is highly experimental.');
-    printStatus('For more information see https://github.com/flutter/flutter/issues/34082.');
-    printStatus(warning * 20);
+    printStatus('Warning: Flutter\'s support for web development is not stable yet and hasn\'t');
+    printStatus('been thoroughly tested in production environments.');
+    printStatus('For more information see https://flutter.dev/web.');
     printStatus('');
     printStatus(message);
     const String quitMessage = 'To quit, press "q".';

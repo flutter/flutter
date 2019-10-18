@@ -1119,7 +1119,7 @@ void main() {
   });
 
   testWidgets('AppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
+    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100));
 
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
@@ -1139,18 +1139,26 @@ void main() {
           child: Scaffold(
             primary: false,
             appBar: AppBar(
-              leading: Placeholder(key: leadingKey),
-              title: Placeholder(key: titleKey),
-              actions: <Widget>[ Placeholder(key: trailingKey) ],
+              leading: Placeholder(key: leadingKey), // Forced to 56x56, see _kLeadingWidth in app_bar.dart.
+              title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
+              actions: <Widget>[ Placeholder(key: trailingKey, fallbackWidth: 10) ],
             ),
           ),
         ),
       ),
     ));
-    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
-    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
-    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
-    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));
+    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0, 0));
+    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100));
+    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100));
+
+    // Because the topPadding eliminates the vertical space for the
+    // NavigtationToolbar within the AppBar, the toolbar is constrained
+    // with minHeight=maxHeight=0. The _AppBarTitle widget vertically centers
+    // the title, so its Y coordinate relative to the toolbar is -kToolbarHeight / 2
+    // (-28). The top of the toolbar is at (screen coordinates) y=100, so the
+    // top of the title is 100 + -28 = 72. The toolbar clips its contents
+    // so the title isn't actually visible.
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(10 + NavigationToolbar.kMiddleSpacing, 72));
   });
 
   testWidgets('SliverAppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
@@ -1176,7 +1184,7 @@ void main() {
             slivers: <Widget>[
               SliverAppBar(
                 leading: Placeholder(key: leadingKey),
-                title: Placeholder(key: titleKey),
+                title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
                 actions: <Widget>[ Placeholder(key: trailingKey) ],
               ),
             ],
@@ -1579,5 +1587,75 @@ void main() {
     final Finder materialFinder = find.byType(Material);
     Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
+  });
+
+  testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
+    double textScaleFactor;
+    TextDirection textDirection;
+    bool centerTitle;
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Directionality(
+              textDirection: textDirection,
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      appBar: AppBar(
+                        centerTitle: centerTitle,
+                        title: const Text('Jumbo'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    final Finder appBarTitle = find.text('Jumbo');
+    final Finder toolbar = find.byType(NavigationToolbar);
+
+    // Overall screen size is 800x600
+    // Left or right justified title is padded by 16 on the "start" side.
+    // Toolbar height is 56.
+
+    textScaleFactor = 1; // "Jumbo" title is 100x20.
+    textDirection = TextDirection.ltr;
+    centerTitle = false;
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 18, 116, 38));
+    expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
+
+    textScaleFactor = 3; // "Jumbo" title is 300x60.
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, -2, 316, 58));
+    expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
+
+    textScaleFactor = 3.5; // "Jumbo" title is 350x70.
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, -7, 366, 63));
+    expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
+
+    textScaleFactor = 4; // "Jumbo" title is 400x80.
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, -12, 416, 68));
+    expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
+
+    textDirection = TextDirection.rtl; // Changed to rtl. "Jumbo" title is still 400x80.
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(800.0 - 400.0 - 16.0, -12, 800.0 - 16.0, 68));
+    expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
+
+    centerTitle = true; // Changed to true. "Jumbo" title is still 400x80.
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(200, -12, 800.0 - 200.0, 68));
+    expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
   });
 }
