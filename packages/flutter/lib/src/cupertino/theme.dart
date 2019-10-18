@@ -41,7 +41,8 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
 /// See also:
 ///
 ///  * [CupertinoThemeData], specifies the theme's visual styling.
-///  * [CupertinoApp], which will automatically add a [CupertinoTheme].
+///  * [CupertinoApp], which will automatically add a [CupertinoTheme] based on the
+///    value of [CupertinoApp.theme].
 ///  * [Theme], a Material theme which will automatically add a [CupertinoTheme]
 ///    with a [CupertinoThemeData] derived from the Material [ThemeData].
 class CupertinoTheme extends StatelessWidget {
@@ -59,20 +60,22 @@ class CupertinoTheme extends StatelessWidget {
   /// The [CupertinoThemeData] styling for this theme.
   final CupertinoThemeData data;
 
-  /// Retrieve the [CupertinoThemeData] from an ancestor [CupertinoTheme] widget,
-  /// or a default [CupertinoThemeData] if no [CupertinoTheme] widgets exist
-  /// in the ancestry tree, and resolve all the colors defined in that
-  /// [CupertinoThemeData] against the given [BuildContext] on a best-effort basis.
+  /// Retrieves the [CupertinoThemeData] from the closest ancestor [CupertinoTheme]
+  /// widget, or a default [CupertinoThemeData] if no [CupertinoTheme] ancestor
+  /// exists.
+  ///
+  /// Resolves all the colors defined in that [CupertinoThemeData] against the
+  /// given [BuildContext] on a best-effort basis.
   static CupertinoThemeData of(BuildContext context) {
     final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
     return (inheritedTheme?.theme?.data ?? const CupertinoThemeData()).resolveFrom(context, nullOk: true);
   }
 
-  /// Retrieve the [Brightness] value from the closest ancestor [CupertinoTheme]
+  /// Retrieves the [Brightness] value from the closest ancestor [CupertinoTheme]
   /// widget.
   ///
-  /// If no [CupertinoTheme] ancestor with explicit brightness value could be
-  /// found, the method will resort to the closest ancestor [MediaQuery] widget.
+  /// If no [CupertinoTheme] ancestor with an explicit brightness value could be
+  /// found, this method will resort to the closest ancestor [MediaQuery] widget.
   ///
   /// Throws an exception if no such [CupertinoTheme] or [MediaQuery] widgets exist
   /// in the ancestry tree, unless [nullOk] is set to true.
@@ -130,7 +133,7 @@ class _InheritedCupertinoTheme extends InheritedWidget {
 ///    styling via a [CupertinoThemeData] subclass [MaterialBasedCupertinoThemeData].
 @immutable
 class CupertinoThemeData extends Diagnosticable {
-  /// Create a [CupertinoTheme] styling specification.
+  /// Creates a [CupertinoTheme] styling specification.
   ///
   /// Unspecified parameters default to a reasonable iOS default style.
   const CupertinoThemeData({
@@ -190,6 +193,11 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// If coming from a Material [Theme] and unspecified, [brightness] will be
   /// derived from the Material [ThemeData]'s `brightness`.
+  ///
+  /// See also:
+  ///
+  /// * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///   [brightness] to its Material [Theme] parent if it's unspecified.
   Brightness get brightness => _brightness ?? Brightness.light;
   final Brightness _brightness;
 
@@ -203,23 +211,32 @@ class CupertinoThemeData extends Diagnosticable {
   /// iOS styling, the [primaryColor] is more sparsely used than in Material
   /// Design where the [primaryColor] can appear on non-interactive surfaces like
   /// the [AppBar] background, [TextField] borders etc.
+  ///
+  /// See also:
+  ///
+  /// * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///   [primaryColor] to its Material [Theme] parent if it's unspecified.
   Color get primaryColor => _primaryColor ?? _defaults.primaryColor;
   final Color _primaryColor;
 
-  /// A color used for content that must contrast against a [primaryColor] background.
+  /// A color that must be easy to see when rendered on a [primaryColor] background.
   ///
   /// For example, this color is used for a [CupertinoButton]'s text and icons
   /// when the button's background is [primaryColor].
   ///
   /// If coming from a Material [Theme] and unspecified, [primaryContrastingColor]
   /// will be derived from the Material [ThemeData]'s `colorScheme.onPrimary`.
+  ///
+  /// See also:
+  ///
+  /// * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///   [primaryContrastingColor] to its Material [Theme] parent if it's unspecified.
   Color get primaryContrastingColor => _primaryContrastingColor ?? _defaults.primaryContrastingColor;
   final Color _primaryContrastingColor;
 
   /// Text styles used by Cupertino widgets.
   ///
-  /// Derived [primaryColor] if unspecified, including [primaryColor] of a Material
-  /// [ThemeData] if coming from a Material [Theme].
+  /// Derived from [primaryColor] if unspecified.
   CupertinoTextThemeData get textTheme {
     return _textTheme ?? _defaults.textThemeDefaults.createDefaults(primaryColor: primaryColor);
   }
@@ -227,8 +244,8 @@ class CupertinoThemeData extends Diagnosticable {
 
   /// Background color of the top nav bar and bottom tab bar.
   ///
-  /// Defaults to a light gray or a dark gray translucent color depending
-  /// on the brightness of the [BuildContext] it last resolved against.
+  /// Defaults to a light gray in light mode, or a dark translucent gray color in
+  /// dark mode.
   Color get barBackgroundColor => _barBackgroundColor ?? _defaults.barBackgroundColor;
   final Color _barBackgroundColor;
 
@@ -238,7 +255,7 @@ class CupertinoThemeData extends Diagnosticable {
   Color get scaffoldBackgroundColor => _scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
   final Color _scaffoldBackgroundColor;
 
-  /// Return an instance of the [CupertinoThemeData] whose property getters
+  /// Returns an instance of the [CupertinoThemeData] whose property getters
   /// only return the construction time specifications with no derived values.
   ///
   /// Used in Material themes to let unspecified properties fallback to Material
@@ -254,10 +271,11 @@ class CupertinoThemeData extends Diagnosticable {
     );
   }
 
-  /// Return a new `CupertinoThemeData` with all its colors resolved aginst the
+  /// Returns a new `CupertinoThemeData` with all its colors resolved aginst the
   /// given [BuildContext].
   ///
-  /// It will be called in [CupertinoTheme.of].
+  /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved
+  /// [CupertinoThemeData].
   @protected
   CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
@@ -273,13 +291,13 @@ class CupertinoThemeData extends Diagnosticable {
     );
   }
 
-  /// Create a copy of [CupertinoThemeData] with specified attributes overridden.
+  /// Creates a copy of [CupertinoThemeData] with specified attributes overridden.
   ///
   /// Only the current instance's specified attributes are copied instead of
-  /// derived values. For instance, if the current [primaryColor] is implied
-  /// to be [CupertinoColors.activeOrange] due to the current [primaryColor],
-  /// copying with a different [primaryColor] will also change the copy's
-  /// implied [textTheme].
+  /// derived values. For instance, if the current [CupertinoThemeData.textTheme]
+  /// is implied from the current [primaryColor] because it was not specified,
+  /// copying with a different [primaryColor] will also change the copy's implied
+  /// [textTheme].
   CupertinoThemeData copyWith({
     Brightness brightness,
     Color primaryColor,

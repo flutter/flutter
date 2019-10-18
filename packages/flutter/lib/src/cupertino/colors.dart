@@ -13,6 +13,7 @@ import 'theme.dart';
 
 // Examples can assume:
 // Widget child;
+// BuildContext context;
 
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
@@ -555,8 +556,9 @@ class CupertinoColors {
 /// basis.
 ///
 /// {@tool sample}
-/// The following snippet builds a [CupertinoButton] that appears white in light
-/// mode, and changes automatically to black in dark mode.
+/// By default a [CupertinoButton] has no background color. The following sample
+/// code shows how to build a [CupertinoButton] that appears white in light mode,
+/// and changes automatically to black in dark mode.
 ///
 /// ```dart
 /// Builder(builder: (BuildContext context) {
@@ -567,7 +569,7 @@ class CupertinoColors {
 ///       color: CupertinoColors.white,
 ///       darkColor: CupertinoColors.black,
 ///     ),
-///     onPressed: () => null,
+///     onPressed: () { },
 ///   );
 /// })
 /// ```
@@ -581,7 +583,7 @@ class CupertinoColors {
 /// before returning it.
 ///
 /// {@tool sample}
-/// The following snippet creates a [Container] with the `primaryColor` of the
+/// The following code sample creates a [Container] with the `primaryColor` of the
 /// current theme. If `primaryColor` is a [CupertinoDynamicColor], the container
 /// will be adaptive, thanks to [CupertinoTheme.of]: it will switch to `primaryColor`'s
 /// dark variant once dark mode is turned on, and turns to primaryColor`'s high
@@ -589,45 +591,41 @@ class CupertinoColors {
 /// [MediaQuery], etc.
 ///
 /// ```dart
-/// Builder(builder:(BuildContext context) {
-///   // Container is not a Cupertino widget, but CupertinoTheme.of implicitly resolves
-///   // colors used in the retrieved CupertinoThemeData.
-///   return Container(
-///     color: CupertinoTheme.of(context).primaryColor,
-///   );
-/// })
+/// // Container is not a Cupertino widget, but CupertinoTheme.of implicitly
+/// // resolves colors used in the retrieved CupertinoThemeData.
+/// Container(color: CupertinoTheme.of(context).primaryColor)
 /// ```
 /// {@end-tool}
 ///
 /// ### Manually Resolving a [CupertinoDynamicColor]
 ///
-/// When used outside of a Cupertino component, or wrapped in an object opaque to
-/// the receiving Cupertino component, you may have to manually resolve the color
-/// using [CupertinoDynamicColor.resolve] before painting. For example, to use a
-/// custom [Border] in a [CupertinoNavigationBar], the colors used in the [Border]
-/// have to be resolved manually before being passed to [CupertinoNavigationBar]'s
-/// constructor.
+/// When used to configure a non-Cupertino widget, or wrapped in an object opaque
+/// to the receiving Cupertino component, a [CupertinoDynamicColor] may need to be
+/// manually resolved using [CupertinoDynamicColor.resolve], before it can used
+/// to paint. For example, to use a custom [Border] in a [CupertinoNavigationBar],
+/// the colors used in the [Border] have to be resolved manually before being passed
+/// to [CupertinoNavigationBar]'s constructor.
 ///
 /// {@tool sample}
 ///
-/// The following snippet demostrates two cases where you have to manually resolve
-/// a [CupertinoDynamicColor].
+/// The following code sample demostrates two cases where you have to manually
+/// resolve a [CupertinoDynamicColor].
 ///
 /// ```dart
-/// final Widget example1 = Builder(builder: (BuildContext context) {
-///   final Color resolvedColor = CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context);
-///   return CupertinoNavigationBar(
-///     // CupertinoNavigationBar does not know how to resolve colors used in
-///     // a Border class.
-///     border: Border(bottom: BorderSide(color: resolvedColor)),
-///   );
-/// });
+/// CupertinoNavigationBar(
+///   // CupertinoNavigationBar does not know how to resolve colors used in
+///   // a Border class.
+///   border: Border(
+///     bottom: BorderSide(
+///       color: CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context),
+///     ),
+///   ),
+/// )
 ///
-/// final Widget example2 = Builder(builder: (BuildContext context) {
-///   final Color resolvedColor = CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context);
-///   // Container is not a Cupertino widget.
-///   return Container(color: resolvedColor);
-/// });
+/// // Container is not a Cupertino widget.
+/// Container(
+///   color: CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context),
+/// )
 /// ```
 /// {@end-tool}
 ///
