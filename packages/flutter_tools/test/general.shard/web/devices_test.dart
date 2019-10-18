@@ -49,8 +49,8 @@ void main() {
   test('Server defaults', () async {
     final WebServerDevice device = WebServerDevice();
 
-    expect(device.name, 'Headless Server');
-    expect(device.id, 'headless-server');
+    expect(device.name, 'Web Server');
+    expect(device.id, 'web-server');
     expect(device.supportsHotReload, true);
     expect(device.supportsHotRestart, true);
     expect(device.supportsStartPaused, true);
