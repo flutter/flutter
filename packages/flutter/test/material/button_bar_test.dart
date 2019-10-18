@@ -95,7 +95,7 @@ void main() {
       );
 
       // ButtonBar uses a Row internally to implement this
-      final Row row = tester.widget(find.byType(Row));
+      final ButtonBarRow row = tester.widget(find.byType(ButtonBarRow));
       expect(row.mainAxisSize, equals(MainAxisSize.max));
     });
 
@@ -116,7 +116,7 @@ void main() {
       );
 
       // ButtonBar uses a Row internally to implement this
-      final Row row = tester.widget(find.byType(Row));
+      final ButtonBarRow row = tester.widget(find.byType(ButtonBarRow));
       expect(row.mainAxisSize, equals(MainAxisSize.min));
     });
 
@@ -138,7 +138,7 @@ void main() {
       );
 
       // ButtonBar uses a Row internally to implement this
-      final Row row = tester.widget(find.byType(Row));
+      final ButtonBarRow row = tester.widget(find.byType(ButtonBarRow));
       expect(row.mainAxisSize, equals(MainAxisSize.max));
     });
 

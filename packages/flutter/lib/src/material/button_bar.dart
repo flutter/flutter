@@ -231,8 +231,11 @@ class RenderButtonBarRow extends RenderFlex {
     textBaseline: textBaseline,
   );
 
+  BoxConstraints _originalConstraints;
+
   @override
   BoxConstraints get constraints {
+    _originalConstraints = super.constraints.copyWith();
     return super.constraints.copyWith(
       maxWidth: double.infinity,
     );
@@ -241,7 +244,10 @@ class RenderButtonBarRow extends RenderFlex {
   @override
   void performLayout() {
     super.performLayout();
-    if (size.width > constraints.minWidth) {
+
+    // If the button bar is constrained by width and it overflows, set the
+    // buttons to align vertically instead.
+    if (size.width > _originalConstraints.maxWidth) {
       RenderBox child = firstChild;
       double currentHeight = 0.0;
       while (child != null) {
@@ -250,12 +256,12 @@ class RenderButtonBarRow extends RenderFlex {
 
         childParentData.offset = Offset(0, currentHeight);
         currentHeight += child.size.height;
-        child.layout(constraints, parentUsesSize: true);
+        child.layout(_originalConstraints, parentUsesSize: true);
 
         child = childParentData.nextSibling;
       }
 
-      size = constraints.constrain(Size(constraints.minWidth, currentHeight));
+      size = constraints.constrain(Size(_originalConstraints.maxWidth, currentHeight));
     }
   }
 }
