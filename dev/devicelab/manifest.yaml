@@ -91,21 +91,19 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # codegen_integration_linux:
-  #   description: >
-  #     Runs codegeneration and verifies that it can execute
-  #     correctly.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
+  codegen_integration_linux:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # uncaught_image_error_linux:
-  #   description: >
-  #     Ensures that an error thrown into the zone can be caught by the ImageStream
-  #     completer
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
+  uncaught_image_error_linux:
+    description: >
+      Ensures that an error thrown into the zone can be caught by the ImageStream
+      completer
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   flutter_gallery_android__compile:
     description: >
@@ -356,12 +354,11 @@ tasks:
   #   required_agent_capabilities: ["linux/android"]
   #   flaky: true
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # web_size__compile_test:
-  #   description: >
-  #     Measures the size of a dart2js bundle.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
+  web_size__compile_test:
+    description: >
+      Measures the size of a dart2js bundle.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   image_list_reported_duration:
     description: >
@@ -375,12 +372,11 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # build_benchmark:
-  #   description: >
-  #     Measures APK build performance across config changes.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
+  build_benchmark:
+    description: >
+      Measures APK build performance across config changes.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   # iOS on-device tests
 
