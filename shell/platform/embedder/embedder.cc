@@ -4,6 +4,8 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <iostream>
+
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/native_library.h"
@@ -46,18 +48,28 @@ const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
 const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
 
 static FlutterEngineResult LogEmbedderError(FlutterEngineResult code,
-                                            const char* name,
+                                            const char* reason,
+                                            const char* code_name,
                                             const char* function,
                                             const char* file,
                                             int line) {
-  FML_LOG(ERROR) << "Returning error '" << name << "' (" << code
-                 << ") from Flutter Embedder API call to '" << function
-                 << "'. Origin: " << file << ":" << line;
+#if OS_WIN
+  constexpr char kSeparator = '\\';
+#else
+  constexpr char kSeparator = '/';
+#endif
+  const auto file_base =
+      (::strrchr(file, kSeparator) ? strrchr(file, kSeparator) + 1 : file);
+  char error[256] = {};
+  snprintf(error, (sizeof(error) / sizeof(char)),
+           "%s (%d): '%s' returned '%s'. %s", file_base, line, function,
+           code_name, reason);
+  std::cerr << error << std::endl;
   return code;
 }
 
-#define LOG_EMBEDDER_ERROR(code) \
-  LogEmbedderError(code, #code, __FUNCTION__, __FILE__, __LINE__)
+#define LOG_EMBEDDER_ERROR(code, reason) \
+  LogEmbedderError(code, reason, #code, __FUNCTION__, __FILE__, __LINE__)
 
 static bool IsOpenGLRendererConfigValid(const FlutterRendererConfig* config) {
   if (config->type != kOpenGL) {
@@ -580,19 +592,26 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                                                 engine_out) {
   // Step 0: Figure out arguments for shell creation.
   if (version != FLUTTER_ENGINE_VERSION) {
-    return LOG_EMBEDDER_ERROR(kInvalidLibraryVersion);
+    return LOG_EMBEDDER_ERROR(
+        kInvalidLibraryVersion,
+        "Flutter embedder version mismatch. There has been a breaking change. "
+        "Please consult the changelog and update the embedder.");
   }
 
   if (engine_out == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The engine out parameter was missing.");
   }
 
   if (args == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The Flutter project arguments were missing.");
   }
 
   if (SAFE_ACCESS(args, assets_path, nullptr) == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "The assets path in the Flutter project arguments was missing.");
   }
 
   if (SAFE_ACCESS(args, main_path__unused__, nullptr) != nullptr) {
@@ -606,8 +625,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   }
 
   if (!IsRendererValid(config)) {
-    FML_LOG(WARNING) << "Invalid renderer config.";
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The renderer configuration was invalid.");
   }
 
   std::string icu_data_path;
@@ -647,9 +666,9 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     std::string application_kernel_path = fml::paths::JoinPaths(
         {settings.assets_path, kApplicationKernelSnapshotFileName});
     if (!fml::IsFile(application_kernel_path)) {
-      FML_LOG(ERROR) << "Not running in AOT mode but could not resolve the "
-                        "kernel binary.";
-      return LOG_EMBEDDER_ERROR(kInvalidArguments);
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "Not running in AOT mode but could not resolve the kernel binary.");
     }
     settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
   }
@@ -781,7 +800,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   auto external_view_embedder_result =
       InferExternalViewEmbedderFromArgs(SAFE_ACCESS(args, compositor, nullptr));
   if (external_view_embedder_result.second) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Compositor arguments were invalid.");
   }
 
   flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
@@ -797,7 +817,9 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       std::move(external_view_embedder_result.first));
 
   if (!on_create_platform_view) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not infer platform view creation callback.");
   }
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
@@ -870,16 +892,16 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
           SAFE_ACCESS(args, custom_task_runners, nullptr));
 
   if (!thread_host || !thread_host->IsValid()) {
-    FML_LOG(ERROR) << "Could not setup or infer thread configuration to run "
-                      "the Flutter engine on.";
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Could not setup or infer thread configuration "
+                              "to run the Flutter engine on.");
   }
 
   auto task_runners = thread_host->GetTaskRunners();
 
   if (!task_runners.IsValid()) {
-    FML_LOG(ERROR) << "Task runner configuration specified is invalid.";
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Task runner configuration was invalid.");
   }
 
   auto run_configuration =
@@ -893,7 +915,9 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   }
 
   if (!run_configuration.IsValid()) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Could not infer the Flutter project to run from given arguments.");
   }
 
   // Create the engine but don't launch the shell or run the root isolate.
@@ -916,7 +940,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 FlutterEngineResult FlutterEngineRunInitialized(
     FLUTTER_API_SYMBOL(FlutterEngine) engine) {
   if (!engine) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
   auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
@@ -924,24 +948,28 @@ FlutterEngineResult FlutterEngineRunInitialized(
   // The engine must not already be running. Initialize may only be called once
   // on an engine instance.
   if (embedder_engine->IsValid()) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
   // Step 1: Launch the shell.
   if (!embedder_engine->LaunchShell()) {
-    FML_LOG(ERROR) << "Could not launch the engine using supplied "
-                      "initialization arguments.";
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Could not launch the engine using supplied initialization arguments.");
   }
 
   // Step 2: Tell the platform view to initialize itself.
   if (!embedder_engine->NotifyCreated()) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not create platform view components.");
   }
 
   // Step 3: Launch the root isolate.
   if (!embedder_engine->RunRootIsolate()) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Could not run the root isolate of the Flutter application using the "
+        "project arguments specified.");
   }
 
   return kSuccess;
@@ -951,7 +979,7 @@ FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
                                                   engine) {
   if (engine == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
   auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
@@ -975,7 +1003,7 @@ FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterWindowMetricsEvent* flutter_metrics) {
   if (engine == nullptr || flutter_metrics == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
   flutter::ViewportMetrics metrics;
@@ -985,15 +1013,16 @@ FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
   metrics.device_pixel_ratio = SAFE_ACCESS(flutter_metrics, pixel_ratio, 1.0);
 
   if (metrics.device_pixel_ratio <= 0.0) {
-    FML_LOG(ERROR) << "Device pixel ratio invalid: "
-                   << metrics.device_pixel_ratio;
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Device pixel ratio was invalid. It must be greater than zero.");
   }
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)->SetViewportMetrics(
              std::move(metrics))
              ? kSuccess
-             : LOG_EMBEDDER_ERROR(kInvalidArguments);
+             : LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Viewport metrics were invalid.");
 }
 
 // Returns the flutter::PointerData::Change for the given FlutterPointerPhase.
@@ -1068,8 +1097,12 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterPointerEvent* pointers,
     size_t events_count) {
-  if (engine == nullptr || pointers == nullptr || events_count == 0) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  if (pointers == nullptr || events_count == 0) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid pointer events.");
   }
 
   auto packet = std::make_unique<flutter::PointerDataPacket>(events_count);
@@ -1120,25 +1153,34 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)
                  ->DispatchPointerDataPacket(std::move(packet))
              ? kSuccess
-             : LOG_EMBEDDER_ERROR(kInvalidArguments);
+             : LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                                  "Could not dispatch pointer events to the "
+                                  "running Flutter application.");
 }
 
 FlutterEngineResult FlutterEngineSendPlatformMessage(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterPlatformMessage* flutter_message) {
-  if (engine == nullptr || flutter_message == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  if (flutter_message == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid message argument.");
   }
 
   if (SAFE_ACCESS(flutter_message, channel, nullptr) == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "Message argument did not specify a valid channel.");
   }
 
   size_t message_size = SAFE_ACCESS(flutter_message, message_size, 0);
   const uint8_t* message_data = SAFE_ACCESS(flutter_message, message, nullptr);
 
   if (message_size != 0 && message_data == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Message size was non-zero but the message data was nullptr.");
   }
 
   const FlutterPlatformMessageResponseHandle* response_handle =
@@ -1163,7 +1205,9 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)
                  ->SendPlatformMessage(std::move(message))
              ? kSuccess
-             : LOG_EMBEDDER_ERROR(kInvalidArguments);
+             : LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                                  "Could not send a message to the running "
+                                  "Flutter application.");
 }
 
 FlutterEngineResult FlutterPlatformMessageCreateResponseHandle(
@@ -1171,9 +1215,13 @@ FlutterEngineResult FlutterPlatformMessageCreateResponseHandle(
     FlutterDataCallback data_callback,
     void* user_data,
     FlutterPlatformMessageResponseHandle** response_out) {
-  if (engine == nullptr || data_callback == nullptr ||
-      response_out == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  if (data_callback == nullptr || response_out == nullptr) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "Data callback or the response handle was invalid.");
   }
 
   flutter::EmbedderPlatformMessageResponse::Callback response_callback =
@@ -1200,8 +1248,12 @@ FlutterEngineResult FlutterPlatformMessageCreateResponseHandle(
 FlutterEngineResult FlutterPlatformMessageReleaseResponseHandle(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterPlatformMessageResponseHandle* response) {
-  if (engine == nullptr || response == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  if (response == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid response handle.");
   }
   delete response;
   return kSuccess;
@@ -1213,7 +1265,9 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
     const uint8_t* data,
     size_t data_length) {
   if (data_length != 0 && data == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Data size was non zero but the pointer to the data was null.");
   }
 
   auto response = handle->message->response();
@@ -1240,12 +1294,18 @@ FlutterEngineResult __FlutterEngineFlushPendingTasksNow() {
 FlutterEngineResult FlutterEngineRegisterExternalTexture(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier) {
-  if (engine == nullptr || texture_identifier == 0) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  if (texture_identifier == 0) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Texture identifier was invalid.");
   }
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)->RegisterTexture(
           texture_identifier)) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency);
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not register the specified texture.");
   }
   return kSuccess;
 }
@@ -1253,13 +1313,19 @@ FlutterEngineResult FlutterEngineRegisterExternalTexture(
 FlutterEngineResult FlutterEngineUnregisterExternalTexture(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier) {
-  if (engine == nullptr || texture_identifier == 0) {
-    return kInvalidArguments;
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  if (texture_identifier == 0) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Texture identifier was invalid.");
   }
 
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)->UnregisterTexture(
           texture_identifier)) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency);
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not un-register the specified texture.");
   }
 
   return kSuccess;
@@ -1268,12 +1334,17 @@ FlutterEngineResult FlutterEngineUnregisterExternalTexture(
 FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier) {
-  if (engine == nullptr || texture_identifier == 0) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+  if (texture_identifier == 0) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid texture identifier.");
   }
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->MarkTextureFrameAvailable(texture_identifier)) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency);
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not mark the texture frame as being available.");
   }
   return kSuccess;
 }
@@ -1282,11 +1353,12 @@ FlutterEngineResult FlutterEngineUpdateSemanticsEnabled(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     bool enabled) {
   if (engine == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)->SetSemanticsEnabled(
           enabled)) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency);
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not update semantics state.");
   }
   return kSuccess;
 }
@@ -1295,11 +1367,12 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterAccessibilityFeature flags) {
   if (engine == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->SetAccessibilityFeatures(flags)) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency);
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not update accessibility features.");
   }
   return kSuccess;
 }
@@ -1311,14 +1384,15 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     const uint8_t* data,
     size_t data_length) {
   if (engine == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
   auto engine_action = static_cast<flutter::SemanticsAction>(action);
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->DispatchSemanticsAction(
                id, engine_action,
                std::vector<uint8_t>({data, data + data_length}))) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency);
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not dispatch semantics action.");
   }
   return kSuccess;
 }
@@ -1329,7 +1403,7 @@ FlutterEngineResult FlutterEngineOnVsync(FLUTTER_API_SYMBOL(FlutterEngine)
                                          uint64_t frame_start_time_nanos,
                                          uint64_t frame_target_time_nanos) {
   if (engine == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
 
   TRACE_EVENT0("flutter", "FlutterEngineOnVsync");
@@ -1342,7 +1416,9 @@ FlutterEngineResult FlutterEngineOnVsync(FLUTTER_API_SYMBOL(FlutterEngine)
 
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)->OnVsyncEvent(
           baton, start_time, target_time)) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency);
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not notify the running engine instance of a Vsync event.");
   }
 
   return kSuccess;
@@ -1351,14 +1427,15 @@ FlutterEngineResult FlutterEngineOnVsync(FLUTTER_API_SYMBOL(FlutterEngine)
 FlutterEngineResult FlutterEngineReloadSystemFonts(
     FLUTTER_API_SYMBOL(FlutterEngine) engine) {
   if (engine == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
 
   TRACE_EVENT0("flutter", "FlutterEngineReloadSystemFonts");
 
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->ReloadSystemFonts()) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency);
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not reload system fonts.");
   }
 
   return kSuccess;
@@ -1380,8 +1457,13 @@ FlutterEngineResult FlutterEnginePostRenderThreadTask(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     VoidCallback callback,
     void* baton) {
-  if (engine == nullptr || callback == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  if (callback == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Render thread callback was null.");
   }
 
   auto task = [callback, baton]() { callback(baton); };
@@ -1389,7 +1471,8 @@ FlutterEngineResult FlutterEnginePostRenderThreadTask(
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)
                  ->PostRenderThreadTask(task)
              ? kSuccess
-             : LOG_EMBEDDER_ERROR(kInternalInconsistency);
+             : LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                                  "Could not post the render thread task.");
 }
 
 uint64_t FlutterEngineGetCurrentTime() {
@@ -1400,10 +1483,11 @@ FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
                                              engine,
                                          const FlutterTask* task) {
   if (engine == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)->RunTask(task)
              ? kSuccess
-             : LOG_EMBEDDER_ERROR(kInvalidArguments);
+             : LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Could not run the specified task.");
 }
