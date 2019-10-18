@@ -379,7 +379,7 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 
   final List<String> args = <String>[
     'app:$task',
-    ...?options,
+    ...<String>['--debug', ...?options],
   ];
   final String gradle = path.join(workingDirectory, Platform.isWindows ? 'gradlew.bat' : './gradlew');
   print('┌── $gradle');
