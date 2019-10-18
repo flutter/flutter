@@ -356,7 +356,7 @@ Future<void> _runGradleTask({String workingDirectory, String task, List<String> 
   final ProcessResult result = await _resultOfGradleTask(
       workingDirectory: workingDirectory,
       task: task,
-      options: <String>['--verbose', ...?options]);
+      options: <String>['--debug', ...?options]);
   if (result.exitCode != 0) {
     print('stdout:');
     print(result.stdout);
