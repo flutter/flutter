@@ -104,7 +104,7 @@ Future<void> buildWithAssemble({
   @required String outputDir,
   @required String depfilePath,
   @required bool precompiled,
-  @required bool trackWidgetCreation,
+  bool trackWidgetCreation,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
   buildMode = precompiled ? buildMode : BuildMode.debug;
