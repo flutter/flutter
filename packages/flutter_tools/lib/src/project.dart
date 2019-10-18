@@ -617,7 +617,7 @@ class AndroidProject {
     _overwriteFromTemplate(fs.path.join(
       'module',
       'android',
-      featureFlags.isNewAndroidEmbeddingEnabled ? 'library_new_embedding' : 'library',
+      featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
     ), ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
     gradle.injectGradleWrapperIfNeeded(ephemeralDirectory);
@@ -631,7 +631,7 @@ class AndroidProject {
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
-        'useNewAndroidEmbedding': featureFlags.isNewAndroidEmbeddingEnabled,
+        'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
