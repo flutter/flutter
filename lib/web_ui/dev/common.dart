@@ -4,6 +4,7 @@
 
 import 'dart:io' as io;
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
@@ -34,7 +35,10 @@ abstract class PlatformBinding {
 
   int getChromeBuild(YamlMap chromeLock);
   String getChromeDownloadUrl(String version);
+  String getFirefoxDownloadUrl(String version);
   String getChromeExecutablePath(io.Directory versionDir);
+  String getFirefoxExecutablePath(io.Directory versionDir);
+  String getFirefoxLatestVersionUrl();
 }
 
 const String _kBaseDownloadUrl =
@@ -54,6 +58,22 @@ class _LinuxBinding implements PlatformBinding {
   @override
   String getChromeExecutablePath(io.Directory versionDir) =>
       path.join(versionDir.path, 'chrome-linux', 'chrome');
+
+  @override
+  String getFirefoxDownloadUrl(String version) {
+    return 'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/linux-x86_64/en-US/firefox-${version}.tar.bz2';
+  }
+
+  @override
+  String getFirefoxExecutablePath(io.Directory versionDir) {
+    // TODO: implement getFirefoxExecutablePath
+    return null;
+  }
+
+  @override
+  String getFirefoxLatestVersionUrl() {
+    return 'https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US';
+  }
 }
 
 class _MacBinding implements PlatformBinding {
@@ -75,4 +95,34 @@ class _MacBinding implements PlatformBinding {
       'Contents',
       'MacOS',
       'Chromium');
+
+  @override
+  String getFirefoxDownloadUrl(String version) {
+    // TODO: implement getFirefoxDownloadUrl
+    return null;
+  }
+
+  @override
+  String getFirefoxExecutablePath(io.Directory versionDir) {
+    // TODO: implement getFirefoxExecutablePath
+    return null;
+  }
+
+  @override
+  String getFirefoxLatestVersionUrl() {
+    return 'https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US';
+  }
+}
+
+class BrowserInstallation {
+  const BrowserInstallation({
+    @required this.version,
+    @required this.executable,
+  });
+
+  /// Browser version.
+  final String version;
+
+  /// Path the the browser executable.
+  final String executable;
 }

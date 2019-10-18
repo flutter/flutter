@@ -44,14 +44,14 @@ void addChromeVersionOption(ArgParser argParser) {
 /// exact build nuber, such as 695653. Build numbers can be found here:
 ///
 /// https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Linux_x64/
-Future<ChromeInstallation> getOrInstallChrome(
+Future<BrowserInstallation> getOrInstallChrome(
   String requestedVersion, {
   StringSink infoLog,
 }) async {
   infoLog ??= io.stdout;
 
   if (requestedVersion == 'system') {
-    return ChromeInstallation(
+    return BrowserInstallation(
       version: 'system',
       executable: await _findSystemChromeExecutable(),
     );
@@ -69,7 +69,7 @@ Future<ChromeInstallation> getOrInstallChrome(
     } else {
       infoLog.writeln('Installing Chrome version: ${installer.version}');
       await installer.install();
-      final ChromeInstallation installation = installer.getInstallation();
+      final BrowserInstallation installation = installer.getInstallation();
       infoLog.writeln(
           'Installations complete. To launch it run ${installation.executable}');
     }
@@ -89,19 +89,6 @@ Future<String> _findSystemChromeExecutable() async {
   }
 
   return which.stdout;
-}
-
-class ChromeInstallation {
-  const ChromeInstallation({
-    @required this.version,
-    @required this.executable,
-  });
-
-  /// Chrome version.
-  final String version;
-
-  /// Path the the Chrome executable.
-  final String executable;
 }
 
 /// Manages the installation of a particular [version] of Chrome.
@@ -157,12 +144,12 @@ class ChromeInstaller {
     return versionDir.existsSync();
   }
 
-  ChromeInstallation getInstallation() {
+  BrowserInstallation getInstallation() {
     if (!isInstalled) {
       return null;
     }
 
-    return ChromeInstallation(
+    return BrowserInstallation(
       version: version,
       executable: PlatformBinding.instance.getChromeExecutablePath(versionDir),
     );
