@@ -343,10 +343,10 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 9.2';
+  String get versionText => 'Xcode 10.2';
 
   @override
-  int get majorVersion => 9;
+  int get majorVersion => 10;
 
   @override
   int get minorVersion => 2;

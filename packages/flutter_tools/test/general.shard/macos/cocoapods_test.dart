@@ -186,7 +186,7 @@ void main() {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.getBuildSettings(any, any))
         .thenAnswer((_) async => <String, String>{
-          'SWIFT_VERSION': '4.0',
+          'SWIFT_VERSION': '5.0',
         });
 
       final FlutterProject project = FlutterProject.fromPath('project');
@@ -273,7 +273,7 @@ void main() {
         ..writeAsStringSync('Existing release config');
 
       final FlutterProject project = FlutterProject.fromPath('project');
-      await injectPlugins(project);
+      await injectPlugins(project, checkProjects: true);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(
@@ -309,6 +309,27 @@ void main() {
       expect(testLogger.errorText, contains('not installed'));
       expect(testLogger.errorText, contains('Skipping pod install'));
       expect(didInstall, isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('prints warning, if Podfile is out of date', () async {
+      pretendPodIsInstalled();
+
+      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('Existing Podfile');
+
+      final Directory symlinks = projectUnderTest.ios.symlinks
+        ..createSync(recursive: true);
+      symlinks.childLink('flutter').createSync('cache');
+
+      await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.ios,
+        engineDir: 'engine/path',
+      );
+      expect(testLogger.errorText, contains('Warning: Podfile is out of date'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,

@@ -492,6 +492,7 @@ class DebuggingOptions {
     this.traceSkia = false,
     this.traceSystrace = false,
     this.dumpSkpOnShaderCompilation = false,
+    this.cacheSkSL = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
@@ -499,9 +500,10 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.browserLaunch = true,
+    this.vmserviceOutFile,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname })
+  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -514,7 +516,8 @@ class DebuggingOptions {
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
       observatoryPort = null,
-      browserLaunch = true;
+      browserLaunch = true,
+      vmserviceOutFile = null;
 
   final bool debuggingEnabled;
 
@@ -527,6 +530,7 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool traceSystrace;
   final bool dumpSkpOnShaderCompilation;
+  final bool cacheSkSL;
   final bool useTestFonts;
   final bool verboseSystemLogs;
   /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
@@ -535,6 +539,8 @@ class DebuggingOptions {
   final String port;
   final String hostname;
   final bool browserLaunch;
+  /// A file where the vmservice uri should be written after the application is started.
+  final String vmserviceOutFile;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }

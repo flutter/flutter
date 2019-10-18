@@ -534,7 +534,7 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  });
+  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/42767
 }
 
 class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {

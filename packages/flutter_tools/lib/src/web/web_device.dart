@@ -61,7 +61,7 @@ class ChromeDevice extends Device {
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
-    return NoOpDeviceLogReader(app.name);
+    return NoOpDeviceLogReader(app?.name);
   }
 
   @override

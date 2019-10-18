@@ -392,6 +392,50 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
+      testUsingContext(' succeeds with --cache-sksl', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.setLogReader(mockApp, mockLogReader);
+        final Uri uri = Uri(
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: 1234,
+          path: 'observatory',
+        );
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+            .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
+
+        List<String> args;
+        when(mockIosDeploy.runApp(
+          deviceId: anyNamed('deviceId'),
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation inv) {
+          args = inv.namedArguments[const Symbol('launchArguments')];
+          return Future<int>.value(0);
+        });
+
+        final LaunchResult launchResult = await device.startApp(mockApp,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(
+              const BuildInfo(BuildMode.debug, null),
+              cacheSkSL: true,
+          ),
+          platformArgs: <String, dynamic>{},
+        );
+        expect(launchResult.started, isTrue);
+        expect(args, contains('--cache-sksl'));
+        expect(await device.stopApp(mockApp), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
+        FileSystem: () => mockFileSystem,
+        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
+        IOSDeploy: () => mockIosDeploy,
+      });
+
       void testNonPrebuilt({
         @required bool showBuildSettingsFlakes,
       }) {
