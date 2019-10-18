@@ -561,17 +561,15 @@ class CupertinoColors {
 /// and changes automatically to black in dark mode.
 ///
 /// ```dart
-/// Builder(builder: (BuildContext context) {
-///   return CupertinoButton(
-///     child: child,
-///     // CupertinoDynamicColor works out of box in a CupertinoButton.
-///     color: CupertinoDynamicColor.withBrightness(
-///       color: CupertinoColors.white,
-///       darkColor: CupertinoColors.black,
-///     ),
-///     onPressed: () { },
-///   );
-/// })
+/// CupertinoButton(
+///   child: child,
+///   // CupertinoDynamicColor works out of box in a CupertinoButton.
+///   color: CupertinoDynamicColor.withBrightness(
+///     color: CupertinoColors.white,
+///     darkColor: CupertinoColors.black,
+///   ),
+///   onPressed: () { },
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -591,9 +589,11 @@ class CupertinoColors {
 /// [MediaQuery], etc.
 ///
 /// ```dart
-/// // Container is not a Cupertino widget, but CupertinoTheme.of implicitly
-/// // resolves colors used in the retrieved CupertinoThemeData.
-/// Container(color: CupertinoTheme.of(context).primaryColor)
+/// Container(
+///   // Container is not a Cupertino widget, but CupertinoTheme.of implicitly
+///   // resolves colors used in the retrieved CupertinoThemeData.
+///   color: CupertinoTheme.of(context).primaryColor,
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -608,7 +608,7 @@ class CupertinoColors {
 ///
 /// {@tool sample}
 ///
-/// The following code sample demostrates two cases where you have to manually
+/// The following code samples demostrate two cases where you have to manually
 /// resolve a [CupertinoDynamicColor].
 ///
 /// ```dart
@@ -621,9 +621,11 @@ class CupertinoColors {
 ///     ),
 ///   ),
 /// )
+/// ```
 ///
-/// // Container is not a Cupertino widget.
+/// ```dart
 /// Container(
+///   // Container is not a Cupertino widget.
 ///   color: CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context),
 /// )
 /// ```
