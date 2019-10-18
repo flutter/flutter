@@ -80,9 +80,9 @@ void main() {
     await slowDrag(tester, blockKey, const Offset(0.0, 100.0));
     await expectLater(
       find.byType(FlexibleSpaceBar),
-      matchesGoldenFile('flexibleSpaceBar_blurBackground.png'),
+      matchesGoldenFile('flexible_space_bar_stretch_mode.blur_background.png'),
     );
-    
+
   });
 //
 //  testWidgets('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
