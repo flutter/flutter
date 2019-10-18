@@ -207,7 +207,7 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -220,7 +220,7 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -234,7 +234,7 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesNumberPlugins, '0'));
-    }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -248,7 +248,7 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesProjectModule, 'false'));
-    }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -262,7 +262,7 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesProjectModule, 'true'));
-    }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -275,7 +275,7 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -288,7 +288,7 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectModulePluginInjected(projectPath);
-    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -309,7 +309,7 @@ void main() {
 
       expectDependenciesResolved(exampleProjectPath);
       expectPluginInjected(exampleProjectPath);
-    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
   });
