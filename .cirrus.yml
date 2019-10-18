@@ -1,18 +1,41 @@
-container:
-  image: gcr.io/flutter-cirrus/build-flutter-image:latest
+# CIRRUS CONFIGURATION FILE
 
+use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+
+environment:
+  # For details about environment variables used in Cirrus, including how encrypted variables work,
+  # see https://cirrus-ci.org/guide/writing-tasks/#environment-variables
+  GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+  # We change Flutter's directory to include a space in its name (see $CIRRUS_WORKING_DIR) so that
+  # we constantly test path names with spaces in them. The FLUTTER_SDK_PATH_WITH_SPACE variable must
+  # therefore have a space in it.
+  FLUTTER_SDK_PATH_WITH_SPACE: "flutter sdk"
+  # We force BOT to true so that all our tools know we're in a CI environment. This avoids any
+  # dependency on precisely how Cirrus is detected by our tools.
+  BOT: "true"
+  # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they might include non-ASCII
+  # characters which makes Gradle crash. See: https://github.com/flutter/flutter/issues/24935
+  # TODO(amirha): remove once we've migrated to newer Gradle
+  CIRRUS_CHANGE_MESSAGE: ""
+  CIRRUS_COMMIT_MESSAGE: ""
+
+# LINUX SHARDS
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-  env:
-    # Name the SDK directory to include a space so that we constantly
-    # test path names with spaces in them.
-    CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
+  container:
+    image: gcr.io/flutter-cirrus/build-flutter-image:latest
+    cpu: $CPU
+    memory: $MEMORY
+  environment:
+    # We shrink our default resource requirement as much as possible because that way we are more
+    # likely to get scheduled. We require 4G of RAM because most of the shards (all but one as of
+    # October 2019) just get OOM-killed with less. Some shards may need more. When increasing the
+    # requirements for select shards, please leave a comment on those shards saying when you
+    # increased the requirements, what numbers you tried, and what the results were.
+    CPU: 1 # 0.1-8 without compute credits, 0.1-30 with (yes, you can go fractional)
+    MEMORY: 4G # 256M-24G without compute credits, 256M-90G with
+    CIRRUS_WORKING_DIR: "/tmp/$FLUTTER_SDK_PATH_WITH_SPACE"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
-  git_fetch_script:
-    - git clean -xfd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
     folder: $HOME/.pub-cache
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
@@ -22,345 +45,302 @@ task:
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/*.version
-  setup_script: ./dev/bots/cirrus_setup.sh
+  setup_script:
+    - date
+    - git clean -xffd
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+    - flutter config --no-analytics
+    - flutter doctor -v
+    - flutter update-packages
+    - ./dev/bots/accept_android_sdk_licenses.sh
+    - date
+  on_failure:
+    failure_script:
+      - date
+      - which flutter
   matrix:
-    - name: docs
-      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
-      env:
-        SHARD: docs
+    - name: analyze-linux # linux-only
+      # environment:
+        # Empirically, the analyze-linux shard runs surprisingly fast (under 15 minutes) with just 1
+        # CPU and 4G RAM as of October 2019. It fails with less than 4G though.
+      script:
+        - dart --enable-asserts ./dev/bots/analyze.dart
+
+    - name: framework_tests-widgets-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # We use 3 CPUs because that's the minimum required to get framework_tests-widgets-linux
+        # running fast enough that it is not the long pole, as of OCtober 2019.
+        CPU: 3
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      script:
+        - ./dev/bots/download_goldctl.sh
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: framework_tests-libraries-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # We use 3 CPUs because that's the minimum required to get the
+        # framework_tests-libraries-linux shard running fast enough that it is not the long pole, as
+        # of October 2019.
+        CPU: 3
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      script:
+        - ./dev/bots/download_goldctl.sh
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: framework_tests-misc-linux
+      # this includes the tests for directories in dev/
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # We use 3 CPUs because that's the minimum required to get framework_tests-misc-linux
+        # running fast enough that it is not the long pole, as of October 2019.
+        CPU: 3
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: tool_tests-general-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the tool_tests-general-linux shard got faster with more CPUs up to 4
+        # CPUs, and needed at least 8G of RAM to not run out of memory.
+        CPU: 4
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: tool_tests-commands-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the tool_tests-commands-linux shard got faster with more CPUs up to 6
+        # CPUs, and needed at least 8G of RAM to not run out of memory.
+        CPU: 6
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: tool_tests-integration-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the tool_tests-integration-linux shard got faster with more CPUs up to
+        # 6 CPUs, and needed at least 8G of RAM to not run out of memory.
+        CPU: 6
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: tool_coverage-linux # linux-only
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**/*.dart', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the tool_coverage-linux shard needed at least 12G of RAM to run without
+        # getting OOM-killed, and even 8 CPUs took 25 minutes.
+        CPU: 8
+        MEMORY: 12G
+        CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+        - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/coverage/lcov.info -F flutter_tool
+
+    - name: web_tests-0-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the Web shards needed more than 6G of RAM.
+        CPU: 2
+        MEMORY: 8G
+      allow_failures: true
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: web_tests-1-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the Web shards needed more than 6G of RAM.
+        CPU: 2
+        MEMORY: 8G
+      allow_failures: true
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: web_tests-2-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the Web shards needed more than 6G of RAM.
+        CPU: 2
+        MEMORY: 8G
+      allow_failures: true
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: web_tests-3-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the Web shards needed more than 6G of RAM.
+        CPU: 2
+        MEMORY: 8G
+      allow_failures: true
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: web_tests-4-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the Web shards needed more than 6G of RAM.
+        CPU: 2
+        MEMORY: 8G
+      allow_failures: true
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: web_tests-5_last-linux # last Web shard must end with _last
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the Web shards needed more than 6G of RAM.
+        CPU: 2
+        MEMORY: 8G
+      allow_failures: true
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: build_tests-linux
+      environment:
+        # With 1 CPU and 4G of RAM, as of October 2019, build_tests-linux would get OOM-killed.
+        # Increasing the RAM to 12G allowed it to finish in about 30 minutes, any extra CPU (tried 2
+        # and 4) reduced that to just over 20 minutes. 6G was enough not to get OOM-killed.
+        CPU: 2
+        MEMORY: 6G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-0-linux
+      environment:
+        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
+        CPU: 2
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-1-linux
+      environment:
+        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
+        CPU: 2
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-2-linux
+      environment:
+        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
+        CPU: 2
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-3-linux
+      environment:
+        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
+        CPU: 2
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-4-linux
+      environment:
+        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
+        CPU: 2
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-5_last-linux
+      environment:
+        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
+        CPU: 2
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    # TODO(ianh): name: add_to_app_tests-linux
+
+    - name: docs-linux # linux-only
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # Empirically, as of October 2019, the docs-linux shard took about 30 minutes when run with
+        # 1 CPU and 4G of RAM. 2 CPUs reduced that to 20 minutes, more CPUs did not improve matters.
+        CPU: 2
         # For uploading master docs to Firebase master branch staging site
         FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
         # For uploading beta docs to Firebase public live site
         FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
-      docs_script: ./dev/bots/docs.sh
-    - name: deploy_gallery
-      depends_on:
-        - docs
-        - analyze
-        - build_tests-linux
-      env:
-        SHARD: deploy_gallery
-        GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
-        ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
-      test_script:
-        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
-        # might include non-ASCII characters which makes Gradle crash.
-        # See: https://github.com/flutter/flutter/issues/24935
-        # This is a temporary workaround until we figure how to properly configure
-        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
-        # TODO(amirh): Set the locale to UTF8.
-        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
-        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
-        - export CIRRUS_CHANGE_MESSAGE=""
-        - export CIRRUS_COMMIT_MESSAGE=""
-        - ./dev/bots/deploy_gallery.sh
-        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
-        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
-    - name: analyze
-      test_script:
-        - dart --enable-asserts ./dev/bots/analyze.dart
-    - name: bots_tests-linux
-      skip: "!changesInclude('dev/bots/**')"
-      test_script:
-        - (cd ./dev/bots && pub run test)
-      container:
-        cpu: 4
-        memory: 12G
-    - name: tests_widgets-linux
-      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: widgets
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      goldctl_script: ./dev/bots/download_goldctl.sh
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: tests_framework_other-linux
-      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: framework_other
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      goldctl_script: ./dev/bots/download_goldctl.sh
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: tests_extras-linux
-      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**', 'dev/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: extras
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    # all of the tests except the ones in test/integration and test/commands/create_test for packages/flutter_tools
-    - name: tool_tests_general-linux
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: general
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: tool_tests_commands-linux
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: commands
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    # all of the tests in test/integration for packages/flutter_tools
-    - name: tool_tests_integration-linux
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: integration
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: tool_coverage-linux
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**/*.dart') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
-        SHARD: tool_coverage
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-        - bash <(curl -s https://codecov.io/bash) -c -s ./packages/flutter_tools/coverage/ -f '*.lcov.info' -F flutter_tool
-      container:
-        cpu: 8
-        memory: 24G
-    - name: web_tests-linux-shard-0
-      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-      env:
-        SHARD: web_tests
-        WEB_SHARD: 0
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: web_tests-linux-shard-1
-      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-      env:
-        SHARD: web_tests
-        WEB_SHARD: 1
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: web_tests-linux-shard-2
-      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-      env:
-        SHARD: web_tests
-        WEB_SHARD: 2
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: web_tests-linux-shard-3
-      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-      env:
-        SHARD: web_tests
-        WEB_SHARD: 3
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: web_tests-linux-shard-4
-      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-      env:
-        SHARD: web_tests
-        WEB_SHARD: 4
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: web_tests-linux-shard-5
-      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-      env:
-        SHARD: web_tests
-        WEB_SHARD: 5
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: build_tests-linux
-      env:
-        SHARD: build_tests
-    - name: integration_tests-linux
-      env:
-        SHARD: integration_tests
-      test_script:
-        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
-        # might include non-ASCII characters which makes Gradle crash.
-        # See: https://github.com/flutter/flutter/issues/24935
-        # This is a temporary workaround until we figure how to properly configure
-        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
-        # TODO(amirh): Set the locale to UTF8.
-        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
-        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
-        - export CIRRUS_CHANGE_MESSAGE=""
-        - export CIRRUS_COMMIT_MESSAGE=""
-        - dart --enable-asserts ./dev/bots/test.dart
-        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
-        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
-      container:
-        cpu: 4
-        memory: 12G
-    - name: gradle_tests-linux-shard-1
-      env:
-        SHARD: integration_tests
-        SUBSHARD: gradle1
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: gradle_tests-linux-shard-2
-      env:
-        SHARD: integration_tests
-        SUBSHARD: gradle2
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: gradle_embedding_v2_tests-linux-shard-1
-      env:
-        SHARD: integration_tests
-        SUBSHARD: gradle1
-        ENABLE_ANDROID_EMBEDDING_V2: 'true'
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: gradle_embedding_v2_tests-linux-shard-2
-      env:
-        SHARD: integration_tests
-        SUBSHARD: gradle2
-        ENABLE_ANDROID_EMBEDDING_V2: 'true'
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: release_smoke_tests
-      env:
-        CLOUDSDK_CORE_DISABLE_PROMPTS: 1
-        GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[1c140257edc48f5578fa5a0e5038b84c8e53270c405efa5a8e35ea303a4e0d135853989f448f72136206de854d17fbec]
-      test_script:
-        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
-        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
-        - export CIRRUS_CHANGE_MESSAGE=""
-        - export CIRRUS_COMMIT_MESSAGE=""
-        - ./dev/bots/firebase_testlab.sh
-        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
-        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
+      script:
+        - ./dev/bots/docs.sh
+
     - name: customer_testing-linux
+      # environment:
+        # Empirically, this shard runs fine at 1 CPU and 4G RAM as of October 2019. We will probably
+        # want to grow this container when we invite people to add their tests in large numbers.
       script:
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
-task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-  windows_container:
-    image: cirrusci/android-sdk:28-windowsservercore-2019
-    os_version: 2019
-    cpu: 4
-  env:
-    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
-    PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
-  git_fetch_script:
-    - git clean -xfd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
-  pub_cache:
-    folder: $APPDATA\Pub\Cache
-    fingerprint_script:
-      - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
-  flutter_pkg_cache:
-    folder: bin\cache\pkg
-    fingerprint_script: echo %OS% & type bin\internal\*.version
-  artifacts_cache:
-    folder: bin\cache\artifacts
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
-  setup_script:
-    - flutter config --no-analytics
-    - flutter doctor -v
-    - flutter update-packages
-    - git fetch origin master
-  test_all_script:
-    - dart --enable-asserts dev\bots\test.dart
-  matrix:
-    # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
-    - name: tool_tests_general-windows
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: general
-    # all of the tests in test/commands/create_test
-    - name: tool_tests_commands-windows
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: commands
-    # all of the tests in test/integration for packages/flutter_tools
-    - name: tool_tests_integration-windows
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: integration
+    - name: firebase_test_lab_tests-linux # linux-only
+      environment:
+        # Empirically, this shard runs in 20-25 minutes with just one CPU and 4G of RAM, as of
+        # October 2019. It does not seem to be sensitive to the number of CPUs or amount of RAM;
+        # doubling CPUs had no effect (mere seconds under 20 minutes), increasing RAM to 24G left it
+        # on the high end of the 20-25 minute range. (This makes sense, as it's just driving the
+        # Firebase test lab remotely.) Less than 4G of RAM made it go OOM.
+        CLOUDSDK_CORE_DISABLE_PROMPTS: 1
+        GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[1c140257edc48f5578fa5a0e5038b84c8e53270c405efa5a8e35ea303a4e0d135853989f448f72136206de854d17fbec]
+      script:
+        - ./dev/bots/firebase_testlab.sh
 
+    - name: deploy_gallery-linux # linux- and macos- only
+      depends_on:
+        - analyze-linux
+        - framework_tests-widgets-linux
+        - framework_tests-libraries-linux
+        - framework_tests-misc-linux
+        - tool_tests-general-linux
+        - tool_tests-commands-linux
+        - tool_tests-integration-linux
+        - build_tests-linux
+        - hostonly_devicelab_tests-0-linux
+        - hostonly_devicelab_tests-1-linux
+        - hostonly_devicelab_tests-2-linux
+        - hostonly_devicelab_tests-3-linux
+        - hostonly_devicelab_tests-4-linux
+        - hostonly_devicelab_tests-5_last-linux
+        - firebase_test_lab_tests-linux
+      environment:
+        # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
+        # minutes, once it got started.
+        GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
+        ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
+      script:
+        - ./dev/bots/deploy_gallery.sh
+
+# WINDOWS SHARDS
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   windows_container:
     image: cirrusci/android-sdk:28-windowsservercore-2019
     os_version: 2019
-    cpu: 4
-  env:
-    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
+    cpu: $CPU
+    memory: $MEMORY
+  environment:
+    # It's not clear that changing the cpu/memory fields here has any impact, so we use
+    # small numbers...
+    CPU: 2 # 1-8 without compute credits, 1-30 with
+    MEMORY: 2G # 256M-24G without compute credits, 256M-90G with
+    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\$FLUTTER_SDK_PATH_WITH_SPACE"
     PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
-  git_fetch_script:
-    - git clean -xfd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
     folder: $APPDATA\Pub\Cache
     fingerprint_script:
-      - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
+      - ps: $Environment:OS; Get-ChildItem -Path "$Environment:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
   flutter_pkg_cache:
     folder: bin\cache\pkg
     fingerprint_script: echo %OS% & type bin\internal\*.version
@@ -368,290 +348,285 @@ task:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
+    - git clean -xffd
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
     - flutter update-packages
     - git fetch origin master
   matrix:
-    - name: bots_tests-windows
-      skip: "!changesInclude('dev/bots/**')"
-      test_script:
-        - cd dev\bots
-        - pub run test
-    - name: tests_widgets-windows
-      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: widgets
+    - name: framework_tests-widgets-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
         GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      goldctl_script: powershell dev\bots\download_goldctl.ps1
-      test_all_script:
+      script:
+        - powershell dev\bots\download_goldctl.ps1
         - dart --enable-asserts dev\bots\test.dart
-    - name: tests_framework_other-windows
-      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: framework_other
+
+    - name: framework_tests-libraries-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
         GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      goldctl_script: powershell dev\bots\download_goldctl.ps1
-      test_all_script:
+      script:
+        - powershell dev\bots\download_goldctl.ps1
         - dart --enable-asserts dev\bots\test.dart
-    - name: tests_extras-windows
-      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**', 'dev/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: extras
-      test_all_script:
+
+    - name: framework_tests-misc-windows
+      # this includes the tests for directories in dev/
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      script:
         - dart --enable-asserts dev\bots\test.dart
+
+    - name: tool_tests-general-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: tool_tests-commands-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: tool_tests-integration-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    # TODO(ianh): Enable Web tests on Windows
+
     - name: build_tests-windows
-      env:
-        SHARD: build_tests
-      container:
-        cpu: 4
-        memory: 12G
-      test_all_script:
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      script:
         - dart --enable-asserts dev\bots\test.dart
-    - name: integration_tests-windows
-      env:
-        SHARD: integration_tests
-      container:
-        cpu: 4
-        memory: 12G
-      test_all_script:
-        - dart --enable-asserts dev\bots\test.dart
+
+    - name: hostonly_devicelab_tests-0-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-1-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-2-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-3-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-4-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-5_last-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    # TODO(ianh): name: add_to_app_tests-windows
+
     - name: customer_testing-windows
-      test_script:
+      script:
         - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
         - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
         - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
-    - name: gradle_tests-windows-shard-1
-      env:
-        SHARD: integration_tests
-        SUBSHARD: gradle1
-      test_script:
-        - dart --enable-asserts dev\bots\test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: gradle_tests-windows-shard-2
-      env:
-        SHARD: integration_tests
-        SUBSHARD: gradle2
-      test_script:
-        - dart --enable-asserts dev\bots\test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: gradle_embedding_v2_tests-windows-shard-1
-      env:
-        SHARD: integration_tests
-        SUBSHARD: gradle1
-        ENABLE_ANDROID_EMBEDDING_V2: 'true'
-      test_script:
-        - dart --enable-asserts dev\bots\test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: gradle_embedding_v2_tests-windows-shard-2
-      env:
-        SHARD: integration_tests
-        SUBSHARD: gradle2
-        ENABLE_ANDROID_EMBEDDING_V2: 'true'
-      test_script:
-        - dart --enable-asserts dev\bots\test.dart
-      container:
-        cpu: 4
-        memory: 12G
 
+# MACOS SHARDS
+# Mac doesn't use caches because they apparently take longer to populate and save
+# than just fetching the data in the first place.
 task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-  name: deploy_gallery-macos
-  depends_on:
-    - analyze
-  env:
-    # Name the SDK directory to include a space so that we constantly
-    # test path names with spaces in them.
-    CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
-    SHARD: deploy_gallery
-    # Apple Fastlane password.
-    FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
-    # Private repo for publishing certificates.
-    PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
-    PUBLISHING_MATCH_REPO_TOKEN: ENCRYPTED[3d1230b744c6ed6c788a91bec741b769401dbcd426b18f9af8080bfeefdfc21913ca4047980c5b5b7ce823f12e7b6b19]
-    # Apple Certificates Match Passphrase
-    MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
   osx_instance:
-    image: mojave-xcode-10.2
-  # occasionally the clock on these machines is out of sync
-  # with the actual time - this should help to verify
-  print_date_script:
-    - date
-  install_cocoapods_script:
-    - sudo gem install cocoapods --no-document
-  git_fetch_script:
-    - git clean -xfd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD
-  setup_script:
-    - bin/flutter config --no-analytics
-    - bin/flutter update-packages
-  test_all_script:
-    - ./dev/bots/deploy_gallery.sh
-
-task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-  osx_instance:
-    image: mojave-xcode-10.2
-  depends_on:
-    - analyze
-  env:
-    CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
-    COCOAPODS_DISABLE_STATS: true
-  print_date_script:
-    - date
-  git_fetch_script:
-    - git clean -xfd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
-  setup_script:
-    - bin/flutter config --no-analytics
-    - bin/flutter doctor -v
-    - bin/flutter update-packages
-  test_all_script:
-    - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    - bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
-  matrix:
-    # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
-    - name: tool_tests_general-macos
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: general
-    # all of the tests in test/commands/create_test
-    - name: tool_tests_commands-macos
-      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: commands
-    # all of the tests in test/integration for packages/flutter_tools
-    - name: tool_tests_integration-macos
-      only_if: $CIRRUS_BRANCH == 'master'
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: integration
-
-task:
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-  osx_instance:
-    image: mojave-xcode-10.2
-  depends_on:
-    - analyze
-  env:
-    CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
-    COCOAPODS_DISABLE_STATS: true
+    image: mojave-xcode-10.2-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
+    # cpu is always 2
+    # memory is always 8G
+  environment:
+    CIRRUS_WORKING_DIR: "/tmp/$FLUTTER_SDK_PATH_WITH_SPACE"
+    FLUTTER_FRAMEWORK_DIR: "$CIRRUS_WORKING_DIR/bin/cache/artifacts/engine/ios/"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
-  # occasionally the clock on these machines is out of sync
-  # with the actual time - this should help to verify
-  print_date_script:
-    - date
-  install_cocoapods_script:
-    - sudo gem install cocoapods --no-document
-  git_fetch_script:
-    - git clean -xfd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
+    COCOAPODS_DISABLE_STATS: true
+    CPU: 2
+    MEMORY: 8G
   setup_script:
-    - bin/flutter config --no-analytics
-    - bin/flutter doctor -v
-    - bin/flutter update-packages
+    - date
+    - which flutter
+    - sudo gem install cocoapods
+    - sudo gem install xcpretty
+    - git clean -xffd
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+    - flutter config --no-analytics
+    - flutter doctor -v
+    - flutter update-packages
+    - date
+    - which flutter
+  on_failure:
+    failure_script:
+      - date
+      - which flutter
   matrix:
-    - name: bots_tests-macos
-      skip: "!changesInclude('dev/bots/**')"
-      test_script:
-        - (cd ./dev/bots && pub run test)
-    - name: tests_widgets-macos
-      only_if: $CIRRUS_BRANCH == 'master'
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: widgets
+    - name: framework_tests-widgets-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
         GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      goldctl_script: ./dev/bots/download_goldctl.sh
-      test_all_script:
+      script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts dev/bots/test.dart
-      on_failure:
-        print_failure_time_script: date
-    - name: tests_framework_other-macos
-      only_if: $CIRRUS_BRANCH == 'master'
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: framework_other
+
+    - name: framework_tests-libraries-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
         GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      goldctl_script: ./dev/bots/download_goldctl.sh
-      test_all_script:
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - ./dev/bots/download_goldctl.sh
+        - dart --enable-asserts dev/bots/test.dart
+
+    - name: framework_tests-misc-macos
+      # this includes the tests for directories in dev/
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts dev/bots/test.dart
-      on_failure:
-        print_failure_time_script: date
-    - name: integration_tests-macos
-      only_if: $CIRRUS_BRANCH == 'master'
-      env:
-        SHARD: integration_tests
-      test_all_script:
+
+    - name: tool_tests-general-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: tool_tests-commands-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: tool_tests-integration-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    # TODO(ianh): Enable Web tests on macOS.
+
+    - name: build_tests-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-0-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-1-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-2-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-3-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-4-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: hostonly_devicelab_tests-5_last-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: add_to_app_tests-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      skip: true # https://github.com/flutter/flutter/pull/42444
+      script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts dev/bots/test.dart
-    - name: add2app-macos
-      skip: true # https://github.com/flutter/flutter/issues/39507
-      env:
-        SHARD: add2app_test
-      setup_xcpretty_script:
-        - sudo gem install xcpretty
-      test_all_script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts dev/bots/test.dart
+
     - name: customer_testing-macos
-      test_script:
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
+    - name: deploy_gallery-macos # linux- and macos- only
+      depends_on:
+        - analyze-linux
+        - framework_tests-widgets-macos
+        - framework_tests-libraries-macos
+        - framework_tests-misc-macos
+        - tool_tests-general-macos
+        - tool_tests-commands-macos
+        - tool_tests-integration-macos
+        - build_tests-macos
+        - hostonly_devicelab_tests-0-macos
+        - hostonly_devicelab_tests-1-macos
+        - hostonly_devicelab_tests-2-macos
+        - hostonly_devicelab_tests-3-macos
+        - hostonly_devicelab_tests-4-macos
+        - hostonly_devicelab_tests-5_last-macos
+        - firebase_test_lab_tests-linux
+      environment:
+        # Apple Fastlane password.
+        FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
+        # Private repo for publishing certificates.
+        PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
+        PUBLISHING_MATCH_REPO_TOKEN: ENCRYPTED[3d1230b744c6ed6c788a91bec741b769401dbcd426b18f9af8080bfeefdfc21913ca4047980c5b5b7ce823f12e7b6b19]
+        # Apple Certificates Match Passphrase
+        MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - ./dev/bots/deploy_gallery.sh
+
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or release.)
   only_if: $CIRRUS_TAG != ''
-  env:
+  environment:
     GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
   depends_on:
-    - docs
-    - analyze
-    - tests_widgets-linux
-    - tests_framework_other-linux
-    - tests_extras-linux
-    - tool_tests_general-linux
-    - tool_tests_commands-linux
-    - tool_tests_integration-linux
+    - docs-linux
+    - analyze-linux
+    - framework_tests-widgets-linux
+    - framework_tests-libraries-linux
+    - framework_tests-misc-linux
+    - tool_tests-general-linux
+    - tool_tests-commands-linux
+    - tool_tests-integration-linux
     - build_tests-linux
-    - integration_tests-linux
-    - gradle_tests-linux-shard-1
-    - gradle_tests-linux-shard-2
-    - gradle_embedding_v2_tests-linux-shard-1
-    - gradle_embedding_v2_tests-linux-shard-2
-    - gradle_tests-windows-shard-1
-    - gradle_tests-windows-shard-2
-    - gradle_embedding_v2_tests-windows-shard-1
-    - gradle_embedding_v2_tests-windows-shard-2
-    - release_smoke_tests
-  build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
-  login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
-  push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
+    - hostonly_devicelab_tests-0-linux
+    - hostonly_devicelab_tests-1-linux
+    - hostonly_devicelab_tests-2-linux
+    - hostonly_devicelab_tests-3-linux
+    - hostonly_devicelab_tests-4-linux
+    - hostonly_devicelab_tests-5_last-linux
+    - firebase_test_lab_tests-linux
+  script:
+    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
+    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
+    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
