@@ -66,10 +66,19 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
 
   @override
   Widget build(BuildContext context) {
-    return AbsorbPointer(
+    Widget child = AbsorbPointer(
       absorbing: !_active,
       child: widget.child,
     );
+
+    if (!_active) {
+      child = FocusScope(
+        canRequestFocus: false,
+        debugLabel: '$_TappableWhileStatusIs',
+        child: child,
+      );
+    }
+    return child;
   }
 }
 
@@ -275,10 +284,14 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               ),
             ),
             Expanded(
-              child: Visibility(
-                child: widget.backLayer,
-                visible: _controller.status != AnimationStatus.completed,
-                maintainState: true,
+              child: _TappableWhileStatusIs(
+                AnimationStatus.dismissed,
+                controller: _controller,
+                child: Visibility(
+                  child: widget.backLayer,
+                  visible: _controller.status != AnimationStatus.completed,
+                  maintainState: true,
+                ),
               ),
             ),
           ],

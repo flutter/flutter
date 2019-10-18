@@ -8,6 +8,7 @@ import 'dart:ui' show window;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -44,6 +45,9 @@ Widget buildFrame({
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
   Size mediaSize,
+  FocusNode focusNode,
+  bool autofocus = false,
+  Color focusColor,
 }) {
   return TestApp(
     textDirection: textDirection,
@@ -65,6 +69,9 @@ Widget buildFrame({
             isDense: isDense,
             isExpanded: isExpanded,
             underline: underline,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            focusColor: focusColor,
             items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
@@ -990,6 +997,7 @@ void main() {
       isButton: true,
       label: 'test',
       hasTapAction: true,
+      isFocusable: true,
     ));
 
     await tester.pumpWidget(buildFrame(
@@ -1005,6 +1013,7 @@ void main() {
       isButton: true,
       label: 'three',
       hasTapAction: true,
+      isFocusable: true,
     ));
     handle.dispose();
   });
@@ -1327,10 +1336,10 @@ void main() {
 
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, underline: customUnderline,
         value: 'two', onChanged: onChanged));
-    expect(tester.widget<DecoratedBox>(decoratedBox).decoration, decoration);
+    expect(tester.widgetList<DecoratedBox>(decoratedBox).last.decoration, decoration);
 
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, value: 'two', onChanged: onChanged));
-    expect(tester.widget<DecoratedBox>(decoratedBox).decoration, defaultDecoration);
+    expect(tester.widgetList<DecoratedBox>(decoratedBox).last.decoration, defaultDecoration);
   });
 
   testWidgets('DropdownButton selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
@@ -1911,5 +1920,80 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
+  });
+  testWidgets('DropdownButton can be focused, and has focusColor', (WidgetTester tester) async {
+    final UniqueKey buttonKey = UniqueKey();
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
+    await tester.pump(); // Pump a frame for autofocus to take effect.
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    final Finder buttonFinder = find.byKey(buttonKey);
+    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0x1f000000)));
+
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
+    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0xff00ff00)));
+  });
+  testWidgets("DropdownButton won't be focused if not enabled", (WidgetTester tester) async {
+    final UniqueKey buttonKey = UniqueKey();
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, focusNode: focusNode, autofocus: true, focusColor: const Color(0xff00ff00)));
+    await tester.pump(); // Pump a frame for autofocus to take effect (although it shouldn't).
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(find.byKey(buttonKey), isNot(paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0xff00ff00))));
+  });
+  testWidgets('DropdownButton is activated with the enter key', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    String value = 'one';
+    void didChangeValue(String newValue) {
+      value = newValue;
+    }
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButton<String>(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  onChanged: didChangeValue,
+                  value: value,
+                  itemHeight: null,
+                  items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      key: ValueKey<String>(item),
+                      value: item,
+                      child: Text(item, key: ValueKey<String>(item + 'Text')),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pump(); // Pump a frame for autofocus to take effect.
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+    expect(value, equals('one'));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Focus 'one'
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Focus 'two'
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select 'two'
+    await tester.pump();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('two'));
   });
 }

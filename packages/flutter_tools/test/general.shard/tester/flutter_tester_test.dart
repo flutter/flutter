@@ -9,10 +9,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -102,24 +100,23 @@ void main() {
       String mainPath;
 
       MockArtifacts mockArtifacts;
-      MockKernelCompiler mockKernelCompiler;
       MockProcessManager mockProcessManager;
       MockProcess mockProcess;
+      MockBuildSystem mockBuildSystem;
 
       final Map<Type, Generator> startOverrides = <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: 'linux'),
         FileSystem: () => fs,
         ProcessManager: () => mockProcessManager,
-        Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
-        KernelCompilerFactory: () => FakeKernelCompilerFactory(mockKernelCompiler),
         Artifacts: () => mockArtifacts,
+        BuildSystem: () => mockBuildSystem,
       };
 
       setUp(() {
+        mockBuildSystem = MockBuildSystem();
         flutterRoot = fs.path.join('home', 'me', 'flutter');
         flutterTesterPath = fs.path.join(flutterRoot, 'bin', 'cache',
             'artifacts', 'engine', 'linux-x64', 'flutter_tester');
-
         final File flutterTesterFile = fs.file(flutterTesterPath);
         flutterTesterFile.parent.createSync(recursive: true);
         flutterTesterFile.writeAsBytesSync(const <int>[]);
@@ -139,24 +136,23 @@ void main() {
           mode: anyNamed('mode')
         )).thenReturn(artifactPath);
 
-        mockKernelCompiler = MockKernelCompiler();
+        when(mockBuildSystem.build(
+          any,
+          any,
+        )).thenAnswer((_) async {
+          fs.file('$mainPath.dill').createSync(recursive: true);
+          return BuildResult(success: true);
+        });
       });
 
       testUsingContext('not debug', () async {
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
             debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
+
         expect(result.started, isFalse);
       }, overrides: startOverrides);
 
-      testUsingContext('no flutter_tester', () async {
-        fs.file(flutterTesterPath).deleteSync();
-        expect(() async {
-          await device.startApp(null,
-              mainPath: mainPath,
-              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)));
-        }, throwsToolExit());
-      }, overrides: startOverrides);
 
       testUsingContext('start', () async {
         final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
@@ -167,22 +163,6 @@ Hello!
 '''
               .codeUnits,
         ]));
-
-        when(mockKernelCompiler.compile(
-          sdkRoot: anyNamed('sdkRoot'),
-          mainPath: anyNamed('mainPath'),
-          outputFilePath: anyNamed('outputFilePath'),
-          depFilePath: anyNamed('depFilePath'),
-          buildMode: BuildMode.debug,
-          trackWidgetCreation: anyNamed('trackWidgetCreation'),
-          extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
-          fileSystemRoots: anyNamed('fileSystemRoots'),
-          fileSystemScheme: anyNamed('fileSystemScheme'),
-          packagesPath: anyNamed('packagesPath'),
-        )).thenAnswer((_) async {
-          fs.file('$mainPath.dill').createSync(recursive: true);
-          return CompilerOutput('$mainPath.dill', 0, <Uri>[]);
-        });
 
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
@@ -195,15 +175,5 @@ Hello!
   });
 }
 
+class MockBuildSystem extends Mock implements BuildSystem {}
 class MockArtifacts extends Mock implements Artifacts {}
-class MockKernelCompiler extends Mock implements KernelCompiler {}
-class FakeKernelCompilerFactory implements KernelCompilerFactory {
-  FakeKernelCompilerFactory(this.kernelCompiler);
-
-  final KernelCompiler kernelCompiler;
-
-  @override
-  Future<KernelCompiler> create(FlutterProject flutterProject) async {
-    return kernelCompiler;
-  }
-}

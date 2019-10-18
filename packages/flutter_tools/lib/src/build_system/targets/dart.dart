@@ -31,6 +31,9 @@ const String kTargetFile = 'TargetFile';
 /// The define to control whether the AOT snapshot is built with bitcode.
 const String kBitcodeFlag = 'EnableBitcode';
 
+/// Whether to enable or disable track widget creation.
+const String kTrackWidgetCreation = 'TrackWidgetCreation';
+
 /// The define to control what iOS architectures are built for.
 ///
 /// This is expected to be a comma-separated list of architectures. If not
@@ -208,12 +211,14 @@ class KernelSnapshot extends Target {
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
     final String targetFileAbsolute = fs.file(targetFile).absolute.path;
+    // everything besides 'false' is considered to be enabled.
+    final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
 
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       aot: buildMode != BuildMode.debug,
       buildMode: buildMode,
-      trackWidgetCreation: buildMode == BuildMode.debug,
+      trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
       targetModel: TargetModel.flutter,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,

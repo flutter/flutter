@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
@@ -967,17 +968,13 @@ void main() {
         ),
       );
 
-      // Initial focus happens.
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(Focus.of(lowerRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
 
@@ -985,17 +982,14 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       expect(Focus.of(lowerRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
@@ -1004,15 +998,134 @@ void main() {
       // Traverse in a direction
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(Focus.of(lowerRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
+    });
+    testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
+      final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
+      final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
+      final GlobalKey lowerLeftKey = GlobalKey(debugLabel: 'lowerLeftKey');
+      final GlobalKey lowerRightKey = GlobalKey(debugLabel: 'lowerRightKey');
+
+      final TextEditingController controller1 = TextEditingController();
+      final TextEditingController controller2 = TextEditingController();
+      final TextEditingController controller3 = TextEditingController();
+      final TextEditingController controller4 = TextEditingController();
+
+      final FocusNode focusNodeUpperLeft = FocusNode(debugLabel: 'upperLeft');
+      final FocusNode focusNodeUpperRight = FocusNode(debugLabel: 'upperRight');
+      final FocusNode focusNodeLowerLeft = FocusNode(debugLabel: 'lowerLeft');
+      final FocusNode focusNodeLowerRight = FocusNode(debugLabel: 'lowerRight');
+
+      Widget generateTestWidgets(bool ignoreTextFields) {
+        final Map<LogicalKeySet, Intent> shortcuts = <LogicalKeySet, Intent>{
+          LogicalKeySet(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left, ignoreTextFields: ignoreTextFields),
+          LogicalKeySet(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right, ignoreTextFields: ignoreTextFields),
+          LogicalKeySet(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down, ignoreTextFields: ignoreTextFields),
+          LogicalKeySet(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up, ignoreTextFields: ignoreTextFields),
+        };
+
+        return MaterialApp(
+          home: Shortcuts(
+            shortcuts: shortcuts,
+            child: FocusScope(
+              debugLabel: 'scope',
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Container(
+                        width: 100,
+                        height: 100,
+                        child: EditableText(
+                          autofocus: true,
+                          key: upperLeftKey,
+                          controller: controller1,
+                          focusNode: focusNodeUpperLeft,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
+                        ),
+                      ),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        child: EditableText(
+                          key: upperRightKey,
+                          controller: controller2,
+                          focusNode: focusNodeUpperRight,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Container(
+                        width: 100,
+                        height: 100,
+                        child: EditableText(
+                          key: lowerLeftKey,
+                          controller: controller3,
+                          focusNode: focusNodeLowerLeft,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
+                        ),
+                      ),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        child: EditableText(
+                          key: lowerRightKey,
+                          controller: controller4,
+                          focusNode: focusNodeLowerRight,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(generateTestWidgets(false));
+
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusNodeUpperRight.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusNodeLowerRight.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusNodeLowerLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+
+      await tester.pumpWidget(generateTestWidgets(true));
+
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusNodeUpperRight.hasPrimaryFocus, isFalse);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusNodeLowerRight.hasPrimaryFocus, isFalse);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusNodeLowerLeft.hasPrimaryFocus, isFalse);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
     });
   });
 }
