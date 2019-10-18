@@ -283,20 +283,24 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// should search for annotations, or if the layer has its own annotations to
   /// add.
   ///
+  /// The default implementation simply returns `false`, which means neither
+  /// the layer nor its children has annotations, and the annotation search
+  /// is not absorbed either (see below for explanation).
+  ///
   /// ## About layer annotations
   ///
   /// {@template flutter.rendering.layer.findAnnotations.aboutAnnotations}
-  /// Annotation is an optional object of any type that can be carried with a
+  /// An annotation is an optional object of any type that can be carried with a
   /// layer. An annotation can be found at a location as long as the owner layer
   /// contains the location and is walked to.
   ///
-  /// The annotations are searched by first visitng each child recursively, then
-  /// this layer, resulting in an order from visually front to back. Annotations
-  /// must meet the given restrictions, such as type and position.
+  /// The annotations are searched by first visiting each child recursively,
+  /// then this layer, resulting in an order from visually front to back.
+  /// Annotations must meet the given restrictions, such as type and position.
   ///
   /// The common way for a value to be found here is by pushing an
   /// [AnnotatedRegionLayer] into the layer tree, or by adding the desired
-  /// annotation by overriding `findAnnotations`.
+  /// annotation by overriding [findAnnotations].
   /// {@endtemplate}
   ///
   /// ## Parameters and return value
@@ -336,8 +340,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Returns null if no matching annotations are found.
   ///
   /// By default this method simply calls [findAnnotations] with `onlyFirst:
-  /// true` and returns the annotation of the first result. It is encouraged to
-  /// override [findAnnotations] instead of this method.
+  /// true` and returns the annotation of the first result. Prefer overriding
+  /// [findAnnotations] instead of this method, because during an annotation
+  /// search, only [findAnnotations] is recursively called, while custom
+  /// behavior in this method is ignored.
   ///
   /// ## About layer annotations
   ///
@@ -360,8 +366,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Returns a result with empty entries if no matching annotations are found.
   ///
   /// By default this method simply calls [findAnnotations] with `onlyFirst:
-  /// false` and returns the annotations of its result. It is encouraged to
-  /// override [findAnnotations] instead of this method.
+  /// false` and returns the annotations of its result. Prefer overriding
+  /// [findAnnotations] instead of this method, because during an annotation
+  /// search, only [findAnnotations] is recursively called, while custom
+  /// behavior in this method is ignored.
   ///
   /// ## About layer annotations
   ///
@@ -388,8 +396,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Returns a result with empty entries if no matching annotations are found.
   ///
   /// By default this method simply calls [findAnnotations] with `onlyFirst:
-  /// false` and returns the annotations of its result. It is encouraged to
-  /// override [findAnnotations] instead of this method.
+  /// false` and returns the annotations of its result. Prefer overriding
+  /// [findAnnotations] instead of this method, because during an annotation
+  /// search, only [findAnnotations] is recursively called, while custom
+  /// behavior in this method is ignored.
   ///
   /// ## About layer annotations
   ///
