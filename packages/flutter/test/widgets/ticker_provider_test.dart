@@ -121,19 +121,19 @@ void main() {
         expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   __SingleTickerTestState#00000(ticker active) was disposed with an\n'
-          '   active Ticker.\n'
-          '   __SingleTickerTestState created a Ticker via its\n'
-          '   SingleTickerProviderStateMixin, but at the time dispose() was\n'
-          '   called on the mixin, that Ticker was still active. The Ticker\n'
-          '   must be disposed before calling super.dispose().\n'
-          '   Tickers used by AnimationControllers should be disposed by\n'
-          '   calling dispose() on the AnimationController itself. Otherwise,\n'
-          '   the ticker will leak.\n'
-          '   The offending ticker was:\n'
-          '     Ticker(created by __SingleTickerTestState#00000(lifecycle\n'
-          '     state: created))\n'
-          '     The stack trace when the Ticker was actually created was:'
+            '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
+            '   active Ticker.\n'
+            '   _SingleTickerTestState created a Ticker via its\n'
+            '   SingleTickerProviderStateMixin, but at the time dispose() was\n'
+            '   called on the mixin, that Ticker was still active. The Ticker\n'
+            '   must be disposed before calling super.dispose().\n'
+            '   Tickers used by AnimationControllers should be disposed by\n'
+            '   calling dispose() on the AnimationController itself. Otherwise,\n'
+            '   the ticker will leak.\n'
+            '   The offending ticker was:\n'
+            '     Ticker(created by _SingleTickerTestState#00000(lifecycle state:\n'
+            '     created))\n'
+            '     The stack trace when the Ticker was actually created was:'
         ));
         key.currentState.controller.stop();
       }
@@ -164,9 +164,9 @@ void main() {
         expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   __SingleTickerTestState#00000(ticker active) was disposed with an\n'
+          '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
           '   active Ticker.\n'
-          '   __SingleTickerTestState created a Ticker via its\n'
+          '   _SingleTickerTestState created a Ticker via its\n'
           '   SingleTickerProviderStateMixin, but at the time dispose() was\n'
           '   called on the mixin, that Ticker was still active. The Ticker\n'
           '   must be disposed before calling super.dispose().\n'
@@ -174,8 +174,8 @@ void main() {
           '   calling dispose() on the AnimationController itself. Otherwise,\n'
           '   the ticker will leak.\n'
           '   The offending ticker was:\n'
-          '     Ticker(created by __SingleTickerTestState#00000(lifecycle\n'
-          '     state: created))\n'
+          '     Ticker(created by _SingleTickerTestState#00000(lifecycle state:\n'
+          '     created))\n'
           '     The stack trace when the Ticker was actually created was:'
         ));
         key.currentState.controller.stop();
@@ -207,9 +207,9 @@ void main() {
         expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   __MultipleTickerTestState#00000(tickers: tracking 2 tickers) was\n'
+          '   _MultipleTickerTestState#00000(tickers: tracking 2 tickers) was\n'
           '   disposed with an active Ticker.\n'
-          '   __MultipleTickerTestState created a Ticker via its\n'
+          '   _MultipleTickerTestState created a Ticker via its\n'
           '   TickerProviderStateMixin, but at the time dispose() was called on\n'
           '   the mixin, that Ticker was still active. All Tickers must be\n'
           '   disposed before calling super.dispose().\n'
@@ -218,7 +218,7 @@ void main() {
           '   the ticker will leak.\n'
           '   The offending ticker was:\n'
           '     _WidgetTicker(created by\n'
-          '     __MultipleTickerTestState#00000(lifecycle state: created,\n'
+          '     _MultipleTickerTestState#00000(lifecycle state: created,\n'
           '     tickers: tracking 0 tickers))'
         ));
         key.currentState.controllers.first.stop();

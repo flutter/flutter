@@ -146,7 +146,7 @@ class NullOffsetPositionDelegate extends MultiChildLayoutDelegate {
 
 // Used in the 'performLayout error control test' test case for triggering
 //  to layout child more than once
-class _InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
+class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
     final BoxConstraints constraints = BoxConstraints.loose(
@@ -317,7 +317,7 @@ void main() {
         delegate: ZeroAndOneIdLayoutDelegate(),
         message:
           'FlutterError\n'
-          '   The _ZeroAndOneIdLayoutDelegate custom multichild layout delegate\n'
+          '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate\n'
           '   tried to lay out a non-existent child.\n'
           '   There is no child with the id "1".\n'
       );
@@ -329,7 +329,7 @@ void main() {
           delegate: DuplicateLayoutDelegate(),
           message:
             'FlutterError\n'
-            '   The _DuplicateLayoutDelegate custom multichild layout delegate\n'
+            '   The DuplicateLayoutDelegate custom multichild layout delegate\n'
             '   tried to lay out the child with id "0" more than once.\n'
             '   Each child must be laid out exactly once.\n'
       );
@@ -338,10 +338,10 @@ void main() {
     testWidgets('layoutChild on invalid size constraint', (WidgetTester tester) async {
       expectFlutterErrorMessage(
         tester: tester,
-        delegate: _InvalidConstraintsChildLayoutDelegate(),
+        delegate: InvalidConstraintsChildLayoutDelegate(),
         message:
           'FlutterError\n'
-          '   The _InvalidConstraintsChildLayoutDelegate custom multichild\n'
+          '   The InvalidConstraintsChildLayoutDelegate custom multichild\n'
           '   layout delegate provided invalid box constraints for the child\n'
           '   with id "0".\n'
           '   FlutterError\n'
@@ -360,8 +360,8 @@ void main() {
         delegate: NonExistentPositionDelegate(),
         message:
           'FlutterError\n'
-          '   The _NonExistentPositionDelegate custom multichild layout\n'
-          '   delegate tried to position out a non-existent child:\n'
+          '   The NonExistentPositionDelegate custom multichild layout delegate\n'
+          '   tried to position out a non-existent child:\n'
           '   There is no child with the id "1".\n'
       );
     });
@@ -372,7 +372,7 @@ void main() {
         delegate: NullOffsetPositionDelegate(),
         message:
           'FlutterError\n'
-          '   The _NullOffsetPositionDelegate custom multichild layout delegate\n'
+          '   The NullOffsetPositionDelegate custom multichild layout delegate\n'
           '   provided a null position for the child with id "0".\n',
       );
     });
@@ -387,12 +387,11 @@ void main() {
         ),
         tester: tester,
         message:
-         'FlutterError\n'
+          'FlutterError\n'
           '   Every child of a RenderCustomMultiChildLayoutBox must have an ID\n'
           '   in its parent data.\n'
-          '   The following child has no ID: RenderConstrainedBox#71417 '
-          'NEEDS-LAYOUT NEEDS-PAINT:\n'
-          '     creator: ConstrainedBox ← Container ← _LayoutWithMissingId ←\n'
+          '   The following child has no ID: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT:\n'
+          '     creator: ConstrainedBox ← Container ← LayoutWithMissingId ←\n'
           '       CustomMultiChildLayout ← Center ← [root]\n'
           '     parentData: offset=Offset(0.0, 0.0); id=null\n'
           '     constraints: MISSING\n'
@@ -417,7 +416,7 @@ void main() {
         message:
           'FlutterError\n'
           '   Each child must be laid out exactly once.\n'
-          '   The _ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
+          '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
           ' forgot to lay out the following child:\n'
           '     2: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n'
       );
@@ -440,7 +439,7 @@ void main() {
         message:
           'FlutterError\n'
           '   Each child must be laid out exactly once.\n'
-          '   The _ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
+          '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
           ' forgot to lay out the following children:\n'
           '     2: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n'
           '     3: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n'
