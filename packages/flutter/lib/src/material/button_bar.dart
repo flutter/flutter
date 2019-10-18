@@ -142,7 +142,7 @@ class ButtonBar extends StatelessWidget {
     final Widget child = ButtonTheme.fromButtonThemeData(
       data: buttonTheme,
       child: ButtonBarRow(
-        mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
+        mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.start,
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
         children: children.map<Widget>((Widget child) {
           return Padding(
@@ -175,7 +175,7 @@ class ButtonBar extends StatelessWidget {
 }
 
 // create a ButtonBarRenderObjectWidget that extends Flex
-class ButtonBarRow extends Flex{
+class ButtonBarRow extends Flex {
   ButtonBarRow({
     List<Widget> children,
     Axis direction = Axis.horizontal,
@@ -208,6 +208,18 @@ class ButtonBarRow extends Flex{
       textBaseline: textBaseline,
     );
   }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderButtonBarRow renderObject) {
+    renderObject
+      ..direction = direction
+      ..mainAxisAlignment = mainAxisAlignment
+      ..mainAxisSize = mainAxisSize
+      ..crossAxisAlignment = crossAxisAlignment
+      ..textDirection = getEffectiveTextDirection(context)
+      ..verticalDirection = verticalDirection
+      ..textBaseline = textBaseline;
+  }
 }
 
 class RenderButtonBarRow extends RenderFlex {
@@ -231,23 +243,26 @@ class RenderButtonBarRow extends RenderFlex {
     textBaseline: textBaseline,
   );
 
-  BoxConstraints _originalConstraints;
+  bool _hasCheckedLayoutWidth = false;
 
   @override
   BoxConstraints get constraints {
-    _originalConstraints = super.constraints.copyWith();
-    return super.constraints.copyWith(
-      maxWidth: double.infinity,
-    );
+    if (_hasCheckedLayoutWidth)
+      return super.constraints;
+    return super.constraints.copyWith(maxWidth: double.infinity);
   }
 
   @override
   void performLayout() {
+    // Perform layout to ensure that button bar knows how wide it would
+    // ideally want to be.
     super.performLayout();
+    _hasCheckedLayoutWidth = true;
 
     // If the button bar is constrained by width and it overflows, set the
-    // buttons to align vertically instead.
-    if (size.width > _originalConstraints.maxWidth) {
+    // buttons to align vertically. Otherwise, layout button bar
+    // horizontally as normal.
+    if (size.width > constraints.maxWidth) {
       RenderBox child = firstChild;
       double currentHeight = 0.0;
       while (child != null) {
@@ -256,12 +271,12 @@ class RenderButtonBarRow extends RenderFlex {
 
         childParentData.offset = Offset(0, currentHeight);
         currentHeight += child.size.height;
-        child.layout(_originalConstraints, parentUsesSize: true);
-
+        child.layout(constraints, parentUsesSize: true);
         child = childParentData.nextSibling;
       }
-
-      size = constraints.constrain(Size(_originalConstraints.maxWidth, currentHeight));
+      size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
+    } else {
+      super.performLayout();
     }
   }
 }
