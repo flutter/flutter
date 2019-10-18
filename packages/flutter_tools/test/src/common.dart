@@ -127,6 +127,13 @@ Future<String> createProject(Directory temp, { List<String> arguments }) async {
   return projectPath;
 }
 
+/// Test case timeout for tests involving remote calls to `pub get` or similar.
+const Timeout allowForRemotePubInvocation = Timeout.factor(10.0);
+
+/// Test case timeout for tests involving creating a Flutter project with
+/// `--no-pub`. Use [allowForRemotePubInvocation] when creation involves `pub`.
+const Timeout allowForCreateFlutterProject = Timeout.factor(3.0);
+
 Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
   try {
     await future;

@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Integration tests which invoke flutter instead of unit testing the code
+// will not produce meaningful coverage information - we can measure coverage
+// from the isolate running the test, but not from the isolate started via
+// the command line process.
+@Tags(<String>['no_coverage'])
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,58 +21,79 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  test('device.getDevices', () async {
-    final Directory tempDir = createResolvedTempDirectorySync('daemon_mode_test.');
-
+  group('daemon_mode', () {
+    Directory tempDir;
     final BasicProject _project = BasicProject();
-    await _project.setUpIn(tempDir);
+    Process process;
 
-    final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    setUp(() async {
+      tempDir = createResolvedTempDirectorySync('daemon_mode_test.');
+      await _project.setUpIn(tempDir);
+    });
 
-    const ProcessManager processManager = LocalProcessManager();
-    final Process process = await processManager.start(
-      <String>[flutterBin, '--show-test-device', 'daemon'],
-      workingDirectory: tempDir.path,
-    );
+    tearDown(() async {
+      tryToDelete(tempDir);
+      process?.kill();
+    });
 
-    final StreamController<String> stdout = StreamController<String>.broadcast();
-    transformToLines(process.stdout).listen((String line) => stdout.add(line));
-    final Stream<Map<String, dynamic>> stream = stdout
-      .stream
-      .map<Map<String, dynamic>>(parseFlutterResponse)
-      .where((Map<String, dynamic> value) => value != null);
+    test('device.getDevices', () async {
+      final String flutterBin =
+          fs.path.join(getFlutterRoot(), 'bin', 'flutter');
 
-    Map<String, dynamic> response = await stream.first;
-    expect(response['event'], 'daemon.connected');
+      const ProcessManager processManager = LocalProcessManager();
+      process = await processManager.start(
+          <String>[flutterBin, '--show-test-device', 'daemon'],
+          workingDirectory: tempDir.path);
 
-    // start listening for devices
-    process.stdin.writeln('[${jsonEncode(<String, dynamic>{
-      'id': 1,
-      'method': 'device.enable',
-    })}]');
-    response = await stream.first;
-    expect(response['id'], 1);
-    expect(response['error'], isNull);
+      final StreamController<String> stdout =
+          StreamController<String>.broadcast();
 
-    // [{"event":"device.added","params":{"id":"flutter-tester","name":
-    //   "Flutter test device","platform":"flutter-tester","emulator":false}}]
-    response = await stream.first;
-    expect(response['event'], 'device.added');
+      transformToLines(process.stdout)
+          .listen((String line) => stdout.add(line));
 
-    // get the list of all devices
-    process.stdin.writeln('[${jsonEncode(<String, dynamic>{
-      'id': 2,
-      'method': 'device.getDevices',
-    })}]');
-    response = await stream.first;
-    expect(response['id'], 2);
-    expect(response['error'], isNull);
+      final Stream<Map<String, dynamic>> stream =
+        stdout.stream.where((String line) {
+          final Map<String, dynamic> response = parseFlutterResponse(line);
+          // ignore 'Starting device daemon...'
+          if (response == null) {
+            return false;
+          }
+          // TODO(devoncarew): Remove this after #25440 lands.
+          if (response['event'] == 'daemon.showMessage') {
+            return false;
+          }
+          return true;
+        }).map(parseFlutterResponse);
 
-    final dynamic result = response['result'];
-    expect(result, isList);
-    expect(result, isNotEmpty);
+      Map<String, dynamic> response = await stream.first;
+      expect(response['event'], 'daemon.connected');
 
-    tryToDelete(tempDir);
-    process.kill();
-  });
+      // start listening for devices
+      process.stdin.writeln('[${jsonEncode(<String, dynamic>{
+        'id': 1,
+        'method': 'device.enable',
+      })}]');
+      response = await stream.first;
+      expect(response['id'], 1);
+      expect(response['error'], isNull);
+
+      // [{"event":"device.added","params":{"id":"flutter-tester","name":
+      //   "Flutter test device","platform":"flutter-tester","emulator":false}}]
+      response = await stream.first;
+      expect(response['event'], 'device.added');
+
+      // get the list of all devices
+      process.stdin.writeln('[${jsonEncode(<String, dynamic>{
+        'id': 2,
+        'method': 'device.getDevices',
+      })}]');
+      response = await stream.first;
+      expect(response['id'], 2);
+      expect(response['error'], isNull);
+
+      final dynamic result = response['result'];
+      expect(result, isList);
+      expect(result, isNotEmpty);
+    });
+  }, timeout: const Timeout.factor(10), tags: <String>['integration']); // This test uses the `flutter` tool, which could be blocked behind the startup lock for a long time.
 }

@@ -48,6 +48,7 @@ typedef ContextInitializer = void Function(AppContext testContext);
 void testUsingContext(
   String description,
   dynamic testMethod(), {
+  Timeout timeout,
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
@@ -136,7 +137,8 @@ void testUsingContext(
         },
       );
     });
-  }, testOn: testOn, skip: skip);
+  }, timeout: timeout ?? const Timeout(Duration(seconds: 60)),
+      testOn: testOn, skip: skip);
 }
 
 void _printBufferedErrors(AppContext testContext) {
