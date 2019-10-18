@@ -106,7 +106,8 @@ class Switch extends StatefulWidget {
     this.hoverColor,
     this.focusNode,
     this.autofocus = false,
-  })  : _switchType = _SwitchType.adaptive,
+  })  : assert(autofocus != null),
+        _switchType = _SwitchType.adaptive,
         super(key: key);
 
   /// Whether this switch is on or off.
@@ -212,6 +213,46 @@ class Switch extends StatefulWidget {
 }
 
 class _SwitchState extends State<Switch> with TickerProviderStateMixin {
+  Map<LocalKey, ActionFactory> _actionMap;
+  bool _showHighlight = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _actionMap = <LocalKey, ActionFactory>{ SelectAction.key: _createAction };
+    _updateHighlightMode(WidgetsBinding.instance.focusManager.highlightMode);
+    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
+  }
+
+  Action _createAction() {
+    return CallbackAction(
+      SelectAction.key,
+      onInvoke: (FocusNode node, Intent intent) {
+        if (widget.onChanged != null) {
+          widget.onChanged(!widget.value);
+        }
+      },
+    );
+  }
+
+  void _updateHighlightMode(FocusHighlightMode mode) {
+    switch (WidgetsBinding.instance.focusManager.highlightMode) {
+      case FocusHighlightMode.touch:
+        _showHighlight = false;
+        break;
+      case FocusHighlightMode.traditional:
+        _showHighlight = true;
+        break;
+    }
+  }
+
+  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
+    if (!mounted) {
+      return;
+    }
+    setState(() { _updateHighlightMode(mode); });
+  }
+
   Size getSwitchSize(ThemeData theme) {
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
@@ -225,6 +266,12 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     return null;
   }
 
+  bool get enabled => widget.onChanged != null;
+
+  bool hovering = false;
+  void _handleMouseEnter(PointerEnterEvent event) => setState(() { hovering = true; });
+  void _handleMouseExit(PointerExitEvent event) => setState(() { hovering = false; });
+
   Widget buildMaterialSwitch(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
@@ -232,10 +279,12 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
 
     final Color activeThumbColor = widget.activeColor ?? theme.toggleableActiveColor;
     final Color activeTrackColor = widget.activeTrackColor ?? activeThumbColor.withAlpha(0x80);
+    final Color hoverColor = widget.hoverColor ?? theme.hoverColor;
+    final Color focusColor = widget.focusColor ?? theme.focusColor;
 
     Color inactiveThumbColor;
     Color inactiveTrackColor;
-    if (widget.onChanged != null) {
+    if (enabled) {
       const Color black32 = Color(0x52000000); // Black with 32% opacity
       inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade50);
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white30 : black32);
@@ -244,38 +293,44 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
 
-    return Focus(
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      child: Builder(
-        builder: (BuildContext context) {
-          final bool hasFocus = Focus.of(context).hasFocus;
-          Color reactionColor = ;
-          if (hasFocus) {
-            reactionColor = const Color(0x8000ff00); // TODO: FIX WITH THE RIGHT COLOR.
-          }
-          if (
-
-          return _SwitchRenderObjectWidget(
-            dragStartBehavior: widget.dragStartBehavior,
-            value: widget.value,
-            activeColor: activeThumbColor,
-            inactiveColor: inactiveThumbColor,
-            reactionColor: hasFocus ? const Color(0x8000ff00) : null,
-            activeThumbImage: widget.activeThumbImage,
-            inactiveThumbImage: widget.inactiveThumbImage,
-            activeTrackColor: activeTrackColor,
-            inactiveTrackColor: inactiveTrackColor,
-            configuration: createLocalImageConfiguration(context),
-            onChanged: widget.onChanged,
-            additionalConstraints: BoxConstraints.tight(getSwitchSize(theme)),
-            hasFocus: hasFocus,
-            vsync: this,
-          );
-        },
+    return MouseRegion(
+      onEnter: enabled ? _handleMouseEnter : null,
+      onExit: enabled ? _handleMouseExit : null,
+      child: Actions(
+        actions: _actionMap,
+        child: Focus(
+          focusNode: widget.focusNode,
+          autofocus: widget.autofocus,
+          canRequestFocus: enabled,
+          debugLabel: '${describeIdentity(widget)}({$widget.value})',
+          child: Builder(
+            builder: (BuildContext context) {
+              final bool hasFocus = Focus.of(context).hasFocus;
+              return _SwitchRenderObjectWidget(
+                dragStartBehavior: widget.dragStartBehavior,
+                value: widget.value,
+                activeColor: activeThumbColor,
+                inactiveColor: inactiveThumbColor,
+                hoverColor: hoverColor,
+                focusColor: focusColor,
+                activeThumbImage: widget.activeThumbImage,
+                inactiveThumbImage: widget.inactiveThumbImage,
+                activeTrackColor: activeTrackColor,
+                inactiveTrackColor: inactiveTrackColor,
+                configuration: createLocalImageConfiguration(context),
+                onChanged: widget.onChanged,
+                additionalConstraints: BoxConstraints.tight(getSwitchSize(theme)),
+                hasFocus: enabled && _showHighlight && hasFocus,
+                hovering: enabled && _showHighlight && hovering,
+                vsync: this,
+              );
+            },
+          ),
+        ),
       ),
     );
   }
+
   Widget buildCupertinoSwitch(BuildContext context) {
     final Size size = getSwitchSize(Theme.of(context));
     return Focus(
@@ -324,7 +379,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.value,
     this.activeColor,
     this.inactiveColor,
-    this.reactionColor,
+    this.hoverColor,
+    this.focusColor,
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.activeTrackColor,
@@ -335,12 +391,14 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.additionalConstraints,
     this.dragStartBehavior,
     this.hasFocus,
+    this.hovering,
   }) : super(key: key);
 
   final bool value;
   final Color activeColor;
   final Color inactiveColor;
-  final Color reactionColor;
+  final Color hoverColor;
+  final Color focusColor;
   final ImageProvider activeThumbImage;
   final ImageProvider inactiveThumbImage;
   final Color activeTrackColor;
@@ -351,6 +409,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final BoxConstraints additionalConstraints;
   final DragStartBehavior dragStartBehavior;
   final bool hasFocus;
+  final bool hovering;
 
   @override
   _RenderSwitch createRenderObject(BuildContext context) {
@@ -359,7 +418,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       value: value,
       activeColor: activeColor,
       inactiveColor: inactiveColor,
-      reactionColor: reactionColor,
+      hoverColor: hoverColor,
+      focusColor: focusColor,
       activeThumbImage: activeThumbImage,
       inactiveThumbImage: inactiveThumbImage,
       activeTrackColor: activeTrackColor,
@@ -369,6 +429,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       additionalConstraints: additionalConstraints,
       hasFocus: hasFocus,
+      hovering: hovering,
       vsync: vsync,
     );
   }
@@ -379,7 +440,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
-      ..reactionColor = reactionColor
+      ..hoverColor = hoverColor
+      ..focusColor = focusColor
       ..activeThumbImage = activeThumbImage
       ..inactiveThumbImage = inactiveThumbImage
       ..activeTrackColor = activeTrackColor
@@ -390,6 +452,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..additionalConstraints = additionalConstraints
       ..dragStartBehavior = dragStartBehavior
       ..hasFocus = hasFocus
+      ..hovering = hovering
       ..vsync = vsync;
   }
 }
@@ -399,7 +462,8 @@ class _RenderSwitch extends RenderToggleable {
     bool value,
     Color activeColor,
     Color inactiveColor,
-    Color reactionColor,
+    Color hoverColor,
+    Color focusColor,
     ImageProvider activeThumbImage,
     ImageProvider inactiveThumbImage,
     Color activeTrackColor,
@@ -410,23 +474,26 @@ class _RenderSwitch extends RenderToggleable {
     ValueChanged<bool> onChanged,
     DragStartBehavior dragStartBehavior,
     bool hasFocus,
+    bool hovering,
     @required TickerProvider vsync,
   }) : assert(textDirection != null),
        _activeThumbImage = activeThumbImage,
        _inactiveThumbImage = inactiveThumbImage,
        _activeTrackColor = activeTrackColor,
        _inactiveTrackColor = inactiveTrackColor,
-       _reactionColor = reactionColor,
        _configuration = configuration,
        _textDirection = textDirection,
-       _hasFocus = hasFocus,
        super(
          value: value,
          tristate: false,
          activeColor: activeColor,
          inactiveColor: inactiveColor,
+         hoverColor: hoverColor,
+         focusColor: focusColor,
          onChanged: onChanged,
          additionalConstraints: additionalConstraints,
+         hasFocus: hasFocus,
+         hovering: hovering,
          vsync: vsync,
        ) {
     _drag = HorizontalDragGestureRecognizer()
@@ -471,26 +538,6 @@ class _RenderSwitch extends RenderToggleable {
     if (value == _inactiveTrackColor)
       return;
     _inactiveTrackColor = value;
-    markNeedsPaint();
-  }
-
-  Color get reactionColor => _reactionColor;
-  Color _reactionColor;
-  set reactionColor(Color value) {
-    assert(value != null);
-    if (value == _reactionColor)
-      return;
-    _reactionColor = value;
-    markNeedsPaint();
-  }
-
-  bool get hasFocus => _hasFocus;
-  bool _hasFocus;
-  set hasFocus(bool value) {
-    assert(value != null);
-    if (value == _hasFocus)
-      return;
-    _hasFocus = value;
     markNeedsPaint();
   }
 
@@ -647,7 +694,7 @@ class _RenderSwitch extends RenderToggleable {
       size.height / 2.0,
     );
 
-    paintRadialReaction(canvas, offset, thumbPosition, color: reactionColor, radius: hasFocus ? kRadialReactionRadius : null);
+    paintRadialReaction(canvas, offset, thumbPosition);
 
     try {
       _isPainting = true;
