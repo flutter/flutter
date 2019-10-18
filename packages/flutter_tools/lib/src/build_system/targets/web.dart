@@ -109,7 +109,6 @@ class Dart2JSTarget extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
     Source.artifact(Artifact.flutterWebSdk),
     Source.artifact(Artifact.dart2jsSnapshot),
     Source.artifact(Artifact.engineDartBinary),
@@ -184,7 +183,6 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/main.dart.js'),
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
     Source.behavior(AssetOutputBehavior('assets')),
     Source.pattern('{PROJECT_DIR}/web/index.html'),
   ];
