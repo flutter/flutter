@@ -24,90 +24,88 @@ set -x
 
 cd "$FLUTTER_ROOT"
 
-version="$(<version)"
-if [[ "$OS" == "linux" ]]; then
-  echo "Building Flutter Gallery $version for Android..."
-  # ANDROID_SDK_ROOT must be set in the env.
-  (
-    cd examples/flutter_gallery
-    flutter build apk --release -t lib/main_publish.dart
-  )
-  echo "Android Flutter Gallery built"
-  if [[ -z "$CIRRUS_PR" && "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
-    echo "Deploying Flutter Gallery $version to Play Store..."
-    set +x # Don't echo back the below.
-    if [ -n "$ANDROID_GALLERY_UPLOAD_KEY" ]; then
-      echo "$ANDROID_GALLERY_UPLOAD_KEY" | base64 --decode > /root/.android/debug.keystore
-    fi
-    set -x
+if [[ "$SHARD" = "deploy_gallery" ]]; then
+  version="$(<version)"
+  if [[ "$OS" == "linux" ]]; then
+    echo "Building Flutter Gallery $version for Android..."
+
+    # ANDROID_SDK_ROOT must be set in the env.
     (
-      cd examples/flutter_gallery/android
-      fastlane deploy_play_store
+      cd examples/flutter_gallery
+      flutter build apk --release -t lib/main_publish.dart
     )
-  else
-    echo "(Not deploying; Flutter Gallery is only deployed to Play store for tagged dev branch commits.)"
-  fi
-elif [[ "$OS" == "darwin" ]]; then
-  echo "Building Flutter Gallery $version for iOS..."
-  (
-    cd examples/flutter_gallery
-    flutter build ios --release --no-codesign -t lib/main_publish.dart
-
-    # flutter build ios will run CocoaPods script. Check generated locations.
-    if [[ ! -d "ios/Pods" ]]; then
-      echo "Error: pod install failed to setup plugins"
-      exit 1
-    fi
-
-    if [[ ! -d "ios/.symlinks/plugins" ]]; then
-      echo "Error: pod install failed to setup plugin symlinks"
-      exit 1
-    fi
-
-    if [[ -d "ios/.symlinks/flutter" ]]; then
-      echo "Error: pod install created flutter symlink"
-      exit 1
-    fi
-
-    if [[ ! -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets" ]]; then
-      echo "Error: flutter_assets not assembled"
-      exit 1
-    fi
-
-    if [[
-      -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/isolate_snapshot_data" ||
-      -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/kernel_blob.bin" ||
-      -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/vm_snapshot_data"
-     ]]; then
-      echo "Error: compiled debug version of app with --release flag"
-      exit 1
-    fi
-  )
-  echo "iOS Flutter Gallery built"
-  if [[ -z "$CIRRUS_PR" ]]; then
-    if [[ "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
-      echo "Archiving with distribution profile and deploying to TestFlight..."
+    echo "Android Flutter Gallery built"
+    if [[ -z "$CIRRUS_PR" && "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
+      echo "Deploying Flutter Gallery $version to Play Store..."
+      set +x # Don't echo back the below.
+      if [ -n "$ANDROID_GALLERY_UPLOAD_KEY" ]; then
+        echo "$ANDROID_GALLERY_UPLOAD_KEY" | base64 --decode > /root/.android/debug.keystore
+      fi
+      set -x
       (
-        cd examples/flutter_gallery/ios
-        export DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="-t DAV"
-        fastlane build_and_deploy_testflight upload:true
+        cd examples/flutter_gallery/android
+        fastlane deploy_play_store
       )
     else
-      # On iOS the signing can break as well, so we verify this regularly (not just
-      # on tagged dev branch commits). We can only do this post-merge, though, because
-      # the secrets aren't available on PRs.
-      echo "Testing archiving with distribution profile..."
-      (
-        cd examples/flutter_gallery/ios
-        fastlane build_and_deploy_testflight
-      )
-      echo "(Not deploying; Flutter Gallery is only deployed to TestFlight for tagged dev branch commits.)"
+      echo "Not deployed: Flutter Gallery is only deployed to the Play Store on merged and tagged dev branch commits"
     fi
-  else
-    echo "(Not archiving or deploying; Flutter Gallery archiving is only tested post-commit.)"
+  elif [[ "$OS" == "darwin" ]]; then
+    echo "Building Flutter Gallery $version for iOS..."
+    (
+      cd examples/flutter_gallery
+      flutter build ios --release --no-codesign -t lib/main_publish.dart
+
+      # flutter build ios will run CocoaPods script. Check generated locations.
+      if [[ ! -d "ios/Pods" ]]; then
+        echo "Error: pod install failed to setup plugins"
+        exit 1
+      fi
+
+      if [[ ! -d "ios/.symlinks/plugins" ]]; then
+        echo "Error: pod install failed to setup plugin symlinks"
+        exit 1
+      fi
+
+      if [[ -d "ios/.symlinks/flutter" ]]; then
+        echo "Error: pod install created flutter symlink"
+        exit 1
+      fi
+
+      if [[ ! -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets" ]]; then
+        echo "Error: flutter_assets not assembled"
+        exit 1
+      fi
+
+      if [[ 
+        -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/isolate_snapshot_data" ||
+        -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/kernel_blob.bin" ||
+        -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/vm_snapshot_data"
+       ]]; then
+        echo "Error: compiled debug version of app with --release flag"
+        exit 1
+      fi
+    )
+    echo "iOS Flutter Gallery built"
+    if [[ -z "$CIRRUS_PR" ]]; then
+      if [[ "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
+        echo "Archiving with distribution profile and deploying to TestFlight..."
+        (
+          cd examples/flutter_gallery/ios
+          export DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="-t DAV"
+          fastlane build_and_deploy_testflight upload:true
+        )
+      else
+        echo "Archiving with distribution profile..."
+        (
+          cd examples/flutter_gallery/ios
+          fastlane build_and_deploy_testflight
+        )
+        echo "Archive is only deployed to TestFlight on tagged dev branch commits"
+      fi
+    else
+      echo "Not deployed: Flutter Gallery is only deployed to TestFlight on merged and tagged dev branch commits"
+    fi
   fi
 else
-  echo "Unknown OS: $OS"
-  echo "Aborted."
-  exit 1
+  echo "Doing nothing: not on the 'deploy_gallery' SHARD."
 fi

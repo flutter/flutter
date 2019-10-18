@@ -135,7 +135,7 @@ void main() {
       return _updateIdeConfig(
         expectedContents: expectedContents,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('creates non-existent files', () async {
       final Map<String, String> templateManifest = _getManifest(
@@ -155,7 +155,7 @@ void main() {
       return _updateIdeConfig(
         expectedContents: expectedContents,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('overwrites existing files with --overwrite', () async {
       final Map<String, String> templateManifest = _getManifest(
@@ -181,7 +181,7 @@ void main() {
         args: <String>['--overwrite'],
         expectedContents: expectedContents,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('only adds new templates without --overwrite', () async {
       final Map<String, String> templateManifest = _getManifest(
@@ -212,7 +212,7 @@ void main() {
         args: <String>['--update-templates'],
         expectedContents: expectedContents,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('update all templates with --overwrite', () async {
       final Map<String, String> templateManifest = _getManifest(
@@ -239,7 +239,7 @@ void main() {
         args: <String>['--update-templates', '--overwrite'],
         expectedContents: expectedContents,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('removes deleted imls with --overwrite', () async {
       final Map<String, String> templateManifest = _getManifest(
@@ -275,7 +275,7 @@ void main() {
         args: <String>['--update-templates', '--overwrite'],
         expectedContents: expectedContents,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('removes deleted imls with --overwrite, including empty parent dirs', () async {
       final Map<String, String> templateManifest = _getManifest(
@@ -316,7 +316,7 @@ void main() {
         args: <String>['--update-templates', '--overwrite'],
         expectedContents: expectedContents,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
   });
 }
