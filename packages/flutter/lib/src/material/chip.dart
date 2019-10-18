@@ -2460,7 +2460,7 @@ class _RenderChip extends RenderBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, {Offset position}) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (!size.contains(position)) {
       return false;
     }

@@ -228,7 +228,7 @@ bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
 bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
 
 // Ripple pattern matches if there exists at least one ripple
-// With the [expectedCenter] and [expectedRadius].
+// with the [expectedCenter] and [expectedRadius].
 // This ensures the existence of a ripple.
 PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
@@ -246,7 +246,7 @@ PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
 }
 
 // Unique ripple pattern matches if there does not exist ripples
-// Other than ones with the [expectedCenter] and [expectedRadius].
+// other than ones with the [expectedCenter] and [expectedRadius].
 // This ensures the nonexistence of two different ripples.
 PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
