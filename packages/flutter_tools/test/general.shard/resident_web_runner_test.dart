@@ -435,6 +435,26 @@ void main() {
         args: <String, Object>{'enabled': true})).called(1);
   }));
 
+  test('debugTogglePlatform', () => testbed.run(() async {
+    _setupMocks();
+    final BufferLogger bufferLogger = logger;
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callServiceExtension('ext.flutter.platformOverride'))
+      .thenAnswer((Invocation _) async {
+        return Response.parse(<String, Object>{'value': 'iOS'});
+    });
+
+    await residentWebRunner.debugTogglePlatform();
+
+    expect(bufferLogger.statusText, contains('Switched operating system to android'));
+    verify(mockVmService.callServiceExtension('ext.flutter.platformOverride',
+        args: <String, Object>{'value': 'android'})).called(1);
+  }));
+
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
     _setupMocks();
     bool debugClosed = false;

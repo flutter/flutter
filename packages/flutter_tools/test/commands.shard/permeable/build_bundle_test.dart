@@ -6,6 +6,8 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
@@ -202,6 +204,37 @@ void main() {
     ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
+
+  testUsingContext('passes track widget creation through', () async {
+    fs.file('lib/main.dart').createSync(recursive: true);
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      final Environment environment = invocation.positionalArguments[1];
+      expect(environment.defines, <String, String>{
+        kTargetFile: fs.path.join('lib', 'main.dart'),
+        kBuildMode: 'debug',
+        kTargetPlatform: 'android-arm',
+        kTrackWidgetCreation: 'true',
+      });
+
+      return BuildResult(success: true);
+    });
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--debug',
+      '--target-platform=android-arm',
+      '--track-widget-creation'
+    ]);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    BuildSystem: () => MockBuildSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+  });
 }
 
 class MockBundleBuilder extends Mock implements BundleBuilder {}
+class MockBuildSystem extends Mock implements BuildSystem {}

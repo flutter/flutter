@@ -952,7 +952,16 @@ class FocusScopeNode extends FocusNode {
   FocusScopeNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
-  }) : super(debugLabel: debugLabel, onKey: onKey);
+    bool skipTraversal = false,
+    bool canRequestFocus = true,
+  })  : assert(skipTraversal != null),
+        assert(canRequestFocus != null),
+        super(
+          debugLabel: debugLabel,
+          onKey: onKey,
+          canRequestFocus: canRequestFocus,
+          skipTraversal: skipTraversal,
+        );
 
   @override
   FocusScopeNode get nearestScope => this;
