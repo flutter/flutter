@@ -233,12 +233,12 @@ bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
 PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return false;
-      final Offset center = arguments[0];
-      final double radius = arguments[1];
-      return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
-    }
+        if (method != #drawCircle)
+          return false;
+        final Offset center = arguments[0];
+        final double radius = arguments[1];
+        return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
+      }
     );
 }
 
@@ -248,16 +248,16 @@ PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
 PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..everything((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return true;
-      final Offset center = arguments[0];
-      final double radius = arguments[1];
-      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
-        return true;
-      throw '''
-            Expected: center == $expectedCenter, radius == $expectedRadius
-            Found: center == $center radius == $radius''';
-    }
+        if (method != #drawCircle)
+          return true;
+        final Offset center = arguments[0];
+        final double radius = arguments[1];
+        if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
+          return true;
+        throw '''
+              Expected: center == $expectedCenter, radius == $expectedRadius
+              Found: center == $center radius == $radius''';
+      }
     );
 }
 
