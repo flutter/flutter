@@ -7288,5 +7288,23 @@ void main() {
       final RenderBox renderBox = tester.renderObject(find.byType(TextField));
       expect(renderBox.size.height, kMinInteractiveDimension);
     });
+
+    testWidgets('When isDense, TextField can go below kMinInteractiveDimension height', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(),
+        home: const Scaffold(
+          body: Center(
+            child: TextField(
+              decoration: InputDecoration(
+                isDense: true,
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      final RenderBox renderBox = tester.renderObject(find.byType(TextField));
+      expect(renderBox.size.height, lessThan(kMinInteractiveDimension));
+    });
   });
 }
