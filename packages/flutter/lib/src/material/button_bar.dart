@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
@@ -140,7 +141,7 @@ class ButtonBar extends StatelessWidget {
     final double paddingUnit = buttonTheme.padding.horizontal / 4.0;
     final Widget child = ButtonTheme.fromButtonThemeData(
       data: buttonTheme,
-      child: Row(
+      child: ButtonBarRow(
         mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
         children: children.map<Widget>((Widget child) {
@@ -170,5 +171,79 @@ class ButtonBar extends StatelessWidget {
     }
     assert(false);
     return null;
+  }
+}
+
+// create a ButtonBarRenderObjectWidget that extends Flex
+class ButtonBarRow extends Flex{
+  ButtonBarRow({
+    List<Widget> children,
+    Axis direction = Axis.horizontal,
+    MainAxisSize mainAxisSize = MainAxisSize.max,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection = VerticalDirection.down,
+    TextBaseline textBaseline,
+  }) : super(
+    children: children,
+    direction: direction,
+    mainAxisSize: mainAxisSize,
+    mainAxisAlignment: mainAxisAlignment,
+    crossAxisAlignment: crossAxisAlignment,
+    textDirection: textDirection,
+    verticalDirection: verticalDirection,
+    textBaseline: textBaseline,
+  );
+
+  @override
+  RenderButtonBarRow createRenderObject(BuildContext context) {
+    return RenderButtonBarRow(
+      direction: direction,
+      mainAxisAlignment: mainAxisAlignment,
+      mainAxisSize: mainAxisSize,
+      crossAxisAlignment: crossAxisAlignment,
+      textDirection: getEffectiveTextDirection(context),
+      verticalDirection: verticalDirection,
+      textBaseline: textBaseline,
+    );
+  }
+}
+
+class RenderButtonBarRow extends RenderFlex {
+  RenderButtonBarRow({
+    List<RenderBox> children,
+    Axis direction = Axis.horizontal,
+    MainAxisSize mainAxisSize = MainAxisSize.max,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection = VerticalDirection.down,
+    TextBaseline textBaseline,
+  }) : super(
+    children: children,
+    direction: direction,
+    mainAxisSize: mainAxisSize,
+    mainAxisAlignment: mainAxisAlignment,
+    crossAxisAlignment: crossAxisAlignment,
+    textDirection: textDirection,
+    verticalDirection: verticalDirection,
+    textBaseline: textBaseline,
+  );
+
+  @override
+  BoxConstraints get constraints {
+    return super.constraints.copyWith(
+      maxWidth: double.infinity,
+    );
+  }
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (size.width > constraints.minWidth) {
+      setDirectionWithoutLayout(Axis.vertical);
+      super.performLayout();
+    }
   }
 }

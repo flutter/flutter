@@ -302,6 +302,15 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
+  /// Sets the direction to use as the main axis without marking the
+  /// render object as requiring a layout.
+  void setDirectionWithoutLayout(Axis value) {
+    assert(value != null);
+    if (_direction != value) {
+      _direction = value;
+    }
+  }
+
   /// How the children should be placed along the main axis.
   ///
   /// If the [direction] is [Axis.horizontal], and the [mainAxisAlignment] is
