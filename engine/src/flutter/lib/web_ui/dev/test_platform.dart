@@ -41,6 +41,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip;
 
 import 'chrome_installer.dart';
+import 'common.dart';
 import 'environment.dart' as env;
 import 'goldens.dart';
 
@@ -992,7 +993,7 @@ class Chrome extends Browser {
     assert(version != null);
     var remoteDebuggerCompleter = Completer<Uri>.sync();
     return Chrome._(() async {
-      final ChromeInstallation installation = await getOrInstallChrome(
+      final BrowserInstallation installation = await getOrInstallChrome(
         version,
         infoLog: isCirrus ? stdout : _DevNull(),
       );
