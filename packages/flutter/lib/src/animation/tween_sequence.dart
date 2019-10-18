@@ -117,18 +117,7 @@ class FlippedTweenSequence extends TweenSequence<double> {
       super(items);
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
-    if (t == 1.0)
-      return _evaluateAt(t, _items.length - 1);
-    for (int index = 0; index < _items.length; index++) {
-      if (_intervals[index].contains(1.0 - t))
-        return 1.0 - _evaluateAt(1.0 - t, index);
-    }
-    // Should be unreachable.
-    assert(false, 'TweenSequence.evaluate() could not find an interval for $t');
-    return null;
-  }
+  double transform(double t) => 1 - super.transform(1 - t);
 }
 
 /// A simple holder for one element of a [TweenSequence].

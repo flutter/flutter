@@ -162,8 +162,8 @@ class _ZoomPageTransition extends StatefulWidget {
     end: 0.60,
   );
 
-  // A curve sequence similar to the 'fastOutExtraSlowIn' curve used in the
-  // native transition.
+  // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
+  // the native transition.
   static final List<TweenSequenceItem<double>> fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
       tween: Tween<double>(begin: 0.0, end: 0.4)
@@ -200,6 +200,10 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
     });
   }
 
+  // This check ensures that the animation reverses the original animation if
+  // the transition were interruped midway. This prevents a disjointed
+  // experience since the reverse animation uses different fade and scaling
+  // curves.
   bool get _transitionWasInterrupted {
     bool wasInProgress = false;
     bool isInProgress = false;
@@ -229,39 +233,33 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> _forwardScrimOpacityAnimation = _ZoomPageTransition._scrimOpacityTween
-      .animate(CurvedAnimation(
-        parent: widget.animation,
-        curve: const Interval(0.2075, 0.4175),
-      ));
+    final Animation<double> _forwardScrimOpacityAnimation = widget.animation.drive(
+      _ZoomPageTransition._scrimOpacityTween
+        .chain(CurveTween(curve: const Interval(0.2075, 0.4175))));
 
-    final Animation<double> _forwardEndScreenScaleTransition = Tween<double>(begin: 0.85, end: 1.00)
-      .chain(_ZoomPageTransition._scaleCurveSequence)
-      .animate(widget.animation);
+    final Animation<double> _forwardEndScreenScaleTransition = widget.animation.drive(
+      Tween<double>(begin: 0.85, end: 1.00)
+        .chain(_ZoomPageTransition._scaleCurveSequence));
 
-    final Animation<double> _forwardStartScreenScaleTransition = Tween<double>(begin: 1.00, end: 1.05)
-      .chain(_ZoomPageTransition._scaleCurveSequence)
-      .animate(widget.secondaryAnimation);
+    final Animation<double> _forwardStartScreenScaleTransition = widget.secondaryAnimation.drive(
+      Tween<double>(begin: 1.00, end: 1.05)
+        .chain(_ZoomPageTransition._scaleCurveSequence));
 
-    final Animation<double> _forwardEndScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
-      .animate(CurvedAnimation(
-        parent: widget.animation,
-        curve: const Interval(0.125, 0.250),
-      ));
+    final Animation<double> _forwardEndScreenFadeTransition = widget.animation.drive(
+      Tween<double>(begin: 0.0, end: 1.00)
+        .chain(CurveTween(curve: const Interval(0.125, 0.250))));
 
-    final Animation<double> _reverseEndScreenScaleTransition = Tween<double>(begin: 1.00, end: 1.10)
-      .chain(_ZoomPageTransition._flippedScaleCurveSequence)
-      .animate(widget.secondaryAnimation);
+    final Animation<double> _reverseEndScreenScaleTransition = widget.secondaryAnimation.drive(
+      Tween<double>(begin: 1.00, end: 1.10)
+        .chain(_ZoomPageTransition._flippedScaleCurveSequence));
 
-    final Animation<double> _reverseStartScreenScaleTransition = Tween<double>(begin: 0.9, end: 1.0)
-      .chain(_ZoomPageTransition._flippedScaleCurveSequence)
-      .animate(widget.animation);
+    final Animation<double> _reverseStartScreenScaleTransition = widget.animation.drive(
+      Tween<double>(begin: 0.9, end: 1.0)
+        .chain(_ZoomPageTransition._flippedScaleCurveSequence));
 
-    final Animation<double> _reverseStartScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
-      .animate(CurvedAnimation(
-        parent: widget.animation,
-        curve: const Interval(1 - 0.2075, 1 - 0.0825),
-      ));
+    final Animation<double> _reverseStartScreenFadeTransition = widget.animation.drive(
+      Tween<double>(begin: 0.0, end: 1.00)
+        .chain(CurveTween(curve: const Interval(1 - 0.2075, 1 - 0.0825))));
 
     return AnimatedBuilder(
       animation: widget.animation,
@@ -323,7 +321,7 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines a page transition similar
-///    to the one provided in Android Q.
+///    to the one provided in Android 10.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 abstract class PageTransitionsBuilder {
