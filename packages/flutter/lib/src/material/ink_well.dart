@@ -198,6 +198,7 @@ class InkResponse extends StatefulWidget {
     this.onLongPress,
     this.onHighlightChanged,
     this.onHover,
+    this.mouseCursor,
     this.containedInkWell = false,
     this.highlightShape = BoxShape.circle,
     this.radius,
@@ -263,6 +264,9 @@ class InkResponse extends StatefulWidget {
   /// part of the material and false if a pointer has exited this part of the
   /// material.
   final ValueChanged<bool> onHover;
+
+  /// The cursor for a mouse pointer when it enters or is hovering the region.
+  final int mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
   ///
@@ -778,6 +782,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
         child: MouseRegion(
           onEnter: enabled ? _handleMouseEnter : null,
           onExit: enabled ? _handleMouseExit : null,
+          cursor: widget.mouseCursor,
           child: GestureDetector(
             onTapDown: enabled ? _handleTapDown : null,
             onTap: enabled ? () => _handleTap(context) : null,
@@ -899,6 +904,7 @@ class InkWell extends InkResponse {
     GestureTapCancelCallback onTapCancel,
     ValueChanged<bool> onHighlightChanged,
     ValueChanged<bool> onHover,
+    int mouseCursor,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,
@@ -923,6 +929,7 @@ class InkWell extends InkResponse {
     onTapCancel: onTapCancel,
     onHighlightChanged: onHighlightChanged,
     onHover: onHover,
+    mouseCursor: mouseCursor,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
     focusColor: focusColor,
