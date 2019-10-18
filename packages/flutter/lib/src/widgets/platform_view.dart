@@ -846,6 +846,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
     if (widget.viewType != oldWidget.viewType) {
       _controller?.dispose();
+      // The _surface has to be recreated as its controller is disposed.
+      // Setting _surface to null will trigger its creation in build().
+      _surface = null;
 
       // We are about to create a new platform view.
       _platformViewCreated = false;

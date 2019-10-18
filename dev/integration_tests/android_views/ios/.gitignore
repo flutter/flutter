@@ -38,6 +38,7 @@ Icon?
 /Flutter/flutter_assets/
 /Flutter/App.framework
 /Flutter/Flutter.framework
+/Flutter/Flutter.podspec
 /Flutter/Generated.xcconfig
 /Flutter/flutter_export_environment.sh
 /ServiceDefinitions.json

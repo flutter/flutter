@@ -3655,8 +3655,9 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
     });
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
@@ -3709,7 +3710,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, -11);
 
       await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowUp);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
@@ -3774,7 +3775,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
     });
 
     testWidgets('Read only keyboard selection test', (WidgetTester tester) async {
@@ -3794,7 +3795,7 @@ void main() {
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
     });
   });
 
@@ -3867,8 +3868,8 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
     await tester.pumpAndSettle();
 
-    const String expected = 'a biga big house\njumped over a mouse';
-    expect(find.text(expected), findsOneWidget);
+    const String expected = 'a big a bighouse\njumped over a mouse';
+    expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
   });
 
   testWidgets('Cut test', (WidgetTester tester) async {
@@ -4100,7 +4101,7 @@ void main() {
     }
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4136,7 +4137,7 @@ void main() {
     }
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 10);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
   });
 
 
@@ -4193,7 +4194,7 @@ void main() {
     }
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 0);
 
     await tester.enterText(find.byType(TextField).last, testValue);
@@ -4212,7 +4213,7 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
-    expect(c2.selection.extentOffset - c2.selection.baseOffset, 5);
+    expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   });
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
@@ -7306,5 +7307,93 @@ void main() {
       final RenderBox renderBox = tester.renderObject(find.byType(TextField));
       expect(renderBox.size.height, lessThan(kMinInteractiveDimension));
     });
+  });
+  testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
+    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller2 = TextEditingController();
+    final TextEditingController controller3 = TextEditingController();
+    final TextEditingController controller4 = TextEditingController();
+    final TextEditingController controller5 = TextEditingController();
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'Field 1');
+    final FocusNode focusNode2 = FocusNode(debugLabel: 'Field 2');
+    final FocusNode focusNode3 = FocusNode(debugLabel: 'Field 3');
+    final FocusNode focusNode4 = FocusNode(debugLabel: 'Field 4');
+    final FocusNode focusNode5 = FocusNode(debugLabel: 'Field 5');
+
+    // Lay out text fields in a "+" formation, and focus the center one.
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                width: 100.0,
+                child: TextField(
+                  controller: controller1,
+                  focusNode: focusNode1,
+                ),
+              ),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      width: 100.0,
+                      child: TextField(
+                        controller: controller2,
+                        focusNode: focusNode2,
+                      ),
+                    ),
+                    Container(
+                      width: 100.0,
+                      child: TextField(
+                        controller: controller3,
+                        focusNode: focusNode3,
+                      ),
+                    ),
+                    Container(
+                      width: 100.0,
+                      child: TextField(
+                        controller: controller4,
+                        focusNode: focusNode4,
+                      ),
+                    ),
+                  ],
+                ),
+              Container(
+                width: 100.0,
+                child: TextField(
+                  controller: controller5,
+                  focusNode: focusNode5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),);
+
+    focusNode3.requestFocus();
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
   });
 }

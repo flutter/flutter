@@ -186,7 +186,7 @@ class Focus extends StatefulWidget {
 
   /// Handler called when the focus changes.
   ///
-  /// Called with true if this node gains focus, and false if it loses
+  /// Called with true if this widget's node gains focus, and false if it loses
   /// focus.
   final ValueChanged<bool> onFocusChange;
 
@@ -230,6 +230,7 @@ class Focus extends StatefulWidget {
   /// still be focused explicitly.
   final bool skipTraversal;
 
+  /// {@template flutter.widgets.Focus.canRequestFocus}
   /// If true, this widget may request the primary focus.
   ///
   /// Defaults to true.  Set to false if you want the [FocusNode] this widget
@@ -249,6 +250,7 @@ class Focus extends StatefulWidget {
   ///     its descendants.
   ///   - [FocusTraversalPolicy], a class that can be extended to describe a
   ///     traversal policy.
+  /// {@endtemplate}
   final bool canRequestFocus;
 
   /// Returns the [focusNode] of the [Focus] that most tightly encloses the
@@ -260,12 +262,26 @@ class Focus extends StatefulWidget {
   /// [nullOk].
   ///
   /// The [context] and [nullOk] arguments must not be null.
-  static FocusNode of(BuildContext context, { bool nullOk = false }) {
+  static FocusNode of(BuildContext context, { bool nullOk = false, bool scopeOk = false }) {
     assert(context != null);
     assert(nullOk != null);
+    assert(scopeOk != null);
     final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
     final FocusNode node = marker?.notifier;
-    if (node is FocusScopeNode) {
+    if (node == null) {
+      if (!nullOk) {
+        throw FlutterError(
+            'Focus.of() was called with a context that does not contain a Focus widget.\n'
+                'No Focus widget ancestor could be found starting from the context that was passed to '
+                'Focus.of(). This can happen because you are using a widget that looks for a Focus '
+                'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
+                'The context used was:\n'
+                '  $context'
+        );
+      }
+      return null;
+    }
+    if (!scopeOk && node is FocusScopeNode) {
       if (!nullOk) {
         throw FlutterError(
             'Focus.of() was called with a context that does not contain a Focus between the given '
@@ -274,19 +290,6 @@ class Focus extends StatefulWidget {
             'Focus.of() to the point where it found the nearest FocusScope widget. This can happen '
             'because you are using a widget that looks for a Focus ancestor, and do not have a '
             'Focus widget ancestor in the current FocusScope.\n'
-            'The context used was:\n'
-            '  $context'
-        );
-      }
-      return null;
-    }
-    if (node == null) {
-      if (!nullOk) {
-        throw FlutterError(
-            'Focus.of() was called with a context that does not contain a Focus widget.\n'
-            'No Focus widget ancestor could be found starting from the context that was passed to '
-            'Focus.of(). This can happen because you are using a widget that looks for a Focus '
-            'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
             'The context used was:\n'
             '  $context'
         );
@@ -513,6 +516,8 @@ class FocusScope extends Focus {
     @required Widget child,
     bool autofocus = false,
     ValueChanged<bool> onFocusChange,
+    bool canRequestFocus,
+    bool skipTraversal,
     FocusOnKeyCallback onKey,
     String debugLabel,
   })  : assert(child != null),
@@ -523,6 +528,8 @@ class FocusScope extends Focus {
           focusNode: node,
           autofocus: autofocus,
           onFocusChange: onFocusChange,
+          canRequestFocus: canRequestFocus,
+          skipTraversal: skipTraversal,
           onKey: onKey,
           debugLabel: debugLabel,
         );
@@ -549,6 +556,8 @@ class _FocusScopeState extends _FocusState {
   FocusScopeNode _createNode() {
     return FocusScopeNode(
       debugLabel: widget.debugLabel,
+      canRequestFocus: widget.canRequestFocus ?? true,
+      skipTraversal: widget.skipTraversal ?? false,
     );
   }
 

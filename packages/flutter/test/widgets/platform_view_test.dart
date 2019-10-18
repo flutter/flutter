@@ -2059,6 +2059,7 @@ void main() {
     testWidgets('PlatformViewLink re-initializes when view type changes', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final List<int> ids = <int>[];
+      final List<int> surfaceViewIds = <int>[];
       final List<String> viewTypes = <String>[];
 
       PlatformViewLink createPlatformViewLink(String viewType) {
@@ -2072,6 +2073,7 @@ void main() {
             return controller;
           },
           surfaceFactory: (BuildContext context, PlatformViewController controller) {
+            surfaceViewIds.add(controller.viewId);
             return PlatformViewSurface(
               gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
               controller: controller,
@@ -2102,6 +2104,13 @@ void main() {
 
       expect(
         ids,
+        unorderedEquals(<int>[
+          currentViewId+1, currentViewId+2,
+        ]),
+      );
+
+      expect(
+        surfaceViewIds,
         unorderedEquals(<int>[
           currentViewId+1, currentViewId+2,
         ]),

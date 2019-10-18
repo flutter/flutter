@@ -16,29 +16,27 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  group(LinuxDevice, () {
-    final LinuxDevice device = LinuxDevice();
-    final MockPlatform notLinux = MockPlatform();
+  final LinuxDevice device = LinuxDevice();
+  final MockPlatform notLinux = MockPlatform();
 
-    when(notLinux.isLinux).thenReturn(false);
+  when(notLinux.isLinux).thenReturn(false);
 
-    testUsingContext('defaults', () async {
-      final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
-      expect(await device.targetPlatform, TargetPlatform.linux_x64);
-      expect(device.name, 'Linux');
-      expect(await device.installApp(linuxApp), true);
-      expect(await device.uninstallApp(linuxApp), true);
-      expect(await device.isLatestBuildInstalled(linuxApp), true);
-      expect(await device.isAppInstalled(linuxApp), true);
-      expect(await device.stopApp(linuxApp), true);
-      expect(device.category, Category.desktop);
-    });
+  testUsingContext('LinuxDevice defaults', () async {
+    final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
+    expect(await device.targetPlatform, TargetPlatform.linux_x64);
+    expect(device.name, 'Linux');
+    expect(await device.installApp(linuxApp), true);
+    expect(await device.uninstallApp(linuxApp), true);
+    expect(await device.isLatestBuildInstalled(linuxApp), true);
+    expect(await device.isAppInstalled(linuxApp), true);
+    expect(await device.stopApp(linuxApp), true);
+    expect(device.category, Category.desktop);
+  });
 
-    testUsingContext('No devices listed if platform unsupported', () async {
-      expect(await LinuxDevices().devices, <Device>[]);
-    }, overrides: <Type, Generator>{
-      Platform: () => notLinux,
-    });
+  testUsingContext('LinuxDevice: no devices listed if platform unsupported', () async {
+    expect(await LinuxDevices().devices, <Device>[]);
+  }, overrides: <Type, Generator>{
+    Platform: () => notLinux,
   });
 
   testUsingContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {
@@ -50,6 +48,7 @@ void main() {
     expect(LinuxDevice().isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 
   testUsingContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
@@ -60,9 +59,10 @@ void main() {
     expect(LinuxDevice().isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 
-  testUsingContext('executablePathForDevice uses the correct package executable', () async {
+  testUsingContext('LinuxDevice.executablePathForDevice uses the correct package executable', () async {
     final MockLinuxApp mockApp = MockLinuxApp();
     const String debugPath = 'debug/executable';
     const String profilePath = 'profile/executable';
@@ -76,6 +76,7 @@ void main() {
     expect(LinuxDevice().executablePathForDevice(mockApp, BuildMode.release), releasePath);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 }
 
