@@ -3275,6 +3275,7 @@ void main() {
       error = e;
     } finally {
       expect(error, isNotNull);
+      expect(error.diagnostics.length, 1);
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -3284,7 +3285,6 @@ void main() {
           '   isDirectional: false)\n',
         ),
       );
-      expect(error.diagnostics.length, 1);
     }
   });
 

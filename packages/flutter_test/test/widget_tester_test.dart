@@ -674,16 +674,6 @@ void main() {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.toStringDeep(), startsWith(
-          'FlutterError\n'
-          '   A Ticker was active .\n'
-          '   All Tickers must be disposed.\n'
-          '   Tickers used by AnimationControllers should be disposed by\n'
-          '   calling dispose() on the AnimationController itself. Otherwise,\n'
-          '   the ticker will leak.\n'
-          '   The offending ticker was:\n'
-          '     _TestTicker()\n',
-        ));
         expect(error.diagnostics.length, 4);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
@@ -694,6 +684,16 @@ void main() {
         );
         expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
         expect(error.diagnostics.last.value, ticker);
+        expect(error.toStringDeep(), startsWith(
+          'FlutterError\n'
+          '   A Ticker was active .\n'
+          '   All Tickers must be disposed.\n'
+          '   Tickers used by AnimationControllers should be disposed by\n'
+          '   calling dispose() on the AnimationController itself. Otherwise,\n'
+          '   the ticker will leak.\n'
+          '   The offending ticker was:\n'
+          '     _TestTicker()\n',
+        ));
       }
       ticker.stop();
   });
@@ -720,10 +720,10 @@ class _SingleTickerTest extends StatefulWidget {
   const _SingleTickerTest({Key key}) : super(key: key);
 
   @override
-  __SingleTickerTestState createState() => __SingleTickerTestState();
+  _SingleTickerTestState createState() => _SingleTickerTestState();
 }
 
-class __SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
+class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
   AnimationController controller;
 
   @override

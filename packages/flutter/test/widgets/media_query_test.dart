@@ -24,6 +24,8 @@ void main() {
     expect(exception, isNotNull);
     expect(exception ,isFlutterError);
     final FlutterError error = exception;
+    expect(error.diagnostics.length, 3);
+    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Element>>());
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -39,8 +41,6 @@ void main() {
         '     Builder\n',
       ),
     );
-    expect(error.diagnostics.length, 3);
-    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Element>>());
   });
 
   testWidgets('MediaQuery defaults to null', (WidgetTester tester) async {

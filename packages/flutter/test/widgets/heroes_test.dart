@@ -550,6 +550,16 @@ Future<void> main() async {
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     final FlutterError error = exception;
+    expect(error.diagnostics.length, 3);
+    final DiagnosticsNode last = error.diagnostics.last;
+    expect(last, isInstanceOf<DiagnosticsProperty<StatefulElement>>());
+    expect(
+      last.toStringDeep(),
+      equalsIgnoringHashCodes(
+        '# Here is the subtree for one of the offending heroes: Hero\n',
+      ),
+    );
+    expect(last.style, DiagnosticsTreeStyle.dense);
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -562,16 +572,6 @@ Future<void> main() async {
         '   ├# Here is the subtree for one of the offending heroes: Hero\n',
       ),
     );
-    expect(error.diagnostics.length, 3);
-    final DiagnosticsNode last = error.diagnostics.last;
-    expect(last, isInstanceOf<DiagnosticsProperty<StatefulElement>>());
-    expect(
-      last.toStringDeep(),
-      equalsIgnoringHashCodes(
-        '# Here is the subtree for one of the offending heroes: Hero\n',
-      ),
-    );
-    expect(last.style, DiagnosticsTreeStyle.dense);
   });
 
   testWidgets('Hero push transition interrupted by a pop', (WidgetTester tester) async {

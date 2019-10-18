@@ -91,11 +91,10 @@ class NotifierLayoutDelegate extends MultiChildLayoutDelegate {
   }
 }
 
-// LayoutDelegate that layout child with id 0 and 1
-// Used in the 'performLayout error control test' test case for triggering
-// For triggering an error when laying out non existent child
-// For triggering an error when a child has not been laid out
-class _ZeroAndOneIdLayoutDelegate extends MultiChildLayoutDelegate {
+// LayoutDelegate that lays out child with id 0 and 1
+// Used in the 'performLayout error control test' test case to trigger:
+//  - error when laying out a non existent child and a child that has not been laid out
+class ZeroAndOneIdLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
     final BoxConstraints constraints = BoxConstraints.loose(size);
@@ -108,8 +107,8 @@ class _ZeroAndOneIdLayoutDelegate extends MultiChildLayoutDelegate {
 }
 
 // Used in the 'performLayout error control test' test case
-// For triggering an error when laying out child more than once
-class _DuplicateLayoutDelegate extends MultiChildLayoutDelegate {
+//  to trigger an error when laying out child more than once
+class DuplicateLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
     final BoxConstraints constraints = BoxConstraints.loose(size);
@@ -121,8 +120,8 @@ class _DuplicateLayoutDelegate extends MultiChildLayoutDelegate {
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
 }
 // Used in the 'performLayout error control test' test case
-// For triggering an error when positioning non existent child
-class _NonExistentPositionDelegate extends MultiChildLayoutDelegate {
+//  to trigger an error when positioning non existent child
+class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
     positionChild(0, const Offset(0, 0));
@@ -134,8 +133,8 @@ class _NonExistentPositionDelegate extends MultiChildLayoutDelegate {
 }
 
 // Used in the 'performLayout error control test' test case
-// For triggering an error when positioning with null offset
-class _NullOffsetPositionDelegate extends MultiChildLayoutDelegate {
+//  to trigger an error when positioning with null offset
+class NullOffsetPositionDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
     positionChild(0, null);
@@ -146,7 +145,7 @@ class _NullOffsetPositionDelegate extends MultiChildLayoutDelegate {
 }
 
 // Used in the 'performLayout error control test' test case for triggering
-// to layout child more than once
+//  to layout child more than once
 class _InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
@@ -161,8 +160,8 @@ class _InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
 }
 
-class _LayoutWithMissingId extends ParentDataWidget<CustomMultiChildLayout> {
-  const _LayoutWithMissingId({
+class LayoutWithMissingId extends ParentDataWidget<CustomMultiChildLayout> {
+  const LayoutWithMissingId({
     Key key,
     @required Widget child,
   }) : assert(child != null),
@@ -294,9 +293,9 @@ void main() {
 
     Future<void> expectFlutterErrorMessage({
       Widget widget,
-      WidgetTester tester,
       MultiChildLayoutDelegate delegate,
-      String message,
+      @required WidgetTester tester,
+      @required String message,
     }) async {
       final FlutterExceptionHandler oldHandler = FlutterError.onError;
       final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
@@ -315,7 +314,7 @@ void main() {
     testWidgets('layoutChild on non existent child', (WidgetTester tester) async {
       expectFlutterErrorMessage(
         tester: tester,
-        delegate: _ZeroAndOneIdLayoutDelegate(),
+        delegate: ZeroAndOneIdLayoutDelegate(),
         message:
           'FlutterError\n'
           '   The _ZeroAndOneIdLayoutDelegate custom multichild layout delegate\n'
@@ -327,7 +326,7 @@ void main() {
     testWidgets('layoutChild more than once', (WidgetTester tester) async {
       expectFlutterErrorMessage(
           tester: tester,
-          delegate: _DuplicateLayoutDelegate(),
+          delegate: DuplicateLayoutDelegate(),
           message:
             'FlutterError\n'
             '   The _DuplicateLayoutDelegate custom multichild layout delegate\n'
@@ -358,7 +357,7 @@ void main() {
     testWidgets('positionChild on non existent child', (WidgetTester tester) async {
       expectFlutterErrorMessage(
         tester: tester,
-        delegate: _NonExistentPositionDelegate(),
+        delegate: NonExistentPositionDelegate(),
         message:
           'FlutterError\n'
           '   The _NonExistentPositionDelegate custom multichild layout\n'
@@ -370,7 +369,7 @@ void main() {
     testWidgets('positionChild on non existent child', (WidgetTester tester) async {
       expectFlutterErrorMessage(
         tester: tester,
-        delegate: _NullOffsetPositionDelegate(),
+        delegate: NullOffsetPositionDelegate(),
         message:
           'FlutterError\n'
           '   The _NullOffsetPositionDelegate custom multichild layout delegate\n'
@@ -382,7 +381,7 @@ void main() {
       expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(
-            children: <Widget>[_LayoutWithMissingId(child: Container(width: 100))],
+            children: <Widget>[LayoutWithMissingId(child: Container(width: 100))],
             delegate: PreferredSizeDelegate(preferredSize: const Size(10, 10)),
           ),
         ),
@@ -411,7 +410,7 @@ void main() {
               LayoutId(id: 1, child: Container(width: 100)),
               LayoutId(id: 2, child: Container(width: 100)),
             ],
-            delegate: _ZeroAndOneIdLayoutDelegate(),
+            delegate: ZeroAndOneIdLayoutDelegate(),
           ),
         ),
         tester: tester,
@@ -434,7 +433,7 @@ void main() {
               LayoutId(id: 2, child: Container(width: 100)),
               LayoutId(id: 3, child: Container(width: 100)),
             ],
-            delegate: _ZeroAndOneIdLayoutDelegate(),
+            delegate: ZeroAndOneIdLayoutDelegate(),
           ),
         ),
         tester: tester,

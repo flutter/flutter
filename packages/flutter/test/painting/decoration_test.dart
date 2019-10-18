@@ -252,6 +252,9 @@ void main() {
       error = e;
     }
     expect(error, isNotNull);
+    expect(error.diagnostics.length, 4);
+    expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<DecorationImage>>());
+    expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ImageConfiguration>>());
     expect(error.toStringDeep(),
       'FlutterError\n'
       '   ImageDecoration.matchTextDirection can only be used when a\n'
@@ -264,9 +267,6 @@ void main() {
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n'
     );
-    expect(error.diagnostics.length, 4);
-    expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<DecorationImage>>());
-    expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ImageConfiguration>>());
   });
 
   test('BoxDecoration.lerp - shapes', () {

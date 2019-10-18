@@ -1046,6 +1046,7 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception;
       expect(error, isNotNull);
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -1058,7 +1059,6 @@ void main() {
           '     NavigatorState#4d6bf(lifecycle state: created)\n',
         ),
       );
-      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
     });
 
     testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
@@ -1073,6 +1073,7 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception;
       expect(error, isNotNull);
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -1085,7 +1086,6 @@ void main() {
           '     NavigatorState#38036(lifecycle state: created)\n',
         ),
       );
-      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
     });
   });
 

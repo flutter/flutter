@@ -246,6 +246,9 @@ void main() {
     }
     expect(error, isNotNull);
     expect(error.toStringDeep(), matches(
+      // RegExp matcher is required here due to flutter web and flutter mobile generating
+      // slightly different floating point numbers
+      // in Flutter web 0.0 sometimes just appears as 0. or 0
       RegExp(
         r'''FlutterError
    Invalid curve endpoint at \d+(\.\d*)?\.

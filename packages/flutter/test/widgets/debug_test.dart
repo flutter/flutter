@@ -74,6 +74,7 @@ void main() {
           } finally {
             expect(error, isNotNull);
             expect(error.diagnostics.length, 4);
+            expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
             expect(
               error.toStringDeep(),
               equalsIgnoringHashCodes(
@@ -86,7 +87,6 @@ void main() {
                 '     [root]"\n'
               ),
             );
-            expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
           }
           return Container();
         }
@@ -106,6 +106,15 @@ void main() {
           } finally {
             expect(error, isNotNull);
             expect(error.diagnostics.length, 5);
+            expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
+            expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+            expect(
+              error.diagnostics.last.toStringDeep(),
+              equalsIgnoringHashCodes(
+                'Typically, the MediaQuery widget is introduced by the MaterialApp\n'
+                'or WidgetsApp widget at the top of your application widget tree.\n'
+              ),
+            );
             expect(
               error.toStringDeep(),
               equalsIgnoringHashCodes(
@@ -121,15 +130,6 @@ void main() {
                 '   or WidgetsApp widget at the top of your application widget tree.\n'
               ),
             );
-            expect(error.diagnostics.last.level, DiagnosticLevel.hint);
-            expect(
-              error.diagnostics.last.toStringDeep(),
-              equalsIgnoringHashCodes(
-                'Typically, the MediaQuery widget is introduced by the MaterialApp\n'
-                'or WidgetsApp widget at the top of your application widget tree.\n'
-              ),
-            );
-            expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
           }
           return Container();
         }
@@ -146,6 +146,27 @@ void main() {
       error = e;
     } finally {
       expect(error, isNotNull);
+      expect(error.diagnostics.length, 4);
+      expect(error.diagnostics[1], isInstanceOf<DiagnosticsProperty<Widget>>());
+      expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
+      expect(
+        error.diagnostics[1].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'The offending widget is:\n'
+          '  Container\n'
+        )
+      );
+      expect(error.diagnostics[2].level, DiagnosticLevel.info);
+      expect(error.diagnostics[3].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[3].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'To return an empty space that causes the building widget to fill\n'
+          'available room, return "Container()". To return an empty space\n'
+          'that takes as little room as possible, return "Container(width:\n'
+          '0.0, height: 0.0)".\n',
+        )
+      );
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -160,27 +181,6 @@ void main() {
           '   0.0, height: 0.0)".\n'
         ),
       );
-      expect(error.diagnostics.length, 4);
-      expect(error.diagnostics[1], isInstanceOf<DiagnosticsProperty<Widget>>());
-      expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
-      expect(
-        error.diagnostics[1].toStringDeep(),
-        equalsIgnoringHashCodes(
-          'The offending widget is:\n'
-            '  Container\n'
-        )
-      );
-      expect(error.diagnostics[2].level, DiagnosticLevel.info);
-      expect(error.diagnostics[3].level, DiagnosticLevel.hint);
-      expect(
-        error.diagnostics[3].toStringDeep(),
-        equalsIgnoringHashCodes(
-          'To return an empty space that causes the building widget to fill\n'
-          'available room, return "Container()". To return an empty space\n'
-          'that takes as little room as possible, return "Container(width:\n'
-          '0.0, height: 0.0)".\n',
-        )
-      );
       error = null;
     }
     try {
@@ -189,6 +189,16 @@ void main() {
       error = e;
     } finally {
       expect(error, isNotNull);
+      expect(error.diagnostics.length, 3);
+      expect(error.diagnostics[1], isInstanceOf<DiagnosticsProperty<Widget>>());
+      expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
+      expect(
+        error.diagnostics[1].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'The offending widget is:\n'
+          '  Container\n'
+        )
+      );
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -202,16 +212,6 @@ void main() {
           '   crash.\n'
         ),
       );
-      expect(error.diagnostics.length, 3);
-      expect(error.diagnostics[1], isInstanceOf<DiagnosticsProperty<Widget>>());
-      expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
-      expect(
-        error.diagnostics[1].toStringDeep(),
-        equalsIgnoringHashCodes(
-          'The offending widget is:\n'
-          '  Container\n'
-        )
-      );
     }
   });
 
@@ -224,13 +224,12 @@ void main() {
       error = e;
     } finally {
       expect(error, isNotNull);
+      expect(error.diagnostics.length, 1);
       expect(
         error.toStringDeep(),
         'FlutterError\n'
         '   The value of a widget debug variable was changed by the test.\n',
       );
-      expect(error.diagnostics.length, 1);
     }
   });
-
 }

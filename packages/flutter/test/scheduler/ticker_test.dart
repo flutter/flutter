@@ -32,6 +32,8 @@ void main() {
       error = e;
     }
     expect(error, isNotNull);
+    expect(error.diagnostics.length, 3);
+    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
     expect(
       error.toStringDeep(),
       startsWith(
@@ -43,8 +45,6 @@ void main() {
         '     Ticker()\n',
       ),
     );
-    expect(error.diagnostics.length, 3);
-    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
 
     await tester.pump(const Duration(milliseconds: 10));
 

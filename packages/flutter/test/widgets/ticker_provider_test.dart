@@ -73,6 +73,15 @@ void main() {
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
       final FlutterError error = exception;
+      expect(error.diagnostics.length, 3);
+      expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+      expect(error.diagnostics[2].toStringDeep(), equalsIgnoringHashCodes(
+        'If a State is used for multiple AnimationController objects, or\n'
+        'if it is passed to other objects and those objects might use it\n'
+        'more than one time in total, then instead of mixing in a\n'
+        'SingleTickerProviderStateMixin, use a regular\n'
+        'TickerProviderStateMixin.\n',
+      ));
       expect(error.toStringDeep(), equalsIgnoringHashCodes(
         'FlutterError\n'
         '   _SingleTickerCreateMultipleTickerState is a\n'
@@ -85,19 +94,10 @@ void main() {
         '   SingleTickerProviderStateMixin, use a regular\n'
         '   TickerProviderStateMixin.\n',
       ));
-      expect(error.diagnostics.length, 3);
-      expect(error.diagnostics[2].level, DiagnosticLevel.hint);
-      expect(error.diagnostics[2].toStringDeep(), equalsIgnoringHashCodes(
-        'If a State is used for multiple AnimationController objects, or\n'
-        'if it is passed to other objects and those objects might use it\n'
-        'more than one time in total, then instead of mixing in a\n'
-        'SingleTickerProviderStateMixin, use a regular\n'
-        'TickerProviderStateMixin.\n',
-      ));
     });
 
     testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
-      final GlobalKey<__SingleTickerTestState> key = GlobalKey<__SingleTickerTestState>();
+      final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
       final Widget widget = Container(
         child: _SingleTickerTest(key: key),
       );
@@ -110,6 +110,15 @@ void main() {
         error = e;
       } finally {
         expect(error, isNotNull);
+        expect(error.diagnostics.length, 4);
+        expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+        expect(
+          error.diagnostics[2].toStringDeep(),
+          'Tickers used by AnimationControllers should be disposed by\n'
+          'calling dispose() on the AnimationController itself. Otherwise,\n'
+          'the ticker will leak.\n'
+        );
+        expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   __SingleTickerTestState#00000(ticker active) was disposed with an\n'
@@ -126,21 +135,12 @@ void main() {
           '     state: created))\n'
           '     The stack trace when the Ticker was actually created was:'
         ));
-        expect(error.diagnostics.length, 4);
-        expect(error.diagnostics[2].level, DiagnosticLevel.hint);
-        expect(
-          error.diagnostics[2].toStringDeep(),
-          'Tickers used by AnimationControllers should be disposed by\n'
-          'calling dispose() on the AnimationController itself. Otherwise,\n'
-          'the ticker will leak.\n'
-        );
-        expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
         key.currentState.controller.stop();
       }
     });
 
     testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
-      final GlobalKey<__SingleTickerTestState> key = GlobalKey<__SingleTickerTestState>();
+      final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
       final Widget widget = Container(
         child: _SingleTickerTest(key: key),
       );
@@ -153,37 +153,37 @@ void main() {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
-          'FlutterError\n'
-            '   __SingleTickerTestState#00000(ticker active) was disposed with an\n'
-            '   active Ticker.\n'
-            '   __SingleTickerTestState created a Ticker via its\n'
-            '   SingleTickerProviderStateMixin, but at the time dispose() was\n'
-            '   called on the mixin, that Ticker was still active. The Ticker\n'
-            '   must be disposed before calling super.dispose().\n'
-            '   Tickers used by AnimationControllers should be disposed by\n'
-            '   calling dispose() on the AnimationController itself. Otherwise,\n'
-            '   the ticker will leak.\n'
-            '   The offending ticker was:\n'
-            '     Ticker(created by __SingleTickerTestState#00000(lifecycle\n'
-            '     state: created))\n'
-            '     The stack trace when the Ticker was actually created was:'
-        ));
         expect(error.diagnostics.length, 4);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
           error.diagnostics[2].toStringDeep(),
           'Tickers used by AnimationControllers should be disposed by\n'
-            'calling dispose() on the AnimationController itself. Otherwise,\n'
-            'the ticker will leak.\n'
+          'calling dispose() on the AnimationController itself. Otherwise,\n'
+          'the ticker will leak.\n'
         );
         expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
+        expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   __SingleTickerTestState#00000(ticker active) was disposed with an\n'
+          '   active Ticker.\n'
+          '   __SingleTickerTestState created a Ticker via its\n'
+          '   SingleTickerProviderStateMixin, but at the time dispose() was\n'
+          '   called on the mixin, that Ticker was still active. The Ticker\n'
+          '   must be disposed before calling super.dispose().\n'
+          '   Tickers used by AnimationControllers should be disposed by\n'
+          '   calling dispose() on the AnimationController itself. Otherwise,\n'
+          '   the ticker will leak.\n'
+          '   The offending ticker was:\n'
+          '     Ticker(created by __SingleTickerTestState#00000(lifecycle\n'
+          '     state: created))\n'
+          '     The stack trace when the Ticker was actually created was:'
+        ));
         key.currentState.controller.stop();
       }
     });
 
     testWidgets('ProviderStateMixin dispose while any ticker is active', (WidgetTester tester) async {
-      final GlobalKey<__MultipleTickerTestState> key = GlobalKey<__MultipleTickerTestState>();
+      final GlobalKey<_MultipleTickerTestState> key = GlobalKey<_MultipleTickerTestState>();
       final Widget widget = Container(
         child: _MultipleTickerTest(key: key),
       );
@@ -196,31 +196,31 @@ void main() {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
-          'FlutterError\n'
-            '   __MultipleTickerTestState#00000(tickers: tracking 2 tickers) was\n'
-            '   disposed with an active Ticker.\n'
-            '   __MultipleTickerTestState created a Ticker via its\n'
-            '   TickerProviderStateMixin, but at the time dispose() was called on\n'
-            '   the mixin, that Ticker was still active. All Tickers must be\n'
-            '   disposed before calling super.dispose().\n'
-            '   Tickers used by AnimationControllers should be disposed by\n'
-            '   calling dispose() on the AnimationController itself. Otherwise,\n'
-            '   the ticker will leak.\n'
-            '   The offending ticker was:\n'
-            '     _WidgetTicker(created by\n'
-            '     __MultipleTickerTestState#00000(lifecycle state: created,\n'
-            '     tickers: tracking 0 tickers))'
-        ));
         expect(error.diagnostics.length, 4);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
           error.diagnostics[2].toStringDeep(),
           'Tickers used by AnimationControllers should be disposed by\n'
-            'calling dispose() on the AnimationController itself. Otherwise,\n'
-            'the ticker will leak.\n'
+          'calling dispose() on the AnimationController itself. Otherwise,\n'
+          'the ticker will leak.\n'
         );
         expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
+        expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   __MultipleTickerTestState#00000(tickers: tracking 2 tickers) was\n'
+          '   disposed with an active Ticker.\n'
+          '   __MultipleTickerTestState created a Ticker via its\n'
+          '   TickerProviderStateMixin, but at the time dispose() was called on\n'
+          '   the mixin, that Ticker was still active. All Tickers must be\n'
+          '   disposed before calling super.dispose().\n'
+          '   Tickers used by AnimationControllers should be disposed by\n'
+          '   calling dispose() on the AnimationController itself. Otherwise,\n'
+          '   the ticker will leak.\n'
+          '   The offending ticker was:\n'
+          '     _WidgetTicker(created by\n'
+          '     __MultipleTickerTestState#00000(lifecycle state: created,\n'
+          '     tickers: tracking 0 tickers))'
+        ));
         key.currentState.controllers.first.stop();
       }
     });
@@ -241,10 +241,10 @@ class _SingleTickerTest extends StatefulWidget {
   const _SingleTickerTest({Key key}) : super(key: key);
 
   @override
-  __SingleTickerTestState createState() => __SingleTickerTestState();
+  _SingleTickerTestState createState() => _SingleTickerTestState();
 }
 
-class __SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
+class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
   AnimationController controller;
 
   @override
@@ -253,7 +253,7 @@ class __SingleTickerTestState extends State<_SingleTickerTest> with SingleTicker
     controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 100),
-    )  ;
+    );
   }
 
   @override
@@ -266,10 +266,10 @@ class _MultipleTickerTest extends StatefulWidget {
   const _MultipleTickerTest({Key key}) : super(key: key);
 
   @override
-  __MultipleTickerTestState createState() => __MultipleTickerTestState();
+  _MultipleTickerTestState createState() => _MultipleTickerTestState();
 }
 
-class __MultipleTickerTestState extends State<_MultipleTickerTest> with TickerProviderStateMixin {
+class _MultipleTickerTestState extends State<_MultipleTickerTest> with TickerProviderStateMixin {
   List<AnimationController> controllers = <AnimationController>[];
 
   @override
@@ -285,7 +285,6 @@ class __MultipleTickerTestState extends State<_MultipleTickerTest> with TickerPr
     return Container();
   }
 }
-
 
 class _SingleTickerCreateMultipleTicker extends StatefulWidget {
   @override

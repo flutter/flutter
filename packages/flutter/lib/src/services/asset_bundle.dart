@@ -102,9 +102,9 @@ abstract class AssetBundle {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl, [HttpClient httpClient])
+  NetworkAssetBundle(Uri baseUrl)
     : _baseUrl = baseUrl,
-      _httpClient = httpClient ?? HttpClient();
+      _httpClient = HttpClient();
 
   final Uri _baseUrl;
   final HttpClient _httpClient;

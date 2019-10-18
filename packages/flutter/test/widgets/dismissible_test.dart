@@ -778,14 +778,6 @@ void main() {
     expect(exception, isNotNull);
     expect(exception, isFlutterError);
     final FlutterError error = exception;
-    expect(
-      error.toStringDeep(),
-      'FlutterError\n'
-        '   A dismissed Dismissible widget is still part of the tree.\n'
-        '   Make sure to implement the onDismissed handler and to immediately\n'
-        '   remove the Dismissible widget from the application once that\n'
-        '   handler has fired.\n',
-    );
     expect(error.diagnostics.last.level, DiagnosticLevel.hint);
     expect(
       error.diagnostics.last.toStringDeep(),
@@ -794,6 +786,14 @@ void main() {
         'remove the Dismissible widget from the application once that\n'
         'handler has fired.\n',
       ),
+    );
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   A dismissed Dismissible widget is still part of the tree.\n'
+      '   Make sure to implement the onDismissed handler and to immediately\n'
+      '   remove the Dismissible widget from the application once that\n'
+      '   handler has fired.\n',
     );
   });
 }

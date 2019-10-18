@@ -132,7 +132,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     assert(() {
       if (minExtent <= maxExtent)
         return true;
-      // TODO(jacobr): Create unit test throwing this Error
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('The maxExtent for this $runtimeType is less than its minExtent.'),
         DoubleProperty('The specified maxExtent was', maxExtent),

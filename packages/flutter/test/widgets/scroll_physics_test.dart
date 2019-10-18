@@ -212,6 +212,16 @@ void main() {
       error = e;
     } finally {
       expect(error, isNotNull);
+      expect(error.diagnostics.length, 4);
+      expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<ScrollPhysics>>());
+      expect(error.diagnostics[2].style, DiagnosticsTreeStyle.errorProperty);
+      expect(error.diagnostics[2].value, physics);
+      expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ScrollMetrics>>());
+      expect(error.diagnostics[3].style, DiagnosticsTreeStyle.errorProperty);
+      expect(error.diagnostics[3].value, position);
+      // RegExp matcher is required here due to flutter web and flutter mobile generating
+      // slightly different floating point numbers
+      // in Flutter web 0.0 sometimes just appears as 0. or 0
       expect(error.toStringDeep(), matches(RegExp(
         r'''FlutterError
    ClampingScrollPhysics\.applyBoundaryConditions\(\) was called
@@ -226,14 +236,8 @@ void main() {
    The position object in question was\:
      FixedScrollMetrics\(500(\.\d*)?..\[0(\.\d*)?\]..500(\.\d*)?\)
 ''',
+        multiLine: true,
       )));
-      expect(error.diagnostics.length, 4);
-      expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<ScrollPhysics>>());
-      expect(error.diagnostics[2].style, DiagnosticsTreeStyle.errorProperty);
-      expect(error.diagnostics[2].value, physics);
-      expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ScrollMetrics>>());
-      expect(error.diagnostics[3].style, DiagnosticsTreeStyle.errorProperty);
-      expect(error.diagnostics[3].value, position);
     }
   });
 }

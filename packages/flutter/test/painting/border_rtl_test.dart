@@ -125,6 +125,15 @@ void main() {
       error = e;
     }
     expect(error, isNotNull);
+    expect(error.diagnostics.length, 3);
+    expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[2].toStringDeep(),
+      equalsIgnoringHashCodes(
+        'For a more general interpolation method, consider using\n'
+        'ShapeBorder.lerp instead.\n',
+      ),
+    );
     expect(error.toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   BoxBorder.lerp can only interpolate Border and BorderDirectional\n'
@@ -139,15 +148,6 @@ void main() {
       '   For a more general interpolation method, consider using\n'
       '   ShapeBorder.lerp instead.\n'
     ));
-    expect(error.diagnostics.length, 3);
-    expect(error.diagnostics[2].level, DiagnosticLevel.hint);
-    expect(
-      error.diagnostics[2].toStringDeep(),
-      equalsIgnoringHashCodes(
-        'For a more general interpolation method, consider using\n'
-        'ShapeBorder.lerp instead.\n',
-      ),
-    );
   });
 
   test('BoxBorder.getInnerPath / BoxBorder.getOuterPath', () {

@@ -1105,14 +1105,14 @@ void main() {
     expect(
       error.toStringDeep(),
       'FlutterError\n'
-        '   RenderViewport does not support returning intrinsic dimensions.\n'
-        '   Calculating the intrinsic dimensions would require instantiating\n'
-        '   every child of the viewport, which defeats the point of viewports\n'
-        '   being lazy.\n'
-        '   If you are merely trying to shrink-wrap the viewport in the main\n'
-        '   axis direction, consider a RenderShrinkWrappingViewport render\n'
-        '   object (ShrinkWrappingViewport widget), which achieves that\n'
-        '   effect without implementing the intrinsic dimension API.\n',
+      '   RenderViewport does not support returning intrinsic dimensions.\n'
+      '   Calculating the intrinsic dimensions would require instantiating\n'
+      '   every child of the viewport, which defeats the point of viewports\n'
+      '   being lazy.\n'
+      '   If you are merely trying to shrink-wrap the viewport in the main\n'
+      '   axis direction, consider a RenderShrinkWrappingViewport render\n'
+      '   object (ShrinkWrappingViewport widget), which achieves that\n'
+      '   effect without implementing the intrinsic dimension API.\n',
     );
 
     final RenderShrinkWrappingViewport renderShrinkWrappingViewport = RenderShrinkWrappingViewport(
@@ -1128,15 +1128,15 @@ void main() {
     expect(
       error.toStringDeep(),
       'FlutterError\n'
-        '   RenderShrinkWrappingViewport does not support returning intrinsic\n'
-        '   dimensions.\n'
-        '   Calculating the intrinsic dimensions would require instantiating\n'
-        '   every child of the viewport, which defeats the point of viewports\n'
-        '   being lazy.\n'
-        '   If you are merely trying to shrink-wrap the viewport in the main\n'
-        '   axis direction, you should be able to achieve that effect by just\n'
-        '   giving the viewport loose constraints, without needing to measure\n'
-        '   its intrinsic dimensions.\n',
+      '   RenderShrinkWrappingViewport does not support returning intrinsic\n'
+      '   dimensions.\n'
+      '   Calculating the intrinsic dimensions would require instantiating\n'
+      '   every child of the viewport, which defeats the point of viewports\n'
+      '   being lazy.\n'
+      '   If you are merely trying to shrink-wrap the viewport in the main\n'
+      '   axis direction, you should be able to achieve that effect by just\n'
+      '   giving the viewport loose constraints, without needing to measure\n'
+      '   its intrinsic dimensions.\n',
     );
   });
 }

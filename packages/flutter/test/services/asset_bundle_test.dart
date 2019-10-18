@@ -4,14 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 class TestAssetBundle extends CachingAssetBundle {
   Map<String, int> loadCallCount = <String, int>{};
@@ -60,17 +58,8 @@ void main() {
   });
 
   test('NetworkAssetBundle control test', () async {
-    final HttpClient mockHttpClient = MockHttpClient();
     final Uri uri = Uri.http('example.org', '/path');
-    final HttpClientRequest mockRequest = MockHttpClientRequest();
-    final HttpClientResponse mockResponse = MockHttpClientResponse();
-    when(mockHttpClient.getUrl(any)).thenAnswer((_) async => mockRequest);
-    when(mockRequest.close()).thenAnswer((_) async => mockResponse);
-    when(mockResponse.statusCode).thenReturn(HttpStatus.badRequest);
-    final NetworkAssetBundle bundle = NetworkAssetBundle(
-      uri,
-      mockHttpClient
-    );
+    final NetworkAssetBundle bundle = NetworkAssetBundle(uri);
     FlutterError error;
     try {
       await bundle.load('key');
@@ -78,17 +67,13 @@ void main() {
       error = e;
     }
     expect(error, isNotNull);
+    expect(error.diagnostics.length, 2);
+    expect(error.diagnostics.last, isInstanceOf<IntProperty>());
     expect(
       error.toStringDeep(),
       'FlutterError\n'
       '   Unable to load asset: key\n'
-      '   HTTP status code: 400\n',
+      '   HTTP status code: 404\n',
     );
-    expect(error.diagnostics.length, 2);
-    expect(error.diagnostics.last, isInstanceOf<IntProperty>());
   });
 }
-
-class MockHttpClient extends Mock implements HttpClient {}
-class MockHttpClientRequest extends Mock implements HttpClientRequest {}
-class MockHttpClientResponse extends Mock implements HttpClientResponse {}
