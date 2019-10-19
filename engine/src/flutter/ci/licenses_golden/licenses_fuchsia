@@ -1,4 +1,4 @@
-Signature: b3cf0a93175e1cbe0ff9abacfb75a14a
+Signature: 6a2e947ff3136329c6cafa01ab0743cd
 
 UNUSED LICENSES:
 
@@ -2360,9 +2360,11 @@ ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/null.h
 TYPE: LicenseType.mit
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/null.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/multiboot.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/time.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/null.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/multiboot.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/time.h
 ----------------------------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
