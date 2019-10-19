@@ -143,6 +143,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       child: CustomScrollView(
         semanticChildCount: _kChildCount,
         slivers: <Widget>[
@@ -199,56 +200,59 @@ class Tab1RowItem extends StatelessWidget {
           ),
         ));
       },
-      child: SafeArea(
-        top: false,
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0, right: 8.0),
-          child: Row(
-            children: <Widget>[
-              Container(
-                height: 60.0,
-                width: 60.0,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(colorName),
-                      const Padding(padding: EdgeInsets.only(top: 8.0)),
-                      const Text(
-                        'Buy this cool color',
-                        style: TextStyle(
-                          color: Color(0xFF8E8E93),
-                          fontSize: 13.0,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ],
+      child: Container(
+        color: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0, right: 8.0),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  height: 60.0,
+                  width: 60.0,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-              ),
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.plus_circled,
-                  semanticLabel: 'Add',
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(colorName),
+                        const Padding(padding: EdgeInsets.only(top: 8.0)),
+                        Text(
+                          'Buy this cool color',
+                          style: TextStyle(
+                            color: CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context),
+                            fontSize: 13.0,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                onPressed: () { },
-              ),
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.share,
-                  semanticLabel: 'Share',
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: const Icon(CupertinoIcons.plus_circled,
+                    semanticLabel: 'Add',
+                  ),
+                  onPressed: () { },
                 ),
-                onPressed: () { },
-              ),
-            ],
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: const Icon(CupertinoIcons.share,
+                    semanticLabel: 'Share',
+                  ),
+                  onPressed: () { },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -263,7 +267,7 @@ class Tab1RowItem extends StatelessWidget {
         row,
         Container(
           height: 1.0,
-          color: const Color(0xFFD9D9D9),
+          color: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
         ),
       ],
     );
@@ -336,8 +340,8 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                         const Padding(padding: EdgeInsets.only(top: 6.0)),
                         Text(
                           'Item number ${widget.index}',
-                          style: const TextStyle(
-                            color: Color(0xFF8E8E93),
+                          style: TextStyle(
+                            color: CupertinoDynamicColor.resolve(CupertinoColors.secondaryLabel, context),
                             fontSize: 16.0,
                             fontWeight: FontWeight.w100,
                           ),
@@ -487,8 +491,8 @@ class Tab2Header extends StatelessWidget {
                 ),
               ),
               Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F3F3),
+                decoration: BoxDecoration(
+                  color: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
