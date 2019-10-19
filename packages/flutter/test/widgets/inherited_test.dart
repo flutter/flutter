@@ -91,7 +91,7 @@ void main() {
   testWidgets('Inherited can be scoped', (WidgetTester tester) async {
     final GlobalKey<void> scopedKey = GlobalKey();
     final GlobalKey<void> unscopedKey = GlobalKey();
-    
+
     await tester.pumpWidget(
       TestInherited(
         key: unscopedKey,
@@ -560,7 +560,7 @@ void main() {
   testWidgets('InheritedNotifier can be scoped', (WidgetTester tester) async {
     final GlobalKey<void> scopedKey = GlobalKey();
     final GlobalKey<void> unscopedKey = GlobalKey();
-    
+
     await tester.pumpWidget(
       ChangeNotifierInherited(
         key: unscopedKey,

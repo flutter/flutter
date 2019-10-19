@@ -479,7 +479,7 @@ void main() {
   testWidgets('InheritedModel can be scoped', (WidgetTester tester) async {
     final GlobalKey<void> scopedKey = GlobalKey();
     final GlobalKey<void> unscopedKey = GlobalKey();
-    
+
     await tester.pumpWidget(
       ABCModel(
         key: unscopedKey,
