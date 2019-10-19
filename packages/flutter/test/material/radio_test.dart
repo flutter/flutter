@@ -131,6 +131,7 @@ void main() {
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
           ],
           actions: <SemanticsAction>[
             SemanticsAction.tap,
@@ -157,6 +158,7 @@ void main() {
             SemanticsFlag.isChecked,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
           ],
           actions: <SemanticsAction>[
             SemanticsAction.tap,
@@ -181,6 +183,7 @@ void main() {
             SemanticsFlag.isInMutuallyExclusiveGroup,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isFocusable,
           ],
         ),
       ],
@@ -232,7 +235,7 @@ void main() {
     ));
 
     await tester.tap(find.byKey(key));
-    final RenderObject object = tester.firstRenderObject(find.byKey(key));
+    final RenderObject object = tester.firstRenderObject(find.byType(Focus));
 
     expect(radioValue, 1);
     expect(semanticEvent, <String, dynamic>{

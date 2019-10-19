@@ -518,7 +518,7 @@ void main() {
       ),
     );
     await tester.tap(find.byType(Switch));
-    final RenderObject object = tester.firstRenderObject(find.byType(Switch));
+    final RenderObject object = tester.firstRenderObject(find.byType(Focus));
 
     expect(value, true);
     expect(semanticEvent, <String, dynamic>{
