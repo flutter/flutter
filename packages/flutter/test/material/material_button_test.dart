@@ -630,7 +630,6 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 
-  
   testWidgets('MaterialButton shape overrides ButtonTheme shape', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/29146
     await tester.pumpWidget(
