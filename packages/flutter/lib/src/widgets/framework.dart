@@ -1584,8 +1584,19 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 abstract class InheritedWidget extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const InheritedWidget({ Key key, Widget child })
+  const InheritedWidget({ Key key, this.scope, Widget child })
     : super(key: key, child: child);
+
+  /// An identifier that allows two differenciate between two [InheritedWidget]
+  /// of same type.
+  ///
+  /// If a [scope] is specified, that same object must be passed to
+  /// [Context.ancestorInheritedElementFroWidgetOfExactType] or
+  /// [Context.inheritFromWidgetOfExactType] to be able to obtain this
+  /// [InheritedWidget].
+  ///
+  /// Defaults to `null`.
+  final Object scope;
 
   @override
   InheritedElement createElement() => InheritedElement(this);
@@ -1969,7 +1980,7 @@ abstract class BuildContext {
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect, Object scope });
 
   /// Obtains the element corresponding to the nearest widget of the given type,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -1985,7 +1996,7 @@ abstract class BuildContext {
   /// [inheritFromWidgetOfExactType] in [State.didChangeDependencies]. It is
   /// safe to use this method from [State.deactivate], which is called whenever
   /// the widget is removed from the tree.
-  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
+  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType, { Object scope });
 
   /// Returns the nearest ancestor widget of the given type, which must be the
   /// type of a concrete [Widget] subclass.
@@ -3413,7 +3424,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  Map<Type, InheritedElement> _inheritedWidgets;
+  Map<Object, InheritedElement> _inheritedWidgets;
   Set<InheritedElement> _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -3448,9 +3459,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect }) {
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect, Object scope }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
+    InheritedElement ancestor;
+    if (_inheritedWidgets != null) {
+      if (scope == null)
+        ancestor = _inheritedWidgets[targetType];
+      else
+        ancestor = _inheritedWidgets[_Scope(targetType, scope)];
+    }
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
       return inheritFromElement(ancestor, aspect: aspect);
@@ -3460,10 +3477,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
+  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType, { Object scope }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
-    return ancestor;
+    if (_inheritedWidgets == null)
+      return null;
+    if (scope == null)
+      return _inheritedWidgets[targetType];
+    else
+      return _inheritedWidgets[_Scope(targetType, scope)];
   }
 
   void _updateInheritance() {
@@ -4394,6 +4415,20 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   }
 }
 
+class _Scope {
+  _Scope(this.left, this.right);
+
+  final Type left;
+  final Object right;
+
+  @override
+  bool operator ==(Object other) =>
+    other is _Scope && other.left == left && other.right == right;
+
+  @override
+  int get hashCode => hashValues(left, right);
+}
+
 /// An [Element] that uses an [InheritedWidget] as its configuration.
 class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
@@ -4407,12 +4442,16 @@ class InheritedElement extends ProxyElement {
   @override
   void _updateInheritance() {
     assert(_active);
-    final Map<Type, InheritedElement> incomingWidgets = _parent?._inheritedWidgets;
+    final Map<Object, InheritedElement> incomingWidgets = _parent?._inheritedWidgets;
     if (incomingWidgets != null)
-      _inheritedWidgets = HashMap<Type, InheritedElement>.from(incomingWidgets);
+      _inheritedWidgets = HashMap<Object, InheritedElement>.from(incomingWidgets);
     else
-      _inheritedWidgets = HashMap<Type, InheritedElement>();
-    _inheritedWidgets[widget.runtimeType] = this;
+      _inheritedWidgets = HashMap<Object, InheritedElement>();
+
+    if (widget.scope == null)
+      _inheritedWidgets[widget.runtimeType] = this;
+    else
+      _inheritedWidgets[_Scope(widget.runtimeType, widget.scope)] = this;
   }
 
   @override

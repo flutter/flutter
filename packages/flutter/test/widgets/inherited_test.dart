@@ -8,8 +8,12 @@ import 'package:flutter/material.dart';
 import 'test_widgets.dart';
 
 class TestInherited extends InheritedWidget {
-  const TestInherited({ Key key, Widget child, this.shouldNotify = true })
-    : super(key: key, child: child);
+  const TestInherited({
+    Key key,
+    Object scope,
+    Widget child,
+    this.shouldNotify = true,
+  }) : super(key: key, child: child, scope: scope);
 
   final bool shouldNotify;
 
@@ -82,6 +86,43 @@ void main() {
     await tester.pumpWidget(third);
 
     expect(log, equals(<TestInherited>[first, third]));
+  });
+
+  testWidgets('Inherited can be scoped', (WidgetTester tester) async {
+    final GlobalKey<void> scopedKey = GlobalKey();
+    final GlobalKey<void> unscopedKey = GlobalKey();
+    
+    await tester.pumpWidget(
+      TestInherited(
+        key: unscopedKey,
+        child: TestInherited(
+          key: scopedKey,
+          scope: 42,
+          child: Container(),
+        ),
+      ),
+    );
+
+
+    final BuildContext context = tester.element(find.byType(Container));
+
+    expect(
+      context.ancestorInheritedElementForWidgetOfExactType(TestInherited, scope: 42).widget,
+      equals(scopedKey.currentWidget),
+    );
+    expect(
+      context.ancestorInheritedElementForWidgetOfExactType(TestInherited).widget,
+      equals(unscopedKey.currentWidget),
+    );
+
+    expect(
+      context.inheritFromWidgetOfExactType(TestInherited, scope: 42),
+      equals(scopedKey.currentWidget),
+    );
+    expect(
+      context.inheritFromWidgetOfExactType(TestInherited),
+      equals(unscopedKey.currentWidget),
+    );
   });
 
   testWidgets('Update inherited when reparenting state', (WidgetTester tester) async {

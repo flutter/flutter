@@ -46,9 +46,10 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   const InheritedNotifier({
     Key key,
     this.notifier,
+    Object scope,
     @required Widget child,
   }) : assert(child != null),
-       super(key: key, child: child);
+       super(key: key, scope: scope, child: child);
 
   /// The [Listenable] object to which to listen.
   ///
