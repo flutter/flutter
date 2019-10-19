@@ -461,7 +461,6 @@ void main() {
     });
 
     group('debugging options', () {
-      const Symbol kDebugOptionsSymbol = Symbol('debuggingOptions');
       DebuggingOptions debuggingOptions;
 
       String testApp, testFile;
@@ -486,11 +485,11 @@ void main() {
           platformArgs: anyNamed('platformArgs'),
           prebuiltApplication: anyNamed('prebuiltApplication'),
         )).thenAnswer((Invocation invocation) async {
-          debuggingOptions = invocation.namedArguments[kDebugOptionsSymbol];
+          debuggingOptions = invocation.namedArguments[#debuggingOptions];
           return mockLaunchResult;
         });
-        when(mockDevice.isAppInstalled(any)).thenAnswer((_) =>
-        Future<bool>.value(false));
+        when(mockDevice.isAppInstalled(any))
+            .thenAnswer((_) => Future<bool>.value(false));
 
         testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
         testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -499,7 +498,7 @@ void main() {
           throwToolExit(null, exitCode: 123);
         };
         appStopper = expectAsync1(
-              (DriveCommand command) async {
+          (DriveCommand command) async {
             return true;
           },
           count: 2,
@@ -510,13 +509,12 @@ void main() {
         await memFs.file(testFile).writeAsString('main() {}');
       }
 
-      Future<void> _testOptionThatDefaultsToFalse(
-          String optionName,
-          bool setToTrue,
-          bool optionValue(),
-      ) async {
-        testUsingContext(
-            '$optionName ${setToTrue ? 'works' : 'defaults to false'}', () async {
+      void _testOptionThatDefaultsToFalse(
+        String optionName,
+        bool setToTrue,
+        bool optionValue(),
+      ) {
+        testUsingContext('$optionName ${setToTrue ? 'works' : 'defaults to false'}', () async {
           await appStarterSetup();
 
           final List<String> args = <String>[
@@ -546,9 +544,9 @@ void main() {
         });
       }
 
-      Future<void> testOptionThatDefaultsToFalse(
-          String optionName,
-          bool optionValue(),
+      void testOptionThatDefaultsToFalse(
+        String optionName,
+        bool optionValue(),
       ) {
         _testOptionThatDefaultsToFalse(optionName, true, optionValue);
         _testOptionThatDefaultsToFalse(optionName, false, optionValue);
@@ -561,12 +559,12 @@ void main() {
 
       testOptionThatDefaultsToFalse(
         '--verbose-system-logs',
-            () => debuggingOptions.verboseSystemLogs,
+        () => debuggingOptions.verboseSystemLogs,
       );
 
       testOptionThatDefaultsToFalse(
         '--cache-sksl',
-            () => debuggingOptions.cacheSkSL,
+        () => debuggingOptions.cacheSkSL,
       );
     });
   });
