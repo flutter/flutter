@@ -476,7 +476,7 @@ void main() {
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
   });
 
-  testWidgets('InheritedNotifier can be scoped', (WidgetTester tester) async {
+  testWidgets('InheritedModel can be scoped', (WidgetTester tester) async {
     final GlobalKey<void> scopedKey = GlobalKey();
     final GlobalKey<void> unscopedKey = GlobalKey();
     
