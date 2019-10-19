@@ -21,7 +21,6 @@ export 'src/services/keyboard_maps.dart';
 export 'src/services/message_codec.dart';
 export 'src/services/message_codecs.dart';
 export 'src/services/mouse_cursor.dart';
-export 'src/services/mouse_cursors.dart';
 export 'src/services/platform_channel.dart';
 export 'src/services/platform_messages.dart';
 export 'src/services/platform_views.dart';

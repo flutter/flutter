@@ -88,7 +88,7 @@ class RawMaterialButton extends StatefulWidget {
   final ValueChanged<bool> onHighlightChanged;
 
   /// The cursor for a mouse pointer when it is on this button.
-  final int mouseCursor;
+  final MouseCursor mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].

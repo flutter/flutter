@@ -68,7 +68,7 @@ class MouseTrackerAnnotation {
   ///
   ///  * [MouseCursors], which is a collection of system cursors of all
   ///    platforms.
-  final int Function() cursor;
+  final MouseCursor Function() cursor;
 
   @override
   String toString() {
@@ -122,7 +122,7 @@ class _MouseState {
   int get device => _mostRecentEvent.device;
 
   // The current mouse cursor.
-  int cursor = MouseCursors.basic;
+  MouseCursor cursor = SystemCursors.basic;
 
   @override
   String toString() {
@@ -156,7 +156,7 @@ class MouseTracker extends ChangeNotifier {
   /// devices have changed cursors.
   ///
   /// All of the parameters must not be null.
-  MouseTracker(this._router, this.annotationFinder, this._cursorDelegate)
+  MouseTracker(this._router, this.annotationFinder, this._cursorManager)
       : assert(_router != null),
         assert(annotationFinder != null) {
     _router.addGlobalRoute(_handleEvent);
@@ -182,7 +182,7 @@ class MouseTracker extends ChangeNotifier {
   // mouse events from.
   final PointerRouter _router;
 
-  final MouseCursorDelegate _cursorDelegate;
+  final MouseCursorManager _cursorManager;
 
   // Tracks the state of connected mouse devices.
   //
@@ -306,9 +306,9 @@ class MouseTracker extends ChangeNotifier {
     );
 
     // Change mouse cursor.
-    final int cursor = _findDeviceCursor(nextAnnotations);
+    final MouseCursor cursor = _findDeviceCursor(nextAnnotations);
     if (cursor != mouseState.cursor) {
-      _cursorDelegate.setCursor(device, cursor);
+      _cursorManager.setDeviceCursor(device, cursor);
     }
 
     mouseState.cursor = cursor;
@@ -332,14 +332,14 @@ class MouseTracker extends ChangeNotifier {
   // The `annotations` is the current annotations that the device is
   // hovering in visual order from front the back.
   // Guarantees to return a non-null cursor.
-  static int _findDeviceCursor(Iterable<MouseTrackerAnnotation> annotations) {
+  static MouseCursor _findDeviceCursor(Iterable<MouseTrackerAnnotation> annotations) {
     for (final MouseTrackerAnnotation annotation in annotations) {
-      final int cursor = annotation.cursor == null ? null : annotation.cursor();
+      final MouseCursor cursor = annotation.cursor == null ? null : annotation.cursor();
       if (cursor != null) {
         return cursor;
       }
     }
-    return MouseCursors.basic;
+    return SystemCursors.basic;
   }
 
   // Dispatch callbacks related to a device after all necessary information

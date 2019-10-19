@@ -5817,7 +5817,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onExit,
     this.onHover,
     this.opaque = true,
-    this.cursor = MouseCursors.basic,
+    this.cursor = SystemCursors.basic,
     Widget child,
   }) : assert(opaque != null),
        super(key: key, child: child);
@@ -5863,7 +5863,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///
   ///  * [MouseCursors], which is a collection of system cursors of all
   ///    platforms.
-  final int cursor;
+  final MouseCursor cursor;
 
   @override
   _MouseRegionElement createElement() => _MouseRegionElement(this);

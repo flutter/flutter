@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart' show MouseCursors;
+import 'package:flutter/services.dart' show systemCursors;
 
 import 'button.dart';
 import 'floating_action_button_theme.dart';
@@ -455,7 +455,7 @@ class FloatingActionButton extends StatelessWidget {
 
     Widget result = RawMaterialButton(
       onPressed: onPressed,
-      mouseCursor: MouseCursors.click,
+      mouseCursor: SystemCursors.click,
       elevation: elevation,
       focusElevation: focusElevation,
       hoverElevation: hoverElevation,

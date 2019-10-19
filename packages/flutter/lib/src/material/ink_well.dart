@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart' show MouseCursor;
 
 import 'debug.dart';
 import 'feedback.dart';
@@ -266,7 +267,7 @@ class InkResponse extends StatefulWidget {
   final ValueChanged<bool> onHover;
 
   /// The cursor for a mouse pointer when it enters or is hovering the region.
-  final int mouseCursor;
+  final MouseCursor mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
   ///
@@ -904,7 +905,7 @@ class InkWell extends InkResponse {
     GestureTapCancelCallback onTapCancel,
     ValueChanged<bool> onHighlightChanged,
     ValueChanged<bool> onHover,
-    int mouseCursor,
+    MouseCursor mouseCursor,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,

@@ -2615,7 +2615,7 @@ class RenderMouseRegion extends RenderProxyBox {
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
     this.opaque = true,
-    int cursor,
+    MouseCursor cursor,
     RenderBox child,
   }) : assert(opaque != null),
        _onEnter = onEnter,
@@ -2706,15 +2706,15 @@ class RenderMouseRegion extends RenderProxyBox {
   ///    platforms.
   ///  * [Layer.findAnnotations], which describes the annotation searching
   ///    algorithm.
-  int get cursor => _cursor;
-  set cursor(int value) {
+  MouseCursor get cursor => _cursor;
+  set cursor(MouseCursor value) {
     if (_cursor != value) {
       _cursor = value;
       _updateAnnotations();
     }
   }
-  int _cursor;
-  int _getCursor() => _cursor;
+  MouseCursor _cursor;
+  MouseCursor _getCursor() => _cursor;
 
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;

@@ -264,6 +264,6 @@ class SystemChannels {
   ///    cursor. See [MouseCursors] for a list of system cursors.
   static const MethodChannel mouseCursor = OptionalMethodChannel(
     'flutter/mousecursor',
-    JSONMethodCodec(),
+    StandardMethodCodec(),
   );
 }
