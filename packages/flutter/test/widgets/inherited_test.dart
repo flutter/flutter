@@ -57,8 +57,8 @@ class ExpectFailState extends State<ExpectFail> {
 }
 
 class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
-  const ChangeNotifierInherited({ Key key, Widget child, ChangeNotifier notifier })
-    : super(key: key, child: child, notifier: notifier);
+  const ChangeNotifierInherited({ Key key, Widget child, Object scope, ChangeNotifier notifier })
+    : super(key: key, child: child, scope: scope, notifier: notifier);
 }
 
 void main() {
@@ -102,7 +102,6 @@ void main() {
         ),
       ),
     );
-
 
     final BuildContext context = tester.element(find.byType(Container));
 
@@ -557,4 +556,41 @@ void main() {
     ));
     expect(buildCount, equals(3));
   });
+
+  testWidgets('InheritedNotifier can be scoped', (WidgetTester tester) async {
+    final GlobalKey<void> scopedKey = GlobalKey();
+    final GlobalKey<void> unscopedKey = GlobalKey();
+    
+    await tester.pumpWidget(
+      ChangeNotifierInherited(
+        key: unscopedKey,
+        child: ChangeNotifierInherited(
+          key: scopedKey,
+          scope: 42,
+          child: Container(),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byType(Container));
+
+    expect(
+      context.ancestorInheritedElementForWidgetOfExactType(ChangeNotifierInherited, scope: 42).widget,
+      equals(scopedKey.currentWidget),
+    );
+    expect(
+      context.ancestorInheritedElementForWidgetOfExactType(ChangeNotifierInherited).widget,
+      equals(unscopedKey.currentWidget),
+    );
+
+    expect(
+      context.inheritFromWidgetOfExactType(ChangeNotifierInherited, scope: 42),
+      equals(scopedKey.currentWidget),
+    );
+    expect(
+      context.inheritFromWidgetOfExactType(ChangeNotifierInherited),
+      equals(unscopedKey.currentWidget),
+    );
+  });
+
 }

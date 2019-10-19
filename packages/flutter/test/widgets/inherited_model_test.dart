@@ -16,8 +16,9 @@ class ABCModel extends InheritedModel<String> {
     this.b,
     this.c,
     this.aspects,
+    Object scope,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : super(key: key, scope: scope, child: child);
 
   final int a;
   final int b;
@@ -473,5 +474,41 @@ void main() {
     expect(find.text('b: 102 [5]'), findsOneWidget); // rebuilt showB now depends on the inner model
     expect(find.text('c: null [5]'), findsOneWidget); // rebuilt showC now depends on the inner model
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
+  });
+
+  testWidgets('InheritedNotifier can be scoped', (WidgetTester tester) async {
+    final GlobalKey<void> scopedKey = GlobalKey();
+    final GlobalKey<void> unscopedKey = GlobalKey();
+    
+    await tester.pumpWidget(
+      ABCModel(
+        key: unscopedKey,
+        child: ABCModel(
+          key: scopedKey,
+          scope: 42,
+          child: Container(),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byType(Container));
+
+    expect(
+      context.ancestorInheritedElementForWidgetOfExactType(ABCModel, scope: 42).widget,
+      equals(scopedKey.currentWidget),
+    );
+    expect(
+      context.ancestorInheritedElementForWidgetOfExactType(ABCModel).widget,
+      equals(unscopedKey.currentWidget),
+    );
+
+    expect(
+      context.inheritFromWidgetOfExactType(ABCModel, scope: 42),
+      equals(scopedKey.currentWidget),
+    );
+    expect(
+      context.inheritFromWidgetOfExactType(ABCModel),
+      equals(unscopedKey.currentWidget),
+    );
   });
 }
