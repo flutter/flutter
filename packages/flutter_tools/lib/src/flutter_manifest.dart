@@ -401,7 +401,7 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         break;
       case 'plugin':
-        if (kvp.value is! YamlMap || kvp == null) {
+        if (kvp.value is! YamlMap || kvp.value == null) {
           errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
           break;
         }
