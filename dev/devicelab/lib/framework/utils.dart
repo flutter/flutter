@@ -314,6 +314,13 @@ Future<int> exec(
       .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stderr: $line');
+        // grab gradle daemon log file.
+        if (line.contains('log file:')) {
+          final File file = File(line.split(':').last.trim());
+          for (String line in file.readAsLinesSync()) {
+            print('crash: $line');
+          }
+        }
       }, onDone: () { stderrDone.complete(); });
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
