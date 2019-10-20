@@ -950,8 +950,17 @@ String get androidSdkRoot {
 
 Future<void> _androidGradleTests(String subShard) async {
   // Force tool re-snapshot.
-  File(flutterToolStamp).deleteSync();
-  await runCommand(flutter, <String>[]);
+  try {
+    File(flutterToolStamp).deleteSync();
+  } on FileSystemException {
+    // Do nothing.
+  }
+  await runCommand(flutter,
+    <String>['doctor'],
+    workingDirectory: flutterRoot,
+    expectNonZeroExit: false,
+    outputMode: OutputMode.discard,
+  );
 
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
   if (androidSdkRoot == null || Platform.isWindows) {
