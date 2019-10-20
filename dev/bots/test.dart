@@ -26,6 +26,7 @@ typedef OutputChecker = String Function(CapturedOutput);
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+final String flutterToolStamp = path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
@@ -948,6 +949,10 @@ String get androidSdkRoot {
 }
 
 Future<void> _androidGradleTests(String subShard) async {
+  // Force tool re-snapshot.
+  File(flutterToolStamp).deleteSync();
+  await runCommand(flutter, <String>[]);
+
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
   if (androidSdkRoot == null || Platform.isWindows) {
     print('No Android SDK detected or on Windows, skipping Android gradle test.');
