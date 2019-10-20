@@ -49,62 +49,47 @@ class AndroidMouseCursorActions {
 }
 
 /// TODOC
-@immutable
-class AndroidSystemMouseCursor extends MouseCursor {
-  /// TODOC
-  const AndroidSystemMouseCursor({
-    @required this.value,
-    @required this.description,
-  }) : assert(value != null), assert(description != null);
-
-  /// TODOC
-  final int value;
-
-  /// TODOC
-  final String description;
-
-  @override
-  Future<void> onActivate(MouseCursorActivateDetails details) {
-    return AndroidMouseCursorActions(details.mouseCursorChannel)
-      .setDeviceAsSystemCursor(device: details.device, systemConstant: value);
-  }
-
-  @override
-  String describeCursor() => description;
-}
-
-/// TODOC
 class AndroidSystemCursorCollection extends SystemCursorCollection {
   /// TODOC
   const AndroidSystemCursorCollection();
 
-  @override
-  MouseCursor get none => const AndroidSystemMouseCursor(
-    value: AndroidMouseCursorConstants.TYPE_NULL,
-    description: 'null',
-  );
+  Future<void> _activateSystemConstant({
+    ActivateMouseCursorDetails details,
+    int systemConstant,
+  }) {
+    return AndroidMouseCursorActions(details.mouseCursorChannel)
+      .setDeviceAsSystemCursor(device: details.device, systemConstant: systemConstant);
+  }
 
   @override
-  MouseCursor get basic => const AndroidSystemMouseCursor(
-    value: AndroidMouseCursorConstants.TYPE_ARROW,
-    description: 'arrow',
-  );
-
-  @override
-  MouseCursor get click => const AndroidSystemMouseCursor(
-    value: AndroidMouseCursorConstants.TYPE_HAND,
-    description: 'hand',
-  );
-
-  @override
-  MouseCursor get text => const AndroidSystemMouseCursor(
-    value: AndroidMouseCursorConstants.TYPE_TEXT,
-    description: 'text',
-  );
-
-  @override
-  MouseCursor get grab => click;
-
-  @override
-  MouseCursor get grabbing => click;
+  Future<void> activateShape(ActivateMouseCursorDetails details, SystemCursorShape shape) {
+    switch (shape) {
+      case SystemCursorShape.none:
+        return _activateSystemConstant(
+          details: details,
+          systemConstant: AndroidMouseCursorConstants.TYPE_NULL,
+        );
+      case SystemCursorShape.basic:
+        break;
+      case SystemCursorShape.click:
+        return _activateSystemConstant(
+          details: details,
+          systemConstant: AndroidMouseCursorConstants.TYPE_HAND,
+        );
+      case SystemCursorShape.text:
+        return _activateSystemConstant(
+          details: details,
+          systemConstant: AndroidMouseCursorConstants.TYPE_TEXT,
+        );
+      case SystemCursorShape.forbidden:
+        break;
+      case SystemCursorShape.grab:
+        return activateShape(details, SystemCursorShape.click);
+      case SystemCursorShape.grabbing:
+        return activateShape(details, SystemCursorShape.click);
+    }
+    return _activateSystemConstant(
+      systemConstant: AndroidMouseCursorConstants.TYPE_ARROW,
+    );
+  }
 }

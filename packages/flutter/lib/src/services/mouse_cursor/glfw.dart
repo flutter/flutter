@@ -43,71 +43,52 @@ class GLFWMouseCursorActions {
 
 /// TODOC
 @immutable
-class GLFWMouseCursor extends MouseCursor {
+class GLFWSystemCursorCollection extends SystemCursorCollection {
   /// TODOC
-  /// When hidden is true, value is ignored.
-  const GLFWMouseCursor({
-    @required this.value,
-    this.hidden = false,
-    @required this.description,
-  }) : assert(value != null), assert(description != null);
+  const GLFWSystemCursorCollection();
 
-  /// TODOC
-  final int value;
-
-  /// TODOC
-  final bool hidden;
-
-  /// TODOC
-  final String description;
-
-  @override
-  Future<void> onActivate(MouseCursorActivateDetails details) {
+  Future<void> _activateSystemConstant({
+    ActivateMouseCursorDetails details,
+    int systemConstant,
+    bool hidden,
+  }) {
     return GLFWMouseCursorActions(details.mouseCursorChannel)
       .setDeviceAsSystemCursor(
         device: details.device,
-        systemConstant: value,
+        systemConstant: systemConstant,
         hidden: hidden,
       );
   }
 
   @override
-  String describeCursor() => description;
-}
-
-/// TODOC
-class GLFWSystemCursorCollection extends SystemCursorCollection {
-  /// TODOC
-  const GLFWSystemCursorCollection();
-
-  @override
-  MouseCursor get none => const GLFWMouseCursor(
-    value: GLFWMouseCursorConstants.GLFW_ARROW_CURSOR,
-    hidden: true,
-    description: 'hidden',
-  );
-
-  @override
-  MouseCursor get basic => const GLFWMouseCursor(
-    value: GLFWMouseCursorConstants.GLFW_ARROW_CURSOR,
-    description: 'arrow',
-  );
-
-  @override
-  MouseCursor get click => const GLFWMouseCursor(
-    value: GLFWMouseCursorConstants.GLFW_HAND_CURSOR,
-    description: 'hand',
-  );
-
-  @override
-  MouseCursor get text => const GLFWMouseCursor(
-    value: GLFWMouseCursorConstants.GLFW_IBEAM_CURSOR,
-    description: 'ibeam',
-  );
-
-  @override
-  MouseCursor get grab => click;
-
-  @override
-  MouseCursor get grabbing => click;
+  Future<void> activateShape(ActivateMouseCursorDetails details, SystemCursorShape shape) {
+    switch (shape) {
+      case SystemCursorShape.none:
+        return _activateSystemConstant(
+          details: details,
+          systemConstant: GLFWMouseCursorConstants.GLFW_ARROW_CURSOR,
+          hidden: true,
+        );
+      case SystemCursorShape.basic:
+        break;
+      case SystemCursorShape.click:
+        return _activateSystemConstant(
+          details: details,
+          systemConstant: GLFWMouseCursorConstants.GLFW_HAND_CURSOR,
+        );
+      case SystemCursorShape.text:
+        return _activateSystemConstant(
+          systemConstant: GLFWMouseCursorConstants.GLFW_IBEAM_CURSOR,
+        );
+      case SystemCursorShape.forbidden:
+        break;
+      case SystemCursorShape.grab:
+        return activateShape(details, SystemCursorShape.click);
+      case SystemCursorShape.grabbing:
+        return activateShape(details, SystemCursorShape.click);
+    }
+    return _activateSystemConstant(
+      systemConstant: GLFWMouseCursorConstants.GLFW_ARROW_CURSOR,
+    );
+  }
 }

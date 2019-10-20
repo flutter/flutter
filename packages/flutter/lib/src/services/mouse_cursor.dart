@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 
 import 'mouse_cursor/android.dart';
@@ -15,68 +13,68 @@ export 'mouse_cursor/basic.dart';
 
 /// TODOC
 @immutable
-class SystemCursor extends MouseCursor {
-  SystemCursorCollection get _collection {
-    if (_cachedCollection == null) {
-      if (Platform.isLinux)
-        _cachedCollection = const GLFWSystemCursorCollection();
-      if (Platform.isAndroid)
-        _cachedCollection = const AndroidSystemCursorCollection();
-      _cachedCollection ??= const UnsupportedSystemCursorCollection();
-    }
-    return _cachedCollection;
-  }
-  SystemCursorCollection _cachedCollection;
-
+class SystemCursor extends PlatformDependentCursor {
   /// TODOC
-  const SystemCursor(this.shape);
+  const SystemCursor(this.shape, this.description);
 
   /// TODOC
   final SystemCursorShape shape;
 
+  /// TODOC
+  final String description;
+
   @override
-  Future<void> onActivate(MouseCursorActivateDetails details) {
-    return _collection.fromShape(shape).onActivate(details);
+  Future<void> onActivateOnPlatform(MouseCursorTargetPlatform platform, ActivateMouseCursorDetails details) {
+    switch (platform) {
+      case MouseCursorTargetPlatform.android:
+        return const AndroidSystemCursorCollection()
+          .activateShape(details, shape);
+      case MouseCursorTargetPlatform.linux:
+        return const GLFWSystemCursorCollection()
+          .activateShape(details, shape);
+    }
+    return null;
   }
 
   @override
   String describeCursor() {
-    return _collection.fromShape(shape).describeCursor();
+    return description;
   }
 }
 
-class SystemCursors implements SystemCursorCollection {
+/// TODOC
+class SystemCursors {
   /// A special value that tells Flutter to release the control of cursors.
   ///
   /// A layer with this value will absorb the search for mouse cursor
   /// configuration, but the pointer's cursor will not be changed when it enters
   /// or is hovering this layer. This value is typically used on a platform view
   /// or other layers that manages the cursor by itself.
-  releaseControl,
+  static const MouseCursor releaseControl = NoopMouseCursor();
 
   /// Displays no cursor at the pointer.
-  none,
+  static const MouseCursor none = SystemCursor(SystemCursorShape.none, 'none');
 
   /// The platform-dependent basic cursor. Typically the shape of an arrow.
-  basic,
+  static const MouseCursor basic = SystemCursor(SystemCursorShape.basic, 'basic');
 
   /// A cursor that indicates links or something that needs to be emphasized
   /// to be clickable. Typically the shape of a pointing hand.
-  click,
+  static const MouseCursor click = SystemCursor(SystemCursorShape.click, 'click');
 
   /// A cursor that indicates a selectable text. Typically the shape of an
   /// I-beam.
-  text,
+  static const MouseCursor text = SystemCursor(SystemCursorShape.text, 'text');
 
   /// A cursor that indicates an unpermitted action. Typically the shape of a
   /// circle with a diagnal line.
-  forbidden,
+  static const MouseCursor forbidden = SystemCursor(SystemCursorShape.forbidden, 'forbidden');
 
   /// A cursor that indicates something that can be dragged. Typically the shape
   /// of an open hand.
-  grab,
+  static const MouseCursor grab = SystemCursor(SystemCursorShape.grab, 'grab');
 
   /// A cursor that indicates something that is being dragged. Typically the
   /// shape of a closed hand.
-  grabbing,
+  static const MouseCursor grabbing = SystemCursor(SystemCursorShape.grabbing, 'grabbing');
 }
