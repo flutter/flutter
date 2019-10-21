@@ -1026,7 +1026,7 @@ void main() {
     await tester.pump();
 
     // Pumps 5 frames of 20 ms each.
-    await pumpFrames(tester: tester, frames: 5, duration: const Duration(milliseconds: 20));
+    await tester.pump(const Duration(milliseconds: 100));
 
     // There should be exactly one ink-creating widget.
     expect(find.byType(InkWell), findsOneWidget);
@@ -1040,7 +1040,7 @@ void main() {
     expect(findTooltipContainer('Delete'), findsNothing);
 
     // Pumps 5 more frames of 20 ms each.
-    await pumpFrames(tester: tester, frames: 5, duration: const Duration(milliseconds: 20));
+    await tester.pump(const Duration(milliseconds: 100));
 
     // The ripple should grow, with the same center.
     expect(box, ripplePattern(const Offset(163.0, 6.0), 41.8));
@@ -1080,7 +1080,8 @@ void main() {
     await tester.pump();
 
     // Pumps 10 frames of 20 ms each.
-    await pumpFrames(tester: tester, frames: 10, duration: const Duration(milliseconds: 20));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     // There should be exactly one ink-creating widget.
     expect(find.byType(InkWell), findsOneWidget);
@@ -1094,7 +1095,8 @@ void main() {
     expect(findTooltipContainer('Delete'), findsNothing);
 
     // Pumps 10 more frames of 20 ms each.
-    await pumpFrames(tester: tester, frames: 10, duration: const Duration(milliseconds: 20));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     // The ripple should grow, but the center should move,
     // Towards the center of the delete icon.
@@ -1164,7 +1166,7 @@ void main() {
     await tester.pump();
 
     // Pumps 5 frames of 20 ms each.
-    await pumpFrames(tester: tester, frames: 5, duration: const Duration(milliseconds: 20));
+    await tester.pump(const Duration(milliseconds: 100));
 
     // There should be exactly one ink-creating widget.
     expect(find.byType(InkWell), findsOneWidget);
@@ -1178,7 +1180,7 @@ void main() {
     expect(findTooltipContainer('Delete'), findsNothing);
 
     // Pumps 5 more frames of 20 ms each.
-    await pumpFrames(tester: tester, frames: 5, duration: const Duration(milliseconds: 20));
+    await tester.pump(const Duration(milliseconds: 100));
 
     // The ripple should grow, with the same center.
     // This indicates that the tap is not on a delete icon.
