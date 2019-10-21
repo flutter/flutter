@@ -37,7 +37,12 @@ class _AndroidMouseCursorActions {
   final MethodChannel mouseCursorChannel;
 
   /// TODOC
-  Future<void> setDeviceAsSystemCursor({int device, int systemConstant}) {
+  Future<void> setDeviceAsSystemCursor({
+    @required int device,
+    @required int systemConstant,
+  }) {
+    assert(device != null);
+    assert(systemConstant != null);
     return mouseCursorChannel.invokeMethod<void>(
       'setDeviceAsSystemCursor',
       <String, dynamic>{
@@ -56,8 +61,8 @@ class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
   final MethodChannel _mouseCursorChannel;
 
   Future<bool> _activateSystemConstant({
-    ActivateMouseCursorDetails details,
-    int systemConstant,
+    @required ActivateMouseCursorDetails details,
+    @required int systemConstant,
   }) async {
     await _AndroidMouseCursorActions(_mouseCursorChannel)
       .setDeviceAsSystemCursor(device: details.device, systemConstant: systemConstant);
@@ -75,6 +80,7 @@ class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
         );
       case SystemCursorShape.basic:
         return _activateSystemConstant(
+          details: details,
           systemConstant: AndroidMouseCursorConstants.TYPE_ARROW,
         );
       case SystemCursorShape.click:

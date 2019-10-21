@@ -29,7 +29,14 @@ class _GLFWMouseCursorActions {
   final MethodChannel mouseCursorChannel;
 
   /// TODOC
-  Future<void> setDeviceAsSystemCursor({int device, int systemConstant, bool hidden}) {
+  Future<void> setDeviceAsSystemCursor({
+    @required int device,
+    @required int systemConstant,
+    @required bool hidden,
+  }) {
+    assert(device != null);
+    assert(systemConstant != null);
+    assert(hidden != null);
     return mouseCursorChannel.invokeMethod<void>(
       'setDeviceAsSystemCursor',
       <String, dynamic>{
@@ -49,15 +56,27 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
   final MethodChannel _mouseCursorChannel;
 
   Future<bool> _activateSystemConstant({
-    ActivateMouseCursorDetails details,
-    int systemConstant,
-    bool hidden,
+    @required ActivateMouseCursorDetails details,
+    @required int systemConstant,
   }) async {
     await _GLFWMouseCursorActions(_mouseCursorChannel)
       .setDeviceAsSystemCursor(
         device: details.device,
         systemConstant: systemConstant,
-        hidden: hidden,
+        hidden: false,
+      );
+    // This action is asserted to be successful. If not, throw the error.
+    return true;
+  }
+
+  Future<bool> _hideCursor({
+    @required ActivateMouseCursorDetails details,
+  }) async {
+    await _GLFWMouseCursorActions(_mouseCursorChannel)
+      .setDeviceAsSystemCursor(
+        device: details.device,
+        systemConstant: 0,
+        hidden: true,
       );
     // This action is asserted to be successful. If not, throw the error.
     return true;
@@ -70,13 +89,12 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
   ) async {
     switch (shape) {
       case SystemCursorShape.none:
-        return _activateSystemConstant(
+        return _hideCursor(
           details: details,
-          systemConstant: GLFWMouseCursorConstants.GLFW_ARROW_CURSOR,
-          hidden: true,
         );
       case SystemCursorShape.basic:
         return _activateSystemConstant(
+          details: details,
           systemConstant: GLFWMouseCursorConstants.GLFW_ARROW_CURSOR,
         );
       case SystemCursorShape.click:
@@ -86,6 +104,7 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
         );
       case SystemCursorShape.text:
         return _activateSystemConstant(
+          details: details,
           systemConstant: GLFWMouseCursorConstants.GLFW_IBEAM_CURSOR,
         );
       case SystemCursorShape.forbidden:
