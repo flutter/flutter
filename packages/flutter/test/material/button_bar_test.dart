@@ -290,7 +290,165 @@ void main() {
       final Finder buttonBar = find.byType(ButtonBar);
       expect(tester.getBottomRight(buttonBar).dy - tester.getTopRight(buttonBar).dy, 26.0);
     });
-
   });
 
+  group("ButtonBar's children wrap when they overflow horizontally", () {
+    testWidgets("ButtonBar's children wrap when buttons overflow", (WidgetTester tester) async {
+      final Key keyOne = UniqueKey();
+      final Key keyTwo = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ButtonBar(
+            children: <Widget>[
+              Container(key: keyOne, height: 50.0, width: 800.0),
+              Container(key: keyTwo, height: 50.0, width: 800.0),
+            ],
+          ),
+        ),
+      );
+
+      // Second [Container] should wrap around to the next column since
+      // they take up max width constraint.
+      final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
+      final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
+      expect(containerOneRect.bottom, containerTwoRect.top);
+      expect(containerOneRect.left, containerTwoRect.left);
+    });
+
+    testWidgets(
+      "ButtonBar's children overflow defaults - MainAxisAlignment.start", (WidgetTester tester) async {
+        final Key keyOne = UniqueKey();
+        final Key keyTwo = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ButtonBar(
+              // Set padding to zero to align buttons with edge of button bar.
+              buttonPadding: EdgeInsets.zero,
+              children: <Widget>[
+                Container(key: keyOne, height: 50.0, width: 500.0),
+                Container(key: keyTwo, height: 50.0, width: 500.0),
+              ],
+            ),
+          ),
+        );
+
+        final Rect buttonBarRect = tester.getRect(find.byType(ButtonBar));
+        final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
+        final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
+        // Second [Container] should wrap around to the next row.
+        expect(containerOneRect.bottom, containerTwoRect.top);
+        // Second [Container] should align to the start of the ButtonBar.
+        expect(containerOneRect.left, containerTwoRect.left);
+        expect(containerOneRect.left, buttonBarRect.left);
+      },
+    );
+
+    testWidgets("ButtonBar's children overflow - MainAxisAlignment.end", (WidgetTester tester) async {
+      final Key keyOne = UniqueKey();
+      final Key keyTwo = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ButtonBar(
+            alignment: MainAxisAlignment.end,
+            // Set padding to zero to align buttons with edge of button bar.
+            buttonPadding: EdgeInsets.zero,
+            children: <Widget>[
+              Container(key: keyOne, height: 50.0, width: 500.0),
+              Container(key: keyTwo, height: 50.0, width: 500.0),
+            ],
+          ),
+        ),
+      );
+
+      final Rect buttonBarRect = tester.getRect(find.byType(ButtonBar));
+      final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
+      final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
+      // Second [Container] should wrap around to the next row.
+      expect(containerOneRect.bottom, containerTwoRect.top);
+      // [Container]s should align to the end of the ButtonBar.
+      expect(containerOneRect.right, containerTwoRect.right);
+      expect(containerOneRect.right, buttonBarRect.right);
+    });
+
+    testWidgets("ButtonBar's children overflow - MainAxisAlignment.center", (WidgetTester tester) async {
+      final Key keyOne = UniqueKey();
+      final Key keyTwo = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ButtonBar(
+            alignment: MainAxisAlignment.end,
+            // Set padding to zero to align buttons with edge of button bar.
+            buttonPadding: EdgeInsets.zero,
+            children: <Widget>[
+              Container(key: keyOne, height: 50.0, width: 500.0),
+              Container(key: keyTwo, height: 50.0, width: 500.0),
+            ],
+          ),
+        ),
+      );
+
+      final Rect buttonBarRect = tester.getRect(find.byType(ButtonBar));
+      final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
+      final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
+      // Second [Container] should wrap around to the next row.
+      expect(containerOneRect.bottom, containerTwoRect.top);
+      // [Container]s should center themselves in the ButtonBar.
+      expect(containerOneRect.center.dx, containerTwoRect.center.dx);
+      expect(containerOneRect.center.dx, buttonBarRect.center.dx);
+    });
+
+    testWidgets(
+      "ButtonBar's children default to MainAxisAlignment.start for horizontal "
+      'alignment when overflowing in spaceBetween, spaceAround and spaceEvenly '
+      'cases when overflowing.', (WidgetTester tester) async {
+        final Key keyOne = UniqueKey();
+        final Key keyTwo = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ButtonBar(
+              alignment: MainAxisAlignment.spaceEvenly,
+              // Set padding to zero to align buttons with edge of button bar.
+              buttonPadding: EdgeInsets.zero,
+              children: <Widget>[
+                Container(key: keyOne, height: 50.0, width: 500.0),
+                Container(key: keyTwo, height: 50.0, width: 500.0),
+              ],
+            ),
+          ),
+        );
+
+        Rect buttonBarRect = tester.getRect(find.byType(ButtonBar));
+        Rect containerOneRect = tester.getRect(find.byKey(keyOne));
+        Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
+        // Second [Container] should wrap around to the next row.
+        expect(containerOneRect.bottom, containerTwoRect.top);
+        // Should align horizontally to the start of the button bar.
+        expect(containerOneRect.left, containerTwoRect.left);
+        expect(containerOneRect.left, buttonBarRect.left);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ButtonBar(
+              alignment: MainAxisAlignment.spaceAround,
+              // Set padding to zero to align buttons with edge of button bar.
+              buttonPadding: EdgeInsets.zero,
+              children: <Widget>[
+                Container(key: keyOne, height: 50.0, width: 500.0),
+                Container(key: keyTwo, height: 50.0, width: 500.0),
+              ],
+            ),
+          ),
+        );
+
+        buttonBarRect = tester.getRect(find.byType(ButtonBar));
+        containerOneRect = tester.getRect(find.byKey(keyOne));
+        containerTwoRect = tester.getRect(find.byKey(keyTwo));
+        // Second [Container] should wrap around to the next row.
+        expect(containerOneRect.bottom, containerTwoRect.top);
+        // Should align horizontally to the start of the button bar.
+        expect(containerOneRect.left, containerTwoRect.left);
+        expect(containerOneRect.left, buttonBarRect.left);
+      },
+    );
+  });
 }

@@ -11,7 +11,8 @@ import 'dialog.dart';
 import 'flat_button.dart';
 import 'raised_button.dart';
 
-/// An end-aligned row of buttons.
+/// An end-aligned row of buttons, laying out into a column if there is not
+/// enough horizontal space.
 ///
 /// Places the buttons horizontally according to the [buttonPadding]. The
 /// children are laid out in a [Row] with [MainAxisAlignment.end]. When the
@@ -19,6 +20,13 @@ import 'raised_button.dart';
 /// right justified and the last child becomes the rightmost child. When the
 /// [Directionality] [TextDirection.rtl] the children are left justified and
 /// the last child becomes the leftmost child.
+///
+/// If the button bar's width exceeds the maximum width constraint on the
+/// widget, it aligns its buttons in a column. The key difference here
+/// is that the [MainAxisAlignment] will then be treated as a
+/// cross-axis/horizontal alignment. For example, if the buttons overflow and
+/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
+/// align to the horizontal start of the button bar.
 ///
 /// The [ButtonBar] can be configured with a [ButtonBarTheme]. For any null
 /// property on the ButtonBar, the surrounding ButtonBarTheme's property
@@ -182,8 +190,8 @@ class ButtonBar extends StatelessWidget {
 /// less than the maximum width constraints of the widget, it then lays
 /// out the widget as though it were placed in a [Row].
 ///
-/// However, if the button bar's width exceeds the maximum constraints on the
-/// widget, it then aligns its buttons in a column. The key difference here
+/// However, if the button bar's width exceeds the maximum width constraint on
+/// the widget, it then aligns its buttons in a column. The key difference here
 /// is that the [MainAxisAlignment] will then be treated as a
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
 /// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
@@ -245,8 +253,8 @@ class ButtonBarRow extends Flex {
 /// less than the maximum width constraints of the widget, it then lays
 /// out the widget as though it were placed in a [Row].
 ///
-/// However, if the button bar's width exceeds the maximum constraints on the
-/// widget, it then aligns its buttons in a column. The key difference here
+/// However, if the button bar's width exceeds the maximum width constraint on
+/// the widget, it then aligns its buttons in a column. The key difference here
 /// is that the [MainAxisAlignment] will then be treated as a
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
 /// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
