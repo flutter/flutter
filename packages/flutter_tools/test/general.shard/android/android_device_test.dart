@@ -348,6 +348,14 @@ Use the 'android' tool to install them:
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('knownPhysical Samsung SM G570M', () async {
+      hardware = 'samsungexynos7570';
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('knownEmulator', () async {
       hardware = 'goldfish';
       final AndroidDevice device = AndroidDevice('test');
