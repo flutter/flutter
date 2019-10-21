@@ -42,6 +42,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
       std::move(task_runners),            // task runners
       nullptr,                            // window
       {},                                 // io manager
+      {},                                 // unref queue
       {},                                 // image decoder
       "main.dart",                        // advisory uri
       "main",                             // advisory entrypoint,
@@ -75,6 +76,7 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
       std::move(task_runners),            // task runners
       nullptr,                            // window
       {},                                 // io manager
+      {},                                 // unref queue
       {},                                 // image decoder
       "main.dart",                        // advisory uri
       "main",                             // advisory entrypoint
@@ -185,6 +187,7 @@ static void RunDartCodeInIsolate(DartVMRef& vm_ref,
       std::move(task_runners),            // task runners
       nullptr,                            // window
       {},                                 // io manager
+      {},                                 // unref queue
       {},                                 // image decoder
       "main.dart",                        // advisory uri
       "main",                             // advisory entrypoint

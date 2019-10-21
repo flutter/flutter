@@ -77,6 +77,7 @@ class UIDartState : public tonic::DartState {
               TaskObserverAdd add_callback,
               TaskObserverRemove remove_callback,
               fml::WeakPtr<IOManager> io_manager,
+              fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
               fml::WeakPtr<ImageDecoder> image_decoder,
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,
@@ -99,6 +100,7 @@ class UIDartState : public tonic::DartState {
   const TaskObserverAdd add_callback_;
   const TaskObserverRemove remove_callback_;
   fml::WeakPtr<IOManager> io_manager_;
+  fml::RefPtr<SkiaUnrefQueue> skia_unref_queue_;
   fml::WeakPtr<ImageDecoder> image_decoder_;
   const std::string advisory_script_uri_;
   const std::string advisory_script_entrypoint_;
