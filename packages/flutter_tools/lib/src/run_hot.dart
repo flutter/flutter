@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 
 import 'base/async_guard.dart';
 import 'base/common.dart';
@@ -1050,6 +1051,8 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
+  static const int _kMaxPendingStats = 16;
+
   static Future<List<Uri>> findInvalidated({
     @required DateTime lastCompiled,
     @required List<Uri> urisToMonitor,
@@ -1077,16 +1080,19 @@ class ProjectFileInvalidator {
     final List<Uri> invalidatedFiles = <Uri>[];
 
     if (asyncScanning) {
+      final Pool pool = Pool(_kMaxPendingStats);
       final List<Future<void>> waitList = <Future<void>>[];
       for (final Uri uri in urisToScan) {
-        waitList.add(fs
+        waitList.add(pool.withResource<void>(
+          () => fs
             .stat(uri.toFilePath(windows: platform.isWindows))
             .then((FileStat stat) {
-          final DateTime updatedAt = stat.modified;
-          if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
-            invalidatedFiles.add(uri);
-          }
-        }));
+              final DateTime updatedAt = stat.modified;
+              if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+                invalidatedFiles.add(uri);
+              }
+            })
+        ));
       }
       await Future.wait<void>(waitList);
     } else {
