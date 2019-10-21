@@ -387,8 +387,14 @@ void migrateToR8(Directory directory) {
   }
   printTrace('set `android.enableR8=true` in gradle.properties');
   try {
-    gradleProperties
-      .writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
+    // Add `android.enableR8=true` to the next line in gradle.properties.
+    if (propertiesContent.isNotEmpty && !propertiesContent.endsWith('\n')) {
+      gradleProperties
+        .writeAsStringSync('\nandroid.enableR8=true\n', mode: FileMode.append);
+    } else {
+      gradleProperties
+        .writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
+    }
   } on FileSystemException {
     throwToolExit(
       'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
