@@ -1,0 +1,20 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+template("fuchsia_host_bundle") {
+  assert(defined(invoker.name), "'name' must be defined for $target_name.")
+  dest_dir = "${root_out_dir}/host_bundle/${invoker.name}-${host_os}-${host_cpu}"
+
+  copy(target_name) {
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+
+    sources = invoker.sources
+
+    outputs = [
+      "$dest_dir/{{source_file_part}}",
+    ]
+  }
+}

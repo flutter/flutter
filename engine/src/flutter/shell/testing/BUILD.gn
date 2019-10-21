@@ -5,8 +5,6 @@
 import("//build/fuchsia/sdk.gni")
 
 executable("testing") {
-  testonly = true
-
   output_name = "flutter_tester"
 
   public_configs = [

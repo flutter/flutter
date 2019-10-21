@@ -4,25 +4,75 @@
 
 import("//build/fuchsia/sdk.gni")
 import("$flutter_root/common/config.gni")
+import("$flutter_root/tools/fuchsia/dart.gni")
+import("$flutter_root/tools/fuchsia/fuchsia_host_bundle.gni")
 
 if (using_fuchsia_sdk) {
   testonly = true
 
   product_suffix = ""
+  is_product = false
 
   if (flutter_runtime_mode == "release") {
     product_suffix = "product_"
+    is_product = true
+  }
+
+  fuchsia_host_bundle("flutter_binaries") {
+    name = "flutter_binaries"
+
+    _flutter_tester_label = "//flutter/shell/testing:testing($host_toolchain)"
+
+    deps = [
+      _flutter_tester_label,
+    ]
+
+    _flutter_tester_bin_path =
+        rebase_path(get_label_info(_flutter_tester_label, "root_out_dir") +
+                    "/flutter_tester")
+
+    sources = [
+      _flutter_tester_bin_path,
+    ]
+  }
+
+  fuchsia_host_bundle("dart_binaries") {
+    name = "dart_binaries"
+
+    _gen_snapshot_to_use = gen_snapshot + "($host_toolchain)"
+    if (is_product) {
+      _gen_snapshot_to_use = gen_snapshot_product + "($host_toolchain)"
+    }
+
+    _kernel_compiler_label = "dart:kernel_compiler($host_toolchain)"
+
+    deps = [
+      _gen_snapshot_to_use,
+      _kernel_compiler_label,
+    ]
+
+    _gen_snapshot_bin_path =
+        rebase_path(get_label_info(_gen_snapshot_to_use, "root_out_dir") + "/" +
+                    get_label_info(_gen_snapshot_to_use, "name"))
+
+    _kernel_compiler_path =
+        rebase_path(get_label_info(_kernel_compiler_label, "root_gen_dir") +
+                    "/kernel_compiler.dart.snapshot")
+
+    sources = [
+      _gen_snapshot_bin_path,
+      _kernel_compiler_path,
+    ]
   }
 
   group("fuchsia") {
     deps = [
-      "dart:kernel_compiler",
+      ":dart_binaries",
+      ":flutter_binaries",
       "dart_runner:dart_aot_${product_suffix}runner",
       "dart_runner:dart_jit_${product_suffix}runner",
       "flutter:flutter_aot_${product_suffix}runner",
       "flutter:flutter_jit_${product_suffix}runner",
-      "flutter:flutter_runner_tests",
-      "//flutter/shell/testing:testing($host_toolchain)",
     ]
   }
 }
