@@ -301,6 +301,8 @@ void main() {
     final BufferLogger bufferLogger = logger;
 
     expect(bufferLogger.statusText, contains('Warning'));
+    expect(bufferLogger.statusText, contains('https://flutter.dev/web'));
+    expect(bufferLogger.statusText, isNot(contains('https://flutter.dev/web.')));
   }));
 
   test('debugDumpApp', () => testbed.run(() async {
