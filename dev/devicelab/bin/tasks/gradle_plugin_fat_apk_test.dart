@@ -21,12 +21,10 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-          'lib/arm64-v8a/libflutter.so',
+          ...debugAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
+          'lib/arm64-v8a/libflutter.so',
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
@@ -48,18 +46,14 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
+          'lib/arm64-v8a/libflutter.so',
+          'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
+        checkItDoesNotContain<String>(debugAssets, apkFiles);
       });
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
@@ -71,18 +65,14 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
+        checkItDoesNotContain<String>(debugAssets, apkFiles);
       });
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
@@ -95,31 +85,23 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
         ], armApkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], armApkFiles);
+        checkItDoesNotContain<String>(debugAssets, armApkFiles);
 
         final Iterable<String> arm64ApkFiles = await getFilesInApk(pluginProject.releaseArm64ApkPath);
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
+          ...baseApkFiles,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], arm64ApkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], arm64ApkFiles);
+        checkItDoesNotContain<String>(debugAssets, arm64ApkFiles);
       });
 
       await runProjectTest((FlutterProject project) async {

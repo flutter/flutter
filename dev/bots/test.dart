@@ -722,11 +722,6 @@ Map<String, String> _initGradleEnvironment() {
 final Map<String, String> gradleEnvironment = _initGradleEnvironment();
 
 Future<void> _runHostOnlyDeviceLabTests() async {
-  if (Platform.isWindows) {
-    // TODO(ianh): remove when https://github.com/flutter/flutter/issues/36311 fixed by https://github.com/flutter/flutter/pull/42709
-    return;
-  }
-
   // Please don't add more tests here. We should not be using the devicelab
   // logic to run tests outside devicelab, that's just confusing.
   // Instead, create tests that are not devicelab tests, and run those.

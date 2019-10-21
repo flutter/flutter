@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -10,6 +11,11 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> main() async {
+  final Iterable<String> baseAabFiles = <String>[
+    'base/dex/classes.dex',
+    'base/manifest/AndroidManifest.xml',
+  ];
+  final Iterable<String> flutterAabAssets = flutterAssets.map((String file) => 'base/$file');
   await task(() async {
     try {
       await runProjectTest((FlutterProject project) async {
@@ -26,8 +32,8 @@ Future<void> main() async {
           'app-release.aab',
         );
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
+          ...baseAabFiles,
+          ...flutterAabAssets,
           'base/lib/arm64-v8a/libapp.so',
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
@@ -36,6 +42,10 @@ Future<void> main() async {
       });
 
       await runProjectTest((FlutterProject project) async {
+        if (Platform.isWindows) {
+          // https://github.com/flutter/flutter/issues/42985
+          return;
+        }
         section('App bundle content using flavors without explicit target platform');
         // Add a few flavors.
         await project.addProductFlavors(<String> [
@@ -57,8 +67,8 @@ Future<void> main() async {
           'app-production-release.aab',
         );
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
+          ...baseAabFiles,
+          ...flutterAabAssets,
           'base/lib/arm64-v8a/libapp.so',
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
@@ -93,8 +103,8 @@ Future<void> main() async {
           'app-flavor_underscore-release.aab',
         );
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
+          ...baseAabFiles,
+          ...flutterAabAssets,
           'base/lib/arm64-v8a/libapp.so',
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
@@ -128,8 +138,8 @@ Future<void> main() async {
           'app-production-release.aab',
         );
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
+          ...baseAabFiles,
+          ...flutterAabAssets,
           'base/lib/arm64-v8a/libapp.so',
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
@@ -153,10 +163,9 @@ Future<void> main() async {
         );
 
         final Iterable<String> bundleFiles = await getFilesInAppBundle(releaseBundle);
-
         checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
+          ...baseAabFiles,
+          ...flutterAabAssets,
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
         ], bundleFiles);
