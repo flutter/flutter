@@ -205,7 +205,9 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 /// }
 ///
 /// /// Displays its integer item as 'item N' on a Card whose color is based on
-/// /// the item's value. The text is displayed in bright green if [selected] is
+/// /// the item's value.
+/// ///
+/// /// The text is displayed in bright green if [selected] is
 /// /// true. This widget's height is based on the [animation] parameter, it
 /// /// varies from 0 to 128 as the animation varies from 0.0 to 1.0.
 /// class CardItem extends StatelessWidget {
@@ -216,9 +218,9 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///     @required this.item,
 ///     this.selected: false
 ///   }) : assert(animation != null),
-///       assert(item != null && item >= 0),
-///       assert(selected != null),
-///       super(key: key);
+///        assert(item != null && item >= 0),
+///        assert(selected != null),
+///        super(key: key);
 ///
 ///   final Animation<double> animation;
 ///   final VoidCallback onTap;
@@ -537,7 +539,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///   }
 ///
 ///   // Used to build an item after it has been removed from the list. This
-///   // method is needed because a removed item remains  visible until its
+///   // method is needed because a removed item remains visible until its
 ///   // animation has completed (even though it's gone as far this ListModel is
 ///   // concerned). The widget will be used by the
 ///   // [AnimatedListState.removeItem] method's
@@ -663,8 +665,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 /// }
 ///
 /// // Displays its integer item as 'Item N' on a Card whose color is based on
-/// // the item's value. The card turns gray when selected. This widget's height
-/// // is based on the animation parameter. It varies as the animation value
+/// // the item's value.
+/// //
+/// // The card turns gray when [selected] is true. This widget's height
+/// // is based on the [animation] parameter. It varies as the animation value
 /// // transitions from 0.0 to 1.0.
 /// class CardItem extends StatelessWidget {
 ///   const CardItem({
