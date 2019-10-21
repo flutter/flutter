@@ -99,7 +99,7 @@ void main() {
     expect(editableText.maxLines, equals(1));
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
-    expect(editableText.noSuggestions, isFalse);
+    expect(editableText.enableSuggestions, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
   });
@@ -308,9 +308,9 @@ void main() {
         equals('TextInputAction.done'));
   });
 
-  testWidgets('noSuggestions flag is sent to the engine properly', (WidgetTester tester) async {
+  testWidgets('enableSuggestions flag is sent to the engine properly', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
-    const bool noSuggestions = true;
+    const bool enableSuggestions = false;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -323,7 +323,7 @@ void main() {
               controller: controller,
               backgroundCursorColor: Colors.grey,
               focusNode: focusNode,
-              noSuggestions: noSuggestions,
+              enableSuggestions: enableSuggestions,
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -335,7 +335,7 @@ void main() {
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
     await tester.idle();
-    expect(tester.testTextInput.setClientArgs['noSuggestions'], noSuggestions);
+    expect(tester.testTextInput.setClientArgs['enableSuggestions'], enableSuggestions);
   });
 
   testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
