@@ -133,7 +133,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_coverage-linux # linux-only
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**/*.dart', 'bin/internal/**') || $CIRRUS_PR == ''"
+      only_if: "$CIRRUS_PR == ''"
       environment:
         # As of October 2019, the tool_coverage-linux shard needed at least 12G of RAM to run without
         # getting OOM-killed, and even 8 CPUs took 25 minutes.
