@@ -219,19 +219,24 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _actionMap = <LocalKey, ActionFactory>{ SelectAction.key: _createAction };
+    _actionMap = <LocalKey, ActionFactory>{
+      SelectAction.key: _createAction,
+      if (!kIsWeb) ActivateAction.key: _createAction,
+    };
     _updateHighlightMode(WidgetsBinding.instance.focusManager.highlightMode);
     WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
+  }
+
+  void _actionHandler(FocusNode node, Intent intent){
+    if (widget.onChanged != null) {
+      widget.onChanged(!widget.value);
+    }
   }
 
   Action _createAction() {
     return CallbackAction(
       SelectAction.key,
-      onInvoke: (FocusNode node, Intent intent) {
-        if (widget.onChanged != null) {
-          widget.onChanged(!widget.value);
-        }
-      },
+      onInvoke: _actionHandler,
     );
   }
 

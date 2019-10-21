@@ -164,29 +164,34 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _actionMap = <LocalKey, ActionFactory>{ SelectAction.key: _createAction };
+    _actionMap = <LocalKey, ActionFactory>{
+      SelectAction.key: _createAction,
+      if (!kIsWeb) ActivateAction.key: _createAction,
+    };
     _updateHighlightMode(WidgetsBinding.instance.focusManager.highlightMode);
     WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
+  }
+
+  void _actionHandler(FocusNode node, Intent intent){
+    if (widget.onChanged != null) {
+      switch (widget.value) {
+        case false:
+          widget.onChanged(true);
+          break;
+        case true:
+          widget.onChanged(widget.tristate ? null : false);
+          break;
+        default: // case null:
+          widget.onChanged(false);
+          break;
+      }
+    }
   }
 
   Action _createAction() {
     return CallbackAction(
       SelectAction.key,
-      onInvoke: (FocusNode node, Intent intent) {
-        if (widget.onChanged != null) {
-          switch (widget.value) {
-            case false:
-              widget.onChanged(true);
-              break;
-            case true:
-              widget.onChanged(widget.tristate ? null : false);
-              break;
-            default: // case null:
-              widget.onChanged(false);
-              break;
-          }
-        }
-      },
+      onInvoke: _actionHandler,
     );
   }
 
