@@ -76,6 +76,7 @@ template("fuchsia_archive") {
 
   action("${target_name}_dir") {
     script = "$flutter_root/tools/fuchsia/copy_path.py"
+    sources = copy_sources
     response_file_contents = rebase_path(copy_sources + copy_outputs)
     deps = pkg_dir_deps
     args = [ "--file-list={{response_file_name}}" ]
@@ -87,10 +88,12 @@ template("fuchsia_archive") {
     script = "$flutter_root/tools/fuchsia/gen_package.py"
     deps = pkg_dir_deps + [ ":${target_name}_dir" ]
     sources = copy_outputs
+
     inputs = []
     if (defined(invoker.inputs)) {
-      inputs = invoker.inputs
+      inputs += invoker.inputs
     }
+
     args = [
       "--pm-bin",
       rebase_path("//fuchsia/sdk/$host_os/tools/pm"),
