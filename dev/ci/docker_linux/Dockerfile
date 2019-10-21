@@ -119,12 +119,15 @@ RUN go get -u github.com/technosophos/dashing
 RUN locale-gen en_US "en_US.UTF-8" && dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
 
-# Install coveralls and Firebase
 # This is why we need ruby installed.
 # Skip all the documentation (-N) since it's just on CI.
-RUN gem install coveralls -N
 RUN gem install bundler -N
-# Install fastlane which is used on Linux to build and deploy Android
-# builds to the Play Store.
-RUN gem install fastlane -N
 
+# Other ruby dependencies should be tracked in Gemfile so that we can lock their
+# package versions.
+COPY Gemfile /root/Gemfile
+ENV BUNDLE_ROOT="/opt/bundler"
+ENV BUNDLE_GEMFILE="$BUNDLE_ROOT/Gemfile"
+RUN mkdir --parents "$BUNDLE_ROOT"
+ADD Gemfile "$BUNDLE_GEMFILE"
+RUN cd "$BUNDLE_ROOT" && bundle install --system

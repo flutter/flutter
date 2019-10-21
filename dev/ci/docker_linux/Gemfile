@@ -1,0 +1,7 @@
+source "https://rubygems.org"
+
+# Install coveralls and Firebase
+gem 'coveralls', '0.8.15'
+# Install fastlane which is used on Linux to build and deploy Android
+# builds to the Play Store.
+gem 'fastlane', '2.134.0'
