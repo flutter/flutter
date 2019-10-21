@@ -7,6 +7,9 @@ part of engine;
 /// Make the content editable span visible to facilitate debugging.
 const bool _debugVisibleTextEditing = false;
 
+/// The `keyCode` of the "Enter" key.
+const int _kReturnKeyCode = 13;
+
 void _emptyCallback(dynamic _) {}
 
 /// These style attributes are constant throughout the life time of an input
@@ -171,23 +174,29 @@ class EditingState {
 /// This corresponds to Flutter's [TextInputConfiguration].
 class InputConfiguration {
   InputConfiguration({
-    this.inputType,
-    this.obscureText = false,
+    @required this.inputType,
+    @required this.inputAction,
+    @required this.obscureText,
   });
 
   InputConfiguration.fromFlutter(Map<String, dynamic> flutterInputConfiguration)
       : inputType = EngineInputType.fromName(
             flutterInputConfiguration['inputType']['name']),
+        inputAction = flutterInputConfiguration['inputAction'],
         obscureText = flutterInputConfiguration['obscureText'];
 
   /// The type of information being edited in the input control.
   final EngineInputType inputType;
+
+  /// The default action for the input field.
+  final String inputAction;
 
   /// Whether to hide the text being edited.
   final bool obscureText;
 }
 
 typedef _OnChangeCallback = void Function(EditingState editingState);
+typedef _OnActionCallback = void Function(String inputAction);
 
 /// Wraps the DOM element used to provide text editing capabilities.
 ///
@@ -219,11 +228,16 @@ class TextEditingElement {
       const Duration(milliseconds: 100);
 
   final HybridTextEditing owner;
-  bool _enabled = false;
+
+  @visibleForTesting
+  bool isEnabled = false;
 
   html.HtmlElement domElement;
+  InputConfiguration _inputConfiguration;
   EditingState _lastEditingState;
+
   _OnChangeCallback _onChange;
+  _OnActionCallback _onAction;
 
   final List<StreamSubscription<html.Event>> _subscriptions =
       <StreamSubscription<html.Event>>[];
@@ -261,12 +275,15 @@ class TextEditingElement {
   void enable(
     InputConfiguration inputConfig, {
     @required _OnChangeCallback onChange,
+    @required _OnActionCallback onAction,
   }) {
-    assert(!_enabled);
+    assert(!isEnabled);
 
     _initDomElement(inputConfig);
-    _enabled = true;
+    isEnabled = true;
+    _inputConfiguration = inputConfig;
     _onChange = onChange;
+    _onAction = onAction;
 
     // Chrome on Android will hide the onscreen keyboard when you tap outside
     // the text box. Instead, we want the framework to tell us to hide the
@@ -279,7 +296,7 @@ class TextEditingElement {
     if (browserEngine == BrowserEngine.blink ||
         browserEngine == BrowserEngine.unknown) {
       _subscriptions.add(domElement.onBlur.listen((_) {
-        if (_enabled) {
+        if (isEnabled) {
           _refocus();
         }
       }));
@@ -296,6 +313,8 @@ class TextEditingElement {
 
     // Subscribe to text and selection changes.
     _subscriptions.add(domElement.onInput.listen(_handleChange));
+
+    _subscriptions.add(domElement.onKeyDown.listen(_maybeSendAction));
 
     /// Detects changes in text selection.
     ///
@@ -330,9 +349,9 @@ class TextEditingElement {
   ///
   /// Calling [disable] also removes any registered event listeners.
   void disable() {
-    assert(_enabled);
+    assert(isEnabled);
 
-    _enabled = false;
+    isEnabled = false;
     _lastEditingState = null;
 
     for (int i = 0; i < _subscriptions.length; i++) {
@@ -390,7 +409,7 @@ class TextEditingElement {
 
   void setEditingState(EditingState editingState) {
     _lastEditingState = editingState;
-    if (!_enabled || !editingState.isValid) {
+    if (!isEnabled || !editingState.isValid) {
       return;
     }
 
@@ -414,6 +433,13 @@ class TextEditingElement {
     if (newEditingState != _lastEditingState) {
       _lastEditingState = newEditingState;
       _onChange(_lastEditingState);
+    }
+  }
+
+  void _maybeSendAction(html.KeyboardEvent event) {
+    if (event.keyCode == _kReturnKeyCode) {
+      event.preventDefault();
+      _onAction(_inputConfiguration.inputAction);
     }
   }
 }
@@ -512,7 +538,7 @@ class HybridTextEditing {
   ///
   /// Use [stopUsingCustomEditableElement] to switch back to default element.
   void useCustomEditableElement(TextEditingElement customEditingElement) {
-    if (_isEditing && customEditingElement != _customEditingElement) {
+    if (isEditing && customEditingElement != _customEditingElement) {
       stopEditing();
     }
     _customEditingElement = customEditingElement;
@@ -529,20 +555,21 @@ class HybridTextEditing {
   /// Flag which shows if there is an ongoing editing.
   ///
   /// Also used to define if a keyboard is needed.
-  bool _isEditing = false;
+  @visibleForTesting
+  bool isEditing = false;
 
   /// Indicates whether the input element needs to be positioned.
   ///
   /// See [TextEditingElement._delayBeforePositioning].
   bool get inputElementNeedsToBePositioned =>
-      !inputPositioned && _isEditing && doesKeyboardShiftInput;
+      !inputPositioned && isEditing && doesKeyboardShiftInput;
 
   /// Flag indicating whether the input element's position is set.
   ///
   /// See [inputElementNeedsToBePositioned].
   bool inputPositioned = false;
 
-  Map<String, dynamic> _configuration;
+  InputConfiguration _configuration;
 
   /// All "flutter/textinput" platform messages should be sent to this method.
   void handleTextInput(ByteData data) {
@@ -551,11 +578,11 @@ class HybridTextEditing {
       case 'TextInput.setClient':
         final bool clientIdChanged =
             _clientId != null && _clientId != call.arguments[0];
-        if (clientIdChanged && _isEditing) {
+        if (clientIdChanged && isEditing) {
           stopEditing();
         }
         _clientId = call.arguments[0];
-        _configuration = call.arguments[1];
+        _configuration = InputConfiguration.fromFlutter(call.arguments[1]);
         break;
 
       case 'TextInput.setEditingState':
@@ -564,7 +591,7 @@ class HybridTextEditing {
         break;
 
       case 'TextInput.show':
-        if (!_isEditing) {
+        if (!isEditing) {
           _startEditing();
         }
         break;
@@ -579,7 +606,7 @@ class HybridTextEditing {
 
       case 'TextInput.clearClient':
       case 'TextInput.hide':
-        if (_isEditing) {
+        if (isEditing) {
           stopEditing();
         }
         break;
@@ -587,17 +614,18 @@ class HybridTextEditing {
   }
 
   void _startEditing() {
-    assert(!_isEditing);
-    _isEditing = true;
+    assert(!isEditing);
+    isEditing = true;
     editingElement.enable(
-      InputConfiguration.fromFlutter(_configuration),
+      _configuration,
       onChange: _syncEditingStateToFlutter,
+      onAction: _sendInputActionToFlutter,
     );
   }
 
   void stopEditing() {
-    assert(_isEditing);
-    _isEditing = false;
+    assert(isEditing);
+    isEditing = false;
     editingElement.disable();
   }
 
@@ -661,6 +689,19 @@ class HybridTextEditing {
           _clientId,
           editingState.toFlutter(),
         ]),
+      ),
+      _emptyCallback,
+    );
+  }
+
+  void _sendInputActionToFlutter(String inputAction) {
+    ui.window.onPlatformMessage(
+      'flutter/textinput',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall(
+          'TextInputClient.performAction',
+          <dynamic>[_clientId, inputAction],
+        ),
       ),
       _emptyCallback,
     );
