@@ -139,9 +139,9 @@ Future<void> copyAssets(AssetBundle assetBundle, Environment environment, [Strin
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
-          (content.file as File).copySync(file.path);
+          await (content.file as File).copy(file.path);
         } else {
-          file.writeAsBytesSync(await entry.value.contentsAsBytes());
+          await file.writeAsBytes(await entry.value.contentsAsBytes());
         }
       } finally {
         resource.release();

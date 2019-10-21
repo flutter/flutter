@@ -138,25 +138,32 @@ class FileHashStore {
   Future<List<File>> hashFiles(List<File> files) async {
     final List<File> dirty = <File>[];
     final Pool openFiles = Pool(kMaxOpenFiles);
-   for (File file in files) {
-     _hashFile(file, dirty, openFiles);
-   }
+    await Future.wait(<Future<void>>[
+       for (File file in files) _hashFile(file, dirty, openFiles)
+    ]);
     return dirty;
   }
 
-  void _hashFile(File file, List<File> dirty, Pool pool) {
-    //final PoolResource resource = await pool.request();
+  Future<void> _hashFile(File file, List<File> dirty, Pool pool) async {
+    final PoolResource resource = await pool.request();
     try {
       final String absolutePath = file.path;
       final String previousHash = previousHashes[absolutePath];
-      final Digest digest = md5.convert(file.readAsBytesSync());
-      final String currentHash = digest.toString();
-      if (currentHash != previousHash) {
+      // If the file is missing it is assumed to be dirty.
+      if (!file.existsSync()) {
+        currentHashes.remove(absolutePath);
+        previousHashes.remove(absolutePath);
         dirty.add(file);
+      } else {
+        final Digest digest = md5.convert(await file.readAsBytes());
+        final String currentHash = digest.toString();
+        if (currentHash != previousHash) {
+          dirty.add(file);
+        }
+        currentHashes[absolutePath] = currentHash;
       }
-      currentHashes[absolutePath] = currentHash;
     } finally {
-      //resource.release();
+      resource.release();
     }
   }
 
