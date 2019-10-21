@@ -80,6 +80,7 @@ class BundleBuilder {
       outputDir: assetDirPath,
       depfilePath: depfilePath,
       precompiled: precompiledSnapshot,
+      trackWidgetCreation: trackWidgetCreation,
     );
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -103,6 +104,7 @@ Future<void> buildWithAssemble({
   @required String outputDir,
   @required String depfilePath,
   @required bool precompiled,
+  bool trackWidgetCreation,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
   buildMode = precompiled ? buildMode : BuildMode.debug;
@@ -114,6 +116,7 @@ Future<void> buildWithAssemble({
       kTargetFile: mainPath,
       kBuildMode: getNameForBuildMode(buildMode),
       kTargetPlatform: getNameForTargetPlatform(targetPlatform),
+      kTrackWidgetCreation: trackWidgetCreation?.toString(),
     },
   );
   final Target target = buildMode == BuildMode.debug

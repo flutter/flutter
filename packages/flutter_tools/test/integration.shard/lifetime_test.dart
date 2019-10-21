@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Integration tests which invoke flutter instead of unit testing the code
-// will not produce meaningful coverage information - we can measure coverage
-// from the isolate running the test, but not from the isolate started via
-// the command line process.
-@Tags(<String>['no_coverage'])
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -23,32 +18,30 @@ import 'test_utils.dart';
 const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
-  group('flutter run', () {
-    final BasicProject _project = BasicProject();
-    FlutterRunTestDriver _flutter;
-    Directory tempDir;
+  final BasicProject _project = BasicProject();
+  FlutterRunTestDriver _flutter;
+  Directory tempDir;
 
-    setUp(() async {
-      tempDir = createResolvedTempDirectorySync('lifetime_test.');
-      await _project.setUpIn(tempDir);
-      _flutter = FlutterRunTestDriver(tempDir);
-    });
+  setUp(() async {
+    tempDir = createResolvedTempDirectorySync('lifetime_test.');
+    await _project.setUpIn(tempDir);
+    _flutter = FlutterRunTestDriver(tempDir);
+  });
 
-    tearDown(() async {
-      await _flutter.stop();
-      tryToDelete(tempDir);
-    });
+  tearDown(() async {
+    await _flutter.stop();
+    tryToDelete(tempDir);
+  });
 
-    test('does not terminate when a debugger is attached', () async {
-      await _flutter.run(withDebugger: true);
-      await Future<void>.delayed(requiredLifespan);
-      expect(_flutter.hasExited, equals(false));
-    });
+  test('flutter run does not terminate when a debugger is attached', () async {
+    await _flutter.run(withDebugger: true);
+    await Future<void>.delayed(requiredLifespan);
+    expect(_flutter.hasExited, equals(false));
+  });
 
-    test('does not terminate when a debugger is attached and pause-on-exceptions', () async {
-      await _flutter.run(withDebugger: true, pauseOnExceptions: true);
-      await Future<void>.delayed(requiredLifespan);
-      expect(_flutter.hasExited, equals(false));
-    });
-  }, timeout: const Timeout.factor(10), tags: <String>['integration']); // The DevFS sync takes a really long time, so these tests can be slow.
+  test('fluter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
+    await _flutter.run(withDebugger: true, pauseOnExceptions: true);
+    await Future<void>.delayed(requiredLifespan);
+    expect(_flutter.hasExited, equals(false));
+  });
 }

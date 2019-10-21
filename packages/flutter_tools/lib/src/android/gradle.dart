@@ -304,6 +304,18 @@ String _locateGradlewExecutable(Directory directory) {
   return null;
 }
 
+// Gradle crashes for several known reasons when downloading that are not
+// actionable by flutter.
+const List<String> _kKnownErrorPrefixes = <String>[
+  'java.io.FileNotFoundException: https://downloads.gradle.org',
+  'java.io.IOException: Unable to tunnel through proxy',
+  'java.lang.RuntimeException: Timeout of',
+  'java.util.zip.ZipException: error in opening zip file',
+  'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
+  'java.net.SocketException: Connection reset',
+  'java.io.FileNotFoundException',
+];
+
 // Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
@@ -333,9 +345,25 @@ Future<String> _initializeGradle(FlutterProject project) async {
     );
   } on ProcessException catch (e) {
     final String error = e.toString();
-    if (error.contains('java.io.FileNotFoundException: https://downloads.gradle.org') ||
-        error.contains('java.io.IOException: Unable to tunnel through proxy')) {
-      throwToolExit('$gradle threw an error while trying to update itself.\n$e');
+    // TODO(jonahwilliams): automatically retry on network errors.
+    if (_kKnownErrorPrefixes.any((String candidate) => error.contains(candidate))) {
+      throwToolExit(
+        '$gradle threw an error while trying to update itself.'
+        ' Try rerunning to retry the update.\n$e');
+    }
+    // gradlew is missing execute.
+    if (error.contains('Permission denied')) {
+      throwToolExit(
+        '$gradle does not have permission to execute by your user.\n'
+        'You should change the ownership of the project directory to your user'
+        ', or move the project to a directory with execute permissions.\n$error'
+      );
+    }
+    // No idea what went wrong but we can't do anything about it.
+    if (error.contains('ProcessException: Process exited abnormally')) {
+      throwToolExit(
+        '$gradle exited abnormally. Try rerunning with \'-v\' for more '
+        'infomration, or check the gradlew script above for errors.\n$error');
     }
     rethrow;
   } finally {
