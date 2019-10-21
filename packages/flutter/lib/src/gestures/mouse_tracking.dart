@@ -122,7 +122,7 @@ class _MouseState {
   int get device => _mostRecentEvent.device;
 
   // The current mouse cursor.
-  MouseCursor cursor = SystemCursors.basic;
+  MouseCursor cursor = SystemMouseCursors.basic;
 
   @override
   String toString() {
@@ -339,7 +339,7 @@ class MouseTracker extends ChangeNotifier {
         return cursor;
       }
     }
-    return SystemCursors.basic;
+    return SystemMouseCursors.basic;
   }
 
   // Dispatch callbacks related to a device after all necessary information

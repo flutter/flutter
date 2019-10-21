@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../platform_channel.dart';
-import 'basic.dart';
+import 'common.dart';
 
 /// TODOC
 class AndroidMouseCursorConstants {
@@ -29,9 +29,9 @@ class AndroidMouseCursorConstants {
 
 /// TODOC
 @immutable
-class AndroidMouseCursorActions {
+class _AndroidMouseCursorActions {
   /// TODOC
-  const AndroidMouseCursorActions(this.mouseCursorChannel);
+  const _AndroidMouseCursorActions(this.mouseCursorChannel);
 
   /// TODOC
   final MethodChannel mouseCursorChannel;
@@ -51,18 +51,22 @@ class AndroidMouseCursorActions {
 /// TODOC
 class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
   /// TODOC
-  const MouseCursorAndroidDelegate();
+  const MouseCursorAndroidDelegate(this._mouseCursorChannel);
 
-  Future<void> _activateSystemConstant({
+  final MethodChannel _mouseCursorChannel;
+
+  Future<bool> _activateSystemConstant({
     ActivateMouseCursorDetails details,
     int systemConstant,
-  }) {
-    return AndroidMouseCursorActions(details.mouseCursorChannel)
+  }) async {
+    await _AndroidMouseCursorActions(_mouseCursorChannel)
       .setDeviceAsSystemCursor(device: details.device, systemConstant: systemConstant);
+    // This action is asserted to be successful. If not, throw the error.
+    return true;
   }
 
   @override
-  Future<void> activateSystemCursor(ActivateMouseCursorDetails details, SystemCursorShape shape) {
+  Future<bool> activateSystemCursor(ActivateMouseCursorDetails details, SystemCursorShape shape) async {
     switch (shape) {
       case SystemCursorShape.none:
         return _activateSystemConstant(
@@ -70,7 +74,9 @@ class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
           systemConstant: AndroidMouseCursorConstants.TYPE_NULL,
         );
       case SystemCursorShape.basic:
-        break;
+        return _activateSystemConstant(
+          systemConstant: AndroidMouseCursorConstants.TYPE_ARROW,
+        );
       case SystemCursorShape.click:
         return _activateSystemConstant(
           details: details,
@@ -82,14 +88,12 @@ class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
           systemConstant: AndroidMouseCursorConstants.TYPE_TEXT,
         );
       case SystemCursorShape.forbidden:
-        break;
+        return false;
       case SystemCursorShape.grab:
         return activateSystemCursor(details, SystemCursorShape.click);
       case SystemCursorShape.grabbing:
         return activateSystemCursor(details, SystemCursorShape.click);
     }
-    return _activateSystemConstant(
-      systemConstant: AndroidMouseCursorConstants.TYPE_ARROW,
-    );
+    return false;
   }
 }

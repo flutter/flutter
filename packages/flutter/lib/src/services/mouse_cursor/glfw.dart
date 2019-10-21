@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../platform_channel.dart';
-import 'basic.dart';
+import 'common.dart';
 
 /// TODOC
 class GLFWMouseCursorConstants {
@@ -21,9 +21,9 @@ class GLFWMouseCursorConstants {
 
 /// TODOC
 @immutable
-class GLFWMouseCursorActions {
+class _GLFWMouseCursorActions {
   /// TODOC
-  const GLFWMouseCursorActions(this.mouseCursorChannel);
+  const _GLFWMouseCursorActions(this.mouseCursorChannel);
 
   /// TODOC
   final MethodChannel mouseCursorChannel;
@@ -42,26 +42,32 @@ class GLFWMouseCursorActions {
 }
 
 /// TODOC
-@immutable
 class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
   /// TODOC
-  const MouseCursorGLFWDelegate();
+  MouseCursorGLFWDelegate(this._mouseCursorChannel);
 
-  Future<void> _activateSystemConstant({
+  final MethodChannel _mouseCursorChannel;
+
+  Future<bool> _activateSystemConstant({
     ActivateMouseCursorDetails details,
     int systemConstant,
     bool hidden,
-  }) {
-    return GLFWMouseCursorActions(details.mouseCursorChannel)
+  }) async {
+    await _GLFWMouseCursorActions(_mouseCursorChannel)
       .setDeviceAsSystemCursor(
         device: details.device,
         systemConstant: systemConstant,
         hidden: hidden,
       );
+    // This action is asserted to be successful. If not, throw the error.
+    return true;
   }
 
   @override
-  Future<void> activateSystemCursor(ActivateMouseCursorDetails details, SystemCursorShape shape) {
+  Future<bool> activateSystemCursor(
+    ActivateMouseCursorDetails details,
+    SystemCursorShape shape,
+  ) async {
     switch (shape) {
       case SystemCursorShape.none:
         return _activateSystemConstant(
@@ -70,7 +76,9 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
           hidden: true,
         );
       case SystemCursorShape.basic:
-        break;
+        return _activateSystemConstant(
+          systemConstant: GLFWMouseCursorConstants.GLFW_ARROW_CURSOR,
+        );
       case SystemCursorShape.click:
         return _activateSystemConstant(
           details: details,
@@ -81,14 +89,12 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
           systemConstant: GLFWMouseCursorConstants.GLFW_IBEAM_CURSOR,
         );
       case SystemCursorShape.forbidden:
-        break;
+        return false;
       case SystemCursorShape.grab:
         return activateSystemCursor(details, SystemCursorShape.click);
       case SystemCursorShape.grabbing:
         return activateSystemCursor(details, SystemCursorShape.click);
     }
-    return _activateSystemConstant(
-      systemConstant: GLFWMouseCursorConstants.GLFW_ARROW_CURSOR,
-    );
+    return false;
   }
 }

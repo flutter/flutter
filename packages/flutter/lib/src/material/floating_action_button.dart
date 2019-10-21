@@ -455,7 +455,7 @@ class FloatingActionButton extends StatelessWidget {
 
     Widget result = RawMaterialButton(
       onPressed: onPressed,
-      mouseCursor: SystemCursors.click,
+      mouseCursor: SystemMouseCursors.click,
       elevation: elevation,
       focusElevation: focusElevation,
       hoverElevation: hoverElevation,
