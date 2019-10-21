@@ -149,7 +149,7 @@ class ButtonBar extends StatelessWidget {
     final double paddingUnit = buttonTheme.padding.horizontal / 4.0;
     final Widget child = ButtonTheme.fromButtonThemeData(
       data: buttonTheme,
-      child: ButtonBarRow(
+      child: _ButtonBarRow(
         mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
         children: children.map<Widget>((Widget child) {
@@ -196,10 +196,10 @@ class ButtonBar extends StatelessWidget {
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
 /// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
 /// align to the horizontal start of the button bar.
-class ButtonBarRow extends Flex {
+class _ButtonBarRow extends Flex {
   /// Creates a button bar that attempts to display in a row, but displays in
   /// a column if there is insufficient horizontal space.
-  ButtonBarRow({
+  _ButtonBarRow({
     List<Widget> children,
     Axis direction = Axis.horizontal,
     MainAxisSize mainAxisSize = MainAxisSize.max,
@@ -220,8 +220,8 @@ class ButtonBarRow extends Flex {
   );
 
   @override
-  RenderButtonBarRow createRenderObject(BuildContext context) {
-    return RenderButtonBarRow(
+  _RenderButtonBarRow createRenderObject(BuildContext context) {
+    return _RenderButtonBarRow(
       direction: direction,
       mainAxisAlignment: mainAxisAlignment,
       mainAxisSize: mainAxisSize,
@@ -233,7 +233,7 @@ class ButtonBarRow extends Flex {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderButtonBarRow renderObject) {
+  void updateRenderObject(BuildContext context, covariant _RenderButtonBarRow renderObject) {
     renderObject
       ..direction = direction
       ..mainAxisAlignment = mainAxisAlignment
@@ -259,10 +259,10 @@ class ButtonBarRow extends Flex {
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
 /// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
 /// align to the horizontal start of the button bar.
-class RenderButtonBarRow extends RenderFlex {
+class _RenderButtonBarRow extends RenderFlex {
   /// Creates a button bar that attempts to display in a row, but displays in
   /// a column if there is insufficient horizontal space.
-  RenderButtonBarRow({
+  _RenderButtonBarRow({
     List<RenderBox> children,
     Axis direction = Axis.horizontal,
     MainAxisSize mainAxisSize = MainAxisSize.max,
@@ -323,7 +323,7 @@ class RenderButtonBarRow extends RenderFlex {
           case TextDirection.ltr:
             switch (mainAxisAlignment) {
               case MainAxisAlignment.center:
-                final double midpoint = constraints.maxWidth / 2.0 - child.size.width / 2.0;
+                final double midpoint = (constraints.maxWidth - child.size.width) / 2.0;
                 childParentData.offset = Offset(midpoint, currentHeight);
                 break;
               case MainAxisAlignment.end:

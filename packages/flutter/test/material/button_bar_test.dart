@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -83,65 +85,159 @@ void main() {
 
   group('mainAxisSize', () {
 
-    testWidgets('default mainAxisSize is MainAxisSize.max', (WidgetTester tester) async {
+    testWidgets('Default mainAxisSize is MainAxisSize.max', (WidgetTester tester) async {
+      const Key buttonBarKey = Key('row');
+      const Key child0Key = Key('child0');
+      const Key child1Key = Key('child1');
+      const Key child2Key = Key('child2');
+
       await tester.pumpWidget(
         MaterialApp(
-          home: ButtonBar(
-            children: <Widget>[
-              Container(),
-            ],
+          home: Center(
+            child: ButtonBar(
+              key: buttonBarKey,
+              // buttonPadding set to zero to simplify test calculations.
+              buttonPadding: EdgeInsets.zero,
+              children: <Widget>[
+                Container(key: child0Key, width: 100.0, height: 100.0),
+                Container(key: child1Key, width: 100.0, height: 100.0),
+                Container(key: child2Key, width: 100.0, height: 100.0),
+              ],
+            ),
           ),
         ),
       );
 
-      // ButtonBar uses a Row internally to implement this
-      final ButtonBarRow row = tester.widget(find.byType(ButtonBarRow));
-      expect(row.mainAxisSize, equals(MainAxisSize.max));
+      // ButtonBar should take up all the space it is provided by its parent.
+      final Rect buttonBarRect = tester.getRect(find.byKey(buttonBarKey));
+      expect(buttonBarRect.size.width, equals(800.0));
+      expect(buttonBarRect.size.height, equals(100.0));
+
+      // The children of [ButtonBar] are aligned by [MainAxisAligment.end] by
+      // default.
+      Rect childRect;
+      childRect = tester.getRect(find.byKey(child0Key));
+      expect(childRect.size.width, equals(100.0));
+      expect(childRect.size.height, equals(100.0));
+      expect(childRect.right, 800.0 - 200.0);
+
+      childRect = tester.getRect(find.byKey(child1Key));
+      expect(childRect.size.width, equals(100.0));
+      expect(childRect.size.height, equals(100.0));
+      expect(childRect.right, 800.0 - 100.0);
+
+      childRect = tester.getRect(find.byKey(child2Key));
+      expect(childRect.size.width, equals(100.0));
+      expect(childRect.size.height, equals(100.0));
+      expect(childRect.right, 800.0);
     });
 
     testWidgets('ButtonBarTheme.mainAxisSize overrides default', (WidgetTester tester) async {
+      const Key buttonBarKey = Key('row');
+      const Key child0Key = Key('child0');
+      const Key child1Key = Key('child1');
+      const Key child2Key = Key('child2');
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBarTheme(
             data: const ButtonBarThemeData(
               mainAxisSize: MainAxisSize.min,
             ),
-            child: ButtonBar(
-              children: <Widget>[
-                Container(),
-              ],
+            child: Center(
+              child: ButtonBar(
+                key: buttonBarKey,
+                // buttonPadding set to zero to simplify test calculations.
+                buttonPadding: EdgeInsets.zero,
+                children: <Widget>[
+                  Container(key: child0Key, width: 100.0, height: 100.0),
+                  Container(key: child1Key, width: 100.0, height: 100.0),
+                  Container(key: child2Key, width: 100.0, height: 100.0),
+                ],
+              ),
             ),
           ),
         ),
       );
 
-      // ButtonBar uses a Row internally to implement this
-      final ButtonBarRow row = tester.widget(find.byType(ButtonBarRow));
-      expect(row.mainAxisSize, equals(MainAxisSize.min));
+      // ButtonBar should take up minimum space it requires.
+      final Rect buttonBarRect = tester.getRect(find.byKey(buttonBarKey));
+      expect(buttonBarRect.size.width, equals(300.0));
+      expect(buttonBarRect.size.height, equals(100.0));
+
+      Rect childRect;
+      childRect = tester.getRect(find.byKey(child0Key));
+      expect(childRect.size.width, equals(100.0));
+      expect(childRect.size.height, equals(100.0));
+      // Should be a center aligned because of [Center] widget.
+      // First child is on the left side of the button bar.
+      expect(childRect.left, (800.0 - buttonBarRect.width) / 2.0);
+
+      childRect = tester.getRect(find.byKey(child1Key));
+      expect(childRect.size.width, equals(100.0));
+      expect(childRect.size.height, equals(100.0));
+      // Should be a center aligned because of [Center] widget.
+      // Second child is on the center the button bar.
+      expect(childRect.left, ((800.0 - buttonBarRect.width) / 2.0) + 100.0);
+
+      childRect = tester.getRect(find.byKey(child2Key));
+      expect(childRect.size.width, equals(100.0));
+      expect(childRect.size.height, equals(100.0));
+      // Should be a center aligned because of [Center] widget.
+      // Third child is on the right side of the button bar.
+      expect(childRect.left, ((800.0 - buttonBarRect.width) / 2.0) + 200.0);
     });
 
     testWidgets('ButtonBar.mainAxisSize overrides ButtonBarTheme.mainAxisSize and default', (WidgetTester tester) async {
+      const Key buttonBarKey = Key('row');
+      const Key child0Key = Key('child0');
+      const Key child1Key = Key('child1');
+      const Key child2Key = Key('child2');
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBarTheme(
             data: const ButtonBarThemeData(
               mainAxisSize: MainAxisSize.min,
             ),
-            child: ButtonBar(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Container(),
-              ],
+            child: Center(
+              child: ButtonBar(
+                key: buttonBarKey,
+                // buttonPadding set to zero to simplify test calculations.
+                buttonPadding: EdgeInsets.zero,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Container(key: child0Key, width: 100.0, height: 100.0),
+                  Container(key: child1Key, width: 100.0, height: 100.0),
+                  Container(key: child2Key, width: 100.0, height: 100.0),
+                ],
+              ),
             ),
           ),
         ),
       );
 
-      // ButtonBar uses a Row internally to implement this
-      final ButtonBarRow row = tester.widget(find.byType(ButtonBarRow));
-      expect(row.mainAxisSize, equals(MainAxisSize.max));
-    });
+      // ButtonBar should take up all the space it is provided by its parent.
+      final Rect buttonBarRect = tester.getRect(find.byKey(buttonBarKey));
+      expect(buttonBarRect.size.width, equals(800.0));
+      expect(buttonBarRect.size.height, equals(100.0));
 
+      // The children of [ButtonBar] are aligned by [MainAxisAligment.end] by
+      // default.
+      Rect childRect;
+      childRect = tester.getRect(find.byKey(child0Key));
+      expect(childRect.size.width, equals(100.0));
+      expect(childRect.size.height, equals(100.0));
+      expect(childRect.right, 800.0 - 200.0);
+
+      childRect = tester.getRect(find.byKey(child1Key));
+      expect(childRect.size.width, equals(100.0));
+      expect(childRect.size.height, equals(100.0));
+      expect(childRect.right, 800.0 - 100.0);
+
+      childRect = tester.getRect(find.byKey(child2Key));
+      expect(childRect.size.width, equals(100.0));
+      expect(childRect.size.height, equals(100.0));
+      expect(childRect.right, 800.0);
+    });
   });
 
   group('button properies override ButtonTheme', () {
