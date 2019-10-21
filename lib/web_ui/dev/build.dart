@@ -20,6 +20,11 @@ class BuildCommand extends Command<bool> {
         abbr: 'w',
         help: 'Run the build in watch mode so it rebuilds whenever a change'
             'is made.',
+      )
+      ..addOption(
+        'ninja-jobs',
+        abbr: 'j',
+        help: 'Number of parallel jobs to use in the ninja build.',
       );
   }
 
@@ -31,12 +36,21 @@ class BuildCommand extends Command<bool> {
 
   bool get isWatchMode => argResults['watch'];
 
+  int getNinjaJobCount() {
+    final String ninjaJobsArg = argResults['ninja-jobs'];
+    if (ninjaJobsArg != null) {
+      return int.tryParse(ninjaJobsArg);
+    }
+    return null;
+  }
+
   @override
   FutureOr<bool> run() async {
+    final int ninjaJobCount = getNinjaJobCount();
     final FilePath libPath = FilePath.fromWebUi('lib');
     final Pipeline buildPipeline = Pipeline(steps: <PipelineStep>[
       gn,
-      ninja,
+      () => ninja(ninjaJobCount),
     ]);
     await buildPipeline.start();
 
@@ -67,11 +81,17 @@ Future<void> gn() {
 }
 
 // TODO(mdebbar): Make the ninja step interruptable in the pipeline.
-Future<void> ninja() {
-  print('Running ninja...');
+Future<void> ninja(int ninjaJobs) {
+  if (ninjaJobs == null) {
+    print('Running ninja (with default ninja parallelization)...');
+  } else {
+    print('Running ninja (with $ninjaJobs parallel jobs)...');
+  }
+
   return runProcess('ninja', <String>[
     '-C',
     environment.hostDebugUnoptDir.path,
+    if (ninjaJobs != null) ...['-j', '$ninjaJobs'],
   ]);
 }
 
@@ -106,8 +126,10 @@ class Pipeline {
         await _currentStepFuture;
       }
       status = PipelineStatus.done;
-    } catch (_) {
+    } catch (error, stackTrace) {
       status = PipelineStatus.error;
+      print('Error in the pipeline: $error');
+      print(stackTrace);
     } finally {
       _currentStepFuture = null;
     }

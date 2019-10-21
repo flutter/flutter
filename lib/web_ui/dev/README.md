@@ -23,6 +23,13 @@ felt build --watch
 
 If you don't want to add `felt` to your path, you can still invoke it using a relative path like `./web_ui/dev/felt <command>`
 
+## Speeding up your builds
+You can speed up your builds by using more CPU cores. Pass `-j` to specify the desired level of parallelism, like so:
+```
+felt build [-w] -j 100
+```
+If you are a Google employee, you can use an internal instance of Goma to parallelize your builds. Because Goma compiles code on remote servers, this option is effective even on low-powered laptops.
+
 ## Running web engine tests
 To run all tests:
 ```
