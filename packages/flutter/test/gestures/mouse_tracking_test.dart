@@ -56,7 +56,7 @@ void main() {
     final MouseTracker mouseTracker = MouseTracker(
       GestureBinding.instance.pointerRouter,
       annotationFinder,
-      _MouseCursorManagerTestDelegate(handleSetCursor)
+      MouseCursorManager(handleSetCursor)
     );
     RendererBinding.instance.initMouseTracker(mouseTracker);
   }
@@ -779,20 +779,6 @@ class _EventListCriticalFieldsMatcher extends Matcher {
 
 Matcher _equalToEventsOnCriticalFields(List<PointerEvent> source) {
   return _EventListCriticalFieldsMatcher(source);
-}
-
-class _MouseCursorManagerTestDelegate implements MouseCursorDelegate {
-  _MouseCursorManagerTestDelegate(this.handleSetCursor);
-
-  final bool Function(int, int) handleSetCursor;
-
-  @override
-  Future<bool> setCursor(int device, int cursor) async {
-    if (handleSetCursor == null) {
-      return true;
-    }
-    return handleSetCursor(device, cursor);
-  }
 }
 
 @immutable

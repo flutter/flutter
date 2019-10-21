@@ -24,14 +24,14 @@ class SystemCursor extends PlatformDependentCursor {
   final String description;
 
   @override
-  Future<void> onActivateOnPlatform(MouseCursorTargetPlatform platform, ActivateMouseCursorDetails details) {
+  Future<void> activateOnPlatform(MouseCursorTargetPlatform platform, ActivateMouseCursorDetails details) {
     switch (platform) {
       case MouseCursorTargetPlatform.android:
-        return const AndroidSystemCursorCollection()
-          .activateShape(details, shape);
+        return const MouseCursorAndroidDelegate()
+          .activateSystemCursor(details, shape);
       case MouseCursorTargetPlatform.linux:
-        return const GLFWSystemCursorCollection()
-          .activateShape(details, shape);
+        return const MouseCursorGLFWDelegate()
+          .activateSystemCursor(details, shape);
     }
     return null;
   }

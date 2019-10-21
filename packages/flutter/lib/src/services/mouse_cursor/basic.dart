@@ -45,12 +45,20 @@ enum SystemCursorShape {
 
 /// TODOC
 @immutable
+class CreateMouseCursorDetails {
+  /// TODOC
+  const CreateMouseCursorDetails({
+  });
+}
+
+/// TODOC
+@immutable
 class ActivateMouseCursorDetails {
   /// TODOC
   const ActivateMouseCursorDetails({
-    this.device,
-    this.mouseCursorChannel,
-  });
+    @required this.device,
+    @required this.mouseCursorChannel,
+  }) : assert(device != null), assert(mouseCursorChannel != null);
 
   /// TODOC
   final int device;
@@ -66,7 +74,7 @@ abstract class MouseCursor {
   const MouseCursor();
 
   /// TODOC
-  Future<void> onActivate(ActivateMouseCursorDetails details);
+  Future<void> activate(ActivateMouseCursorDetails details);
 
   /// TODOC
   /// Platform-independent
@@ -85,7 +93,7 @@ class NoopMouseCursor extends MouseCursor {
 
   /// This method does nothing and immediately returns.
   @override
-  Future<void> onActivate(ActivateMouseCursorDetails details) async {
+  Future<void> activate(ActivateMouseCursorDetails details) async {
     return;
   }
 
@@ -115,18 +123,18 @@ abstract class PlatformDependentCursor extends MouseCursor {
   static bool _platformIsSupported;
 
   @override
-  Future<void> onActivate(ActivateMouseCursorDetails details) {
+  Future<void> activate(ActivateMouseCursorDetails details) {
     _ensureCalculatedPlatform();
     if (!_platformIsSupported)
       return onActivateOnUnsupportedPlatform(details);
     assert(_platform != null);
-    return onActivateOnPlatform(_platform, details);
+    return activateOnPlatform(_platform, details);
   }
 
   /// TODOC
   /// platform is never null
   @protected
-  Future<void> onActivateOnPlatform(
+  Future<void> activateOnPlatform(
     MouseCursorTargetPlatform platform,
     ActivateMouseCursorDetails details,
   );
@@ -139,22 +147,37 @@ abstract class PlatformDependentCursor extends MouseCursor {
 }
 
 /// TODOC
-abstract class SystemCursorCollection {
+abstract class MouseCursorPlatformDelegate {
   /// TODOC
-  const SystemCursorCollection();
+  const MouseCursorPlatformDelegate();
 
   /// TODOC
-  Future<void> activateShape(ActivateMouseCursorDetails details, SystemCursorShape shape);
+  /// Returns whether the cursor was successfully set. 
+  Future<bool> activateSystemCursor(
+    ActivateMouseCursorDetails details,
+    SystemCursorShape shape,
+  );
+
+  /// TODOC
+  /// Returns a cursor handle. Can be null.
+  Future<int> createCursor(
+    CreateMouseCursorDetails details,
+  );
 }
 
 /// TODOC
-class UnsupportedSystemCursorCollection extends SystemCursorCollection {
+class UnsupportedSystemCursorCollection extends MouseCursorPlatformDelegate {
   /// TODOC
   const UnsupportedSystemCursorCollection();
 
   @override
-  Future<void> activateShape(ActivateMouseCursorDetails details, SystemCursorShape shape) async {
-    return;
+  Future<bool> activateSystemCursor(ActivateMouseCursorDetails details, SystemCursorShape shape) async {
+    return true;
+  }
+
+  @override
+  Future<int> createCursor(CreateMouseCursorDetails details) {
+    return null;
   }
 }
 
@@ -170,6 +193,9 @@ class MouseCursorManager {
 
   /// TODOC
   Future<void> setDeviceCursor(int device, MouseCursor cursor) async {
-    throw UnimplementedError();
+    return cursor.activate(ActivateMouseCursorDetails(
+      device: device,
+      mouseCursorChannel: channel,
+    ));
   }
 }

@@ -49,9 +49,9 @@ class AndroidMouseCursorActions {
 }
 
 /// TODOC
-class AndroidSystemCursorCollection extends SystemCursorCollection {
+class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
   /// TODOC
-  const AndroidSystemCursorCollection();
+  const MouseCursorAndroidDelegate();
 
   Future<void> _activateSystemConstant({
     ActivateMouseCursorDetails details,
@@ -62,7 +62,7 @@ class AndroidSystemCursorCollection extends SystemCursorCollection {
   }
 
   @override
-  Future<void> activateShape(ActivateMouseCursorDetails details, SystemCursorShape shape) {
+  Future<void> activateSystemCursor(ActivateMouseCursorDetails details, SystemCursorShape shape) {
     switch (shape) {
       case SystemCursorShape.none:
         return _activateSystemConstant(
@@ -84,9 +84,9 @@ class AndroidSystemCursorCollection extends SystemCursorCollection {
       case SystemCursorShape.forbidden:
         break;
       case SystemCursorShape.grab:
-        return activateShape(details, SystemCursorShape.click);
+        return activateSystemCursor(details, SystemCursorShape.click);
       case SystemCursorShape.grabbing:
-        return activateShape(details, SystemCursorShape.click);
+        return activateSystemCursor(details, SystemCursorShape.click);
     }
     return _activateSystemConstant(
       systemConstant: AndroidMouseCursorConstants.TYPE_ARROW,
