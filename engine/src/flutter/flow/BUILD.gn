@@ -114,6 +114,7 @@ executable("flow_unittests") {
     "matrix_decomposition_unittests.cc",
     "mutators_stack_unittests.cc",
     "raster_cache_unittests.cc",
+    "skia_gpu_object_unittests.cc",
     "texture_unittests.cc",
   ]
 
@@ -121,6 +122,7 @@ executable("flow_unittests") {
     ":flow",
     ":flow_fixtures",
     "$flutter_root/fml",
+    "$flutter_root/testing:testing_lib",
     "//third_party/dart/runtime:libdart_jit",  # for tracing
     "//third_party/googletest:gtest",
     "//third_party/skia",

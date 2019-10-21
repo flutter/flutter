@@ -80,6 +80,7 @@ FILE: ../../../flutter/flow/scene_update_context.cc
 FILE: ../../../flutter/flow/scene_update_context.h
 FILE: ../../../flutter/flow/skia_gpu_object.cc
 FILE: ../../../flutter/flow/skia_gpu_object.h
+FILE: ../../../flutter/flow/skia_gpu_object_unittests.cc
 FILE: ../../../flutter/flow/texture.cc
 FILE: ../../../flutter/flow/texture.h
 FILE: ../../../flutter/flow/texture_unittests.cc
