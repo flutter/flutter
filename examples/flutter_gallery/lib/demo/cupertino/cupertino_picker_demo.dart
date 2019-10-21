@@ -59,10 +59,10 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     return Container(
       height: _kPickerSheetHeight,
       padding: const EdgeInsets.only(top: 6.0),
-      color: CupertinoColors.white,
+      color: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
       child: DefaultTextStyle(
-        style: const TextStyle(
-          color: CupertinoColors.black,
+        style: TextStyle(
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
           fontSize: 22.0,
         ),
         child: GestureDetector(
@@ -90,7 +90,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               CupertinoPicker(
                 scrollController: scrollController,
                 itemExtent: _kPickerItemHeight,
-                backgroundColor: CupertinoColors.white,
+                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
                 onSelectedItemChanged: (int index) {
                   setState(() => _selectedColorIndex = index);
                 },
@@ -126,6 +126,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _buildBottomPicker(
               CupertinoTimerPicker(
+                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
                 initialTimerDuration: timer,
                 onTimerDurationChanged: (Duration newTimer) {
                   setState(() => timer = newTimer);
@@ -157,6 +158,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _buildBottomPicker(
               CupertinoDatePicker(
+                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
                 mode: CupertinoDatePickerMode.date,
                 initialDateTime: date,
                 onDateTimeChanged: (DateTime newDateTime) {
@@ -187,6 +189,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _buildBottomPicker(
               CupertinoDatePicker(
+                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
                 mode: CupertinoDatePickerMode.time,
                 initialDateTime: time,
                 onDateTimeChanged: (DateTime newDateTime) {
@@ -217,6 +220,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _buildBottomPicker(
               CupertinoDatePicker(
+                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
                 mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: dateTime,
                 onDateTimeChanged: (DateTime newDateTime) {
@@ -252,22 +256,15 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       ),
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: CupertinoTheme.of(context).brightness == Brightness.light
-                ? CupertinoColors.extraLightBackgroundGray
-                : CupertinoColors.darkBackgroundGray,
-          ),
-          child: ListView(
-            children: <Widget>[
-              const Padding(padding: EdgeInsets.only(top: 32.0)),
-              _buildColorPicker(context),
-              _buildCountdownTimerPicker(context),
-              _buildDatePicker(context),
-              _buildTimePicker(context),
-              _buildDateAndTimePicker(context),
-            ],
-          ),
+        child: ListView(
+          children: <Widget>[
+            const Padding(padding: EdgeInsets.only(top: 32.0)),
+            _buildColorPicker(context),
+            _buildCountdownTimerPicker(context),
+            _buildDatePicker(context),
+            _buildTimePicker(context),
+            _buildDateAndTimePicker(context),
+          ],
         ),
       ),
     );
