@@ -447,9 +447,8 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (flutterUsage.isFirstRun) {
-          flutterUsage.printWelcome();
-        }
+        // Prints the welcome message if needed.
+        flutterUsage.printWelcome();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult;
