@@ -15,7 +15,7 @@ SkiaUnrefQueue::SkiaUnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
       drain_pending_(false) {}
 
 SkiaUnrefQueue::~SkiaUnrefQueue() {
-  Drain();
+  FML_DCHECK(objects_.empty());
 }
 
 void SkiaUnrefQueue::Unref(SkRefCnt* object) {
