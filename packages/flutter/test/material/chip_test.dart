@@ -1920,7 +1920,7 @@ void main() {
           onDeleted: () { },
           backgroundColor: Colors.pink,
           label: const Text('Chip with delete icon'),
-          deleteIcon: Icon(Icons.cancel),
+          deleteIcon: const Icon(Icons.cancel),
         ),
       ),
     );
