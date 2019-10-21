@@ -32,7 +32,7 @@ import 'android_sdk.dart';
 enum _HardwareType { emulator, physical }
 
 /// Map to help our `isLocalEmulator` detection.
-const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
+const Map<String, _HardwareType> _kKnownHardware = <String, _HardwareType>{
   'goldfish': _HardwareType.emulator,
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
@@ -42,6 +42,7 @@ const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
   'samsungexynos9810': _HardwareType.physical,
+  'samsungexynos7570': _HardwareType.physical,
 };
 
 bool allowHeapCorruptionOnWindows(int exitCode) {
@@ -122,9 +123,9 @@ class AndroidDevice extends Device {
     if (_isLocalEmulator == null) {
       final String hardware = await _getProperty('ro.hardware');
       printTrace('ro.hardware = $hardware');
-      if (_knownHardware.containsKey(hardware)) {
+      if (_kKnownHardware.containsKey(hardware)) {
         // Look for known hardware models.
-        _isLocalEmulator = _knownHardware[hardware] == _HardwareType.emulator;
+        _isLocalEmulator = _kKnownHardware[hardware] == _HardwareType.emulator;
       } else {
         // Fall back to a best-effort heuristic-based approach.
         final String characteristics = await _getProperty('ro.build.characteristics');
