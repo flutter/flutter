@@ -45,7 +45,7 @@ void main() {
 
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('activityIndicator.paused.light.png', version: 0),
+      matchesGoldenFile('activityIndicator.paused.light.png'),
     );
 
     await tester.pumpWidget(
@@ -65,7 +65,7 @@ void main() {
 
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('activityIndicator.paused.dark.png', version: 0),
+      matchesGoldenFile('activityIndicator.paused.dark.png'),
     );
   });
 
