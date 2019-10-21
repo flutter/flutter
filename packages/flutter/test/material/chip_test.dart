@@ -188,16 +188,6 @@ void _expectCheckmarkColor(Finder finder, Color color) {
   );
 }
 
-Future<void> pumpFrames({
-  WidgetTester tester,
-  int frames,
-  Duration duration,
-}) async {
-  for (int i = 0; i < frames; ++i) {
-    await tester.pump(duration);
-  }
-}
-
 Widget _chipWithOptionalDeleteButton({
   UniqueKey deleteButtonKey,
   UniqueKey labelKey,
