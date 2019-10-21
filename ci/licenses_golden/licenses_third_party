@@ -1,4 +1,4 @@
-Signature: a418a65187112c66586ad4b47f6c2f6e
+Signature: 2cc07f9d4ea778820af052007d9c6b64
 
 UNUSED LICENSES:
 
@@ -3308,27 +3308,6 @@ FILE: ../../../third_party/boringssl/src/util/bot/yasm-win32.exe.sha1
 FILE: ../../../third_party/boringssl/src/util/doc.config
 FILE: ../../../third_party/boringssl/src/util/doc.go
 FILE: ../../../third_party/boringssl/src/util/fipstools/delocate.peg.go
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-GlobalEntry/in.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-GlobalEntry/out.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-LoadToR0/in.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-LoadToR0/out.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-Sample/in.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-Sample/out.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-Sample2/in.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-Sample2/out.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-TOCWithOffset/in.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/ppc64le-TOCWithOffset/out.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-BSS/in.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-BSS/out.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-Basic/in.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-Basic/out.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-GOTRewrite/in.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-GOTRewrite/out.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-LabelRewrite/in1.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-LabelRewrite/in2.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-LabelRewrite/out.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-Sections/in.s
-FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-Sections/out.s
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/vm/lib/bigint_patch.dart
 ----------------------------------------------------------------------------------------------------
