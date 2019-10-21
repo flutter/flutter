@@ -1,4 +1,4 @@
-Signature: d52395830cb736d9f08073419100ba12
+Signature: 961809a7ec0221157e15192a4d0d87b7
 
 UNUSED LICENSES:
 
@@ -474,9 +474,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.ethernet/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.address.space/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.control/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.pipe/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
@@ -1273,12 +1271,10 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/styles.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.ethernet/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.address.space/goldfish-address-space.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.address.space/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.control/goldfish-control.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.control/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.pipe/goldfish-pipe.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.pipe/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_address_space.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_control.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_pipe.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/hwinfo.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/image_pipe2.fidl
@@ -2042,9 +2038,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.ethernet/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.address.space/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.control/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.pipe/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
