@@ -18,8 +18,7 @@ import 'debug.dart';
 ///
 /// See also:
 ///
-///  * [Layer.find], [Layer.findAll], and [Layer.findAnnotations], which create
-///    and use objects of this class.
+///  * [Layer.findAnnotations], which create and use objects of this class.
 @immutable
 class AnnotationEntry<T> {
   /// Create an entry of found annotation by providing the oject and related
@@ -48,8 +47,8 @@ class AnnotationEntry<T> {
 /// See also:
 ///
 ///  * [AnnotationEntry], which are members of this class.
-///  * [Layer.findAll], and [Layer.findAnnotations], which create and use an
-///    object of this class.
+///  * [Layer.findAllAnnotations], and [Layer.findAnnotations], which create and
+///    use an object of this class.
 class AnnotationResult<T> {
   final List<AnnotationEntry<T>> _entries = <AnnotationEntry<T>>[];
 
@@ -280,23 +279,28 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// location described by `localPosition`.
   ///
   /// This method is called by the default implementation of [find] and
-  /// [findAll]. Override this method to customize how the layer should search
-  /// for annotations, or if the layer has its own annotations to add.
+  /// [findAllAnnotations]. Override this method to customize how the layer
+  /// should search for annotations, or if the layer has its own annotations to
+  /// add.
+  ///
+  /// The default implementation simply returns `false`, which means neither
+  /// the layer nor its children has annotations, and the annotation search
+  /// is not absorbed either (see below for explanation).
   ///
   /// ## About layer annotations
   ///
   /// {@template flutter.rendering.layer.findAnnotations.aboutAnnotations}
-  /// Annotation is an optional object of any type that can be carried with a
+  /// An annotation is an optional object of any type that can be carried with a
   /// layer. An annotation can be found at a location as long as the owner layer
   /// contains the location and is walked to.
   ///
-  /// The annotations are searched by first visitng each child recursively, then
-  /// this layer, resulting in an order from visually front to back. Annotations
-  /// must meet the given restrictions, such as type and position.
+  /// The annotations are searched by first visiting each child recursively,
+  /// then this layer, resulting in an order from visually front to back.
+  /// Annotations must meet the given restrictions, such as type and position.
   ///
   /// The common way for a value to be found here is by pushing an
   /// [AnnotatedRegionLayer] into the layer tree, or by adding the desired
-  /// annotation by overriding `findAnnotations`.
+  /// annotation by overriding [findAnnotations].
   /// {@endtemplate}
   ///
   /// ## Parameters and return value
@@ -326,7 +330,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     AnnotationResult<S> result,
     Offset localPosition, {
     @required bool onlyFirst,
-  });
+  }) {
+    return false;
+  }
 
   /// Search this layer and its subtree for the first annotation of type `S`
   /// under the point described by `localPosition`.
@@ -334,8 +340,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Returns null if no matching annotations are found.
   ///
   /// By default this method simply calls [findAnnotations] with `onlyFirst:
-  /// true` and returns the first result. It is encouraged to override
-  /// [findAnnotations] instead of this method.
+  /// true` and returns the annotation of the first result. Prefer overriding
+  /// [findAnnotations] instead of this method, because during an annotation
+  /// search, only [findAnnotations] is recursively called, while custom
+  /// behavior in this method is ignored.
   ///
   /// ## About layer annotations
   ///
@@ -343,13 +351,13 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// See also:
   ///
-  ///  * [findAll], which is similar but returns all annotations found at the
-  ///    given position.
+  ///  * [findAllAnnotations], which is similar but returns all annotations found
+  ///    at the given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  AnnotationEntry<S> find<S>(Offset localPosition) {
+  S find<S>(Offset localPosition) {
     final AnnotationResult<S> result = AnnotationResult<S>();
     findAnnotations<S>(result, localPosition, onlyFirst: true);
-    return result.entries.isEmpty ? null : result.entries.first;
+    return result.entries.isEmpty ? null : result.entries.first.annotation;
   }
 
   /// Search this layer and its subtree for all annotations of type `S` under
@@ -358,8 +366,40 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Returns a result with empty entries if no matching annotations are found.
   ///
   /// By default this method simply calls [findAnnotations] with `onlyFirst:
-  /// false` and returns its result. It is encouraged to override
-  /// [findAnnotations] instead of this method.
+  /// false` and returns the annotations of its result. Prefer overriding
+  /// [findAnnotations] instead of this method, because during an annotation
+  /// search, only [findAnnotations] is recursively called, while custom
+  /// behavior in this method is ignored.
+  ///
+  /// ## About layer annotations
+  ///
+  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
+  ///
+  /// See also:
+  ///
+  ///  * [find], which is similar but returns the first annotation found at the
+  ///    given position.
+  ///  * [findAllAnnotations], which is similar but returns an
+  ///    [AnnotationResult], which contains more information, such as the local
+  ///    position of the event related to each annotation, and is equally fast,
+  ///    hence is preferred over [findAll].
+  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
+  @Deprecated('Use findAllAnnotations instead. This API will be removed in early 2020.')
+  Iterable<S> findAll<S>(Offset localPosition) {
+    final AnnotationResult<S> result = findAllAnnotations(localPosition);
+    return result.entries.map((AnnotationEntry<S> entry) => entry.annotation);
+  }
+
+  /// Search this layer and its subtree for all annotations of type `S` under
+  /// the point described by `localPosition`.
+  ///
+  /// Returns a result with empty entries if no matching annotations are found.
+  ///
+  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// false` and returns the annotations of its result. Prefer overriding
+  /// [findAnnotations] instead of this method, because during an annotation
+  /// search, only [findAnnotations] is recursively called, while custom
+  /// behavior in this method is ignored.
   ///
   /// ## About layer annotations
   ///
@@ -370,7 +410,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [find], which is similar but returns the first annotation found at the
   ///    given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  AnnotationResult<S> findAll<S>(Offset localPosition) {
+  AnnotationResult<S> findAllAnnotations<S>(Offset localPosition) {
     final AnnotationResult<S> result = AnnotationResult<S>();
     findAnnotations<S>(result, localPosition, onlyFirst: false);
     return result;
@@ -2247,10 +2287,10 @@ class FollowerLayer extends ContainerLayer {
 /// layer to the tree is the common way of adding an annotation.
 ///
 /// An annotation is an optional object of any type that, when attached with a
-/// layer, can be retrieved using [Layer.find] or [Layer.findAll] with a
-/// position. The search process is done recursively, controlled by a concept
-/// of being opaque to a type of annotation, explained in the document of
-/// [Layer.findAnnotations].
+/// layer, can be retrieved using [Layer.find] or [Layer.findAllAnnotations]
+/// with a position. The search process is done recursively, controlled by a
+/// concept of being opaque to a type of annotation, explained in the document
+/// of [Layer.findAnnotations].
 ///
 /// When an annotation search arrives, this layer defers the same search to each
 /// of this layer's children, respecting their opacity. Then it adds this

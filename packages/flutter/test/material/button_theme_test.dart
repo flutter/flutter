@@ -18,7 +18,6 @@ void main() {
     ));
     expect(theme.alignedDropdown, false);
     expect(theme.layoutBehavior, ButtonBarLayoutBehavior.padded);
-    expect(theme.colorScheme, const ColorScheme.light());
   });
 
   test('ButtonThemeData default overrides', () {
@@ -29,14 +28,12 @@ void main() {
       padding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(),
       alignedDropdown: true,
-      colorScheme: ColorScheme.dark()
     );
     expect(theme.textTheme, ButtonTextTheme.primary);
     expect(theme.constraints, const BoxConstraints(minWidth: 100.0, minHeight: 200.0));
     expect(theme.padding, EdgeInsets.zero);
     expect(theme.shape, const RoundedRectangleBorder());
     expect(theme.alignedDropdown, true);
-    expect(theme.colorScheme, const ColorScheme.dark());
   });
 
   testWidgets('ButtonTheme defaults', (WidgetTester tester) async {
@@ -83,7 +80,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     ));
     expect(alignedDropdown, false);
-    expect(colorScheme, const ColorScheme.light());
+    expect(colorScheme, ThemeData.light().colorScheme);
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 36.0));
   });
@@ -98,7 +95,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     ));
     expect(theme.alignedDropdown, false);
-    expect(theme.colorScheme, const ColorScheme.light());
+    expect(theme.colorScheme, null);
 
     theme = const ButtonThemeData().copyWith(
       textTheme: ButtonTextTheme.primary,
@@ -405,80 +402,4 @@ void main() {
   },
     semanticsEnabled: true,
   );
-
-  testWidgets('Default RaisedButton text color when textTheme is set to ButtonTextTheme.accent', (WidgetTester tester) async {
-    // Test for https://github.com/flutter/flutter/issues/38655
-    const Color defaultEnabledAccentTextColor = Color(0xff2196f3);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: RaisedButton(
-              child: const Text('RaisedButton'),
-              onPressed: () {},
-              textTheme: ButtonTextTheme.accent,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    Color getRaisedButtonTextColor() {
-      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
-    }
-
-    expect(getRaisedButtonTextColor(), equals(defaultEnabledAccentTextColor));
-  });
-
-  testWidgets('default button theme primary color for RaisedButton', (WidgetTester tester) async {
-    // Test for https://github.com/flutter/flutter/issues/38655
-    const Color defaultEnabledPrimaryTextColor = Color(0xff000000);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: RaisedButton(
-              child: const Text('RaisedButton'),
-              onPressed: () {},
-              textTheme: ButtonTextTheme.primary,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    Color getRaisedButtonTextColor() {
-      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
-    }
-
-    expect(getRaisedButtonTextColor(), equals(defaultEnabledPrimaryTextColor));
-  });
-
-  testWidgets('default button theme normal color for RaisedButton', (WidgetTester tester) async {
-    // Test for https://github.com/flutter/flutter/issues/38655
-    const Color defaultEnabledNormalTextColor = Color(0xffffffff);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.dark(),
-        home: Scaffold(
-          body: Center(
-            child: RaisedButton(
-              child: const Text('RaisedButton'),
-              onPressed: () {},
-              textTheme: ButtonTextTheme.normal
-            ),
-          ),
-        ),
-      ),
-    );
-
-    Color getRaisedButtonTextColor() {
-      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
-    }
-
-    expect(getRaisedButtonTextColor(), equals(defaultEnabledNormalTextColor));
-  });
 }
