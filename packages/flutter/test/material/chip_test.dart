@@ -1015,7 +1015,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(tapLocationOfLabel);
     await tester.pump();
 
-    // Pumps 5 frames of 20 ms each.
+    // Waits for 100 ms.
     await tester.pump(const Duration(milliseconds: 100));
 
     // There should be exactly one ink-creating widget.
@@ -1029,7 +1029,7 @@ void main() {
     // There should be no tooltip.
     expect(findTooltipContainer('Delete'), findsNothing);
 
-    // Pumps 5 more frames of 20 ms each.
+    // Waits for 100 ms again.
     await tester.pump(const Duration(milliseconds: 100));
 
     // The ripple should grow, with the same center.
@@ -1069,7 +1069,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(tapLocationOfDeleteButton);
     await tester.pump();
 
-    // Pumps 10 frames of 20 ms each.
+    // Waits for 200 ms.
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -1084,7 +1084,7 @@ void main() {
     // There should be no tooltip.
     expect(findTooltipContainer('Delete'), findsNothing);
 
-    // Pumps 10 more frames of 20 ms each.
+    // Waits for 200 ms again.
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -1155,7 +1155,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(tapLocation);
     await tester.pump();
 
-    // Pumps 5 frames of 20 ms each.
+    // Waits for 100 ms.
     await tester.pump(const Duration(milliseconds: 100));
 
     // There should be exactly one ink-creating widget.
@@ -1169,7 +1169,7 @@ void main() {
     // There should be no tooltip.
     expect(findTooltipContainer('Delete'), findsNothing);
 
-    // Pumps 5 more frames of 20 ms each.
+    // Waits for 100 ms again.
     await tester.pump(const Duration(milliseconds: 100));
 
     // The ripple should grow, with the same center.
