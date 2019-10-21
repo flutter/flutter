@@ -925,6 +925,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
             entry.name != 'test' &&
             entry.name != 'test.disabled' &&
             entry.name != 'test_support' &&
+            entry.name != 'testdata' &&
             entry.name != 'tests' &&
             entry.name != 'javatests' &&
             entry.name != 'testing' &&
