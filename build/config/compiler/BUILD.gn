@@ -611,10 +611,6 @@ config("runtime_library") {
 default_warning_flags = []
 default_warning_flags_cc = []
 if (is_win) {
-  if (current_cpu != "x86") {
-    default_warning_flags += [ "/WX" ]  # Treat warnings as errors.
-  }
-
   default_warning_flags += [
     # Permanent.
     "/wd4091",  # typedef warning from dbghelp.h
