@@ -21,6 +21,21 @@ typedef _DismissCallback = void Function(
   double opacity,
 );
 
+/// A function that produces the preview when the ContextMenu is open.
+///
+/// Called every time the animation value changes.
+typedef PreviewBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+  Widget child,
+);
+
+// A function that proxies to PreviewBuilder without the child.
+typedef _PreviewBuilderChildless = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+);
+
 // Given a GlobalKey, return the Rect of the corresponding RenderBox's
 // paintBounds in global coordinates.
 Rect _getRect(GlobalKey globalKey) {
@@ -40,10 +55,11 @@ enum _ContextMenuLocation {
 
 /// A full-screen modal route that opens when the [child] is long-pressed.
 ///
-/// When open, the ContextMenu shows the child, or [preview] if given, in a
-/// large full-screen [Overlay] with a list of buttons specified by [actions].
-/// The child/preview is placed in an [Expanded] widget so that it will grow to
-/// fill the Overlay if its size is unconstrained.
+/// When open, the ContextMenu shows the child, or the widget returned by
+/// [previewBuilder] if given, in a large full-screen [Overlay] with a list of
+/// buttons specified by [actions]. The child/preview is placed in an [Expanded]
+/// widget so that it will grow to fill the Overlay if its size is
+/// unconstrained.
 ///
 /// When closed, the ContextMenu simply displays the child as if the ContextMenu
 /// were not there. Sizing and positioning is unaffected. The menu can be closed
@@ -51,9 +67,10 @@ enum _ContextMenuLocation {
 /// `Navigator.pop(context)`. Unlike PopupRoute, it can also be closed by
 /// swiping downwards.
 ///
-/// The [preview] parameter is most commonly used to display a slight variation
-/// of [child]. See [preview] for an example of rounding the child's corners and
-/// allowing its aspect ratio to expand, similar to the Photos app on iOS.
+/// The [previewBuilder] parameter is most commonly used to display a slight
+/// variation of [child]. See [previewBuilder] for an example of rounding the
+/// child's corners and allowing its aspect ratio to expand, similar to the
+/// Photos app on iOS.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
@@ -108,7 +125,7 @@ class ContextMenu extends StatefulWidget {
     Key key,
     @required this.actions,
     @required this.child,
-    this.preview,
+    this.previewBuilder,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(child != null),
        super(key: key);
@@ -116,9 +133,10 @@ class ContextMenu extends StatefulWidget {
   /// The widget that can be "opened" with the [ContextMenu].
   ///
   /// When the [ContextMenu] is long-pressed, the menu will open and this widget
-  /// (or [preview], if provided) will be moved to the [Overlay] and placed
-  /// inside of an [Expanded] widget. This allows the child to resize to fit in
-  /// the full-screen Overlay, if it doesn't size itself.
+  /// (or the widget returned by [previewBuilder], if provided) will be moved to
+  /// the [Overlay] and placed inside of an [Expanded] widget. This allows the
+  /// child to resize to fit in the full-screen Overlay, if it doesn't size
+  /// itself.
   ///
   /// When the [ContextMenu] is "closed", this widget acts like a [Container],
   /// i.e. it does not constrain its child's size or affect its position.
@@ -132,7 +150,8 @@ class ContextMenu extends StatefulWidget {
   /// [ContextMenuAction]s.
   final List<ContextMenuAction> actions;
 
-  /// A alternative widget that's shown when the [ContextMenu] menu is open.
+  /// A function that returns an alternative widget to show when the
+  /// [ContextMenu] is open.
   ///
   /// If not specified, [child] will be shown.
   ///
@@ -140,9 +159,15 @@ class ContextMenu extends StatefulWidget {
   /// example, the child could be given rounded corners in the preview but have
   /// sharp corners when in the page.
   ///
+  /// In addition to the current [BuildContext], the function is also called
+  /// with an [Animation] and the [child]. The animation is used internally to
+  /// animate the ContextMenu open. It can be used to animate the preview in
+  /// sync with the opening of the ContextMenu. The child parameter provides
+  /// access to the child displayed when the ContextMenu is closed.
+  ///
   /// {@tool sample}
   ///
-  /// Below is an example of using `preview` to show an image tile that's
+  /// Below is an example of using `previewBuilder` to show an image tile that's
   /// similar to each tile in the iOS iPhoto app's context menu. Several of
   /// these could be used in a GridView for a similar effect.
 
@@ -162,16 +187,19 @@ class ContextMenu extends StatefulWidget {
   ///   // The FittedBox in the preview here allows the image to animate its
   ///   // aspect ratio when the ContextMenu is animating its preview widget
   ///   // open and closed.
-  ///   preview: FittedBox(
-  ///     fit: BoxFit.cover,
-  ///     // This ClipRRect rounds the corners of the image when the
-  ///     // ContextMenu is open, even though it's not rounded when it's
-  ///     // closed.
-  ///     child: ClipRRect(
-  ///       borderRadius: BorderRadius.circular(64.0),
-  ///       child: Image.asset('assets/photo.jpg'),
-  ///     ),
-  ///   ),
+  ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
+  ///     return FittedBox(
+  ///       fit: BoxFit.cover,
+  ///       // This ClipRRect rounds the corners of the image when the
+  ///       // ContextMenu is open, even though it's not rounded when it's
+  ///       // closed. It uses the given animation to animate the corners in
+  ///       // sync with the opening animation.
+  ///       child: ClipRRect(
+  ///         borderRadius: BorderRadius.circular(64.0 * animation.value),
+  ///         child: Image.asset('assets/photo.jpg'),
+  ///       ),
+  ///     );
+  ///   },
   ///   actions: <ContextMenuAction>[
   ///     ContextMenuAction(
   ///       child: const Text('Action one'),
@@ -182,7 +210,7 @@ class ContextMenu extends StatefulWidget {
   /// ```
   ///
   /// {@end-tool}
-  final Widget preview;
+  final PreviewBuilder previewBuilder;
 
   @override
   _ContextMenuState createState() => _ContextMenuState();
@@ -242,7 +270,12 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       ),
       contextMenuOrientation: _contextMenuOrientation,
       previousChildRect: _decoyChildEndRect,
-      builder: (BuildContext context) => widget.preview ?? widget.child,
+      builder: (BuildContext context, Animation<double> animation) {
+        if (widget.previewBuilder == null) {
+          return widget.child;
+        }
+        return widget.previewBuilder(context, animation, widget.child);
+      },
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route);
     _route.animation.addStatusListener(_routeAnimationStatusListener);
@@ -269,6 +302,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         // because _ContextMenuRoute renders its first frame offscreen.
         // Otherwise there would be a visible flash when nothing is rendered for
         // one frame.
+        // TODO(justinmc): Post frame callback?
         Future<void>.delayed(const Duration(milliseconds: 0)).then((_) {
           _lastOverlayEntry?.remove();
           _lastOverlayEntry = null;
@@ -495,7 +529,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     @required List<ContextMenuAction> actions,
     @required _ContextMenuLocation contextMenuOrientation,
     this.barrierLabel,
-    WidgetBuilder builder,
+    _PreviewBuilderChildless builder,
     ui.ImageFilter filter,
     Rect previousChildRect,
     RouteSettings settings,
@@ -517,7 +551,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
   final List<ContextMenuAction> _actions;
-  final WidgetBuilder _builder;
+  final _PreviewBuilderChildless _builder;
   final GlobalKey _childGlobalKey = GlobalKey();
   final _ContextMenuLocation _contextMenuOrientation;
   bool _externalOffstage = false;
@@ -757,7 +791,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
               Positioned.fromRect(
                 key: _childGlobalKey,
                 rect: rect,
-                child: _builder(context),
+                child: _builder(context, animation),
               ),
             ],
           );
@@ -767,7 +801,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
         // the final position.
         return _ContextMenuRouteStatic(
           actions: _actions,
-          child: _builder(context),
+          child: _builder(context, animation),
           childGlobalKey: _childGlobalKey,
           contextMenuOrientation: _contextMenuOrientation,
           onDismiss: _onDismiss,
