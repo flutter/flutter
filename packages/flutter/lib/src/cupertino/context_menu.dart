@@ -41,9 +41,9 @@ enum _ContextMenuLocation {
 /// A full-screen modal route that opens when the [child] is long-pressed.
 ///
 /// When open, the ContextMenu shows the child, or [preview] if given, in a
-/// large full-screen Overlay with a list of buttons specified by [actions]. The
-/// child/preview is placed in an Expanded widget so that it will grow to fill
-/// the Overlay if its size is unconstrained.
+/// large full-screen [Overlay] with a list of buttons specified by [actions].
+/// The child/preview is placed in an [Expanded] widget so that it will grow to
+/// fill the Overlay if its size is unconstrained.
 ///
 /// When closed, the ContextMenu simply displays the child as if the ContextMenu
 /// were not there. Sizing and positioning is unaffected. The menu can be closed
@@ -53,7 +53,7 @@ enum _ContextMenuLocation {
 ///
 /// The [preview] parameter is most commonly used to display a slight variation
 /// of [child]. See [preview] for an example of rounding the child's corners and
-/// allowing its aspect ratio to expand, similar to the iPhoto app on iOS.
+/// allowing its aspect ratio to expand, similar to the Photos app on iOS.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
@@ -242,9 +242,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       ),
       contextMenuOrientation: _contextMenuOrientation,
       previousChildRect: _decoyChildEndRect,
-      builder: (BuildContext context) {
-        return widget.preview ?? widget.child;
-      },
+      builder: (BuildContext context) => widget.preview ?? widget.child,
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route);
     _route.animation.addStatusListener(_routeAnimationStatusListener);
@@ -371,28 +369,34 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 }
 
-// A floating copy of the ContextMenu's child, used in animations.
+// A floating copy of the ContextMenu's child.
+//
+// When the child is pressed, but before the ContextMenu opens, it does a
+// "bounce" animation where it shrinks and then grows. This is implemented
+// by hiding the original child and placing _DecoyChild on top of it in an
+// Overlay. The use of an Overlay allows the _DecoyChild to appear on top of
+// siblines of the original child.
 class _DecoyChild extends StatefulWidget {
   const _DecoyChild({
     Key key,
     this.beginRect,
-    this.child,
     this.controller,
     this.endRect,
+    this.child,
   }) : super(key: key);
 
   final Rect beginRect;
-  final Widget child;
   final AnimationController controller;
   final Rect endRect;
+  final Widget child;
 
   @override
   _DecoyChildState createState() => _DecoyChildState();
 }
 
 class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin {
-  // TODO(justinmc): Replace with real dark mode colors.
-  //static const Color _darkModeMaskColor = Color(0xAAFFFFFF);
+  // TODO(justinmc): Dark mode support.
+  // See https://github.com/flutter/flutter/issues/43211.
   static const Color _lightModeMaskColor = Color(0xFF888888);
   static const Color _masklessColor = Color(0xFFFFFFFF);
 
