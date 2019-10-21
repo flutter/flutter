@@ -174,8 +174,23 @@ class ButtonBar extends StatelessWidget {
   }
 }
 
-// create a ButtonBarRenderObjectWidget that extends Flex
+/// Attempts to display buttons in a row, but displays them in a column if
+/// there is not enough horizontal space.
+///
+/// It first attempts to lay out its buttons as though there were no
+/// maximumm width constraints on the widget. If the button bar's width is
+/// less than the maximum width constraints of the widget, it then lays
+/// out the widget as though it were placed in a [Row].
+///
+/// However, if the button bar's width exceeds the maximum constraints on the
+/// widget, it then aligns its buttons in a column. The key difference here
+/// is that the [MainAxisAlignment] will then be treated as a
+/// cross-axis/horizontal alignment. For example, if the buttons overflow and
+/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
+/// align to the horizontal start of the button bar.
 class ButtonBarRow extends Flex {
+  /// Creates a button bar that attempts to display in a row, but displays in
+  /// a column if there is insufficient horizontal space.
   ButtonBarRow({
     List<Widget> children,
     Axis direction = Axis.horizontal,
@@ -222,7 +237,23 @@ class ButtonBarRow extends Flex {
   }
 }
 
+/// Attempts to display buttons in a row, but displays them in a column if
+/// there is not enough horizontal space.
+///
+/// It first attempts to lay out its buttons as though there were no
+/// maximumm width constraints on the widget. If the button bar's width is
+/// less than the maximum width constraints of the widget, it then lays
+/// out the widget as though it were placed in a [Row].
+///
+/// However, if the button bar's width exceeds the maximum constraints on the
+/// widget, it then aligns its buttons in a column. The key difference here
+/// is that the [MainAxisAlignment] will then be treated as a
+/// cross-axis/horizontal alignment. For example, if the buttons overflow and
+/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
+/// align to the horizontal start of the button bar.
 class RenderButtonBarRow extends RenderFlex {
+  /// Creates a button bar that attempts to display in a row, but displays in
+  /// a column if there is insufficient horizontal space.
   RenderButtonBarRow({
     List<RenderBox> children,
     Axis direction = Axis.horizontal,
