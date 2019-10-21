@@ -156,6 +156,7 @@ class DartIsolate : public UIDartState {
   /// @param[in]  window                      The weak pointer to the window
   ///                                         associated with this root isolate.
   /// @param[in]  io_manager                  The i/o manager.
+  /// @param[in]  unref_queue                 The Skia unref queue.
   /// @param[in]  image_decoder               The image decoder.
   /// @param[in]  advisory_script_uri         The advisory script uri. This is
   ///                                         only used in instrumentation.
@@ -196,6 +197,7 @@ class DartIsolate : public UIDartState {
       TaskRunners task_runners,
       std::unique_ptr<Window> window,
       fml::WeakPtr<IOManager> io_manager,
+      fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
       fml::WeakPtr<ImageDecoder> image_decoder,
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
@@ -441,6 +443,7 @@ class DartIsolate : public UIDartState {
               fml::RefPtr<const DartSnapshot> shared_snapshot,
               TaskRunners task_runners,
               fml::WeakPtr<IOManager> io_manager,
+              fml::RefPtr<SkiaUnrefQueue> unref_queue,
               fml::WeakPtr<ImageDecoder> image_decoder,
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,

@@ -280,7 +280,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          TaskRunners task_runners,
          Settings settings,
          std::unique_ptr<Animator> animator,
-         fml::WeakPtr<IOManager> io_manager);
+         fml::WeakPtr<IOManager> io_manager,
+         fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the engine engine. Called by the shell on the UI task

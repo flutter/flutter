@@ -18,6 +18,7 @@ UIDartState::UIDartState(
     TaskObserverAdd add_callback,
     TaskObserverRemove remove_callback,
     fml::WeakPtr<IOManager> io_manager,
+    fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
@@ -28,6 +29,7 @@ UIDartState::UIDartState(
       add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
       io_manager_(std::move(io_manager)),
+      skia_unref_queue_(std::move(skia_unref_queue)),
       image_decoder_(std::move(image_decoder)),
       advisory_script_uri_(std::move(advisory_script_uri)),
       advisory_script_entrypoint_(std::move(advisory_script_entrypoint)),
@@ -83,16 +85,7 @@ fml::WeakPtr<IOManager> UIDartState::GetIOManager() const {
 }
 
 fml::RefPtr<flutter::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
-  // TODO(gw280): The WeakPtr here asserts that we are derefing it on the
-  // same thread as it was created on. As we can't guarantee that currently
-  // we're being called from the IO thread (construction thread), we need
-  // to use getUnsafe() here to avoid failing the assertion.
-  //
-  // https://github.com/flutter/flutter/issues/42946
-  if (!io_manager_.getUnsafe()) {
-    return nullptr;
-  }
-  return io_manager_.getUnsafe()->GetSkiaUnrefQueue();
+  return skia_unref_queue_;
 }
 
 void UIDartState::ScheduleMicrotask(Dart_Handle closure) {

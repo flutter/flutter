@@ -89,6 +89,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   auto io_manager_future = io_manager_promise.get_future();
   std::promise<fml::WeakPtr<ShellIOManager>> weak_io_manager_promise;
   auto weak_io_manager_future = weak_io_manager_promise.get_future();
+  std::promise<fml::RefPtr<SkiaUnrefQueue>> unref_queue_promise;
+  auto unref_queue_future = unref_queue_promise.get_future();
   auto io_task_runner = shell->GetTaskRunners().GetIOTaskRunner();
 
   // TODO(gw280): The WeakPtr here asserts that we are derefing it on the
@@ -101,6 +103,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       io_task_runner,
       [&io_manager_promise,                          //
        &weak_io_manager_promise,                     //
+       &unref_queue_promise,                         //
        platform_view = platform_view->GetWeakPtr(),  //
        io_task_runner                                //
   ]() {
@@ -108,6 +111,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         auto io_manager = std::make_unique<ShellIOManager>(
             platform_view.getUnsafe()->CreateResourceContext(), io_task_runner);
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
+        unref_queue_promise.set_value(io_manager->GetSkiaUnrefQueue());
         io_manager_promise.set_value(std::move(io_manager));
       });
 
@@ -126,7 +130,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          isolate_snapshot = std::move(isolate_snapshot),  //
                          shared_snapshot = std::move(shared_snapshot),    //
                          vsync_waiter = std::move(vsync_waiter),          //
-                         &weak_io_manager_future                          //
+                         &weak_io_manager_future,                         //
+                         &unref_queue_future                              //
   ]() mutable {
         TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
         const auto& task_runners = shell->GetTaskRunners();
@@ -137,15 +142,16 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                                    std::move(vsync_waiter));
 
         engine_promise.set_value(std::make_unique<Engine>(
-            *shell,                       //
-            dispatcher_maker,             //
-            *shell->GetDartVM(),          //
-            std::move(isolate_snapshot),  //
-            std::move(shared_snapshot),   //
-            task_runners,                 //
-            shell->GetSettings(),         //
-            std::move(animator),          //
-            weak_io_manager_future.get()  //
+            *shell,                        //
+            dispatcher_maker,              //
+            *shell->GetDartVM(),           //
+            std::move(isolate_snapshot),   //
+            std::move(shared_snapshot),    //
+            task_runners,                  //
+            shell->GetSettings(),          //
+            std::move(animator),           //
+            weak_io_manager_future.get(),  //
+            unref_queue_future.get()       //
             ));
       }));
 
