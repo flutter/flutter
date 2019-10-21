@@ -120,8 +120,8 @@ class ResidentWebRunner extends ResidentRunner {
       return printHelpDetails();
     }
     const String fire = '🔥';
-    const String rawMessage = '  To hot reload changes while running, press "r". '
-      'To hot restart (and rebuild state), press "R".';
+    const String rawMessage = '  To hot restart changes while running, press "r". '
+      'To hot restart (and refresh the browser), press "R".';
     final String message = terminal.color(
       fire + terminal.bolden(rawMessage),
       TerminalColor.red,
