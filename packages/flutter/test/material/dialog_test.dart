@@ -647,7 +647,6 @@ void main() {
   });
 
   group('Scrollable title and content', () {
-    // test for scrollable oversized title
     testWidgets('Title is scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final AlertDialog dialog = AlertDialog(
