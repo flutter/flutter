@@ -100,7 +100,7 @@ enum _ContextMenuLocation {
 class ContextMenu extends StatefulWidget {
   /// Create a context menu.
   ///
-  /// [actions] is required and cannot be null. Itmust contain at least one
+  /// [actions] is required and cannot be null. It must contain at least one
   /// [ContextMenuAction].
   ///
   /// [child] is required and cannot be null.
@@ -132,51 +132,53 @@ class ContextMenu extends StatefulWidget {
   /// [ContextMenuAction]s.
   final List<ContextMenuAction> actions;
 
-  /// The widget to show when the [ContextMenu] is open.
+  /// A alternative widget that's shown when the [ContextMenu] menu is open.
   ///
   /// If not specified, [child] will be shown.
   ///
-  /// This can be used to shown an entirely different widget than the child, but
-  /// it can also show a slight variation of the child. As a simple example, the
-  /// child could be given rounded corners in the preview but have sharp corners
-  /// when in the page.
+  /// The preview is often used to show a slight variation of the [child]. For
+  /// example, the child could be given rounded corners in the preview but have
+  /// sharp corners when in the page.
   ///
   /// {@tool sample}
   ///
-  /// Below is an example of using `preview` to create a square image tile very
-  /// similar to the iOS iPhoto app's context menu. When opened, the child
-  /// animates to show its full aspect ratio and has rounded corners.
+  /// Below is an example of using `preview` to show an image tile that's
+  /// similar to each tile in the iOS iPhoto app's context menu. Several of
+  /// these could be used in a GridView for a similar effect.
+
+  /// When opened, the child animates to show its full aspect ratio and has
+  /// rounded corners. The larger size of the open ContextMenu allows the
+  /// FittedBox to fit the entire image, even when it has a very tall or wide
+  /// aspect ratio compared to the square of a GridView, so this animates into
+  /// view as the ContextMenu is opened. The preview is swapped in right when
+  /// the open animation begins, which includes the rounded corners.
   ///
   /// ```dart
-  /// GridView.count(
-  ///   crossAxisCount: 3,
-  ///   children: <Widget>[
-  ///     ContextMenu(
-  ///       child: FittedBox(
-  ///         fit: BoxFit.cover,
-  ///         child: Image.asset('assets/photo.jpg'),
-  ///       ),
-  ///       // The FittedBox in the preview here allows the image to animate its
-  ///       // aspect ratio when the ContextMenu is animating open and closed.
-  ///       preview: FittedBox(
-  ///         fit: BoxFit.cover,
-  ///         // This ClipRRect rounds the corners of the image when the
-  ///         // ContextMenu is open, even though it's not rounded when it's
-  ///         // closed.
-  ///         child: ClipRRect(
-  ///           borderRadius: BorderRadius.circular(64.0),
-  ///           child: Image.asset('assets/photo.jpg'),
-  ///         ),
-  ///       ),
-  ///       actions: <ContextMenuAction>[
-  ///         ContextMenuAction(
-  ///           child: const Text('Action one'),
-  ///           onPressed: () {},
-  ///         ),
-  ///       ],
+  /// ContextMenu(
+  ///   child: FittedBox(
+  ///     fit: BoxFit.cover,
+  ///     child: Image.asset('assets/photo.jpg'),
+  ///   ),
+  ///   // The FittedBox in the preview here allows the image to animate its
+  ///   // aspect ratio when the ContextMenu is animating its preview widget
+  ///   // open and closed.
+  ///   preview: FittedBox(
+  ///     fit: BoxFit.cover,
+  ///     // This ClipRRect rounds the corners of the image when the
+  ///     // ContextMenu is open, even though it's not rounded when it's
+  ///     // closed.
+  ///     child: ClipRRect(
+  ///       borderRadius: BorderRadius.circular(64.0),
+  ///       child: Image.asset('assets/photo.jpg'),
+  ///     ),
+  ///   ),
+  ///   actions: <ContextMenuAction>[
+  ///     ContextMenuAction(
+  ///       child: const Text('Action one'),
+  ///       onPressed: () {},
   ///     ),
   ///   ],
-  /// )
+  /// ),
   /// ```
   ///
   /// {@end-tool}
@@ -189,7 +191,8 @@ class ContextMenu extends StatefulWidget {
 class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin {
   final GlobalKey _childGlobalKey = GlobalKey();
   double _childOpacity = 1.0;
-  AnimationController _decoyController;
+  // Animates the child while it's opening.
+  AnimationController _openController;
   Rect _decoyChildEndRect;
   OverlayEntry _lastOverlayEntry;
   _ContextMenuRoute<void> _route;
@@ -197,11 +200,11 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _decoyController = AnimationController(
+    _openController = AnimationController(
       duration: kLongPressTimeout,
       vsync: this,
     );
-    _decoyController.addStatusListener(_onDecoyAnimationStatusChange);
+    _openController.addStatusListener(_onDecoyAnimationStatusChange);
   }
 
   // Determine the _ContextMenuLocation based on the location of the original
@@ -271,7 +274,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         Future<void>.delayed(const Duration(milliseconds: 0)).then((_) {
           _lastOverlayEntry?.remove();
           _lastOverlayEntry = null;
-          _decoyController.reset();
+          _openController.reset();
         });
         break;
 
@@ -294,20 +297,20 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 
   void _onTap() {
-    if (_decoyController.isAnimating && _decoyController.value < 0.5) {
-      _decoyController.reverse();
+    if (_openController.isAnimating && _openController.value < 0.5) {
+      _openController.reverse();
     }
   }
 
   void _onTapCancel() {
-    if (_decoyController.isAnimating && _decoyController.value < 0.5) {
-      _decoyController.reverse();
+    if (_openController.isAnimating && _openController.value < 0.5) {
+      _openController.reverse();
     }
   }
 
   void _onTapUp(TapUpDetails details) {
-    if (_decoyController.isAnimating && _decoyController.value < 0.5) {
-      _decoyController.reverse();
+    if (_openController.isAnimating && _openController.value < 0.5) {
+      _openController.reverse();
     }
   }
 
@@ -337,13 +340,13 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         return _DecoyChild(
           beginRect: childRect,
           child: widget.child,
-          controller: _decoyController,
+          controller: _openController,
           endRect: _decoyChildEndRect,
         );
       },
     );
     Overlay.of(context).insert(_lastOverlayEntry);
-    _decoyController.forward();
+    _openController.forward();
   }
 
   @override
@@ -363,7 +366,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   @override
   void dispose() {
-    _decoyController.dispose();
+    _openController.dispose();
     super.dispose();
   }
 }
