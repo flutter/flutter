@@ -1410,6 +1410,27 @@ Exception in thread "main" java.lang.NullPointerException
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
+
+    testUsingContext('appends android.enableR8=true to the new line', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M');
+
+      migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText, contains('set `android.enableR8=true` in gradle.properties'));
+      expect(
+        sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals(
+          'org.gradle.jvmargs=-Xmx1536M\n'
+          'android.enableR8=true\n'
+        ),
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    });
   });
 
   group('isAppUsingAndroidX', () {
