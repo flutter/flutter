@@ -114,26 +114,15 @@ class SkPath implements ui.Path {
       double rotation = 0.0,
       bool largeArc = false,
       bool clockwise = true}) {
-    assert(rotation == 0.0,
-        'Skia backend does not support `arcToPoint` rotation.');
-    assert(!largeArc, 'Skia backend does not support `arcToPoint` largeArc.');
-    assert(radius.x == radius.y,
-        'Skia backend does not support `arcToPoint` with elliptical radius.');
-
-    // TODO(het): Remove asserts above and use the correct override of `arcTo`
-    //   when it is available in CanvasKit.
-    // The only `arcTo` method exposed in CanvasKit is:
-    //   arcTo(x1, y1, x2, y2, radius)
-    final ui.Offset lastPoint = _getCurrentPoint();
-    _skPath.callMethod('arcTo',
-        <double>[lastPoint.dx, lastPoint.dy, arcEnd.dx, arcEnd.dy, radius.x]);
-  }
-
-  ui.Offset _getCurrentPoint() {
-    final int pointCount = _skPath.callMethod('countPoints');
-    final js.JsObject lastPoint =
-        _skPath.callMethod('getPoint', <int>[pointCount - 1]);
-    return ui.Offset(lastPoint[0], lastPoint[1]);
+    _skPath.callMethod('arcTo', <dynamic>[
+      radius.x,
+      radius.y,
+      rotation,
+      !largeArc,
+      !clockwise,
+      arcEnd.dx,
+      arcEnd.dy,
+    ]);
   }
 
   @override

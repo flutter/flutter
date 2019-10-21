@@ -354,7 +354,9 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/assets.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/bitmap_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/browser_detection.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/browser_location.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/canvas.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/engine_delegate.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/fonts.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/image.dart
