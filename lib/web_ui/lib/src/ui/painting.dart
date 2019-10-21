@@ -1388,7 +1388,7 @@ abstract class Image {
 ///
 /// Instances of this class are used with [Paint.colorFilter] on [Paint]
 /// objects.
-class ColorFilter {
+abstract class ColorFilter {
   /// Creates a color filter that applies the blend mode given as the second
   /// argument. The source color is the one given as the first argument, and the
   /// destination color is the one from the layer being composited.
@@ -1396,9 +1396,7 @@ class ColorFilter {
   /// The output of this filter is then composited into the background according
   /// to the [Paint.blendMode], using the output of this filter as the source
   /// and the background as the destination.
-  const ColorFilter.mode(Color color, BlendMode blendMode)
-      : _color = color,
-        _blendMode = blendMode;
+  const factory ColorFilter.mode(Color color, BlendMode blendMode) = engine.EngineColorFilter.mode;
 
   /// Construct a color filter that transforms a color by a 4x5 matrix.
   ///
@@ -1458,43 +1456,28 @@ class ColorFilter {
   ///   0,      0,      0,      1, 0,
   /// ]);
   /// ```
-  const ColorFilter.matrix(List<double> matrix)
-      : _color = null,
-        _blendMode = null;
+  const factory ColorFilter.matrix(List<double> matrix) = engine.EngineColorFilter.matrix;
 
   /// Construct a color filter that applies the sRGB gamma curve to the RGB
   /// channels.
-  const ColorFilter.linearToSrgbGamma()
-      : _color = null,
-        _blendMode = null;
+  const factory ColorFilter.linearToSrgbGamma() = engine.EngineColorFilter.linearToSrgbGamma;
 
   /// Creates a color filter that applies the inverse of the sRGB gamma curve
   /// to the RGB channels.
-  const ColorFilter.srgbToLinearGamma()
-      : _color = null,
-        _blendMode = null;
-
-  final Color _color;
-  final BlendMode _blendMode;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! ColorFilter) {
-      return false;
-    }
-    final ColorFilter typedOther = other;
-    return _color == typedOther._color && _blendMode == typedOther._blendMode;
-  }
-
-  @override
-  int get hashCode => hashValues(_color, _blendMode);
+  const factory ColorFilter.srgbToLinearGamma() = engine.EngineColorFilter.srgbToLinearGamma;
 
   List<dynamic> webOnlySerializeToCssPaint() {
     throw UnsupportedError('ColorFilter for CSS paint not yet supported');
   }
 
   @override
-  String toString() => 'ColorFilter($_color, $_blendMode)';
+  bool operator==(dynamic other);
+
+  @override
+  int get hashCode;
+
+  @override
+  String toString();
 }
 
 /// Styles to use for blurs in [MaskFilter] objects.

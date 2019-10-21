@@ -99,12 +99,12 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawCircle(ui.Offset c, double radius, ui.Paint paint) {
-    final js.JsObject skPaint = makeSkPaint(paint);
-    // TODO(het): Use `drawCircle` when CanvasKit makes it available.
-    // Since CanvasKit does not expose `drawCircle`, use `drawOval` instead.
-    final js.JsObject skRect = makeSkRect(ui.Rect.fromLTWH(
-        c.dx - radius, c.dy - radius, 2.0 * radius, 2.0 * radius));
-    skCanvas.callMethod('drawOval', <js.JsObject>[skRect, skPaint]);
+    skCanvas.callMethod('drawCircle', <dynamic>[
+      c.dx,
+      c.dy,
+      radius,
+      makeSkPaint(paint),
+    ]);
   }
 
   @override
@@ -114,7 +114,11 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
-    throw 'drawDRRect';
+    skCanvas.callMethod('drawDRRect', <js.JsObject>[
+      makeSkRRect(outer),
+      makeSkRRect(inner),
+      makeSkPaint(paint),
+    ]);
   }
 
   @override
@@ -190,19 +194,8 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawRRect(ui.RRect rrect, ui.Paint paint) {
-    // Since CanvasKit does not expose `drawRRect` we have to make do with
-    // `drawRoundRect`. The downside of `drawRoundRect` is that all of the
-    // corner radii must be the same.
-    assert(
-      rrect.tlRadius == rrect.trRadius &&
-          rrect.tlRadius == rrect.brRadius &&
-          rrect.tlRadius == rrect.blRadius,
-      'CanvasKit only supports drawing RRects where the radii are all the same.',
-    );
-    skCanvas.callMethod('drawRoundRect', <dynamic>[
-      makeSkRect(rrect.outerRect),
-      rrect.tlRadiusX,
-      rrect.tlRadiusY,
+    skCanvas.callMethod('drawRRect', <js.JsObject>[
+      makeSkRRect(rrect),
       makeSkPaint(paint),
     ]);
   }

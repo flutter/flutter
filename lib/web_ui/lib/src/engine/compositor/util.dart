@@ -9,6 +9,20 @@ js.JsObject makeSkRect(ui.Rect rect) {
       <double>[rect.left, rect.top, rect.right, rect.bottom]);
 }
 
+js.JsObject makeSkRRect(ui.RRect rrect) {
+  return js.JsObject.jsify({
+    'rect': makeSkRect(rrect.outerRect),
+    'rx1': rrect.tlRadiusX,
+    'ry1': rrect.tlRadiusY,
+    'rx2': rrect.trRadiusX,
+    'ry2': rrect.trRadiusY,
+    'rx3': rrect.brRadiusX,
+    'ry3': rrect.brRadiusY,
+    'rx4': rrect.blRadiusX,
+    'ry4': rrect.blRadiusY,
+  });
+}
+
 js.JsArray<double> makeSkPoint(ui.Offset point) {
   final js.JsArray<double> skPoint = js.JsArray<double>();
   skPoint.length = 2;
@@ -140,6 +154,12 @@ js.JsObject makeSkPaint(ui.Paint paint) {
     final js.JsObject skMaskFilter = canvasKit
         .callMethod('MakeBlurMaskFilter', <dynamic>[skBlurStyle, sigma, true]);
     skPaint.callMethod('setMaskFilter', <js.JsObject>[skMaskFilter]);
+  }
+
+  if (paint.colorFilter != null) {
+    EngineColorFilter engineFilter = paint.colorFilter;
+    SkColorFilter skFilter = engineFilter._toSkColorFilter();
+    skPaint.callMethod('setColorFilter', <js.JsObject>[skFilter.skColorFilter]);
   }
 
   return skPaint;
