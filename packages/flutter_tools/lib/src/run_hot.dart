@@ -29,6 +29,10 @@ import 'vmservice.dart';
 class HotRunnerConfig {
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
   bool stableDartDependencies = false;
+
+  /// Whether the hot runner should scan for modified files asynchronously.
+  bool asyncScanning = false;
+
   /// A hook for implementations to perform any necessary initialization prior
   /// to a hot restart. Should return true if the hot restart should continue.
   Future<bool> setupHotRestart() async {
@@ -66,7 +70,6 @@ class HotRunner extends ResidentRunner {
     String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
-    this.asyncScanning = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -80,7 +83,6 @@ class HotRunner extends ResidentRunner {
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
-  final bool asyncScanning;
   bool _didAttach = false;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
@@ -303,7 +305,7 @@ class HotRunner extends ResidentRunner {
         lastCompiled: flutterDevices[0].devFS.lastCompiled,
         urisToMonitor: flutterDevices[0].devFS.sources,
         packagesPath: packagesFilePath,
-        asyncScanning: asyncScanning,
+        asyncScanning: hotRunnerConfig.asyncScanning,
       );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {

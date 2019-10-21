@@ -173,14 +173,6 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
-      ..addFlag('async-scanning',
-        negatable: true,
-        hide: !verboseHelp,
-        help: 'Whether to scan for modified files using asynchronously. '
-              'Enabling this can reduce hot reload times for projects that '
-              'reside on network file systems but might be worse for projects '
-              'on local file systems.',
-      )
       ..addFlag('disable-service-auth-codes',
         negatable: false,
         hide: !verboseHelp,
@@ -455,7 +447,6 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: argResults['output-dill'],
         stayResident: stayResident,
         ipv6: ipv6,
-        asyncScanning: argResults['async-scanning'],
       );
     } else if (webMode) {
       runner = webRunnerFactory.createWebRunner(
