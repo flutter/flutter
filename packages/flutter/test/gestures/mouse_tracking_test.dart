@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/services/mouse_cursor/common.dart';
 
 import '../flutter_test_alternative.dart';
 
@@ -75,13 +76,22 @@ void main() {
   // This annotation also contains a cursor with a value of `kTestCursor`.
   // The mouse tracker records the cursor requests it receives to `logCursors`.
   MouseTrackerAnnotation _setUpWithOneAnnotation({
-    @required List<PointerEvent> logEvents,
+    List<PointerEvent> logEvents,
     List<_ActivateSystemCursorDetails> logCursors,
   }) {
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
-      onEnter: (PointerEnterEvent event) => logEvents.add(event),
-      onHover: (PointerHoverEvent event) => logEvents.add(event),
-      onExit: (PointerExitEvent event) => logEvents.add(event),
+      onEnter: (PointerEnterEvent event) {
+        if (logEvents != null)
+          logEvents.add(event);
+      },
+      onHover: (PointerHoverEvent event) {
+        if (logEvents != null)
+          logEvents.add(event);
+      },
+      onExit: (PointerExitEvent event) {
+        if (logEvents != null)
+          logEvents.add(event);
+      },
       cursor: () => testCursor,
     );
     _setUpMouseTracker(
@@ -628,6 +638,52 @@ void main() {
     ]));
     expect(logs, <String>['exitB', 'enterA', 'hoverA']);
   });
+
+  test('should not do anything on platforms that doesn\'t support mouse cursor', () {
+    final List<_ActivateSystemCursorDetails> cursorRequests = <_ActivateSystemCursorDetails>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) {},
+      cursor: () => testCursor,
+    );
+    final MouseTracker mouseTracker = MouseTracker(
+      GestureBinding.instance.pointerRouter,
+      (Offset position) sync* {
+        yield annotation;
+      },
+      _TestMouseCursorManager(
+        const MouseCursorUnsupportedDelegate()
+      ),
+    );
+    RendererBinding.instance.initMouseTracker(mouseTracker);
+    _mouseTracker.attachAnnotation(annotation);
+
+    // Enter
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(1.0, 0.0)),
+    ]));
+    expect(cursorRequests, isEmpty);
+    cursorRequests.clear();
+
+    // Hover
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
+    ]));
+    expect(cursorRequests, isEmpty);
+
+    // Remove
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, const Offset(1.0, 201.0)),
+    ]));
+    expect(cursorRequests, isEmpty);
+    cursorRequests.clear();
+
+    // Add again
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(1.0, 301.0)),
+    ]));
+    expect(cursorRequests, isEmpty);
+    cursorRequests.clear();
+  });
 }
 
 ui.PointerData _pointerData(
@@ -836,5 +892,5 @@ class _TestMouseCursorManager extends MouseCursorManager {
 
   @override
   MouseCursorPlatformDelegate get delegate => _delegate;
-  final _TestMouseCursorPlatformDelegate _delegate;
+  final MouseCursorPlatformDelegate _delegate;
 }
