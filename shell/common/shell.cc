@@ -468,7 +468,20 @@ bool Shell::EngineHasLivePorts() const {
   if (!engine_) {
     return false;
   }
-  return engine_->UIIsolateHasLivePorts();
+
+  std::promise<bool> ui_isolate_has_live_ports_promise;
+  auto ui_isolate_has_live_ports_future =
+      ui_isolate_has_live_ports_promise.get_future();
+  auto ui_task_runner = task_runners_.GetUITaskRunner();
+
+  fml::TaskRunner::RunNowOrPostTask(
+      ui_task_runner,
+      [&ui_isolate_has_live_ports_promise, engine = engine_->GetWeakPtr()]() {
+        ui_isolate_has_live_ports_promise.set_value(
+            engine->UIIsolateHasLivePorts());
+      });
+
+  return ui_isolate_has_live_ports_future.get();
 }
 
 bool Shell::IsSetup() const {
