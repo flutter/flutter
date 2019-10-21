@@ -254,14 +254,17 @@ class RenderButtonBarRow extends RenderFlex {
 
   @override
   void performLayout() {
+    // Set check layout width to false in reload or update cases.
+    _hasCheckedLayoutWidth = false;
+
     // Perform layout to ensure that button bar knows how wide it would
     // ideally want to be.
     super.performLayout();
     _hasCheckedLayoutWidth = true;
 
     // If the button bar is constrained by width and it overflows, set the
-    // buttons to align vertically. Otherwise, layout button bar
-    // horizontally as normal.
+    // buttons to align vertically. Otherwise, lay out the button bar
+    // horizontally.
     if (size.width > constraints.maxWidth) {
       RenderBox child = firstChild;
       double currentHeight = 0.0;
@@ -269,9 +272,47 @@ class RenderButtonBarRow extends RenderFlex {
         final FlexParentData childParentData = child.parentData;
         assert(child.parentData == childParentData);
 
-        childParentData.offset = Offset(0, currentHeight);
-        currentHeight += child.size.height;
+        // Lay out the child with the original constraints.
         child.layout(constraints, parentUsesSize: true);
+
+        // Set the cross axis alignment for the column to match the main axis
+        // alignment for a row. For [MainAxisAligment.spaceAround],
+        // [MainAxisAligment.spaceBetween] and [MainAxisAlignment.spaceEvenly]
+        // cases, use [MainAxisAligmnent.start].
+        switch (textDirection) {
+          case TextDirection.ltr:
+            switch (mainAxisAlignment) {
+              case MainAxisAlignment.center:
+                final double midpoint = constraints.maxWidth / 2.0 - child.size.width / 2.0;
+                childParentData.offset = Offset(midpoint, currentHeight);
+                break;
+              case MainAxisAlignment.end:
+                childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
+                break;
+              default:
+                childParentData.offset = Offset(0, currentHeight);
+                break;
+            }
+            break;
+          case TextDirection.rtl:
+            switch (mainAxisAlignment) {
+              case MainAxisAlignment.center:
+                final double midpoint = constraints.maxWidth / 2.0 - child.size.width / 2.0;
+                childParentData.offset = Offset(midpoint, currentHeight);
+                break;
+              case MainAxisAlignment.end:
+                childParentData.offset = Offset(0, currentHeight);
+                break;
+              default:
+                childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
+                break;
+            }
+            break;
+          default:
+            assert(true, 'Text direction is null when it should be set.');
+            break;
+        }
+        currentHeight += child.size.height;
         child = childParentData.nextSibling;
       }
       size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
