@@ -321,25 +321,32 @@ class AlertDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          if (title != null)
-            Padding(
-              padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
-              child: DefaultTextStyle(
-                style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
-                child: Semantics(
-                  child: title,
-                  namesRoute: true,
-                  container: true,
-                ),
-              ),
-            ),
-          if (content != null)
+          if (title != null || content != null)
             Flexible(
-              child: Padding(
-                padding: contentPadding,
-                child: DefaultTextStyle(
-                  style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
-                  child: content,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    if (title != null)
+                      Padding(
+                        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+                        child: DefaultTextStyle(
+                          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
+                          child: Semantics(
+                            child: title,
+                            namesRoute: true,
+                            container: true,
+                          ),
+                        ),
+                      ),
+                    if (content != null)
+                      Padding(
+                        padding: contentPadding,
+                        child: DefaultTextStyle(
+                          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+                          child: content,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
