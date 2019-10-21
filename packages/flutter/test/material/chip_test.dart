@@ -1914,18 +1914,17 @@ void main() {
 
   testWidgets('Chips with background color should have delete icon ripple and splash in the foreground', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/41461
-    final Key deleteKey = UniqueKey();
     await tester.pumpWidget(
       _wrapForChip(
         child: Chip(
           onDeleted: () { },
           backgroundColor: Colors.pink,
           label: const Text('Chip with delete icon'),
-          deleteIcon: Icon(Icons.cancel, key: deleteKey),
+          deleteIcon: Icon(Icons.cancel),
         ),
       ),
     );
-    final Offset center = tester.getCenter(find.byKey(deleteKey));
+    final Offset center = tester.getCenter(find.byType(Icon));
 
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
