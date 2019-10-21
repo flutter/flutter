@@ -154,14 +154,14 @@ class FileHashStore {
         currentHashes.remove(absolutePath);
         previousHashes.remove(absolutePath);
         dirty.add(file);
-      } else {
-        final Digest digest = md5.convert(await file.readAsBytes());
-        final String currentHash = digest.toString();
-        if (currentHash != previousHash) {
-          dirty.add(file);
-        }
-        currentHashes[absolutePath] = currentHash;
+        return;
       }
+      final Digest digest = md5.convert(await file.readAsBytes());
+      final String currentHash = digest.toString();
+      if (currentHash != previousHash) {
+        dirty.add(file);
+      }
+      currentHashes[absolutePath] = currentHash;
     } finally {
       resource.release();
     }
