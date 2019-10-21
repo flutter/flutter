@@ -36,8 +36,8 @@ class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
 
-  /// Whether the new Android embedding is enabled.
-  bool get isNewAndroidEmbeddingEnabled => isEnabled(flutterNewAndroidEmbeddingFeature);
+  /// Whether the Android embedding V2 is enabled.
+  bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -71,7 +71,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
   flutterBuildPluginAsAarFeature,
-  flutterNewAndroidEmbeddingFeature,
+  flutterAndroidEmbeddingV2Feature,
 ];
 
 /// The [Feature] for flutter web.
@@ -133,9 +133,10 @@ const Feature flutterBuildPluginAsAarFeature = Feature(
 );
 
 /// The [Feature] for generating projects using the new Android embedding.
-const Feature flutterNewAndroidEmbeddingFeature = Feature(
-  name: 'flutter create generates projects using the new Android embedding',
-  configSetting: 'enable-new-android-embedding',
+const Feature flutterAndroidEmbeddingV2Feature = Feature(
+  name: 'flutter create generates projects using the Android embedding V2',
+  environmentOverride: 'ENABLE_ANDROID_EMBEDDING_V2',
+  configSetting: 'enable-android-embedding-v2',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,

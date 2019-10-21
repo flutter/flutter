@@ -15,6 +15,7 @@ import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
+import 'build_info.dart';
 import 'codegen.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -238,6 +239,31 @@ class PackageUriMapper {
   }
 }
 
+List<String> _buildModeOptions(BuildMode mode) {
+  switch (mode) {
+    case BuildMode.debug:
+      return <String>[
+        '-Ddart.vm.profile=false',
+        '-Ddart.vm.product=false',
+        '--bytecode-options=source-positions,local-var-info,debugger-stops,instance-field-initializers,keep-unreachable-code,avoid-closure-call-instructions',
+        '--enable-asserts',
+      ];
+    case BuildMode.profile:
+      return <String>[
+        '-Ddart.vm.profile=true',
+        '-Ddart.vm.product=false',
+        '--bytecode-options=source-positions',
+      ];
+    case BuildMode.release:
+      return <String>[
+        '-Ddart.vm.profile=false',
+        '-Ddart.vm.product=true',
+        '--bytecode-options=source-positions',
+      ];
+  }
+  throw Exception('Unknown BuildMode: $mode');
+}
+
 class KernelCompiler {
   const KernelCompiler();
 
@@ -247,16 +273,15 @@ class KernelCompiler {
     String outputFilePath,
     String depFilePath,
     TargetModel targetModel = TargetModel.flutter,
+    @required BuildMode buildMode,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    bool enableAsserts = false,
     bool causalAsyncStacks = true,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    bool targetProductVm = false,
     String initializeFromDill,
     String platformDill,
   }) async {
@@ -288,19 +313,13 @@ class KernelCompiler {
       '--strong',
       '--target=$targetModel',
       '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
-      if (enableAsserts) '--enable-asserts',
+      ..._buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
         '--aot',
         '--tfa',
       ],
-      // If we're not targeting product (release) mode and we're still aot, then
-      // target profile mode.
-      if (targetProductVm)
-        '-Ddart.vm.product=true'
-      else if (aot)
-        '-Ddart.vm.profile=true',
       if (packagesPath != null) ...<String>[
         '--packages',
         packagesPath,
@@ -429,7 +448,7 @@ class _RejectRequest extends _CompilationRequest {
 class ResidentCompiler {
   ResidentCompiler(
     this._sdkRoot, {
-    bool enableAsserts = false,
+    @required BuildMode buildMode,
     bool causalAsyncStacks = true,
     bool trackWidgetCreation = false,
     String packagesPath,
@@ -441,7 +460,7 @@ class ResidentCompiler {
     bool unsafePackageSerialization,
     List<String> experimentalFlags,
   }) : assert(_sdkRoot != null),
-       _enableAsserts = enableAsserts,
+       _buildMode = buildMode,
        _causalAsyncStacks = causalAsyncStacks,
        _trackWidgetCreation = trackWidgetCreation,
        _packagesPath = packagesPath,
@@ -459,7 +478,7 @@ class ResidentCompiler {
     }
   }
 
-  final bool _enableAsserts;
+  final BuildMode _buildMode;
   final bool _causalAsyncStacks;
   final bool _trackWidgetCreation;
   final String _packagesPath;
@@ -586,7 +605,7 @@ class ResidentCompiler {
         '--packages',
         _packagesPath,
       ],
-      if (_enableAsserts) '--enable-asserts',
+      ..._buildModeOptions(_buildMode),
       if (_trackWidgetCreation) '--track-widget-creation',
       if (_fileSystemRoots != null)
         for (String root in _fileSystemRoots) ...<String>[

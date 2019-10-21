@@ -58,6 +58,7 @@ void main() {
       expect(findApkFiles(gradleProject, buildInfo), <File>[]);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     test('androidXFailureRegex should match lines with likely AndroidX errors', () {
@@ -130,6 +131,7 @@ void main() {
       expect(bundle.path, '/foo_barRelease/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in release mode', () {
@@ -139,6 +141,7 @@ void main() {
       expect(bundle.path, '/fooRelease/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when no flavor is used in release mode', () {
@@ -148,6 +151,7 @@ void main() {
       expect(bundle.path, '/release/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode', () {
@@ -157,6 +161,7 @@ void main() {
       expect(bundle.path, '/foo_barDebug/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in debug mode', () {
@@ -166,6 +171,7 @@ void main() {
       expect(bundle.path, '/fooDebug/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when no flavor is used in debug mode', () {
@@ -175,6 +181,7 @@ void main() {
       expect(bundle.path, '/debug/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode', () {
@@ -184,6 +191,7 @@ void main() {
       expect(bundle.path, '/foo_barProfile/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in profile mode', () {
@@ -193,6 +201,7 @@ void main() {
       expect(bundle.path, '/fooProfile/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when no flavor is used in profile mode', () {
@@ -202,6 +211,7 @@ void main() {
       expect(bundle.path, '/profile/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle in release mode - Gradle 3.5', () {
@@ -211,6 +221,7 @@ void main() {
       expect(bundle.path, '/release/app-release.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle in profile mode - Gradle 3.5', () {
@@ -220,6 +231,7 @@ void main() {
       expect(bundle.path, '/profile/app-profile.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle in debug mode - Gradle 3.5', () {
@@ -229,6 +241,7 @@ void main() {
       expect(bundle.path, '/debug/app-debug.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in release mode - Gradle 3.5', () {
@@ -238,6 +251,7 @@ void main() {
       expect(bundle.path, '/foo_barRelease/app-foo_bar-release.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
@@ -247,6 +261,7 @@ void main() {
       expect(bundle.path, '/foo_barProfile/app-foo_bar-profile.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode - Gradle 3.5', () {
@@ -256,6 +271,7 @@ void main() {
       expect(bundle.path, '/foo_barDebug/app-foo_bar-debug.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -492,6 +508,7 @@ include ':app'
 
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Logger: () => mockLogger,
     });
 
@@ -525,6 +542,7 @@ include ':app'
 
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Logger: () => mockLogger,
     });
   });
@@ -587,9 +605,9 @@ include ':app'
     void testUsingAndroidContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
-        ProcessManager: () => mockProcessManager,
         Platform: () => android,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -843,7 +861,7 @@ flutter:
     });
   });
 
-  group('Gradle HTTP failures', () {
+  group('Gradle failures', () {
     MemoryFileSystem fs;
     Directory tempDir;
     Directory gradleWrapperDirectory;
@@ -951,6 +969,245 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingContext('throws toolExit if gradle is missing execute permissions. ', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        'Permission denied\nCommand: /home/android/gradlew -v',
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: 'does not have permission to execute by your user'));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws toolExit if gradle times out waiting for exclusive access to zip', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached waiting for exclusive access to file: /User/documents/gradle-5.6.2-all.zip
+	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:61)
+	at org.gradle.wrapper.Install.createDist(Install.java:48)
+	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws toolExit if gradle fails to unzip file', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Exception in thread "main" java.util.zip.ZipException: error in opening zip file /User/documents/gradle-5.6.2-all.zip
+	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:61)
+	at org.gradle.wrapper.Install.createDist(Install.java:48)
+	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws toolExit if remote host closes connection', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
+
+
+Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake
+	at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:994)
+	at sun.security.ssl.SSLSocketImpl.performInitialHandshake(SSLSocketImpl.java:1367)
+	at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1395)
+	at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1379)
+	at sun.net.www.protocol.https.HttpsClient.afterConnect(HttpsClient.java:559)
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:185)
+	at sun.net.www.protocol.http.HttpURLConnection.followRedirect0(HttpURLConnection.java:2729)
+	at sun.net.www.protocol.http.HttpURLConnection.followRedirect(HttpURLConnection.java:2641)
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1824)
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1492)
+	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:263)
+	at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+	at org.gradle.wrapper.Download.download(Download.java:44)
+	at org.gradle.wrapper.Install\$1.call(Install.java:61)
+	at org.gradle.wrapper.Install\$1.call(Install.java:48)
+	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+	at org.gradle.wrapper.Install.createDist(Install.java:48)
+	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws toolExit if file opening fails', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = r'''
+Downloading https://services.gradle.org/distributions/gradle-3.5.0-all.zip
+
+Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle-dn.com/distributions/gradle-3.5.0-all.zip
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1890)
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1492)
+	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:263)
+	at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+	at org.gradle.wrapper.Download.download(Download.java:44)
+	at org.gradle.wrapper.Install$1.call(Install.java:61)
+	at org.gradle.wrapper.Install$1.call(Install.java:48)
+	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+	at org.gradle.wrapper.Install.createDist(Install.java:48)
+	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws toolExit if the connection is reset', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
+
+
+Exception in thread "main" java.net.SocketException: Connection reset
+	at java.net.SocketInputStream.read(SocketInputStream.java:210)
+	at java.net.SocketInputStream.read(SocketInputStream.java:141)
+	at sun.security.ssl.InputRecord.readFully(InputRecord.java:465)
+	at sun.security.ssl.InputRecord.readV3Record(InputRecord.java:593)
+	at sun.security.ssl.InputRecord.read(InputRecord.java:532)
+	at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:975)
+	at sun.security.ssl.SSLSocketImpl.performInitialHandshake(SSLSocketImpl.java:1367)
+	at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1395)
+	at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1379)
+	at sun.net.www.protocol.https.HttpsClient.afterConnect(HttpsClient.java:559)
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:185)
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1564)
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1492)
+	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:263)
+	at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+	at org.gradle.wrapper.Download.download(Download.java:44)
+	at org.gradle.wrapper.Install\$1.call(Install.java:61)
+	at org.gradle.wrapper.Install\$1.call(Install.java:48)
+	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+	at org.gradle.wrapper.Install.createDist(Install.java:48)
+	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+     testUsingContext('throws toolExit if gradle exits abnormally', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+ProcessException: Process exited abnormally:
+Exception in thread "main" java.lang.NullPointerException
+	at org.gradle.wrapper.BootstrapMainStarter.findLauncherJar(BootstrapMainStarter.java:34)
+	at org.gradle.wrapper.BootstrapMainStarter.start(BootstrapMainStarter.java:25)
+	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:129)
+	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
   });
 
   group('injectGradleWrapperIfNeeded', () {
@@ -1011,6 +1268,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Inject the wrapper when some files are missing', () {
@@ -1051,6 +1309,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Gives executable permission to gradle', () {
@@ -1068,6 +1327,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       OperatingSystemUtils: () => OperatingSystemUtils(),
     });
   });
@@ -1089,6 +1349,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('throws ToolExit if it cannot write gradle.properties', () {
@@ -1126,6 +1387,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
         equals('android.enableR8=true'));
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('sets android.enableR8=true', () {
@@ -1146,6 +1408,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -1167,6 +1430,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns false when the project is not using AndroidX', () async {
@@ -1180,6 +1444,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('returns false when gradle.properties does not exist', () async {
@@ -1189,6 +1454,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -1291,8 +1557,8 @@ plugin2=${plugin2.path}
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FileSystem: () => fs,
-      GradleUtils: () => FakeGradleUtils(),
       ProcessManager: () => mockProcessManager,
+      GradleUtils: () => FakeGradleUtils(),
     });
   });
 
@@ -1405,9 +1671,9 @@ plugin2=${plugin2.path}
       AndroidStudio: () => mockAndroidStudio,
       Artifacts: () => mockArtifacts,
       Cache: () => cache,
-      ProcessManager: () => mockProcessManager,
       Platform: () => android,
       FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
     });
   });
 }

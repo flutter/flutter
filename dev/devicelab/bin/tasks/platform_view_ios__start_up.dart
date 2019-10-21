@@ -13,8 +13,15 @@ import 'package:flutter_devicelab/framework/framework.dart';
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(() async {
+    final String platformViewDirectoryPath = '${flutterDirectory.path}/examples/platform_view';
+    final Directory platformViewDirectory = dir(
+      platformViewDirectoryPath
+    );
+    await inDirectory(platformViewDirectory, () async {
+      await flutter('pub', options: <String>['get']);
+    });
     final Directory iosDirectory = dir(
-      '${flutterDirectory.path}/examples/platform_view/ios',
+      '$platformViewDirectoryPath/ios',
     );
     await inDirectory(iosDirectory, () async {
       await exec('pod', <String>['install']);
