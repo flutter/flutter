@@ -1079,7 +1079,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      */
     private SemanticsNode getRootSemanticsNode() {
         if (BuildConfig.DEBUG && !flutterSemanticsTree.containsKey(0)) {
-            Log.e(TAG, "Attempted to getRootSemanticsNode without a root sematnics node.");
+            Log.e(TAG, "Attempted to getRootSemanticsNode without a root semantics node.");
         }
         return flutterSemanticsTree.get(0);
     }
@@ -1138,6 +1138,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      */
     public boolean onAccessibilityHoverEvent(MotionEvent event) {
         if (!accessibilityManager.isTouchExplorationEnabled()) {
+            return false;
+        }
+        if (flutterSemanticsTree.isEmpty()) {
             return false;
         }
 
