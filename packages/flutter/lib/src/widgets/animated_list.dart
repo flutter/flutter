@@ -95,7 +95,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   }
 ///
 ///   // Used to build an item after it has been removed from the list. This
-///   // method is needed because a removed item remains  visible until its
+///   // method is needed because a removed item remains visible until its
 ///   // animation has completed (even though it's gone as far this ListModel is
 ///   // concerned). The widget will be used by the
 ///   // [AnimatedListState.removeItem] method's
@@ -157,7 +157,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   }
 /// }
 ///
-/// /// Keeps a Dart List in sync with an AnimatedList.
+/// /// Keeps a Dart [List] in sync with an [AnimatedList].
 /// ///
 /// /// The [insert] and [removeAt] methods apply to both the internal list and
 /// /// the animated list that belongs to [listKey].
@@ -205,8 +205,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 /// }
 ///
 /// /// Displays its integer item as 'item N' on a Card whose color is based on
-/// /// the item's value. The text is displayed in bright green if selected is
-/// /// true. This widget's height is based on the animation parameter, it
+/// /// the item's value. The text is displayed in bright green if [selected] is
+/// /// true. This widget's height is based on the [animation] parameter, it
 /// /// varies from 0 to 128 as the animation varies from 0.0 to 1.0.
 /// class CardItem extends StatelessWidget {
 ///   const CardItem({
@@ -615,7 +615,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///   }
 /// }
 ///
-/// // Keeps a Dart List in sync with an AnimatedList.
+/// // Keeps a Dart [List] in sync with an [AnimatedList].
 /// //
 /// // The [insert] and [removeAt] methods apply to both the internal list and
 /// // the animated list that belongs to [listKey].
