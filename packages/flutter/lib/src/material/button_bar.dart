@@ -311,8 +311,9 @@ class RenderButtonBarRow extends RenderFlex {
         final FlexParentData childParentData = child.parentData;
         assert(child.parentData == childParentData);
 
-        // Lay out the child with the original constraints.
-        child.layout(constraints, parentUsesSize: true);
+        // Lay out the child with the button bar's original constraints, but
+        // with minimum width set to zero.
+        child.layout(constraints.copyWith(minWidth: 0.0), parentUsesSize: true);
 
         // Set the cross axis alignment for the column to match the main axis
         // alignment for a row. For [MainAxisAligment.spaceAround],

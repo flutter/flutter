@@ -316,7 +316,7 @@ void main() {
     });
 
     testWidgets(
-      "ButtonBar's children overflow defaults - MainAxisAlignment.start", (WidgetTester tester) async {
+      "ButtonBar's children overflow defaults - MainAxisAlignment.end", (WidgetTester tester) async {
         final Key keyOne = UniqueKey();
         final Key keyTwo = UniqueKey();
         await tester.pumpWidget(
@@ -338,18 +338,18 @@ void main() {
         // Second [Container] should wrap around to the next row.
         expect(containerOneRect.bottom, containerTwoRect.top);
         // Second [Container] should align to the start of the ButtonBar.
-        expect(containerOneRect.left, containerTwoRect.left);
-        expect(containerOneRect.left, buttonBarRect.left);
+        expect(containerOneRect.right, containerTwoRect.right);
+        expect(containerOneRect.right, buttonBarRect.right);
       },
     );
 
-    testWidgets("ButtonBar's children overflow - MainAxisAlignment.end", (WidgetTester tester) async {
+    testWidgets("ButtonBar's children overflow - MainAxisAlignment.start", (WidgetTester tester) async {
       final Key keyOne = UniqueKey();
       final Key keyTwo = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBar(
-            alignment: MainAxisAlignment.end,
+            alignment: MainAxisAlignment.start,
             // Set padding to zero to align buttons with edge of button bar.
             buttonPadding: EdgeInsets.zero,
             children: <Widget>[
@@ -366,8 +366,8 @@ void main() {
       // Second [Container] should wrap around to the next row.
       expect(containerOneRect.bottom, containerTwoRect.top);
       // [Container]s should align to the end of the ButtonBar.
-      expect(containerOneRect.right, containerTwoRect.right);
-      expect(containerOneRect.right, buttonBarRect.right);
+      expect(containerOneRect.left, containerTwoRect.left);
+      expect(containerOneRect.left, buttonBarRect.left);
     });
 
     testWidgets("ButtonBar's children overflow - MainAxisAlignment.center", (WidgetTester tester) async {
@@ -376,7 +376,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBar(
-            alignment: MainAxisAlignment.end,
+            alignment: MainAxisAlignment.center,
             // Set padding to zero to align buttons with edge of button bar.
             buttonPadding: EdgeInsets.zero,
             children: <Widget>[
