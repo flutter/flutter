@@ -107,7 +107,7 @@ class SliverConstraints extends Constraints {
     @required this.viewportMainAxisExtent,
     @required this.remainingCacheExtent,
     @required this.cacheOrigin,
-    this.flexExtent,
+    this.flexExtent = 0.0,
   }) : assert(axisDirection != null),
        assert(growthDirection != null),
        assert(userScrollDirection != null),
@@ -119,7 +119,8 @@ class SliverConstraints extends Constraints {
        assert(crossAxisDirection != null),
        assert(viewportMainAxisExtent != null),
        assert(remainingCacheExtent != null),
-       assert(cacheOrigin != null);
+       assert(cacheOrigin != null),
+       assert(flexExtent != null);
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -155,6 +156,7 @@ class SliverConstraints extends Constraints {
     );
   }
 
+  /// Doc
   final double flexExtent;
 
   /// The direction in which the [scrollOffset] and [remainingPaintExtent]
@@ -445,6 +447,7 @@ class SliverConstraints extends Constraints {
       verify(remainingCacheExtent >= 0.0, 'The "remainingCacheExtent" is negative.');
       verify(cacheOrigin <= 0.0, 'The "cacheOrigin" is positive.');
       verify(isNormalized, 'The constraints are not normalized.'); // should be redundant with earlier checks
+      verify(flexExtent >= 0.0, 'The flexExtent is negative');
       return true;
     }());
     return true;
@@ -467,7 +470,8 @@ class SliverConstraints extends Constraints {
         && typedOther.crossAxisDirection == crossAxisDirection
         && typedOther.viewportMainAxisExtent == viewportMainAxisExtent
         && typedOther.remainingCacheExtent == remainingCacheExtent
-        && typedOther.cacheOrigin == cacheOrigin;
+        && typedOther.cacheOrigin == cacheOrigin
+        && typedOther.flexExtent == flexExtent;
   }
 
   @override
@@ -483,6 +487,7 @@ class SliverConstraints extends Constraints {
       viewportMainAxisExtent,
       remainingCacheExtent,
       cacheOrigin,
+      flexExtent,
     );
   }
 
@@ -500,6 +505,7 @@ class SliverConstraints extends Constraints {
              'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}, '
              'remainingCacheExtent: ${remainingCacheExtent.toStringAsFixed(1)} '
              'cacheOrigin: ${cacheOrigin.toStringAsFixed(1)} '
+             'flexExtent : ${flexExtent.toStringAsFixed(1)} '
            ')';
   }
 }
@@ -1801,18 +1807,9 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
       geometry = SliverGeometry.zero;
       return;
     }
+    
+    child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
 
-    print('flexExtent: ${constraints.flexExtent}');
-
-    if(constraints.flexExtent != null) {
-      print('expanding');
-      child.layout(constraints.asBoxConstraints(
-        minExtent: constraints.flexExtent,
-        maxExtent: constraints.flexExtent,
-      ));
-    } else {
-      child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-    }
     double childExtent;
     switch (constraints.axis) {
       case Axis.horizontal:
@@ -1821,6 +1818,16 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
       case Axis.vertical:
         childExtent = child.size.height;
         break;
+    }
+    if (constraints.flexExtent > 0.0) {
+      childExtent += constraints.flexExtent;
+      child.layout(
+        constraints.asBoxConstraints(
+          minExtent: childExtent,
+          maxExtent: childExtent,
+        ),
+        parentUsesSize: true,
+      );
     }
     assert(childExtent != null);
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);

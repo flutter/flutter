@@ -143,8 +143,6 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   void performLayout() {
     double childExtent;
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
-    print(constraints.remainingPaintExtent);
-    print(constraints.overlap);
     double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
     if (hasScrollBody) {

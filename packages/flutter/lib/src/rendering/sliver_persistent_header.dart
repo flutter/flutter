@@ -290,6 +290,7 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     final double maxExtent = this.maxExtent;
     final bool overlapsContent = constraints.overlap > 0.0;
     excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
+//    print(constraints.scrollOffset);
     layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
     final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
     geometry = SliverGeometry(
@@ -302,6 +303,8 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
       cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
+//    print(constraints);
+//    print('Header: $geometry');
   }
 
   @override
@@ -480,6 +483,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: overlapsContent);
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
+    print(geometry);
+    print(_childPosition);
   }
 
   @override
