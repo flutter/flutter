@@ -142,7 +142,7 @@ class ButtonBar extends StatelessWidget {
     final Widget child = ButtonTheme.fromButtonThemeData(
       data: buttonTheme,
       child: ButtonBarRow(
-        mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.start,
+        mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
         children: children.map<Widget>((Widget child) {
           return Padding(
