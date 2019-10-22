@@ -53,7 +53,7 @@ void main() {
       verify(xcodeProjectInterpreter.cleanWorkspace(any, 'Runner')).called(2);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Xcode: () => mockXcode,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });

@@ -52,7 +52,7 @@ void main() {
       expect(fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Stdio: () => mockStdio,
     });
 
@@ -73,7 +73,7 @@ void main() {
       expect(fs.file(outputFile).readAsStringSync(), isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Stdio: () => mockStdio,
     });
 
@@ -88,7 +88,7 @@ void main() {
       expect(fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Stdio: () => mockStdio,
     });
   });

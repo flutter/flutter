@@ -111,7 +111,7 @@ void main() {
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   });
 
@@ -129,7 +129,7 @@ void main() {
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
@@ -147,7 +147,7 @@ void main() {
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
@@ -165,7 +165,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
@@ -183,7 +183,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
@@ -201,7 +201,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -230,9 +230,9 @@ void main() {
       '--track-widget-creation'
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => MockBuildSystem(),
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    BuildSystem: () => MockBuildSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 }
 

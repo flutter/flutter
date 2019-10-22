@@ -807,7 +807,7 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     Platform: () => macPlatform,
   });
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
@@ -819,7 +819,7 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     Platform: () => macPlatform,
   });
 
@@ -831,7 +831,7 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     Platform: () => macPlatform,
   });
 }
