@@ -194,8 +194,8 @@ class ButtonBar extends StatelessWidget {
 /// the widget, it then aligns its buttons in a column. The key difference here
 /// is that the [MainAxisAlignment] will then be treated as a
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
-/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
-/// align to the horizontal start of the button bar.
+/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the column of
+/// buttons would align to the horizontal start of the button bar.
 class _ButtonBarRow extends Flex {
   /// Creates a button bar that attempts to display in a row, but displays in
   /// a column if there is insufficient horizontal space.
@@ -268,19 +268,20 @@ class _RenderButtonBarRow extends RenderFlex {
     MainAxisSize mainAxisSize = MainAxisSize.max,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-    TextDirection textDirection,
+    @required TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
-  }) : super(
-    children: children,
-    direction: direction,
-    mainAxisSize: mainAxisSize,
-    mainAxisAlignment: mainAxisAlignment,
-    crossAxisAlignment: crossAxisAlignment,
-    textDirection: textDirection,
-    verticalDirection: verticalDirection,
-    textBaseline: textBaseline,
-  );
+  }) : assert(textDirection != null),
+       super(
+         children: children,
+         direction: direction,
+         mainAxisSize: mainAxisSize,
+         mainAxisAlignment: mainAxisAlignment,
+         crossAxisAlignment: crossAxisAlignment,
+         textDirection: textDirection,
+         verticalDirection: verticalDirection,
+         textBaseline: textBaseline,
+       );
 
   bool _hasCheckedLayoutWidth = false;
 
@@ -304,16 +305,22 @@ class _RenderButtonBarRow extends RenderFlex {
     // If the button bar is constrained by width and it overflows, set the
     // buttons to align vertically. Otherwise, lay out the button bar
     // horizontally.
-    if (size.width > constraints.maxWidth) {
+    if (size.width <= constraints.maxWidth) {
+      // A second performLayout is required to ensure that the original maximum
+      // width constraints are used. The original perform layout call assumes
+      // a maximum width constraint of infinity.
+      super.performLayout();
+    } else {
+      final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
       RenderBox child = firstChild;
       double currentHeight = 0.0;
+
       while (child != null) {
         final FlexParentData childParentData = child.parentData;
-        assert(child.parentData == childParentData);
 
         // Lay out the child with the button bar's original constraints, but
         // with minimum width set to zero.
-        child.layout(constraints.copyWith(minWidth: 0.0), parentUsesSize: true);
+        child.layout(childConstraints, parentUsesSize: true);
 
         // Set the cross axis alignment for the column to match the main axis
         // alignment for a row. For [MainAxisAligment.spaceAround],
@@ -348,16 +355,11 @@ class _RenderButtonBarRow extends RenderFlex {
                 break;
             }
             break;
-          default:
-            assert(true, 'Text direction is null when it should be set.');
-            break;
         }
         currentHeight += child.size.height;
         child = childParentData.nextSibling;
       }
       size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
-    } else {
-      super.performLayout();
     }
   }
 }
