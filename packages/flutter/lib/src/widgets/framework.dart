@@ -1587,7 +1587,7 @@ abstract class InheritedWidget extends ProxyWidget {
   const InheritedWidget({ Key key, this.scope, Widget child })
     : super(key: key, child: child);
 
-  /// An identifier that allows two differenciate between two [InheritedWidget]
+  /// An identifier that allows to differentiate between two [InheritedWidget]
   /// of same type.
   ///
   /// If a [scope] is specified, that same object must be passed to
@@ -1595,7 +1595,7 @@ abstract class InheritedWidget extends ProxyWidget {
   /// [Context.inheritFromWidgetOfExactType] to be able to obtain this
   /// [InheritedWidget].
   ///
-  /// Defaults to `null`.
+  /// Defaults to null.
   final Object scope;
 
   @override
