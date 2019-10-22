@@ -492,6 +492,12 @@ public class FlutterFragmentActivity extends FragmentActivity
     flutterFragment.onTrimMemory(level);
   }
 
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    flutterFragment.onActivityResult(requestCode, resultCode, data);
+  }
+
   @SuppressWarnings("unused")
   @Nullable
   protected FlutterEngine getFlutterEngine() {
