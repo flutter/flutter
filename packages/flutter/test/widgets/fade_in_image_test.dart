@@ -4,10 +4,13 @@
 
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../painting/image_test_utils.dart';
+import '../painting/image_data.dart';
 
 const Duration animationDuration = Duration(milliseconds: 50);
 
@@ -260,6 +263,26 @@ Future<void> main() async {
       await tester.pump(animationDuration);
       expect(findFadeInImage(tester).placeholder.opacity, moreOrLessEquals(0));
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
+    });
+
+    testWidgets('placeholder cacheWidth and cacheHeight is passed through', (WidgetTester tester) async {
+      final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
+      final FadeInImage image = FadeInImage.memoryNetwork(
+        placeholder: testBytes,
+        image: 'test.com',
+        placeholderCacheWidth: 20,
+        placeholderCacheHeight: 30,
+        imageCacheWidth: 40,
+        imageCacheHeight: 50,
+      );
+
+      final DecoderCallback decode1 = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+        expect(cacheWidth, 20);
+        expect(cacheHeight, 30);
+        return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+      };
+
+      image.placeholder.load(await image.placeholder.obtainKey(ImageConfiguration.empty), decode1);
     });
 
     group('semantics', () {
