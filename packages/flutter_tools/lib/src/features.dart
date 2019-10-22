@@ -39,8 +39,8 @@ class FeatureFlags {
   /// Whether the Android embedding V2 is enabled.
   bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
 
-  /// Whether the incremental compiler is enabled.
-  bool get isIncrementalCompilerEnabled => isEnabled(flutterIncrementalCompiler);
+  /// Whether the web incremental compiler is enabled.
+  bool get isWebIncrementalCompilerEnabled => isEnabled(flutterWebIncrementalCompiler);
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -75,7 +75,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterWindowsDesktopFeature,
   flutterBuildPluginAsAarFeature,
   flutterAndroidEmbeddingV2Feature,
-  flutterIncrementalCompiler,
+  flutterWebIncrementalCompiler,
 ];
 
 /// The [Feature] for flutter web.
@@ -148,8 +148,8 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
 );
 
 /// The [Feature] for using the incremental compiler instead of build runner.
-const Feature flutterIncrementalCompiler = Feature(
-  name: 'Enable the incremental compiler for web buiilds',
+const Feature flutterWebIncrementalCompiler = Feature(
+  name: 'Enable the incremental compiler for web builds',
   configSetting: 'enable-web-incremental-compiler',
   master: FeatureChannelSetting(
     available: true,
