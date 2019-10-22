@@ -52,6 +52,8 @@ class TargetModel {
         return flutterRunner;
       case 'vm':
         return vm;
+      case 'dartdevc':
+        return dartdevc;
     }
     assert(false);
     return null;
@@ -67,6 +69,9 @@ class TargetModel {
 
   /// The Dart vm.
   static const TargetModel vm = TargetModel._('vm');
+
+  /// The development compiler for JavaScript.
+  static const TargetModel dartdevc = TargetModel._('dartdevc');
 
   final String _value;
 
@@ -459,6 +464,7 @@ class ResidentCompiler {
     TargetModel targetModel = TargetModel.flutter,
     bool unsafePackageSerialization,
     List<String> experimentalFlags,
+    String platformDill,
   }) : assert(_sdkRoot != null),
        _buildMode = buildMode,
        _causalAsyncStacks = causalAsyncStacks,
@@ -471,6 +477,7 @@ class ResidentCompiler {
        _controller = StreamController<_CompilationRequest>(),
        _initializeFromDill = initializeFromDill,
        _unsafePackageSerialization = unsafePackageSerialization,
+       _platformDill = platformDill,
        _experimentalFlags = experimentalFlags {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/')) {
@@ -491,6 +498,7 @@ class ResidentCompiler {
   final String _initializeFromDill;
   final bool _unsafePackageSerialization;
   final List<String> _experimentalFlags;
+  final String _platformDill;
   bool _compileRequestNeedsConfirmation = false;
 
   final StreamController<_CompilationRequest> _controller;
@@ -619,6 +627,10 @@ class ResidentCompiler {
       if (_initializeFromDill != null) ...<String>[
         '--initialize-from-dill',
         _initializeFromDill,
+      ],
+      if (_platformDill != null) ...<String>[
+        '--platform',
+        _platformDill,
       ],
       if (_unsafePackageSerialization == true) '--unsafe-package-serialization',
       if ((_experimentalFlags != null) && _experimentalFlags.isNotEmpty)

@@ -5,14 +5,19 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
@@ -23,6 +28,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 import '../src/testbed.dart';
 
 void main() {
@@ -599,6 +605,44 @@ void main() {
 
     expect(await fs.file('foo').readAsString(), testUri.toString());
   }));
+
+  test('FlutterDevice uses dartdevc configuration when targeting web', () => testbed.run(() async {
+    final MockDevice mockDevice = MockDevice();
+    final StreamController<List<int>> stdout = StreamController<List<int>>();
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.web_javascript;
+    });
+    when(processManager.start(any)).thenAnswer((Invocation invocation) async {
+      final List<String> arguments = invocation.positionalArguments.first;
+      // Contains configuration for dartdevc target.
+      expect(arguments,
+        contains(artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/'));
+      expect(arguments,
+        contains(artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug)));
+      expect(arguments,
+        contains('--target=dartdevc'));
+      return FakeProcess(
+        stdout: stdout.stream,
+      );
+    });
+
+    final FlutterDevice flutterDevice = await FlutterDevice.create(
+      mockDevice,
+      buildMode: BuildMode.debug,
+      flutterProject: FlutterProject.current(),
+      target: null,
+      trackWidgetCreation: true,
+    );
+    final Future<void> onDone = flutterDevice.generator.recompile('main.dart', <Uri>[], outputPath: 'app.dill');
+    stdout.add(utf8.encode('result 578145e3-fe1c-4094-9dda-c208d5a60168\n'));
+    stdout.add(utf8.encode('578145e3-fe1c-4094-9dda-c208d5a60168\n'));
+    stdout.add(utf8.encode('+file:///foo/flutter/packages/flutter/lib/src/physics/utils.dart\n'));
+    stdout.add(utf8.encode('578145e3-fe1c-4094-9dda-c208d5a60168 app.dill 0\n'));
+    await onDone;
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(),
+    FeatureFlags: () => TestFeatureFlags(isIncrementalCompilerEnabled: true),
+  }));
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
@@ -608,6 +652,7 @@ class MockDevFS extends Mock implements DevFS {}
 class MockIsolate extends Mock implements Isolate {}
 class MockDevice extends Mock implements Device {}
 class MockUsage extends Mock implements Usage {}
+class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, this.views)

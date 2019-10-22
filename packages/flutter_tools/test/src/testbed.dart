@@ -700,6 +700,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
     this.isAndroidEmbeddingV2Enabled = false,
+    this.isIncrementalCompilerEnabled = false,
 });
 
   @override
@@ -716,6 +717,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isAndroidEmbeddingV2Enabled;
+
+  @override
+  final bool isIncrementalCompilerEnabled;
 
   @override
   bool isEnabled(Feature feature) {
