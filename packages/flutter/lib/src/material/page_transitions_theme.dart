@@ -11,7 +11,7 @@ import 'theme.dart';
 
 // Slides the page upwards and fades it in, starting from 1/4 screen
 // below the top. This transition is intended to match the default for
-// Android P.
+// Android O.
 class _FadeUpwardsPageTransition extends StatelessWidget {
   _FadeUpwardsPageTransition({
     Key key,
