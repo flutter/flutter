@@ -71,13 +71,19 @@ void main() {
     await pump(FloatingActionButtonLocation.endDocked);
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
+      matchesGoldenFile(
+        'bottom_app_bar.custom_shape.1.png',
+        version: null,
+      ),
     );
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
+      matchesGoldenFile(
+        'bottom_app_bar.custom_shape.2.png',
+        version: null,
+      ),
     );
   }, skip: isBrowser);
 

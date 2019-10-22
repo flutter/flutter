@@ -303,7 +303,9 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// The [key] may be either a [Uri] or a [String] representation of a URI.
 ///
 /// The [version] is a number that can be used to differentiate historical
-/// golden files. This parameter is optional.
+/// golden files. This parameter is optional. Version numbers are used in golden
+/// file tests for package:flutter. You can learn more about these tests
+/// [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
 ///
 /// This is an asynchronous matcher, meaning that callers should use
 /// [expectLater] when using this matcher and await the future returned by
@@ -334,11 +336,8 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 ///
 /// await expectLater(
 ///   imageFuture,
-///   matchesGoldenFile(
-///     'save.png',
-///     version: 2,
-///   ),
-/// );
+///   matchesGoldenFile('save.png'),
+///  );
 ///
 /// await expectLater(
 ///   find.byType(MyWidget),

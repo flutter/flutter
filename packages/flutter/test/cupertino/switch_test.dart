@@ -542,7 +542,10 @@ void main() {
 
     await expectLater(
       find.byKey(switchKey),
-      matchesGoldenFile('switch.tap.off.png'),
+      matchesGoldenFile(
+        'switch.tap.off.png',
+        version: 1,
+      ),
     );
 
     await tester.tap(find.byKey(switchKey));
@@ -553,13 +556,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 60));
     await expectLater(
       find.byKey(switchKey),
-      matchesGoldenFile('switch.tap.turningOn.png'),
+      matchesGoldenFile(
+        'switch.tap.turningOn.png',
+        version: 1,
+      ),
     );
 
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(switchKey),
-      matchesGoldenFile('switch.tap.on.png'),
+      matchesGoldenFile(
+        'switch.tap.on.png',
+        version: 1,
+      ),
     );
   });
 
@@ -595,7 +604,10 @@ void main() {
 
     await expectLater(
       find.byKey(switchKey),
-      matchesGoldenFile('switch.tap.off.dark.png'),
+      matchesGoldenFile(
+        'switch.tap.off.dark.png',
+        version: 0,
+      ),
     );
 
     await tester.tap(find.byKey(switchKey));
@@ -604,7 +616,10 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(switchKey),
-      matchesGoldenFile('switch.tap.on.dark.png'),
+      matchesGoldenFile(
+        'switch.tap.on.dark.png',
+        version: 0,
+      ),
     );
   });
 }
