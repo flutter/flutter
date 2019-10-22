@@ -93,6 +93,11 @@ group("flutter") {
 
 config("config") {
   include_dirs = [ ".." ]
+  if (is_win) {
+    if (current_cpu != "x86") {
+      cflags = [ "/WX" ]  # Treat warnings as errors.
+    }
+  }
 }
 
 config("export_dynamic_symbols") {

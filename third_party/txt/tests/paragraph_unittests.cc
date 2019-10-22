@@ -313,7 +313,7 @@ TEST_F(ParagraphTest, DISABLE_ON_MAC(LineMetricsParagraph2)) {
   ASSERT_EQ(paragraph->GetLineMetrics()[0].hard_break, false);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].ascent, 27.84);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].descent, 7.6799998);
-  ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].width, 349.22266);
+  ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].width, 349.21875);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].left, 0.0);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].baseline, 28.32);
   ASSERT_EQ(paragraph->GetLineMetrics()[0].line_number, 0ull);
@@ -4457,9 +4457,9 @@ TEST_F(ParagraphTest, KernScaleParagraph) {
 
   EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 207.37109375f);
-  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 230.87109375f);
-  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 253.36328125f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 207.36328125f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 230.86328125f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 253.35546875f);
 }
 
 TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(NewlineParagraph)) {

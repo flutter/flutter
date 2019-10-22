@@ -1,4 +1,4 @@
-Signature: bc14a6c15e2ed1c6819d722a808248b9
+Signature: cbd43a0be5a032d016a584dc0fa51225
 
 UNUSED LICENSES:
 
@@ -11568,6 +11568,7 @@ FILE: ../../../third_party/harfbuzz/src/harfbuzz-config.cmake.in
 FILE: ../../../third_party/harfbuzz/src/harfbuzz-gobject.pc.in
 FILE: ../../../third_party/harfbuzz/src/harfbuzz-icu.pc.in
 FILE: ../../../third_party/harfbuzz/src/harfbuzz-subset.pc.in
+FILE: ../../../third_party/harfbuzz/src/harfbuzz.cc
 FILE: ../../../third_party/harfbuzz/src/harfbuzz.pc.in
 FILE: ../../../third_party/harfbuzz/src/hb-ot-shape-complex-arabic-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-shape-complex-indic-table.cc
@@ -11692,6 +11693,8 @@ FILE: ../../../third_party/harfbuzz/src/hb-ot-color-colr-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-color-sbix-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-color-svg-table.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-gasp-table.hh
+FILE: ../../../third_party/harfbuzz/src/hb-ot-metrics.h
+FILE: ../../../third_party/harfbuzz/src/hb-ot-metrics.hh
 FILE: ../../../third_party/harfbuzz/src/hb-ot-stat-table.hh
 ----------------------------------------------------------------------------------------------------
 Copyright © 2018  Ebrahim Byagowi
@@ -11768,6 +11771,46 @@ FILE: ../../../third_party/harfbuzz/src/hb-aat-layout-trak-table.hh
 ----------------------------------------------------------------------------------------------------
 Copyright © 2018  Ebrahim Byagowi
 Copyright © 2018  Google, Inc.
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-aat-layout-opbd-table.hh
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-aat-layout-opbd-table.hh
+FILE: ../../../third_party/harfbuzz/src/hb-gdi.cc
+FILE: ../../../third_party/harfbuzz/src/hb-gdi.h
+FILE: ../../../third_party/harfbuzz/src/hb-number-parser.hh
+FILE: ../../../third_party/harfbuzz/src/hb-number-parser.rl
+FILE: ../../../third_party/harfbuzz/src/hb-number.cc
+FILE: ../../../third_party/harfbuzz/src/hb-number.hh
+FILE: ../../../third_party/harfbuzz/src/hb-ot-meta-table.hh
+FILE: ../../../third_party/harfbuzz/src/hb-ot-meta.cc
+FILE: ../../../third_party/harfbuzz/src/hb-ot-meta.h
+FILE: ../../../third_party/harfbuzz/src/test-number.cc
+FILE: ../../../third_party/harfbuzz/src/test-ot-meta.cc
+----------------------------------------------------------------------------------------------------
+Copyright © 2019  Ebrahim Byagowi
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -11892,6 +11935,35 @@ FILE: ../../../third_party/harfbuzz/src/hb-object.hh
 Copyright © 2007  Chris Wilson
 Copyright © 2009,2010  Red Hat, Inc.
 Copyright © 2011,2012  Google, Inc.
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-bimap.hh
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-bimap.hh
+----------------------------------------------------------------------------------------------------
+Copyright © 2019 Adobe Inc.
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -13005,6 +13077,8 @@ TYPE: LicenseType.unknown
 FILE: ../../../third_party/harfbuzz/src/hb-ot-glyf-table.hh
 ----------------------------------------------------------------------------------------------------
 Copyright © 2015  Google, Inc.
+Copyright © 2019  Adobe Inc.
+Copyright © 2019  Ebrahim Byagowi
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -13105,9 +13179,9 @@ ORIGIN: ../../../third_party/harfbuzz/src/hb-ot-layout-base-table.hh
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/harfbuzz/src/hb-ot-layout-base-table.hh
 ----------------------------------------------------------------------------------------------------
-Copyright © 2016 Elie Roux <elie.roux@telecom-bretagne.eu>
+Copyright © 2016  Elie Roux <elie.roux@telecom-bretagne.eu>
 Copyright © 2018  Google, Inc.
-Copyright © 2018  Ebrahim Byagowi
+Copyright © 2018-2019  Ebrahim Byagowi
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -13352,6 +13426,35 @@ FILE: ../../../third_party/harfbuzz/src/hb-ot-math.cc
 FILE: ../../../third_party/harfbuzz/src/hb-ot-math.h
 ----------------------------------------------------------------------------------------------------
 Copyright © 2016  Igalia S.L.
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-ot-metrics.cc
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-ot-metrics.cc
+----------------------------------------------------------------------------------------------------
+Copyright © 2018-2019  Ebrahim Byagowi
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -13648,6 +13751,36 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 ====================================================================================================
 LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/hb-ot-var-gvar-table.hh
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/hb-ot-var-gvar-table.hh
+----------------------------------------------------------------------------------------------------
+Copyright © 2019  Adobe Inc.
+Copyright © 2019  Ebrahim Byagowi
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
 ORIGIN: ../../../third_party/harfbuzz/src/hb-serialize.hh
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/harfbuzz/src/hb-serialize.hh
@@ -13855,6 +13988,35 @@ TYPE: LicenseType.unknown
 FILE: ../../../third_party/harfbuzz/src/hb-vector.hh
 ----------------------------------------------------------------------------------------------------
 Copyright © 2017,2018  Google, Inc.
+
+ This is part of HarfBuzz, a text shaping library.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in
+all copies of this software.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
+IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: harfbuzz
+ORIGIN: ../../../third_party/harfbuzz/src/test-bimap.cc
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/harfbuzz/src/test-bimap.cc
+----------------------------------------------------------------------------------------------------
+Copyright © 2019  Adobe, Inc.
 
  This is part of HarfBuzz, a text shaping library.
 
@@ -18431,8 +18593,8 @@ We recommend reading one or more of these references before trying to
 understand the innards of the JPEG software.
 
 The best short technical introduction to the JPEG compression algorithm is
-	Wallace, Gregory K.  "The JPEG Still Picture Compression Standard",
-	Communications of the ACM, April 1991 (vol. 34 no. 4), pp. 30-44.
+  Wallace, Gregory K.  "The JPEG Still Picture Compression Standard",
+  Communications of the ACM, April 1991 (vol. 34 no. 4), pp. 30-44.
 (Adjacent articles in that issue discuss MPEG motion picture compression,
 applications of JPEG, and related topics.)  If you don't have the CACM issue
 handy, a PDF file containing a revised version of Wallace's article is
@@ -18500,8 +18662,8 @@ and other news.answers archive sites, including the official news.answers
 archive at rtfm.mit.edu: ftp://rtfm.mit.edu/pub/usenet/news.answers/jpeg-faq/.
 If you don't have Web or FTP access, send e-mail to mail-server@rtfm.mit.edu
 with body
-	send usenet/news.answers/jpeg-faq/part1
-	send usenet/news.answers/jpeg-faq/part2
+  send usenet/news.answers/jpeg-faq/part1
+  send usenet/news.answers/jpeg-faq/part2
 
 FILE FORMAT WARS
 ================
@@ -23186,4 +23348,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 361
+Total license count: 366
