@@ -68,7 +68,7 @@ void main() {
 
   // System cursors must be constants.
   const MouseCursor testCursor = SystemMouseCursors.grabbing;
-  const SystemCursorShape testCursorShape = SystemCursorShape.grabbing;
+  const SystemMouseCursorShape testCursorShape = SystemMouseCursorShape.grabbing;
 
   // Set up a trivial test environment that includes one annotation.
   // This annotation records the enter, hover, and exit events it receives to
@@ -182,7 +182,7 @@ void main() {
     ]));
     expect(listenerLogs, <bool>[false]);
     expect(cursorRequests, const <_ActivateSystemCursorDetails>[
-      _ActivateSystemCursorDetails(device: 0, shape: SystemCursorShape.basic),
+      _ActivateSystemCursorDetails(device: 0, shape: SystemMouseCursorShape.basic),
     ]);
     cursorRequests.clear();
     events.clear();
@@ -849,7 +849,7 @@ class _ActivateSystemCursorDetails {
 
   final int device;
 
-  final SystemCursorShape shape;
+  final SystemMouseCursorShape shape;
 
   @override
   bool operator ==(dynamic other) {
@@ -876,10 +876,10 @@ class _TestMouseCursorPlatformDelegate extends MouseCursorPlatformDelegate {
   final bool Function(_ActivateSystemCursorDetails) onActivateSystemCursor;
 
   @override
-  Future<bool> activateSystemCursor(ActivateMouseCursorDetails details, SystemCursorShape shape) async {
+  Future<bool> activateSystemCursor({int device, SystemMouseCursorShape shape}) async {
     if (onActivateSystemCursor != null) {
       return onActivateSystemCursor(_ActivateSystemCursorDetails(
-        device: details.device,
+        device: device,
         shape: shape,
       ));
     }

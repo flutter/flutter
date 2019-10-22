@@ -7,16 +7,19 @@ import 'package:flutter/foundation.dart';
 import '../platform_channel.dart';
 import 'common.dart';
 
-/// TODOC
+// The channel interface with the platform.
+//
+// It is separated to a class for the conventience of reference by the shell
+// implementation.
 @immutable
 class _GLFWMouseCursorActions {
-  /// TODOC
   const _GLFWMouseCursorActions(this.mouseCursorChannel);
 
-  /// TODOC
   final MethodChannel mouseCursorChannel;
 
-  /// TODOC
+  // Set cursor as a sytem cursor specified by `systemConstant`, and/or hidden.
+  //
+  // If `hidden` is true, `systemConstant` is ignored.
   Future<void> setAsSystemCursor({
     @required int systemConstant,
     @required bool hidden,
@@ -33,15 +36,21 @@ class _GLFWMouseCursorActions {
   }
 }
 
-/// TODOC
+/// The implementation of [MouseCursorPlatformDelegate] that controls
+/// [GLFW](https://www.glfw.org) over a method channel.
 class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
-  /// TODOC
-  MouseCursorGLFWDelegate(this._mouseCursorChannel);
+  /// Create a [MouseCursorGLFWDelegate] by providing the method channel to use.
+  ///
+  /// The [mouseCursorChannel] must not be null.
+  MouseCursorGLFWDelegate({@required this.mouseCursorChannel})
+    : assert(mouseCursorChannel != null);
 
-  final MethodChannel _mouseCursorChannel;
+  /// The method channel to control the platform with.
+  final MethodChannel mouseCursorChannel;
 
   // System cursor constants are used to set system cursor on GLFW.
-  // Must be kept in sync with GLFW's [Standard cursor shapes](https://www.glfw.org/docs/latest/group__shapes.html)
+  // Must be kept in sync with GLFW's
+  // [Standard cursor shapes](https://www.glfw.org/docs/latest/group__shapes.html)
 
   /// The same constant as GLFW's `GLFW_ARROW_CURSOR`,
   /// used internally to set system cursor.
@@ -55,62 +64,41 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
   /// used internally to set system cursor.
   static const int kSystemConstantHand = 0x00036004;
 
-  Future<bool> _activateSystemConstant({
-    @required ActivateMouseCursorDetails details,
-    @required int systemConstant,
-  }) async {
-    await _GLFWMouseCursorActions(_mouseCursorChannel)
+  Future<bool> _activateSystemConstant(int systemConstant) async {
+    await _GLFWMouseCursorActions(mouseCursorChannel)
       .setAsSystemCursor(
         systemConstant: systemConstant,
         hidden: false,
       );
-    // This action is asserted to be successful. If not, throw the error.
     return true;
   }
 
-  Future<bool> _hideCursor({
-    @required ActivateMouseCursorDetails details,
-  }) async {
-    await _GLFWMouseCursorActions(_mouseCursorChannel)
+  Future<bool> _hideCursor() async {
+    await _GLFWMouseCursorActions(mouseCursorChannel)
       .setAsSystemCursor(
         systemConstant: 0,
         hidden: true,
       );
-    // This action is asserted to be successful. If not, throw the error.
     return true;
   }
 
   @override
-  Future<bool> activateSystemCursor(
-    ActivateMouseCursorDetails details,
-    SystemCursorShape shape,
-  ) async {
+  Future<bool> activateSystemCursor({int device, SystemMouseCursorShape shape}) async {
     switch (shape) {
-      case SystemCursorShape.none:
-        return _hideCursor(
-          details: details,
-        );
-      case SystemCursorShape.basic:
-        return _activateSystemConstant(
-          details: details,
-          systemConstant: MouseCursorGLFWDelegate.kSystemConstantArrow,
-        );
-      case SystemCursorShape.click:
-        return _activateSystemConstant(
-          details: details,
-          systemConstant: MouseCursorGLFWDelegate.kSystemConstantHand,
-        );
-      case SystemCursorShape.text:
-        return _activateSystemConstant(
-          details: details,
-          systemConstant: MouseCursorGLFWDelegate.kSystemConstantIbeam,
-        );
-      case SystemCursorShape.forbidden:
+      case SystemMouseCursorShape.none:
+        return _hideCursor();
+      case SystemMouseCursorShape.basic:
+        return _activateSystemConstant(MouseCursorGLFWDelegate.kSystemConstantArrow);
+      case SystemMouseCursorShape.click:
+        return _activateSystemConstant(MouseCursorGLFWDelegate.kSystemConstantHand);
+      case SystemMouseCursorShape.text:
+        return _activateSystemConstant(MouseCursorGLFWDelegate.kSystemConstantIbeam);
+      case SystemMouseCursorShape.forbidden:
         return false;
-      case SystemCursorShape.grab:
-        return activateSystemCursor(details, SystemCursorShape.click);
-      case SystemCursorShape.grabbing:
-        return activateSystemCursor(details, SystemCursorShape.click);
+      case SystemMouseCursorShape.grab:
+        return activateSystemCursor(device: device, shape: SystemMouseCursorShape.click);
+      case SystemMouseCursorShape.grabbing:
+        return activateSystemCursor(device: device, shape: SystemMouseCursorShape.click);
       default:
         break;
     }

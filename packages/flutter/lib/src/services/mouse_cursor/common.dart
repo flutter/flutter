@@ -6,22 +6,25 @@ import 'package:flutter/foundation.dart';
 
 /// The kinds of all system cursors supported by Flutter.
 ///
-/// Each value of [SystemCursorShape] corresponds to a [MouseCursor] object in
-/// [SystemMouseCursors].
+/// Each value of [SystemMouseCursorShape] corresponds to a [MouseCursor] object
+/// in [SystemMouseCursors].
 ///
 /// You should directly use the objects defined in [SystemMouseCursors]
-/// when possible instead of redefining them on your own.
+/// when possible instead of using this value to redefine these cursors.
 ///
 /// See also:
 ///
 ///  * [SystemMouseCursors], which contains usable [MouseCursor] objects that
-///    correspond to values of [SystemCursorShape].
-///  * [SystemMouseCursor], which uses this type.
-enum SystemCursorShape {
+///    correspond to values of this type.
+///  * [MouseCursorPlatformDelegate], which uses this type to define how
+///    system cursors are implemented on platforms.
+enum SystemMouseCursorShape {
   /// The shape that corresponds to [SystemCursors.none].
   none,
 
   /// The shape that corresponds to [SystemCursors.basic].
+  ///
+  /// This shape must be implemented by all platforms.
   basic,
 
   /// The shape that corresponds to [SystemCursors.click].
@@ -77,12 +80,16 @@ abstract class MouseCursor {
   /// The base constructor does nothing.
   const MouseCursor();
 
-  /// Perform necessary preparations and platform calls that change a device to
-  /// this cursor.
+  /// Change a device to this cursor by performing necessary preparations and
+  /// platform calls.
+  ///
+  /// It resolves to `true` if the operation is successful, `false` if the
+  /// operation is unsupported by the platform, or rejects to error if the
+  /// operation is implemented but an error occurs.
   ///
   /// It is called by [MouseTracker] when a mouse pointer enters a region that
   /// is assigned with this mouse cursor.
-  Future<void> activate(ActivateMouseCursorDetails details);
+  Future<bool> activate(ActivateMouseCursorDetails details);
 
   /// A platform-independent short description for this cursor.
   ///
@@ -95,32 +102,41 @@ abstract class MouseCursor {
   }
 }
 
-/// A special mouse cursor that does nothing.
+/// A mouse cursor that does nothing when activated.
+///
+/// See also:
+///
+///  * [SystemMouseCursors.releaseControl], which is an object of this cursor.
 class NoopMouseCursor extends MouseCursor {
   /// Create a [NoopMouseCursor].
   const NoopMouseCursor();
 
-  /// This method does nothing and immediately returns.
+  /// Does nothing and immediately returns true.
   @override
-  Future<void> activate(ActivateMouseCursorDetails details) async {
-    return;
+  Future<bool> activate(ActivateMouseCursorDetails details) async {
+    return true;
   }
 
   @override
   String describeCursor() => 'noop';
 }
 
-/// TODOC
+/// An interface for controlling the platform to perform operations related
+/// to mouse cursor.
 abstract class MouseCursorPlatformDelegate {
-  /// TODOC
+  /// Create a [MouseCursorPlatformDelegate].
   const MouseCursorPlatformDelegate();
 
-  /// TODOC
-  /// Returns whether the cursor was successfully set.
-  Future<bool> activateSystemCursor(
-    ActivateMouseCursorDetails details,
-    SystemCursorShape shape,
-  );
+  /// Asks the platform to change the cursor of `device` to the system cursor
+  /// specified by `shape`.
+  ///
+  /// It resolves to `true` if the operation is successful, `false` if the
+  /// operation is unsupported by the platform, or rejects to error if the
+  /// operation is implemented but an error occurs.
+  Future<bool> activateSystemCursor({
+    @required int device,
+    @required SystemMouseCursorShape shape,
+  });
 }
 
 /// TODOC
@@ -129,7 +145,10 @@ class MouseCursorUnsupportedDelegate extends MouseCursorPlatformDelegate {
   const MouseCursorUnsupportedDelegate();
 
   @override
-  Future<bool> activateSystemCursor(ActivateMouseCursorDetails details, SystemCursorShape shape) async {
+  Future<bool> activateSystemCursor({
+    int device,
+    SystemMouseCursorShape shape,
+  }) async {
     return true;
   }
 }
