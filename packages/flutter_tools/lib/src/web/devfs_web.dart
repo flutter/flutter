@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
@@ -19,7 +20,7 @@ import '../globals.dart';
 class WebAssetServer {
   @visibleForTesting
   WebAssetServer(this._httpServer) {
-    _httpServer.listen(_handleRequest);
+    _httpServer.listen(_handleOrThrow);
   }
 
   // Fallback to "application/octet-stream" on null which
@@ -27,12 +28,37 @@ class WebAssetServer {
   static const String _kDefaultMimeType = 'application/octet-stream';
 
   /// Start the web asset server on a [hostname] and [port].
+  ///
+  /// Throws a [ToolExit] if the server fails to bind to the correct address.
   static Future<WebAssetServer> start(String hostname, int port) async {
-    return WebAssetServer(await HttpServer.bind(hostname, port));
+    try {
+      final HttpServer httpServer = await HttpServer.bind(hostname, port);
+      return WebAssetServer(httpServer);
+    } on SocketException catch (err) {
+      throwToolExit('Web asset server failed to bind to $hostname:$port\n$err');
+    }
+    assert(false);
+    return null;
   }
 
   final HttpServer _httpServer;
   final Map<Uri, Uint8List> _files = <Uri, Uint8List>{};
+
+  // If the request handler fails with a filesystem exception, return a 500.
+  // For other types of errors, tear down the asset server.
+  Future<void> _handleOrThrow(HttpRequest request) async {
+    try {
+      await _handleRequest(request);
+    // Assume exception types are recoverble. On error types we should take
+    // down the server.
+    } on Exception {
+      final HttpResponse response = request.response;
+      response.statusCode = HttpStatus.internalServerError;
+      await response.close();
+    } catch (err) {
+      throwToolExit('Web asset server failed to handle request:\n$err');
+    }
+  }
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   Future<void> _handleRequest(HttpRequest request) async {
@@ -98,7 +124,7 @@ class WebAssetServer {
     await response.close();
   }
 
-  /// Tear down the http server running.
+  /// Tear down the runnin http server.
   Future<void> dispose() {
     return _httpServer.close();
   }
@@ -120,6 +146,10 @@ class WebAssetServer {
       }
       final int start = offsets[0];
       final int end = offsets[1];
+      if (end >= bytes.lengthInBytes || start < 0) {
+        printTrace('Invalid byte slice: [$start, $end]');
+        continue;
+      }
       final Uint8List byteView = Uint8List.view(bytes.buffer, start, end - start);
       _files[uri] = byteView;
     }

@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -61,6 +63,10 @@ void main() {
     await requestController.close();
   });
 
+  test('Throws a tool exit if bind fails with a SocketException', () => testbed.run(() async {
+    expect(WebAssetServer.start('hello', 1234), throwsA(isInstanceOf<ToolExit>()));
+  }));
+
   test('Handles against malformed manifest', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
@@ -72,8 +78,12 @@ void main() {
     final File manifestNonFileScheme = fs.file('manifestA')
       ..writeAsStringSync(json.encode(<String, Object>{'http:///foo.js': <int>[0, 10]}));
 
+    final File manifestOutOfBounds = fs.file('manifest')
+      ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0, 100]}));
+
     await webAssetServer.write(source, manifestMissingOffset);
     await webAssetServer.write(source, manifestNonFileScheme);
+    await webAssetServer.write(source, manifestOutOfBounds);
   }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
