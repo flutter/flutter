@@ -321,7 +321,8 @@ static void CheckFrameTimings(const std::vector<FrameTiming>& timings,
   }
 }
 
-TEST_F(ShellTest, ReportTimingsIsCalled) {
+// TODO(43192): This test is disable because of flakiness.
+TEST_F(ShellTest, DISABLED_ReportTimingsIsCalled) {
   fml::TimePoint start = fml::TimePoint::Now();
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
