@@ -90,7 +90,10 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.0.png'),
+      matchesGoldenFile(
+        'editable_text_test.0.png',
+        version: 3,
+      ),
     );
   });
 
@@ -141,7 +144,10 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.1.png'),
+      matchesGoldenFile(
+        'editable_text_test.1.png',
+        version: 3,
+      ),
     );
   });
 
@@ -791,7 +797,10 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.2.png'),
+      matchesGoldenFile(
+        'editable_text_test.2.png',
+        version: 0,
+      ),
     );
     debugDefaultTargetPlatformOverride = null;
   });

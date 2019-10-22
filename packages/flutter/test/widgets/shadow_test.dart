@@ -23,14 +23,20 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('shadow.BoxDecoration.disabled.png'),
+      matchesGoldenFile(
+        'shadow.BoxDecoration.disabled.png',
+        version: null,
+      ),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
+      matchesGoldenFile(
+        'shadow.BoxDecoration.enabled.png',
+        version: null,
+      ),
     );
     debugDisableShadows = true;
   }, skip: isBrowser);
@@ -56,7 +62,10 @@ void main() {
       await tester.pumpWidget(build(elevation));
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('shadow.ShapeDecoration.$elevation.png'),
+        matchesGoldenFile(
+          'shadow.ShapeDecoration.$elevation.png',
+          version: null,
+        ),
       );
     }
     debugDisableShadows = true;
@@ -83,14 +92,20 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('shadow.PhysicalModel.disabled.png'),
+      matchesGoldenFile(
+        'shadow.PhysicalModel.disabled.png',
+        version: null,
+      ),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
+      matchesGoldenFile(
+        'shadow.PhysicalModel.enabled.png',
+        version: null,
+      ),
     );
     debugDisableShadows = true;
   }, skip: isBrowser);
@@ -120,7 +135,10 @@ void main() {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('shadow.PhysicalShape.$elevation.png'),
+        matchesGoldenFile(
+          'shadow.PhysicalShape.$elevation.png',
+          version: 1,
+        ),
       );
     }
     debugDisableShadows = true;
