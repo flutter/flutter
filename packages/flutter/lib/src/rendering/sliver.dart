@@ -447,7 +447,7 @@ class SliverConstraints extends Constraints {
       verify(remainingCacheExtent >= 0.0, 'The "remainingCacheExtent" is negative.');
       verify(cacheOrigin <= 0.0, 'The "cacheOrigin" is positive.');
       verify(isNormalized, 'The constraints are not normalized.'); // should be redundant with earlier checks
-      verify(flexExtent >= 0.0, 'The flexExtent is negative');
+      verify(flexExtent != null, 'The flexExtent is null');
       return true;
     }());
     return true;
@@ -1844,5 +1844,7 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
       hasVisualOverflow: childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     setChildParentData(child, constraints, geometry);
+    print('Constraints: $constraints');
+    print('Geometry: $geometry');
   }
 }

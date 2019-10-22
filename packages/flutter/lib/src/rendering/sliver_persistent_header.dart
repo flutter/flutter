@@ -285,30 +285,44 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     RenderBox child,
   }) : super(child: child);
 
-  @override
-  void performLayout() {
+  // Distance from our leading edge to the child's leading edge, in the axis
+  // direction. Negative if we're scrolled off the top.
+  double _childPosition;
+
+  /// Updates [geometry], and returns the new value for [childMainAxisPosition].
+  ///
+  /// This is used by [performLayout].
+  @protected
+  double updateGeometry() {
     final double maxExtent = this.maxExtent;
-    final bool overlapsContent = constraints.overlap > 0.0;
-    excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
-//    print(constraints.scrollOffset);
-    layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
     final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
-      paintExtent: math.min(childExtent, constraints.remainingPaintExtent),
+      paintExtent: math.min(childExtent, constraints.remainingPaintExtent) + constraints.flexExtent,
       layoutExtent: layoutExtent,
       maxPaintExtent: maxExtent,
       maxScrollObstructionExtent: minExtent,
       cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
-//    print(constraints);
-//    print('Header: $geometry');
+    return math.min(0.0, constraints.flexExtent);
   }
 
   @override
-  double childMainAxisPosition(RenderBox child) => 0.0;
+  void performLayout() {
+    final double maxExtent = this.maxExtent;
+    final bool overlapsContent = constraints.overlap > 0.0;
+    excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
+    layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
+    _childPosition = updateGeometry();
+  }
+
+  @override
+  double childMainAxisPosition(RenderBox child) {
+    assert(child == this.child);
+    return _childPosition;
+  }
 }
 
 /// Specifies how a floating header is to be "snapped" (animated) into or out
@@ -483,8 +497,6 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: overlapsContent);
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
-    print(geometry);
-    print(_childPosition);
   }
 
   @override
