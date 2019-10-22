@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/web/devfs_web.dart';
 import 'package:mockito/mockito.dart';
@@ -30,8 +31,11 @@ void main() {
   MockHttpHeaders headers;
   Completer<void> closeCompleter;
   WebAssetServer webAssetServer;
+  MockPlatform windows;
 
   setUp(() {
+    windows = MockPlatform();
+    when(windows.isWindows).thenReturn(true);
     testbed = Testbed(setup: () {
       mockHttpServer = MockHttpServer();
       requestController = StreamController<HttpRequest>.broadcast();
@@ -56,6 +60,21 @@ void main() {
     await webAssetServer.dispose();
     await requestController.close();
   });
+
+  test('Handles against malformed manifest', () => testbed.run(() async {
+    final File source = fs.file('source')
+      ..writeAsStringSync('main() {}');
+
+    // Missing ending offset.
+    final File manifestMissingOffset = fs.file('manifestA')
+      ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0]}));
+    // Non-file URI.
+    final File manifestNonFileScheme = fs.file('manifestA')
+      ..writeAsStringSync(json.encode(<String, Object>{'http:///foo.js': <int>[0, 10]}));
+
+    await webAssetServer.write(source, manifestMissingOffset);
+    await webAssetServer.write(source, manifestNonFileScheme);
+  }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
     final File source = fs.file('source')
@@ -87,8 +106,23 @@ void main() {
     verify(response.statusCode = 404).called(1);
   }));
 
-  test('serves Dart files from in filesystem', () => testbed.run(() async {
-    final File source = fs.file('foo.dart')
+  test('serves Dart files from in filesystem on Windows', () => testbed.run(() async {
+    final File source = fs.file('foo.dart').absolute
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+
+    when(request.uri).thenReturn(Uri.parse('http://foobar/C:/foo.dart'));
+    requestController.add(request);
+    await closeCompleter.future;
+
+    verify(headers.add('Content-Length', source.lengthSync())).called(1);
+    verify(response.addStream(any)).called(1);
+  }, overrides: <Type,  Generator>{
+    Platform: () => windows,
+  }));
+
+  test('serves Dart files from in filesystem on Linux/macOS', () => testbed.run(() async {
+    final File source = fs.file('foo.dart').absolute
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() {}');
 
@@ -169,4 +203,4 @@ class MockHttpServer extends Mock implements HttpServer {}
 class MockHttpRequest extends Mock implements HttpRequest {}
 class MockHttpResponse extends Mock implements HttpResponse {}
 class MockHttpHeaders extends Mock implements HttpHeaders {}
-
+class MockPlatform extends Mock implements Platform {}

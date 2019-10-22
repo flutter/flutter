@@ -36,15 +36,15 @@ class WebAssetServer {
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   Future<void> _handleRequest(HttpRequest request) async {
-    final File file = fs.file(request.uri.path);
-    final String extension = fs.path.extension(file.path);
+    final File file = fs.file(Uri.base.resolve(request.uri.path));
+    final String fileExtension = fs.path.extension(file.path);
     final HttpResponse response = request.response;
 
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI, returning a 404 if it is not
     // found. The tool doesn't currently consider the case of JavaScript files
     // as assets.
-    if (extension == '.js') {
+    if (fileExtension == '.js') {
       final List<int> bytes = _files[file.uri];
       if (bytes != null) {
         response.headers
@@ -61,7 +61,7 @@ class WebAssetServer {
     // likely coming from a source map request. Attempt to look in the
     // local filesystem for it, and return a 404 if it is not found. The tool
     // doesn't currently consider the case of Dart files as assets.
-    if (extension == '.dart') {
+    if (fileExtension == '.dart') {
       if (file.existsSync()) {
         response.headers.add('Content-Length', file.lengthSync());
         await response.addStream(file.openRead());
@@ -116,6 +116,7 @@ class WebAssetServer {
       final List<Object> offsets = manifest[fileUri];
       if (offsets.length != 2) {
         printTrace('Invalid manifest byte offsets: $offsets');
+        continue;
       }
       final int start = offsets[0];
       final int end = offsets[1];
