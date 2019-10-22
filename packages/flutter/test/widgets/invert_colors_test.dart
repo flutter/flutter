@@ -20,7 +20,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('invert_colors_test.0.png'),
+      matchesGoldenFile(
+        'invert_colors_test.0.png',
+        version: null,
+      ),
     );
   }, skip: isBrowser);
 
@@ -38,7 +41,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('invert_colors_test.1.png'),
+      matchesGoldenFile(
+        'invert_colors_test.1.png',
+        version: null,
+      ),
     );
   }, skip: isBrowser);
 }

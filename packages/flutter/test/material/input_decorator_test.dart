@@ -2960,13 +2960,19 @@ void main() {
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
+        matchesGoldenFile(
+          'input_decorator.outline_icon_label.ltr.png',
+          version: null,
+        ),
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
+        matchesGoldenFile(
+          'input_decorator.outline_icon_label.rtl.png',
+          version: null,
+        ),
       );
     },
   );
