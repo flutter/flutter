@@ -35,14 +35,4 @@
 - (nullable instancetype)initWithCoder:(nonnull NSCoder*)coder NS_UNAVAILABLE;
 - (nonnull instancetype)init NS_UNAVAILABLE;
 
-/**
- * Sets this view as the current context object for OpenGL drawing.
- */
-- (void)makeCurrentContext;
-
-/**
- * Called when the OpenGL display should be updated.
- */
-- (void)onPresent;
-
 @end
