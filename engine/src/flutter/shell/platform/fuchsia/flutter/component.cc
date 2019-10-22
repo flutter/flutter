@@ -99,9 +99,11 @@ static std::unique_ptr<fml::FileMapping> MakeFileMapping(const char* path,
 
   using Protection = fml::FileMapping::Protection;
 
+  std::initializer_list<Protection> protection_execute = {Protection::kRead,
+                                                          Protection::kExecute};
+  std::initializer_list<Protection> protection_read = {Protection::kRead};
   auto mapping = std::make_unique<fml::FileMapping>(
-      fml::UniqueFD{fd}, std::initializer_list<Protection>{
-                             Protection::kRead, Protection::kExecute});
+      fml::UniqueFD{fd}, executable ? protection_execute : protection_read);
 
   if (!mapping->IsValid()) {
     return nullptr;
