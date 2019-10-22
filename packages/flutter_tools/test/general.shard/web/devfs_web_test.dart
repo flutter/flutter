@@ -88,7 +88,7 @@ void main() {
   }));
 
   test('serves Dart files from in filesystem', () => testbed.run(() async {
-    final File source = fs.file('foo.dart').absolute
+    final File source = fs.file('foo.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() {}');
 
