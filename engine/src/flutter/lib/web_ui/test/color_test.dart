@@ -137,4 +137,21 @@ void main() {
     // 0.0722 * ((0.18823529411 + 0.055) / 1.055) ^ 2.4
     expect(brightRed.computeLuminance(), equals(0.24601329637099723));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/41257
+  // CupertinoDynamicColor was overriding base class and calling super(0).
+  test('subclass of Color can override value', () {
+    final DynamicColorClass color = DynamicColorClass(0xF0E0D0C0);
+    expect(color.value, 0xF0E0D0C0);
+    // Call base class member, make sure it uses overridden value.
+    expect(color.red, 0xE0);
+  });
+}
+
+class DynamicColorClass extends Color {
+  const DynamicColorClass(int newValue) : _newValue = newValue, super(0);
+
+  final int _newValue;
+
+  int get value => _newValue;
 }
