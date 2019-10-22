@@ -820,10 +820,7 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile(
-          'nav_bar_test.standard_title.png',
-          version: 2,
-        ),
+        matchesGoldenFile('nav_bar_test.standard_title.png'),
       );
     },
   );
@@ -854,10 +851,7 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile(
-          'nav_bar_test.large_title.png',
-          version: 2,
-        ),
+        matchesGoldenFile('nav_bar_test.large_title.png'),
       );
     },
   );

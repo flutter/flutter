@@ -78,7 +78,7 @@ void main() {
       ],
     );
     return _runFlutterTest(projectDir);
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -96,7 +96,7 @@ void main() {
         'ios/Runner/GeneratedPluginRegistrant.h',
       ],
     );
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -118,11 +118,9 @@ void main() {
       'ios/',
     ]);
     return _runFlutterTest(projectDir);
-  },
-    timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
-      Pub: () => const Pub(),
-    },
-  );
+  }, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
 
   testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
@@ -138,7 +136,7 @@ void main() {
           '.ios/',
         ]),
       throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
     ...noColorTerminalOverride,
   });
@@ -164,7 +162,7 @@ void main() {
         '.ios/',
       ],
     );
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -189,7 +187,7 @@ void main() {
         '.ios/',
       ],
     );
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -214,7 +212,7 @@ void main() {
         'lib/flutter_project.dart',
       ],
     );
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -245,7 +243,7 @@ void main() {
         'test/widget_test.dart',
       ],
     );
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -267,7 +265,7 @@ void main() {
         'ios/Runner/main.m',
       ],
     );
-  }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -297,7 +295,7 @@ void main() {
       ],
     );
     return _runFlutterTest(projectDir);
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -319,7 +317,7 @@ void main() {
       ],
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -346,7 +344,7 @@ void main() {
         'example/ios/Runner/main.m',
       ],
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('plugin project with custom org', () async {
     return _createProject(
@@ -366,7 +364,7 @@ void main() {
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
       ],
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('plugin project with valid custom project name', () async {
     return _createProject(
@@ -386,7 +384,7 @@ void main() {
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
       ],
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('plugin project with invalid custom project name', () async {
     expect(
@@ -396,7 +394,7 @@ void main() {
       ),
       throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.'),
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('legacy app project with-driver-test', () async {
     return _createAndAnalyzeProject(
@@ -404,7 +402,7 @@ void main() {
       <String>['--with-driver-test', '--template=app'],
       <String>['lib/main.dart'],
     );
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -439,7 +437,7 @@ void main() {
       'android/',
       'ios/',
     ]);
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -463,7 +461,7 @@ void main() {
     final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('non androidx app project', () async {
     Cache.flutterRoot = '../..';
@@ -484,7 +482,7 @@ void main() {
     final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), false);
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('androidx is used by default in a module project', () async {
     Cache.flutterRoot = '../..';
@@ -501,7 +499,7 @@ void main() {
       project.usesAndroidX,
       true,
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('non androidx module', () async {
     Cache.flutterRoot = '../..';
@@ -518,7 +516,7 @@ void main() {
       project.usesAndroidX,
       false,
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('androidx is used by default in a plugin project', () async {
     Cache.flutterRoot = '../..';
@@ -539,7 +537,7 @@ void main() {
     final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('non androidx plugin project', () async {
     Cache.flutterRoot = '../..';
@@ -560,7 +558,7 @@ void main() {
     final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), false);
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('app supports macOS if requested', () async {
     Cache.flutterRoot = '../..';
@@ -573,7 +571,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--macos', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), true);
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('app does not include macOS by default', () async {
     Cache.flutterRoot = '../..';
@@ -586,7 +584,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), false);
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('plugin supports macOS if requested', () async {
     Cache.flutterRoot = '../..';
@@ -599,7 +597,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--macos', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('plugin does not include macOS by default', () async {
     Cache.flutterRoot = '../..';
@@ -612,7 +610,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
@@ -708,7 +706,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FlutterVersion: () => mockFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('has correct content and formatting with app template', () async {
     Cache.flutterRoot = '../..';
@@ -779,7 +777,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FlutterVersion: () => mockFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('has correct application id for android and bundle id for ios', () async {
     Cache.flutterRoot = '../..';
@@ -827,7 +825,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FlutterVersion: () => mockFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('can re-gen default template over existing project', () async {
     Cache.flutterRoot = '../..';
@@ -841,7 +839,7 @@ void main() {
 
     final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('can re-gen default template over existing app project with no metadta and detect the type', () async {
     Cache.flutterRoot = '../..';
@@ -858,7 +856,7 @@ void main() {
 
     final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('can re-gen app template over existing app project and detect the type', () async {
     Cache.flutterRoot = '../..';
@@ -872,7 +870,7 @@ void main() {
 
     final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('can re-gen template over existing module project and detect the type', () async {
     Cache.flutterRoot = '../..';
@@ -886,7 +884,7 @@ void main() {
 
     final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: module\n'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('can re-gen default template over existing plugin project and detect the type', () async {
     Cache.flutterRoot = '../..';
@@ -900,7 +898,7 @@ void main() {
 
     final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: plugin'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('can re-gen default template over existing package project and detect the type', () async {
     Cache.flutterRoot = '../..';
@@ -914,7 +912,7 @@ void main() {
 
     final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: package'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('can re-gen module .android/ folder, reusing custom org', () async {
     await _createProject(
@@ -930,7 +928,7 @@ void main() {
         '.android/app/src/main/java/com/bar/foo/flutter_project/host/MainActivity.java',
       ],
     );
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -947,7 +945,7 @@ void main() {
       await project.ios.productBundleIdentifier,
       'com.bar.foo.flutterProject',
     );
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -974,7 +972,7 @@ void main() {
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
       ],
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('can re-gen app ios/ folder, reusing custom org', () async {
     await _createProject(
@@ -989,7 +987,7 @@ void main() {
       await project.ios.productBundleIdentifier,
       'com.bar.foo.flutterProject',
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('can re-gen plugin ios/ and example/ folders, reusing custom org', () async {
     await _createProject(
@@ -1022,7 +1020,7 @@ void main() {
       await project.example.ios.productBundleIdentifier,
       'com.bar.foo.flutterProjectExample',
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('fails to re-gen without specified org when org is ambiguous', () async {
     await _createProject(
@@ -1040,7 +1038,7 @@ void main() {
       () => _createProject(projectDir, <String>[], <String>[]),
       throwsToolExit(message: 'Ambiguous organization'),
     );
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   // Verify that we help the user correct an option ordering issue
   testUsingContext('produces sensible error message', () async {
@@ -1102,7 +1100,7 @@ void main() {
         'ios/Runner/GeneratedPluginRegistrant.h',
       ],
     );
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });
 
@@ -1128,7 +1126,6 @@ void main() {
       expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
       expect(loggingProcessManager.commands.first, contains('--offline'));
     },
-    timeout: allowForCreateFlutterProject,
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
       Pub: () => const Pub(),
@@ -1147,7 +1144,6 @@ void main() {
       expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
       expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
     },
-    timeout: allowForCreateFlutterProject,
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
       Pub: () => const Pub(),
@@ -1168,7 +1164,7 @@ void main() {
     );
     expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
       contains('void main() {}'));
-  }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
   });
 
