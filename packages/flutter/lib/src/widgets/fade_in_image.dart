@@ -16,6 +16,14 @@ import 'transitions.dart';
 // Examples can assume:
 // Uint8List bytes;
 
+// Same as in painting/image.dart.
+ImageProvider<dynamic> _resizeIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
+  if (cacheWidth != null || cacheHeight != null) {
+    return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
+  }
+  return provider;
+}
+
 /// An image that shows a [placeholder] image while the target [image] is
 /// loading, then fades in the new image when it loads.
 ///
@@ -73,8 +81,8 @@ class FadeInImage extends StatelessWidget {
   /// If [excludeFromSemantics] is true, then [imageSemanticLabel] will be ignored.
   const FadeInImage({
     Key key,
-    @required this.placeholder,
-    @required this.image,
+    @required ImageProvider placeholder,
+    @required ImageProvider image,
     this.excludeFromSemantics = false,
     this.imageSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
@@ -87,8 +95,14 @@ class FadeInImage extends StatelessWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
+    int placeholderCacheWidth,
+    int placeholderCacheHeight,
+    int imageCacheWidth,
+    int imageCacheHeight,
   }) : assert(placeholder != null),
        assert(image != null),
+       placeholder = _resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, placeholder),
+       image = _resizeIfNeeded(imageCacheWidth, imageCacheHeight, image),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
@@ -137,6 +151,10 @@ class FadeInImage extends StatelessWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
+    int placeholderCacheWidth,
+    int placeholderCacheHeight,
+    int imageCacheWidth,
+    int imageCacheHeight,
   }) : assert(placeholder != null),
        assert(image != null),
        assert(placeholderScale != null),
@@ -148,8 +166,8 @@ class FadeInImage extends StatelessWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       placeholder = MemoryImage(placeholder, scale: placeholderScale),
-       image = NetworkImage(image, scale: imageScale),
+       placeholder = MemoryImage(placeholder, scale: placeholderScale, cacheWidth: placeholderCacheWidth, cacheHeight: placeholderCacheHeight),
+       image = NetworkImage(image, scale: imageScale, cacheWidth: imageCacheWidth, cacheHeight: imageCacheHeight),
        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -195,11 +213,15 @@ class FadeInImage extends StatelessWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
+    int placeholderCacheWidth,
+    int placeholderCacheHeight,
+    int imageCacheWidth,
+    int imageCacheHeight,
   }) : assert(placeholder != null),
        assert(image != null),
        placeholder = placeholderScale != null
          ? ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale)
-         : AssetImage(placeholder, bundle: bundle),
+         : AssetImage(placeholder, bundle: bundle, cacheWidth: placeholderCacheWidth, cacheHeight: placeholderCacheHeight),
        assert(imageScale != null),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
@@ -208,7 +230,7 @@ class FadeInImage extends StatelessWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       image = NetworkImage(image, scale: imageScale),
+       image = NetworkImage(image, scale: imageScale, cacheWidth: imageCacheWidth, cacheHeight: imageCacheHeight),
        super(key: key);
 
   /// Image displayed while the target [image] is loading.

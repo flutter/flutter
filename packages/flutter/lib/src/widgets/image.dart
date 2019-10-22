@@ -55,6 +55,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
   );
 }
 
+// Same as in widgets/fade_in_image.dart.
 ImageProvider<dynamic> _resizeIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
   if (cacheWidth != null || cacheHeight != null) {
     return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
