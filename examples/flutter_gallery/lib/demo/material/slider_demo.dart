@@ -69,6 +69,7 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     Thumb thumb,
+    bool isSelected,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -268,15 +269,26 @@ class _SlidersState extends State<_Sliders> {
                   ),
                 ),
               ),
-              Slider.adaptive(
-                value: _continuousValue,
-                min: 0.0,
-                max: 100.0,
-                onChanged: (double value) {
-                  setState(() {
-                    _continuousValue = value;
-                  });
-                },
+              SliderTheme(
+                data: SliderThemeData(
+                  showValueIndicator: ShowValueIndicator.always
+                ),
+                child: MediaQuery(
+                  data: MediaQueryData(
+                    textScaleFactor: 2,
+                  ),
+                  child: Slider.adaptive(
+                    value: _continuousValue,
+                    min: 0.0,
+                    max: 100.0,
+                    label: '${_continuousValue.round().toString()}',
+                    onChanged: (double value) {
+                      setState(() {
+                        _continuousValue = value;
+                      });
+                    },
+                  ),
+                ),
               ),
               const Text('Continuous with Editable Numerical Value'),
             ],
