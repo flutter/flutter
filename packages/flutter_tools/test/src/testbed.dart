@@ -734,7 +734,7 @@ class TestFeatureFlags implements FeatureFlags {
         return isWindowsEnabled;
       case flutterAndroidEmbeddingV2Feature:
         return isAndroidEmbeddingV2Enabled;
-      case flutterWebIncrementalCompilerFeature:
+      case flutterWebIncrementalCompiler:
         return isWebIncrementalCompilerEnabled;
     }
     return false;
