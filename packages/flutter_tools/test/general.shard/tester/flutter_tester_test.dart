@@ -37,7 +37,7 @@ void main() {
       expect(app.packagesFile.path, fs.path.join(projectPath, '.packages'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 

@@ -158,8 +158,6 @@ class _DefaultPub implements Pub {
       return;
     }
 
-    final DateTime originalPubspecYamlModificationTime = pubSpecYaml.lastModifiedSync();
-
     if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
       final String command = upgrade ? 'upgrade' : 'get';
       final Status status = logger.startProgress(
@@ -191,34 +189,11 @@ class _DefaultPub implements Pub {
     if (!dotPackages.existsSync()) {
       throwToolExit('$directory: pub did not create .packages file.');
     }
-    if (pubSpecYaml.lastModifiedSync() != originalPubspecYamlModificationTime) {
-      throwToolExit('$directory: unexpected concurrent modification of pubspec.yaml while running pub.');
-    }
-    // We don't check if dotPackages was actually modified, because as far as we can tell sometimes
-    // pub will decide it does not need to actually modify it.
-    // Since we rely on the file having a more recent timestamp, though, we do manually force the
-    // file to be more recently modified.
-    final DateTime now = DateTime.now();
-    if (now.isBefore(originalPubspecYamlModificationTime)) {
-      printError(
-        'Warning: File "${fs.path.absolute(pubSpecYaml.path)}" was created in the future. '
-        'Optimizations that rely on comparing time stamps will be unreliable. Check your '
-        'system clock for accuracy.\n'
-        'The timestamp was: $originalPubspecYamlModificationTime\n'
-        'The time now is: $now'
-      );
-    } else {
-      dotPackages.setLastModifiedSync(now);
-      final DateTime newDotPackagesTimestamp = dotPackages.lastModifiedSync();
-      if (newDotPackagesTimestamp.isBefore(originalPubspecYamlModificationTime)) {
-        printError(
-          'Warning: Failed to set timestamp of "${fs.path.absolute(dotPackages.path)}". '
-          'Tried to set timestamp to $now, but new timestamp is $newDotPackagesTimestamp.'
-        );
-        if (newDotPackagesTimestamp.isAfter(now)) {
-          printError('Maybe the file was concurrently modified?');
-        }
-      }
+
+    if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync())) {
+      throwToolExit('$directory: pub did not update .packages file '
+          '(pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; '
+          '.packages timestamp: ${dotPackages.lastModifiedSync()}).');
     }
   }
 

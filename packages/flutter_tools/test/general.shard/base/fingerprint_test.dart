@@ -30,7 +30,7 @@ void main() {
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     };
 
     testUsingContext('throws when depfile is malformed', () {
@@ -293,7 +293,7 @@ void main() {
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       });
 
       testUsingContext('populates checksums for valid files', () {
@@ -307,7 +307,7 @@ void main() {
         expect(jsonObject['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       });
 
       testUsingContext('includes framework version', () {
@@ -489,7 +489,7 @@ void main() {
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     };
 
     testUsingContext('returns one file if only one is listed', () {
