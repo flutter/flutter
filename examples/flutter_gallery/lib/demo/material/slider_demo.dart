@@ -131,6 +131,8 @@ class _CustomThumbShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
+    double canvasWidth,
+    MediaQueryData mediaQueryData,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -170,6 +172,8 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
+    double canvasWidth,
+      MediaQueryData mediaQueryData,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween enableColor = ColorTween(
@@ -189,12 +193,13 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       Paint()..color = paintColor,
     );
     canvas.drawLine(
-        thumbCenter,
-        thumbCenter + slideUpOffset,
-        Paint()
-          ..color = paintColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0);
+      thumbCenter,
+      thumbCenter + slideUpOffset,
+      Paint()
+        ..color = paintColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0,
+    );
     labelPainter.paint(canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
   }
 }
@@ -271,10 +276,10 @@ class _SlidersState extends State<_Sliders> {
               ),
               SliderTheme(
                 data: SliderThemeData(
-                  showValueIndicator: ShowValueIndicator.always
+                  showValueIndicator: ShowValueIndicator.always,
                 ),
                 child: MediaQuery(
-                  data: MediaQueryData(
+                  data: MediaQuery.of(context).copyWith(
                     textScaleFactor: 2,
                   ),
                   child: Slider.adaptive(
@@ -303,17 +308,24 @@ class _SlidersState extends State<_Sliders> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Slider.adaptive(
-                value: _discreteValue,
-                min: 0.0,
-                max: 200.0,
-                divisions: 5,
-                label: '${_discreteValue.round()}',
-                onChanged: (double value) {
-                  setState(() {
-                    _discreteValue = value;
-                  });
-                },
+              SliderTheme(
+                data: SliderThemeData(
+//                  tickMarkShape: RoundSliderTickMarkShape(tickMarkRadius: 1),
+//                  activeTickMarkColor: Colors.green.withOpacity(0.75),
+//                  inactiveTickMarkColor: Colors.green.withOpacity(0.75),
+                ),
+                child: Slider.adaptive(
+                  value: _discreteValue,
+                  min: 0.0,
+                  max: 200.0,
+                  divisions: 5,
+                  label: '${_discreteValue.round()}',
+                  onChanged: (double value) {
+                    setState(() {
+                      _discreteValue = value;
+                    });
+                  },
+                ),
               ),
               const Text('Discrete'),
             ],

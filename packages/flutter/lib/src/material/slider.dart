@@ -483,8 +483,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
-  static const SliderComponentShape _defaultValueIndicatorShape = PaddleSliderValueIndicatorShape();
-//  static const SliderComponentShape _defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
+//  static const SliderComponentShape _defaultValueIndicatorShape = PaddleSliderValueIndicatorShape();
+  static const SliderComponentShape _defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
   @override
@@ -1139,9 +1139,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           .getPreferredSize(
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
-      )
-          .width;
-      final double adjustedTrackWidth = trackRect.width - tickMarkWidth;
+      ).width;
+      final double adjustedTrackWidth = trackRect.width - trackRect.height;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1149,8 +1148,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth +
-              tickMarkWidth / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth + trackRect.height / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.tickMarkShape.paint(
             context,
@@ -1180,6 +1178,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           sliderTheme: _sliderTheme,
           textDirection: _textDirection,
           value: _value,
+          canvasWidth: mediaQueryData.size.width,
+          mediaQueryData: mediaQueryData,
         );
       }
     }

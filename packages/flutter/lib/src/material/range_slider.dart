@@ -592,7 +592,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       divisions: widget.divisions,
       labels: widget.labels,
       sliderTheme: sliderTheme,
-      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+      mediaQueryData: MediaQuery.of(context),
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -609,7 +609,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.labels,
     this.sliderTheme,
-    this.textScaleFactor,
+    this.mediaQueryData,
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -621,7 +621,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final RangeLabels labels;
   final SliderThemeData sliderTheme;
-  final double textScaleFactor;
+  final MediaQueryData mediaQueryData;
   final ValueChanged<RangeValues> onChanged;
   final ValueChanged<RangeValues> onChangeStart;
   final ValueChanged<RangeValues> onChangeEnd;
@@ -636,7 +636,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       labels: labels,
       sliderTheme: sliderTheme,
       theme: Theme.of(context),
-      textScaleFactor: textScaleFactor,
+      mediaQueryData: mediaQueryData,
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -655,7 +655,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..labels = labels
       ..sliderTheme = sliderTheme
       ..theme = Theme.of(context)
-      ..textScaleFactor = textScaleFactor
+      ..mediaQueryData = mediaQueryData
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -672,7 +672,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     RangeLabels labels,
     SliderThemeData sliderTheme,
     ThemeData theme,
-    double textScaleFactor,
+    MediaQueryData mediaQueryData,
     TargetPlatform platform,
     ValueChanged<RangeValues> onChanged,
     RangeSemanticFormatterCallback semanticFormatterCallback,
@@ -692,7 +692,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         _divisions = divisions,
         _sliderTheme = sliderTheme,
         _theme = theme,
-        _textScaleFactor = textScaleFactor,
+        _mediaQueryData = mediaQueryData,
         _onChanged = onChanged,
         _state = state,
         _textDirection = textDirection {
@@ -856,12 +856,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     markNeedsPaint();
   }
 
-  double get textScaleFactor => _textScaleFactor;
-  double _textScaleFactor;
-  set textScaleFactor(double value) {
-    if (value == _textScaleFactor)
+  MediaQueryData get mediaQueryData => _mediaQueryData;
+  MediaQueryData _mediaQueryData;
+  set mediaQueryData(MediaQueryData value) {
+    if (value == _mediaQueryData)
       return;
-    _textScaleFactor = value;
+    _mediaQueryData = value;
     _updateLabelPainters();
   }
 
@@ -954,7 +954,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           text: text,
         )
         ..textDirection = textDirection
-        ..textScaleFactor = textScaleFactor
+        ..textScaleFactor = mediaQueryData.textScaleFactor
         ..layout();
     } else {
       labelPainter.text = null;
@@ -1251,7 +1251,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         isEnabled: isEnabled,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - tickMarkWidth;
+      final double adjustedTrackWidth = trackRect.width - trackRect.height;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1259,7 +1259,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + tickMarkWidth / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth + trackRect.height / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.rangeTickMarkShape.paint(
             context,
@@ -1303,6 +1303,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         textDirection: _textDirection,
         thumb: bottomThumb,
         value: bottomValue,
+        canvasWidth: mediaQueryData.size.width,
       );
     }
 
@@ -1325,12 +1326,14 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         center: startThumbCenter,
         labelPainter: _startLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
+        canvasWidth: mediaQueryData.size.width,
       );
       final double endOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
         parentBox: this,
         center: endThumbCenter,
         labelPainter: _endLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
+        canvasWidth: mediaQueryData.size.width,
       );
       final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _startLabelPainter).width / 2;
       final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _endLabelPainter).width / 2;
@@ -1359,6 +1362,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         textDirection: _textDirection,
         thumb: topThumb,
         value: topValue,
+        canvasWidth: mediaQueryData.size.width,
       );
     }
 
