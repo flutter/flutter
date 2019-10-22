@@ -69,6 +69,7 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     Thumb thumb,
+    bool isSelected,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -130,6 +131,8 @@ class _CustomThumbShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
+    double canvasWidth,
+      MediaQueryData mediaQueryData,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -169,6 +172,8 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
+    double canvasWidth,
+      MediaQueryData mediaQueryData,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween enableColor = ColorTween(
@@ -188,12 +193,13 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       Paint()..color = paintColor,
     );
     canvas.drawLine(
-        thumbCenter,
-        thumbCenter + slideUpOffset,
-        Paint()
-          ..color = paintColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0);
+      thumbCenter,
+      thumbCenter + slideUpOffset,
+      Paint()
+        ..color = paintColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0,
+    );
     labelPainter.paint(canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
   }
 }
@@ -268,78 +274,89 @@ class _SlidersState extends State<_Sliders> {
                   ),
                 ),
               ),
-              Slider.adaptive(
-                value: _continuousValue,
-                min: 0.0,
-                max: 100.0,
-                onChanged: (double value) {
-                  setState(() {
-                    _continuousValue = value;
-                  });
-                },
+              MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaleFactor: 3.5
+                ),
+                child: SliderTheme(
+                  data: const SliderThemeData(
+                    showValueIndicator: ShowValueIndicator.always
+                  ),
+                  child: Slider.adaptive(
+                    value: _continuousValue,
+                    min: 0.0,
+                    max: 100.0,
+                    label: '${_continuousValue.round().toString()}',
+                    onChanged: (double value) {
+                      setState(() {
+                        _continuousValue = value;
+                      });
+                    },
+                  ),
+                ),
               ),
               const Text('Continuous with Editable Numerical Value'),
             ],
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const <Widget>[
-              Slider.adaptive(value: 0.25, onChanged: null),
-              Text('Disabled'),
-            ],
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Slider.adaptive(
-                value: _discreteValue,
-                min: 0.0,
-                max: 200.0,
-                divisions: 5,
-                label: '${_discreteValue.round()}',
-                onChanged: (double value) {
-                  setState(() {
-                    _discreteValue = value;
-                  });
-                },
-              ),
-              const Text('Discrete'),
-            ],
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              SliderTheme(
-                data: theme.sliderTheme.copyWith(
-                  activeTrackColor: Colors.deepPurple,
-                  inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.5),
-                  activeTickMarkColor: theme.colorScheme.onSurface.withOpacity(0.7),
-                  inactiveTickMarkColor:  theme.colorScheme.surface.withOpacity(0.7),
-                  overlayColor: theme.colorScheme.onSurface.withOpacity(0.12),
-                  thumbColor: Colors.deepPurple,
-                  valueIndicatorColor: Colors.deepPurpleAccent,
-                  trackHeight: 2,
-                  thumbShape: _CustomThumbShape(),
-                  valueIndicatorShape: _CustomValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: theme.colorScheme.onSurface),
-                ),
-                child: Slider(
-                  value: _discreteCustomValue,
-                  min: 0.0,
-                  max: 200.0,
-                  divisions: 5,
-                  semanticFormatterCallback: (double value) => value.round().toString(),
-                  label: '${_discreteCustomValue.round()}',
-                  onChanged: (double value) {
-                    setState(() {
-                      _discreteCustomValue = value;
-                    });
-                  },
-                ),
-              ),
-              const Text('Discrete with Custom Theme'),
-            ],
-          ),
+//          Column(
+//            mainAxisSize: MainAxisSize.min,
+//            children: const <Widget>[
+//              Slider.adaptive(value: 0.25, onChanged: null),
+//              Text('Disabled'),
+//            ],
+//          ),
+//          Column(
+//            mainAxisSize: MainAxisSize.min,
+//            children: <Widget>[
+//              Slider.adaptive(
+//                value: _discreteValue,
+//                min: 0.0,
+//                max: 200.0,
+//                divisions: 5,
+//                label: '${_discreteValue.round()}',
+//                onChanged: (double value) {
+//                  setState(() {
+//                    _discreteValue = value;
+//                  });
+//                },
+//              ),
+//              const Text('Discrete'),
+//            ],
+//          ),
+//          Column(
+//            mainAxisSize: MainAxisSize.min,
+//            children: <Widget>[
+//              SliderTheme(
+//                data: theme.sliderTheme.copyWith(
+//                  activeTrackColor: Colors.deepPurple,
+//                  inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.5),
+//                  activeTickMarkColor: theme.colorScheme.onSurface.withOpacity(0.7),
+//                  inactiveTickMarkColor:  theme.colorScheme.surface.withOpacity(0.7),
+//                  overlayColor: theme.colorScheme.onSurface.withOpacity(0.12),
+//                  thumbColor: Colors.deepPurple,
+//                  valueIndicatorColor: Colors.deepPurpleAccent,
+//                  trackHeight: 2,
+//                  thumbShape: _CustomThumbShape(),
+//                  valueIndicatorShape: _CustomValueIndicatorShape(),
+//                  valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: theme.colorScheme.onSurface),
+//                ),
+//                child: Slider(
+//                  value: _discreteCustomValue,
+//                  min: 0.0,
+//                  max: 200.0,
+//                  divisions: 5,
+//                  semanticFormatterCallback: (double value) => value.round().toString(),
+//                  label: '${_discreteCustomValue.round()}',
+//                  onChanged: (double value) {
+//                    setState(() {
+//                      _discreteCustomValue = value;
+//                    });
+//                  },
+//                ),
+//              ),
+//              const Text('Discrete with Custom Theme'),
+//            ],
+//          ),
         ],
       ),
     );
