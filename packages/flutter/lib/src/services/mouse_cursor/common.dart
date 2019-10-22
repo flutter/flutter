@@ -52,14 +52,15 @@ class ActivateMouseCursorDetails {
   /// All parameters must not be null.
   const ActivateMouseCursorDetails({
     @required this.device,
-    @required this.delegate,
-  }) : assert(device != null), assert(delegate != null);
+    @required this.platformDelegate,
+  }) : assert(device != null), assert(platformDelegate != null);
 
   /// The pointer device that should change cursor.
   final int device;
 
-  /// TODOC
-  final MouseCursorPlatformDelegate delegate;
+  /// The delegate of the platform that the program is currently running on,
+  /// with which the cursor can perform operations related to mouse cursor.
+  final MouseCursorPlatformDelegate platformDelegate;
 }
 
 /// A base class for mouse cursors.
@@ -80,8 +81,10 @@ abstract class MouseCursor {
   /// The base constructor does nothing.
   const MouseCursor();
 
-  /// Change a device to this cursor by performing necessary preparations and
-  /// platform calls.
+  /// Change a pointer device to this cursor based on the information provided
+  /// by `details`.
+  ///
+  /// The `details` describes the target device and the platform delegate.
   ///
   /// It resolves to `true` if the operation is successful, `false` if the
   /// operation is unsupported by the platform, or rejects to error if the
@@ -139,9 +142,12 @@ abstract class MouseCursorPlatformDelegate {
   });
 }
 
-/// TODOC
+/// The implementation of [MouseCursorPlatformDelegate] on a platform that
+/// does not support mouse cursor.
+///
+/// Every operation is a no-op and returns with a successful state.
 class MouseCursorUnsupportedDelegate extends MouseCursorPlatformDelegate {
-  /// TODOC
+  /// Create [MouseCursorUnsupportedDelegate].
   const MouseCursorUnsupportedDelegate();
 
   @override

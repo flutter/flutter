@@ -888,9 +888,9 @@ class _TestMouseCursorPlatformDelegate extends MouseCursorPlatformDelegate {
 }
 
 class _TestMouseCursorManager extends MouseCursorManager {
-  _TestMouseCursorManager(this._delegate);
+  _TestMouseCursorManager(this._platformDelegate);
 
   @override
-  MouseCursorPlatformDelegate get delegate => _delegate;
-  final MouseCursorPlatformDelegate _delegate;
+  MouseCursorPlatformDelegate get platformDelegate => _platformDelegate;
+  final MouseCursorPlatformDelegate _platformDelegate;
 }

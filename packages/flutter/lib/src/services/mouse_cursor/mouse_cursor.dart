@@ -32,7 +32,7 @@ class _SystemMouseCursor extends MouseCursor {
 
   @override
   Future<bool> activate(ActivateMouseCursorDetails details) {
-    return details.delegate.activateSystemCursor(
+    return details.platformDelegate.activateSystemCursor(
       device: details.device,
       shape: shape,
     );
@@ -108,13 +108,13 @@ class SystemMouseCursors {
 /// TODOC
 abstract class MouseCursorManager {
   /// TODOC
-  MouseCursorPlatformDelegate get delegate;
+  MouseCursorPlatformDelegate get platformDelegate;
 
   /// TODOC
   Future<void> setDeviceCursor(int device, MouseCursor cursor) async {
     final ActivateMouseCursorDetails details = ActivateMouseCursorDetails(
       device: device,
-      delegate: delegate,
+      platformDelegate: platformDelegate,
     );
     final bool implemented = await cursor.activate(details);
     if (!implemented) {
@@ -137,7 +137,7 @@ class StandardMouseCursorManager extends MouseCursorManager {
   }
 
   @override
-  MouseCursorPlatformDelegate get delegate => _delegate;
+  MouseCursorPlatformDelegate get platformDelegate => _delegate;
   MouseCursorPlatformDelegate _delegate;
 
   MouseCursorPlatformDelegate _createDelegate(MethodChannel channel) {
