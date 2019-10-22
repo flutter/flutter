@@ -30,7 +30,10 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Centered.png'),
+      matchesGoldenFile(
+        'text_golden.Centered.png',
+        version: null,
+      ),
     );
 
     await tester.pumpWidget(
@@ -54,7 +57,10 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Centered.wrap.png'),
+      matchesGoldenFile(
+        'text_golden.Centered.wrap.png',
+        version: null,
+      ),
     );
   });
 
@@ -85,7 +91,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Foreground.gradient.png'),
+      matchesGoldenFile(
+        'text_golden.Foreground.gradient.png',
+        version: null,
+      ),
     );
 
     await tester.pumpWidget(
@@ -107,7 +116,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Foreground.stroke.png'),
+      matchesGoldenFile(
+        'text_golden.Foreground.stroke.png',
+        version: null,
+      ),
     );
 
     await tester.pumpWidget(
@@ -130,7 +142,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
+      matchesGoldenFile(
+        'text_golden.Foreground.stroke_and_gradient.png',
+        version: null,
+      ),
     );
   });
 
@@ -180,7 +195,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Background.png'),
+      matchesGoldenFile(
+        'text_golden.Background.png',
+        version: null,
+      ),
     );
   });
 
@@ -216,7 +234,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('text_golden.Fade.png'),
+      matchesGoldenFile(
+        'text_golden.Fade.png',
+        version: 1,
+      ),
     );
   });
 
@@ -241,7 +262,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutDefault.png'),
+      matchesGoldenFile(
+        'text_golden.StrutDefault.png',
+        version: null,
+      ),
     );
   });
 
@@ -268,7 +292,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.1.png'),
+      matchesGoldenFile(
+        'text_golden.Strut.1.png',
+        version: 1,
+      ),
     );
   });
 
@@ -296,7 +323,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.2.png'),
+      matchesGoldenFile(
+        'text_golden.Strut.2.png',
+        version: 1,
+      ),
     );
   });
 
@@ -347,7 +377,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.3.png'),
+      matchesGoldenFile(
+        'text_golden.Strut.3.png',
+        version: 1,
+      ),
     );
   });
 
@@ -382,7 +415,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.4.png'),
+      matchesGoldenFile(
+        'text_golden.Strut.4.png',
+        version: 1,
+      ),
     );
   });
 
@@ -433,7 +469,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutForce.1.png'),
+      matchesGoldenFile(
+        'text_golden.StrutForce.1.png',
+        version: 1,
+      ),
     );
   });
 
@@ -471,7 +510,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Decoration.1.png'),
+      matchesGoldenFile(
+        'text_golden.Decoration.1.png',
+        version: 0,
+      ),
     );
   });
 
@@ -510,7 +552,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.DecorationThickness.1.png'),
+      matchesGoldenFile(
+        'text_golden.DecorationThickness.1.png',
+        version: 1,
+      ),
     );
   });
 
@@ -604,7 +649,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidget.1.png'),
+      matchesGoldenFile(
+        'text_golden.TextInlineWidget.1.png',
+        version: 1,
+      ),
     );
   });
 
@@ -649,7 +697,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidget.2.png'),
+      matchesGoldenFile(
+        'text_golden.TextInlineWidget.2.png',
+        version: 2,
+      ),
     );
   });
 
@@ -778,7 +829,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetNest.1.png'),
+      matchesGoldenFile(
+        'text_golden.TextInlineWidgetNest.1.png',
+        version: 3,
+      ),
     );
   });
 
@@ -885,7 +939,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetBaseline.1.png'),
+      matchesGoldenFile(
+        'text_golden.TextInlineWidgetBaseline.1.png',
+        version: 1,
+      ),
     );
   });
 
@@ -992,7 +1049,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetAboveBaseline.1.png'),
+      matchesGoldenFile(
+        'text_golden.TextInlineWidgetAboveBaseline.1.png',
+        version: 1,
+      ),
     );
   });
 
@@ -1099,7 +1159,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetBelowBaseline.1.png'),
+      matchesGoldenFile(
+        'text_golden.TextInlineWidgetBelowBaseline.1.png',
+        version: 1,
+      ),
     );
   });
 
@@ -1206,7 +1269,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetTop.1.png'),
+      matchesGoldenFile(
+        'text_golden.TextInlineWidgetTop.1.png',
+        version: 1,
+      ),
     );
   });
 
@@ -1313,7 +1379,10 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetMiddle.1.png'),
+      matchesGoldenFile(
+        'text_golden.TextInlineWidgetMiddle.1.png',
+        version: 1,
+      ),
     );
   });
 }
