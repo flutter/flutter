@@ -75,7 +75,7 @@ flutter:
       expect(flutterProject.flutterPluginsFile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () {
@@ -86,7 +86,7 @@ flutter:
       expect(flutterProject.flutterPluginsFile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () {
@@ -97,7 +97,7 @@ flutter:
       expect(flutterProject.flutterPluginsFile.existsSync(), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
@@ -111,7 +111,7 @@ flutter:
       expect(macosProject.podManifestLock.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -167,7 +167,7 @@ flutter:
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -192,7 +192,7 @@ flutter:
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -288,7 +288,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
     });
@@ -314,7 +314,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -339,7 +339,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -364,7 +364,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
 
@@ -389,7 +389,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FeatureFlags: () => featureFlags,
     });
   });

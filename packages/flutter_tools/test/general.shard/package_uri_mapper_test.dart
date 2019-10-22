@@ -40,7 +40,7 @@ void main() {
         'package:example/main.dart');
   }, overrides: <Type, Generator>{
     FileSystem: () => mockFileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 
   testUsingContext('single-root maps file from other package to null', () async {
@@ -48,7 +48,7 @@ void main() {
     expect(packageUriMapper.map('/xml/lib/xml.dart'), null);
   }, overrides: <Type, Generator>{
     FileSystem: () => mockFileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 
   testUsingContext('single-root maps non-main file from same package', () async {
@@ -57,7 +57,7 @@ void main() {
         'package:example/src/foo.dart');
   }, overrides: <Type, Generator>{
     FileSystem: () => mockFileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 
   testUsingContext('multi-root maps main file from same package on multiroot scheme', () async {
@@ -76,7 +76,7 @@ void main() {
         'package:example/main.dart');
   }, overrides: <Type, Generator>{
     FileSystem: () => mockFileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 }
 

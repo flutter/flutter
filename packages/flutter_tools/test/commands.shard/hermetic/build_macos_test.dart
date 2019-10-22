@@ -120,7 +120,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 

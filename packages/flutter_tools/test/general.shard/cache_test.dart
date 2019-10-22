@@ -64,7 +64,7 @@ void main() {
       Cache.releaseLockEarly();
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('throws tool exit when lockfile open fails', () async {
@@ -73,7 +73,7 @@ void main() {
       expect(() async => await Cache.lock(), throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () async {
@@ -102,7 +102,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
@@ -118,7 +118,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     test('should not be up to date, if some cached artifact is not', () {
@@ -210,7 +210,7 @@ void main() {
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   });
 
   test('Unstable artifacts', () {
@@ -261,7 +261,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       HttpClientFactory: () => () => fakeHttpClient,
       OperatingSystemUtils: () => mockOperatingSystemUtils,
       Platform: () => fakePlatform,
