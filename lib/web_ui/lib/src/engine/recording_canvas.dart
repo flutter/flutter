@@ -102,7 +102,7 @@ class RecordingCanvas {
   void save() {
     _paintBounds.saveTransformsAndClip();
     _commands.add(const PaintSave());
-    saveCount++;
+    _saveCount++;
   }
 
   void saveLayerWithoutBounds(ui.Paint paint) {
@@ -110,7 +110,7 @@ class RecordingCanvas {
     // TODO(het): Implement this correctly using another canvas.
     _commands.add(const PaintSave());
     _paintBounds.saveTransformsAndClip();
-    saveCount++;
+    _saveCount++;
   }
 
   void saveLayer(ui.Rect bounds, ui.Paint paint) {
@@ -118,7 +118,7 @@ class RecordingCanvas {
     // TODO(het): Implement this correctly using another canvas.
     _commands.add(const PaintSave());
     _paintBounds.saveTransformsAndClip();
-    saveCount++;
+    _saveCount++;
   }
 
   void restore() {
@@ -132,7 +132,7 @@ class RecordingCanvas {
     } else {
       _commands.add(const PaintRestore());
     }
-    saveCount--;
+    _saveCount--;
   }
 
   void translate(double dx, double dy) {
@@ -382,7 +382,8 @@ class RecordingCanvas {
     _commands.add(PaintVertices(vertices, blendMode, paint.webOnlyPaintData));
   }
 
-  int saveCount = 1;
+  int _saveCount = 1;
+  int get saveCount => _saveCount;
 
   /// Prints the commands recorded by this canvas to the console.
   void debugDumpCommands() {
