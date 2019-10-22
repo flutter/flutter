@@ -150,6 +150,10 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   // The context provided to the Flutter engine for resource loading.
   NSOpenGLContext* _resourceContext;
 
+  // The context that is owned by the currently displayed FlutterView. This is stashed in the engine
+  // so that the view doesn't need to be accessed from a background thread.
+  NSOpenGLContext* _mainOpenGLContext;
+
   // A mapping of channel names to the registered handlers for those channels.
   NSMutableDictionary<NSString*, FlutterBinaryMessageHandler>* _messageHandlers;
 
@@ -215,18 +219,26 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   flutterArguments.platform_message_callback = (FlutterPlatformMessageCallback)OnPlatformMessage;
   flutterArguments.custom_dart_entrypoint = entrypoint.UTF8String;
 
-  FlutterEngineResult result = FlutterEngineRun(
+  FlutterEngineResult result = FlutterEngineInitialize(
       FLUTTER_ENGINE_VERSION, &rendererConfig, &flutterArguments, (__bridge void*)(self), &_engine);
   if (result != kSuccess) {
-    NSLog(@"Failed to start Flutter engine: error %d", result);
+    NSLog(@"Failed to initialize Flutter engine: error %d", result);
     return NO;
   }
+
+  result = FlutterEngineRunInitialized(_engine);
+  if (result != kSuccess) {
+    NSLog(@"Failed to run an initialized engine: error %d", result);
+    return NO;
+  }
+
   [self updateWindowMetrics];
   return YES;
 }
 
 - (void)setViewController:(FlutterViewController*)controller {
   _viewController = controller;
+  _mainOpenGLContext = controller.flutterView.openGLContext;
   if (!controller && !_allowHeadlessExecution) {
     [self shutDownEngine];
     _resourceContext = nil;
@@ -281,33 +293,26 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 #pragma mark - Private methods
 
 - (bool)engineCallbackOnMakeCurrent {
-  if (!_viewController.flutterView) {
+  if (!_mainOpenGLContext) {
     return false;
   }
-  [_viewController.flutterView makeCurrentContext];
+  [_mainOpenGLContext makeCurrentContext];
   return true;
 }
 
 - (bool)engineCallbackOnClearCurrent {
-  if (!_viewController.flutterView) {
-    return false;
-  }
   [NSOpenGLContext clearCurrentContext];
   return true;
 }
 
 - (bool)engineCallbackOnPresent {
-  if (!_viewController.flutterView) {
-    return false;
+  if (!_mainOpenGLContext) {
   }
-  [_viewController.flutterView onPresent];
+  [_mainOpenGLContext flushBuffer];
   return true;
 }
 
 - (bool)engineCallbackOnMakeResourceCurrent {
-  if (!_viewController.flutterView) {
-    return false;
-  }
   [self.resourceContext makeCurrentContext];
   return true;
 }
@@ -344,11 +349,18 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
  * Note: Called from dealloc. Should not use accessors or other methods.
  */
 - (void)shutDownEngine {
-  if (_engine) {
-    FlutterEngineResult result = FlutterEngineShutdown(_engine);
-    if (result != kSuccess) {
-      NSLog(@"Failed to shut down Flutter engine: error %d", result);
-    }
+  if (_engine == nullptr) {
+    return;
+  }
+
+  FlutterEngineResult result = FlutterEngineDeinitialize(_engine);
+  if (result != kSuccess) {
+    NSLog(@"Could not de-initialize the Flutter engine: error %d", result);
+  }
+
+  result = FlutterEngineShutdown(_engine);
+  if (result != kSuccess) {
+    NSLog(@"Failed to shut down Flutter engine: error %d", result);
   }
   _engine = nullptr;
 }
