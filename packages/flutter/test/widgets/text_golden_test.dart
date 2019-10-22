@@ -831,7 +831,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile(
         'text_golden.TextInlineWidgetNest.1.png',
-        version: 2,
+        version: 3,
       ),
     );
   });

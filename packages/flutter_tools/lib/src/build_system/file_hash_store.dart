@@ -139,7 +139,8 @@ class FileHashStore {
     final List<File> dirty = <File>[];
     final Pool openFiles = Pool(kMaxOpenFiles);
     await Future.wait(<Future<void>>[
-      for (File file in files) _hashFile(file, dirty, openFiles)]);
+       for (File file in files) _hashFile(file, dirty, openFiles)
+    ]);
     return dirty;
   }
 
@@ -148,6 +149,13 @@ class FileHashStore {
     try {
       final String absolutePath = file.path;
       final String previousHash = previousHashes[absolutePath];
+      // If the file is missing it is assumed to be dirty.
+      if (!file.existsSync()) {
+        currentHashes.remove(absolutePath);
+        previousHashes.remove(absolutePath);
+        dirty.add(file);
+        return;
+      }
       final Digest digest = md5.convert(await file.readAsBytes());
       final String currentHash = digest.toString();
       if (currentHash != previousHash) {

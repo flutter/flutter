@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:build_daemon/client.dart';
@@ -17,6 +18,7 @@ import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_proxy/shelf_proxy.dart';
+import 'package:mime/mime.dart' as mime;
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -209,6 +211,7 @@ class WebFs {
     };
 
     // Initialize the dwds server.
+    final String effectiveHostname = hostname ?? _kHostName;
     final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
 
     final Pipeline pipeline = const Pipeline().addMiddleware((Handler innerHandler) {
@@ -279,10 +282,10 @@ class WebFs {
         final BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
           daemonAssetPort,
           kBuildTargetName,
-          hostname ?? _kHostName,
+          effectiveHostname,
           hostPort);
         dwds = await dwdsFactory(
-          hostname: hostname ?? _kHostName,
+          hostname: effectiveHostname,
           assetHandler: assetHandler,
           buildResults: filteredBuildResults,
           chromeConnection: () async {
@@ -309,13 +312,13 @@ class WebFs {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(assetServer.handle);
-    final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
+    final HttpServer server = await httpMultiServerFactory(effectiveHostname, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     final WebFs webFS = WebFs(
       client,
       server,
       dwds,
-      'http://$_kHostName:$hostPort/',
+      'http://$effectiveHostname:$hostPort/',
       assetServer,
       buildInfo.isDebug,
       flutterProject,
@@ -324,11 +327,19 @@ class WebFs {
       initializePlatform,
     );
     if (!await firstBuildCompleter.future) {
-      throw Exception('Failed to compile for the web.');
+      throw const BuildException();
     }
     await firstBuild?.cancel();
     return webFS;
   }
+}
+
+/// An exception thrown when build runner fails.
+///
+/// This contains no error information as it will have already been printed to
+/// the console.
+class BuildException implements Exception {
+  const BuildException();
 }
 
 abstract class AssetServer {
@@ -492,7 +503,14 @@ class DebugAssetServer extends AssetServer {
       final String assetPath = request.url.path.replaceFirst('assets/', '');
       final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
       if (file.existsSync()) {
-        return Response.ok(file.readAsBytesSync());
+        final Uint8List bytes = file.readAsBytesSync();
+        // Fallback to "application/octet-stream" on null which
+        // makes no claims as to the structure of the data.
+        final String mimeType = mime.lookupMimeType(file.path, headerBytes: bytes)
+          ?? 'application/octet-stream';
+        return Response.ok(bytes, headers: <String, String>{
+          'Content-Type': mimeType,
+        });
       } else {
         return Response.notFound('');
       }

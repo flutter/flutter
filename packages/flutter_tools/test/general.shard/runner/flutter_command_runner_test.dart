@@ -67,6 +67,7 @@ void main() {
         expect(versionChecked, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
@@ -78,6 +79,7 @@ void main() {
 
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
@@ -93,6 +95,7 @@ void main() {
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
@@ -102,6 +105,7 @@ void main() {
         await runner.run(<String>['dummy', '--local-engine-src-path=$_kArbitraryEngineRoot/src', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
@@ -111,6 +115,7 @@ void main() {
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
     });
@@ -125,6 +130,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Platform: () => platform,
     }, initializeFlutterRoot: false);
 
@@ -153,8 +159,8 @@ void main() {
         expect(version.toJson()['frameworkVersion'], '0.10.3');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => platform,
         ProcessManager: () => processManager,
+        Platform: () => platform,
       }, initializeFlutterRoot: false);
     });
 
@@ -182,48 +188,53 @@ void main() {
         ]);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
     });
 
     group('wrapping', () {
       testUsingContext('checks that output wrapping is turned on when writing to a terminal', () async {
-        final FakeCommand fakeCommand = FakeCommand();
+        final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['fake']);
         expect(fakeCommand.preferences.wrapText, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Stdio: () => FakeStdio(hasFakeTerminal: true),
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that output wrapping is turned off when not writing to a terminal', () async {
-        final FakeCommand fakeCommand = FakeCommand();
+        final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['fake']);
         expect(fakeCommand.preferences.wrapText, isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Stdio: () => FakeStdio(hasFakeTerminal: false),
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that output wrapping is turned off when set on the command line and writing to a terminal', () async {
-        final FakeCommand fakeCommand = FakeCommand();
+        final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['--no-wrap', 'fake']);
         expect(fakeCommand.preferences.wrapText, isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Stdio: () => FakeStdio(hasFakeTerminal: true),
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that output wrapping is turned on when set on the command line, but not writing to a terminal', () async {
-        final FakeCommand fakeCommand = FakeCommand();
+        final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['--wrap', 'fake']);
         expect(fakeCommand.preferences.wrapText, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
         Stdio: () => FakeStdio(hasFakeTerminal: false),
       }, initializeFlutterRoot: false);
     });
@@ -236,7 +247,7 @@ class FakeFlutterVersion extends FlutterVersion {
   String get frameworkVersion => '0.10.3';
 }
 
-class FakeCommand extends FlutterCommand {
+class FakeFlutterCommand extends FlutterCommand {
   OutputPreferences preferences;
 
   @override

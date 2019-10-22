@@ -308,9 +308,8 @@ class AOTSnapshotter {
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn: true,
       aot: true,
-      enableAsserts: buildMode == BuildMode.debug,
+      buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
-      targetProductVm: buildMode == BuildMode.release,
     ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
@@ -327,6 +326,7 @@ class AOTSnapshotter {
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
+      TargetPlatform.android_x64,
       TargetPlatform.ios,
       TargetPlatform.darwin_x64,
     ].contains(platform);

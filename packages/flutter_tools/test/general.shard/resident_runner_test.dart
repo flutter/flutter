@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -11,8 +12,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
@@ -532,6 +535,70 @@ void main() {
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.toggleProfileWidgetBuilds()).called(1);
   }));
+
+  test('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+    );
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    await residentRunner.run();
+
+    expect(await fs.file('foo').readAsString(), testUri.toString());
+  }));
+
+  test('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
+    final BufferLogger bufferLogger = logger;
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+    );
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    await residentRunner.run();
+
+    expect(bufferLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem()),
+  }));
+
+
+  test('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = ColdRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo'),
+    );
+    when(mockFlutterDevice.runCold(
+      coldRunner: anyNamed('coldRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    await residentRunner.run();
+
+    expect(await fs.file('foo').readAsString(), testUri.toString());
+  }));
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
@@ -550,3 +617,14 @@ class TestFlutterDevice extends FlutterDevice {
   final List<FlutterView> views;
 }
 
+class ThrowingForwardingFileSystem extends ForwardingFileSystem {
+  ThrowingForwardingFileSystem(FileSystem delegate) : super(delegate);
+
+  @override
+  File file(dynamic path) {
+    if (path == 'foo') {
+      throw const FileSystemException();
+    }
+    return delegate.file(path);
+  }
+}
