@@ -741,20 +741,20 @@ class DropdownButton<T> extends StatefulWidget {
   /// The value of the currently selected [DropdownMenuItem].
   ///
   /// If [value] is null and [hint] is non-null, the [hint] widget is
-  /// displayed as a placeholder for the dropdown button.
+  /// displayed as a placeholder for the dropdown button's value.
   final T value;
 
   /// A placeholder widget that is displayed by the dropdown button.
   ///
   /// If [value] is null, this widget is displayed as a placeholder for
-  /// the dropdown button. This widget is also displayed if the button
+  /// the dropdown button's value. This widget is also displayed if the button
   /// is disabled ([items] or [onChanged] is null) and [disabledHint] is null.
   final Widget hint;
 
   /// A message to show when the dropdown is disabled.
   ///
   /// Displayed if [items] or [onChanged] is null. If [hint] is non-null and
-  /// [disabledHint] is null, the [hint] widget will instead be displayed.
+  /// [disabledHint] is null, the [hint] widget will be displayed instead.
   final Widget disabledHint;
 
   /// {@template flutter.material.dropdownButton.onChanged}
