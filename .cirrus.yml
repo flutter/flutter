@@ -525,41 +525,42 @@ task:
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: hostonly_devicelab_tests-0-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+    # These shards fail consistently on post-submit.
+    # - name: hostonly_devicelab_tests-0-macos
+    #   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+    #   script:
+    #     - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    #     - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: hostonly_devicelab_tests-1-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+    # - name: hostonly_devicelab_tests-1-macos
+    #   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+    #   script:
+    #     - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    #     - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: hostonly_devicelab_tests-2-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+    # - name: hostonly_devicelab_tests-2-macos
+    #   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+    #   script:
+    #     - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    #     - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: hostonly_devicelab_tests-3-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+    # - name: hostonly_devicelab_tests-3-macos
+    #   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+    #   script:
+    #     - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    #     - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: hostonly_devicelab_tests-4-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+    # - name: hostonly_devicelab_tests-4-macos
+    #   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+    #   script:
+    #     - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    #     - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: hostonly_devicelab_tests-5_last-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+    # - name: hostonly_devicelab_tests-5_last-macos
+    #   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+    #   script:
+    #     - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    #     - dart --enable-asserts ./dev/bots/test.dart
 
     - name: add_to_app_tests-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
@@ -585,12 +586,12 @@ task:
         - tool_tests-commands-macos
         - tool_tests-integration-macos
         - build_tests-macos
-        - hostonly_devicelab_tests-0-macos
-        - hostonly_devicelab_tests-1-macos
-        - hostonly_devicelab_tests-2-macos
-        - hostonly_devicelab_tests-3-macos
-        - hostonly_devicelab_tests-4-macos
-        - hostonly_devicelab_tests-5_last-macos
+        # - hostonly_devicelab_tests-0-macos
+        # - hostonly_devicelab_tests-1-macos
+        # - hostonly_devicelab_tests-2-macos
+        # - hostonly_devicelab_tests-3-macos
+        # - hostonly_devicelab_tests-4-macos
+        # - hostonly_devicelab_tests-5_last-macos
         - firebase_test_lab_tests-linux
       environment:
         # Apple Fastlane password.
