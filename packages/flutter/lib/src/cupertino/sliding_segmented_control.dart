@@ -74,7 +74,7 @@ const Duration _kOpacityAnimationDuration = Duration(milliseconds: 470);
 const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
 class _FontWeightTween extends Tween<FontWeight> {
-  _FontWeightTween({ FontWeight begin, FontWeight end}) : super(begin: begin, end: end);
+  _FontWeightTween({ FontWeight begin, FontWeight end }) : super(begin: begin, end: end);
 
   @override
   FontWeight lerp(double t) => FontWeight.lerp(begin, end, t);
@@ -262,22 +262,14 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       duration: _kHighlightAnimationDuration,
       value: isCompleted ? 1 : 0,
       vsync: this,
-    )..addListener(() {
-      setState(() {
-        // The textstyle has changed.
-      });
-    });
+    );
   }
 
   AnimationController _createFadeoutAnimationController() {
     return AnimationController(
       duration: _kOpacityAnimationDuration,
       vsync: this,
-    )..addListener(() {
-      setState(() {
-        // The opacity of the child has changed.
-      });
-    });
+    );
   }
 
   @override
@@ -438,52 +430,60 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         break;
     }
 
-    final List<Widget> children = <Widget>[];
-    for (T currentKey in keys) {
-      final TextStyle textStyle = DefaultTextStyle.of(context).style.copyWith(
-        fontWeight: _highlightTween.evaluate(_highlightControllers[currentKey]),
-      );
+    return AnimatedBuilder(
+      animation: Listenable.merge(<Listenable>[
+        ..._highlightControllers.values,
+        ..._pressControllers.values,
+      ]),
+      builder: (BuildContext context, Widget child) {
+        final List<Widget> children = <Widget>[];
+        for (T currentKey in keys) {
+          final TextStyle textStyle = DefaultTextStyle.of(context).style.copyWith(
+            fontWeight: _highlightTween.evaluate(_highlightControllers[currentKey]),
+          );
 
-      final Widget child = DefaultTextStyle(
-        style: textStyle,
-        child: Semantics(
-          button: true,
-          onTap: () { controller.value = currentKey; },
-          inMutuallyExclusiveGroup: true,
-          selected: controller.value == currentKey,
-          child: Opacity(
-            opacity: _pressTween.evaluate(_pressControllers[currentKey]),
-            // Expand the hitTest area to be as large as the Opacity widget.
-            child: MetaData(
-              behavior: HitTestBehavior.opaque,
-              child: Center(child: widget.children[currentKey]),
+          final Widget child = DefaultTextStyle(
+            style: textStyle,
+            child: Semantics(
+              button: true,
+              onTap: () { controller.value = currentKey; },
+              inMutuallyExclusiveGroup: true,
+              selected: controller.value == currentKey,
+              child: Opacity(
+                opacity: _pressTween.evaluate(_pressControllers[currentKey]),
+                // Expand the hitTest area to be as large as the Opacity widget.
+                child: MetaData(
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(child: widget.children[currentKey]),
+                ),
+              ),
             ),
+          );
+
+          children.add(child);
+        }
+
+        final int selectedIndex = controller.value == null ? null : keys.indexOf(controller.value);
+
+        final Widget box = _SegmentedControlRenderWidget<T>(
+          children: children,
+          selectedIndex: selectedIndex,
+          thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
+          state: this,
+        );
+
+        return UnconstrainedBox(
+          constrainedAxis: Axis.horizontal,
+          child: Container(
+            padding: widget.padding.resolve(Directionality.of(context)),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
+              color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
+            ),
+            child: box,
           ),
-        ),
-      );
-
-      children.add(child);
-    }
-
-    final int selectedIndex = controller.value == null ? null : keys.indexOf(controller.value);
-
-    final Widget box = _SegmentedControlRenderWidget<T>(
-      children: children,
-      selectedIndex: selectedIndex,
-      thumbColor: widget.thumbColor,
-      state: this,
-    );
-
-    return UnconstrainedBox(
-      constrainedAxis: Axis.horizontal,
-      child: Container(
-        padding: widget.padding.resolve(Directionality.of(context)),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
-          color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
-        ),
-        child: box,
-      ),
+        );
+      },
     );
   }
 }
