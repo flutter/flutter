@@ -36,7 +36,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('Non-existent files are ignored', () async {
@@ -50,7 +50,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 }

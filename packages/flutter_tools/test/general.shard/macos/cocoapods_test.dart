@@ -179,7 +179,7 @@ void main() {
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Objective-C iOS podfile template');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('creates swift Podfile if swift', () async {
@@ -195,7 +195,7 @@ void main() {
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Swift iOS podfile template');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
@@ -206,7 +206,7 @@ void main() {
       expect(projectUnderTest.macos.podfile.readAsStringSync(), 'macOS podfile template');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('does not recreate Podfile when already present', () async {
@@ -218,7 +218,7 @@ void main() {
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Existing Podfile');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () async {
@@ -230,7 +230,7 @@ void main() {
       expect(projectUnderTest.ios.podfile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
@@ -256,7 +256,7 @@ void main() {
       expect(releaseContents, contains('Existing release config'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -285,7 +285,7 @@ void main() {
       expect(releaseContents, contains('Existing release config'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 

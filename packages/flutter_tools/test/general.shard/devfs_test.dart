@@ -89,7 +89,7 @@ void main() {
       expect(content.isModified, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     }, skip: Platform.isWindows); // TODO(jonahwilliams): fix or disable this functionality.
   });
 
@@ -159,7 +159,7 @@ void main() {
       verify(httpRequest.close()).called(kFailedAttempts + 1);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
@@ -208,7 +208,7 @@ void main() {
       expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('delete dev file system', () async {
@@ -218,7 +218,7 @@ void main() {
       expect(devFS.assetPathsToEvict, isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('cleanup preexisting file system', () async {
@@ -246,7 +246,7 @@ void main() {
       expect(devFS.assetPathsToEvict, isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('reports unsuccessful compile when errors are returned', () async {
@@ -276,7 +276,7 @@ void main() {
       expect(devFS.lastCompiled, previousCompile);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('correctly updates last compiled time when compilation does not fail', () async {
@@ -310,7 +310,7 @@ void main() {
       expect(devFS.lastCompiled, isNot(previousCompile));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 }

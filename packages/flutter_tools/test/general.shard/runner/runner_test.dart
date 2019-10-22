@@ -71,7 +71,7 @@ void main() {
         'FLUTTER_ROOT': '/',
       }),
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       Usage: () => CrashingUsage(),
     });
   });

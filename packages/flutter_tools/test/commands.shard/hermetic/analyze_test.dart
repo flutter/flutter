@@ -64,7 +64,7 @@ void main() {
       inRepo(<String>[]);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
 
     testUsingContext('analyze --flutter-repo should run update-package first', () async {
