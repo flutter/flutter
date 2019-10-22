@@ -624,7 +624,7 @@ void main() {
     expect(residentCompiler.platformDill,
       artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isIncrementalCompilerEnabled: true),
+    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 }
 
