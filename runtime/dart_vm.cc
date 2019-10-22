@@ -232,12 +232,10 @@ std::shared_ptr<DartVM> DartVM::Create(
     Settings settings,
     fml::RefPtr<DartSnapshot> vm_snapshot,
     fml::RefPtr<DartSnapshot> isolate_snapshot,
-    fml::RefPtr<DartSnapshot> shared_snapshot,
     std::shared_ptr<IsolateNameServer> isolate_name_server) {
-  auto vm_data = DartVMData::Create(settings,                     //
-                                    std::move(vm_snapshot),       //
-                                    std::move(isolate_snapshot),  //
-                                    std::move(shared_snapshot)    //
+  auto vm_data = DartVMData::Create(settings,                    //
+                                    std::move(vm_snapshot),      //
+                                    std::move(isolate_snapshot)  //
   );
 
   if (!vm_data) {

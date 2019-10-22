@@ -139,9 +139,6 @@ class Shell final : public PlatformView::Delegate,
   /// @param[in]  isolate_snapshot         A custom isolate snapshot. Takes
   ///                                      precedence over any snapshots
   ///                                      specified in the settings.
-  /// @param[in]  shared_snapshot          A custom shared snapshot. Takes
-  ///                                      precedence over any snapshots
-  ///                                      specified in the settings.
   /// @param[in]  on_create_platform_view  The callback that must return a
   ///                                      platform view. This will be called on
   ///                                      the platform task runner before this
@@ -164,7 +161,6 @@ class Shell final : public PlatformView::Delegate,
       TaskRunners task_runners,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      fml::RefPtr<const DartSnapshot> shared_snapshot,
       CreateCallback<PlatformView> on_create_platform_view,
       CreateCallback<Rasterizer> on_create_rasterizer,
       DartVMRef vm);
@@ -375,7 +371,6 @@ class Shell final : public PlatformView::Delegate,
       TaskRunners task_runners,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      fml::RefPtr<const DartSnapshot> shared_snapshot,
       Shell::CreateCallback<PlatformView> on_create_platform_view,
       Shell::CreateCallback<Rasterizer> on_create_rasterizer);
 

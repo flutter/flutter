@@ -15,8 +15,7 @@ class DartVMData {
   static std::shared_ptr<const DartVMData> Create(
       Settings settings,
       fml::RefPtr<DartSnapshot> vm_snapshot,
-      fml::RefPtr<DartSnapshot> isolate_snapshot,
-      fml::RefPtr<DartSnapshot> shared_snapshot);
+      fml::RefPtr<DartSnapshot> isolate_snapshot);
 
   ~DartVMData();
 
@@ -26,18 +25,14 @@ class DartVMData {
 
   fml::RefPtr<const DartSnapshot> GetIsolateSnapshot() const;
 
-  fml::RefPtr<const DartSnapshot> GetSharedSnapshot() const;
-
  private:
   const Settings settings_;
   const fml::RefPtr<const DartSnapshot> vm_snapshot_;
   const fml::RefPtr<const DartSnapshot> isolate_snapshot_;
-  const fml::RefPtr<const DartSnapshot> shared_snapshot_;
 
   DartVMData(Settings settings,
              fml::RefPtr<const DartSnapshot> vm_snapshot,
-             fml::RefPtr<const DartSnapshot> isolate_snapshot,
-             fml::RefPtr<const DartSnapshot> shared_snapshot);
+             fml::RefPtr<const DartSnapshot> isolate_snapshot);
 
   FML_DISALLOW_COPY_AND_ASSIGN(DartVMData);
 };

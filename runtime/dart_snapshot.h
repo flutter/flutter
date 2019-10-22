@@ -103,17 +103,6 @@ class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
       const Settings& settings);
 
   //----------------------------------------------------------------------------
-  /// @brief      An empty an invalid snapshot. This is used as a placeholder
-  ///             for certain optional snapshots.
-  ///
-  /// @bug        Now that shared snapshots are no longer required, consider
-  ///             removing this constructor.
-  ///
-  /// @return     An invalid empty snapshot.
-  ///
-  static fml::RefPtr<DartSnapshot> Empty();
-
-  //----------------------------------------------------------------------------
   /// @brief      Determines if this snapshot contains a heap component. Since
   ///             the instructions component is optional, the method does not
   ///             check for its presence. Use `IsValidForAOT` to determine if

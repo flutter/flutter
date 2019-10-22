@@ -32,7 +32,6 @@ namespace flutter {
 std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     const Settings& settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
-    fml::RefPtr<const DartSnapshot> shared_snapshot,
     TaskRunners task_runners,
     std::unique_ptr<Window> window,
     fml::WeakPtr<IOManager> io_manager,
@@ -59,7 +58,6 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
       std::shared_ptr<DartIsolate>(new DartIsolate(
           settings,                     // settings
           std::move(isolate_snapshot),  // isolate snapshot
-          std::move(shared_snapshot),   // shared snapshot
           task_runners,                 // task runners
           std::move(io_manager),        // IO manager
           std::move(unref_queue),       // Skia unref queue
@@ -104,7 +102,6 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
 
 DartIsolate::DartIsolate(const Settings& settings,
                          fml::RefPtr<const DartSnapshot> isolate_snapshot,
-                         fml::RefPtr<const DartSnapshot> shared_snapshot,
                          TaskRunners task_runners,
                          fml::WeakPtr<IOManager> io_manager,
                          fml::RefPtr<SkiaUnrefQueue> unref_queue,
@@ -127,7 +124,6 @@ DartIsolate::DartIsolate(const Settings& settings,
                   DartVMRef::GetIsolateNameServer()),
       settings_(settings),
       isolate_snapshot_(std::move(isolate_snapshot)),
-      shared_snapshot_(std::move(shared_snapshot)),
       child_isolate_preparer_(std::move(child_isolate_preparer)),
       isolate_create_callback_(isolate_create_callback),
       isolate_shutdown_callback_(isolate_shutdown_callback) {
@@ -596,7 +592,6 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
       DartIsolate::CreateRootIsolate(
           vm_data->GetSettings(),         // settings
           vm_data->GetIsolateSnapshot(),  // isolate snapshot
-          vm_data->GetSharedSnapshot(),   // shared snapshot
           null_task_runners,              // task runners
           nullptr,                        // window
           {},                             // IO Manager
@@ -710,7 +705,6 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
         std::shared_ptr<DartIsolate>(new DartIsolate(
             (*raw_embedder_isolate)->GetSettings(),         // settings
             (*raw_embedder_isolate)->GetIsolateSnapshot(),  // isolate_snapshot
-            (*raw_embedder_isolate)->GetSharedSnapshot(),   // shared_snapshot
             null_task_runners,                              // task_runners
             fml::WeakPtr<IOManager>{},                      // io_manager
             fml::RefPtr<SkiaUnrefQueue>{},                  // unref_queue
@@ -731,8 +725,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
       advisory_script_entrypoint,  //
       (*embedder_isolate)->GetIsolateSnapshot()->GetDataMapping(),
       (*embedder_isolate)->GetIsolateSnapshot()->GetInstructionsMapping(),
-      (*embedder_isolate)->GetSharedSnapshot()->GetDataMapping(),
-      (*embedder_isolate)->GetSharedSnapshot()->GetInstructionsMapping(), flags,
+      flags,
       embedder_isolate.get(),  // isolate_group_data
       embedder_isolate.get(),  // isolate_group
       error);
@@ -795,10 +788,6 @@ void DartIsolate::DartIsolateGroupCleanupCallback(
 
 fml::RefPtr<const DartSnapshot> DartIsolate::GetIsolateSnapshot() const {
   return isolate_snapshot_;
-}
-
-fml::RefPtr<const DartSnapshot> DartIsolate::GetSharedSnapshot() const {
-  return shared_snapshot_;
 }
 
 std::weak_ptr<DartIsolate> DartIsolate::GetWeakIsolatePtr() {

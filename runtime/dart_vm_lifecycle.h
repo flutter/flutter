@@ -29,8 +29,7 @@ class DartVMRef {
   FML_WARN_UNUSED_RESULT
   static DartVMRef Create(Settings settings,
                           fml::RefPtr<DartSnapshot> vm_snapshot = nullptr,
-                          fml::RefPtr<DartSnapshot> isolate_snapshot = nullptr,
-                          fml::RefPtr<DartSnapshot> shared_snapshot = nullptr);
+                          fml::RefPtr<DartSnapshot> isolate_snapshot = nullptr);
 
   DartVMRef(DartVMRef&&);
 

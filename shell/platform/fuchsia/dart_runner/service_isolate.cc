@@ -106,10 +106,8 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
   auto state = new std::shared_ptr<tonic::DartState>(new tonic::DartState());
   Dart_Isolate isolate = Dart_CreateIsolateGroup(
       uri, DART_VM_SERVICE_ISOLATE_NAME, mapped_isolate_snapshot_data.address(),
-      mapped_isolate_snapshot_instructions.address(),
-      nullptr /* shared_snapshot_data */,
-      nullptr /* shared_snapshot_instructions */, nullptr /* flags */, state,
-      state, error);
+      mapped_isolate_snapshot_instructions.address(), nullptr /* flags */,
+      state, state, error);
   if (!isolate) {
     FX_LOGF(ERROR, LOG_TAG, "Dart_CreateIsolateGroup failed: %s", *error);
     return nullptr;

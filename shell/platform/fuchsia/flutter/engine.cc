@@ -224,13 +224,12 @@ Engine::Engine(Delegate& delegate,
   {
     TRACE_EVENT0("flutter", "CreateShell");
     shell_ = flutter::Shell::Create(
-        task_runners,                    // host task runners
-        settings_,                       // shell launch settings
-        std::move(isolate_snapshot),     // isolate snapshot
-        flutter::DartSnapshot::Empty(),  // shared snapshot
-        on_create_platform_view,         // platform view create callback
-        on_create_rasterizer,            // rasterizer create callback
-        std::move(vm)                    // vm reference
+        task_runners,                 // host task runners
+        settings_,                    // shell launch settings
+        std::move(isolate_snapshot),  // isolate snapshot
+        on_create_platform_view,      // platform view create callback
+        on_create_rasterizer,         // rasterizer create callback
+        std::move(vm)                 // vm reference
     );
   }
 

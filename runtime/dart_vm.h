@@ -162,7 +162,6 @@ class DartVM {
       Settings settings,
       fml::RefPtr<DartSnapshot> vm_snapshot,
       fml::RefPtr<DartSnapshot> isolate_snapshot,
-      fml::RefPtr<DartSnapshot> shared_snapshot,
       std::shared_ptr<IsolateNameServer> isolate_name_server);
 
   DartVM(std::shared_ptr<const DartVMData> data,

@@ -143,10 +143,6 @@ class DartIsolate : public UIDartState {
   ///                                         usually obtained from the
   ///                                         DartVMData associated with the
   ///                                         running Dart VM instance.
-  /// @param[in]  shared_snapshot             The shared snapshot. This is
-  ///                                         usually obtained from the
-  ///                                         DartVMData associated with the
-  ///                                         running Dart VM instance.
   /// @param[in]  task_runners                The task runners used by the
   ///                                         isolate. Via UI bindings, the
   ///                                         isolate will use the IO task
@@ -193,7 +189,6 @@ class DartIsolate : public UIDartState {
   static std::weak_ptr<DartIsolate> CreateRootIsolate(
       const Settings& settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      fml::RefPtr<const DartSnapshot> shared_snapshot,
       TaskRunners task_runners,
       std::unique_ptr<Window> window,
       fml::WeakPtr<IOManager> io_manager,
@@ -388,14 +383,6 @@ class DartIsolate : public UIDartState {
   fml::RefPtr<const DartSnapshot> GetIsolateSnapshot() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Get the shared snapshot used to launch this isolate. This is
-  ///             referenced by any child isolates launched by the root isolate.
-  ///
-  /// @return     The shared snapshot.
-  ///
-  fml::RefPtr<const DartSnapshot> GetSharedSnapshot() const;
-
-  //----------------------------------------------------------------------------
   /// @brief      A weak pointer to the Dart isolate instance. This instance may
   ///             only be used on the task runner that created the root isolate.
   ///
@@ -430,7 +417,6 @@ class DartIsolate : public UIDartState {
   Phase phase_ = Phase::Unknown;
   const Settings settings_;
   const fml::RefPtr<const DartSnapshot> isolate_snapshot_;
-  const fml::RefPtr<const DartSnapshot> shared_snapshot_;
   std::vector<std::shared_ptr<const fml::Mapping>> kernel_buffers_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
   ChildIsolatePreparer child_isolate_preparer_ = nullptr;
@@ -440,7 +426,6 @@ class DartIsolate : public UIDartState {
 
   DartIsolate(const Settings& settings,
               fml::RefPtr<const DartSnapshot> isolate_snapshot,
-              fml::RefPtr<const DartSnapshot> shared_snapshot,
               TaskRunners task_runners,
               fml::WeakPtr<IOManager> io_manager,
               fml::RefPtr<SkiaUnrefQueue> unref_queue,

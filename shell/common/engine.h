@@ -249,8 +249,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///                                created when the engine is created. This
   ///                                requires access to the isolate snapshot
   ///                                upfront.
-  /// @param[in]  shared_snapshot    The portion of the isolate snapshot shared
-  ///                                among multiple isolates.
   //  TODO(chinmaygarde): This is probably redundant now that the IO manager is
   //  it's own object.
   /// @param[in]  task_runners       The task runners used by the shell that
@@ -276,7 +274,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          const PointerDataDispatcherMaker& dispatcher_maker,
          DartVM& vm,
          fml::RefPtr<const DartSnapshot> isolate_snapshot,
-         fml::RefPtr<const DartSnapshot> shared_snapshot,
          TaskRunners task_runners,
          Settings settings,
          std::unique_ptr<Animator> animator,

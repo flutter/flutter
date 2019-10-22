@@ -53,7 +53,6 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
   auto isolate_weak = DartIsolate::CreateRootIsolate(
       vm.GetSettings(),                   // settings
       vm.GetIsolateSnapshot(),            // isolate_snapshot
-      vm.GetSharedSnapshot(),             // shared_snapshot
       runners,                            // task_runners
       {},                                 // window
       {},                                 // io_manager
