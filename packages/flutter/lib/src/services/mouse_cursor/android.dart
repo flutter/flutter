@@ -8,26 +8,6 @@ import '../platform_channel.dart';
 import 'common.dart';
 
 /// TODOC
-class AndroidMouseCursorConstants {
-  // Must be kept in sync with
-  // https://developer.android.com/reference/android/view/PointerIcon.html
-
-  static const int TYPE_DEFAULT = 1000;
-
-  static const int TYPE_ARROW = 1000;
-
-  static const int TYPE_GRAB = 1020;
-
-  static const int TYPE_GRABBING = 1021;
-
-  static const int TYPE_HAND = 1002;
-
-  static const int TYPE_NULL = 0;
-
-  static const int TYPE_TEXT = 1008;
-}
-
-/// TODOC
 @immutable
 class _AndroidMouseCursorActions {
   /// TODOC
@@ -37,16 +17,13 @@ class _AndroidMouseCursorActions {
   final MethodChannel mouseCursorChannel;
 
   /// TODOC
-  Future<void> setDeviceAsSystemCursor({
-    @required int device,
+  Future<void> setAsSystemCursor({
     @required int systemConstant,
   }) {
-    assert(device != null);
     assert(systemConstant != null);
     return mouseCursorChannel.invokeMethod<void>(
-      'setDeviceAsSystemCursor',
+      'setAsSystemCursor',
       <String, dynamic>{
-        'device': device,
         'systemConstant': systemConstant,
       },
     );
@@ -60,12 +37,43 @@ class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
 
   final MethodChannel _mouseCursorChannel;
 
+  // System cursor constants are used to set system cursor on Android.
+  // Must be kept in sync with Android's [PointerIcon#Constants](https://developer.android.com/reference/android/view/PointerIcon.html#constants_2)
+
+  /// The same constant as Android's `PointerIcon.TYPE_DEFAULT`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantDefault = 1000;
+
+  /// The same constant as Android's `PointerIcon.TYPE_ARROW`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantArrow = 1000;
+
+  /// The same constant as Android's `PointerIcon.TYPE_GRAB`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantGrab = 1020;
+
+  /// The same constant as Android's `PointerIcon.TYPE_GRABBING`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantGrabbing = 1021;
+
+  /// The same constant as Android's `PointerIcon.TYPE_HAND`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantHand = 1002;
+
+  /// The same constant as Android's `PointerIcon.TYPE_NULL`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantNull = 0;
+
+  /// The same constant as Android's `PointerIcon.TYPE_TEXT`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantText = 1008;
+
   Future<bool> _activateSystemConstant({
     @required ActivateMouseCursorDetails details,
     @required int systemConstant,
   }) async {
     await _AndroidMouseCursorActions(_mouseCursorChannel)
-      .setDeviceAsSystemCursor(device: details.device, systemConstant: systemConstant);
+      .setAsSystemCursor(systemConstant: systemConstant);
     // This action is asserted to be successful. If not, throw the error.
     return true;
   }
@@ -76,22 +84,22 @@ class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
       case SystemCursorShape.none:
         return _activateSystemConstant(
           details: details,
-          systemConstant: AndroidMouseCursorConstants.TYPE_NULL,
+          systemConstant: MouseCursorAndroidDelegate.kSystemConstantNull,
         );
       case SystemCursorShape.basic:
         return _activateSystemConstant(
           details: details,
-          systemConstant: AndroidMouseCursorConstants.TYPE_ARROW,
+          systemConstant: MouseCursorAndroidDelegate.kSystemConstantArrow,
         );
       case SystemCursorShape.click:
         return _activateSystemConstant(
           details: details,
-          systemConstant: AndroidMouseCursorConstants.TYPE_HAND,
+          systemConstant: MouseCursorAndroidDelegate.kSystemConstantHand,
         );
       case SystemCursorShape.text:
         return _activateSystemConstant(
           details: details,
-          systemConstant: AndroidMouseCursorConstants.TYPE_TEXT,
+          systemConstant: MouseCursorAndroidDelegate.kSystemConstantText,
         );
       case SystemCursorShape.forbidden:
         return false;

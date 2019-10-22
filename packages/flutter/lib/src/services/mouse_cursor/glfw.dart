@@ -8,18 +8,6 @@ import '../platform_channel.dart';
 import 'common.dart';
 
 /// TODOC
-class GLFWMouseCursorConstants {
-  // Must be kept in sync with
-  // https://www.glfw.org/docs/latest/group__shapes.html
-
-  static const int GLFW_ARROW_CURSOR = 0x00036001;
-
-  static const int GLFW_IBEAM_CURSOR = 0x00036002;
-
-  static const int GLFW_HAND_CURSOR = 0x00036004;
-}
-
-/// TODOC
 @immutable
 class _GLFWMouseCursorActions {
   /// TODOC
@@ -29,18 +17,15 @@ class _GLFWMouseCursorActions {
   final MethodChannel mouseCursorChannel;
 
   /// TODOC
-  Future<void> setDeviceAsSystemCursor({
-    @required int device,
+  Future<void> setAsSystemCursor({
     @required int systemConstant,
     @required bool hidden,
   }) {
-    assert(device != null);
     assert(systemConstant != null);
     assert(hidden != null);
     return mouseCursorChannel.invokeMethod<void>(
-      'setDeviceAsSystemCursor',
+      'setAsSystemCursor',
       <String, dynamic>{
-        'device': device,
         'systemConstant': systemConstant,
         'hidden': hidden,
       },
@@ -55,13 +40,27 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
 
   final MethodChannel _mouseCursorChannel;
 
+  // System cursor constants are used to set system cursor on GLFW.
+  // Must be kept in sync with GLFW's [Standard cursor shapes](https://www.glfw.org/docs/latest/group__shapes.html)
+
+  /// The same constant as GLFW's `GLFW_ARROW_CURSOR`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantArrow = 0x00036001;
+
+  /// The same constant as GLFW's `GLFW_IBEAM_CURSOR`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantIbeam = 0x00036002;
+
+  /// The same constant as GLFW's `GLFW_HAND_CURSOR`,
+  /// used internally to set system cursor.
+  static const int kSystemConstantHand = 0x00036004;
+
   Future<bool> _activateSystemConstant({
     @required ActivateMouseCursorDetails details,
     @required int systemConstant,
   }) async {
     await _GLFWMouseCursorActions(_mouseCursorChannel)
-      .setDeviceAsSystemCursor(
-        device: details.device,
+      .setAsSystemCursor(
         systemConstant: systemConstant,
         hidden: false,
       );
@@ -73,8 +72,7 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
     @required ActivateMouseCursorDetails details,
   }) async {
     await _GLFWMouseCursorActions(_mouseCursorChannel)
-      .setDeviceAsSystemCursor(
-        device: details.device,
+      .setAsSystemCursor(
         systemConstant: 0,
         hidden: true,
       );
@@ -95,17 +93,17 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
       case SystemCursorShape.basic:
         return _activateSystemConstant(
           details: details,
-          systemConstant: GLFWMouseCursorConstants.GLFW_ARROW_CURSOR,
+          systemConstant: MouseCursorGLFWDelegate.kSystemConstantArrow,
         );
       case SystemCursorShape.click:
         return _activateSystemConstant(
           details: details,
-          systemConstant: GLFWMouseCursorConstants.GLFW_HAND_CURSOR,
+          systemConstant: MouseCursorGLFWDelegate.kSystemConstantHand,
         );
       case SystemCursorShape.text:
         return _activateSystemConstant(
           details: details,
-          systemConstant: GLFWMouseCursorConstants.GLFW_IBEAM_CURSOR,
+          systemConstant: MouseCursorGLFWDelegate.kSystemConstantIbeam,
         );
       case SystemCursorShape.forbidden:
         return false;
