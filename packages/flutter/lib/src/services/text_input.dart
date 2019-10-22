@@ -413,13 +413,16 @@ class TextInputConfiguration {
   final bool autocorrect;
 
   /// {@template flutter.services.textInput.enableSuggestions}
-  /// Whether to hide suggestions.
+  /// Whether to show input suggestions as the user types.
   ///
   /// This flag only affects Android. On iOS, suggestions are tied directly to
   /// [autocorrect], so that suggestions are only shown when [autocorrect] is
   /// true. On Android autocorrection and suggestion are controlled separately.
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to true. Cannot be null.
+  ///
+  /// See also:
+  ///  * <https://developer.android.com/reference/android/text/InputType.html#TYPE_TEXT_FLAG_NO_SUGGESTIONS>
   /// {@endtemplate}
   final bool enableSuggestions;
 
