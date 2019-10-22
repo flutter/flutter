@@ -4,8 +4,11 @@
 
 part of engine;
 
-final bool _supportsDecode =
-    js_util.hasProperty(js.JsObject(js.context['Image']), 'decode');
+final bool _supportsDecode = js_util.getProperty(
+        js_util.getProperty(
+            js_util.getProperty(html.window, 'Image'), 'prototype'),
+        'decode') !=
+    null;
 
 class HtmlCodec implements ui.Codec {
   final String src;
