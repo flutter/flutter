@@ -520,26 +520,28 @@ void main() {
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: PopupMenuButton<int>(
-          itemBuilder: (BuildContext context) {
-            return <PopupMenuItem<int>>[
-              const PopupMenuItem<int>(value: 1, child: Text('1')),
-              const PopupMenuItem<int>(value: 2, child: Text('2')),
-              const PopupMenuItem<int>(value: 3, child: Text('3')),
-              const PopupMenuItem<int>(value: 4, child: Text('4')),
-              const PopupMenuItem<int>(value: 5, child: Text('5')),
-            ];
-          },
-          child: const SizedBox(
-            height: 100.0,
-            width: 100.0,
-            child: Text('XXX'),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(value: 1, child: Text('1')),
+                const PopupMenuItem<int>(value: 2, child: Text('2')),
+                const PopupMenuItem<int>(value: 3, child: Text('3')),
+                const PopupMenuItem<int>(value: 4, child: Text('4')),
+                const PopupMenuItem<int>(value: 5, child: Text('5')),
+              ];
+            },
+            child: const SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: Text('XXX'),
+            ),
           ),
         ),
       ),
-    ));
+    );
     await tester.tap(find.text('XXX'));
     await tester.pumpAndSettle();
 
@@ -563,26 +565,31 @@ void main() {
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '1',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '2',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '3',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '4',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '5',
                         textDirection: TextDirection.ltr,
@@ -704,7 +711,7 @@ void main() {
               onSelected: (String result) { },
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<String>>[
-                  // This menu item's height will be 48 because the the default minimum height
+                  // This menu item's height will be 48 because the default minimum height
                   // is 48 and the height of the text is less than 48.
                   const PopupMenuItem<String>(
                     value: '0',
@@ -843,6 +850,129 @@ void main() {
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 1')).height, 48);
     expect(tester.getTopLeft(find.text('Item 0')).dx, 72);
     expect(tester.getTopLeft(find.text('Item 1')).dx, 72);
+  });
+
+  test("PopupMenuButton's child and icon properties cannot be simultaneously defined", () {
+    expect(() {
+      PopupMenuButton<int>(
+        itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
+        child: Container(),
+        icon: const Icon(Icons.error),
+      );
+    }, throwsAssertionError);
+  });
+
+  testWidgets('PopupMenuButton default tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              // Default Tooltip should be present when [PopupMenuButton.icon]
+              // and [PopupMenuButton.child] are undefined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+              // Default Tooltip should be present when
+              // [PopupMenuButton.child] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                child: const Text('Test text'),
+              ),
+              // Default Tooltip should be present when
+              // [PopupMenuButton.icon] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                icon: const Icon(Icons.check),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // The default tooltip is defined as [MaterialLocalizations.showMenuTooltip]
+    // and it is used when no tooltip is provided.
+    expect(find.byType(Tooltip), findsNWidgets(3));
+    expect(find.byTooltip(const DefaultMaterialLocalizations().showMenuTooltip), findsNWidgets(3));
+  });
+
+  testWidgets('PopupMenuButton custom tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              // Tooltip should work when [PopupMenuButton.icon]
+              // and [PopupMenuButton.child] are undefined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                tooltip: 'Test tooltip',
+              ),
+              // Tooltip should work when
+              // [PopupMenuButton.child] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                tooltip: 'Test tooltip',
+                child: const Text('Test text'),
+              ),
+              // Tooltip should work when
+              // [PopupMenuButton.icon] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                tooltip: 'Test tooltip',
+                icon: const Icon(Icons.check),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNWidgets(3));
+    expect(find.byTooltip('Test tooltip',), findsNWidgets(3));
   });
 }
 

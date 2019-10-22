@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:build_daemon/client.dart';
@@ -10,12 +11,14 @@ import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
+import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_proxy/shelf_proxy.dart';
+import 'package:mime/mime.dart' as mime;
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -58,9 +61,7 @@ typedef HttpMultiServerFactory = Future<HttpServer> Function(dynamic address, in
 
 /// A function with the same signature as [Dwds.start].
 typedef DwdsFactory = Future<Dwds> Function({
-  @required int applicationPort,
-  @required int assetServerPort,
-  @required String applicationTarget,
+  @required AssetHandler assetHandler,
   @required Stream<BuildResult> buildResults,
   @required ConnectionProvider chromeConnection,
   String hostname,
@@ -180,7 +181,7 @@ class WebFs {
     // Workaround for https://github.com/flutter/flutter/issues/41681.
     final String toolPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
     if (!fs.isFileSync(fs.path.join(toolPath, '.packages'))) {
-      await pubGet(
+      await pub.get(
         context: PubContext.pubGet,
         directory: toolPath,
         offline: true,
@@ -210,6 +211,7 @@ class WebFs {
     };
 
     // Initialize the dwds server.
+    final String effectiveHostname = hostname ?? _kHostName;
     final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
 
     final Pipeline pipeline = const Pipeline().addMiddleware((Handler innerHandler) {
@@ -277,17 +279,20 @@ class WebFs {
       await assetBundle.build();
       await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
       if (!skipDwds) {
+        final BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
+          daemonAssetPort,
+          kBuildTargetName,
+          effectiveHostname,
+          hostPort);
         dwds = await dwdsFactory(
-          hostname: hostname ?? _kHostName,
-          applicationPort: hostPort,
-          applicationTarget: kBuildTargetName,
-          assetServerPort: daemonAssetPort,
+          hostname: effectiveHostname,
+          assetHandler: assetHandler,
           buildResults: filteredBuildResults,
           chromeConnection: () async {
             return (await ChromeLauncher.connectedInstance).chromeConnection;
           },
           reloadConfiguration: ReloadConfiguration.none,
-          serveDevTools: true,
+          serveDevTools: false,
           verbose: false,
           enableDebugExtension: true,
           logWriter: (dynamic level, String message) => printTrace(message),
@@ -307,13 +312,13 @@ class WebFs {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(assetServer.handle);
-    final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
+    final HttpServer server = await httpMultiServerFactory(effectiveHostname, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     final WebFs webFS = WebFs(
       client,
       server,
       dwds,
-      'http://$_kHostName:$hostPort/',
+      'http://$effectiveHostname:$hostPort/',
       assetServer,
       buildInfo.isDebug,
       flutterProject,
@@ -322,11 +327,19 @@ class WebFs {
       initializePlatform,
     );
     if (!await firstBuildCompleter.future) {
-      throw Exception('Failed to compile for the web.');
+      throw const BuildException();
     }
     await firstBuild?.cancel();
     return webFS;
   }
+}
+
+/// An exception thrown when build runner fails.
+///
+/// This contains no error information as it will have already been printed to
+/// the console.
+class BuildException implements Exception {
+  const BuildException();
 }
 
 abstract class AssetServer {
@@ -411,7 +424,7 @@ class DebugAssetServer extends AssetServer {
         ));
         if (dart2jsArchive.existsSync()) {
           final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
-          partFiles = fs.systemTempDirectory.createTempSync('_flutter_tool')
+          partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
           for (ArchiveFile file in archive) {
             partFiles.childFile(file.name).writeAsBytesSync(file.content);
@@ -490,7 +503,14 @@ class DebugAssetServer extends AssetServer {
       final String assetPath = request.url.path.replaceFirst('assets/', '');
       final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
       if (file.existsSync()) {
-        return Response.ok(file.readAsBytesSync());
+        final Uint8List bytes = file.readAsBytesSync();
+        // Fallback to "application/octet-stream" on null which
+        // makes no claims as to the structure of the data.
+        final String mimeType = mime.lookupMimeType(file.path, headerBytes: bytes)
+          ?? 'application/octet-stream';
+        return Response.ok(bytes, headers: <String, String>{
+          'Content-Type': mimeType,
+        });
       } else {
         return Response.notFound('');
       }

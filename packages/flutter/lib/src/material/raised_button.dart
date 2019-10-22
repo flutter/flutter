@@ -244,7 +244,7 @@ class RaisedButton extends MaterialButton {
   }
 }
 
-/// The type of of RaisedButtons created with [RaisedButton.icon].
+/// The type of RaisedButtons created with [RaisedButton.icon].
 ///
 /// This class only exists to give RaisedButtons created with [RaisedButton.icon]
 /// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.

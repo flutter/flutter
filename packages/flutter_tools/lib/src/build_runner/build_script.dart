@@ -36,21 +36,6 @@ const String jsSourceMapExtension = '.ddc.js.map';
 const String kReleaseFlag = 'release';
 const String kProfileFlag = 'profile';
 
-// A minimum set of libraries to skip checks for to keep the examples compiling
-// until we make a decision on whether to support dart:io on the web.
-// See https://github.com/dart-lang/sdk/issues/35969
-// See https://github.com/flutter/flutter/issues/39998
-const Set<String> skipPlatformCheckPackages = <String>{
-  'flutter',
-  'flutter_test',
-  'flutter_driver',
-  'flutter_goldens',
-  'flutter_goldens_client',
-  'flutter_gallery',
-  'connectivity',
-  'video_player',
-};
-
 final DartPlatform flutterWebPlatform = DartPlatform.register('flutter_web', <String>[
   'async',
   'collection',
@@ -215,8 +200,11 @@ class FlutterWebTestEntrypointBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     log.info('building for target ${buildStep.inputId.path}');
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform,
-        skipPlatformCheckPackages: skipPlatformCheckPackages);
+    await bootstrapDdc(
+      buildStep,
+      platform: flutterWebPlatform,
+      skipPlatformCheck: true,
+    );
   }
 }
 
@@ -241,8 +229,11 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform,
-        skipPlatformCheckPackages: skipPlatformCheckPackages);
+    await bootstrapDdc(
+      buildStep,
+      platform: flutterWebPlatform,
+      skipPlatformCheck: true,
+    );
   }
 }
 
@@ -286,6 +277,7 @@ Future<void> main() async {
   // The following parameters are hard-coded in Flutter's test embedder. Since
   // we don't have an embedder yet this is the lowest-most layer we can put
   // this stuff in.
+  ui.debugEmulateFlutterTesterEnvironment = true;
   await ui.webOnlyInitializeEngine();
   // TODO(flutterweb): remove need for dynamic cast.
   (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);

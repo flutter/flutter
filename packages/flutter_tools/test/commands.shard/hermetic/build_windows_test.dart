@@ -25,7 +25,6 @@ import '../../src/testbed.dart';
 
 void main() {
   MockProcessManager mockProcessManager;
-  MemoryFileSystem memoryFilesystem;
   MockProcess mockProcess;
   MockPlatform windowsPlatform;
   MockPlatform notWindowsPlatform;
@@ -40,7 +39,6 @@ void main() {
 
   setUp(() {
     mockProcessManager = MockProcessManager();
-    memoryFilesystem = MemoryFileSystem(style: FileSystemStyle.windows);
     mockProcess = MockProcess();
     windowsPlatform = MockPlatform()
         ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
@@ -68,7 +66,8 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -82,7 +81,8 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -101,7 +101,8 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -136,7 +137,7 @@ void main() {
     expect(props.findAllElements('ItemGroup').length, 1);
     expect(props.findAllElements('FLUTTER_ROOT').first.text, r'C:\');
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,
@@ -168,7 +169,7 @@ void main() {
     final BufferLogger bufferLogger = logger;
     expect(bufferLogger.statusText, contains('🚧'));
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,

@@ -102,7 +102,7 @@ class BuildRunner extends CodeGenerator {
       stringBuffer.writeln('  build_daemon: $kSupportedBuildDaemonVersion');
       syntheticPubspec.writeAsStringSync(stringBuffer.toString());
 
-      await pubGet(
+      await pub.get(
         context: PubContext.pubGet,
         directory: generatedDirectory.path,
         upgrade: false,
@@ -139,7 +139,6 @@ class BuildRunner extends CodeGenerator {
     FlutterProject flutterProject, {
     String mainPath,
     bool linkPlatformKernelIn = false,
-    bool targetProductVm = false,
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions = const <String> [],
   }) async {

@@ -538,7 +538,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     if (shouldRunPub) {
-      await pubGet(context: PubContext.getVerifyContext(name));
+      await pub.get(context: PubContext.getVerifyContext(name));
       final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }

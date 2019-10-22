@@ -228,6 +228,7 @@ class HotRunner extends ResidentRunner {
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
       return 0;
     }
+    writeVmserviceFile();
 
     int result = 0;
     if (stayResident) {
@@ -1031,6 +1032,9 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async {
+    for (FlutterDevice flutterDevice in flutterDevices) {
+      flutterDevice.device.dispose();
+    }
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
   }
@@ -1049,33 +1053,38 @@ class ProjectFileInvalidator {
     assert(packagesPath != null);
 
     if (lastCompiled == null) {
+      // Initial load.
       assert(urisToMonitor.isEmpty);
       return <Uri>[];
     }
 
-    final List<Uri> invalidatedFiles = <Uri>[];
-    int scanned = 0;
     final Stopwatch stopwatch = Stopwatch()..start();
-    for (Uri uri in urisToMonitor) {
-      if ((platform.isWindows && uri.path.contains(_pubCachePathWindows))
-          || uri.path.contains(_pubCachePathLinuxAndMac)) {
-        // Don't watch pub cache directories to speed things up a little.
-        continue;
-      }
+
+    final List<Uri> urisToScan = <Uri>[
+      // Don't watch pub cache directories to speed things up a little.
+      ...urisToMonitor.where(_isNotInPubCache),
+
+      // We need to check the .packages file too since it is not used in compilation.
+      fs.file(packagesPath).uri,
+    ];
+    final List<Uri> invalidatedFiles = <Uri>[];
+    for (final Uri uri in urisToScan) {
       final DateTime updatedAt = fs.statSync(
-          uri.toFilePath(windows: platform.isWindows)).modified;
-      scanned++;
+        uri.toFilePath(windows: platform.isWindows),
+      ).modified;
       if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
         invalidatedFiles.add(uri);
       }
     }
-    // We need to check the .packages file too since it is not used in compilation.
-    final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
-    if (packagesUpdatedAt != null && packagesUpdatedAt.isAfter(lastCompiled)) {
-      invalidatedFiles.add(fs.file(packagesPath).uri);
-      scanned++;
-    }
-    printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
+    printTrace(
+      'Scanned through ${urisToScan.length} files in '
+      '${stopwatch.elapsedMilliseconds}ms',
+    );
     return invalidatedFiles;
+  }
+
+  static bool _isNotInPubCache(Uri uri) {
+    return !(platform.isWindows && uri.path.contains(_pubCachePathWindows))
+        && !uri.path.contains(_pubCachePathLinuxAndMac);
   }
 }
