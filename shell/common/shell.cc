@@ -432,14 +432,12 @@ void Shell::RunEngine(RunConfiguration run_configuration,
 
 std::optional<DartErrorCode> Shell::GetUIIsolateLastError() const {
   FML_DCHECK(is_setup_);
-  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
-  // We're using the unique_ptr here because we're sure we're on the Platform
-  // Thread and callers expect this to be synchronous.
-  if (!engine_) {
+  if (!weak_engine_) {
     return std::nullopt;
   }
-  switch (engine_->GetUIIsolateLastError()) {
+  switch (weak_engine_->GetUIIsolateLastError()) {
     case tonic::kCompilationErrorType:
       return DartErrorCode::CompilationError;
     case tonic::kApiErrorType:
@@ -454,27 +452,13 @@ std::optional<DartErrorCode> Shell::GetUIIsolateLastError() const {
 
 bool Shell::EngineHasLivePorts() const {
   FML_DCHECK(is_setup_);
-  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
-  // We're using the unique_ptr here because we're sure we're on the Platform
-  // Thread and callers expect this to be synchronous.
-  if (!engine_) {
+  if (!weak_engine_) {
     return false;
   }
 
-  std::promise<bool> ui_isolate_has_live_ports_promise;
-  auto ui_isolate_has_live_ports_future =
-      ui_isolate_has_live_ports_promise.get_future();
-  auto ui_task_runner = task_runners_.GetUITaskRunner();
-
-  fml::TaskRunner::RunNowOrPostTask(
-      ui_task_runner,
-      [&ui_isolate_has_live_ports_promise, engine = engine_->GetWeakPtr()]() {
-        ui_isolate_has_live_ports_promise.set_value(
-            engine->UIIsolateHasLivePorts());
-      });
-
-  return ui_isolate_has_live_ports_future.get();
+  return weak_engine_->UIIsolateHasLivePorts();
 }
 
 bool Shell::IsSetup() const {

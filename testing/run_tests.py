@@ -162,18 +162,26 @@ def SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot
   assert os.path.exists(kernel_file_output)
 
 
-def RunDartTest(build_dir, dart_file, verbose_dart_snapshot):
+def RunDartTest(build_dir, dart_file, verbose_dart_snapshot, multithreaded):
   kernel_file_name = os.path.basename(dart_file) + '.kernel.dill'
   kernel_file_output = os.path.join(out_dir, kernel_file_name)
 
   SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot)
 
-  print "Running test '%s' using 'flutter_tester'" % kernel_file_name
-  RunEngineExecutable(build_dir, 'flutter_tester', None, [
+  command_args = [
     '--disable-observatory',
     '--use-test-fonts',
     kernel_file_output
-  ])
+  ]
+
+  if multithreaded:
+    threading = 'multithreaded'
+    command_args.insert(0, '--force-multithreading')
+  else:
+    threading = 'single-threaded'
+
+  print "Running test '%s' using 'flutter_tester' (%s)" % (kernel_file_name, threading)
+  RunEngineExecutable(build_dir, 'flutter_tester', None, command_args)
 
 def RunPubGet(build_dir, directory):
   print "Running 'pub get' in the tests directory %s" % dart_tests_dir
@@ -287,7 +295,8 @@ def RunDartTests(build_dir, filter, verbose_dart_snapshot):
       print "Skipping %s due to filter." % dart_test_file
     else:
       print "Testing dart file %s" % dart_test_file
-      RunDartTest(build_dir, dart_test_file, verbose_dart_snapshot)
+      RunDartTest(build_dir, dart_test_file, verbose_dart_snapshot, True)
+      RunDartTest(build_dir, dart_test_file, verbose_dart_snapshot, False)
 
 def main():
   parser = argparse.ArgumentParser();
