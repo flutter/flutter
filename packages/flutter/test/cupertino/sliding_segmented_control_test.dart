@@ -26,7 +26,7 @@ Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = 
     return local;
 
   final RenderBox segmentedControl = renderSegmentedControl;
-  return local.shift(segmentedControl.localToGlobal(Offset.zero));
+  return local?.shift(segmentedControl.localToGlobal(Offset.zero));
 }
 
 double currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale;
@@ -259,6 +259,91 @@ void main() {
 
     expect(valueChanged, isFalse);
     expect(controller.value, 1);
+  });
+
+  testWidgets('Changing controller works', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+    children[2] = const Text('Child 3');
+
+    final ValueNotifier<int> controller = ValueNotifier<int>(0);
+    final ValueNotifier<int> newControlelr = ValueNotifier<int>(null);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoSlidingSegmentedControl<int>(
+          key: const ValueKey<String>('Segmented Control'),
+          children: children,
+          controller: controller,
+        ),
+      ),
+    );
+
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 1'))),
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoSlidingSegmentedControl<int>(
+          key: const ValueKey<String>('Segmented Control'),
+          children: children,
+          controller: newControlelr,
+        ),
+      ),
+    );
+
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true),
+      isNull,
+    );
+  });
+
+  testWidgets('Can change controller value in build method', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+    children[2] = const Text('Child 3');
+
+    int currentIndex = 0;
+    StateSetter setState;
+    final ValueNotifier<int> controller = ValueNotifier<int>(currentIndex);
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          if (controller.value != currentIndex)
+            controller.value = currentIndex;
+          return boilerplate(
+            child: CupertinoSlidingSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              controller: controller,
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 1'))),
+    );
+
+    setState(() {
+      currentIndex = 2;
+    });
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(
+      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 3')), epsilon: 0.01),
+    );
   });
 
   testWidgets(
