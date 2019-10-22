@@ -49,10 +49,9 @@ window.\$hotReloadHook = function(modules) {
   var reloadCount = 0;
   for (var i = 0; i < modules.length; i++) {
     require.undef(modules[i]);
-  }
-  for (var i = 0; i < modules.length; i++) {
     require([modules[i]], function(module) {
       reloadCount += 1;
+      // once we've reloaded every module, trigger the hot reload.
       if (reloadCount == modules.length) {
         window.\$hotReload();
       }
