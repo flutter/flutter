@@ -66,7 +66,7 @@ class FlutterDevice {
     ResidentCompiler generator,
   }) async {
     ResidentCompiler generator;
-    if (featureFlags.isIncrementalCompilerEnabled &&
+    if (featureFlags.isWebIncrementalCompilerEnabled &&
         await device.targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildMode),
