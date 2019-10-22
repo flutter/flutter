@@ -289,14 +289,6 @@ class PictureLayer extends Layer {
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
-    final RasterCache cache = prerollContext.rasterCache;
-    if (cache != null) {
-      final Matrix4 translateMatrix = Matrix4.identity()
-        ..setTranslationRaw(offset.dx, offset.dy, 0);
-      final Matrix4 cacheMatrix = translateMatrix * matrix;
-      cache.prepare(picture, cacheMatrix, isComplex, willChange);
-    }
-
     paintBounds = picture.cullRect.shift(offset);
   }
 
@@ -308,15 +300,6 @@ class PictureLayer extends Layer {
     paintContext.canvas.save();
     paintContext.canvas.translate(offset.dx, offset.dy);
 
-    if (paintContext.rasterCache != null) {
-      final Matrix4 cacheMatrix = paintContext.canvas.currentTransform;
-      final RasterCacheResult result =
-          paintContext.rasterCache.get(picture, cacheMatrix);
-      if (result.isValid) {
-        result.draw(paintContext.canvas);
-        return;
-      }
-    }
     paintContext.canvas.drawPicture(picture);
     paintContext.canvas.restore();
   }

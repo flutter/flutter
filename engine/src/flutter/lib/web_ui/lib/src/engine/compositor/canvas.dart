@@ -97,6 +97,4 @@ class SkCanvas {
       bool transparentOccluder) {
     drawSkShadow(skCanvas, path, color, elevation, transparentOccluder);
   }
-
-  Matrix4 get currentTransform => throw 'currentTransform';
 }

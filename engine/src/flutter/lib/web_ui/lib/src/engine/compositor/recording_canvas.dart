@@ -15,7 +15,11 @@ class SkRecordingCanvas implements RecordingCanvas {
   bool _hasArbitraryPaint = true;
 
   @override
-  int saveCount = 0;
+  int get saveCount => skCanvas.callMethod('getSaveCount');
+
+  // This is required to implement RecordingCanvas.
+  @override
+  int _saveCount = -1;
 
   @override
   // TODO: implement _commands
@@ -27,7 +31,7 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void apply(EngineCanvas engineCanvas) {
-    throw 'apply';
+    throw UnimplementedError("The Skia backend doesn't support apply()");
   }
 
   @override
@@ -76,22 +80,26 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   ui.Rect computePaintBounds() {
-    throw 'computePaintBounds';
+    throw UnimplementedError(
+        "The Skia backend doesn't use computePaintBounds()");
   }
 
   @override
   void debugDumpCommands() {
-    throw 'debugDumpCommands';
+    throw UnimplementedError(
+        "The Skia backend doesn't use debugDumpCommands()");
   }
 
   @override
   void debugEnforceArbitraryPaint() {
-    throw 'debugEnforceArbitraryPaint';
+    throw UnimplementedError(
+        "The Skia backend doesn't use debugEnforceArbitraryPaint()");
   }
 
   @override
   String debugPrintCommands() {
-    throw 'debugPrintCommands';
+    throw UnimplementedError(
+        "The Skia backend doesn't use debugPrintCommands()");
   }
 
   @override
@@ -109,6 +117,7 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
+    // TODO(het): Implement this once SkCanvas.drawColor becomes available.
     throw 'drawColor';
   }
 
@@ -123,7 +132,13 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
-    throw 'drawImage';
+    final SkImage skImage = image;
+    skCanvas.callMethod('drawImage', <dynamic>[
+      skImage.skImage,
+      offset.dx,
+      offset.dy,
+      makeSkPaint(paint),
+    ]);
   }
 
   @override
@@ -151,12 +166,15 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawOval(ui.Rect rect, ui.Paint paint) {
-    throw 'drawOval';
+    skCanvas.callMethod('drawOval', <js.JsObject>[
+      makeSkRect(rect),
+      makeSkPaint(paint),
+    ]);
   }
 
   @override
   void drawPaint(ui.Paint paint) {
-    throw 'drawPaint';
+    skCanvas.callMethod('drawPaint', <js.JsObject>[makeSkPaint(paint)]);
   }
 
   @override
@@ -230,7 +248,6 @@ class SkRecordingCanvas implements RecordingCanvas {
   @override
   void restore() {
     skCanvas.callMethod('restore');
-    saveCount--;
   }
 
   @override
@@ -242,7 +259,6 @@ class SkRecordingCanvas implements RecordingCanvas {
   @override
   void save() {
     skCanvas.callMethod('save');
-    saveCount++;
   }
 
   @override
@@ -251,12 +267,11 @@ class SkRecordingCanvas implements RecordingCanvas {
       makeSkRect(bounds),
       makeSkPaint(paint),
     ]);
-    saveCount++;
   }
 
   @override
   void saveLayerWithoutBounds(ui.Paint paint) {
-    throw 'saveLayerWithoutBounds';
+    skCanvas.callMethod('saveLayer', <js.JsObject>[null, makeSkPaint(paint)]);
   }
 
   @override
@@ -266,7 +281,7 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void skew(double sx, double sy) {
-    throw 'skew';
+    skCanvas.callMethod('skew', <double>[sx, sy]);
   }
 
   @override

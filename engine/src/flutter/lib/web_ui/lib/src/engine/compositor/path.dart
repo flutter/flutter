@@ -46,9 +46,7 @@ class SkPath implements ui.Path {
 
   @override
   void addOval(ui.Rect oval) {
-    // TODO(het): Use `addOval` instead when CanvasKit exposes it.
-    // Since CanvasKit doesn't expose `addOval`, use `addArc` instead.
-    _skPath.callMethod('addArc', <dynamic>[makeSkRect(oval), 0.0, 360.0]);
+    _skPath.callMethod('addOval', <js.JsObject>[makeSkRect(oval)]);
   }
 
   @override
