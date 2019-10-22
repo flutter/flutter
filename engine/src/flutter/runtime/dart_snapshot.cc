@@ -181,10 +181,6 @@ fml::RefPtr<DartSnapshot> DartSnapshot::IsolateSnapshotFromSettings(
   return nullptr;
 }
 
-fml::RefPtr<DartSnapshot> DartSnapshot::Empty() {
-  return fml::MakeRefCounted<DartSnapshot>(nullptr, nullptr);
-}
-
 DartSnapshot::DartSnapshot(std::shared_ptr<const fml::Mapping> data,
                            std::shared_ptr<const fml::Mapping> instructions)
     : data_(std::move(data)), instructions_(std::move(instructions)) {}

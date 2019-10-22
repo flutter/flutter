@@ -39,7 +39,6 @@ Engine::Engine(Delegate& delegate,
                const PointerDataDispatcherMaker& dispatcher_maker,
                DartVM& vm,
                fml::RefPtr<const DartSnapshot> isolate_snapshot,
-               fml::RefPtr<const DartSnapshot> shared_snapshot,
                TaskRunners task_runners,
                Settings settings,
                std::unique_ptr<Animator> animator,
@@ -62,7 +61,6 @@ Engine::Engine(Delegate& delegate,
       *this,                                 // runtime delegate
       &vm,                                   // VM
       std::move(isolate_snapshot),           // isolate snapshot
-      std::move(shared_snapshot),            // shared snapshot
       task_runners_,                         // task runners
       std::move(io_manager),                 // io manager
       std::move(unref_queue),                // Skia unref queue

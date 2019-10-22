@@ -18,7 +18,6 @@ RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     DartVM* p_vm,
     fml::RefPtr<const DartSnapshot> p_isolate_snapshot,
-    fml::RefPtr<const DartSnapshot> p_shared_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<IOManager> p_io_manager,
     fml::RefPtr<SkiaUnrefQueue> p_unref_queue,
@@ -32,7 +31,6 @@ RuntimeController::RuntimeController(
     : RuntimeController(p_client,
                         p_vm,
                         std::move(p_isolate_snapshot),
-                        std::move(p_shared_snapshot),
                         std::move(p_task_runners),
                         std::move(p_io_manager),
                         std::move(p_unref_queue),
@@ -49,7 +47,6 @@ RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     DartVM* p_vm,
     fml::RefPtr<const DartSnapshot> p_isolate_snapshot,
-    fml::RefPtr<const DartSnapshot> p_shared_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<IOManager> p_io_manager,
     fml::RefPtr<SkiaUnrefQueue> p_unref_queue,
@@ -64,7 +61,6 @@ RuntimeController::RuntimeController(
     : client_(p_client),
       vm_(p_vm),
       isolate_snapshot_(std::move(p_isolate_snapshot)),
-      shared_snapshot_(std::move(p_shared_snapshot)),
       task_runners_(p_task_runners),
       io_manager_(p_io_manager),
       unref_queue_(p_unref_queue),
@@ -82,7 +78,6 @@ RuntimeController::RuntimeController(
   auto strong_root_isolate =
       DartIsolate::CreateRootIsolate(vm_->GetVMData()->GetSettings(),  //
                                      isolate_snapshot_,                //
-                                     shared_snapshot_,                 //
                                      task_runners_,                    //
                                      std::make_unique<Window>(this),   //
                                      io_manager_,                      //
@@ -144,7 +139,6 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
       client_,                      //
       vm_,                          //
       isolate_snapshot_,            //
-      shared_snapshot_,             //
       task_runners_,                //
       io_manager_,                  //
       unref_queue_,                 //

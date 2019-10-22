@@ -43,8 +43,7 @@ DartVMRef::~DartVMRef() {
 
 DartVMRef DartVMRef::Create(Settings settings,
                             fml::RefPtr<DartSnapshot> vm_snapshot,
-                            fml::RefPtr<DartSnapshot> isolate_snapshot,
-                            fml::RefPtr<DartSnapshot> shared_snapshot) {
+                            fml::RefPtr<DartSnapshot> isolate_snapshot) {
   std::scoped_lock lifecycle_lock(gVMMutex);
 
   if (!settings.leak_vm) {
@@ -78,7 +77,6 @@ DartVMRef DartVMRef::Create(Settings settings,
   auto vm = DartVM::Create(std::move(settings),          //
                            std::move(vm_snapshot),       //
                            std::move(isolate_snapshot),  //
-                           std::move(shared_snapshot),   //
                            isolate_name_server           //
   );
 
