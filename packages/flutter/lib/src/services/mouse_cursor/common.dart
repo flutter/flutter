@@ -4,10 +4,19 @@
 
 import 'package:flutter/foundation.dart';
 
-/// A collection of all system mouse cursors supported by all platforms
-// that Flutter is interested in. The implementation to these cursors are left
-/// to platforms, which means multiple constants might result in the same cursor,
-/// and the same constant might look different across platforms.
+/// The kinds of all system cursors supported by Flutter.
+///
+/// Each value of [SystemCursorShape] corresponds to a [MouseCursor] object in
+/// [SystemMouseCursors].
+///
+/// You should directly use the objects defined in [SystemMouseCursors]
+/// when possible instead of redefining them on your own.
+///
+/// See also:
+///
+///  * [SystemMouseCursors], which contains usable [MouseCursor] objects that
+///    correspond to values of [SystemCursorShape].
+///  * [SystemMouseCursor], which uses this type.
 enum SystemCursorShape {
   /// The shape that corresponds to [SystemCursors.none].
   none,
@@ -31,33 +40,53 @@ enum SystemCursorShape {
   grabbing,
 }
 
-/// TODOC
+/// Details for [MouseCursor.activate], such as the target device and the
+/// platform.
 @immutable
 class ActivateMouseCursorDetails {
-  /// TODOC
+  /// Create details for a [MouseCursor.activate] call.
+  ///
+  /// All parameters must not be null.
   const ActivateMouseCursorDetails({
     @required this.device,
     @required this.delegate,
-  }) : assert(device != null);
+  }) : assert(device != null), assert(delegate != null);
 
-  /// TODOC
+  /// The pointer device that should change cursor.
   final int device;
 
   /// TODOC
   final MouseCursorPlatformDelegate delegate;
 }
 
-/// TODOC
+/// A base class for mouse cursors.
+///
+/// When a mouse pointer enters a region that is assigned with a mouse cursor,
+/// the cursor's [MouseCursor.activate] is called.
+///
+/// See also:
+///
+///  * [MouseRegion], which is a common way of assigning a region with a mouse
+///    cursor.
+///  * [MouseTracker], which determines the cursor that each device should show,
+///    and dispatches the changing callbacks.
 @immutable
 abstract class MouseCursor {
-  /// TODOC
+  /// Create a mouse cursor.
+  ///
+  /// The base constructor does nothing.
   const MouseCursor();
 
-  /// TODOC
+  /// Perform necessary preparations and platform calls that change a device to
+  /// this cursor.
+  ///
+  /// It is called by [MouseTracker] when a mouse pointer enters a region that
+  /// is assigned with this mouse cursor.
   Future<void> activate(ActivateMouseCursorDetails details);
 
-  /// TODOC
-  /// Platform-independent
+  /// A platform-independent short description for this cursor.
+  ///
+  /// It is usually one or several readable words.
   String describeCursor();
 
   @override
@@ -66,9 +95,9 @@ abstract class MouseCursor {
   }
 }
 
-/// TODOC
+/// A special mouse cursor that does nothing.
 class NoopMouseCursor extends MouseCursor {
-  /// TODOC
+  /// Create a [NoopMouseCursor].
   const NoopMouseCursor();
 
   /// This method does nothing and immediately returns.
@@ -78,7 +107,7 @@ class NoopMouseCursor extends MouseCursor {
   }
 
   @override
-  String describeCursor() => '';
+  String describeCursor() => 'noop';
 }
 
 /// TODOC

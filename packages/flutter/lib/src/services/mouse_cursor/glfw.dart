@@ -111,6 +111,8 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
         return activateSystemCursor(details, SystemCursorShape.click);
       case SystemCursorShape.grabbing:
         return activateSystemCursor(details, SystemCursorShape.click);
+      default:
+        break;
     }
     return false;
   }
