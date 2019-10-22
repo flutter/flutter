@@ -128,7 +128,7 @@ class ResidentWebRunner extends ResidentRunner {
     );
     printStatus('Warning: Flutter\'s support for web development is not stable yet and hasn\'t');
     printStatus('been thoroughly tested in production environments.');
-    printStatus('For more information see https://flutter.dev/web.');
+    printStatus('For more information see https://flutter.dev/web');
     printStatus('');
     printStatus(message);
     const String quitMessage = 'To quit, press "q".';

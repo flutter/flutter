@@ -99,7 +99,8 @@ elif [[ "$OS" == "darwin" ]]; then
       echo "Testing archiving with distribution profile..."
       (
         cd examples/flutter_gallery/ios
-        fastlane build_and_deploy_testflight
+        # TODO(fujino) re-enable after resolving https://github.com/flutter/flutter/issues/43204
+        #fastlane build_and_deploy_testflight
       )
       echo "(Not deploying; Flutter Gallery is only deployed to TestFlight for tagged dev branch commits.)"
     fi

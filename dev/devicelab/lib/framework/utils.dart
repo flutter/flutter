@@ -255,13 +255,14 @@ Future<Process> startProcess(
 }) async {
   assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
-  print('\nExecuting: $command');
+  final String finalWorkingDirectory = workingDirectory ?? cwd;
+  print('\nExecuting: $command in $finalWorkingDirectory');
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
     environment: environment,
-    workingDirectory: workingDirectory ?? cwd,
+    workingDirectory: finalWorkingDirectory,
   );
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
@@ -447,7 +448,7 @@ void cd(dynamic directory) {
     throw 'Cannot cd into directory that does not exist: $directory';
 }
 
-Directory get flutterDirectory => dir('../..').absolute;
+Directory get flutterDirectory => Directory.current.parent.parent;
 
 String requireEnvVar(String name) {
   final String value = Platform.environment[name];
