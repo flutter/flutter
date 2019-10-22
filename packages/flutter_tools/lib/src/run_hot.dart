@@ -301,13 +301,12 @@ class HotRunner extends ResidentRunner {
 
     // Picking up first device's compiler as a source of truth - compilers
     // for all devices should be in sync.
-    final List<Uri> invalidatedFiles =
-      await ProjectFileInvalidator.findInvalidated(
-        lastCompiled: flutterDevices[0].devFS.lastCompiled,
-        urisToMonitor: flutterDevices[0].devFS.sources,
-        packagesPath: packagesFilePath,
-        asyncScanning: hotRunnerConfig.asyncScanning,
-      );
+    final List<Uri> invalidatedFiles = await ProjectFileInvalidator.findInvalidated(
+      lastCompiled: flutterDevices[0].devFS.lastCompiled,
+      urisToMonitor: flutterDevices[0].devFS.sources,
+      packagesPath: packagesFilePath,
+      asyncScanning: hotRunnerConfig.asyncScanning,
+    );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -1051,8 +1050,10 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  // As of writing, Dart supports up to 32 threads per isolate.  We also
-  // want to avoid hitting platform limits on open file handles/descriptors.
+  // As of writing, Dart supports up to 32 asynchronous I/O threads per
+  // isolate.  We also want to avoid hitting platform limits on open file
+  // handles/descriptors.
+  //
   // This value was chosen based on empirical tests scanning a set of
   // ~2000 files.
   static const int _kMaxPendingStats = 8;
