@@ -120,10 +120,10 @@ class Checkbox extends StatefulWidget {
   ///
   /// Checkbox displays a dash when its value is null.
   ///
-  /// When a tri-state checkbox is tapped its [onChanged] callback will be
-  /// applied to true if the current value is null or false, false otherwise.
-  /// Typically tri-state checkboxes are disabled (the onChanged callback is
-  /// null) so they don't respond to taps.
+  /// When a tri-state checkbox ([tristate] is true) is tapped, its [onChanged]
+  /// callback will be applied to true if the current value is false, to null if
+  /// value is true, and to false if value is null (i.e. it cycles through false
+  /// => true => null => false when tapped).
   ///
   /// If tristate is false (the default), [value] must not be null.
   final bool tristate;
@@ -173,7 +173,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   }
 
   void _actionHandler(FocusNode node, Intent intent){
-    final RenderObject typedRenderObject = node.context.findRenderObject();
     if (widget.onChanged != null) {
       switch (widget.value) {
         case false:
@@ -187,7 +186,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
           break;
       }
     }
-    typedRenderObject.sendSemanticsEvent(const TapSemanticEvent());
+    final RenderObject renderObject = node.context.findRenderObject();
+    renderObject.sendSemanticsEvent(const TapSemanticEvent());
   }
 
   Action _createAction() {

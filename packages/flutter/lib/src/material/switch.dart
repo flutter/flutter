@@ -231,6 +231,8 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     if (widget.onChanged != null) {
       widget.onChanged(!widget.value);
     }
+    final RenderObject renderObject = node.context.findRenderObject();
+    renderObject.sendSemanticsEvent(const TapSemanticEvent());
   }
 
   Action _createAction() {
