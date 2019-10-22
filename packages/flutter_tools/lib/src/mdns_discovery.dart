@@ -57,6 +57,7 @@ class MDnsObservatoryDiscovery {
       final List<PtrResourceRecord> pointerRecords = await client
           .lookup<PtrResourceRecord>(
             ResourceRecordQuery.serverPointer(dartObservatoryName),
+            timeout: const Duration(seconds: 30),
           )
           .toList();
       if (pointerRecords.isEmpty) {
