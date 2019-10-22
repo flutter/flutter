@@ -302,8 +302,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         // because _ContextMenuRoute renders its first frame offscreen.
         // Otherwise there would be a visible flash when nothing is rendered for
         // one frame.
-        // TODO(justinmc): Post frame callback?
-        Future<void>.delayed(const Duration(milliseconds: 0)).then((_) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
           _lastOverlayEntry?.remove();
           _lastOverlayEntry = null;
           _openController.reset();
