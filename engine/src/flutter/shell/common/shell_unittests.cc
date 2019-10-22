@@ -202,27 +202,6 @@ TEST_F(ShellTest, SecondaryIsolateBindingsAreSetupViaShellSettings) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-TEST_F(ShellTest, LastEntrypoint) {
-  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-  auto settings = CreateSettingsForFixture();
-  auto shell = CreateShell(settings);
-  ASSERT_TRUE(ValidateShell(shell.get()));
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  ASSERT_TRUE(configuration.IsValid());
-  std::string entry_point = "fixturesAreFunctionalMain";
-  configuration.SetEntrypoint(entry_point);
-
-  fml::AutoResetWaitableEvent main_latch;
-  AddNativeCallback(
-      "SayHiFromFixturesAreFunctionalMain",
-      CREATE_NATIVE_ENTRY([&main_latch](auto args) { main_latch.Signal(); }));
-
-  RunEngine(shell.get(), std::move(configuration));
-  main_latch.Wait();
-  EXPECT_EQ(entry_point, shell->GetEngine()->GetLastEntrypoint());
-}
-
 TEST(ShellTestNoFixture, EnableMirrorsIsWhitelisted) {
   if (DartVM::IsRunningPrecompiledCode()) {
     // This covers profile and release modes which use AOT (where this flag does

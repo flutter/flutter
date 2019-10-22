@@ -216,6 +216,9 @@ class Shell final : public PlatformView::Delegate,
   ///
   fml::WeakPtr<Rasterizer> GetRasterizer();
 
+// TODO(dnfield): Remove this when either Topaz is up to date or flutter_runner
+// is built out of this repo.
+#ifdef OS_FUCHSIA
   //------------------------------------------------------------------------------
   /// @brief      Engines may only be accessed on the UI thread. This method is
   ///             deprecated, and implementers should instead use other API
@@ -224,6 +227,7 @@ class Shell final : public PlatformView::Delegate,
   /// @return     A weak pointer to the engine.
   ///
   fml::WeakPtr<Engine> GetEngine();
+#endif  // OS_FUCHSIA
 
   //----------------------------------------------------------------------------
   /// @brief      Platform views may only be accessed on the platform task
