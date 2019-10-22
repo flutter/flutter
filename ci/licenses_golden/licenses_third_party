@@ -1,4 +1,4 @@
-Signature: 2cc07f9d4ea778820af052007d9c6b64
+Signature: 2cede78e4885100c7a49cd07d9e28c55
 
 UNUSED LICENSES:
 
@@ -8723,7 +8723,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/strongl
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/target.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/type_arguments.dart
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline_message_handler.js
-FILE: ../../../third_party/dart/runtime/platform/atomic_fuchsia.h
 FILE: ../../../third_party/dart/runtime/platform/syslog_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.h
@@ -9215,10 +9214,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/unknown_ref
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/vm_view.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/tracer.dart
 FILE: ../../../third_party/dart/runtime/platform/atomic.h
-FILE: ../../../third_party/dart/runtime/platform/atomic_android.h
-FILE: ../../../third_party/dart/runtime/platform/atomic_linux.h
-FILE: ../../../third_party/dart/runtime/platform/atomic_macos.h
-FILE: ../../../third_party/dart/runtime/platform/atomic_win.h
 FILE: ../../../third_party/dart/runtime/platform/signal_blocker.h
 FILE: ../../../third_party/dart/runtime/vm/allocation.h
 FILE: ../../../third_party/dart/runtime/vm/class_finalizer.cc
