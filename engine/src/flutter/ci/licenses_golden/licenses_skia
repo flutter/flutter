@@ -1,4 +1,4 @@
-Signature: 26050bb5bdea59ebe1a19f1e3a09d403
+Signature: 66e51cf6b5d186c2e6443ceab57315a0
 
 UNUSED LICENSES:
 
@@ -3829,6 +3829,7 @@ FILE: ../../../third_party/skia/src/gpu/GrRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.h
+FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxyView.h
 FILE: ../../../third_party/skia/src/gpu/GrSwizzle.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureResolveManager.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureResolveRenderTask.cpp
