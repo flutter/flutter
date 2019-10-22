@@ -58,7 +58,7 @@ enum _ContextMenuLocation {
 
 /// A full-screen modal route that opens when the [child] is long-pressed.
 ///
-/// When open, the CupertinoContextMenu shows the child, or the widget returned
+/// When open, the [CupertinoContextMenu] shows the child, or the widget returned
 /// by [previewBuilder] if given, in a large full-screen [Overlay] with a list
 /// of buttons specified by [actions]. The child/preview is placed in an
 /// [Expanded] widget so that it will grow to fill the Overlay if its size is
