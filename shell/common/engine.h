@@ -714,6 +714,18 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   // |PointerDataDispatcher::Delegate|
   void ScheduleSecondaryVsyncCallback(fml::closure callback) override;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Get the last Entrypoint that was used in the RunConfiguration
+  ///             when |Engine::Run| was called.
+  ///
+  const std::string& GetLastEntrypoint() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Get the last Entrypoint Library that was used in the
+  ///             RunConfiguration when |Engine::Run| was called.
+  ///
+  const std::string& GetLastEntrypointLibrary() const;
+
  private:
   Engine::Delegate& delegate_;
   const Settings settings_;
@@ -725,6 +737,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   // is destructed first.
   std::unique_ptr<PointerDataDispatcher> pointer_data_dispatcher_;
 
+  std::string last_entry_point_;
+  std::string last_entry_point_library_;
   std::string initial_route_;
   ViewportMetrics viewport_metrics_;
   std::shared_ptr<AssetManager> asset_manager_;
