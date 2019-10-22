@@ -173,6 +173,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   }
 
   void _actionHandler(FocusNode node, Intent intent){
+    final RenderObject typedRenderObject = node.context.findRenderObject();
     if (widget.onChanged != null) {
       switch (widget.value) {
         case false:
@@ -186,6 +187,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
           break;
       }
     }
+    typedRenderObject.sendSemanticsEvent(const TapSemanticEvent());
   }
 
   Action _createAction() {

@@ -67,11 +67,12 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      isFocusable: true,
     ));
 
     await tester.pumpWidget(Material(
@@ -81,12 +82,13 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
       isEnabled: true,
       hasTapAction: true,
+      isFocusable: true,
     ));
 
     await tester.pumpWidget(const Material(
@@ -96,9 +98,10 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
+      isFocusable: true,
     ));
 
     await tester.pumpWidget(const Material(
@@ -108,7 +111,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -130,13 +133,14 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
       label: 'foo',
       textDirection: TextDirection.ltr,
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      isFocusable: true,
     ));
     handle.dispose();
   });
@@ -202,6 +206,7 @@ void main() {
         SemanticsFlag.hasCheckedState,
         SemanticsFlag.hasEnabledState,
         SemanticsFlag.isEnabled,
+        SemanticsFlag.isFocusable,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));
@@ -222,6 +227,7 @@ void main() {
         SemanticsFlag.hasEnabledState,
         SemanticsFlag.isEnabled,
         SemanticsFlag.isChecked,
+        SemanticsFlag.isFocusable,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));
@@ -241,6 +247,7 @@ void main() {
         SemanticsFlag.hasCheckedState,
         SemanticsFlag.hasEnabledState,
         SemanticsFlag.isEnabled,
+        SemanticsFlag.isFocusable,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));
@@ -274,7 +281,7 @@ void main() {
     );
 
     await tester.tap(find.byType(Checkbox));
-    final RenderObject object = tester.firstRenderObject(find.byType(Checkbox));
+    final RenderObject object = tester.firstRenderObject(find.byType(Focus));
 
     expect(checkboxValue, true);
     expect(semanticEvent, <String, dynamic>{
@@ -304,7 +311,9 @@ void main() {
     }
 
     RenderToggleable getCheckboxRenderer() {
-      return tester.renderObject<RenderToggleable>(find.byType(Checkbox));
+      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
+        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
+      }));
     }
 
     await tester.pumpWidget(buildFrame(false));
@@ -356,7 +365,9 @@ void main() {
     }
 
     RenderToggleable getCheckboxRenderer() {
-      return tester.renderObject<RenderToggleable>(find.byType(Checkbox));
+      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
+        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
+      }));
     }
 
     await tester.pumpWidget(buildFrame(checkColor: const Color(0xFFFFFFFF)));
@@ -458,7 +469,7 @@ void main() {
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Switch(
+              return Checkbox(
                 value: value,
                 onChanged: enabled ? (bool newValue) {
                   setState(() {
@@ -478,13 +489,10 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0xff1e88e5),
             rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff1e88e5)),
+                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
+        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
     // Start hovering
@@ -498,14 +506,10 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0xff1e88e5),
             rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
-        ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff1e88e5)),
+                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
+        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
     // Check what happens when disabled.
@@ -515,13 +519,10 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..rrect(
-            color: const Color(0x1f000000),
+            color: const Color(0x61000000),
             rrect: RRect.fromLTRBR(
-                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xffbdbdbd)),
+                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
+        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
 
