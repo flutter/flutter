@@ -1199,7 +1199,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key) => _streamCompleter;
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) => _streamCompleter;
 
   void complete() {
     _completer.complete(ImageInfo(image: TestImage()));

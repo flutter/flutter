@@ -99,9 +99,10 @@ abstract class ShaderWarmUp {
 /// issues seen so far.
 class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Allow [DefaultShaderWarmUp] to be used as the default value of parameters.
-  const DefaultShaderWarmUp(
-      {this.drawCallSpacing = 0.0,
-      this.canvasSize = const ui.Size(100.0, 100.0)});
+  const DefaultShaderWarmUp({
+    this.drawCallSpacing = 0.0,
+    this.canvasSize = const ui.Size(100.0, 100.0),
+  });
 
   /// Constant that can be used to space out draw calls for visualizing the draws
   /// for debugging purposes (example: 80.0).  Be sure to also change your canvas

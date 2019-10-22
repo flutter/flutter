@@ -32,7 +32,7 @@ import 'android_sdk.dart';
 enum _HardwareType { emulator, physical }
 
 /// Map to help our `isLocalEmulator` detection.
-const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
+const Map<String, _HardwareType> _kKnownHardware = <String, _HardwareType>{
   'goldfish': _HardwareType.emulator,
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
@@ -42,6 +42,7 @@ const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
   'samsungexynos9810': _HardwareType.physical,
+  'samsungexynos7570': _HardwareType.physical,
 };
 
 bool allowHeapCorruptionOnWindows(int exitCode) {
@@ -122,9 +123,9 @@ class AndroidDevice extends Device {
     if (_isLocalEmulator == null) {
       final String hardware = await _getProperty('ro.hardware');
       printTrace('ro.hardware = $hardware');
-      if (_knownHardware.containsKey(hardware)) {
+      if (_kKnownHardware.containsKey(hardware)) {
         // Look for known hardware models.
-        _isLocalEmulator = _knownHardware[hardware] == _HardwareType.emulator;
+        _isLocalEmulator = _kKnownHardware[hardware] == _HardwareType.emulator;
       } else {
         // Fall back to a best-effort heuristic-based approach.
         final String characteristics = await _getProperty('ro.build.characteristics');
@@ -224,10 +225,11 @@ class AndroidDevice extends Device {
   }
 
   String runAdbCheckedSync(
-      List<String> params, {
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-        Map<String, String> environment}) {
+    List<String> params, {
+    String workingDirectory,
+    bool allowReentrantFlutter = false,
+    Map<String, String> environment,
+  }) {
     return processUtils.runSync(
       adbCommandForDevice(params),
       throwOnError: true,
@@ -239,10 +241,10 @@ class AndroidDevice extends Device {
   }
 
   Future<RunResult> runAdbCheckedAsync(
-      List<String> params, {
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-      }) async {
+    List<String> params, {
+    String workingDirectory,
+    bool allowReentrantFlutter = false,
+  }) async {
     return processUtils.run(
       adbCommandForDevice(params),
       throwOnError: true,
@@ -325,8 +327,9 @@ class AndroidDevice extends Device {
       }
 
       return true;
-    } catch (e) {
+    } catch (e, stacktrace) {
       printError('Unexpected failure from adb: $e');
+      printError('Stacktrace: $stacktrace');
       return false;
     }
   }
@@ -573,24 +576,24 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'trace-systrace', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
-      if (debuggingOptions.debuggingEnabled)
-        ...<String>[
-          if (debuggingOptions.buildInfo.isDebug)
-            ...<String>[
-              ...<String>['--ez', 'enable-checked-mode', 'true'],
-              ...<String>['--ez', 'verify-entry-points', 'true'],
-            ],
-          if (debuggingOptions.startPaused)
-            ...<String>['--ez', 'start-paused', 'true'],
-          if (debuggingOptions.disableServiceAuthCodes)
-            ...<String>['--ez', 'disable-service-auth-codes', 'true'],
-          if (debuggingOptions.dartFlags.isNotEmpty)
-            ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
-          if (debuggingOptions.useTestFonts)
-            ...<String>['--ez', 'use-test-fonts', 'true'],
-          if (debuggingOptions.verboseSystemLogs)
-            ...<String>['--ez', 'verbose-logging', 'true'],
+      if (debuggingOptions.cacheSkSL)
+      ...<String>['--ez', 'cache-sksl', 'true'],
+      if (debuggingOptions.debuggingEnabled) ...<String>[
+        if (debuggingOptions.buildInfo.isDebug) ...<String>[
+          ...<String>['--ez', 'enable-checked-mode', 'true'],
+          ...<String>['--ez', 'verify-entry-points', 'true'],
         ],
+        if (debuggingOptions.startPaused)
+          ...<String>['--ez', 'start-paused', 'true'],
+        if (debuggingOptions.disableServiceAuthCodes)
+          ...<String>['--ez', 'disable-service-auth-codes', 'true'],
+        if (debuggingOptions.dartFlags.isNotEmpty)
+          ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
+        if (debuggingOptions.useTestFonts)
+          ...<String>['--ez', 'use-test-fonts', 'true'],
+        if (debuggingOptions.verboseSystemLogs)
+          ...<String>['--ez', 'verbose-logging', 'true'],
+      ],
       apk.launchActivity,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;

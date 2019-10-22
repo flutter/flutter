@@ -304,6 +304,18 @@ String _locateGradlewExecutable(Directory directory) {
   return null;
 }
 
+// Gradle crashes for several known reasons when downloading that are not
+// actionable by flutter.
+const List<String> _kKnownErrorPrefixes = <String>[
+  'java.io.FileNotFoundException: https://downloads.gradle.org',
+  'java.io.IOException: Unable to tunnel through proxy',
+  'java.lang.RuntimeException: Timeout of',
+  'java.util.zip.ZipException: error in opening zip file',
+  'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
+  'java.net.SocketException: Connection reset',
+  'java.io.FileNotFoundException',
+];
+
 // Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
@@ -333,9 +345,25 @@ Future<String> _initializeGradle(FlutterProject project) async {
     );
   } on ProcessException catch (e) {
     final String error = e.toString();
-    if (error.contains('java.io.FileNotFoundException: https://downloads.gradle.org') ||
-        error.contains('java.io.IOException: Unable to tunnel through proxy')) {
-      throwToolExit('$gradle threw an error while trying to update itself.\n$e');
+    // TODO(jonahwilliams): automatically retry on network errors.
+    if (_kKnownErrorPrefixes.any((String candidate) => error.contains(candidate))) {
+      throwToolExit(
+        '$gradle threw an error while trying to update itself.'
+        ' Try rerunning to retry the update.\n$e');
+    }
+    // gradlew is missing execute.
+    if (error.contains('Permission denied')) {
+      throwToolExit(
+        '$gradle does not have permission to execute by your user.\n'
+        'You should change the ownership of the project directory to your user'
+        ', or move the project to a directory with execute permissions.\n$error'
+      );
+    }
+    // No idea what went wrong but we can't do anything about it.
+    if (error.contains('ProcessException: Process exited abnormally')) {
+      throwToolExit(
+        '$gradle exited abnormally. Try rerunning with \'-v\' for more '
+        'infomration, or check the gradlew script above for errors.\n$error');
     }
     rethrow;
   } finally {
@@ -359,8 +387,14 @@ void migrateToR8(Directory directory) {
   }
   printTrace('set `android.enableR8=true` in gradle.properties');
   try {
-    gradleProperties
-      .writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
+    // Add `android.enableR8=true` to the next line in gradle.properties.
+    if (propertiesContent.isNotEmpty && !propertiesContent.endsWith('\n')) {
+      gradleProperties
+        .writeAsStringSync('\nandroid.enableR8=true\n', mode: FileMode.append);
+    } else {
+      gradleProperties
+        .writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
+    }
   } on FileSystemException {
     throwToolExit(
       'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
@@ -745,6 +779,20 @@ Future<void> _buildGradleProjectV2(
     );
   }
 
+  final String exclamationMark = terminal.color('[!]', TerminalColor.red);
+  final bool usesAndroidX = isAppUsingAndroidX(flutterProject.android.hostAppGradleRoot);
+
+  if (usesAndroidX) {
+    BuildEvent('app-using-android-x').send();
+  } else if (!usesAndroidX) {
+    BuildEvent('app-not-using-android-x').send();
+    printStatus('$exclamationMark Your app isn\'t using AndroidX.', emphasis: true);
+    printStatus(
+      'To avoid potential build failures, you can quickly migrate your app '
+      'by following the steps on https://goo.gl/CP92wY.',
+      indent: 4,
+    );
+  }
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
 
   String assembleTask;
@@ -820,9 +868,8 @@ Future<void> _buildGradleProjectV2(
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
       environment: gradleEnv,
-      // TODO(mklim): if AndroidX warnings are no longer required, this
-      // mapFunction and all its associated variabled can be replaced with just
-      // `filter: ndkMessagefilter`.
+      // TODO(mklim): if AndroidX warnings are no longer required, we can remove
+      // them from this map function.
       mapFunction: (String line) {
         final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
         if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
@@ -848,14 +895,12 @@ Future<void> _buildGradleProjectV2(
 
   if (exitCode != 0) {
     if (potentialR8Failure) {
-      final String exclamationMark = terminal.color('[!]', TerminalColor.red);
       printStatus('$exclamationMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
       printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
       printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
       BuildEvent('r8-failure').send();
     } else if (potentialAndroidXFailure) {
       final bool hasPlugins = flutterProject.flutterPluginsFile.existsSync();
-      final bool usesAndroidX = isAppUsingAndroidX(flutterProject.android.hostAppGradleRoot);
       if (!hasPlugins) {
         // If the app doesn't use any plugin, then it's unclear where the incompatibility is coming from.
         BuildEvent('android-x-failure', eventError: 'app-not-using-plugins').send();
@@ -940,7 +985,6 @@ Future<void> _buildGradleProjectV2(
 /// Returns [true] if the current app uses AndroidX.
 // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
 // Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
-@visibleForTesting
 bool isAppUsingAndroidX(Directory androidDirectory) {
   final File properties = androidDirectory.childFile('gradle.properties');
   if (!properties.existsSync()) {

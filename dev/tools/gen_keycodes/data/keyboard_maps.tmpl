@@ -70,3 +70,20 @@ const Map<int, PhysicalKeyboardKey> kLinuxToPhysicalKey = <int, PhysicalKeyboard
 @@@XKB_SCAN_CODE_MAP@@@
 };
 
+/// Maps Web KeyboardEvent codes to the matching [LogicalKeyboardKey].
+const Map<String, LogicalKeyboardKey> kWebToLogicalKey = <String, LogicalKeyboardKey>{
+@@@WEB_LOGICAL_KEY_MAP@@@
+};
+
+/// Maps Web KeyboardEvent codes to the matching [PhysicalKeyboardKey].
+const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyboardKey>{
+@@@WEB_PHYSICAL_KEY_MAP@@@
+};
+
+/// A map of Web KeyboardEvent codes which have printable representations, but appear
+/// on the number pad. Used to provide different key objects for keys like
+/// KEY_EQUALS and NUMPAD_EQUALS.
+const Map<String, LogicalKeyboardKey> kWebNumPadMap = <String, LogicalKeyboardKey>{
+@@@WEB_NUMPAD_MAP@@@
+};
+

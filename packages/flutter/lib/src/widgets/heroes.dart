@@ -250,9 +250,9 @@ class Hero extends StatefulWidget {
   // should be considered for animation when `navigator` transitions from one
   // PageRoute to another.
   static Map<Object, _HeroState> _allHeroesFor(
-      BuildContext context,
-      bool isUserGestureTransition,
-      NavigatorState navigator,
+    BuildContext context,
+    bool isUserGestureTransition,
+    NavigatorState navigator,
   ) {
     assert(context != null);
     assert(isUserGestureTransition != null);

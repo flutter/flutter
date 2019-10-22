@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:build_daemon/client.dart';
@@ -10,12 +11,14 @@ import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
+import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_proxy/shelf_proxy.dart';
+import 'package:mime/mime.dart' as mime;
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -29,12 +32,14 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
+import '../dart/pub.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../web/chrome.dart';
+import '../web/compile.dart';
 
 /// The name of the built web project.
 const String kBuildTargetName = 'web';
@@ -56,9 +61,7 @@ typedef HttpMultiServerFactory = Future<HttpServer> Function(dynamic address, in
 
 /// A function with the same signature as [Dwds.start].
 typedef DwdsFactory = Future<Dwds> Function({
-  @required int applicationPort,
-  @required int assetServerPort,
-  @required String applicationTarget,
+  @required AssetHandler assetHandler,
   @required Stream<BuildResult> buildResults,
   @required ConnectionProvider chromeConnection,
   String hostname,
@@ -89,6 +92,11 @@ class WebFs {
     this._dwds,
     this.uri,
     this._assetServer,
+    this._useBuildRunner,
+    this._flutterProject,
+    this._target,
+    this._buildInfo,
+    this._initializePlatform,
   );
 
   /// The server uri.
@@ -98,12 +106,17 @@ class WebFs {
   final Dwds _dwds;
   final BuildDaemonClient _client;
   final AssetServer _assetServer;
+  final bool _useBuildRunner;
+  final FlutterProject _flutterProject;
+  final String _target;
+  final BuildInfo _buildInfo;
+  final bool _initializePlatform;
   StreamSubscription<void> _connectedApps;
 
   static const String _kHostName = 'localhost';
 
   Future<void> stop() async {
-    await _client.close();
+    await _client?.close();
     await _dwds?.stop();
     await _server.close(force: true);
     await _connectedApps?.cancel();
@@ -132,6 +145,10 @@ class WebFs {
 
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
+    if (!_useBuildRunner) {
+      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform);
+      return true;
+    }
     _client.startBuild();
     await for (BuildResults results in _client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
@@ -161,39 +178,19 @@ class WebFs {
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
-    final bool hasWebPlugins = findPlugins(flutterProject)
-        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-    // Start the build daemon and run an initial build.
-    final Completer<bool> inititalBuild = Completer<bool>();
-    final BuildDaemonClient client = await buildDaemonCreator
-      .startBuildDaemon(fs.currentDirectory.path,
-          release: buildInfo.isRelease,
-          profile: buildInfo.isProfile,
-          hasPlugins: hasWebPlugins,
-          initializePlatform: initializePlatform,
+    // Workaround for https://github.com/flutter/flutter/issues/41681.
+    final String toolPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
+    if (!fs.isFileSync(fs.path.join(toolPath, '.packages'))) {
+      await pub.get(
+        context: PubContext.pubGet,
+        directory: toolPath,
+        offline: true,
+        skipPubspecYamlCheck: true,
+        checkLastModified: false,
       );
-    client.startBuild();
-    // Only provide relevant build results
-    final Stream<BuildResult> filteredBuildResults = client.buildResults
-        .asyncMap<BuildResult>((BuildResults results) {
-          return results.results
-            .firstWhere((BuildResult result) => result.target == kBuildTargetName);
-        });
-    final StreamSubscription<void> firstBuild = client.buildResults.listen((BuildResults buildResults) {
-      if (inititalBuild.isCompleted) {
-        return;
-      }
-      final BuildResult result = buildResults.results.firstWhere((BuildResult result) {
-        return result.target == kBuildTargetName;
-      });
-      if (result.status == BuildStatus.failed) {
-        inititalBuild.complete(false);
-      }
-      if (result.status == BuildStatus.succeeded) {
-        inititalBuild.complete(true);
-      }
-    });
-    final int daemonAssetPort = buildDaemonCreator.assetServerPort(fs.currentDirectory);
+    }
+
+    final Completer<bool> firstBuildCompleter = Completer<bool>();
 
     // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -201,7 +198,7 @@ class WebFs {
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     final String targetBaseName = fs.path
-        .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
+      .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
     final Map<String, String> mappedUrls = <String, String>{
       'main.dart.js': 'packages/${flutterProject.manifest.appName}/'
           '${targetBaseName}_web_entrypoint.dart.js',
@@ -214,6 +211,7 @@ class WebFs {
     };
 
     // Initialize the dwds server.
+    final String effectiveHostname = hostname ?? _kHostName;
     final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
 
     final Pipeline pipeline = const Pipeline().addMiddleware((Handler innerHandler) {
@@ -236,57 +234,159 @@ class WebFs {
         }
       };
     });
+
     Handler handler;
     Dwds dwds;
-    if (!skipDwds) {
-      dwds = await dwdsFactory(
-        hostname: hostname ?? _kHostName,
-        applicationPort: hostPort,
-        applicationTarget: kBuildTargetName,
-        assetServerPort: daemonAssetPort,
-        buildResults: filteredBuildResults,
-        chromeConnection: () async {
-          return (await ChromeLauncher.connectedInstance).chromeConnection;
-        },
-        reloadConfiguration: ReloadConfiguration.none,
-        serveDevTools: true,
-        verbose: false,
-        enableDebugExtension: true,
-        logWriter: (dynamic level, String message) => printTrace(message),
-      );
-      handler = pipeline.addHandler(dwds.handler);
+    BuildDaemonClient client;
+    StreamSubscription<void> firstBuild;
+    if (buildInfo.isDebug) {
+      final bool hasWebPlugins = findPlugins(flutterProject)
+          .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+      // Start the build daemon and run an initial build.
+      client = await buildDaemonCreator
+        .startBuildDaemon(fs.currentDirectory.path,
+            release: buildInfo.isRelease,
+            profile: buildInfo.isProfile,
+            hasPlugins: hasWebPlugins,
+            initializePlatform: initializePlatform,
+        );
+      client.startBuild();
+      // Only provide relevant build results
+      final Stream<BuildResult> filteredBuildResults = client.buildResults
+        .asyncMap<BuildResult>((BuildResults results) {
+          return results.results
+            .firstWhere((BuildResult result) => result.target == kBuildTargetName);
+        });
+      // Start the build daemon and run an initial build.
+      firstBuild = client.buildResults.listen((BuildResults buildResults) {
+        if (firstBuildCompleter.isCompleted) {
+          return;
+        }
+        final BuildResult result = buildResults.results.firstWhere((BuildResult result) {
+          return result.target == kBuildTargetName;
+        });
+        if (result.status == BuildStatus.failed) {
+          firstBuildCompleter.complete(false);
+        }
+        if (result.status == BuildStatus.succeeded) {
+          firstBuildCompleter.complete(true);
+        }
+      });
+      final int daemonAssetPort = buildDaemonCreator.assetServerPort(fs.currentDirectory);
+
+      // Initialize the asset bundle.
+      final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+      await assetBundle.build();
+      await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+      if (!skipDwds) {
+        final BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
+          daemonAssetPort,
+          kBuildTargetName,
+          effectiveHostname,
+          hostPort);
+        dwds = await dwdsFactory(
+          hostname: effectiveHostname,
+          assetHandler: assetHandler,
+          buildResults: filteredBuildResults,
+          chromeConnection: () async {
+            return (await ChromeLauncher.connectedInstance).chromeConnection;
+          },
+          reloadConfiguration: ReloadConfiguration.none,
+          serveDevTools: false,
+          verbose: false,
+          enableDebugExtension: true,
+          logWriter: (dynamic level, String message) => printTrace(message),
+        );
+        handler = pipeline.addHandler(dwds.handler);
+      } else {
+        handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
+      }
     } else {
-      handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
+      await buildWeb(flutterProject, target, buildInfo, initializePlatform);
+      firstBuildCompleter.complete(true);
     }
-    final AssetServer assetServer = AssetServer(flutterProject, targetBaseName);
+
+    final AssetServer assetServer = buildInfo.isDebug
+      ? DebugAssetServer(flutterProject, targetBaseName)
+      : ReleaseAssetServer();
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(assetServer.handle);
-    final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
+    final HttpServer server = await httpMultiServerFactory(effectiveHostname, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     final WebFs webFS = WebFs(
       client,
       server,
       dwds,
-      'http://$_kHostName:$hostPort/',
+      'http://$effectiveHostname:$hostPort/',
       assetServer,
+      buildInfo.isDebug,
+      flutterProject,
+      target,
+      buildInfo,
+      initializePlatform,
     );
-    if (!await inititalBuild.future) {
-      throw Exception('Failed to compile for the web.');
+    if (!await firstBuildCompleter.future) {
+      throw const BuildException();
     }
-    await firstBuild.cancel();
+    await firstBuild?.cancel();
     return webFS;
   }
 }
 
-class AssetServer {
-  AssetServer(this.flutterProject, this.targetBaseName);
+/// An exception thrown when build runner fails.
+///
+/// This contains no error information as it will have already been printed to
+/// the console.
+class BuildException implements Exception {
+  const BuildException();
+}
+
+abstract class AssetServer {
+  Future<Response> handle(Request request);
+
+  void dispose() {}
+}
+
+class ReleaseAssetServer extends AssetServer {
+  @override
+  Future<Response> handle(Request request) async {
+    final Uri artifactUri = fs.directory(getWebBuildDirectory()).uri.resolveUri(request.url);
+    final File file = fs.file(artifactUri);
+    if (file.existsSync()) {
+      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+        'Content-Type': _guessExtension(file),
+      });
+    }
+    if (request.url.path == '') {
+      final File file = fs.file(fs.path.join(getWebBuildDirectory(), 'index.html'));
+      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+        'Content-Type': _guessExtension(file),
+      });
+    }
+    return Response.notFound('');
+  }
+
+  String _guessExtension(File file) {
+    switch (fs.path.extension(file.path)) {
+      case '.js':
+        return 'text/javascript';
+      case '.html':
+        return 'text/html';
+    }
+    return 'text';
+  }
+}
+
+class DebugAssetServer extends AssetServer {
+  DebugAssetServer(this.flutterProject, this.targetBaseName);
 
   final FlutterProject flutterProject;
   final String targetBaseName;
   final PackageMap packageMap = PackageMap(PackageMap.globalPackagesPath);
   Directory partFiles;
 
+  @override
   Future<Response> handle(Request request) async {
     if (request.url.path.endsWith('.html')) {
       final Uri htmlUri = flutterProject.web.directory.uri.resolveUri(request.url);
@@ -324,7 +424,7 @@ class AssetServer {
         ));
         if (dart2jsArchive.existsSync()) {
           final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
-          partFiles = fs.systemTempDirectory.createTempSync('_flutter_tool')
+          partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
           for (ArchiveFile file in archive) {
             partFiles.childFile(file.name).writeAsBytesSync(file.content);
@@ -403,7 +503,14 @@ class AssetServer {
       final String assetPath = request.url.path.replaceFirst('assets/', '');
       final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
       if (file.existsSync()) {
-        return Response.ok(file.readAsBytesSync());
+        final Uint8List bytes = file.readAsBytesSync();
+        // Fallback to "application/octet-stream" on null which
+        // makes no claims as to the structure of the data.
+        final String mimeType = mime.lookupMimeType(file.path, headerBytes: bytes)
+          ?? 'application/octet-stream';
+        return Response.ok(bytes, headers: <String, String>{
+          'Content-Type': mimeType,
+        });
       } else {
         return Response.notFound('');
       }
@@ -411,6 +518,7 @@ class AssetServer {
     return Response.notFound('');
   }
 
+  @override
   void dispose() {
     partFiles?.deleteSync(recursive: true);
   }

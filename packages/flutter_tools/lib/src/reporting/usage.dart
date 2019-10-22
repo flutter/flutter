@@ -124,6 +124,8 @@ abstract class Usage {
   void sendEvent(
     String category,
     String parameter, {
+    String label,
+    int value,
     Map<String, String> parameters,
   });
 
@@ -262,6 +264,8 @@ class _DefaultUsage implements Usage {
   void sendEvent(
     String category,
     String parameter, {
+    String label,
+    int value,
     Map<String, String> parameters,
   }) {
     if (suppressAnalytics) {
@@ -273,7 +277,13 @@ class _DefaultUsage implements Usage {
       cdKey(CustomDimensions.localTime): formatDateTime(systemClock.now()),
     };
 
-    _analytics.sendEvent(category, parameter, parameters: paramsWithLocalTime);
+    _analytics.sendEvent(
+      category,
+      parameter,
+      label: label,
+      value: value,
+      parameters: paramsWithLocalTime,
+    );
   }
 
   @override

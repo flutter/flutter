@@ -17,7 +17,7 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>();
 /// The interface used to determine if a particular [Feature] is enabled.
 ///
 /// The rest of the tools code should use this class instead of looking up
-/// features directly. To faciliate rolls to google3 and other clients, all
+/// features directly. To facilitate rolls to google3 and other clients, all
 /// flags should be provided with a default implementation here. Clients that
 /// use this class should extent instead of implement, so that new flags are
 /// picked up automatically.
@@ -25,19 +25,24 @@ class FeatureFlags {
   const FeatureFlags();
 
   /// Whether flutter desktop for linux is enabled.
-  bool get isLinuxEnabled => _isEnabled(flutterLinuxDesktopFeature);
+  bool get isLinuxEnabled => isEnabled(flutterLinuxDesktopFeature);
 
   /// Whether flutter desktop for macOS is enabled.
-  bool get isMacOSEnabled => _isEnabled(flutterMacOSDesktopFeature);
+  bool get isMacOSEnabled => isEnabled(flutterMacOSDesktopFeature);
 
   /// Whether flutter web is enabled.
-  bool get isWebEnabled => _isEnabled(flutterWebFeature);
+  bool get isWebEnabled => isEnabled(flutterWebFeature);
 
   /// Whether flutter desktop for Windows is enabled.
-  bool get isWindowsEnabled => _isEnabled(flutterWindowsDesktopFeature);
+  bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
 
-  // Calculate whether a particular feature is enabled for the current channel.
-  static bool _isEnabled(Feature feature) {
+  /// Whether the Android embedding V2 is enabled.
+  bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
+
+  /// Whether a particular feature is enabled for the current channel.
+  ///
+  /// Prefer using one of the specific getters above instead of this API.
+  bool isEnabled(Feature feature) {
     final String currentChannel = FlutterVersion.instance.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
@@ -66,6 +71,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
   flutterBuildPluginAsAarFeature,
+  flutterAndroidEmbeddingV2Feature,
 ];
 
 /// The [Feature] for flutter web.
@@ -120,6 +126,17 @@ const Feature flutterWindowsDesktopFeature = Feature(
 const Feature flutterBuildPluginAsAarFeature = Feature(
   name: 'Build plugins independently as AARs in app projects',
   configSetting: 'enable-build-plugin-as-aar',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
+/// The [Feature] for generating projects using the new Android embedding.
+const Feature flutterAndroidEmbeddingV2Feature = Feature(
+  name: 'flutter create generates projects using the Android embedding V2',
+  environmentOverride: 'ENABLE_ANDROID_EMBEDDING_V2',
+  configSetting: 'enable-android-embedding-v2',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,

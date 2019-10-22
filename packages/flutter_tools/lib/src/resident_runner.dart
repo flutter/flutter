@@ -42,6 +42,7 @@ class FlutterDevice {
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+         buildMode: buildMode,
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
@@ -66,11 +67,13 @@ class FlutterDevice {
     ResidentCompiler generator;
     if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
+        buildMode: buildMode,
         flutterProject: flutterProject,
       );
     } else {
       generator = ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+        buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
@@ -544,7 +547,7 @@ abstract class ResidentRunner {
        packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
        _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
-          ? fs.systemTempDirectory.createTempSync('_fluttter_tool')
+          ? fs.systemTempDirectory.createTempSync('flutter_tool.')
           : fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle() {
     if (!artifactDirectory.existsSync()) {
@@ -638,6 +641,20 @@ abstract class ResidentRunner {
     final String mode = isRunningProfile ? 'profile' :
         isRunningRelease ? 'release' : 'this';
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
+  }
+
+  @protected
+  void writeVmserviceFile() {
+    if (debuggingOptions.vmserviceOutFile != null) {
+      try {
+        final String address = flutterDevices.first.vmServices.first.wsAddress.toString();
+        final File vmserviceOutFile = fs.file(debuggingOptions.vmserviceOutFile);
+        vmserviceOutFile.createSync(recursive: true);
+        vmserviceOutFile.writeAsStringSync(address);
+      } on FileSystemException {
+        printError('Failed to write vmservice-out-file at ${debuggingOptions.vmserviceOutFile}');
+      }
+    }
   }
 
   Future<void> exit() async {

@@ -186,16 +186,27 @@ class FlutterManifest {
         : fontList.map<Map<String, dynamic>>(castStringKeyedMap).toList();
   }
 
-  List<Uri> get assets {
+  List<Uri> get assets => _assets ??= _computeAssets();
+  List<Uri> _assets;
+  List<Uri> _computeAssets() {
     final List<dynamic> assets = _flutterDescriptor['assets'];
     if (assets == null) {
       return const <Uri>[];
     }
-    return assets
-        .cast<String>()
-        .map<String>(Uri.encodeFull)
-        ?.map<Uri>(Uri.parse)
-        ?.toList();
+    final List<Uri> results = <Uri>[];
+    for (Object asset in assets) {
+      if (asset is! String || asset == null || asset == '') {
+        printError('Asset manifest contains a null or empty uri.');
+        continue;
+      }
+      final String stringAsset = asset;
+      try {
+        results.add(Uri.parse(Uri.encodeFull(stringAsset)));
+      } on FormatException {
+        printError('Asset manifest contains invalid uri: $asset.');
+      }
+    }
+    return results;
   }
 
   List<Font> _fonts;
@@ -390,8 +401,9 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         break;
       case 'plugin':
-        if (kvp.value is! YamlMap) {
+        if (kvp.value is! YamlMap || kvp.value == null) {
           errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
+          break;
         }
         final List<String> pluginErrors = Plugin.validatePluginYaml(kvp.value);
         errors.addAll(pluginErrors);
@@ -428,8 +440,13 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       errors.add('Expected "fonts" to either be null or a list.');
       continue;
     }
-    for (final YamlMap fontListItem in fontMap['fonts']) {
-      for (final MapEntry<dynamic, dynamic> kvp in fontListItem.entries) {
+    for (final dynamic fontListItem in fontMap['fonts']) {
+      if (fontListItem is! YamlMap) {
+        errors.add('Expected "fonts" to be a list of maps.');
+        continue;
+      }
+      final YamlMap fontMapList = fontListItem;
+      for (final MapEntry<dynamic, dynamic> kvp in fontMapList.entries) {
         if (kvp.key is! String) {
           errors.add('Expected "${kvp.key}" under "fonts" to be a string.');
         }

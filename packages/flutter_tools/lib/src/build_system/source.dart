@@ -9,12 +9,20 @@ import '../globals.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
-/// An input function produces a list of additional input files for an
-/// [Environment].
-typedef InputFunction = List<File> Function(Environment environment);
+/// A set of source files.
+abstract class ResolvedFiles {
+  /// Whether any of the sources we evaluated contained a missing depfile.
+  ///
+  /// If so, the build system needs to rerun the visitor after executing the
+  /// build to ensure all hashes are up to date.
+  bool get containsNewDepfile;
+
+  /// The resolved source files.
+  List<File> get sources;
+}
 
 /// Collects sources for a [Target] into a single list of [FileSystemEntities].
-class SourceVisitor {
+class SourceVisitor implements ResolvedFiles {
   /// Create a new [SourceVisitor] from an [Environment].
   SourceVisitor(this.environment, [this.inputs = true]);
 
@@ -26,14 +34,51 @@ class SourceVisitor {
   /// Defaults to `true`.
   final bool inputs;
 
-  /// The entities are populated after visiting each source.
+  @override
   final List<File> sources = <File>[];
 
-  /// Visit a [Source] which contains a function.
+  @override
+  bool get containsNewDepfile => _containsNewDepfile;
+  bool _containsNewDepfile = false;
+
+  /// Visit a depfile which contains both input and output files.
   ///
-  /// The function is expected to produce a list of [FileSystemEntities]s.
-  void visitFunction(InputFunction function) {
-    sources.addAll(function(environment));
+  /// If the file is missing, this visitor is marked as [containsNewDepfile].
+  /// This is used by the [Node] class to tell the [BuildSystem] to
+  /// defer hash computation until after executing the target.
+  // depfile logic adopted from https://github.com/flutter/flutter/blob/7065e4330624a5a216c8ffbace0a462617dc1bf5/dev/devicelab/lib/framework/apk_utils.dart#L390
+  void visitDepfile(String name) {
+    final File depfile = environment.buildDir.childFile(name);
+    if (!depfile.existsSync()) {
+      _containsNewDepfile = true;
+      return;
+    }
+    final String contents = depfile.readAsStringSync();
+    final List<String> colonSeparated = contents.split(': ');
+    if (colonSeparated.length != 2) {
+      printError('Invalid depfile: ${depfile.path}');
+      return;
+    }
+    if (inputs) {
+      sources.addAll(_processList(colonSeparated[1].trim()));
+    } else {
+      sources.addAll(_processList(colonSeparated[0].trim()));
+    }
+  }
+
+  final RegExp _separatorExpr = RegExp(r'([^\\]) ');
+  final RegExp _escapeExpr = RegExp(r'\\(.)');
+
+  Iterable<File> _processList(String rawText) {
+    return rawText
+    // Put every file on right-hand side on the separate line
+        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
+        .split('\n')
+    // Expand escape sequences, so that '\ ', for example,ß becomes ' '
+        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+        .where((String path) => path.isNotEmpty)
+        .toSet()
+        .map((String path) => fs.file(path));
   }
 
   /// Visit a [Source] which contains a file uri.
@@ -150,17 +195,23 @@ abstract class Source {
   /// environment variables.
   const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
 
-  /// This source is produced by invoking the provided function.
-  const factory Source.function(InputFunction function) = _FunctionSource;
-
   /// This source is produced by the [SourceBehavior] class.
   const factory Source.behavior(SourceBehavior behavior) = _SourceBehavior;
 
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
-  const factory Source.artifact(Artifact artifact, {TargetPlatform platform,
-      BuildMode mode}) = _ArtifactSource;
+  const factory Source.artifact(Artifact artifact, {TargetPlatform platform, BuildMode mode}) = _ArtifactSource;
+
+  /// The source is provided by a depfile generated at runtime.
+  ///
+  /// The `name` is of the file, and is expected to be output relative to the
+  /// build directory.
+  ///
+  /// Before the first build, the depfile is expected to be missing. Its
+  /// absence is interpreted as the build needing to run. Afterwards, both
+  /// input and output file hashes are updated.
+  const factory Source.depfile(String name) = _DepfileSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -199,18 +250,6 @@ class _SourceBehavior implements Source {
   bool get implicit => true;
 }
 
-class _FunctionSource implements Source {
-  const _FunctionSource(this.value);
-
-  final InputFunction value;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitFunction(value);
-
-  @override
-  bool get implicit => true;
-}
-
 class _PatternSource implements Source {
   const _PatternSource(this.value, { this.optional = false });
 
@@ -233,6 +272,18 @@ class _ArtifactSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
+
+  @override
+  bool get implicit => false;
+}
+
+class _DepfileSource implements Source {
+  const _DepfileSource(this.name);
+
+  final String name;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitDepfile(name);
 
   @override
   bool get implicit => false;

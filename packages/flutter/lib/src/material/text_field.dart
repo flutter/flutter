@@ -346,7 +346,7 @@ class TextField extends StatefulWidget {
        ),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? obscureText ?
+       toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
            selectAll: true,
            paste: true,
@@ -356,7 +356,7 @@ class TextField extends StatefulWidget {
            cut: true,
            selectAll: true,
            paste: true,
-         ),
+         )),
        super(key: key);
 
   /// Controls the text being edited.
@@ -878,9 +878,6 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     }
   }
 
-  void _handleMouseEnter(PointerEnterEvent event) => _handleHover(true);
-  void _handleMouseExit(PointerExitEvent event) => _handleHover(false);
-
   void _handleHover(bool hovering) {
     if (hovering != _isHovering) {
       setState(() {
@@ -1007,8 +1004,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     return IgnorePointer(
       ignoring: !_isEnabled,
       child: MouseRegion(
-        onEnter: _handleMouseEnter,
-        onExit: _handleMouseExit,
+        onEnter: (PointerEnterEvent event) => _handleHover(true),
+        onExit: (PointerExitEvent event) => _handleHover(false),
         child: AnimatedBuilder(
           animation: controller, // changes the _currentLength
           builder: (BuildContext context, Widget child) {

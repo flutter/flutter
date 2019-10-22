@@ -4,10 +4,10 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:release_smoke_test/main.dart' as smoke;
-import 'package:instrumentation_adapter/instrumentation_adapter.dart';
+import 'package:e2e/e2e.dart';
 
 void main() {
-  InstrumentationAdapterFlutterBinding.ensureInitialized();
+  E2EWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Hello world smoke test', (WidgetTester tester) async {
     smoke.main(); // builds the app and schedules a frame but doesn't trigger one

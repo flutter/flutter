@@ -99,12 +99,20 @@ void main() {
     expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
   });
 
-  test('Can control fontFamily', () {
-    final ThemeData themeData = ThemeData(fontFamily: 'Ahem');
+  test('Can control fontFamily default', () {
+    final ThemeData themeData = ThemeData(
+      fontFamily: 'Ahem',
+      textTheme: const TextTheme(
+        title: TextStyle(fontFamily: 'Roboto'),
+      ),
+    );
 
     expect(themeData.textTheme.body2.fontFamily, equals('Ahem'));
-    expect(themeData.primaryTextTheme.title.fontFamily, equals('Ahem'));
+    expect(themeData.primaryTextTheme.display2.fontFamily, equals('Ahem'));
     expect(themeData.accentTextTheme.display4.fontFamily, equals('Ahem'));
+
+    // Shouldn't override the specified style's family
+    expect(themeData.textTheme.title.fontFamily, equals('Roboto'));
   });
 
   test('Can estimate brightness - directly', () {
@@ -176,7 +184,7 @@ void main() {
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
-      valueIndicatorTextStyle: const TextStyle(color: Colors.black)
+      valueIndicatorTextStyle: const TextStyle(color: Colors.black),
     );
 
     final ChipThemeData chipTheme = ChipThemeData.fromDefaults(
@@ -260,7 +268,7 @@ void main() {
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
-      valueIndicatorTextStyle: const TextStyle(color: Colors.white)
+      valueIndicatorTextStyle: const TextStyle(color: Colors.white),
     );
 
     final ChipThemeData otherChipTheme = ChipThemeData.fromDefaults(

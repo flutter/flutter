@@ -58,8 +58,7 @@ class FuchsiaPM {
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
   /// is set up to be the file `meta/package` created by [init].
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,

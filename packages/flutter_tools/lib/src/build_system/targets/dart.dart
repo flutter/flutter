@@ -31,6 +31,9 @@ const String kTargetFile = 'TargetFile';
 /// The define to control whether the AOT snapshot is built with bitcode.
 const String kBitcodeFlag = 'EnableBitcode';
 
+/// Whether to enable or disable track widget creation.
+const String kTrackWidgetCreation = 'TrackWidgetCreation';
+
 /// The define to control what iOS architectures are built for.
 ///
 /// This is expected to be a comma-separated list of architectures. If not
@@ -115,29 +118,35 @@ class CopyFlutterBundle extends Target {
 
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
-    final Pool pool = Pool(64);
-    await Future.wait<void>(
-      assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-        final PoolResource resource = await pool.request();
-        try {
-          final File file = fs.file(fs.path.join(environment.outputDir.path, entry.key));
-          file.parent.createSync(recursive: true);
-          final DevFSContent content = entry.value;
-          if (content is DevFSFileContent && content.file is File) {
-            await (content.file as File).copy(file.path);
-          } else {
-            await file.writeAsBytes(await entry.value.contentsAsBytes());
-          }
-        } finally {
-          resource.release();
-        }
-      }));
+    await copyAssets(assetBundle, environment);
   }
 
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
   ];
+}
+
+/// A helper function to copy an [assetBundle] into an [environment]'s output directory,
+/// plus an optional [pathSuffix]
+Future<void> copyAssets(AssetBundle assetBundle, Environment environment, [String pathSuffix = '']) async {
+  final Pool pool = Pool(kMaxOpenFiles);
+  await Future.wait<void>(
+    assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+      final PoolResource resource = await pool.request();
+      try {
+        final File file = fs.file(fs.path.join(environment.outputDir.path, pathSuffix, entry.key));
+        file.parent.createSync(recursive: true);
+        final DevFSContent content = entry.value;
+        if (content is DevFSFileContent && content.file is File) {
+          await (content.file as File).copy(file.path);
+        } else {
+          await file.writeAsBytes(await entry.value.contentsAsBytes());
+        }
+      } finally {
+        resource.release();
+      }
+  }));
 }
 
 /// Copies the prebuilt flutter bundle for release mode.
@@ -176,15 +185,15 @@ class KernelSnapshot extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
-    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
+    Source.depfile('kernel_snapshot.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.depfile('kernel_snapshot.d'),
   ];
 
   @override
@@ -202,17 +211,20 @@ class KernelSnapshot extends Target {
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
     final String targetFileAbsolute = fs.file(targetFile).absolute.path;
+    // everything besides 'false' is considered to be enabled.
+    final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
 
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       aot: buildMode != BuildMode.debug,
-      trackWidgetCreation: buildMode == BuildMode.debug,
+      buildMode: buildMode,
+      trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
       targetModel: TargetModel.flutter,
-      targetProductVm: buildMode == BuildMode.release,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: targetFileAbsolute,
+      depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');

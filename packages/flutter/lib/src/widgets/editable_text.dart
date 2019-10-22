@@ -977,7 +977,7 @@ class EditableText extends StatefulWidget {
   /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
   /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
   ///
-  /// Defaults to EdgeInserts.all(20.0).
+  /// Defaults to EdgeInsets.all(20.0).
   /// {@endtemplate}
   final EdgeInsets scrollPadding;
 

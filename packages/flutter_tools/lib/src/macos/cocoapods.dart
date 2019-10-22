@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -34,13 +35,18 @@ const String brokenCocoaPodsConsequence = '''
   This can happen if the version of Ruby that CocoaPods was installed with is different from the one being used to invoke it.
   This can usually be fixed by re-installing CocoaPods. For more info, see https://github.com/flutter/flutter/issues/14293.''';
 
+const String outOfDatePodfileConsequence = '''
+  This can cause a mismatched version of Flutter to be embedded in your app, which may result in App Store submission rejection or crashes.
+  If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/24641 for instructions.''';
+
 const String cocoaPodsInstallInstructions = '''
-  sudo gem install cocoapods
-  pod setup''';
+  sudo gem install cocoapods''';
 
 const String cocoaPodsUpgradeInstructions = '''
-  sudo gem install cocoapods
-  pod setup''';
+  sudo gem install cocoapods''';
+
+const String podfileMigrationInstructions = '''
+  rm ios/Podfile''';
 
 CocoaPods get cocoaPods => context.get<CocoaPods>();
 
@@ -105,12 +111,20 @@ class CocoaPods {
   /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are
   /// cloned.
   ///
+  /// Versions >= 1.8.0 do not require 'pod setup' and default to a CDN instead
+  /// of a locally cloned repository.
+  /// See http://blog.cocoapods.org/CocoaPods-1.8.0-beta/
+  ///
   /// A user can override the default location via the CP_REPOS_DIR environment
   /// variable.
   ///
   /// See https://github.com/CocoaPods/CocoaPods/blob/master/lib/cocoapods/config.rb#L138
   /// for details of this variable.
-  Future<bool> get isCocoaPodsInitialized {
+  Future<bool> get isCocoaPodsInitialized async {
+    final Version installedVersion = Version.parse(await cocoaPodsVersionText);
+    if (installedVersion != null && installedVersion >= Version.parse('1.8.0')) {
+      return true;
+    }
     final String cocoapodsReposDir = platform.environment['CP_REPOS_DIR'] ?? fs.path.join(homeDirPath, '.cocoapods', 'repos');
     return fs.isDirectory(fs.path.join(cocoapodsReposDir, 'master'));
   }
@@ -125,13 +139,15 @@ class CocoaPods {
     if (!xcodeProject.podfile.existsSync()) {
       throwToolExit('Podfile missing');
     }
+    bool podsProcessed = false;
     if (await _checkPodCondition()) {
       if (_shouldRunPodInstall(xcodeProject, dependenciesChanged)) {
         await _runPodInstall(xcodeProject, engineDir);
-        return true;
+        podsProcessed = true;
       }
+      _warnIfPodfileOutOfDate(xcodeProject);
     }
-    return false;
+    return podsProcessed;
   }
 
   /// Make sure the CocoaPods tools are in the right states.
@@ -285,7 +301,6 @@ class CocoaPods {
       <String>['pod', 'install', '--verbose'],
       workingDirectory: fs.path.dirname(xcodeProject.podfile.path),
       environment: <String, String>{
-        // For backward compatibility with previously created Podfile only.
         'FLUTTER_FRAMEWORK_DIR': engineDirectory,
         // See https://github.com/flutter/flutter/issues/10873.
         // CocoaPods analytics adds a lot of latency.
@@ -316,6 +331,32 @@ class CocoaPods {
         "Error: CocoaPods's specs repository is too out-of-date to satisfy dependencies.\n"
         'To update the CocoaPods specs, run:\n'
         '  pod repo update\n',
+        emphasis: true,
+      );
+    }
+  }
+
+  // Previously, the Podfile created a symlink to the cached artifacts engine framework
+  // and installed the Flutter pod from that path. This could get out of sync with the copy
+  // of the Flutter engine that was copied to ios/Flutter by the xcode_backend script.
+  // It was possible for the symlink to point to a Debug version of the engine when the
+  // Xcode build configuration was Release, which caused App Store submission rejections.
+  //
+  // Warn the user if they are still symlinking to the framework.
+  void _warnIfPodfileOutOfDate(XcodeBasedProject xcodeProject) {
+    if (xcodeProject is! IosProject) {
+      return;
+    }
+    final Link flutterSymlink = fs.link(fs.path.join(
+      xcodeProject.symlinks.path,
+      'flutter',
+    ));
+    if (flutterSymlink.existsSync()) {
+      printError(
+        'Warning: Podfile is out of date\n'
+        '$outOfDatePodfileConsequence\n'
+        'To regenerate the Podfile, run:\n'
+        '$podfileMigrationInstructions\n',
         emphasis: true,
       );
     }

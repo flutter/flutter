@@ -128,6 +128,10 @@ class WidgetSpan extends PlaceholderSpan {
 
   @override
   InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+    if (position.offset == offset.value) {
+      return this;
+    }
+    offset.increment(1);
     return null;
   }
 
