@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'context_menu_action.dart';
 
-// The scale of the child at the time that the ContextMenu opens.
+// The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
 const double _kOpenScale = 1.05;
 
@@ -21,7 +21,7 @@ typedef _DismissCallback = void Function(
   double opacity,
 );
 
-/// A function that produces the preview when the ContextMenu is open.
+/// A function that produces the preview when the CupertinoContextMenu is open.
 ///
 /// Called every time the animation value changes.
 typedef PreviewBuilder = Widget Function(
@@ -41,12 +41,15 @@ typedef _PreviewBuilderChildless = Widget Function(
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
   final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject();
-  final Offset containerOffset = renderBoxContainer.localToGlobal(renderBoxContainer.paintBounds.topLeft);
+  final Offset containerOffset = renderBoxContainer.localToGlobal(
+    renderBoxContainer.paintBounds.topLeft,
+  );
   return containerOffset & renderBoxContainer.paintBounds.size;
 }
 
 // The context menu arranges itself slightly differently based on the location
-// on the screen of [ContextMenu.child] before the [ContextMenu] opens.
+// on the screen of [CupertinoContextMenu.child] before the
+// [CupertinoContextMenu] opens.
 enum _ContextMenuLocation {
   center,
   left,
@@ -55,17 +58,17 @@ enum _ContextMenuLocation {
 
 /// A full-screen modal route that opens when the [child] is long-pressed.
 ///
-/// When open, the ContextMenu shows the child, or the widget returned by
-/// [previewBuilder] if given, in a large full-screen [Overlay] with a list of
-/// buttons specified by [actions]. The child/preview is placed in an [Expanded]
-/// widget so that it will grow to fill the Overlay if its size is
+/// When open, the CupertinoContextMenu shows the child, or the widget returned
+/// by [previewBuilder] if given, in a large full-screen [Overlay] with a list
+/// of buttons specified by [actions]. The child/preview is placed in an
+/// [Expanded] widget so that it will grow to fill the Overlay if its size is
 /// unconstrained.
 ///
-/// When closed, the ContextMenu simply displays the child as if the ContextMenu
-/// were not there. Sizing and positioning is unaffected. The menu can be closed
-/// like other [PopupRoute]s, such as by tapping the background or by calling
-/// `Navigator.pop(context)`. Unlike PopupRoute, it can also be closed by
-/// swiping downwards.
+/// When closed, the CupertinoContextMenu simply displays the child as if the
+/// CupertinoContextMenu were not there. Sizing and positioning is unaffected.
+/// The menu can be closed like other [PopupRoute]s, such as by tapping the
+/// background or by calling `Navigator.pop(context)`. Unlike PopupRoute, it can
+/// also be closed by swiping downwards.
 ///
 /// The [previewBuilder] parameter is most commonly used to display a slight
 /// variation of [child]. See [previewBuilder] for an example of rounding the
@@ -74,8 +77,8 @@ enum _ContextMenuLocation {
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
-/// This sample shows a very simple ContextMenu for an empty red 100x100
-/// Container. Simply long press on it to open.
+/// This sample shows a very simple CupertinoContextMenu for an empty red
+/// 100x100 Container. Simply long press on it to open.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -85,18 +88,18 @@ enum _ContextMenuLocation {
 ///       child: Container(
 ///         width: 100,
 ///         height: 100,
-///         child: ContextMenu(
+///         child: CupertinoContextMenu(
 ///           child: Container(
 ///             color: Colors.red,
 ///           ),
-///           actions: <ContextMenuAction>[
-///             ContextMenuAction(
+///           actions: <CupertinoContextMenuAction>[
+///             CupertinoContextMenuAction(
 ///               child: const Text('Action one'),
 ///               onPressed: () {
 ///                 Navigator.pop(context);
 ///               },
 ///             ),
-///             ContextMenuAction(
+///             CupertinoContextMenuAction(
 ///               child: const Text('Action two'),
 ///               onPressed: () {
 ///                 Navigator.pop(context);
@@ -114,14 +117,14 @@ enum _ContextMenuLocation {
 /// See also:
 ///
 ///   * [Apple's HIG for Context Menus](https://developer.apple.com/design/human-interface-guidelines/ios/controls/context-menus/)
-class ContextMenu extends StatefulWidget {
+class CupertinoContextMenu extends StatefulWidget {
   /// Create a context menu.
   ///
   /// [actions] is required and cannot be null. It must contain at least one
-  /// [ContextMenuAction].
+  /// [CupertinoContextMenuAction].
   ///
   /// [child] is required and cannot be null.
-  ContextMenu({
+  CupertinoContextMenu({
     Key key,
     @required this.actions,
     @required this.child,
@@ -130,16 +133,17 @@ class ContextMenu extends StatefulWidget {
        assert(child != null),
        super(key: key);
 
-  /// The widget that can be "opened" with the [ContextMenu].
+  /// The widget that can be "opened" with the [CupertinoContextMenu].
   ///
-  /// When the [ContextMenu] is long-pressed, the menu will open and this widget
-  /// (or the widget returned by [previewBuilder], if provided) will be moved to
-  /// the [Overlay] and placed inside of an [Expanded] widget. This allows the
-  /// child to resize to fit in the full-screen Overlay, if it doesn't size
-  /// itself.
+  /// When the [CupertinoContextMenu] is long-pressed, the menu will open and
+  /// this widget (or the widget returned by [previewBuilder], if provided) will
+  /// be moved to the [Overlay] and placed inside of an [Expanded] widget. This
+  /// allows the child to resize to fit in the full-screen Overlay, if it
+  /// doesn't size itself.
   ///
-  /// When the [ContextMenu] is "closed", this widget acts like a [Container],
-  /// i.e. it does not constrain its child's size or affect its position.
+  /// When the [CupertinoContextMenu] is "closed", this widget acts like a
+  /// [Container], i.e. it does not constrain its child's size or affect its
+  /// position.
   ///
   /// This parameter cannot be null.
   final Widget child;
@@ -147,11 +151,11 @@ class ContextMenu extends StatefulWidget {
   /// The actions that are shown in the menu.
   ///
   /// This parameter cannot be null, and items in the List must be
-  /// [ContextMenuAction]s.
-  final List<ContextMenuAction> actions;
+  /// [CupertinoContextMenuAction]s.
+  final List<CupertinoContextMenuAction> actions;
 
   /// A function that returns an alternative widget to show when the
-  /// [ContextMenu] is open.
+  /// [CupertinoContextMenu] is open.
   ///
   /// If not specified, [child] will be shown.
   ///
@@ -161,9 +165,10 @@ class ContextMenu extends StatefulWidget {
   ///
   /// In addition to the current [BuildContext], the function is also called
   /// with an [Animation] and the [child]. The animation is used internally to
-  /// animate the ContextMenu open. It can be used to animate the preview in
-  /// sync with the opening of the ContextMenu. The child parameter provides
-  /// access to the child displayed when the ContextMenu is closed.
+  /// animate the CupertinoContextMenu open. It can be used to animate the
+  /// preview in sync with the opening of the CupertinoContextMenu. The child
+  /// parameter provides access to the child displayed when the
+  /// CupertinoContextMenu is closed.
   ///
   /// {@tool sample}
   ///
@@ -172,36 +177,36 @@ class ContextMenu extends StatefulWidget {
   /// these could be used in a GridView for a similar effect.
 
   /// When opened, the child animates to show its full aspect ratio and has
-  /// rounded corners. The larger size of the open ContextMenu allows the
-  /// FittedBox to fit the entire image, even when it has a very tall or wide
-  /// aspect ratio compared to the square of a GridView, so this animates into
-  /// view as the ContextMenu is opened. The preview is swapped in right when
-  /// the open animation begins, which includes the rounded corners.
+  /// rounded corners. The larger size of the open CupertinoContextMenu allows
+  /// the FittedBox to fit the entire image, even when it has a very tall or
+  /// wide aspect ratio compared to the square of a GridView, so this animates
+  /// into view as the CupertinoContextMenu is opened. The preview is swapped in
+  /// right when the open animation begins, which includes the rounded corners.
   ///
   /// ```dart
-  /// ContextMenu(
+  /// CupertinoContextMenu(
   ///   child: FittedBox(
   ///     fit: BoxFit.cover,
   ///     child: Image.asset('assets/photo.jpg'),
   ///   ),
   ///   // The FittedBox in the preview here allows the image to animate its
-  ///   // aspect ratio when the ContextMenu is animating its preview widget
-  ///   // open and closed.
+  ///   // aspect ratio when the CupertinoContextMenu is animating its preview
+  ///   // widget open and closed.
   ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
   ///     return FittedBox(
   ///       fit: BoxFit.cover,
   ///       // This ClipRRect rounds the corners of the image when the
-  ///       // ContextMenu is open, even though it's not rounded when it's
-  ///       // closed. It uses the given animation to animate the corners in
-  ///       // sync with the opening animation.
+  ///       // CupertinoContextMenu is open, even though it's not rounded when
+  ///       // it's closed. It uses the given animation to animate the corners
+  ///       // in sync with the opening animation.
   ///       child: ClipRRect(
   ///         borderRadius: BorderRadius.circular(64.0 * animation.value),
   ///         child: Image.asset('assets/photo.jpg'),
   ///       ),
   ///     );
   ///   },
-  ///   actions: <ContextMenuAction>[
-  ///     ContextMenuAction(
+  ///   actions: <CupertinoContextMenuAction>[
+  ///     CupertinoContextMenuAction(
   ///       child: const Text('Action one'),
   ///       onPressed: () {},
   ///     ),
@@ -213,10 +218,10 @@ class ContextMenu extends StatefulWidget {
   final PreviewBuilder previewBuilder;
 
   @override
-  _ContextMenuState createState() => _ContextMenuState();
+  _CupertinoContextMenuState createState() => _CupertinoContextMenuState();
 }
 
-class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin {
+class _CupertinoContextMenuState extends State<CupertinoContextMenu> with TickerProviderStateMixin {
   final GlobalKey _childGlobalKey = GlobalKey();
   double _childOpacity = 1.0;
   // Animates the child while it's opening.
@@ -242,7 +247,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     final double screenWidth = MediaQuery.of(context).size.width;
 
     final double center = screenWidth / 2;
-    final bool centerDividesChild = childRect.left < center && childRect.right > center;
+    final bool centerDividesChild = childRect.left < center
+      && childRect.right > center;
     final double distanceFromCenter = (center - childRect.center.dx).abs();
     if (centerDividesChild && distanceFromCenter <= childRect.width / 4) {
       return _ContextMenuLocation.center;
@@ -255,7 +261,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     return _ContextMenuLocation.left;
   }
 
-  // Push the new route and open the ContextMenu overlay.
+  // Push the new route and open the CupertinoContextMenu overlay.
   void _openContextMenu() {
     setState(() {
       _childOpacity = 0.0;
@@ -315,7 +321,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 
   // Watch for when _ContextMenuRoute is closed and return to the state where
-  // the ContextMenu just behaves as a Container.
+  // the CupertinoContextMenu just behaves as a Container.
   void _routeAnimationStatusListener(AnimationStatus status) {
     if (status != AnimationStatus.dismissed) {
       return;
@@ -402,10 +408,10 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 }
 
-// A floating copy of the ContextMenu's child.
+// A floating copy of the CupertinoContextMenu's child.
 //
-// When the child is pressed, but before the ContextMenu opens, it does a
-// "bounce" animation where it shrinks and then grows. This is implemented
+// When the child is pressed, but before the CupertinoContextMenu opens, it does
+// a "bounce" animation where it shrinks and then grows. This is implemented
 // by hiding the original child and placing _DecoyChild on top of it in an
 // Overlay. The use of an Overlay allows the _DecoyChild to appear on top of
 // siblines of the original child.
@@ -521,11 +527,11 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
   }
 }
 
-// The open ContextMenu modal.
+// The open CupertinoContextMenu modal.
 class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Build a _ContextMenuRoute.
   _ContextMenuRoute({
-    @required List<ContextMenuAction> actions,
+    @required List<CupertinoContextMenuAction> actions,
     @required _ContextMenuLocation contextMenuOrientation,
     this.barrierLabel,
     _PreviewBuilderChildless builder,
@@ -547,16 +553,17 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   static const Color _kModalBarrierColor = Color(0x6604040F);
   // The duration of the transition used when a modal popup is shown. Eyeballed
   // from a physical device running iOS 13.1.2.
-  static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
+  static const Duration _kModalPopupTransitionDuration =
+    Duration(milliseconds: 335);
 
-  final List<ContextMenuAction> _actions;
+  final List<CupertinoContextMenuAction> _actions;
   final _PreviewBuilderChildless _builder;
   final GlobalKey _childGlobalKey = GlobalKey();
   final _ContextMenuLocation _contextMenuOrientation;
   bool _externalOffstage = false;
   bool _internalOffstage = false;
   Orientation _lastOrientation;
-  // The Rect of the child at the moment that the ContextMenu opens.
+  // The Rect of the child at the moment that the CupertinoContextMenu opens.
   final Rect _previousChildRect;
   double _scale = 1.0;
   final GlobalKey _sheetGlobalKey = GlobalKey();
@@ -570,9 +577,10 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   static final RectTween _rectTween = RectTween();
   static final Animatable<Rect> _rectAnimatable = _rectTween.chain(_curve);
   static final RectTween _rectTweenReverse = RectTween();
-  static final Animatable<Rect> _rectAnimatableReverse = _rectTweenReverse.chain(
-    _curveReverse,
-  );
+  static final Animatable<Rect> _rectAnimatableReverse = _rectTweenReverse
+    .chain(
+      _curveReverse,
+    );
   static final RectTween _sheetRectTween = RectTween();
   final Animatable<Rect> _sheetRectAnimatable = _sheetRectTween.chain(
     _curve,
@@ -581,12 +589,14 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     _curveReverse,
   );
   static final Tween<double> _sheetScaleTween = Tween<double>();
-  static final Animatable<double> _sheetScaleAnimatable = _sheetScaleTween.chain(
-    _curve,
-  );
-  static final Animatable<double> _sheetScaleAnimatableReverse = _sheetScaleTween.chain(
-    _curveReverse,
-  );
+  static final Animatable<double> _sheetScaleAnimatable = _sheetScaleTween
+    .chain(
+      _curve,
+    );
+  static final Animatable<double> _sheetScaleAnimatableReverse =
+    _sheetScaleTween.chain(
+      _curveReverse,
+    );
   final Tween<double> _opacityTween = Tween<double>(begin: 0.0, end: 1.0);
   Animation<double> _sheetOpacity;
 
@@ -617,7 +627,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     return offsetScaled & sizeScaled;
   }
 
-  // Get the alignment for the ContextMenuSheet's Transform.scale based on the
+  // Get the alignment for the _ContextMenuSheet's Transform.scale based on the
   // ContextMenuOrientation.
   static AlignmentDirectional getSheetAlignment(_ContextMenuLocation contextMenuOrientation) {
     switch (contextMenuOrientation) {
@@ -662,7 +672,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     Navigator.of(context).pop();
   }
 
-  // Take measurements on the child and ContextMenuSheet and update the
+  // Take measurements on the child and _ContextMenuSheet and update the
   // animation tweens to match.
   void _updateTweenRects() {
     final Rect childRect = _scale == null
@@ -796,8 +806,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
           );
         }
 
-        // When the animation is done, just render everything in a static layout in
-        // the final position.
+        // When the animation is done, just render everything in a static layout
+        // in the final position.
         return _ContextMenuRouteStatic(
           actions: _actions,
           child: _builder(context, animation),
@@ -812,7 +822,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   }
 }
 
-// The final state of the ContextMenuRoute after animating in and before
+// The final state of the _ContextMenuRoute after animating in and before
 // animating out.
 class _ContextMenuRouteStatic extends StatefulWidget {
   const _ContextMenuRouteStatic({
@@ -828,7 +838,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
        assert(orientation != null),
        super(key: key);
 
-  final List<ContextMenuAction> actions;
+  final List<CupertinoContextMenuAction> actions;
   final Widget child;
   final GlobalKey childGlobalKey;
   final _ContextMenuLocation contextMenuOrientation;
@@ -844,7 +854,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   // The child is scaled down as it is dragged down until it hits this minimum
   // value.
   static const double _kMinScale = 0.8;
-  // The ContextMenuSheet disappears at this scale.
+  // The CupertinoContextMenuSheet disappears at this scale.
   static const double _kSheetScaleThreshold = 0.9;
   static const double _kPadding = 20.0;
   static const double _kDamping = 400.0;
@@ -981,7 +991,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         ),
       );
 
-      // Fade the ContextMenuSheet out or in, if needed.
+      // Fade the _ContextMenuSheet out or in, if needed.
       if (_lastScale <= _kSheetScaleThreshold
           && _sheetController.status != AnimationStatus.forward
           && _sheetScaleAnimation.value != 0.0) {
@@ -994,7 +1004,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     });
   }
 
-  // The order and alignment of the ContextMenuSheet and the child depend on
+  // The order and alignment of the _ContextMenuSheet and the child depend on
   // both the orientation of the screen as well as the position on the screen of
   // the original child.
   List<Widget> _getChildren(Orientation orientation, _ContextMenuLocation contextMenuOrientation) {
@@ -1040,7 +1050,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     }
   }
 
-  // Build the animation for the ContextMenuSheet.
+  // Build the animation for the _ContextMenuSheet.
   Widget _buildSheetAnimation(BuildContext context, Widget child) {
     return Transform.scale(
       alignment: _ContextMenuRoute.getSheetAlignment(widget.contextMenuOrientation),
@@ -1147,7 +1157,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 }
 
-// A menu of _ContextMenuActions.
+// A menu of _CupertinoContextMenuActions.
 class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
     Key key,
@@ -1161,7 +1171,7 @@ class _ContextMenuSheet extends StatelessWidget {
        _orientation = orientation,
        super(key: key);
 
-  final List<ContextMenuAction> actions;
+  final List<CupertinoContextMenuAction> actions;
   final _ContextMenuLocation _contextMenuOrientation;
   final Orientation _orientation;
 

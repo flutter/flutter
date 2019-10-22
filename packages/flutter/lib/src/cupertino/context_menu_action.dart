@@ -11,9 +11,9 @@ import 'colors.dart';
 /// A typical use case is to pass a [Text] as the [child] here, but be sure to
 /// use [TextOverflow.ellipsis] for the [Text.overflow] field if the text may be
 /// long, as without it the text will wrap to the next line.
-class ContextMenuAction extends StatefulWidget {
-  /// Construct a ContextMenuAction.
-  const ContextMenuAction({
+class CupertinoContextMenuAction extends StatefulWidget {
+  /// Construct a CupertinoContextMenuAction.
+  const CupertinoContextMenuAction({
     Key key,
     @required this.child,
     this.isDefaultAction = false,
@@ -39,10 +39,6 @@ class ContextMenuAction extends StatefulWidget {
   /// Called when the action is pressed.
   final VoidCallback onPressed;
 
-  // TODO(justinmc): Is this in the spirit how we usually do things like this in
-  // Flutter? All Apple examples I've seen of ContextMenus feature icons, so
-  // this seemed like a nice way to encourage that. However, it's also totally
-  // possible for the user to do this without this field.
   /// An optional icon to display to the right of the child.
   ///
   /// Will be colored in the same way as the [TextStyle] used for [child] (for
@@ -50,10 +46,10 @@ class ContextMenuAction extends StatefulWidget {
   final IconData trailingIcon;
 
   @override
-  _ContextMenuActionState createState() => _ContextMenuActionState();
+  _CupertinoContextMenuActionState createState() => _CupertinoContextMenuActionState();
 }
 
-class _ContextMenuActionState extends State<ContextMenuAction> {
+class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction> {
   static const Color _kBackgroundColor = Color(0xFFEEEEEE);
   static const Color _kBackgroundColorPressed = Color(0xFFDDDDDD);
   static const double _kButtonHeight = 56.0;
