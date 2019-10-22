@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'android/gradle.dart';
+import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';

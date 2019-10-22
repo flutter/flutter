@@ -8,7 +8,6 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -120,7 +119,9 @@ void main() {
 
     group('AndroidSdk', () {
       testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
-        final Directory gradleCacheDir = memoryFileSystem.directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')..createSync(recursive: true);
+        final Directory gradleCacheDir = memoryFileSystem
+          .directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')
+          ..createSync(recursive: true);
         gradleCacheDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').createSync();
 
         tempDir.childFile('pubspec.yaml')
@@ -141,11 +142,31 @@ flutter:
 ''');
         tempDir.childFile('.packages').createSync(recursive: true);
         final Directory androidDir = tempDir.childDirectory('android');
-        androidDir.childFile('build.gradle').createSync(recursive: true);
-        androidDir.childFile('gradle.properties').createSync(recursive: true);
-        androidDir.childDirectory('gradle').childDirectory('wrapper').childFile('gradle-wrapper.properties').createSync(recursive: true);
-        tempDir.childDirectory('build').childDirectory('outputs').childDirectory('repo').createSync(recursive: true);
-        tempDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+        androidDir
+          .childFile('build.gradle')
+          .createSync(recursive: true);
+        androidDir
+          .childDirectory('app')
+          .childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+        androidDir
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+        androidDir
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+          .childFile('gradle-wrapper.properties')
+          .createSync(recursive: true);
+        tempDir
+          .childDirectory('build')
+          .childDirectory('outputs')
+          .childDirectory('repo')
+          .createSync(recursive: true);
+        tempDir
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .createSync(recursive: true);
         await runBuildAarCommand(tempDir.path);
 
         verifyNever(mockAndroidSdk.validateSdkWellFormed());
@@ -153,7 +174,6 @@ flutter:
       },
       overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
-        GradleUtils: () => GradleUtils(),
         ProcessManager: () => mockProcessManager,
         FileSystem: () => memoryFileSystem,
       });
