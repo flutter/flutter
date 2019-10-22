@@ -1051,7 +1051,11 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  static const int _kMaxPendingStats = 16;
+  // As of writing, Dart supports up to 32 threads per isolate.  We also
+  // want to avoid hitting platform limits on open file handles/descriptors.
+  // This value was chosen based on empirical tests scanning a set of
+  // ~2000 files.
+  static const int _kMaxPendingStats = 8;
 
   static Future<List<Uri>> findInvalidated({
     @required DateTime lastCompiled,
