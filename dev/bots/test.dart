@@ -42,7 +42,7 @@ final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNE
 ///
 /// WARNING: if you change this number, also change .cirrus.yml
 /// and make sure it runs _all_ shards.
-const int kDeviceLabShardCount = 6;
+const int kDeviceLabShardCount = 4;
 
 /// The number of Cirrus jobs that run Web tests in parallel.
 ///
@@ -735,33 +735,27 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   // seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     // Keep this in alphabetical order.
-    () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment, testEmbeddingV2: false),
+    () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment),
     if (Platform.isMacOS) () => _runDevicelabTest('flutter_create_offline_test_mac'),
     if (Platform.isLinux) () => _runDevicelabTest('flutter_create_offline_test_linux'),
     if (Platform.isWindows) () => _runDevicelabTest('flutter_create_offline_test_windows'),
     // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
-    if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment),
+
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: false),
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    if (!Platform.isMacOS) () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: false),
+    if (!Platform.isMacOS) () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+
     // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
     // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
-    () => _runDevicelabTest('plugin_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('plugin_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
   ]..shuffle(math.Random(0));
 
   final int testsPerShard = tests.length ~/ kDeviceLabShardCount;
@@ -789,6 +783,10 @@ Future<void> _runHostOnlyDeviceLabTests() async {
 
 Future<void> _runDevicelabTest(String testName, {
   Map<String, String> environment,
+  // testEmbeddingV2 is only supported by certain specific devicelab tests.
+  // Don't use it unless you're sure the test actually supports it.
+  // You can check by looking to see if the test examines the environment
+  // for the ENABLE_ANDROID_EMBEDDING_V2 variable.
   bool testEmbeddingV2 = false,
 }) async {
   await runCommand(
