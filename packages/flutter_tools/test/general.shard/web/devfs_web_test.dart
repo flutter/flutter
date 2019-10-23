@@ -73,7 +73,7 @@ void main() {
       ..writeAsStringSync(json.encode(<String, Object>{'http:///foo.js': <int>[0, 10]}));
 
     await webAssetServer.write(source, manifestMissingOffset);
-    await webAssetServer.write(source, manifestNonFileScheme);
+    webAssetServer.write(source, manifestNonFileScheme);
   }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
@@ -81,7 +81,7 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File manifest = fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0, source.lengthSync()]}));
-    await webAssetServer.write(source, manifest);
+    webAssetServer.write(source, manifest);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
     requestController.add(request);
@@ -97,7 +97,7 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File manifest = fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0, source.lengthSync()]}));
-    await webAssetServer.write(source, manifest);
+    webAssetServer.write(source, manifest);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/bar.js'));
     requestController.add(request);

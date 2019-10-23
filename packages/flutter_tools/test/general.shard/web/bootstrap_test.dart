@@ -12,6 +12,7 @@ void main() {
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
       mainModule: 'foobar',
+      entrypoint: 'foo/bar.js',
     );
     // require js source is interpolated correctly.
     expect(result, contains('requireEl.src = "require.js";'));

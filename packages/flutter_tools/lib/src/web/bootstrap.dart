@@ -17,6 +17,7 @@ String generateBootstrapScript({
   @required String requireUrl,
   @required String mapperUrl,
   @required String mainModule,
+  @required String entrypoint,
 }) {
   return '''
 "use strict";
@@ -39,24 +40,29 @@ document.head.appendChild(requireEl);
 
 // Invoked by connected chrome debugger for hot reload/restart support.
 window.\$hotReloadHook = function(modules) {
-  if (modules == null) {
-    return;
-  }
-  // If no modules change, only invoke main.
-  if (modules.length == 0) {
-    window.\$hotReload();
-  }
-  var reloadCount = 0;
-  for (var i = 0; i < modules.length; i++) {
-    require.undef(modules[i]);
-    require([modules[i]], function(module) {
-      reloadCount += 1;
-      // once we've reloaded every module, trigger the hot reload.
-      if (reloadCount == modules.length) {
-        window.\$hotReload();
-      }
-    });
-  }
+  return new Promise(function(resolve, reject) {
+    if (modules == null) {
+      reject();
+    }
+    // If no modules change, return immediately.
+    if (modules.length == 0) {
+      resolve();
+    }
+    var reloadCount = 0;
+    for (var i = 0; i < modules.length; i++) {
+      require.undef(modules[i]);
+      require([modules[i]], function(module) {
+        reloadCount += 1;
+        // once we've reloaded every module, trigger the hot reload.
+        if (reloadCount == modules.length) {
+          require(["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
+            window.\$mainEntrypoint = app.main.main;
+            window.\$hotReload(resolve);
+          });
+        }
+      });
+    }
+  });
 }
 ''';
 }
@@ -73,10 +79,13 @@ define("main_module", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   // Attach the main entrypoint and hot reload functionality to the window.
   window.\$mainEntrypoint = app.main.main;
   if (window.\$hotReload == null) {
-    window.\$hotReload = function() {
-      dart_sdk.developer.invokeExtension('ext.flutter.disassemble', '{}');
+    window.\$hotReload = function(cb) {
+      dart_sdk.developer.invokeExtension("ext.flutter.disassemble", "{}");
       dart_sdk.dart.hotRestart();
       window.\$mainEntrypoint();
+      if (cb != null) {
+        cb();
+      }
     }
   }
   app.main.main();

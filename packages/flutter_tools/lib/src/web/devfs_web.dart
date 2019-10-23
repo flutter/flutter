@@ -81,7 +81,7 @@ class WebAssetServer {
     // If both of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
-      final String assetPath = file.path.replaceFirst('assets/', '');
+      final String assetPath = file.path.replaceFirst('/assets/', '');
       file = fs.file(fs.path.join(getAssetBuildDirectory(), fs.path.relative(assetPath)));
     }
 
@@ -119,7 +119,10 @@ class WebAssetServer {
   }
 
   /// Update the in-memory asset server with the provided source and manifest files.
-  Future<void> write(File sourceFile, File manifestFile) async {
+  ///
+  /// Returns a list of updated modules.
+  List<String> write(File sourceFile, File manifestFile) {
+    final List<String> modules = <String>[];
     final Uint8List bytes = sourceFile.readAsBytesSync();
     final Map<String, Object> manifest = json.decode(manifestFile.readAsStringSync());
     for (String filePath in manifest.keys) {
@@ -136,7 +139,9 @@ class WebAssetServer {
       final int end = offsets[1];
       final Uint8List byteView = Uint8List.view(bytes.buffer, start, end - start);
       _files[filePath] = byteView;
+      modules.add(filePath);
     }
+    return modules;
   }
 }
 
@@ -219,6 +224,7 @@ class WebDevFS implements DevFS {
         requireUrl: requireJS.path,
         mapperUrl: null,
         mainModule: 'main_module.js',
+        entrypoint: mainPath,
       ));
       _webAssetServer.writeFile('/main_module.js', generateMainModule(
         entrypoint: mainPath,
@@ -244,14 +250,16 @@ class WebDevFS implements DevFS {
     sources = compilerOutput.sources;
     File sourceFile;
     File manifestFile;
+    List<String> modules;
     try {
       sourceFile = fs.file('${compilerOutput.outputFilename}.sources');
       manifestFile = fs.file('${compilerOutput.outputFilename}.json');
-      await _webAssetServer.write(sourceFile, manifestFile);
+      modules = _webAssetServer.write(sourceFile, manifestFile);
     } on FileSystemException {
       throwToolExit('Incremental compiler did not produce expected output.');
     }
     return UpdateFSReport(success: true, syncedBytes: sourceFile.lengthSync(),
-      invalidatedSourcesCount: invalidatedFiles.length);
+      invalidatedSourcesCount: invalidatedFiles.length)
+        ..invalidatedModules = modules;
   }
 }

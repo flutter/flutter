@@ -348,7 +348,9 @@ class UpdateFSReport {
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
-  List<Uri> invalidatedFiles;
+
+  // Only used for JavaScript compilation.
+  List<String> invalidatedModules;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
@@ -356,6 +358,7 @@ class UpdateFSReport {
     }
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
+    invalidatedModules ??= report.invalidatedModules;
   }
 
   bool _success;
