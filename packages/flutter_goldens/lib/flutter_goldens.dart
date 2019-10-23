@@ -413,8 +413,8 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     if (testExpectations == null) {
       // There is no baseline for this test
       print('No expectations provided by Skia Gold for test: $golden. '
-        'This may be a new test. If this is an unexpected result, check'
-        ' https://flutter-gold.skia.org.\n'
+        'This may be a new test. If this is an unexpected result, check '
+        'https://flutter-gold.skia.org.\n'
         'Validate image output found at $basedir'
       );
       update(golden, imageBytes);
@@ -422,7 +422,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     }
 
     ComparisonResult result;
-    final Map<String, ComparisonResult> validFailures = <String, ComparisonResult>{};
+    final Map<String, ComparisonResult> failureDiffs = <String, ComparisonResult>{};
     for (String expectation in testExpectations) {
       final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
 
@@ -433,12 +433,12 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
       if (result.passed) {
         return true;
-      } else if (await skiaClient.isValidDigestForExpectation(expectation, golden.path)) {
-        validFailures[expectation] = result;
       }
+      failureDiffs[expectation] = result;
     }
-    validFailures.forEach((String expectation, ComparisonResult result) {
-      generateFailureOutput(result, golden, basedir, key: expectation);
+    failureDiffs.forEach((String expectation, ComparisonResult result) async {
+      if (await skiaClient.isValidDigestForExpectation(expectation, golden.path))
+        generateFailureOutput(result, golden, basedir, key: expectation);
     });
     return false;
   }
