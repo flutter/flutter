@@ -276,9 +276,9 @@ class _SlidersState extends State<_Sliders> {
                 ),
               ),
               SliderTheme(
-                data: SliderThemeData(
+                data: const SliderThemeData(
                   showValueIndicator: ShowValueIndicator.always,
-                  valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+//                  valueIndicatorShape: PaddleSliderValueIndicatorShape(),
                 ),
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
@@ -384,6 +384,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
       child: Column(
@@ -395,7 +396,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
               SliderTheme(
                 data: const SliderThemeData(
                   showValueIndicator: ShowValueIndicator.always,
-                  rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
+//                  rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
                 ),
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
@@ -448,10 +449,11 @@ class _RangeSlidersState extends State<_RangeSliders> {
               SliderTheme(
                 data: SliderThemeData(
                   activeTrackColor: Colors.deepPurple,
-                  inactiveTrackColor: Colors.black26,
-                  activeTickMarkColor: Colors.white70,
-                  inactiveTickMarkColor: Colors.black,
-                  overlayColor: Colors.black12,
+                  inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.5),
+                  activeTickMarkColor: theme.colorScheme.onSurface.withOpacity(0.7),
+                  inactiveTickMarkColor:  theme.colorScheme.surface.withOpacity(0.7),
+                  overlayColor: theme.colorScheme.onSurface.withOpacity(0.12),
+                  valueIndicatorColor: Colors.deepPurpleAccent,
                   thumbColor: Colors.deepPurple,
                   trackHeight: 2,
                   rangeThumbShape: _CustomRangeThumbShape(),

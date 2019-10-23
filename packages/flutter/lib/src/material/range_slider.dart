@@ -551,8 +551,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     final RangeSliderValueIndicatorShape valueIndicatorShape = sliderTheme.rangeValueIndicatorShape ?? _defaultValueIndicatorShape;
     Color valueIndicatorColor;
     if (valueIndicatorShape is RectangularRangeSliderValueIndicatorShape) {
-      // TODO: use color scheme?
-      valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Colors.grey[600];
+      valueIndicatorColor = sliderTheme.valueIndicatorColor
+        ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
     } else {
       valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
     }

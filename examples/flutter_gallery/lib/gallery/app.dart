@@ -144,6 +144,7 @@ class _GalleryAppState extends State<GalleryApp> {
         checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
         routes: _buildRoutes(),
         builder: (BuildContext context, Widget child) {
+          print('theme.colorScheme.onPrimary: ${kDarkGalleryTheme.colorScheme.onPrimary}');
           return Directionality(
             textDirection: _options.textDirection,
             child: _applyTextScaleFactor(

@@ -2589,7 +2589,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
       scale: scale,
       labelPainter: labelPainter,
       mediaQueryData: mediaQueryData,
-      backgroundPaintColor: Colors.grey[600] // TODO(antrob): get this from color scheme
+      backgroundPaintColor: sliderTheme.valueIndicatorColor
     );
   }
 }
@@ -2655,7 +2655,7 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
       scale: scale,
       labelPainter: labelPainter,
       mediaQueryData: mediaQueryData,
-      backgroundPaintColor: Colors.grey[600],
+      backgroundPaintColor: sliderTheme.valueIndicatorColor,
       strokePaintColor: isOnTop ? sliderTheme.overlappingShapeStrokeColor : null,
     );
   }
@@ -2664,7 +2664,6 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
 class _RectangularSliderValueIndicatorPathPainter {
   const _RectangularSliderValueIndicatorPathPainter();
 
-  static const double _labelTextDesignSize = 14.0;
   static const double _labelPadding = 16.0;
   static const double _preferredHeight = 32.0;
   static const double _minLabelWidth = 16.0;
