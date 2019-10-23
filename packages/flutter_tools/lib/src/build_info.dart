@@ -271,7 +271,8 @@ enum TargetPlatform {
   darwin_x64,
   linux_x64,
   windows_x64,
-  fuchsia,
+  fuchsia_arm64,
+  fuchsia_x64,
   tester,
   web_javascript,
 }
@@ -339,8 +340,10 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'linux-x64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
-    case TargetPlatform.fuchsia:
-      return 'fuchsia';
+    case TargetPlatform.fuchsia_arm64:
+      return 'fuchsia-arm64';
+    case TargetPlatform.fuchsia_x64:
+      return 'fuchsia-x64';
     case TargetPlatform.tester:
       return 'flutter-tester';
     case TargetPlatform.web_javascript:
@@ -360,6 +363,10 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.android_x64;
     case 'android-x86':
       return TargetPlatform.android_x86;
+    case 'fuchsia-arm64':
+      return TargetPlatform.fuchsia_arm64;
+    case 'fuchsia-x64':
+      return TargetPlatform.fuchsia_x64;
     case 'ios':
       return TargetPlatform.ios;
     case 'darwin-x64':
@@ -418,6 +425,18 @@ String getPlatformNameForAndroidArch(AndroidArch arch) {
   }
   assert(false);
   return null;
+}
+
+String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
+  switch (targetPlatform) {
+    case TargetPlatform.fuchsia_arm64:
+      return 'arm64';
+    case TargetPlatform.fuchsia_x64:
+      return 'x64';
+    default:
+      assert(false);
+      return null;
+  }
 }
 
 HostPlatform getCurrentHostPlatform() {
