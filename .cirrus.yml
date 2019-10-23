@@ -399,7 +399,6 @@ task:
 
     - name: build_tests-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - dart --enable-asserts dev\bots\test.dart
 
