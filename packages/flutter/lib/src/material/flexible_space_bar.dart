@@ -239,6 +239,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       case TargetPlatform.fuchsia:
         return false;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return true;
     }
     return null;
@@ -341,6 +342,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           Widget title;
           switch (theme.platform) {
             case TargetPlatform.iOS:
+            case TargetPlatform.macOS:
               title = widget.title;
               break;
             case TargetPlatform.fuchsia:
@@ -349,6 +351,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 namesRoute: true,
                 child: widget.title,
               );
+              break;
           }
 
           // StretchMode.fadeTitle

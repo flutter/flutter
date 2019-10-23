@@ -106,6 +106,7 @@ class Typography extends Diagnosticable {
     assert(platform != null || (black != null && white != null));
     switch (platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         black ??= blackCupertino;
         white ??= whiteCupertino;
         break;

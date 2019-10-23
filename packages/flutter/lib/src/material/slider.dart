@@ -502,6 +502,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           case TargetPlatform.fuchsia:
             return _buildMaterialSlider(context);
           case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
             return _buildCupertinoSlider(context);
         }
       }
