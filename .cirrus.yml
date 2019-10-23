@@ -323,310 +323,310 @@ task:
       script:
         - ./dev/bots/deploy_gallery.sh
 
-# WINDOWS SHARDS
-task:
-  windows_container:
-    image: cirrusci/android-sdk:28-windowsservercore-2019
-    os_version: 2019
-    cpu: $CPU
-    memory: $MEMORY
-  environment:
-    # It's not clear that changing the cpu/memory fields here has any impact, so we use
-    # small numbers...
-    CPU: 2 # 1-8 without compute credits, 1-30 with
-    MEMORY: 2G # 256M-24G without compute credits, 256M-90G with
-    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\$FLUTTER_SDK_PATH_WITH_SPACE"
-    PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
-  pub_cache:
-    folder: $APPDATA\Pub\Cache
-    fingerprint_script:
-      - ps: $Environment:OS; Get-ChildItem -Path "$Environment:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
-  flutter_pkg_cache:
-    folder: bin\cache\pkg
-    fingerprint_script: echo %OS% & type bin\internal\*.version
-  artifacts_cache:
-    folder: bin\cache\artifacts
-    fingerprint_script: echo %OS% & type bin\internal\*.version
-  setup_script:
-    - git clean -xffd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-    - flutter config --no-analytics
-    - flutter doctor -v
-    - flutter update-packages
-    - git fetch origin master
-  matrix:
-    - name: framework_tests-widgets-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - powershell dev\bots\download_goldctl.ps1
-        - dart --enable-asserts dev\bots\test.dart
-
-    - name: framework_tests-libraries-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - powershell dev\bots\download_goldctl.ps1
-        - dart --enable-asserts dev\bots\test.dart
-
-    - name: framework_tests-misc-windows
-      # this includes the tests for directories in dev/
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      script:
-        - dart --enable-asserts dev\bots\test.dart
-
-    - name: tool_tests-general-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: tool_tests-commands-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: tool_tests-integration-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    # TODO(ianh): Enable Web tests on Windows
-
-    - name: build_tests-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - dart --enable-asserts dev\bots\test.dart
-
-    - name: hostonly_devicelab_tests-0-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-1-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-2-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-3-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-4-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-5_last-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    # TODO(ianh): name: add_to_app_tests-windows
-
-    - name: customer_testing-windows
-      script:
-        - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
-        - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
-        - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
-
-# MACOS SHARDS
-# Mac doesn't use caches because they apparently take longer to populate and save
-# than just fetching the data in the first place.
-task:
-  osx_instance:
-    image: mojave-xcode-10.2-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
-    # cpu is always 2
-    # memory is always 8G
-  environment:
-    CIRRUS_WORKING_DIR: "/tmp/$FLUTTER_SDK_PATH_WITH_SPACE"
-    FLUTTER_FRAMEWORK_DIR: "$CIRRUS_WORKING_DIR/bin/cache/artifacts/engine/ios/"
-    PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
-    COCOAPODS_DISABLE_STATS: true
-    CPU: 2
-    MEMORY: 8G
-  setup_script:
-    - date
-    - which flutter
-    - sudo gem install cocoapods
-    - sudo gem install xcpretty
-    - git clean -xffd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-    - flutter config --no-analytics
-    - flutter doctor -v
-    - flutter update-packages
-    - date
-    - which flutter
-  on_failure:
-    failure_script:
-      - date
-      - which flutter
-  matrix:
-    - name: framework_tests-widgets-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - ./dev/bots/download_goldctl.sh
-        - dart --enable-asserts dev/bots/test.dart
-
-    - name: framework_tests-libraries-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - ./dev/bots/download_goldctl.sh
-        - dart --enable-asserts dev/bots/test.dart
-
-    - name: framework_tests-misc-macos
-      # this includes the tests for directories in dev/
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts dev/bots/test.dart
-
-    - name: tool_tests-general-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: tool_tests-commands-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: tool_tests-integration-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    # TODO(ianh): Enable Web tests on macOS.
-
-    - name: build_tests-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-0-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-1-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-2-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-3-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-4-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: hostonly_devicelab_tests-5_last-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: add_to_app_tests-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      skip: true # https://github.com/flutter/flutter/pull/42444
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts dev/bots/test.dart
-
-    - name: customer_testing-macos
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - rm -rf bin/cache/pkg/tests
-        - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
-        - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
-
-    - name: deploy_gallery-macos # linux- and macos- only
-      depends_on:
-        - analyze-linux
-        - framework_tests-widgets-macos
-        - framework_tests-libraries-macos
-        - framework_tests-misc-macos
-        - tool_tests-general-macos
-        - tool_tests-commands-macos
-        - tool_tests-integration-macos
-        - build_tests-macos
-        - hostonly_devicelab_tests-0-macos
-        - hostonly_devicelab_tests-1-macos
-        - hostonly_devicelab_tests-2-macos
-        - hostonly_devicelab_tests-3-macos
-        - hostonly_devicelab_tests-4-macos
-        - hostonly_devicelab_tests-5_last-macos
-        - firebase_test_lab_tests-linux
-      environment:
-        # Apple Fastlane password.
-        FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
-        # Private repo for publishing certificates.
-        PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
-        PUBLISHING_MATCH_REPO_TOKEN: ENCRYPTED[3d1230b744c6ed6c788a91bec741b769401dbcd426b18f9af8080bfeefdfc21913ca4047980c5b5b7ce823f12e7b6b19]
-        # Apple Certificates Match Passphrase
-        MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - ./dev/bots/deploy_gallery.sh
-
-docker_builder:
-  # Only build a new docker image when we tag a release (for dev, beta, or release.)
-  only_if: $CIRRUS_TAG != ''
-  environment:
-    GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
-  depends_on:
-    - docs-linux
-    - analyze-linux
-    - framework_tests-widgets-linux
-    - framework_tests-libraries-linux
-    - framework_tests-misc-linux
-    - tool_tests-general-linux
-    - tool_tests-commands-linux
-    - tool_tests-integration-linux
-    - build_tests-linux
-    - hostonly_devicelab_tests-0-linux
-    - hostonly_devicelab_tests-1-linux
-    - hostonly_devicelab_tests-2-linux
-    - hostonly_devicelab_tests-3-linux
-    - hostonly_devicelab_tests-4-linux
-    - hostonly_devicelab_tests-5_last-linux
-    - firebase_test_lab_tests-linux
-  script:
-    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
-    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
-    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
+## WINDOWS SHARDS
+#task:
+#  windows_container:
+#    image: cirrusci/android-sdk:28-windowsservercore-2019
+#    os_version: 2019
+#    cpu: $CPU
+#    memory: $MEMORY
+#  environment:
+#    # It's not clear that changing the cpu/memory fields here has any impact, so we use
+#    # small numbers...
+#    CPU: 2 # 1-8 without compute credits, 1-30 with
+#    MEMORY: 2G # 256M-24G without compute credits, 256M-90G with
+#    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\$FLUTTER_SDK_PATH_WITH_SPACE"
+#    PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
+#  pub_cache:
+#    folder: $APPDATA\Pub\Cache
+#    fingerprint_script:
+#      - ps: $Environment:OS; Get-ChildItem -Path "$Environment:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
+#  flutter_pkg_cache:
+#    folder: bin\cache\pkg
+#    fingerprint_script: echo %OS% & type bin\internal\*.version
+#  artifacts_cache:
+#    folder: bin\cache\artifacts
+#    fingerprint_script: echo %OS% & type bin\internal\*.version
+#  setup_script:
+#    - git clean -xffd
+#    - git fetch origin
+#    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+#    - flutter config --no-analytics
+#    - flutter doctor -v
+#    - flutter update-packages
+#    - git fetch origin master
+#  matrix:
+#    - name: framework_tests-widgets-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      environment:
+#        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
+#        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+#      script:
+#        - powershell dev\bots\download_goldctl.ps1
+#        - dart --enable-asserts dev\bots\test.dart
+#
+#    - name: framework_tests-libraries-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      environment:
+#        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
+#        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+#      script:
+#        - powershell dev\bots\download_goldctl.ps1
+#        - dart --enable-asserts dev\bots\test.dart
+#
+#    - name: framework_tests-misc-windows
+#      # this includes the tests for directories in dev/
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      script:
+#        - dart --enable-asserts dev\bots\test.dart
+#
+#    - name: tool_tests-general-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: tool_tests-commands-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: tool_tests-integration-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    # TODO(ianh): Enable Web tests on Windows
+#
+#    - name: build_tests-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+#      script:
+#        - dart --enable-asserts dev\bots\test.dart
+#
+#    - name: hostonly_devicelab_tests-0-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-1-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-2-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-3-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-4-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-5_last-windows
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    # TODO(ianh): name: add_to_app_tests-windows
+#
+#    - name: customer_testing-windows
+#      script:
+#        - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
+#        - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
+#        - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
+#
+## MACOS SHARDS
+## Mac doesn't use caches because they apparently take longer to populate and save
+## than just fetching the data in the first place.
+#task:
+#  osx_instance:
+#    image: mojave-xcode-10.2-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
+#    # cpu is always 2
+#    # memory is always 8G
+#  environment:
+#    CIRRUS_WORKING_DIR: "/tmp/$FLUTTER_SDK_PATH_WITH_SPACE"
+#    FLUTTER_FRAMEWORK_DIR: "$CIRRUS_WORKING_DIR/bin/cache/artifacts/engine/ios/"
+#    PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
+#    COCOAPODS_DISABLE_STATS: true
+#    CPU: 2
+#    MEMORY: 8G
+#  setup_script:
+#    - date
+#    - which flutter
+#    - sudo gem install cocoapods
+#    - sudo gem install xcpretty
+#    - git clean -xffd
+#    - git fetch origin
+#    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+#    - flutter config --no-analytics
+#    - flutter doctor -v
+#    - flutter update-packages
+#    - date
+#    - which flutter
+#  on_failure:
+#    failure_script:
+#      - date
+#      - which flutter
+#  matrix:
+#    - name: framework_tests-widgets-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      environment:
+#        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+#        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - ./dev/bots/download_goldctl.sh
+#        - dart --enable-asserts dev/bots/test.dart
+#
+#    - name: framework_tests-libraries-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      environment:
+#        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+#        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - ./dev/bots/download_goldctl.sh
+#        - dart --enable-asserts dev/bots/test.dart
+#
+#    - name: framework_tests-misc-macos
+#      # this includes the tests for directories in dev/
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts dev/bots/test.dart
+#
+#    - name: tool_tests-general-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: tool_tests-commands-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: tool_tests-integration-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    # TODO(ianh): Enable Web tests on macOS.
+#
+#    - name: build_tests-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+#      script:
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-0-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-1-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-2-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-3-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-4-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: hostonly_devicelab_tests-5_last-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts ./dev/bots/test.dart
+#
+#    - name: add_to_app_tests-macos
+#      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+#      skip: true # https://github.com/flutter/flutter/pull/42444
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - dart --enable-asserts dev/bots/test.dart
+#
+#    - name: customer_testing-macos
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - rm -rf bin/cache/pkg/tests
+#        - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
+#        - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
+#
+#    - name: deploy_gallery-macos # linux- and macos- only
+#      depends_on:
+#        - analyze-linux
+#        - framework_tests-widgets-macos
+#        - framework_tests-libraries-macos
+#        - framework_tests-misc-macos
+#        - tool_tests-general-macos
+#        - tool_tests-commands-macos
+#        - tool_tests-integration-macos
+#        - build_tests-macos
+#        - hostonly_devicelab_tests-0-macos
+#        - hostonly_devicelab_tests-1-macos
+#        - hostonly_devicelab_tests-2-macos
+#        - hostonly_devicelab_tests-3-macos
+#        - hostonly_devicelab_tests-4-macos
+#        - hostonly_devicelab_tests-5_last-macos
+#        - firebase_test_lab_tests-linux
+#      environment:
+#        # Apple Fastlane password.
+#        FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
+#        # Private repo for publishing certificates.
+#        PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
+#        PUBLISHING_MATCH_REPO_TOKEN: ENCRYPTED[3d1230b744c6ed6c788a91bec741b769401dbcd426b18f9af8080bfeefdfc21913ca4047980c5b5b7ce823f12e7b6b19]
+#        # Apple Certificates Match Passphrase
+#        MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
+#      script:
+#        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+#        - ./dev/bots/deploy_gallery.sh
+#
+#docker_builder:
+#  # Only build a new docker image when we tag a release (for dev, beta, or release.)
+#  only_if: $CIRRUS_TAG != ''
+#  environment:
+#    GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
+#  depends_on:
+#    - docs-linux
+#    - analyze-linux
+#    - framework_tests-widgets-linux
+#    - framework_tests-libraries-linux
+#    - framework_tests-misc-linux
+#    - tool_tests-general-linux
+#    - tool_tests-commands-linux
+#    - tool_tests-integration-linux
+#    - build_tests-linux
+#    - hostonly_devicelab_tests-0-linux
+#    - hostonly_devicelab_tests-1-linux
+#    - hostonly_devicelab_tests-2-linux
+#    - hostonly_devicelab_tests-3-linux
+#    - hostonly_devicelab_tests-4-linux
+#    - hostonly_devicelab_tests-5_last-linux
+#    - firebase_test_lab_tests-linux
+#  script:
+#    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
+#    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
+#    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
