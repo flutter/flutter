@@ -2255,4 +2255,54 @@ Future<void> main() async {
       moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01)
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/40239.
+  testWidgets(
+    'In a pop transition, when fromHero is null, the to hero should eventually become visible',
+    (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+      StateSetter setState;
+      bool shouldDisplayHero = true;
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: Hero(
+            tag: navigatorKey,
+            child: const Placeholder(),
+          ),
+        ),
+      );
+
+      final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return CupertinoPageScaffold(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return shouldDisplayHero
+                  ? Hero(tag: navigatorKey, child: const Text('text'))
+                  : const SizedBox();
+              },
+            ),
+          );
+        },
+      );
+
+      navigatorKey.currentState.push(route2);
+      await tester.pumpAndSettle();
+
+      expect(find.text('text'), findsOneWidget);
+      expect(find.byType(Placeholder), findsNothing);
+
+      setState(() { shouldDisplayHero = false; });
+      await tester.pumpAndSettle();
+
+      expect(find.text('text'), findsNothing);
+
+      navigatorKey.currentState.pop();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Placeholder), findsOneWidget);
+    },
+  );
 }
