@@ -20,7 +20,7 @@ import '../globals.dart';
 class WebAssetServer {
   @visibleForTesting
   WebAssetServer(this._httpServer) {
-    _httpServer.listen(_handleOrThrow);
+    _httpServer.listen(_handleRequest);
   }
 
   // Fallback to "application/octet-stream" on null which
@@ -28,58 +28,48 @@ class WebAssetServer {
   static const String _kDefaultMimeType = 'application/octet-stream';
 
   /// Start the web asset server on a [hostname] and [port].
-  ///
-  /// Throws a [ToolExit] if the server fails to bind to the correct address.
   static Future<WebAssetServer> start(String hostname, int port) async {
     try {
       final HttpServer httpServer = await HttpServer.bind(hostname, port);
       return WebAssetServer(httpServer);
     } on SocketException catch (err) {
-      throwToolExit('Web asset server failed to bind to $hostname:$port\n$err');
+      throwToolExit('Failed to bind web development server:\n$err');
     }
     assert(false);
     return null;
   }
 
   final HttpServer _httpServer;
-  final Map<Uri, Uint8List> _files = <Uri, Uint8List>{};
-
-  // If the request handler fails with a filesystem exception, return a 500.
-  // For other types of errors, tear down the asset server.
-  Future<void> _handleOrThrow(HttpRequest request) async {
-    try {
-      await _handleRequest(request);
-    // Assume exception types are recoverble. On error types we should take
-    // down the server.
-    } on Exception {
-      final HttpResponse response = request.response;
-      response.statusCode = HttpStatus.internalServerError;
-      await response.close();
-    } catch (err) {
-      throwToolExit('Web asset server failed to handle request:\n$err');
-    }
-  }
+  final Map<String, Uint8List> _files = <String, Uint8List>{};
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   Future<void> _handleRequest(HttpRequest request) async {
-    final File file = fs.file(Uri.base.resolve(request.uri.path));
-    final String fileExtension = fs.path.extension(file.path);
     final HttpResponse response = request.response;
-
-    // If this is a JavaScript file, it must be in the in-memory cache.
-    // Attempt to look up the file by URI, returning a 404 if it is not
-    // found. The tool doesn't currently consider the case of JavaScript files
-    // as assets.
-    if (fileExtension == '.js') {
-      final List<int> bytes = _files[file.uri];
-      if (bytes != null) {
-        response.headers
-          ..add('Content-Length', bytes.length)
-          ..add('Content-Type', 'application/javascript');
-        response.add(bytes);
+    // If the response is `/`, then we are requesting the index file.
+    if (request.uri.path == '/') {
+      final File indexFile = fs.currentDirectory
+        .childDirectory('web')
+        .childFile('index.html');
+      if (indexFile.existsSync()) {
+        response.headers.add('Content-Type', 'text/html');
+        response.headers.add('Content-Length', indexFile.lengthSync());
+        await response.addStream(indexFile.openRead());
       } else {
         response.statusCode = HttpStatus.notFound;
       }
+      await response.close();
+      return;
+    }
+
+    // If this is a JavaScript file, it must be in the in-memory cache.
+    // Attempt to look up the file by URI, returning a 404 if it is not
+    // found.
+    if (_files.containsKey(request.uri.path)) {
+      final List<int> bytes = _files[request.uri.path];
+      response.headers
+        ..add('Content-Length', bytes.length)
+        ..add('Content-Type', 'application/javascript');
+      response.add(bytes);
       await response.close();
       return;
     }
@@ -87,71 +77,75 @@ class WebAssetServer {
     // likely coming from a source map request. Attempt to look in the
     // local filesystem for it, and return a 404 if it is not found. The tool
     // doesn't currently consider the case of Dart files as assets.
-    if (fileExtension == '.dart') {
-      if (file.existsSync()) {
-        response.headers.add('Content-Length', file.lengthSync());
-        await response.addStream(file.openRead());
-      } else {
-        response.statusCode = HttpStatus.notFound;
-      }
-      await response.close();
-      return;
-    }
+    File file = fs.file(Uri.base.resolve(request.uri.path));
+
     // If both of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
-    final String assetPath = file.path.replaceFirst('assets/', '');
-    final File assetFile = fs.file(fs.path.join(getAssetBuildDirectory(), fs.path.relative(assetPath)));
-    if (!assetFile.existsSync()) {
+    if (!file.existsSync()) {
+      final String assetPath = file.path.replaceFirst('/assets/', '');
+      file = fs.file(fs.path.join(getAssetBuildDirectory(), fs.path.relative(assetPath)));
+    }
+
+    if (!file.existsSync()) {
       response.statusCode = HttpStatus.notFound;
       await response.close();
       return;
     }
-    final int length = assetFile.lengthSync();
+    final int length = file.lengthSync();
     // Attempt to determine the file's mime type. if this is not provided some
     // browsers will refuse to render images/show video et cetera. If the tool
     // cannot determine a mime type, fall back to application/octet-stream.
     String mimeType;
     if (length >= 12) {
       mimeType= mime.lookupMimeType(
-        assetFile.path,
-        headerBytes: await assetFile.openRead(0, 12).first,
+        file.path,
+        headerBytes: await file.openRead(0, 12).first,
       );
     }
     mimeType ??= _kDefaultMimeType;
     response.headers.add('Content-Length', length);
     response.headers.add('Content-Type', mimeType);
-    await response.addStream(assetFile.openRead());
+    await response.addStream(file.openRead());
     await response.close();
   }
 
-  /// Tear down the runnin http server.
+  /// Tear down the http server running.
   Future<void> dispose() {
     return _httpServer.close();
   }
 
+  /// Write a single file into the in-memory cache.
+  void writeFile(String filePath, String contents) {
+    _files[filePath] = Uint8List.fromList(utf8.encode(contents));
+  }
+
   /// Update the in-memory asset server with the provided source and manifest files.
-  Future<void> write(File sourceFile, File manifestFile) async {
+  ///
+  /// Returns a list of updated modules.
+  List<String> write(File sourceFile, File manifestFile) {
+    final List<String> modules = <String>[];
     final Uint8List bytes = sourceFile.readAsBytesSync();
     final Map<String, Object> manifest = json.decode(manifestFile.readAsStringSync());
-    for (String fileUri in manifest.keys) {
-      final Uri uri = Uri.tryParse(fileUri);
-      if (uri == null || uri.scheme != 'file') {
-        printTrace('Invalid manfiest file uri: $fileUri');
+    for (String filePath in manifest.keys) {
+      if (filePath == null) {
+        printTrace('Invalid manfiest file: $filePath');
         continue;
       }
-      final List<Object> offsets = manifest[fileUri];
+      final List<Object> offsets = manifest[filePath];
       if (offsets.length != 2) {
         printTrace('Invalid manifest byte offsets: $offsets');
         continue;
       }
       final int start = offsets[0];
       final int end = offsets[1];
-      if (end > bytes.lengthInBytes || start < 0) {
-        printTrace('Invalid byte slice: [$start, $end]');
+      if (start < 0 || end > bytes.lengthInBytes) {
+        printTrace('Invalid byte index: [$start, $end]');
         continue;
       }
       final Uint8List byteView = Uint8List.view(bytes.buffer, start, end - start);
-      _files[uri] = byteView;
+      _files[filePath] = byteView;
+      modules.add(filePath);
     }
+    return modules;
   }
 }

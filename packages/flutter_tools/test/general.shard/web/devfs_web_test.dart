@@ -73,25 +73,25 @@ void main() {
 
     // Missing ending offset.
     final File manifestMissingOffset = fs.file('manifestA')
-      ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0]}));
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0]}));
     // Non-file URI.
     final File manifestNonFileScheme = fs.file('manifestA')
-      ..writeAsStringSync(json.encode(<String, Object>{'http:///foo.js': <int>[0, 10]}));
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, 10]}));
 
     final File manifestOutOfBounds = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0, 100]}));
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, 100]}));
 
-    await webAssetServer.write(source, manifestMissingOffset);
-    await webAssetServer.write(source, manifestNonFileScheme);
-    await webAssetServer.write(source, manifestOutOfBounds);
+    expect(webAssetServer.write(source, manifestMissingOffset), isEmpty);
+    expect(webAssetServer.write(source, manifestNonFileScheme), isEmpty);
+    expect(webAssetServer.write(source, manifestOutOfBounds), isEmpty);
   }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
     final File manifest = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0, source.lengthSync()]}));
-    await webAssetServer.write(source, manifest);
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, source.lengthSync()]}));
+    webAssetServer.write(source, manifest);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
     requestController.add(request);
@@ -106,8 +106,8 @@ void main() {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
     final File manifest = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0, source.lengthSync()]}));
-    await webAssetServer.write(source, manifest);
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, source.lengthSync()]}));
+    webAssetServer.write(source, manifest);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/bar.js'));
     requestController.add(request);
