@@ -285,6 +285,24 @@ Future<void> main() async {
       resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
     });
 
+    testWidgets('do not resize when null cache dimensions', (WidgetTester tester) async {
+      final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
+      final FadeInImage image = FadeInImage.memoryNetwork(
+        placeholder: testBytes,
+        image: 'test.com',
+      );
+
+      final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+        expect(cacheWidth, null);
+        expect(cacheHeight, null);
+        return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+      };
+      // image.placeholder should be an instance of MemoryImage instead of ResizeImage
+      final MemoryImage memoryImage = image.placeholder;
+      expect(image.placeholder is MemoryImage, true);
+      memoryImage.load(await memoryImage.obtainKey(ImageConfiguration.empty), decode);
+    });
+
     group('semantics', () {
       testWidgets('only one Semantics node appears within FadeInImage', (WidgetTester tester) async {
         final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
