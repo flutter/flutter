@@ -67,18 +67,27 @@ class MouseCursorActivateDetails {
 
 /// An interface for mouse cursor definitions.
 ///
-/// A [MouseCursor] object is a stateless definition of a kind of mouse cursor
-/// to be used as a parameter of widgets.
+/// A mouse cursor is a graphical image on the screen that echoes the movement
+/// of a pointer device, such as a mouse or a stylus. A [MouseCursor] object
+/// is a stateless definition of a kind of mouse cursor, such as an arrow,
+/// a pointing hand, or an I-beam.
 ///
-/// When a mouse pointer enters a region that is assigned with a mouse cursor,
-/// the cursor's [MouseCursor.activate] is called.
+/// A [MouseCursor] object is used by being assigned to a region. The most
+/// common way of doing so is [MouseRegion], which is wrapped and exposed by
+/// many other widgets.
+///
+/// When a pointer enters a region that is assigned with a [MouseCursor], the
+/// cursor's [MouseCursor.activate] is called.
 ///
 /// See also:
 ///
-///  * [MouseRegion], which is a common way of assigning a region with a mouse
-///    cursor.
+///  * [MouseRegion], which is a common way of assigning a region with a
+///    [MouseCursor].
 ///  * [MouseTracker], which determines the cursor that each device should show,
 ///    and dispatches the changing callbacks.
+///  * [SystemMouseCursors], which provies many system cursors.
+///  * [NoopMouseCursors], which is a special type of mouse cursor that does
+///    nothing.
 @immutable
 abstract class MouseCursor {
   /// Create a mouse cursor.

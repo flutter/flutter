@@ -65,9 +65,11 @@ class _EnsuredImplementedSystemMouseCursor extends _SystemMouseCursor {
 
 /// A collection of system [MouseCursor]s.
 ///
-/// This is a superset of system cursors from all platforms that Flutter
-/// supports. If a cursor is unimplemented by a platform, it will fallback to
-/// another cursor or the basic cursor.
+/// System cursors are mouse cursors that are included in a platform, available
+/// without external resources. [SystemMouseCursors] is a superset of the system
+/// cursors of every platform that Flutter supports. A cursor that is
+/// unimplemented by a platform will fallback to another cursor or the basic
+/// cursor.
 class SystemMouseCursors {
   /// A special value that tells Flutter to release the control of cursors.
   ///
@@ -91,8 +93,8 @@ class SystemMouseCursors {
   /// to be clickable. Typically the shape of a pointing hand.
   static const MouseCursor click = _SystemMouseCursor(SystemMouseCursorShape.click, 'click');
 
-  /// A cursor that indicates a selectable text. Typically the shape of an
-  /// I-beam.
+  /// A cursor that indicates a selectable text. Typically the shape of a
+  /// capital I.
   static const MouseCursor text = _SystemMouseCursor(SystemMouseCursorShape.text, 'text');
 
   /// A cursor that indicates an unpermitted action. Typically the shape of a
@@ -111,8 +113,13 @@ class SystemMouseCursors {
 /// The base class of a manager that maintains states related to mouse cursor
 /// and provides a simple interface to operate [MouseCursor]s.
 ///
+/// Widgets should not use [MouseCursorManager] directly, instead they should
+/// assign [MouseCursor]s to regions, and then [MouseTracker] will handle cursor
+/// changes accordingly.
+///
 /// See also:
 ///
+///  * [MouseCursor], which talks more about handling mouse cursors.
 ///  * [StandardMouseCursorManager], which implements the platform-specific
 ///    code based on the platform that this program is running on.
 ///  * [MouseTracker], which uses this class.

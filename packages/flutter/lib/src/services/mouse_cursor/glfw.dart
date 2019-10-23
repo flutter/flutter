@@ -12,8 +12,8 @@ import 'common.dart';
 // It is separated to a class for the conventience of reference by the shell
 // implementation.
 @immutable
-class _GLFWMouseCursorActions {
-  const _GLFWMouseCursorActions(this.mouseCursorChannel);
+class _GLFWPlatformActions {
+  const _GLFWPlatformActions(this.mouseCursorChannel);
 
   final MethodChannel mouseCursorChannel;
 
@@ -49,12 +49,11 @@ class _GLFWMouseCursorActions {
 class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
   /// Create a [MouseCursorGLFWDelegate] by providing the method channel to use.
   ///
-  /// The [mouseCursorChannel] must not be null.
-  MouseCursorGLFWDelegate({@required this.mouseCursorChannel})
-    : assert(mouseCursorChannel != null);
-
-  /// The method channel to control the platform with.
-  final MethodChannel mouseCursorChannel;
+  /// The [mouseCursorChannel] must not be null, and is usually
+  /// [SystemChannels.mouseCursor].
+  MouseCursorGLFWDelegate({@required MethodChannel mouseCursorChannel})
+    : assert(mouseCursorChannel != null),
+      _platform = _GLFWPlatformActions(mouseCursorChannel);
 
   // System cursor constants are used to set system cursor on GLFW.
   // Must be kept in sync with GLFW's
@@ -72,23 +71,22 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
   /// used internally to set system cursor.
   static const int kSystemConstantHand = 0x00036004;
 
+  final _GLFWPlatformActions _platform;
   bool _isHidden = false;
 
   Future<bool> _activateSystemConstant(int systemConstant) async {
     if (_isHidden) {
       _isHidden = false;
-      await _GLFWMouseCursorActions(mouseCursorChannel)
-        .setHidden(hidden: false);
+      await _platform.setHidden(hidden: false);
     }
-    await _GLFWMouseCursorActions(mouseCursorChannel)
-      .setAsSystemCursor(systemConstant: systemConstant);
+    await _platform.setAsSystemCursor(systemConstant: systemConstant);
     return true;
   }
 
   Future<bool> _hideCursor() async {
     if (!_isHidden) {
       _isHidden = true;
-      await _GLFWMouseCursorActions(mouseCursorChannel).setHidden(hidden: true);
+      await _platform.setHidden(hidden: true);
     }
     return true;
   }

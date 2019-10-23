@@ -12,8 +12,8 @@ import 'common.dart';
 // It is separated to a class for the conventience of reference by the shell
 // implementation.
 @immutable
-class _AndroidMouseCursorActions {
-  const _AndroidMouseCursorActions(this.mouseCursorChannel);
+class _AndroidPlatformActions {
+  const _AndroidPlatformActions(this.mouseCursorChannel);
 
   final MethodChannel mouseCursorChannel;
 
@@ -37,11 +37,11 @@ class _AndroidMouseCursorActions {
 class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
   /// Create a [MouseCursorAndroidDelegate] by providing the method channel to use.
   ///
-  /// The [mouseCursorChannel] must not be null.
-  const MouseCursorAndroidDelegate({@required this.mouseCursorChannel});
-
-  /// The method channel to control the platform with.
-  final MethodChannel mouseCursorChannel;
+  /// The [mouseCursorChannel] must not be null, and is usually
+  /// [SystemChannels.mouseCursor].
+  MouseCursorAndroidDelegate({@required MethodChannel mouseCursorChannel})
+    : assert(mouseCursorChannel != null),
+      _platform = _AndroidPlatformActions(mouseCursorChannel);
 
   // System cursor constants are used to set system cursor on Android.
   // Must be kept in sync with Android's [PointerIcon#Constants](https://developer.android.com/reference/android/view/PointerIcon.html#constants_2)
@@ -74,9 +74,10 @@ class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
   /// used internally to set system cursor.
   static const int kSystemConstantText = 1008;
 
+  final _AndroidPlatformActions _platform;
+
   Future<bool> _activateSystemConstant(int systemConstant) async {
-    await _AndroidMouseCursorActions(mouseCursorChannel)
-      .setAsSystemCursor(systemConstant: systemConstant);
+    await _platform.setAsSystemCursor(systemConstant: systemConstant);
     return true;
   }
 

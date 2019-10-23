@@ -12,8 +12,8 @@ import 'common.dart';
 // It is separated to a class for the conventience of reference by the shell
 // implementation.
 @immutable
-class _MacOSMouseCursorActions {
-  const _MacOSMouseCursorActions(this.mouseCursorChannel);
+class _MacOSPlatformActions {
+  const _MacOSPlatformActions(this.mouseCursorChannel);
 
   final MethodChannel mouseCursorChannel;
 
@@ -47,12 +47,11 @@ class _MacOSMouseCursorActions {
 class MouseCursorMacOSDelegate extends MouseCursorPlatformDelegate {
   /// Create a [MouseCursorMacOSDelegate] by providing the method channel to use.
   ///
-  /// The [mouseCursorChannel] must not be null.
-  MouseCursorMacOSDelegate({@required this.mouseCursorChannel})
-    : assert(mouseCursorChannel != null);
-
-  /// The method channel to control the platform with.
-  final MethodChannel mouseCursorChannel;
+  /// The [mouseCursorChannel] must not be null, and is usually
+  /// [SystemChannels.mouseCursor].
+  MouseCursorMacOSDelegate({@required MethodChannel mouseCursorChannel})
+    : assert(mouseCursorChannel != null),
+      _platform = _MacOSPlatformActions(mouseCursorChannel);
 
   // System cursor constants are used to set system cursor on macOS.
   // The list should be kept in sync with
@@ -133,23 +132,22 @@ class MouseCursorMacOSDelegate extends MouseCursorPlatformDelegate {
   /// used internally to set system cursor.
   static const int kSystemConstantContextualMenu = 0x0012;
 
+  final _MacOSPlatformActions _platform;
   bool _isHidden = false;
 
   Future<bool> _activateSystemConstant(int systemConstant) async {
     if (_isHidden) {
       _isHidden = false;
-      await _MacOSMouseCursorActions(mouseCursorChannel)
-        .setHidden(hidden: false);
+      await _platform.setHidden(hidden: false);
     }
-    await _MacOSMouseCursorActions(mouseCursorChannel)
-      .setAsSystemCursor(systemConstant: systemConstant);
+    await _platform.setAsSystemCursor(systemConstant: systemConstant);
     return true;
   }
 
   Future<bool> _hideCursor() async {
     if (!_isHidden) {
       _isHidden = true;
-      await _MacOSMouseCursorActions(mouseCursorChannel).setHidden(hidden: true);
+      await _platform.setHidden(hidden: true);
     }
     return true;
   }
