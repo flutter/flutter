@@ -1,5 +1,10 @@
 # Recipe Changelog
 
+### 23 Oct 2019
+
+* Recipe Link: https://chromium-review.googlesource.com/c/chromium/tools/build/+/1875314
+* Reason: Using `unopt` flutter_tester is slower than the optimized alternative.
+
 ### 21 Oct 2019
 
 * Recipe Link: https://chromium-review.googlesource.com/c/chromium/tools/build/+/1872832
