@@ -8,6 +8,7 @@ import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
+import 'build_info.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
@@ -95,11 +96,10 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     String outputFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    bool enableAsserts = false,
+    @required BuildMode buildMode,
     bool causalAsyncStacks = true,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    bool targetProductVm = false,
     // These arguments are currently unused.
     String sdkRoot,
     String packagesPath,
@@ -133,11 +133,10 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       outputFilePath: outputFilePath,
       linkPlatformKernelIn: linkPlatformKernelIn,
       aot: aot,
-      enableAsserts: enableAsserts,
+      buildMode: buildMode,
       causalAsyncStacks: causalAsyncStacks,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
-      targetProductVm: targetProductVm,
       sdkRoot: sdkRoot,
       packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[
@@ -165,7 +164,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   /// codegen mode.
   static Future<ResidentCompiler> create({
     @required FlutterProject flutterProject,
-    bool enableAsserts = false,
+    @required BuildMode buildMode,
     bool trackWidgetCreation = false,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     bool unsafePackageSerialization = false,
@@ -176,7 +175,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     codeGenerator.updatePackages(flutterProject);
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      enableAsserts: enableAsserts,
+      buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
       packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[

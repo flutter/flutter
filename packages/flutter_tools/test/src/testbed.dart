@@ -22,8 +22,11 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:process/process.dart';
 
 import 'context.dart';
+import 'fake_process_manager.dart';
+import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
@@ -32,6 +35,7 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
   FileSystem: () => MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
+  ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
@@ -728,37 +732,5 @@ class TestFeatureFlags implements FeatureFlags {
         return isNewAndroidEmbeddingEnabled;
     }
     return false;
-  }
-}
-
-class ThrowingPub implements Pub {
-  @override
-  Future<void> batch(List<String> arguments, {
-    PubContext context,
-    String directory,
-    MessageFilter filter,
-    String failureMessage = 'pub failed',
-    bool retry,
-    bool showTraceForErrors,
-  }) {
-    throw UnsupportedError('Attempted to inovke pub during test.');
-  }
-
-  @override
-  Future<void> get({
-    PubContext context,
-    String directory,
-    bool skipIfAbsent = false,
-    bool upgrade = false,
-    bool offline = false,
-    bool checkLastModified = true,
-    bool skipPubspecYamlCheck = false,
-  }) {
-    throw UnsupportedError('Attempted to inovke pub during test.');
-  }
-
-  @override
-  Future<void> interactively(List<String> arguments, {String directory}) {
-    throw UnsupportedError('Attempted to inovke pub during test.');
   }
 }
