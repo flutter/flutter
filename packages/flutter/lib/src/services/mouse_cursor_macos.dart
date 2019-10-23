@@ -17,13 +17,13 @@ class _MacOSPlatformActions {
 
   final MethodChannel mouseCursorChannel;
 
-  // Set cursor as a sytem cursor specified by `systemConstant`.
-  Future<void> setAsSystemCursor({@required int systemConstant}) {
-    assert(systemConstant != null);
+  // Set cursor as a sytem cursor specified by `platformConstant`.
+  Future<void> setAsSystemCursor({@required int platformConstant}) {
+    assert(platformConstant != null);
     return mouseCursorChannel.invokeMethod<void>(
       'setAsSystemCursor',
       <String, dynamic>{
-        'systemConstant': systemConstant,
+        'platformConstant': platformConstant,
       },
     );
   }
@@ -62,85 +62,85 @@ class MouseCursorMacOSDelegate extends MouseCursorPlatformDelegate {
 
   /// The constant that represents macOS's `NSCursor.arrowCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantArrow = 0x0001;
+  static const int kPlatformConstantArrow = 0x0001;
 
   /// The constant that represents macOS's `NSCursor.iBeamCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantIBeam = 0x0002;
+  static const int kPlatformConstantIBeam = 0x0002;
 
   /// The constant that represents macOS's `NSCursor.crosshairCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantCrosshair = 0x0003;
+  static const int kPlatformConstantCrosshair = 0x0003;
 
   /// The constant that represents macOS's `NSCursor.closedHandCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantClosedHand = 0x0004;
+  static const int kPlatformConstantClosedHand = 0x0004;
 
   /// The constant that represents macOS's `NSCursor.openHandCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantOpenHand = 0x0005;
+  static const int kPlatformConstantOpenHand = 0x0005;
 
   /// The constant that represents macOS's `NSCursor.pointingHandCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantPointingHand = 0x0006;
+  static const int kPlatformConstantPointingHand = 0x0006;
 
   /// The constant that represents macOS's `NSCursor.resizeLeftCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantResizeLeft = 0x0007;
+  static const int kPlatformConstantResizeLeft = 0x0007;
 
   /// The constant that represents macOS's `NSCursor.resizeRightCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantResizeRight = 0x0008;
+  static const int kPlatformConstantResizeRight = 0x0008;
 
   /// The constant that represents macOS's `NSCursor.resizeLeftRightCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantResizeLeftRight = 0x0009;
+  static const int kPlatformConstantResizeLeftRight = 0x0009;
 
   /// The constant that represents macOS's `NSCursor.resizeUpCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantResizeUp = 0x000a;
+  static const int kPlatformConstantResizeUp = 0x000a;
 
   /// The constant that represents macOS's `NSCursor.resizeDownCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantResizeDown = 0x000b;
+  static const int kPlatformConstantResizeDown = 0x000b;
 
   /// The constant that represents macOS's `NSCursor.resizeUpDownCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantResizeUpDown = 0x000c;
+  static const int kPlatformConstantResizeUpDown = 0x000c;
 
   /// The constant that represents macOS's `NSCursor.disappearingItemCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantDisappearingItem = 0x000d;
+  static const int kPlatformConstantDisappearingItem = 0x000d;
 
   /// The constant that represents macOS's `NSCursor.iBeamCursorForVerticalLayoutCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantIBeamCursorForVerticalLayout = 0x000e;
+  static const int kPlatformConstantIBeamCursorForVerticalLayout = 0x000e;
 
   /// The constant that represents macOS's `NSCursor.operationNotAllowed`,
   /// used internally to set system cursor.
-  static const int kSystemConstantOperationNotAllowed = 0x000f;
+  static const int kPlatformConstantOperationNotAllowed = 0x000f;
 
   /// The constant that represents macOS's `NSCursor.dragLinkCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantDragLink = 0x0010;
+  static const int kPlatformConstantDragLink = 0x0010;
 
   /// The constant that represents macOS's `NSCursor.dragCopyCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantDragCopy = 0x0011;
+  static const int kPlatformConstantDragCopy = 0x0011;
 
   /// The constant that represents macOS's `NSCursor.contextualMenuCursor`,
   /// used internally to set system cursor.
-  static const int kSystemConstantContextualMenu = 0x0012;
+  static const int kPlatformConstantContextualMenu = 0x0012;
 
   final _MacOSPlatformActions _platform;
   bool _isHidden = false;
 
-  Future<bool> _activateSystemConstant(int systemConstant) async {
+  Future<bool> _activatePlatformConstant(int platformConstant) async {
     if (_isHidden) {
       _isHidden = false;
       await _platform.setHidden(hidden: false);
     }
-    await _platform.setAsSystemCursor(systemConstant: systemConstant);
+    await _platform.setAsSystemCursor(platformConstant: platformConstant);
     return true;
   }
 
@@ -154,21 +154,21 @@ class MouseCursorMacOSDelegate extends MouseCursorPlatformDelegate {
 
   @override
   Future<bool> activateSystemCursor(MouseCursorPlatformActivateSystemCursorDetails details) async {
-    switch (details.shape) {
-      case SystemMouseCursorShape.none:
+    switch (details.systemShape) {
+      case MouseCursorSystemShape.none:
         return _hideCursor();
-      case SystemMouseCursorShape.basic:
-        return _activateSystemConstant(MouseCursorMacOSDelegate.kSystemConstantArrow);
-      case SystemMouseCursorShape.click:
-        return _activateSystemConstant(MouseCursorMacOSDelegate.kSystemConstantPointingHand);
-      case SystemMouseCursorShape.text:
-        return _activateSystemConstant(MouseCursorMacOSDelegate.kSystemConstantIBeam);
-      case SystemMouseCursorShape.forbidden:
-        return _activateSystemConstant(MouseCursorMacOSDelegate.kSystemConstantDisappearingItem);
-      case SystemMouseCursorShape.grab:
-        return _activateSystemConstant(MouseCursorMacOSDelegate.kSystemConstantClosedHand);
-      case SystemMouseCursorShape.grabbing:
-        return _activateSystemConstant(MouseCursorMacOSDelegate.kSystemConstantOpenHand);
+      case MouseCursorSystemShape.basic:
+        return _activatePlatformConstant(MouseCursorMacOSDelegate.kPlatformConstantArrow);
+      case MouseCursorSystemShape.click:
+        return _activatePlatformConstant(MouseCursorMacOSDelegate.kPlatformConstantPointingHand);
+      case MouseCursorSystemShape.text:
+        return _activatePlatformConstant(MouseCursorMacOSDelegate.kPlatformConstantIBeam);
+      case MouseCursorSystemShape.forbidden:
+        return _activatePlatformConstant(MouseCursorMacOSDelegate.kPlatformConstantDisappearingItem);
+      case MouseCursorSystemShape.grab:
+        return _activatePlatformConstant(MouseCursorMacOSDelegate.kPlatformConstantClosedHand);
+      case MouseCursorSystemShape.grabbing:
+        return _activatePlatformConstant(MouseCursorMacOSDelegate.kPlatformConstantOpenHand);
       default:
         break;
     }

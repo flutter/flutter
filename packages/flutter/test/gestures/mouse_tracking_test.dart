@@ -67,7 +67,7 @@ void main() {
 
   // System cursors must be constants.
   const MouseCursor testCursor = SystemMouseCursors.grabbing;
-  const SystemMouseCursorShape testCursorShape = SystemMouseCursorShape.grabbing;
+  const MouseCursorSystemShape testCursorShape = MouseCursorSystemShape.grabbing;
 
   // Set up a trivial test environment that includes one annotation.
   // This annotation records the enter, hover, and exit events it receives to
@@ -153,7 +153,7 @@ void main() {
     ]));
     expect(listenerLogs, <bool>[true]);
     expect(cursorRequests, const <MouseCursorPlatformActivateSystemCursorDetails>[
-      MouseCursorPlatformActivateSystemCursorDetails(device: 0, shape: testCursorShape),
+      MouseCursorPlatformActivateSystemCursorDetails(device: 0, systemShape: testCursorShape),
     ]);
     cursorRequests.clear();
     events.clear();
@@ -181,7 +181,7 @@ void main() {
     ]));
     expect(listenerLogs, <bool>[false]);
     expect(cursorRequests, const <MouseCursorPlatformActivateSystemCursorDetails>[
-      MouseCursorPlatformActivateSystemCursorDetails(device: 0, shape: SystemMouseCursorShape.basic),
+      MouseCursorPlatformActivateSystemCursorDetails(device: 0, systemShape: MouseCursorSystemShape.basic),
     ]);
     cursorRequests.clear();
     events.clear();
@@ -197,7 +197,7 @@ void main() {
     ]));
     expect(listenerLogs, <bool>[true]);
     expect(cursorRequests, const <MouseCursorPlatformActivateSystemCursorDetails>[
-      MouseCursorPlatformActivateSystemCursorDetails(device: 0, shape: testCursorShape),
+      MouseCursorPlatformActivateSystemCursorDetails(device: 0, systemShape: testCursorShape),
     ]);
     cursorRequests.clear();
     events.clear();

@@ -17,15 +17,15 @@ class _AndroidPlatformActions {
 
   final MethodChannel mouseCursorChannel;
 
-  // Set cursor as a sytem cursor specified by `systemConstant`.
+  // Set cursor as a sytem cursor specified by `platformConstant`.
   Future<void> setAsSystemCursor({
-    @required int systemConstant,
+    @required int platformConstant,
   }) {
-    assert(systemConstant != null);
+    assert(platformConstant != null);
     return mouseCursorChannel.invokeMethod<void>(
       'setAsSystemCursor',
       <String, dynamic>{
-        'systemConstant': systemConstant,
+        'platformConstant': platformConstant,
       },
     );
   }
@@ -48,61 +48,61 @@ class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
 
   /// The same constant as Android's `PointerIcon.TYPE_DEFAULT`,
   /// used internally to set system cursor.
-  static const int kSystemConstantDefault = 1000;
+  static const int kPlatformConstantDefault = 1000;
 
   /// The same constant as Android's `PointerIcon.TYPE_ARROW`,
   /// used internally to set system cursor.
-  static const int kSystemConstantArrow = 1000;
+  static const int kPlatformConstantArrow = 1000;
 
   /// The same constant as Android's `PointerIcon.TYPE_GRAB`,
   /// used internally to set system cursor.
-  static const int kSystemConstantGrab = 1020;
+  static const int kPlatformConstantGrab = 1020;
 
   /// The same constant as Android's `PointerIcon.TYPE_GRABBING`,
   /// used internally to set system cursor.
-  static const int kSystemConstantGrabbing = 1021;
+  static const int kPlatformConstantGrabbing = 1021;
 
   /// The same constant as Android's `PointerIcon.TYPE_HAND`,
   /// used internally to set system cursor.
-  static const int kSystemConstantHand = 1002;
+  static const int kPlatformConstantHand = 1002;
 
   /// The same constant as Android's `PointerIcon.TYPE_NULL`,
   /// used internally to set system cursor.
-  static const int kSystemConstantNull = 0;
+  static const int kPlatformConstantNull = 0;
 
   /// The same constant as Android's `PointerIcon.TYPE_TEXT`,
   /// used internally to set system cursor.
-  static const int kSystemConstantText = 1008;
+  static const int kPlatformConstantText = 1008;
 
   final _AndroidPlatformActions _platform;
 
-  Future<bool> _activateSystemConstant(int systemConstant) async {
-    await _platform.setAsSystemCursor(systemConstant: systemConstant);
+  Future<bool> _activatePlatformConstant(int platformConstant) async {
+    await _platform.setAsSystemCursor(platformConstant: platformConstant);
     return true;
   }
 
   @override
   Future<bool> activateSystemCursor(MouseCursorPlatformActivateSystemCursorDetails details) async {
-    switch (details.shape) {
-      case SystemMouseCursorShape.none:
-        return _activateSystemConstant(kSystemConstantNull);
-      case SystemMouseCursorShape.basic:
-        return _activateSystemConstant(kSystemConstantArrow);
-      case SystemMouseCursorShape.click:
-        return _activateSystemConstant(kSystemConstantHand);
-      case SystemMouseCursorShape.text:
-        return _activateSystemConstant(kSystemConstantText);
-      case SystemMouseCursorShape.forbidden:
+    switch (details.systemShape) {
+      case MouseCursorSystemShape.none:
+        return _activatePlatformConstant(kPlatformConstantNull);
+      case MouseCursorSystemShape.basic:
+        return _activatePlatformConstant(kPlatformConstantArrow);
+      case MouseCursorSystemShape.click:
+        return _activatePlatformConstant(kPlatformConstantHand);
+      case MouseCursorSystemShape.text:
+        return _activatePlatformConstant(kPlatformConstantText);
+      case MouseCursorSystemShape.forbidden:
         return false;
-      case SystemMouseCursorShape.grab:
+      case MouseCursorSystemShape.grab:
         return activateSystemCursor(MouseCursorPlatformActivateSystemCursorDetails(
           device: details.device,
-          shape: SystemMouseCursorShape.click,
+          systemShape: MouseCursorSystemShape.click,
         ));
-      case SystemMouseCursorShape.grabbing:
+      case MouseCursorSystemShape.grabbing:
         return activateSystemCursor(MouseCursorPlatformActivateSystemCursorDetails(
           device: details.device,
-          shape: SystemMouseCursorShape.click,
+          systemShape: MouseCursorSystemShape.click,
         ));
       default:
         break;

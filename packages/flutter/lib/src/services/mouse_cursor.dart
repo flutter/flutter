@@ -12,13 +12,13 @@ import 'mouse_cursor_glfw.dart';
 import 'mouse_cursor_macos.dart';
 import 'platform_channel.dart';
 
-/// The kinds of all system cursors supported by Flutter.
+/// The kinds of system cursors supported by Flutter.
 ///
-/// Each value of [SystemMouseCursorShape] corresponds to a [MouseCursor] object
+/// Each value of [MouseCursorSystemShape] corresponds to a [MouseCursor] object
 /// in [SystemMouseCursors].
 ///
-/// You should directly use the objects defined in [SystemMouseCursors]
-/// when possible instead of using this value to redefine these cursors.
+/// Widgets that wants to use system cursors should use the objects defined in
+/// [SystemMouseCursors] instead of using [MouseCursorSystemShape].
 ///
 /// See also:
 ///
@@ -26,7 +26,7 @@ import 'platform_channel.dart';
 ///    correspond to values of this type.
 ///  * [MouseCursorPlatformDelegate], which uses this type to define how
 ///    system cursors are implemented on platforms.
-enum SystemMouseCursorShape {
+enum MouseCursorSystemShape {
   /// The shape that corresponds to [SystemCursors.none].
   none,
 
@@ -153,10 +153,10 @@ class NoopMouseCursor extends MouseCursor {
 //  * [SystemMouseCursors], which lists all system mouse cursors.
 @immutable
 class _SystemMouseCursor extends MouseCursor {
-  const _SystemMouseCursor(this.shape, this.description)
-    : assert(shape != null), assert(description != null);
+  const _SystemMouseCursor(this.systemShape, this.description)
+    : assert(systemShape != null), assert(description != null);
 
-  final SystemMouseCursorShape shape;
+  final MouseCursorSystemShape systemShape;
 
   final String description;
 
@@ -165,7 +165,7 @@ class _SystemMouseCursor extends MouseCursor {
     return details.platformDelegate.activateSystemCursor(
       MouseCursorPlatformActivateSystemCursorDetails(
         device: details.device,
-        shape: shape,
+        systemShape: systemShape,
       ),
     );
   }
@@ -180,9 +180,9 @@ class _SystemMouseCursor extends MouseCursor {
 @immutable
 class _EnsuredImplementedSystemMouseCursor extends _SystemMouseCursor {
   const _EnsuredImplementedSystemMouseCursor(
-    SystemMouseCursorShape shape,
+    MouseCursorSystemShape systemShape,
     String description,
-  ) : super(shape, description);
+  ) : super(systemShape, description);
 
   @override
   Future<bool> activate(MouseCursorActivateDetails details) async {
@@ -209,34 +209,34 @@ class SystemMouseCursors {
   static const MouseCursor releaseControl = NoopMouseCursor();
 
   /// Displays no cursor at the pointer.
-  static const MouseCursor none = _SystemMouseCursor(SystemMouseCursorShape.none, 'none');
+  static const MouseCursor none = _SystemMouseCursor(MouseCursorSystemShape.none, 'none');
 
   /// The platform-dependent basic cursor. Typically the shape of an arrow.
   ///
   /// This cursor is the fallback of unimplemented cursors, and guarantees to
   /// be implemented by all platforms.
   static const MouseCursor basic = _EnsuredImplementedSystemMouseCursor(
-    SystemMouseCursorShape.basic, 'basic');
+    MouseCursorSystemShape.basic, 'basic');
 
   /// A cursor that indicates links or something that needs to be emphasized
   /// to be clickable. Typically the shape of a pointing hand.
-  static const MouseCursor click = _SystemMouseCursor(SystemMouseCursorShape.click, 'click');
+  static const MouseCursor click = _SystemMouseCursor(MouseCursorSystemShape.click, 'click');
 
   /// A cursor that indicates a selectable text. Typically the shape of a
   /// capital I.
-  static const MouseCursor text = _SystemMouseCursor(SystemMouseCursorShape.text, 'text');
+  static const MouseCursor text = _SystemMouseCursor(MouseCursorSystemShape.text, 'text');
 
   /// A cursor that indicates an unpermitted action. Typically the shape of a
   /// circle with a diagnal line.
-  static const MouseCursor forbidden = _SystemMouseCursor(SystemMouseCursorShape.forbidden, 'forbidden');
+  static const MouseCursor forbidden = _SystemMouseCursor(MouseCursorSystemShape.forbidden, 'forbidden');
 
   /// A cursor that indicates something that can be dragged. Typically the shape
   /// of an open hand.
-  static const MouseCursor grab = _SystemMouseCursor(SystemMouseCursorShape.grab, 'grab');
+  static const MouseCursor grab = _SystemMouseCursor(MouseCursorSystemShape.grab, 'grab');
 
   /// A cursor that indicates something that is being dragged. Typically the
   /// shape of a closed hand.
-  static const MouseCursor grabbing = _SystemMouseCursor(SystemMouseCursorShape.grabbing, 'grabbing');
+  static const MouseCursor grabbing = _SystemMouseCursor(MouseCursorSystemShape.grabbing, 'grabbing');
 }
 
 /// Details for [MouseCursorPlatformDelegate.activateSystemCursor], such as the
@@ -249,29 +249,29 @@ class MouseCursorPlatformActivateSystemCursorDetails {
   /// All parameters must not be null.
   const MouseCursorPlatformActivateSystemCursorDetails({
     @required this.device,
-    @required this.shape,
-  }) : assert(device != null), assert(shape != null);
+    @required this.systemShape,
+  }) : assert(device != null), assert(systemShape != null);
 
   /// The pointer device that should change cursor.
   final int device;
 
   /// The kind of system cursor that should change to.
-  final SystemMouseCursorShape shape;
+  final MouseCursorSystemShape systemShape;
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != MouseCursorPlatformActivateSystemCursorDetails)
       return false;
     final MouseCursorPlatformActivateSystemCursorDetails typed = other;
-    return typed.device == device && typed.shape == shape;
+    return typed.device == device && typed.systemShape == systemShape;
   }
 
   @override
-  int get hashCode => hashValues(device, shape);
+  int get hashCode => hashValues(device, systemShape);
 
   @override
   String toString() {
-    return '$runtimeType(device: $device, shape: $shape)';
+    return '$runtimeType(device: $device, systemShape: $systemShape)';
   }
 }
 
@@ -290,7 +290,7 @@ abstract class MouseCursorPlatformDelegate {
   const MouseCursorPlatformDelegate();
 
   /// Asks the platform to change the cursor of `device` to the system cursor
-  /// specified by `shape`.
+  /// specified by `systemShape`.
   ///
   /// It resolves to `true` if the operation is successful, `false` if the
   /// operation is unsupported by the platform, or rejects to error if the
