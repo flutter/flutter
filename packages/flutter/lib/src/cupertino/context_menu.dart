@@ -92,7 +92,7 @@ enum _ContextMenuLocation {
 ///           child: Container(
 ///             color: Colors.red,
 ///           ),
-///           actions: <CupertinoContextMenuAction>[
+///           actions: <Widget>[
 ///             CupertinoContextMenuAction(
 ///               child: const Text('Action one'),
 ///               onPressed: () {
@@ -120,8 +120,7 @@ enum _ContextMenuLocation {
 class CupertinoContextMenu extends StatefulWidget {
   /// Create a context menu.
   ///
-  /// [actions] is required and cannot be null. It must contain at least one
-  /// [CupertinoContextMenuAction].
+  /// [actions] is required and cannot be null or empty.
   ///
   /// [child] is required and cannot be null.
   CupertinoContextMenu({
@@ -150,9 +149,8 @@ class CupertinoContextMenu extends StatefulWidget {
 
   /// The actions that are shown in the menu.
   ///
-  /// This parameter cannot be null or empty, and items in the List must be
-  /// [CupertinoContextMenuAction]s.
-  final List<CupertinoContextMenuAction> actions;
+  /// This parameter cannot be null or empty.
+  final List<Widget> actions;
 
   /// A function that returns an alternative widget to show when the
   /// [CupertinoContextMenu] is open.
@@ -205,7 +203,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       ),
   ///     );
   ///   },
-  ///   actions: <CupertinoContextMenuAction>[
+  ///   actions: <Widget>[
   ///     CupertinoContextMenuAction(
   ///       child: const Text('Action one'),
   ///       onPressed: () {},
@@ -537,7 +535,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
 class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Build a _ContextMenuRoute.
   _ContextMenuRoute({
-    @required List<CupertinoContextMenuAction> actions,
+    @required List<Widget> actions,
     @required _ContextMenuLocation contextMenuOrientation,
     this.barrierLabel,
     _ContextMenuPreviewBuilderChildless builder,
@@ -562,7 +560,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   static const Duration _kModalPopupTransitionDuration =
     Duration(milliseconds: 335);
 
-  final List<CupertinoContextMenuAction> _actions;
+  final List<Widget> _actions;
   final _ContextMenuPreviewBuilderChildless _builder;
   final GlobalKey _childGlobalKey = GlobalKey();
   final _ContextMenuLocation _contextMenuOrientation;
@@ -844,7 +842,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
        assert(orientation != null),
        super(key: key);
 
-  final List<CupertinoContextMenuAction> actions;
+  final List<Widget> actions;
   final Widget child;
   final GlobalKey childGlobalKey;
   final _ContextMenuLocation contextMenuOrientation;
@@ -1163,7 +1161,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 }
 
-// A menu of _CupertinoContextMenuActions.
+// The menu that displays when CupertinoContextMenu is open. It consists of a
+// list of actions that are typically CupertinoContextMenuActions.
 class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
     Key key,
@@ -1177,7 +1176,7 @@ class _ContextMenuSheet extends StatelessWidget {
        _orientation = orientation,
        super(key: key);
 
-  final List<CupertinoContextMenuAction> actions;
+  final List<Widget> actions;
   final _ContextMenuLocation _contextMenuOrientation;
   final Orientation _orientation;
 
