@@ -610,23 +610,23 @@ docker_builder:
   #only_if: $CIRRUS_TAG != ''
   environment:
     GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
-  depends_on:
-    - docs-linux
-    - analyze-linux
-    - framework_tests-widgets-linux
-    - framework_tests-libraries-linux
-    - framework_tests-misc-linux
-    - tool_tests-general-linux
-    - tool_tests-commands-linux
-    - tool_tests-integration-linux
-    - build_tests-linux
-    - hostonly_devicelab_tests-0-linux
-    - hostonly_devicelab_tests-1-linux
-    - hostonly_devicelab_tests-2-linux
-    - hostonly_devicelab_tests-3-linux
-    - hostonly_devicelab_tests-4-linux
-    - hostonly_devicelab_tests-5_last-linux
-    - firebase_test_lab_tests-linux
+    #depends_on:
+    #  - docs-linux
+    #  - analyze-linux
+    #  - framework_tests-widgets-linux
+    #  - framework_tests-libraries-linux
+    #  - framework_tests-misc-linux
+    #  - tool_tests-general-linux
+    #  - tool_tests-commands-linux
+    #  - tool_tests-integration-linux
+    #  - build_tests-linux
+    #  - hostonly_devicelab_tests-0-linux
+    #  - hostonly_devicelab_tests-1-linux
+    #  - hostonly_devicelab_tests-2-linux
+    #  - hostonly_devicelab_tests-3-linux
+    #  - hostonly_devicelab_tests-4-linux
+    #  - hostonly_devicelab_tests-5_last-linux
+    #  - firebase_test_lab_tests-linux
   script:
     - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
     - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
