@@ -16,8 +16,11 @@ if (is_fuchsia_host || is_fuchsia) {
 
     deps = [
       "//third_party/dart-pkg/pub/args",
+      "//third_party/dart-pkg/pub/cli_util",
       "//third_party/dart-pkg/pub/path",
+      "//third_party/dart-pkg/pub/source_maps",
       "//third_party/dart-pkg/pub/usage",
+      "//third_party/dart/pkg/analyzer",
       "//third_party/dart/pkg/build_integration",
       "//third_party/dart/pkg/dev_compiler",
       "//third_party/dart/pkg/front_end",
