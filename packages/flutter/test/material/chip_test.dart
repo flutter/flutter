@@ -1935,7 +1935,7 @@ void main() {
       paints
         ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 342.0, 32.0))
         ..path(color: Colors.pink[500])
-        ..circle(x: 12.0, y: 12.0, radius: 0, color: const Color(0x66c8c8c8))
+        ..circle(x: 12.0, y: 12.0, radius: 0.0, color: const Color(0x66c8c8c8))
         ..circle(x: 326.0, y: 16.0, radius: 35.0, color: const Color(0x00bcbcbc))
     );
     await gesture.up();

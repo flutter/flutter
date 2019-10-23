@@ -621,7 +621,6 @@ void main() {
 
     final double firstTextDy = tester.getBottomLeft(find.text('First')).dy;
     final double secondTextDy = tester.getBottomLeft(find.text('Second')).dy;
-    expect(firstTextDy,  closeTo(secondTextDy - 4.0, 0.001));
+    expect(firstTextDy, closeTo(secondTextDy - 4.0, 0.001));
   }, skip: isBrowser);
-
 }
