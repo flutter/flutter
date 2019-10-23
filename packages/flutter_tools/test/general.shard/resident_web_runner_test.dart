@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart';
@@ -177,6 +176,7 @@ void main() {
 
   test('Can hot reload after attaching', () => testbed.run(() async {
     _setupMocks();
+    final BufferLogger bufferLogger = logger;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -190,6 +190,7 @@ void main() {
     });
     final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
+    expect(bufferLogger.statusText, contains('Reloaded application in'));
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
@@ -207,6 +208,7 @@ void main() {
 
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
+    final BufferLogger bufferLogger = logger;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -215,11 +217,12 @@ void main() {
     when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
       return true;
     });
-    when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
+    when(mockVmService.callServiceExtension('fullReload')).thenAnswer((Invocation _) async {
       return Response.parse(<String, Object>{'type': 'Success'});
     });
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
+    expect(bufferLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
@@ -228,8 +231,8 @@ void main() {
       'cd29': 'false',
       'cd30': 'true',
     })).called(1);
-    verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
-    verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
     verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
@@ -256,7 +259,31 @@ void main() {
     Usage: () => MockFlutterUsage(),
   }));
 
-  test('Fails on vmservice response error', () => testbed.run(() async {
+  test('Fails on vmservice response error for hot restart', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+      return true;
+    });
+    when(mockVmService.callServiceExtension('fullReload')).thenAnswer((Invocation _) async {
+      return Response.parse(<String, Object>{'type': 'Failed'});
+    });
+    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    expect(result.code, 1);
+    expect(result.message, contains('Failed'));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockFlutterUsage(),
+  }));
+
+  test('Fails on vmservice response error for hot reload', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -269,7 +296,7 @@ void main() {
     when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
       return Response.parse(<String, Object>{'type': 'Failed'});
     });
-    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
     expect(result.code, 1);
     expect(result.message, contains('Failed'));
@@ -291,17 +318,19 @@ void main() {
       return true;
     });
     when(mockVmService.callServiceExtension('hotRestart')).thenThrow(RPCError('', 2, '123'));
-    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
     expect(result.code, 1);
     expect(result.message, contains('Page requires refresh'));
   }));
 
-  test('printHelp without details is spoopy', () => testbed.run(() async {
+  test('printHelp without details has web warning', () => testbed.run(() async {
     residentWebRunner.printHelp(details: false);
     final BufferLogger bufferLogger = logger;
 
-    expect(bufferLogger.statusText, contains('👻'));
+    expect(bufferLogger.statusText, contains('Warning'));
+    expect(bufferLogger.statusText, contains('https://flutter.dev/web'));
+    expect(bufferLogger.statusText, isNot(contains('https://flutter.dev/web.')));
   }));
 
   test('debugDumpApp', () => testbed.run(() async {
@@ -436,6 +465,26 @@ void main() {
         args: <String, Object>{'enabled': true})).called(1);
   }));
 
+  test('debugTogglePlatform', () => testbed.run(() async {
+    _setupMocks();
+    final BufferLogger bufferLogger = logger;
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callServiceExtension('ext.flutter.platformOverride'))
+      .thenAnswer((Invocation _) async {
+        return Response.parse(<String, Object>{'value': 'iOS'});
+    });
+
+    await residentWebRunner.debugTogglePlatform();
+
+    expect(bufferLogger.statusText, contains('Switched operating system to android'));
+    verify(mockVmService.callServiceExtension('ext.flutter.platformOverride',
+        args: <String, Object>{'value': 'android'})).called(1);
+  }));
+
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
     _setupMocks();
     bool debugClosed = false;
@@ -563,63 +612,3 @@ class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
-class DelegateLogger implements Logger {
-  DelegateLogger(this.delegate);
-
-  final Logger delegate;
-  Status status;
-
-  @override
-  bool get quiet => delegate.quiet;
-
-  @override
-  set quiet(bool value) => delegate.quiet;
-
-  @override
-  bool get hasTerminal => delegate.hasTerminal;
-
-  @override
-  bool get isVerbose => delegate.isVerbose;
-
-  @override
-  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
-    delegate.printError(
-      message,
-      stackTrace: stackTrace,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
-    delegate.printStatus(message,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printTrace(String message) {
-    delegate.printTrace(message);
-  }
-
-  @override
-  void sendNotification(String message, {String progressId}) {
-    delegate.sendNotification(message, progressId: progressId);
-  }
-
-  @override
-  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
-    return status;
-  }
-
-  @override
-  bool get supportsColor => delegate.supportsColor;
-}

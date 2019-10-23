@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 
 import 'base/async_guard.dart';
 import 'base/common.dart';
@@ -29,6 +30,10 @@ import 'vmservice.dart';
 class HotRunnerConfig {
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
   bool stableDartDependencies = false;
+
+  /// Whether the hot runner should scan for modified files asynchronously.
+  bool asyncScanning = false;
+
   /// A hook for implementations to perform any necessary initialization prior
   /// to a hot restart. Should return true if the hot restart should continue.
   Future<bool> setupHotRestart() async {
@@ -296,10 +301,11 @@ class HotRunner extends ResidentRunner {
 
     // Picking up first device's compiler as a source of truth - compilers
     // for all devices should be in sync.
-    final List<Uri> invalidatedFiles = ProjectFileInvalidator.findInvalidated(
+    final List<Uri> invalidatedFiles = await ProjectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevices[0].devFS.lastCompiled,
       urisToMonitor: flutterDevices[0].devFS.sources,
       packagesPath: packagesFilePath,
+      asyncScanning: hotRunnerConfig.asyncScanning,
     );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
@@ -1044,11 +1050,20 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  static List<Uri> findInvalidated({
+  // As of writing, Dart supports up to 32 asynchronous I/O threads per
+  // isolate.  We also want to avoid hitting platform limits on open file
+  // handles/descriptors.
+  //
+  // This value was chosen based on empirical tests scanning a set of
+  // ~2000 files.
+  static const int _kMaxPendingStats = 8;
+
+  static Future<List<Uri>> findInvalidated({
     @required DateTime lastCompiled,
     @required List<Uri> urisToMonitor,
     @required String packagesPath,
-  }) {
+    bool asyncScanning = false,
+  }) async {
     assert(urisToMonitor != null);
     assert(packagesPath != null);
 
@@ -1068,17 +1083,36 @@ class ProjectFileInvalidator {
       fs.file(packagesPath).uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
-    for (final Uri uri in urisToScan) {
-      final DateTime updatedAt = fs.statSync(
-        uri.toFilePath(windows: platform.isWindows),
-      ).modified;
-      if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
-        invalidatedFiles.add(uri);
+
+    if (asyncScanning) {
+      final Pool pool = Pool(_kMaxPendingStats);
+      final List<Future<void>> waitList = <Future<void>>[];
+      for (final Uri uri in urisToScan) {
+        waitList.add(pool.withResource<void>(
+          () => fs
+            .stat(uri.toFilePath(windows: platform.isWindows))
+            .then((FileStat stat) {
+              final DateTime updatedAt = stat.modified;
+              if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+                invalidatedFiles.add(uri);
+              }
+            })
+        ));
+      }
+      await Future.wait<void>(waitList);
+    } else {
+      for (final Uri uri in urisToScan) {
+        final DateTime updatedAt = fs.statSync(
+            uri.toFilePath(windows: platform.isWindows)).modified;
+        if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+          invalidatedFiles.add(uri);
+        }
       }
     }
     printTrace(
       'Scanned through ${urisToScan.length} files in '
-      '${stopwatch.elapsedMilliseconds}ms',
+      '${stopwatch.elapsedMilliseconds}ms'
+      '${asyncScanning ? " (async)" : ""}',
     );
     return invalidatedFiles;
   }

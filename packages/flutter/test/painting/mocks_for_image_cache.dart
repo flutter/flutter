@@ -37,7 +37,7 @@ class TestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key) {
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image))
     );
@@ -51,7 +51,7 @@ class FailingTestImageProvider extends TestImageProvider {
   const FailingTestImageProvider(int key, int imageValue, { ui.Image image }) : super(key, imageValue, image: image);
 
   @override
-  ImageStreamCompleter load(int key) {
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(Future<ImageInfo>.sync(() => Future<ImageInfo>.error('loading failed!')));
   }
 }
@@ -85,7 +85,7 @@ class TestImage implements ui.Image {
 
 class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
   @override
-  ImageStreamCompleter load(ErrorImageProvider key) {
+  ImageStreamCompleter load(ErrorImageProvider key, DecoderCallback decode) {
     throw Error();
   }
 
@@ -97,7 +97,7 @@ class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
 
 class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvider> {
   @override
-  ImageStreamCompleter load(ObtainKeyErrorImageProvider key) {
+  ImageStreamCompleter load(ObtainKeyErrorImageProvider key, DecoderCallback decode) {
     throw Error();
   }
 
@@ -109,7 +109,7 @@ class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvi
 
 class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
   @override
-  ImageStreamCompleter load(LoadErrorImageProvider key) {
+  ImageStreamCompleter load(LoadErrorImageProvider key, DecoderCallback decode) {
     throw Error();
   }
 
@@ -121,7 +121,7 @@ class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
 
 class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterImageProvider> {
   @override
-  ImageStreamCompleter load(LoadErrorCompleterImageProvider key) {
+  ImageStreamCompleter load(LoadErrorCompleterImageProvider key, DecoderCallback decode) {
     final Completer<void> completer = Completer<void>.sync();
     completer.completeError(Error());
     return OneFrameImageStreamCompleter(completer.future);
