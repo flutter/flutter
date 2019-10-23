@@ -18,6 +18,7 @@ environment:
   # TODO(amirha): remove once we've migrated to newer Gradle
   CIRRUS_CHANGE_MESSAGE: ""
   CIRRUS_COMMIT_MESSAGE: ""
+  CIRRUS_DOCKER_CONTEXT: "/tmp/${FLUTTER_SDK_PATH_WITH_SPACE}/dev/ci/docker_linux"
 
 # LINUX SHARDS
 task:
@@ -35,7 +36,6 @@ task:
     CPU: 1 # 0.1-8 without compute credits, 0.1-30 with (yes, you can go fractional)
     MEMORY: 4G # 256M-24G without compute credits, 256M-90G with
     CIRRUS_WORKING_DIR: "/tmp/$FLUTTER_SDK_PATH_WITH_SPACE"
-    CIRRUS_DOCKER_CONTEXT: "${CIRRUS_WORKING_DIR}/dev/ci/docker_linux"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
   pub_cache:
