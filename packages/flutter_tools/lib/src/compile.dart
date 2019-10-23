@@ -52,6 +52,8 @@ class TargetModel {
         return flutterRunner;
       case 'vm':
         return vm;
+      case 'dartdevc':
+        return dartdevc;
     }
     assert(false);
     return null;
@@ -67,6 +69,9 @@ class TargetModel {
 
   /// The Dart vm.
   static const TargetModel vm = TargetModel._('vm');
+
+  /// The development compiler for JavaScript.
+  static const TargetModel dartdevc = TargetModel._('dartdevc');
 
   final String _value;
 
@@ -383,9 +388,9 @@ abstract class _CompilationRequest {
 
   Completer<CompilerOutput> completer;
 
-  Future<CompilerOutput> _run(ResidentCompiler compiler);
+  Future<CompilerOutput> _run(DefaultResidentCompiler compiler);
 
-  Future<void> run(ResidentCompiler compiler) async {
+  Future<void> run(DefaultResidentCompiler compiler) async {
     completer.complete(await _run(compiler));
   }
 }
@@ -405,7 +410,7 @@ class _RecompileRequest extends _CompilationRequest {
   String packagesFilePath;
 
   @override
-  Future<CompilerOutput> _run(ResidentCompiler compiler) async =>
+  Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
       compiler._recompile(this);
 }
 
@@ -428,7 +433,7 @@ class _CompileExpressionRequest extends _CompilationRequest {
   bool isStatic;
 
   @override
-  Future<CompilerOutput> _run(ResidentCompiler compiler) async =>
+  Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
       compiler._compileExpression(this);
 }
 
@@ -436,7 +441,7 @@ class _RejectRequest extends _CompilationRequest {
   _RejectRequest(Completer<CompilerOutput> completer) : super(completer);
 
   @override
-  Future<CompilerOutput> _run(ResidentCompiler compiler) async =>
+  Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
       compiler._reject();
 }
 
@@ -445,55 +450,22 @@ class _RejectRequest extends _CompilationRequest {
 ///
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
-class ResidentCompiler {
-  ResidentCompiler(
-    this._sdkRoot, {
+abstract class ResidentCompiler {
+  factory ResidentCompiler(String sdkRoot, {
     @required BuildMode buildMode,
-    bool causalAsyncStacks = true,
-    bool trackWidgetCreation = false,
+    bool causalAsyncStacks,
+    bool trackWidgetCreation,
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    CompilerMessageConsumer compilerMessageConsumer = printError,
+    CompilerMessageConsumer compilerMessageConsumer,
     String initializeFromDill,
-    TargetModel targetModel = TargetModel.flutter,
+    TargetModel targetModel,
     bool unsafePackageSerialization,
     List<String> experimentalFlags,
-  }) : assert(_sdkRoot != null),
-       _buildMode = buildMode,
-       _causalAsyncStacks = causalAsyncStacks,
-       _trackWidgetCreation = trackWidgetCreation,
-       _packagesPath = packagesPath,
-       _fileSystemRoots = fileSystemRoots,
-       _fileSystemScheme = fileSystemScheme,
-       _targetModel = targetModel,
-       _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
-       _controller = StreamController<_CompilationRequest>(),
-       _initializeFromDill = initializeFromDill,
-       _unsafePackageSerialization = unsafePackageSerialization,
-       _experimentalFlags = experimentalFlags {
-    // This is a URI, not a file path, so the forward slash is correct even on Windows.
-    if (!_sdkRoot.endsWith('/')) {
-      _sdkRoot = '$_sdkRoot/';
-    }
-  }
+    String platformDill,
+  }) = DefaultResidentCompiler;
 
-  final BuildMode _buildMode;
-  final bool _causalAsyncStacks;
-  final bool _trackWidgetCreation;
-  final String _packagesPath;
-  final TargetModel _targetModel;
-  final List<String> _fileSystemRoots;
-  final String _fileSystemScheme;
-  String _sdkRoot;
-  Process _server;
-  final StdoutHandler _stdoutHandler;
-  final String _initializeFromDill;
-  final bool _unsafePackageSerialization;
-  final List<String> _experimentalFlags;
-  bool _compileRequestNeedsConfirmation = false;
-
-  final StreamController<_CompilationRequest> _controller;
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -502,6 +474,89 @@ class ResidentCompiler {
   /// point that is used for recompilation.
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
+  Future<CompilerOutput> recompile(
+    String mainPath,
+    List<Uri> invalidatedFiles, {
+    @required String outputPath,
+    String packagesFilePath,
+  });
+
+  Future<CompilerOutput> compileExpression(
+    String expression,
+    List<String> definitions,
+    List<String> typeDefinitions,
+    String libraryUri,
+    String klass,
+    bool isStatic,
+  );
+
+  /// Should be invoked when results of compilation are accepted by the client.
+  ///
+  /// Either [accept] or [reject] should be called after every [recompile] call.
+  void accept();
+
+  /// Should be invoked when results of compilation are rejected by the client.
+  ///
+  /// Either [accept] or [reject] should be called after every [recompile] call.
+  Future<CompilerOutput> reject();
+
+  /// Should be invoked when frontend server compiler should forget what was
+  /// accepted previously so that next call to [recompile] produces complete
+  /// kernel file.
+  void reset();
+
+  Future<dynamic> shutdown();
+}
+
+@visibleForTesting
+class DefaultResidentCompiler implements ResidentCompiler {
+  DefaultResidentCompiler(
+    String sdkRoot, {
+    @required this.buildMode,
+    this.causalAsyncStacks = true,
+    this.trackWidgetCreation = false,
+    this.packagesPath,
+    this.fileSystemRoots,
+    this.fileSystemScheme,
+    CompilerMessageConsumer compilerMessageConsumer = printError,
+    this.initializeFromDill,
+    this.targetModel = TargetModel.flutter,
+    this.unsafePackageSerialization,
+    this.experimentalFlags,
+    this.platformDill,
+  }) : assert(sdkRoot != null),
+       _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
+       // This is a URI, not a file path, so the forward slash is correct even on Windows.
+       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
+
+  final BuildMode buildMode;
+  final bool causalAsyncStacks;
+  final bool trackWidgetCreation;
+  final String packagesPath;
+  final TargetModel targetModel;
+  final List<String> fileSystemRoots;
+  final String fileSystemScheme;
+  final String initializeFromDill;
+  final bool unsafePackageSerialization;
+  final List<String> experimentalFlags;
+
+  /// The path to the root of the Dart SDK used to compile.
+  ///
+  /// This is used to resolve the [platformDill].
+  final String sdkRoot;
+
+  /// The path to the platform dill file.
+  ///
+  /// This does not need to be provided for the normal Flutter workflow.
+  final String platformDill;
+
+  Process _server;
+  final StdoutHandler _stdoutHandler;
+  bool _compileRequestNeedsConfirmation = false;
+
+  final StreamController<_CompilationRequest> _controller = StreamController<_CompilationRequest>();
+
+  @override
   Future<CompilerOutput> recompile(
     String mainPath,
     List<Uri> invalidatedFiles, {
@@ -526,12 +581,12 @@ class ResidentCompiler {
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
     PackageUriMapper packageUriMapper;
-    if (request.packagesFilePath != null || _packagesPath != null) {
+    if (request.packagesFilePath != null || packagesPath != null) {
       packageUriMapper = PackageUriMapper(
         request.mainPath,
-        request.packagesFilePath ?? _packagesPath,
-        _fileSystemScheme,
-        _fileSystemRoots,
+        request.packagesFilePath ?? packagesPath,
+        fileSystemScheme,
+        fileSystemRoots,
       );
     }
 
@@ -541,7 +596,7 @@ class ResidentCompiler {
       return _compile(
           _mapFilename(request.mainPath, packageUriMapper),
           request.outputPath,
-          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null),
+          _mapFilename(request.packagesFilePath ?? packagesPath, /* packageUriMapper= */ null),
       );
     }
 
@@ -589,11 +644,11 @@ class ResidentCompiler {
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       frontendServer,
       '--sdk-root',
-      _sdkRoot,
+      sdkRoot,
       '--incremental',
       '--strong',
-      '--target=$_targetModel',
-      '-Ddart.developer.causal_async_stacks=$_causalAsyncStacks',
+      '--target=$targetModel',
+      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
       if (outputPath != null) ...<String>[
         '--output-dill',
         outputPath,
@@ -601,28 +656,32 @@ class ResidentCompiler {
       if (packagesFilePath != null) ...<String>[
         '--packages',
         packagesFilePath,
-      ] else if (_packagesPath != null) ...<String>[
+      ] else if (packagesPath != null) ...<String>[
         '--packages',
-        _packagesPath,
+        packagesPath,
       ],
-      ..._buildModeOptions(_buildMode),
-      if (_trackWidgetCreation) '--track-widget-creation',
-      if (_fileSystemRoots != null)
-        for (String root in _fileSystemRoots) ...<String>[
+      ..._buildModeOptions(buildMode),
+      if (trackWidgetCreation) '--track-widget-creation',
+      if (fileSystemRoots != null)
+        for (String root in fileSystemRoots) ...<String>[
           '--filesystem-root',
           root,
         ],
-      if (_fileSystemScheme != null) ...<String>[
+      if (fileSystemScheme != null) ...<String>[
         '--filesystem-scheme',
-        _fileSystemScheme,
+        fileSystemScheme,
       ],
-      if (_initializeFromDill != null) ...<String>[
+      if (initializeFromDill != null) ...<String>[
         '--initialize-from-dill',
-        _initializeFromDill,
+        initializeFromDill,
       ],
-      if (_unsafePackageSerialization == true) '--unsafe-package-serialization',
-      if ((_experimentalFlags != null) && _experimentalFlags.isNotEmpty)
-        '--enable-experiment=${_experimentalFlags.join(',')}',
+      if (platformDill != null) ...<String>[
+        '--platform',
+        platformDill,
+      ],
+      if (unsafePackageSerialization == true) '--unsafe-package-serialization',
+      if ((experimentalFlags != null) && experimentalFlags.isNotEmpty)
+        '--enable-experiment=${experimentalFlags.join(',')}',
     ];
     printTrace(command.join(' '));
     _server = await processManager.start(command);
@@ -657,6 +716,7 @@ class ResidentCompiler {
     return _stdoutHandler.compilerOutput.future;
   }
 
+  @override
   Future<CompilerOutput> compileExpression(
     String expression,
     List<String> definitions,
@@ -700,9 +760,7 @@ class ResidentCompiler {
     return _stdoutHandler.compilerOutput.future;
   }
 
-  /// Should be invoked when results of compilation are accepted by the client.
-  ///
-  /// Either [accept] or [reject] should be called after every [recompile] call.
+  @override
   void accept() {
     if (_compileRequestNeedsConfirmation) {
       _server.stdin.writeln('accept');
@@ -711,9 +769,7 @@ class ResidentCompiler {
     _compileRequestNeedsConfirmation = false;
   }
 
-  /// Should be invoked when results of compilation are rejected by the client.
-  ///
-  /// Either [accept] or [reject] should be called after every [recompile] call.
+  @override
   Future<CompilerOutput> reject() {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
@@ -735,9 +791,7 @@ class ResidentCompiler {
     return _stdoutHandler.compilerOutput.future;
   }
 
-  /// Should be invoked when frontend server compiler should forget what was
-  /// accepted previously so that next call to [recompile] produces complete
-  /// kernel file.
+  @override
   void reset() {
     _server?.stdin?.writeln('reset');
     printTrace('<- reset');
@@ -765,21 +819,22 @@ class ResidentCompiler {
       }
     }
 
-    if (_fileSystemRoots != null) {
-      for (String root in _fileSystemRoots) {
+    if (fileSystemRoots != null) {
+      for (String root in fileSystemRoots) {
         if (filename.startsWith(root)) {
           return Uri(
-              scheme: _fileSystemScheme, path: filename.substring(root.length))
+              scheme: fileSystemScheme, path: filename.substring(root.length))
               .toString();
         }
       }
     }
-    if (platform.isWindows && _fileSystemRoots != null && _fileSystemRoots.length > 1) {
+    if (platform.isWindows && fileSystemRoots != null && fileSystemRoots.length > 1) {
       return Uri.file(filename, windows: platform.isWindows).toString();
     }
     return null;
   }
 
+  @override
   Future<dynamic> shutdown() async {
     // Server was never successfully created.
     if (_server == null) {
