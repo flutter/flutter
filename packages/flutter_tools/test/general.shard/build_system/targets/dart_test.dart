@@ -371,7 +371,7 @@ example:fiz/lib/''');
     androidEnvironment.buildDir.childFile('app.so').createSync();
     await const ProfileCopyFlutterAotBundle().build(androidEnvironment);
 
-    expect(androidEnvironment.outputDir.childFile('libapp.so').existsSync(), true);
+    expect(androidEnvironment.outputDir.childFile('app.so').existsSync(), true);
   }));
 }
 

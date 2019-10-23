@@ -337,12 +337,12 @@ abstract class CopyFlutterAotBundle extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/libapp.so'),
+    Source.pattern('{OUTPUT_DIR}/app.so'),
   ];
 
   @override
   Future<void> build(Environment environment) async {
-    final File outputFile = environment.outputDir.childFile('libapp.so');
+    final File outputFile = environment.outputDir.childFile('app.so');
     if (!outputFile.parent.existsSync()) {
       outputFile.parent.createSync(recursive: true);
     }
