@@ -57,7 +57,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       FuchsiaArtifacts: () => fuchsiaArtifacts,
     });
 
@@ -75,7 +75,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       FuchsiaArtifacts: () => fuchsiaArtifacts,
     });
 
@@ -98,7 +98,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       FuchsiaArtifacts: () => fuchsiaArtifacts,
     });
 
@@ -121,7 +121,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       FuchsiaArtifacts: () => fuchsiaArtifactsNoCompiler,
     });
   });
@@ -147,7 +147,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
     FuchsiaSdk: () => fuchsiaSdk,
   });
 }
