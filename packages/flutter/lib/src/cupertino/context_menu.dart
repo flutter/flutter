@@ -175,7 +175,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// Below is an example of using `previewBuilder` to show an image tile that's
   /// similar to each tile in the iOS iPhoto app's context menu. Several of
   /// these could be used in a GridView for a similar effect.
-
+  ///
   /// When opened, the child animates to show its full aspect ratio and has
   /// rounded corners. The larger size of the open CupertinoContextMenu allows
   /// the FittedBox to fit the entire image, even when it has a very tall or
@@ -1189,7 +1189,7 @@ class _ContextMenuSheet extends StatelessWidget {
       flex: 2,
       child: IntrinsicHeight(
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(13.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: actions,
