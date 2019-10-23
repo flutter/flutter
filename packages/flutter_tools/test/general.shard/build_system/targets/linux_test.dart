@@ -39,6 +39,7 @@ void main() {
           kBuildMode: 'debug',
         }
       );
+      fs.file('bin/cache/artifacts/engine/linux-x64/unrelated-stuff').createSync(recursive: true);
       fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux_glfw.so').createSync(recursive: true);
       fs.file('bin/cache/artifacts/engine/linux-x64/flutter_export.h').createSync();
       fs.file('bin/cache/artifacts/engine/linux-x64/flutter_messenger.h').createSync();
@@ -53,7 +54,7 @@ void main() {
     });
   });
 
-  test('Copies files to correct cache directory', () => testbed.run(() async {
+  test('Copies files to correct cache directory, excluding unrelated code', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const UnpackLinuxDebug(), environment);
 
     expect(result.hasException, false);
@@ -64,6 +65,7 @@ void main() {
     expect(fs.file('linux/flutter/ephemeral/flutter_glfw.h').existsSync(), true);
     expect(fs.file('linux/flutter/ephemeral/icudtl.dat').existsSync(), true);
     expect(fs.file('linux/flutter/ephemeral/cpp_client_wrapper_glfw/foo').existsSync(), true);
+    expect(fs.file('linux/flutter/ephemeral/unrelated-stuff').existsSync(), false);
   }));
 
   test('Does not re-copy files unecessarily', () => testbed.run(() async {

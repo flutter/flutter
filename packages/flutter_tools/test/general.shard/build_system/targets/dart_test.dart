@@ -168,6 +168,30 @@ flutter_tools:lib/''');
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
 
+  test('kernel_snapshot can disable track-widget-creation on debug builds', () => testbed.run(() async {
+    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
+    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
+      return mockKernelCompiler;
+    });
+    when(mockKernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      aot: anyNamed('aot'),
+      buildMode: anyNamed('buildMode'),
+      trackWidgetCreation: false,
+      targetModel: anyNamed('targetModel'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      packagesPath: anyNamed('packagesPath'),
+      mainPath: anyNamed('mainPath'),
+    )).thenAnswer((Invocation _) async {
+      return const CompilerOutput('example', 0, <Uri>[]);
+    });
+
+    await const KernelSnapshot().build(androidEnvironment..defines[kTrackWidgetCreation] = 'false');
+  }, overrides: <Type, Generator>{
+    KernelCompilerFactory: () => MockKernelCompilerFactory(),
+  }));
+
   test('kernel_snapshot does use track widget creation on debug builds', () => testbed.run(() async {
     final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
     when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {

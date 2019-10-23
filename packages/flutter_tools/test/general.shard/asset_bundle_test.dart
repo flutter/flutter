@@ -38,7 +38,7 @@ void main() {
       expect(ab.entries.length, greaterThan(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('empty pubspec', () async {
@@ -56,7 +56,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('wildcard directories are updated when filesystem changes', () async {
@@ -96,7 +96,7 @@ flutter:
       expect(bundle.entries.length, 5);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('handle removal of wildcard directories', () async {
@@ -146,7 +146,36 @@ name: example''')
       expect(bundle.entries.length, 4);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    // https://github.com/flutter/flutter/issues/42723
+    testUsingContext('Test regression for mistyped file', () async {
+      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      // Create a directory in the same path to test that we're only looking at File
+      // objects.
+      fs.directory(fs.path.join('assets', 'foo', 'bar')).createSync();
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - assets/foo/
+''');
+      fs.file('.packages').createSync();
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      expect(bundle.entries.length, 4);
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 

@@ -310,7 +310,7 @@ void main() {
     const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
-  });
+  }, skip: isBrowser);
 
   test('ResizeImage does not resize when no size is passed', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
@@ -323,7 +323,7 @@ void main() {
     final MemoryImage resizedImage = MemoryImage(bytes);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage);
     expect(resizedImageSize, const Size(1, 1));
-  });
+  }, skip: isBrowser);
 
   test('ResizeImage stores values', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);

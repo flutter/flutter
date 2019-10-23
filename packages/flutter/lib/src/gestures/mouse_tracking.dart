@@ -123,7 +123,7 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// The second parameter is a function with which the [MouseTracker] can
   /// search for [MouseTrackerAnnotation]s at a given position.
-  /// Usually it is [Layer.findAll] of the root layer.
+  /// Usually it is [Layer.findAllAnnotations] of the root layer.
   ///
   /// All of the parameters must not be null.
   MouseTracker(this._router, this.annotationFinder)

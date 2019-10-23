@@ -11,9 +11,21 @@ import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart';
 import '../build_system.dart';
+import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+
+/// The only files/subdirectories we care out.
+const List<String> _kLinuxArtifacts = <String>[
+  'libflutter_linux_glfw.so',
+  'flutter_export.h',
+  'flutter_messenger.h',
+  'flutter_plugin_registrar.h',
+  'flutter_glfw.h',
+  'icudtl.dat',
+  'cpp_client_wrapper_glfw/',
+];
 
 /// Copies the Linux desktop embedding files to the copy directory.
 class UnpackLinuxDebug extends Target {
@@ -25,17 +37,12 @@ class UnpackLinuxDebug extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    Source.artifact(Artifact.linuxDesktopPath, mode: BuildMode.debug),
+    Source.depfile('linux_engine_sources.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/linux/flutter/ephemeral/libflutter_linux_glfw.so'),
-    Source.pattern('{PROJECT_DIR}/linux/flutter/ephemeral/flutter_export.h'),
-    Source.pattern('{PROJECT_DIR}/linux/flutter/ephemeral/flutter_messenger.h'),
-    Source.pattern('{PROJECT_DIR}/linux/flutter/ephemeral/flutter_plugin_registrar.h'),
-    Source.pattern('{PROJECT_DIR}/linux/flutter/ephemeral/flutter_glfw.h'),
-    Source.pattern('{PROJECT_DIR}/linux/flutter/ephemeral/icudtl.dat'),
+    Source.depfile('linux_engine_sources.d'),
   ];
 
   @override
@@ -44,22 +51,55 @@ class UnpackLinuxDebug extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String basePath = artifacts.getArtifactPath(Artifact.linuxDesktopPath);
-    for (File input in fs.directory(basePath)
-        .listSync(recursive: true)
-        .whereType<File>()) {
-      final String outputPath = fs.path.join(
-        environment.projectDir.path,
-        'linux',
-        'flutter',
-        'ephemeral',
-        fs.path.relative(input.path, from: basePath),
-      );
-      final File destinationFile = fs.file(outputPath);
-      if (!destinationFile.parent.existsSync()) {
-        destinationFile.parent.createSync(recursive: true);
+    final List<File> inputs = <File>[];
+    final List<File> outputs = <File>[];
+    final String outputPrefix = fs.path.join(
+      environment.projectDir.path,
+      'linux',
+      'flutter',
+      'ephemeral',
+    );
+    // The native linux artifacts are composed of 6 files and a directory (listed above)
+    // which need to be copied to the target directory.
+    for (String artifact in _kLinuxArtifacts) {
+      final String entityPath = fs.path.join(basePath, artifact);
+      // If this artifact is a file, just copy the source over.
+      if (fs.isFileSync(entityPath)) {
+        final String outputPath = fs.path.join(
+          outputPrefix,
+          fs.path.relative(entityPath, from: basePath),
+        );
+        final File destinationFile = fs.file(outputPath);
+        if (!destinationFile.parent.existsSync()) {
+          destinationFile.parent.createSync(recursive: true);
+        }
+        final File inputFile = fs.file(entityPath);
+        inputFile.copySync(destinationFile.path);
+        inputs.add(inputFile);
+        outputs.add(destinationFile);
+        continue;
       }
-      fs.file(input).copySync(destinationFile.path);
+      // If the artifact is the directory cpp_client_wrapper, recursively
+      // copy every file from it.
+      for (File input in fs.directory(entityPath)
+          .listSync(recursive: true)
+          .whereType<File>()) {
+        final String outputPath = fs.path.join(
+          outputPrefix,
+          fs.path.relative(input.path, from: basePath),
+        );
+        final File destinationFile = fs.file(outputPath);
+        if (!destinationFile.parent.existsSync()) {
+          destinationFile.parent.createSync(recursive: true);
+        }
+        final File inputFile = fs.file(input);
+        inputFile.copySync(destinationFile.path);
+        inputs.add(inputFile);
+        outputs.add(destinationFile);
+      }
     }
+    final Depfile depfile = Depfile(inputs, outputs);
+    depfile.writeToFile(environment.buildDir.childFile('linux_engine_sources.d'));
   }
 }
 

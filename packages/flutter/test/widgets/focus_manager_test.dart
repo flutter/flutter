@@ -263,6 +263,75 @@ void main() {
       expect(parent1.children.first, equals(child2));
       expect(parent2.children.first, equals(child1));
     });
+    testWidgets('canRequestFocus affects children.', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope', canRequestFocus: true);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope);
+      parent2Attachment.reparent(parent: scope);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent1);
+      child1.requestFocus();
+      await tester.pump();
+
+      expect(tester.binding.focusManager.primaryFocus, equals(child1));
+      expect(scope.focusedChild, equals(child1));
+      expect(scope.traversalDescendants.contains(child1), isTrue);
+      expect(scope.traversalDescendants.contains(child2), isTrue);
+
+      scope.canRequestFocus = false;
+      await tester.pump();
+      child2.requestFocus();
+      await tester.pump();
+      expect(tester.binding.focusManager.primaryFocus, isNot(equals(child2)));
+      expect(tester.binding.focusManager.primaryFocus, isNot(equals(child1)));
+      expect(scope.focusedChild, isNull);
+      expect(scope.traversalDescendants.contains(child1), isFalse);
+      expect(scope.traversalDescendants.contains(child2), isFalse);
+    });
+    testWidgets("skipTraversal doesn't affect children.", (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope', skipTraversal: false);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope);
+      parent2Attachment.reparent(parent: scope);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent1);
+      child1.requestFocus();
+      await tester.pump();
+
+      expect(tester.binding.focusManager.primaryFocus, equals(child1));
+      expect(scope.focusedChild, equals(child1));
+      expect(tester.binding.focusManager.rootScope.traversalDescendants.contains(scope), isTrue);
+      expect(scope.traversalDescendants.contains(child1), isTrue);
+      expect(scope.traversalDescendants.contains(child2), isTrue);
+
+      scope.skipTraversal = true;
+      await tester.pump();
+      expect(tester.binding.focusManager.primaryFocus, equals(child1));
+      expect(scope.focusedChild, equals(child1));
+      expect(tester.binding.focusManager.rootScope.traversalDescendants.contains(scope), isFalse);
+      expect(scope.traversalDescendants.contains(child1), isTrue);
+      expect(scope.traversalDescendants.contains(child2), isTrue);
+    });
     testWidgets('Can move node between scopes and lose scope focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
