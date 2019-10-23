@@ -1,4 +1,4 @@
-Signature: cbd43a0be5a032d016a584dc0fa51225
+Signature: a46695125e340e941fb302f07980b963
 
 UNUSED LICENSES:
 
@@ -18593,8 +18593,8 @@ We recommend reading one or more of these references before trying to
 understand the innards of the JPEG software.
 
 The best short technical introduction to the JPEG compression algorithm is
-  Wallace, Gregory K.  "The JPEG Still Picture Compression Standard",
-  Communications of the ACM, April 1991 (vol. 34 no. 4), pp. 30-44.
+	Wallace, Gregory K.  "The JPEG Still Picture Compression Standard",
+	Communications of the ACM, April 1991 (vol. 34 no. 4), pp. 30-44.
 (Adjacent articles in that issue discuss MPEG motion picture compression,
 applications of JPEG, and related topics.)  If you don't have the CACM issue
 handy, a PDF file containing a revised version of Wallace's article is
@@ -18662,8 +18662,8 @@ and other news.answers archive sites, including the official news.answers
 archive at rtfm.mit.edu: ftp://rtfm.mit.edu/pub/usenet/news.answers/jpeg-faq/.
 If you don't have Web or FTP access, send e-mail to mail-server@rtfm.mit.edu
 with body
-  send usenet/news.answers/jpeg-faq/part1
-  send usenet/news.answers/jpeg-faq/part2
+	send usenet/news.answers/jpeg-faq/part1
+	send usenet/news.answers/jpeg-faq/part2
 
 FILE FORMAT WARS
 ================
