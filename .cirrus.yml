@@ -25,7 +25,7 @@ task:
     #image: gcr.io/flutter-cirrus/build-flutter-image:latest
     dockerfile: dev/ci/docker_linux/Dockerfile
     docker_arguments:
-      foo: bar
+      - 'dev/ci/docker-linux/Dockerfile'
     cpu: $CPU
     memory: $MEMORY
   environment:
