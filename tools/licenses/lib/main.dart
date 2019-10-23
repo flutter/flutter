@@ -1889,7 +1889,7 @@ class _RepositoryBoringSSLDirectory extends _RepositoryDirectory {
   _RepositoryDirectory createSubdirectory(fs.Directory entry) {
     if (entry.name == 'src')
       return _RepositoryBoringSSLSourceDirectory(this, entry);
-    return super.createSubdirectory(entry);
+    return _RepositoryBoringSSLDirectory(this, entry);
   }
 }
 

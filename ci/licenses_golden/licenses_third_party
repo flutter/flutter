@@ -1,4 +1,4 @@
-Signature: 92367041bce08daa96cfc6552f3f5a64
+Signature: 2fa9542b052e62d47f99557a8925c2ca
 
 UNUSED LICENSES:
 
@@ -3256,6 +3256,7 @@ FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/rsaz_exp.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/rsaz_exp.h
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p256-x86_64.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p256-x86_64.h
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/fips_shared.lds
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/intcheck1.png
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/intcheck2.png
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/intcheck3.png
@@ -3280,6 +3281,32 @@ FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCryp
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20170615.docx!/word/styles.xml
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20170615.docx!/word/theme/theme1.xml
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20170615.docx!/word/webSettings.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/[Content_Types].xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/_rels/.rels
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/customXml/_rels/item1.xml.rels
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/customXml/item1.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/customXml/itemProps1.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/docProps/app.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/docProps/core.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/docProps/thumbnail.emf
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/_rels/document.xml.rels
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/document.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/endnotes.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/fontTable.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/footer1.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/footer2.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/footer3.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/footnotes.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/header1.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/header2.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/header3.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/media/image1.png
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/media/image2.png
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/numbering.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/settings.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/styles.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/theme/theme1.xml
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/policydocs/BoringCrypto-Security-Policy-20180730.docx!/word/webSettings.xml
 FILE: ../../../third_party/boringssl/src/crypto/obj/obj_mac.num
 FILE: ../../../third_party/boringssl/src/crypto/poly1305/poly1305_arm_asm.S
 FILE: ../../../third_party/boringssl/src/crypto/rsa_extra/rsa_print.c
@@ -3293,9 +3320,9 @@ FILE: ../../../third_party/boringssl/src/crypto/x509/some_names2.pem
 FILE: ../../../third_party/boringssl/src/crypto/x509/some_names3.pem
 FILE: ../../../third_party/boringssl/src/crypto/x509/x509_time_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/x509v3/v3_ocsp.c
-FILE: ../../../third_party/boringssl/src/fipstools/run_cavp.go
-FILE: ../../../third_party/boringssl/src/infra/config/cq.cfg
+FILE: ../../../third_party/boringssl/src/go.mod
 FILE: ../../../third_party/boringssl/src/ssl/bio_ssl.cc
+FILE: ../../../third_party/boringssl/src/ssl/ssl_c_test.c
 FILE: ../../../third_party/boringssl/src/util/all_tests.json
 FILE: ../../../third_party/boringssl/src/util/bot/UPDATING
 FILE: ../../../third_party/boringssl/src/util/bot/cmake-linux64.tar.gz.sha1
@@ -3304,10 +3331,19 @@ FILE: ../../../third_party/boringssl/src/util/bot/cmake-win32.zip.sha1
 FILE: ../../../third_party/boringssl/src/util/bot/nasm-win32.exe.sha1
 FILE: ../../../third_party/boringssl/src/util/bot/perl-win32.zip.sha1
 FILE: ../../../third_party/boringssl/src/util/bot/sde-linux64.tar.bz2.sha1
+FILE: ../../../third_party/boringssl/src/util/bot/sde-win32.tar.bz2.sha1
 FILE: ../../../third_party/boringssl/src/util/bot/yasm-win32.exe.sha1
 FILE: ../../../third_party/boringssl/src/util/doc.config
 FILE: ../../../third_party/boringssl/src/util/doc.go
-FILE: ../../../third_party/boringssl/src/util/fipstools/delocate.peg.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/acvp/acvptool/acvp.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/acvp/acvptool/acvp/acvp.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/acvp/acvptool/interactive.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/acvp/acvptool/parser.peg
+FILE: ../../../third_party/boringssl/src/util/fipstools/acvp/acvptool/parser.peg.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/acvp/acvptool/subprocess/hash.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/acvp/acvptool/subprocess/subprocess.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/run_cavp.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/delocate/delocate.peg.go
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/vm/lib/bigint_patch.dart
 ----------------------------------------------------------------------------------------------------
@@ -3461,6 +3497,28 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+The code in third_party/sike also carries the MIT license:
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE
 
 Licenses for support code
 
@@ -4049,7 +4107,6 @@ FILE: ../../../third_party/boringssl/src/include/openssl/chacha.h
 FILE: ../../../third_party/boringssl/src/include/openssl/crypto.h
 FILE: ../../../third_party/boringssl/src/include/openssl/engine.h
 FILE: ../../../third_party/boringssl/src/include/openssl/hkdf.h
-FILE: ../../../third_party/boringssl/src/include/openssl/lhash_macros.h
 FILE: ../../../third_party/boringssl/src/include/openssl/objects.h
 FILE: ../../../third_party/boringssl/src/include/openssl/opensslconf.h
 FILE: ../../../third_party/boringssl/src/include/openssl/opensslv.h
@@ -4226,41 +4283,41 @@ FILE: ../../../third_party/boringssl/src/crypto/rand_extra/rand_extra.c
 FILE: ../../../third_party/boringssl/src/crypto/x509/make_many_constraints.go
 FILE: ../../../third_party/boringssl/src/decrepit/cfb/cfb.c
 FILE: ../../../third_party/boringssl/src/decrepit/cfb/cfb_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_aes_gcm_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_aes_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_ctr_drbg_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_ecdsa2_keypair_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_ecdsa2_pkv_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_ecdsa2_siggen_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_ecdsa2_sigver_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_hmac_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_keywrap_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_main.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_rsa2_keygen_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_rsa2_siggen_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_rsa2_sigver_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_sha_monte_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_sha_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_tdes_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_test_util.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_test_util.h
-FILE: ../../../third_party/boringssl/src/fipstools/test_fips.c
 FILE: ../../../third_party/boringssl/src/include/openssl/is_boringssl.h
 FILE: ../../../third_party/boringssl/src/include/openssl/span.h
 FILE: ../../../third_party/boringssl/src/ssl/span_test.cc
 FILE: ../../../third_party/boringssl/src/ssl/ssl_versions.cc
 FILE: ../../../third_party/boringssl/src/tool/file.cc
 FILE: ../../../third_party/boringssl/src/tool/sign.cc
+FILE: ../../../third_party/boringssl/src/util/ar/ar.go
 FILE: ../../../third_party/boringssl/src/util/check_imported_libraries.go
 FILE: ../../../third_party/boringssl/src/util/convert_comments.go
 FILE: ../../../third_party/boringssl/src/util/embed_test_data.go
-FILE: ../../../third_party/boringssl/src/util/fipstools/ar.go
 FILE: ../../../third_party/boringssl/src/util/fipstools/break-hash.go
-FILE: ../../../third_party/boringssl/src/util/fipstools/const.go
-FILE: ../../../third_party/boringssl/src/util/fipstools/delocate.go
-FILE: ../../../third_party/boringssl/src/util/fipstools/delocate.peg
-FILE: ../../../third_party/boringssl/src/util/fipstools/delocate_test.go
-FILE: ../../../third_party/boringssl/src/util/fipstools/inject-hash.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_aes_gcm_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_aes_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_ctr_drbg_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_ecdsa2_keypair_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_ecdsa2_pkv_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_ecdsa2_siggen_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_ecdsa2_sigver_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_hmac_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_keywrap_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_main.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_rsa2_keygen_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_rsa2_siggen_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_rsa2_sigver_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_sha_monte_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_sha_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_tdes_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_test_util.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_test_util.h
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/test_fips.c
+FILE: ../../../third_party/boringssl/src/util/fipstools/delocate/delocate.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/delocate/delocate.peg
+FILE: ../../../third_party/boringssl/src/util/fipstools/delocate/delocate_test.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/fipscommon/const.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/inject_hash/inject_hash.go
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2017, Google Inc.
 
@@ -4281,26 +4338,48 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/crypto/bytestring/unicode.c
 TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/crypto/abi_self_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/bytestring/unicode.c
 FILE: ../../../third_party/boringssl/src/crypto/chacha/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/cipher_extra/e_aesccm.c
 FILE: ../../../third_party/boringssl/src/crypto/cpu-aarch64-fuchsia.c
+FILE: ../../../third_party/boringssl/src/crypto/cpu-arm-linux.h
+FILE: ../../../third_party/boringssl/src/crypto/cpu-arm-linux_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/div_extra.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/gcd_extra.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/felem.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/make_ec_scalar_base_mult_tests.go
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/make_p256-x86_64-table.go
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/make_p256-x86_64-tests.go
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/scalar.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/simple_mul.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/md5/internal.h
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/md5/md5_test.cc
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/sha/internal.h
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/sha/sha_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/tls/internal.h
+FILE: ../../../third_party/boringssl/src/crypto/hrss/hrss.c
+FILE: ../../../third_party/boringssl/src/crypto/hrss/hrss_test.cc
+FILE: ../../../third_party/boringssl/src/crypto/hrss/internal.h
+FILE: ../../../third_party/boringssl/src/crypto/impl_dispatch_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/pem/pem_test.cc
+FILE: ../../../third_party/boringssl/src/crypto/rand_extra/rand_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/self_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_kas_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_tlskdf_test.cc
+FILE: ../../../third_party/boringssl/src/crypto/stack/stack_test.cc
+FILE: ../../../third_party/boringssl/src/crypto/x509v3/internal.h
 FILE: ../../../third_party/boringssl/src/include/openssl/e_os2.h
+FILE: ../../../third_party/boringssl/src/include/openssl/hrss.h
 FILE: ../../../third_party/boringssl/src/ssl/handoff.cc
+FILE: ../../../third_party/boringssl/src/third_party/sike/sike_test.cc
+FILE: ../../../third_party/boringssl/src/util/ar/ar_test.go
 FILE: ../../../third_party/boringssl/src/util/check_filenames.go
 FILE: ../../../third_party/boringssl/src/util/convert_wycheproof.go
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_kas_test.cc
+FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/cavp_tlskdf_test.cc
+FILE: ../../../third_party/boringssl/src/util/godeps.go
+FILE: ../../../third_party/boringssl/src/util/make_prefix_headers.go
+FILE: ../../../third_party/boringssl/src/util/read_symbols.go
+FILE: ../../../third_party/boringssl/src/util/testresult/testresult.go
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2018, Google Inc.
 
@@ -5649,6 +5728,33 @@ https://www.openssl.org/source/license.html
 
 ====================================================================================================
 LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/fips_shared_support.c
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/fips_shared_support.c
+FILE: ../../../third_party/boringssl/src/crypto/siphash/siphash.c
+FILE: ../../../third_party/boringssl/src/crypto/siphash/siphash_test.cc
+FILE: ../../../third_party/boringssl/src/decrepit/blowfish/blowfish_test.cc
+FILE: ../../../third_party/boringssl/src/decrepit/cast/cast_test.cc
+FILE: ../../../third_party/boringssl/src/include/openssl/siphash.h
+FILE: ../../../third_party/boringssl/src/util/fipstools/acvp/modulewrapper/modulewrapper.cc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2019, Google Inc.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/modes/cbc.c
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/modes/cbc.c
@@ -5878,6 +5984,27 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/hrss/asm/poly_rq_mul.S
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/crypto/hrss/asm/poly_rq_mul.S
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2017, the HRSS authors.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ====================================================================================================
 
 ====================================================================================================
@@ -6620,6 +6747,10 @@ LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/third_party/fiat/LICENSE
 TYPE: LicenseType.mit
 FILE: ../../../third_party/boringssl/src/third_party/fiat/METADATA
+FILE: ../../../third_party/boringssl/src/third_party/fiat/curve25519_32.h
+FILE: ../../../third_party/boringssl/src/third_party/fiat/curve25519_64.h
+FILE: ../../../third_party/boringssl/src/third_party/fiat/p256_32.h
+FILE: ../../../third_party/boringssl/src/third_party/fiat/p256_64.h
 ----------------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -6705,17 +6836,17 @@ SOFTWARE.
 LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/CHANGES
 FILE: ../../../third_party/boringssl/src/third_party/googletest/CONTRIBUTORS
 FILE: ../../../third_party/boringssl/src/third_party/googletest/METADATA
+FILE: ../../../third_party/boringssl/src/third_party/googletest/cmake/Config.cmake.in
 FILE: ../../../third_party/boringssl/src/third_party/googletest/cmake/gtest.pc.in
 FILE: ../../../third_party/boringssl/src/third_party/googletest/cmake/gtest_main.pc.in
+FILE: ../../../third_party/boringssl/src/third_party/googletest/cmake/libgtest.la.in
 FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest.cbproj
 FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest.groupproj
 FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_main.cbproj
 FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_unittest.cbproj
 FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-param-test.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-param-test.h.pump
 FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-test-part.h
 FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-filepath.h
 FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest-md.sln
@@ -6823,10 +6954,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-printers.h
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-matchers.h
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-matchers.h
 FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-printers.h
 FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-spi.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-matchers.cc
 FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-printers.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2007, Google Inc.
@@ -6995,47 +7128,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-linked_ptr.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-linked_ptr.h
-----------------------------------------------------------------------------------------------------
-Copyright 2003 Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util-generated.h
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util.h
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-typed-test.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util-generated.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util-generated.h.pump
 FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util.h
 FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-type-util.h
 FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-type-util.h.pump
@@ -7046,43 +7141,6 @@ FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample8_
 FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-typed-test.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2008 Google Inc.
-All Rights Reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-tuple.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-tuple.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-tuple.h.pump
-----------------------------------------------------------------------------------------------------
-Copyright 2009 Google Inc.
 All Rights Reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -7150,13 +7208,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/sike/LICENSE
+TYPE: LicenseType.mit
+FILE: ../../../third_party/boringssl/src/third_party/sike/asm/fp_generic.c
+FILE: ../../../third_party/boringssl/src/third_party/sike/curve_params.c
+FILE: ../../../third_party/boringssl/src/third_party/sike/fpx.c
+FILE: ../../../third_party/boringssl/src/third_party/sike/fpx.h
+FILE: ../../../third_party/boringssl/src/third_party/sike/isogeny.c
+FILE: ../../../third_party/boringssl/src/third_party/sike/isogeny.h
+FILE: ../../../third_party/boringssl/src/third_party/sike/sike.c
+FILE: ../../../third_party/boringssl/src/third_party/sike/sike.h
+FILE: ../../../third_party/boringssl/src/third_party/sike/utils.h
+----------------------------------------------------------------------------------------------------
+MIT License
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
 ORIGIN: null
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/boringssl/ios-aarch64/crypto/chacha/chacha-armv8.S
 FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/aesv8-armx64.S
 FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/armv8-mont.S
+FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/ghash-neon-armv8.S
 FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/ghashv8-armx64.S
 FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/sha1-armv8.S
+FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/vpaes-armv8.S
+FILE: ../../../third_party/boringssl/ios-aarch64/crypto/third_party/sike/asm/fp-armv8.S
 FILE: ../../../third_party/boringssl/ios-arm/crypto/chacha/chacha-armv4.S
 FILE: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/aesv8-armx32.S
 FILE: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/armv4-mont.S
@@ -7166,8 +7264,11 @@ FILE: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/sha1-armv4-large.
 FILE: ../../../third_party/boringssl/linux-aarch64/crypto/chacha/chacha-armv8.S
 FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/aesv8-armx64.S
 FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/armv8-mont.S
+FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/ghash-neon-armv8.S
 FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/ghashv8-armx64.S
 FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/sha1-armv8.S
+FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/vpaes-armv8.S
+FILE: ../../../third_party/boringssl/linux-aarch64/crypto/third_party/sike/asm/fp-armv8.S
 FILE: ../../../third_party/boringssl/linux-arm/crypto/chacha/chacha-armv4.S
 FILE: ../../../third_party/boringssl/linux-arm/crypto/fipsmodule/aesv8-armx32.S
 FILE: ../../../third_party/boringssl/linux-arm/crypto/fipsmodule/armv4-mont.S
@@ -7181,6 +7282,7 @@ FILE: ../../../third_party/boringssl/linux-x86/crypto/fipsmodule/aes-586.S
 FILE: ../../../third_party/boringssl/linux-x86/crypto/fipsmodule/aesni-x86.S
 FILE: ../../../third_party/boringssl/linux-x86/crypto/fipsmodule/bn-586.S
 FILE: ../../../third_party/boringssl/linux-x86/crypto/fipsmodule/co-586.S
+FILE: ../../../third_party/boringssl/linux-x86/crypto/fipsmodule/ghash-ssse3-x86.S
 FILE: ../../../third_party/boringssl/linux-x86/crypto/fipsmodule/ghash-x86.S
 FILE: ../../../third_party/boringssl/linux-x86/crypto/fipsmodule/md5-586.S
 FILE: ../../../third_party/boringssl/linux-x86/crypto/fipsmodule/sha1-586.S
@@ -7194,10 +7296,11 @@ FILE: ../../../third_party/boringssl/linux-x86_64/crypto/cipher_extra/chacha20_p
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/aes-x86_64.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/aesni-gcm-x86_64.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/aesni-x86_64.S
-FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/bsaes-x86_64.S
+FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/ghash-ssse3-x86_64.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/ghash-x86_64.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/md5-x86_64.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/p256-x86_64-asm.S
+FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/p256_beeu-x86_64-asm.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/rdrand-x86_64.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/rsaz-avx2.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/sha1-x86_64.S
@@ -7206,11 +7309,13 @@ FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/sha512-x86_6
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/vpaes-x86_64.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/x86_64-mont.S
 FILE: ../../../third_party/boringssl/linux-x86_64/crypto/fipsmodule/x86_64-mont5.S
+FILE: ../../../third_party/boringssl/linux-x86_64/crypto/third_party/sike/asm/fp-x86_64.S
 FILE: ../../../third_party/boringssl/mac-x86/crypto/chacha/chacha-x86.S
 FILE: ../../../third_party/boringssl/mac-x86/crypto/fipsmodule/aes-586.S
 FILE: ../../../third_party/boringssl/mac-x86/crypto/fipsmodule/aesni-x86.S
 FILE: ../../../third_party/boringssl/mac-x86/crypto/fipsmodule/bn-586.S
 FILE: ../../../third_party/boringssl/mac-x86/crypto/fipsmodule/co-586.S
+FILE: ../../../third_party/boringssl/mac-x86/crypto/fipsmodule/ghash-ssse3-x86.S
 FILE: ../../../third_party/boringssl/mac-x86/crypto/fipsmodule/ghash-x86.S
 FILE: ../../../third_party/boringssl/mac-x86/crypto/fipsmodule/md5-586.S
 FILE: ../../../third_party/boringssl/mac-x86/crypto/fipsmodule/sha1-586.S
@@ -7224,10 +7329,11 @@ FILE: ../../../third_party/boringssl/mac-x86_64/crypto/cipher_extra/chacha20_pol
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/aes-x86_64.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/aesni-gcm-x86_64.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/aesni-x86_64.S
-FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/bsaes-x86_64.S
+FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/ghash-ssse3-x86_64.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/ghash-x86_64.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/md5-x86_64.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/p256-x86_64-asm.S
+FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/p256_beeu-x86_64-asm.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/rdrand-x86_64.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/rsaz-avx2.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/sha1-x86_64.S
@@ -7236,11 +7342,13 @@ FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/sha512-x86_64.
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/vpaes-x86_64.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/x86_64-mont.S
 FILE: ../../../third_party/boringssl/mac-x86_64/crypto/fipsmodule/x86_64-mont5.S
+FILE: ../../../third_party/boringssl/mac-x86_64/crypto/third_party/sike/asm/fp-x86_64.S
 FILE: ../../../third_party/boringssl/win-x86/crypto/chacha/chacha-x86.asm
 FILE: ../../../third_party/boringssl/win-x86/crypto/fipsmodule/aes-586.asm
 FILE: ../../../third_party/boringssl/win-x86/crypto/fipsmodule/aesni-x86.asm
 FILE: ../../../third_party/boringssl/win-x86/crypto/fipsmodule/bn-586.asm
 FILE: ../../../third_party/boringssl/win-x86/crypto/fipsmodule/co-586.asm
+FILE: ../../../third_party/boringssl/win-x86/crypto/fipsmodule/ghash-ssse3-x86.asm
 FILE: ../../../third_party/boringssl/win-x86/crypto/fipsmodule/ghash-x86.asm
 FILE: ../../../third_party/boringssl/win-x86/crypto/fipsmodule/md5-586.asm
 FILE: ../../../third_party/boringssl/win-x86/crypto/fipsmodule/sha1-586.asm
@@ -7254,10 +7362,11 @@ FILE: ../../../third_party/boringssl/win-x86_64/crypto/cipher_extra/chacha20_pol
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/aes-x86_64.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/aesni-gcm-x86_64.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/aesni-x86_64.asm
-FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/bsaes-x86_64.asm
+FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/ghash-ssse3-x86_64.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/ghash-x86_64.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/md5-x86_64.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/p256-x86_64-asm.asm
+FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/p256_beeu-x86_64-asm.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/rdrand-x86_64.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/rsaz-avx2.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/sha1-x86_64.asm
@@ -7266,6 +7375,7 @@ FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/sha512-x86_64.
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/vpaes-x86_64.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/x86_64-mont.asm
 FILE: ../../../third_party/boringssl/win-x86_64/crypto/fipsmodule/x86_64-mont5.asm
+FILE: ../../../third_party/boringssl/win-x86_64/crypto/third_party/sike/asm/fp-x86_64.asm
 ----------------------------------------------------------------------------------------------------
 <THIS BLOCK INTENTIONALLY LEFT BLANK>
 ====================================================================================================
@@ -23348,4 +23458,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 366
+Total license count: 367
