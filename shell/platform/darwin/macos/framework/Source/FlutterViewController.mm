@@ -60,6 +60,17 @@ struct MouseState {
   }
 };
 
+/**
+ * State tracking for keyboard events, to adapt between the events coming from the system and the
+ * events that the embedding API expects.
+ */
+struct KeyboardState {
+  /**
+   * The last known pressed modifier flag keys.
+   */
+  uint64_t previously_pressed_flags = 0;
+};
+
 }  // namespace
 
 #pragma mark - Private interface declaration.
@@ -83,6 +94,11 @@ struct MouseState {
  * The current state of the mouse and the sent mouse events.
  */
 @property(nonatomic) MouseState mouseState;
+
+/**
+ * The current state of the keyboard and pressed keys.
+ */
+@property(nonatomic) KeyboardState keyboardState;
 
 /**
  * Starts running |engine|, including any initial setup.
@@ -398,14 +414,18 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)dispatchKeyEvent:(NSEvent*)event ofType:(NSString*)type {
-  [_keyEventChannel sendMessage:@{
+  NSMutableDictionary* keyMessage = [@{
     @"keymap" : @"macos",
     @"type" : type,
     @"keyCode" : @(event.keyCode),
     @"modifiers" : @(event.modifierFlags),
-    @"characters" : event.characters,
-    @"charactersIgnoringModifiers" : event.charactersIgnoringModifiers,
-  }];
+  } mutableCopy];
+  // Calling these methods on any other type of event will raise an exception.
+  if (event.type == NSEventTypeKeyDown || event.type == NSEventTypeKeyUp) {
+    keyMessage[@"characters"] = event.characters;
+    keyMessage[@"charactersIgnoringModifiers"] = event.charactersIgnoringModifiers;
+  }
+  [_keyEventChannel sendMessage:keyMessage];
 }
 
 - (void)onSettingsChanged:(NSNotification*)notification {
@@ -499,6 +519,17 @@ static void CommonInit(FlutterViewController* controller) {
       [responder keyUp:event];
     }
   }
+}
+
+- (void)flagsChanged:(NSEvent*)event {
+  NSUInteger currentlyPressedFlags =
+      event.modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask;
+  if (currentlyPressedFlags < _keyboardState.previously_pressed_flags) {
+    [self keyUp:event];
+  } else {
+    [self keyDown:event];
+  }
+  _keyboardState.previously_pressed_flags = currentlyPressedFlags;
 }
 
 - (void)mouseEntered:(NSEvent*)event {
