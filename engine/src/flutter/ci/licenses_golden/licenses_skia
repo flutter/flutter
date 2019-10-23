@@ -1,4 +1,4 @@
-Signature: 66e51cf6b5d186c2e6443ceab57315a0
+Signature: 4133fde966dd0420bc84c4a1fafefa4c
 
 UNUSED LICENSES:
 
@@ -3292,6 +3292,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/effects/MotionBlurEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/MotionBlurEffect.h
 FILE: ../../../third_party/skia/modules/skottie/src/effects/MotionTileEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/RadialWipeEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/ShiftChannelsEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TintEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TransformEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TritoneEffect.cpp
