@@ -1844,7 +1844,5 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
       hasVisualOverflow: childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     setChildParentData(child, constraints, geometry);
-    print('Constraints: $constraints');
-    print('Geometry: $geometry');
   }
 }
