@@ -12,9 +12,9 @@ void main() {
 
   Widget _getApp([VoidCallback onPressed]) {
     final UniqueKey actionKey = UniqueKey();
-    final ContextMenuAction action = ContextMenuAction(
+    final CupertinoContextMenuAction action = CupertinoContextMenuAction(
       key: actionKey,
-      child: const Text('I am a ContextMenuAction'),
+      child: const Text('I am a CupertinoContextMenuAction'),
       onPressed: onPressed,
     );
 
@@ -29,7 +29,7 @@ void main() {
 
   BoxDecoration _getDecoration(WidgetTester tester) {
     final Finder finder = find.descendant(
-      of: find.byType(ContextMenuAction),
+      of: find.byType(CupertinoContextMenuAction),
       matching: find.byType(Container),
     );
     expect(finder, findsOneWidget);
@@ -44,7 +44,7 @@ void main() {
     }));
 
     expect(wasPressed, false);
-    await tester.tap(find.byType(ContextMenuAction));
+    await tester.tap(find.byType(CupertinoContextMenuAction));
     expect(wasPressed, true);
   });
 
@@ -52,7 +52,7 @@ void main() {
     await tester.pumpWidget(_getApp());
     expect(_getDecoration(tester).color, _kBackgroundColor);
 
-    final Offset actionCenter = tester.getCenter(find.byType(ContextMenuAction));
+    final Offset actionCenter = tester.getCenter(find.byType(CupertinoContextMenuAction));
     final TestGesture gesture = await tester.startGesture(actionCenter);
     await tester.pump();
     expect(_getDecoration(tester).color, _kBackgroundColorPressed);
