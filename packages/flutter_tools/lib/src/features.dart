@@ -153,7 +153,7 @@ const Feature flutterWebIncrementalCompiler = Feature(
   configSetting: 'enable-web-incremental-compiler',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
 );
 

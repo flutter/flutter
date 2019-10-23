@@ -58,23 +58,28 @@ window.\$hotReloadHook = function(modules) {
     });
   }
 }
+''';
+}
 
+String generateMainModule({@required String entrypoint}) {
+  return '''
 // Create the main module loaded below.
-define("main_module", ["$mainModule", "dart_sdk"], function(app, dart_sdk) {
+define("main_module", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._isolate_helper.startRootIsolate(() => {}, []);
   dart_sdk._debugger.registerDevtoolsFormatter();
+  dart_sdk.ui.webOnlyInitializePlatform();
 
   // Attach the main entrypoint and hot reload functionality to the window.
-  window.\$mainEntrypoint = app.main;
+  window.\$mainEntrypoint = app.main.main;
   if (window.\$hotReload == null) {
     window.\$hotReload = function() {
-      dart_sdk.developer.invokeExtension('ext.flutter.disassemble', {});
+      dart_sdk.developer.invokeExtension('ext.flutter.disassemble', '{}');
       dart_sdk.dart.hotRestart();
       window.\$mainEntrypoint();
     }
   }
-  app.main();
+  app.main.main();
 });
 
 // Require JS configuration.

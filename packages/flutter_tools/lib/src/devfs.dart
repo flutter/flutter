@@ -348,6 +348,7 @@ class UpdateFSReport {
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
+  List<Uri> invalidatedFiles;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
