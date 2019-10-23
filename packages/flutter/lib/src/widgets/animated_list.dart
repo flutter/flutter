@@ -10,6 +10,7 @@ import 'framework.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scroll_view.dart';
+import 'sliver.dart';
 import 'ticker_provider.dart';
 
 /// Signature for the builder callback used by [AnimatedList].
@@ -39,15 +40,234 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 
 /// A scrolling container that animates items when they are inserted or removed.
 ///
-/// This widget's [AnimatedListState] can be used to dynamically insert or remove
-/// items. To refer to the [AnimatedListState] either provide a [GlobalKey] or
-/// use the static [of] method from an item's input callback.
+/// This widget's [AnimatedListState] can be used to dynamically insert or
+/// remove items. To refer to the [AnimatedListState] either provide a
+/// [GlobalKey] or use the static [of] method from an item's input callback.
 ///
 /// This widget is similar to one created by [ListView.builder].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
+///
+/// {@tool snippet --template=freeform}
+/// This sample application uses an [AnimatedList] to create an effect when
+/// items are removed or added to the list.
+///
+/// ```dart imports
+/// import 'package:flutter/foundation.dart';
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// class AnimatedListSample extends StatefulWidget {
+///   @override
+///   _AnimatedListSampleState createState() => _AnimatedListSampleState();
+/// }
+///
+/// class _AnimatedListSampleState extends State<AnimatedListSample> {
+///   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+///   ListModel<int> _list;
+///   int _selectedItem;
+///   int _nextItem; // The next item inserted when the user presses the '+' button.
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _list = ListModel<int>(
+///       listKey: _listKey,
+///       initialItems: <int>[0, 1, 2],
+///       removedItemBuilder: _buildRemovedItem,
+///     );
+///     _nextItem = 3;
+///   }
+///
+///   // Used to build list items that haven't been removed.
+///   Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+///     return CardItem(
+///       animation: animation,
+///       item: _list[index],
+///       selected: _selectedItem == _list[index],
+///       onTap: () {
+///         setState(() {
+///           _selectedItem = _selectedItem == _list[index] ? null : _list[index];
+///         });
+///       },
+///     );
+///   }
+///
+///   // Used to build an item after it has been removed from the list. This
+///   // method is needed because a removed item remains visible until its
+///   // animation has completed (even though it's gone as far this ListModel is
+///   // concerned). The widget will be used by the
+///   // [AnimatedListState.removeItem] method's
+///   // [AnimatedListRemovedItemBuilder] parameter.
+///   Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
+///     return CardItem(
+///       animation: animation,
+///       item: item,
+///       selected: false,
+///       // No gesture detector here: we don't want removed items to be interactive.
+///     );
+///   }
+///
+///   // Insert the "next item" into the list model.
+///   void _insert() {
+///     final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem);
+///     _list.insert(index, _nextItem++);
+///   }
+///
+///   // Remove the selected item from the list model.
+///   void _remove() {
+///     if (_selectedItem != null) {
+///       _list.removeAt(_list.indexOf(_selectedItem));
+///       setState(() {
+///         _selectedItem = null;
+///       });
+///     }
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('AnimatedList'),
+///           actions: <Widget>[
+///             IconButton(
+///               icon: const Icon(Icons.add_circle),
+///               onPressed: _insert,
+///               tooltip: 'insert a new item',
+///             ),
+///             IconButton(
+///               icon: const Icon(Icons.remove_circle),
+///               onPressed: _remove,
+///               tooltip: 'remove the selected item',
+///             ),
+///           ],
+///         ),
+///         body: Padding(
+///           padding: const EdgeInsets.all(16.0),
+///           child: AnimatedList(
+///             key: _listKey,
+///             initialItemCount: _list.length,
+///             itemBuilder: _buildItem,
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// /// Keeps a Dart [List] in sync with an [AnimatedList].
+/// ///
+/// /// The [insert] and [removeAt] methods apply to both the internal list and
+/// /// the animated list that belongs to [listKey].
+/// ///
+/// /// This class only exposes as much of the Dart List API as is needed by the
+/// /// sample app. More list methods are easily added, however methods that
+/// /// mutate the list must make the same changes to the animated list in terms
+/// /// of [AnimatedListState.insertItem] and [AnimatedList.removeItem].
+/// class ListModel<E> {
+///   ListModel({
+///     @required this.listKey,
+///     @required this.removedItemBuilder,
+///     Iterable<E> initialItems,
+///   }) : assert(listKey != null),
+///       assert(removedItemBuilder != null),
+///       _items = List<E>.from(initialItems ?? <E>[]);
+///
+///   final GlobalKey<AnimatedListState> listKey;
+///   final dynamic removedItemBuilder;
+///   final List<E> _items;
+///
+///   AnimatedListState get _animatedList => listKey.currentState;
+///
+///   void insert(int index, E item) {
+///     _items.insert(index, item);
+///     _animatedList.insertItem(index);
+///   }
+///
+///   E removeAt(int index) {
+///     final E removedItem = _items.removeAt(index);
+///     if (removedItem != null) {
+///       _animatedList.removeItem(
+///         index,
+///           (BuildContext context, Animation<double> animation) => removedItemBuilder(removedItem, context, animation),
+///       );
+///     }
+///     return removedItem;
+///   }
+///
+///   int get length => _items.length;
+///
+///   E operator [](int index) => _items[index];
+///
+///   int indexOf(E item) => _items.indexOf(item);
+/// }
+///
+/// /// Displays its integer item as 'item N' on a Card whose color is based on
+/// /// the item's value.
+/// ///
+/// /// The text is displayed in bright green if [selected] is
+/// /// true. This widget's height is based on the [animation] parameter, it
+/// /// varies from 0 to 128 as the animation varies from 0.0 to 1.0.
+/// class CardItem extends StatelessWidget {
+///   const CardItem({
+///     Key key,
+///     @required this.animation,
+///     this.onTap,
+///     @required this.item,
+///     this.selected: false
+///   }) : assert(animation != null),
+///        assert(item != null && item >= 0),
+///        assert(selected != null),
+///        super(key: key);
+///
+///   final Animation<double> animation;
+///   final VoidCallback onTap;
+///   final int item;
+///   final bool selected;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     TextStyle textStyle = Theme.of(context).textTheme.display1;
+///     if (selected)
+///       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
+///     return Padding(
+///       padding: const EdgeInsets.all(2.0),
+///       child: SizeTransition(
+///         axis: Axis.vertical,
+///         sizeFactor: animation,
+///         child: GestureDetector(
+///           behavior: HitTestBehavior.opaque,
+///           onTap: onTap,
+///           child: SizedBox(
+///             height: 128.0,
+///             child: Card(
+///               color: Colors.primaries[item % Colors.primaries.length],
+///               child: Center(
+///                 child: Text('Item $item', style: textStyle),
+///               ),
+///             ),
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// void main() {
+///   runApp(AnimatedListSample());
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+/// * [SliverAnimatedList], a sliver that animates items when they are inserted
+///   or removed from a list.
 class AnimatedList extends StatefulWidget {
-  /// Creates a scrolling container that animates items when they are inserted or removed.
+  /// Creates a scrolling container that animates items when they are inserted
+  /// or removed.
   const AnimatedList({
     Key key,
     @required this.itemBuilder,
@@ -77,11 +297,13 @@ class AnimatedList extends StatefulWidget {
   /// [AnimatedListState.removeItem] removes an item immediately.
   final AnimatedListItemBuilder itemBuilder;
 
+  /// {@template flutter.widgets.animatedList.initialItemCount}
   /// The number of items the list will start with.
   ///
   /// The appearance of the initial items is not animated. They
   /// are created, as needed, by [itemBuilder] with an animation parameter
   /// of [kAlwaysCompleteAnimation].
+  /// {@endtemplate}
   final int initialItemCount;
 
   /// The axis along which the scroll view scrolls.
@@ -154,10 +376,11 @@ class AnimatedList extends StatefulWidget {
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry padding;
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
   ///
-  /// This method is typically used by [AnimatedList] item widgets that insert or
-  /// remove items in response to user input.
+  /// This method is typically used by [AnimatedList] item widgets that insert
+  /// or remove items in response to user input.
   ///
   /// ```dart
   /// AnimatedListState animatedList = AnimatedList.of(context);
@@ -170,11 +393,11 @@ class AnimatedList extends StatefulWidget {
       return result;
     throw FlutterError(
       'AnimatedList.of() called with a context that does not contain an AnimatedList.\n'
-      'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of(). '
-      'This can happen when the context provided is from the same StatefulWidget that '
-      'built the AnimatedList. Please see the AnimatedList documentation for examples '
-      'of how to refer to an AnimatedListState object: '
-      '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html \n'
+      'No AnimatedList ancestor could be found starting from the context that '
+      'was passed to AnimatedList.of(). This can happen when the context '
+      'provided is from the same StatefulWidget that built the AnimatedList. '
+      'Please see the AnimatedList documentation for examples of how to refer to '
+      'an AnimatedListState object: https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html \n'
       'The context used was:\n'
       '  $context'
     );
@@ -209,6 +432,389 @@ class AnimatedList extends StatefulWidget {
 /// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
 /// with the static [AnimatedList.of] method.
 class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin<AnimatedList> {
+  final GlobalKey<SliverAnimatedListState> _sliverAnimatedListKey = GlobalKey();
+
+  /// Insert an item at [index] and start an animation that will be passed
+  /// to [AnimatedList.itemBuilder] when the item is visible.
+  ///
+  /// This method's semantics are the same as Dart's [List.insert] method:
+  /// it increases the length of the list by one and shifts all items at or
+  /// after [index] towards the end of the list.
+  void insertItem(int index, { Duration duration = _kDuration }) {
+    _sliverAnimatedListKey.currentState.insertItem(index, duration: duration);
+  }
+
+  /// Remove the item at [index] and start an animation that will be passed
+  /// to [builder] when the item is visible.
+  ///
+  /// Items are removed immediately. After an item has been removed, its index
+  /// will no longer be passed to the [AnimatedList.itemBuilder]. However the
+  /// item will still appear in the list for [duration] and during that time
+  /// [builder] must construct its widget as needed.
+  ///
+  /// This method's semantics are the same as Dart's [List.remove] method:
+  /// it decreases the length of the list by one and shifts all items at or
+  /// before [index] towards the beginning of the list.
+  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+    _sliverAnimatedListKey.currentState.removeItem(index, builder, duration: duration);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      scrollDirection: widget.scrollDirection,
+      reverse: widget.reverse,
+      controller: widget.controller,
+      primary: widget.primary,
+      physics: widget.physics,
+      shrinkWrap: widget.shrinkWrap,
+      slivers: <Widget>[
+        SliverPadding(
+          padding: widget.padding ?? const EdgeInsets.all(0),
+          sliver: SliverAnimatedList(
+            key: _sliverAnimatedListKey,
+            itemBuilder: widget.itemBuilder,
+            initialItemCount: widget.initialItemCount,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A sliver that animates items when they are inserted or removed.
+///
+/// This widget's [SliverAnimatedListState] can be used to dynamically insert or
+/// remove items. To refer to the [SliverAnimatedListState] either provide a
+/// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
+/// input callback.
+///
+/// {@tool snippet --template=freeform}
+/// This sample application uses a [SliverAnimatedList] to create an animated
+/// effect when items are removed or added to the list.
+///
+/// ```dart imports
+/// import 'package:flutter/foundation.dart';
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// void main() => runApp(SliverAnimatedListSample());
+///
+/// class SliverAnimatedListSample extends StatefulWidget {
+///   @override
+///   _SliverAnimatedListSampleState createState() => _SliverAnimatedListSampleState();
+/// }
+///
+/// class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
+///   final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
+///   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+///   ListModel<int> _list;
+///   int _selectedItem;
+///   int _nextItem; // The next item inserted when the user presses the '+' button.
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _list = ListModel<int>(
+///       listKey: _listKey,
+///       initialItems: <int>[0, 1, 2],
+///       removedItemBuilder: _buildRemovedItem,
+///     );
+///     _nextItem = 3;
+///   }
+///
+///   // Used to build list items that haven't been removed.
+///   Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+///     return CardItem(
+///       animation: animation,
+///       item: _list[index],
+///       selected: _selectedItem == _list[index],
+///       onTap: () {
+///         setState(() {
+///           _selectedItem = _selectedItem == _list[index] ? null : _list[index];
+///         });
+///       },
+///     );
+///   }
+///
+///   // Used to build an item after it has been removed from the list. This
+///   // method is needed because a removed item remains visible until its
+///   // animation has completed (even though it's gone as far this ListModel is
+///   // concerned). The widget will be used by the
+///   // [AnimatedListState.removeItem] method's
+///   // [AnimatedListRemovedItemBuilder] parameter.
+///   Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
+///     return CardItem(
+///       animation: animation,
+///       item: item,
+///       selected: false,
+///     );
+///   }
+///
+///   // Insert the "next item" into the list model.
+///   void _insert() {
+///     final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem);
+///     _list.insert(index, _nextItem++);
+///   }
+///
+///   // Remove the selected item from the list model.
+///   void _remove() {
+///     if (_selectedItem != null) {
+///       _list.removeAt(_list.indexOf(_selectedItem));
+///       setState(() {
+///         _selectedItem = null;
+///       });
+///     } else {
+///       _scaffoldKey.currentState.showSnackBar(SnackBar(
+///         content: Text(
+///           'Select an item to remove from the list.',
+///           style: TextStyle(fontSize: 20),
+///         ),
+///       ));
+///     }
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         key: _scaffoldKey,
+///         body: CustomScrollView(
+///           slivers: <Widget>[
+///             SliverAppBar(
+///               title: Text(
+///                 'SliverAnimatedList',
+///                 style: TextStyle(fontSize: 30),
+///               ),
+///               expandedHeight: 100,
+///               centerTitle: true,
+///               backgroundColor: Colors.amber[900],
+///               leading: IconButton(
+///                 icon: const Icon(Icons.add_circle),
+///                 onPressed: _insert,
+///                 tooltip: 'Insert a new item.',
+///                 iconSize: 48,
+///               ),
+///               actions: [
+///                 IconButton(
+///                   icon: const Icon(Icons.remove_circle),
+///                   onPressed: _remove,
+///                   tooltip: 'Remove the selected item.',
+///                   iconSize: 48,
+///                 ),
+///               ],
+///             ),
+///             SliverAnimatedList(
+///               key: _listKey,
+///               initialItemCount: _list.length,
+///               itemBuilder: _buildItem,
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// // Keeps a Dart [List] in sync with an [AnimatedList].
+/// //
+/// // The [insert] and [removeAt] methods apply to both the internal list and
+/// // the animated list that belongs to [listKey].
+/// //
+/// // This class only exposes as much of the Dart List API as is needed by the
+/// // sample app. More list methods are easily added, however methods that
+/// // mutate the list must make the same changes to the animated list in terms
+/// // of [AnimatedListState.insertItem] and [AnimatedList.removeItem].
+/// class ListModel<E> {
+///   ListModel({
+///     @required this.listKey,
+///     @required this.removedItemBuilder,
+///     Iterable<E> initialItems,
+///   }) : assert(listKey != null),
+///        assert(removedItemBuilder != null),
+///        _items = List<E>.from(initialItems ?? <E>[]);
+///
+///   final GlobalKey<SliverAnimatedListState> listKey;
+///   final dynamic removedItemBuilder;
+///   final List<E> _items;
+///
+///   SliverAnimatedListState get _animatedList => listKey.currentState;
+///
+///   void insert(int index, E item) {
+///     _items.insert(index, item);
+///     _animatedList.insertItem(index);
+///   }
+///
+///   E removeAt(int index) {
+///     final E removedItem = _items.removeAt(index);
+///     if (removedItem != null) {
+///       _animatedList.removeItem(
+///         index,
+///         (BuildContext context, Animation<double> animation) => removedItemBuilder(removedItem, context, animation),
+///       );
+///     }
+///     return removedItem;
+///   }
+///
+///   int get length => _items.length;
+///
+///   E operator [](int index) => _items[index];
+///
+///   int indexOf(E item) => _items.indexOf(item);
+/// }
+///
+/// // Displays its integer item as 'Item N' on a Card whose color is based on
+/// // the item's value.
+/// //
+/// // The card turns gray when [selected] is true. This widget's height
+/// // is based on the [animation] parameter. It varies as the animation value
+/// // transitions from 0.0 to 1.0.
+/// class CardItem extends StatelessWidget {
+///   const CardItem({
+///     Key key,
+///     @required this.animation,
+///     @required this.item,
+///     this.onTap,
+///     this.selected = false,
+///   }) : assert(animation != null),
+///        assert(item != null && item >= 0),
+///        assert(selected != null),
+///        super(key: key);
+///
+///   final Animation<double> animation;
+///   final VoidCallback onTap;
+///   final int item;
+///   final bool selected;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding:
+///       const EdgeInsets.only(
+///         left: 2.0,
+///         right: 2.0,
+///         top: 2.0,
+///         bottom: 0.0,
+///       ),
+///       child: SizeTransition(
+///         axis: Axis.vertical,
+///         sizeFactor: animation,
+///         child: GestureDetector(
+///           onTap: onTap,
+///           child: SizedBox(
+///             height: 120.0,
+///             child: Card(
+///               color: selected
+///                 ? Colors.black12
+///                 : Colors.primaries[item % Colors.primaries.length],
+///               child: Center(
+///                 child: Text(
+///                   'Item $item',
+///                   style: Theme.of(context).textTheme.display1,
+///                 ),
+///               ),
+///             ),
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+/// * [SliverList], which does not animate items when they are inserted or
+///   removed.
+/// * [AnimatedList], a non-sliver scrolling container that animates items when
+///   they are inserted or removed.
+class SliverAnimatedList extends StatefulWidget {
+  /// Creates a sliver that animates items when they are inserted or removed.
+  const SliverAnimatedList({
+    Key key,
+    @required this.itemBuilder,
+    this.initialItemCount = 0,
+  }) : assert(itemBuilder != null),
+       assert(initialItemCount != null && initialItemCount >= 0),
+       super(key: key);
+
+  /// Called, as needed, to build list item widgets.
+  ///
+  /// List items are only built when they're scrolled into view.
+  ///
+  /// The [AnimatedListItemBuilder] index parameter indicates the item's
+  /// position in the list. The value of the index parameter will be between 0
+  /// and [initialItemCount] plus the total number of items that have been
+  /// inserted with [SliverAnimatedListState.insertItem] and less the total
+  /// number of items that have been removed with
+  /// [SliverAnimatedListState.removeItem].
+  ///
+  /// Implementations of this callback should assume that
+  /// [SliverAnimatedListState.removeItem] removes an item immediately.
+  final AnimatedListItemBuilder itemBuilder;
+
+  /// {@macro flutter.widgets.animatedList.initialItemCount}
+  final int initialItemCount;
+
+  @override
+  SliverAnimatedListState createState() => SliverAnimatedListState();
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
+  ///
+  /// This method is typically used by [SliverAnimatedList] item widgets that
+  /// insert or remove items in response to user input.
+  ///
+  /// ```dart
+  /// SliverAnimatedListState animatedList = SliverAnimatedList.of(context);
+  /// ```
+  static SliverAnimatedListState of(BuildContext context, {bool nullOk = false}) {
+    assert(context != null);
+    assert(nullOk != null);
+    final SliverAnimatedListState result = context.ancestorStateOfType(const TypeMatcher<SliverAnimatedListState>());
+    if (nullOk || result != null)
+      return result;
+    throw FlutterError(
+        'SliverAnimatedList.of() called with a context that does not contain a SliverAnimatedList.\n'
+        'No SliverAnimatedListState ancestor could be found starting from the '
+        'context that was passed to SliverAnimatedListState.of(). This can '
+        'happen when the context provided is from the same StatefulWidget that '
+        'built the AnimatedList. Please see the SliverAnimatedList documentation '
+        'for examples of how to refer to an AnimatedListState object: '
+        'https://docs.flutter.io/flutter/widgets/SliverAnimatedListState-class.html \n'
+        'The context used was:\n'
+        '  $context');
+  }
+}
+
+/// The state for a sliver that animates items when they are
+/// inserted or removed.
+///
+/// When an item is inserted with [insertItem] an animation begins running. The
+/// animation is passed to [SliverAnimatedList.itemBuilder] whenever the item's
+/// widget is needed.
+///
+/// When an item is removed with [removeItem] its animation is reversed.
+/// The removed item's animation is passed to the [removeItem] builder
+/// parameter.
+///
+/// An app that needs to insert or remove items in response to an event
+/// can refer to the [SliverAnimatedList]'s state with a global key:
+///
+/// ```dart
+/// GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+/// ...
+/// SliverAnimatedList(key: listKey, ...);
+/// ...
+/// listKey.currentState.insert(123);
+/// ```
+///
+/// [SliverAnimatedList] item input handlers can also refer to their
+/// [SliverAnimatedListState] with the static [SliverAnimatedList.of] method.
+class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProviderStateMixin {
+
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
@@ -221,10 +827,9 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 
   @override
   void dispose() {
-    for (_ActiveItem item in _incomingItems)
+    for (_ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
       item.controller.dispose();
-    for (_ActiveItem item in _outgoingItems)
-      item.controller.dispose();
+    }
     super.dispose();
   }
 
@@ -267,8 +872,12 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     return index;
   }
 
-  /// Insert an item at [index] and start an animation that will be passed
-  /// to [AnimatedList.itemBuilder] when the item is visible.
+  SliverChildDelegate _createDelegate() {
+    return SliverChildBuilderDelegate(_itemBuilder, childCount: _itemsCount);
+  }
+
+  /// Insert an item at [index] and start an animation that will be passed to
+  /// [SliverAnimatedList.itemBuilder] when the item is visible.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method:
   /// it increases the length of the list by one and shifts all items at or
@@ -291,8 +900,14 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
         item.itemIndex += 1;
     }
 
-    final AnimationController controller = AnimationController(duration: duration, vsync: this);
-    final _ActiveItem incomingItem = _ActiveItem.incoming(controller, itemIndex);
+    final AnimationController controller = AnimationController(
+      duration: duration,
+      vsync: this,
+    );
+    final _ActiveItem incomingItem = _ActiveItem.incoming(
+      controller,
+      itemIndex,
+    );
     setState(() {
       _incomingItems
         ..add(incomingItem)
@@ -309,8 +924,8 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// to [builder] when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [AnimatedList.itemBuilder]. However the
-  /// item will still appear in the list for [duration] and during that time
+  /// will no longer be passed to the [SliverAnimatedList.itemBuilder]. However
+  /// the item will still appear in the list for [duration] and during that time
   /// [builder] must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.remove] method:
@@ -349,34 +964,32 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
           item.itemIndex -= 1;
       }
 
-      setState(() {
-        _itemsCount -= 1;
-      });
+      setState(() => _itemsCount -= 1);
     });
   }
 
   Widget _itemBuilder(BuildContext context, int itemIndex) {
     final _ActiveItem outgoingItem = _activeItemAt(_outgoingItems, itemIndex);
-    if (outgoingItem != null)
-      return outgoingItem.removedItemBuilder(context, outgoingItem.controller.view);
+    if (outgoingItem != null) {
+      return outgoingItem.removedItemBuilder(
+        context,
+        outgoingItem.controller.view,
+      );
+    }
 
     final _ActiveItem incomingItem = _activeItemAt(_incomingItems, itemIndex);
     final Animation<double> animation = incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
-    return widget.itemBuilder(context, _itemIndexToIndex(itemIndex), animation);
+    return widget.itemBuilder(
+      context,
+      _itemIndexToIndex(itemIndex),
+      animation,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: _itemBuilder,
-      itemCount: _itemsCount,
-      scrollDirection: widget.scrollDirection,
-      reverse: widget.reverse,
-      controller: widget.controller,
-      primary: widget.primary,
-      physics: widget.physics,
-      shrinkWrap: widget.shrinkWrap,
-      padding: widget.padding,
+    return SliverList(
+      delegate: _createDelegate(),
     );
   }
 }

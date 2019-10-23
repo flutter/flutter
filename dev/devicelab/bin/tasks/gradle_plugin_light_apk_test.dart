@@ -21,10 +21,8 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
+          ...debugAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
@@ -32,6 +30,7 @@ Future<void> main() async {
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
+          'lib/arm64-v8a/libapp.so',
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
@@ -48,10 +47,8 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
+          ...debugAssets,
+          ...baseApkFiles,
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
@@ -74,10 +71,8 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
+          ...debugAssets,
+          ...baseApkFiles,
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
@@ -99,17 +94,15 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
+          ...debugAssets,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
         ], apkFiles);
       });
 
@@ -122,17 +115,15 @@ Future<void> main() async {
 
         checkItContains<String>(<String>[
           ...flutterAssets,
-          'classes.dex',
+          ...baseApkFiles,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
         checkItDoesNotContain<String>(<String>[
+          ...debugAssets,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
         ], apkFiles);
       });
 

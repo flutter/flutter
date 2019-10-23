@@ -7,6 +7,7 @@ import 'dart:collection' show HashMap;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'banner.dart';
@@ -20,6 +21,7 @@ import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
 import 'semantics_debugger.dart';
+import 'shortcuts.dart';
 import 'text.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
@@ -1036,6 +1038,24 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return true;
   }
 
+  final Map<LogicalKeySet, Intent> _keyMap = <LogicalKeySet, Intent>{
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+  };
+
+  final Map<LocalKey, ActionFactory> _actionMap = <LocalKey, ActionFactory>{
+    DoNothingAction.key: () => const DoNothingAction(),
+    RequestFocusAction.key: () => RequestFocusAction(),
+    NextFocusAction.key: () => NextFocusAction(),
+    PreviousFocusAction.key: () => PreviousFocusAction(),
+    DirectionalFocusAction.key: () => DirectionalFocusAction(),
+  };
+
   @override
   Widget build(BuildContext context) {
     Widget navigator;
@@ -1147,17 +1167,18 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
-    return Actions(
-      actions: <LocalKey, ActionFactory>{
-        DoNothingAction.key: () => const DoNothingAction(),
-      },
-      child: DefaultFocusTraversal(
-        policy: ReadingOrderTraversalPolicy(),
-        child: _MediaQueryFromWindow(
-          child: Localizations(
-            locale: appLocale,
-            delegates: _localizationsDelegates.toList(),
-            child: title,
+    return Shortcuts(
+      shortcuts: _keyMap,
+      child: Actions(
+        actions: _actionMap,
+        child: DefaultFocusTraversal(
+          policy: ReadingOrderTraversalPolicy(),
+          child: _MediaQueryFromWindow(
+            child: Localizations(
+              locale: appLocale,
+              delegates: _localizationsDelegates.toList(),
+              child: title,
+            ),
           ),
         ),
       ),

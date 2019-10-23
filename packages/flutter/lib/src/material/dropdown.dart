@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show window;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -697,11 +698,15 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense = false,
     this.isExpanded = false,
     this.itemHeight = kMinInteractiveDimension,
+    this.focusColor,
+    this.focusNode,
+    this.autofocus = false,
   }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
        assert(elevation != null),
        assert(iconSize != null),
        assert(isDense != null),
        assert(isExpanded != null),
+       assert(autofocus != null),
        assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
        super(key: key);
 
@@ -899,6 +904,15 @@ class DropdownButton<T> extends StatefulWidget {
   /// [kMinInteractiveDimension].
   final double itemHeight;
 
+  /// The color for the button's [Material] when it has the input focus.
+  final Color focusColor;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   @override
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
 }
@@ -906,36 +920,62 @@ class DropdownButton<T> extends StatefulWidget {
 class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
   int _selectedIndex;
   _DropdownRoute<T> _dropdownRoute;
+  Orientation _lastOrientation;
+  FocusNode _internalNode;
+  FocusNode get focusNode => widget.focusNode ?? _internalNode;
+  bool _hasPrimaryFocus = false;
+  Map<LocalKey, ActionFactory> _actionMap;
+
+  // Only used if needed to create _internalNode.
+  FocusNode _createFocusNode() {
+    return FocusNode(debugLabel: '${widget.runtimeType}');
+  }
 
   @override
   void initState() {
     super.initState();
     _updateSelectedIndex();
-    WidgetsBinding.instance.addObserver(this);
+    if (widget.focusNode == null) {
+      _internalNode ??= _createFocusNode();
+    }
+    _actionMap = <LocalKey, ActionFactory>{ ActivateAction.key: _createAction };
+    focusNode.addListener(_handleFocusChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
+    focusNode.removeListener(_handleFocusChanged);
+    _internalNode?.dispose();
     super.dispose();
-  }
-
-  // Typically called because the device's orientation has changed.
-  // Defined by WidgetsBindingObserver
-  @override
-  void didChangeMetrics() {
-    _removeDropdownRoute();
   }
 
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
     _dropdownRoute = null;
+    _lastOrientation = null;
+  }
+
+  void _handleFocusChanged() {
+    if (_hasPrimaryFocus != focusNode.hasPrimaryFocus) {
+      setState(() {
+        _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+      });
+    }
   }
 
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      if (widget.focusNode == null) {
+        _internalNode ??= _createFocusNode();
+      }
+      _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+      focusNode.addListener(_handleFocusChanged);
+    }
     _updateSelectedIndex();
   }
 
@@ -997,6 +1037,15 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     });
   }
 
+  Action _createAction() {
+    return CallbackAction(
+      ActivateAction.key,
+      onInvoke: (FocusNode node, Intent intent) {
+        _handleTap();
+      },
+    );
+  }
+
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
   // _kDenseButtonHeight, but don't make it smaller than the text that it contains.
   // Similarly, we don't reduce the height of the button so much that its icon
@@ -1036,10 +1085,27 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   bool get _enabled => widget.items != null && widget.items.isNotEmpty && widget.onChanged != null;
 
+  Orientation _getOrientation(BuildContext context) {
+    Orientation result = MediaQuery.of(context, nullOk: true)?.orientation;
+    if (result == null) {
+      // If there's no MediaQuery, then use the window aspect to determine
+      // orientation.
+      final Size size = window.physicalSize;
+      result = size.width > size.height ? Orientation.landscape : Orientation.portrait;
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    final Orientation newOrientation = _getOrientation(context);
+    _lastOrientation ??= newOrientation;
+    if (newOrientation != _lastOrientation) {
+      _removeDropdownRoute();
+      _lastOrientation = newOrientation;
+    }
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
@@ -1062,7 +1128,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       final Widget emplacedHint = _enabled
         ? widget.hint
-        : widget.disabledHint ?? widget.hint;
+        : DropdownMenuItem<Widget>(child: widget.disabledHint ?? widget.hint);
       hintIndex = items.length;
       items.add(DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
@@ -1100,6 +1166,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     Widget result = DefaultTextStyle(
       style: _textStyle,
       child: Container(
+        decoration: BoxDecoration(
+          color:_hasPrimaryFocus ? widget.focusColor ?? Theme.of(context).focusColor : null,
+          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+        ),
         padding: padding.resolve(Directionality.of(context)),
         height: widget.isDense ? _denseButtonHeight : null,
         child: Row(
@@ -1149,10 +1219,18 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     return Semantics(
       button: true,
-      child: GestureDetector(
-        onTap: _enabled ? _handleTap : null,
-        behavior: HitTestBehavior.opaque,
-        child: result,
+      child: Actions(
+        actions: _actionMap,
+        child: Focus(
+          canRequestFocus: _enabled,
+          focusNode: focusNode,
+          autofocus: widget.autofocus,
+          child: GestureDetector(
+            onTap: _enabled ? _handleTap : null,
+            behavior: HitTestBehavior.opaque,
+            child: result,
+          ),
+        ),
       ),
     );
   }

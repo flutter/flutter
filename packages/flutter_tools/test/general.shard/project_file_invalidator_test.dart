@@ -5,37 +5,63 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:meta/meta.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
+// assumption: tests have a timeout less than 100 days
+final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
+
 void main() {
   group('ProjectFileInvalidator', () {
-    final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-    testUsingContext('No last compile', () async {
-      expect(
-        ProjectFileInvalidator.findInvalidated(lastCompiled: null, urisToMonitor: <Uri>[], packagesPath: ''),
-        isEmpty);
-    });
+    _testProjectFileInvalidator(asyncScanning: false);
+  });
+  group('ProjectFileInvalidator (async scanning)', () {
+    _testProjectFileInvalidator(asyncScanning: true);
+  });
+}
 
-    testUsingContext('Empty project', () async {
-      expect(
-        ProjectFileInvalidator.findInvalidated(lastCompiled: DateTime.now(), urisToMonitor: <Uri>[], packagesPath: ''),
-        isEmpty);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-    });
+void _testProjectFileInvalidator({@required bool asyncScanning}) {
+  testUsingContext('No last compile', () async {
+    expect(
+      await ProjectFileInvalidator.findInvalidated(
+        lastCompiled: null,
+        urisToMonitor: <Uri>[],
+        packagesPath: '',
+        asyncScanning: asyncScanning,
+      ),
+      isEmpty,
+    );
+  });
 
-    testUsingContext('Non-existent files are ignored', () async {
-      expect(
-        ProjectFileInvalidator.findInvalidated(
-            lastCompiled: DateTime.now(),
-            urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
-            packagesPath: '',
-          ),
-        isEmpty);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-    });
+  testUsingContext('Empty project', () async {
+    expect(
+      await ProjectFileInvalidator.findInvalidated(
+        lastCompiled: inFuture,
+        urisToMonitor: <Uri>[],
+        packagesPath: '',
+        asyncScanning: asyncScanning,
+      ),
+      isEmpty,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('Non-existent files are ignored', () async {
+    expect(
+      await ProjectFileInvalidator.findInvalidated(
+        lastCompiled: inFuture,
+        urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
+        packagesPath: '',
+        asyncScanning: asyncScanning,
+      ),
+      isEmpty,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }

@@ -108,6 +108,7 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Usage records multiple features in experiment setting', () async {
@@ -129,6 +130,7 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -221,6 +223,7 @@ void main() {
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => mockClock,
       Platform: () => FakePlatform(
         environment: <String, String>{
@@ -246,6 +249,7 @@ void main() {
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => mockClock,
       Platform: () => FakePlatform(
         environment: <String, String>{

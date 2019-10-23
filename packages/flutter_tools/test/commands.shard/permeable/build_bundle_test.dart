@@ -6,12 +6,15 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -72,7 +75,7 @@ void main() {
 
     expect(await command.usageValues,
         containsPair(CustomDimensions.commandBuildBundleIsModule, 'true'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('bundle getUsage indicate that project is not a module', () async {
     final String projectPath = await createProject(tempDir,
@@ -82,7 +85,7 @@ void main() {
 
     expect(await command.usageValues,
         containsPair(CustomDimensions.commandBuildBundleIsModule, 'false'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('bundle getUsage indicate the target platform', () async {
     final String projectPath = await createProject(tempDir,
@@ -92,7 +95,7 @@ void main() {
 
     expect(await command.usageValues,
         containsPair(CustomDimensions.commandBuildBundleTargetPlatform, 'android-arm'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('bundle fails to build for Windows if feature is disabled', () async {
     fs.file('lib/main.dart').createSync(recursive: true);
@@ -108,6 +111,7 @@ void main() {
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   });
 
@@ -125,6 +129,7 @@ void main() {
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
@@ -142,6 +147,7 @@ void main() {
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
@@ -159,6 +165,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
@@ -176,6 +183,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
@@ -193,8 +201,40 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('passes track widget creation through', () async {
+    fs.file('lib/main.dart').createSync(recursive: true);
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      final Environment environment = invocation.positionalArguments[1];
+      expect(environment.defines, <String, String>{
+        kTargetFile: fs.path.join('lib', 'main.dart'),
+        kBuildMode: 'debug',
+        kTargetPlatform: 'android-arm',
+        kTrackWidgetCreation: 'true',
+      });
+
+      return BuildResult(success: true);
+    });
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--debug',
+      '--target-platform=android-arm',
+      '--track-widget-creation'
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => MockBuildSystem(),
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
 
 class MockBundleBuilder extends Mock implements BundleBuilder {}
+class MockBuildSystem extends Mock implements BuildSystem {}
