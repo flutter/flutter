@@ -2809,5 +2809,10 @@ TEST_F(EmbedderTest, CanUpdateLocales) {
   check_latch.Wait();
 }
 
+TEST_F(EmbedderTest, CanQueryDartAOTMode) {
+  ASSERT_EQ(FlutterEngineRunsAOTCompiledDartCode(),
+            flutter::DartVM::IsRunningPrecompiledCode());
+}
+
 }  // namespace testing
 }  // namespace flutter

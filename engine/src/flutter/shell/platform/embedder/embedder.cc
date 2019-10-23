@@ -1573,3 +1573,7 @@ FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
                                   "Could not send message to update locale of "
                                   "a running Flutter application.");
 }
+
+bool FlutterEngineRunsAOTCompiledDartCode(void) {
+  return flutter::DartVM::IsRunningPrecompiledCode();
+}
