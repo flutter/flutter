@@ -81,7 +81,13 @@ def main():
   else:
     manifest_file = GenerateManifest(args.package_dir)
 
+  strace_out = os.path.abspath(os.path.join(os.path.dirname(pkg_dir), 'strace_out'))
+
   pm_command_base = [
+      'strace',
+      '-f',
+      '-o',
+      strace_out,
       args.pm_bin,
       '-o',
       os.path.abspath(os.path.join(pkg_dir, os.pardir)),
@@ -94,13 +100,19 @@ def main():
   # Build and then archive the package
   # Use check_output so if anything goes wrong we get the output.
   try:
-    subprocess.check_output(pm_command_base + ['build'])
-    subprocess.check_output(pm_command_base + ['archive'])
+    for pm_command in ['build', 'archive']:
+      pm_command_args = pm_command_base + [pm_command]
+      sys.stderr.write("===== Running %s\n" % pm_command_args)
+      subprocess.check_output(pm_command_args)
   except subprocess.CalledProcessError as e:
     print('==================== Manifest contents =========================================')
     with open(manifest_file, 'r') as manifest:
-      print(manifest.read())
+      sys.stdout.write(manifest.read())
     print('==================== End manifest contents =====================================')
+    print('==================== Strace output =============================================')
+    with open(strace_out, 'r') as strace:
+      sys.stdout.write(strace.read())
+    print('==================== End strace output =========================================')
     raise
 
   return 0
