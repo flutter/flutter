@@ -63,6 +63,18 @@ task:
       test_framework_script: |
         cd $FRAMEWORK_PATH/flutter/packages/flutter
         ../../bin/flutter test --local-engine=host_debug_unopt
+    - name: build_and_test_web_linux_firefox
+      compile_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/tools/gn --unoptimized --full-dart-sdk
+        ninja -C out/host_debug_unopt
+      test_web_engine_firefox_script: |
+        cd $ENGINE_PATH/src/flutter/web_sdk/web_engine_tester
+        $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
+        cd $ENGINE_PATH/src/flutter/lib/web_ui
+        $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
+        export DART="$ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart"
+        $DART dev/firefox_installer_test.dart
     - name: build_and_test_android_unopt_debug
       env:
         USE_ANDROID: "True"

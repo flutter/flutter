@@ -14,6 +14,7 @@ import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_im
 import 'package:test_core/src/executable.dart'
     as test; // ignore: implementation_imports
 
+import 'chrome.dart';
 import 'chrome_installer.dart';
 import 'test_platform.dart';
 import 'environment.dart';
