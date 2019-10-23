@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #define FML_USED_ON_EMBEDDER
+#define RAPIDJSON_HAS_STDSTRING 1
 
 #include <iostream>
 
@@ -43,6 +44,8 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/embedder_task_runner.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/writer.h"
 
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
 const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
@@ -1490,4 +1493,83 @@ FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
              ? kSuccess
              : LOG_EMBEDDER_ERROR(kInvalidArguments,
                                   "Could not run the specified task.");
+}
+
+FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                   engine,
+                                               const FlutterLocale** locales,
+                                               size_t locales_count) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  if (locales_count == 0) {
+    return kSuccess;
+  }
+
+  if (locales == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "No locales were specified.");
+  }
+
+  rapidjson::Document document;
+  auto& allocator = document.GetAllocator();
+
+  document.SetObject();
+  document.AddMember("method", "setLocale", allocator);
+
+  rapidjson::Value args(rapidjson::kArrayType);
+  args.Reserve(locales_count * 4, allocator);
+  for (size_t i = 0; i < locales_count; ++i) {
+    const FlutterLocale* locale = locales[i];
+    const char* language_code_str = SAFE_ACCESS(locale, language_code, nullptr);
+    if (language_code_str == nullptr || ::strlen(language_code_str) == 0) {
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "Language code is required but not present in FlutterLocale.");
+    }
+
+    const char* country_code_str = SAFE_ACCESS(locale, country_code, "");
+    const char* script_code_str = SAFE_ACCESS(locale, script_code, "");
+    const char* variant_code_str = SAFE_ACCESS(locale, variant_code, "");
+
+    rapidjson::Value language_code, country_code, script_code, variant_code;
+
+    language_code.SetString(language_code_str, allocator);
+    country_code.SetString(country_code_str ? country_code_str : "", allocator);
+    script_code.SetString(script_code_str ? script_code_str : "", allocator);
+    variant_code.SetString(variant_code_str ? variant_code_str : "", allocator);
+
+    // Required.
+    args.PushBack(language_code, allocator);
+    args.PushBack(country_code, allocator);
+    args.PushBack(script_code, allocator);
+    args.PushBack(variant_code, allocator);
+  }
+  document.AddMember("args", args, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  if (!document.Accept(writer)) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not create locale payload.");
+  }
+
+  const char* message = buffer.GetString();
+
+  if (message == nullptr || buffer.GetSize() == 0) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not create locale update message.");
+  }
+
+  auto platform_message = fml::MakeRefCounted<flutter::PlatformMessage>(
+      "flutter/localization",                                     // channel
+      std::vector<uint8_t>{message, message + buffer.GetSize()},  // message
+      nullptr                                                     // response
+  );
+  return reinterpret_cast<flutter::EmbedderEngine*>(engine)
+                 ->SendPlatformMessage(std::move(platform_message))
+             ? kSuccess
+             : LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                                  "Could not send message to update locale of "
+                                  "a running Flutter application.");
 }

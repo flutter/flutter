@@ -779,6 +779,30 @@ typedef struct {
 } FlutterCompositor;
 
 typedef struct {
+  /// This size of this struct. Must be sizeof(FlutterLocale).
+  size_t struct_size;
+  /// The language code of the locale. For example, "en". This is a required
+  /// field. The string must be null terminated. It may be collected after the
+  /// call to `FlutterEngineUpdateLocales`.
+  const char* language_code;
+  /// The country code of the locale. For example, "US". This is a an optional
+  /// field. The string must be null terminated if present. It may be collected
+  /// after the call to `FlutterEngineUpdateLocales`. If not present, a
+  /// `nullptr` may be specified.
+  const char* country_code;
+  /// The script code of the locale. This is a an optional field. The string
+  /// must be null terminated if present. It may be collected after the call to
+  /// `FlutterEngineUpdateLocales`. If not present, a `nullptr` may be
+  /// specified.
+  const char* script_code;
+  /// The variant code of the locale. This is a an optional field. The string
+  /// must be null terminated if present. It may be collected after the call to
+  /// `FlutterEngineUpdateLocales`. If not present, a `nullptr` may be
+  /// specified.
+  const char* variant_code;
+} FlutterLocale;
+
+typedef struct {
   /// The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
   /// The path to the Flutter assets directory containing project assets. The
@@ -1404,7 +1428,7 @@ uint64_t FlutterEngineGetCurrentTime();
 ///             must only be made at the target time specified in that callback.
 ///             Running the task before that time is undefined behavior.
 ///
-/// @param[in]  engine     a running instance.
+/// @param[in]  engine     A running engine instance.
 /// @param[in]  task       the task handle.
 ///
 /// @return     The result of the call.
@@ -1413,6 +1437,24 @@ FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
                                              engine,
                                          const FlutterTask* task);
+
+//------------------------------------------------------------------------------
+/// @brief      Notify a running engine instance that the locale has been
+///             updated. The preferred locale must be the first item in the list
+///             of locales supplied. The other entries will be used as a
+///             fallback.
+///
+/// @param[in]  engine         A running engine instance.
+/// @param[in]  locales        The updated locales in the order of preference.
+/// @param[in]  locales_count  The count of locales supplied.
+///
+/// @return     Whether the locale updates were applied.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                   engine,
+                                               const FlutterLocale** locales,
+                                               size_t locales_count);
 
 #if defined(__cplusplus)
 }  // extern "C"
