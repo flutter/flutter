@@ -36,7 +36,7 @@ task:
     MEMORY: 4G # 256M-24G without compute credits, 256M-90G with
     #CIRRUS_WORKING_DIR: "/tmp/$FLUTTER_SDK_PATH_WITH_SPACE"
     CIRRUS_WORKING_DIR: "/tmp/flutter"
-    DOCKER_CONTEXT: "${CIRRUS_WORKING_DIR}/dev/ci/docker_linux"
+    DOCKER_CONTEXT: "dev/ci/docker_linux"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
   pub_cache:
