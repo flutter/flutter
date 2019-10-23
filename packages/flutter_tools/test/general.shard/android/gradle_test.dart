@@ -58,7 +58,7 @@ void main() {
       expect(findApkFiles(gradleProject, buildInfo), <File>[]);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     test('androidXFailureRegex should match lines with likely AndroidX errors', () {
@@ -131,7 +131,7 @@ void main() {
       expect(bundle.path, '/foo_barRelease/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in release mode', () {
@@ -141,7 +141,7 @@ void main() {
       expect(bundle.path, '/fooRelease/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when no flavor is used in release mode', () {
@@ -151,7 +151,7 @@ void main() {
       expect(bundle.path, '/release/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode', () {
@@ -161,7 +161,7 @@ void main() {
       expect(bundle.path, '/foo_barDebug/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in debug mode', () {
@@ -171,7 +171,7 @@ void main() {
       expect(bundle.path, '/fooDebug/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when no flavor is used in debug mode', () {
@@ -181,7 +181,7 @@ void main() {
       expect(bundle.path, '/debug/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode', () {
@@ -191,7 +191,7 @@ void main() {
       expect(bundle.path, '/foo_barProfile/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in profile mode', () {
@@ -201,7 +201,7 @@ void main() {
       expect(bundle.path, '/fooProfile/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when no flavor is used in profile mode', () {
@@ -211,7 +211,7 @@ void main() {
       expect(bundle.path, '/profile/app.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle in release mode - Gradle 3.5', () {
@@ -221,7 +221,7 @@ void main() {
       expect(bundle.path, '/release/app-release.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle in profile mode - Gradle 3.5', () {
@@ -231,7 +231,7 @@ void main() {
       expect(bundle.path, '/profile/app-profile.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle in debug mode - Gradle 3.5', () {
@@ -241,7 +241,7 @@ void main() {
       expect(bundle.path, '/debug/app-debug.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in release mode - Gradle 3.5', () {
@@ -251,7 +251,7 @@ void main() {
       expect(bundle.path, '/foo_barRelease/app-foo_bar-release.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
@@ -261,7 +261,7 @@ void main() {
       expect(bundle.path, '/foo_barProfile/app-foo_bar-profile.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode - Gradle 3.5', () {
@@ -271,7 +271,7 @@ void main() {
       expect(bundle.path, '/foo_barDebug/app-foo_bar-debug.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -508,7 +508,7 @@ include ':app'
 
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       Logger: () => mockLogger,
     });
 
@@ -542,7 +542,7 @@ include ':app'
 
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       Logger: () => mockLogger,
     });
   });
@@ -1268,7 +1268,7 @@ Exception in thread "main" java.lang.NullPointerException
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Inject the wrapper when some files are missing', () {
@@ -1309,7 +1309,7 @@ Exception in thread "main" java.lang.NullPointerException
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Gives executable permission to gradle', () {
@@ -1327,7 +1327,7 @@ Exception in thread "main" java.lang.NullPointerException
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
     });
   });
@@ -1349,7 +1349,7 @@ Exception in thread "main" java.lang.NullPointerException
 
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('throws ToolExit if it cannot write gradle.properties', () {
@@ -1387,7 +1387,7 @@ Exception in thread "main" java.lang.NullPointerException
         equals('android.enableR8=true'));
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('sets android.enableR8=true', () {
@@ -1408,7 +1408,7 @@ Exception in thread "main" java.lang.NullPointerException
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('appends android.enableR8=true to the new line', () {
@@ -1429,7 +1429,7 @@ Exception in thread "main" java.lang.NullPointerException
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any()
     });
   });
 
@@ -1451,7 +1451,7 @@ Exception in thread "main" java.lang.NullPointerException
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns false when the project is not using AndroidX', () async {
@@ -1465,7 +1465,7 @@ Exception in thread "main" java.lang.NullPointerException
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns false when gradle.properties does not exist', () async {
@@ -1475,7 +1475,7 @@ Exception in thread "main" java.lang.NullPointerException
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
