@@ -74,10 +74,11 @@ class FadeInImage extends StatelessWidget {
   /// Creates a widget that displays a [placeholder] while an [image] is loading,
   /// then fades-out the placeholder and fades-in the image.
   ///
-  /// To include a custom decode/cache size in a manner such as that provided by
-  /// the image constructor `cacheWidth` and `cacheHeight` parameters, the
-  /// 'placeholder' and `image` [ImageProviders] should be composed in a
-  /// [ResizeImage].
+  /// To include a custom decode/cache size such as those provided by
+  /// the [FadeInImage.assetNetwork] and [FadeInImage.memoryNetwork] constructors'
+  /// `placeholderCacheWidth`, `placeholderCacheHeight`, `imageCacheWidth`,
+  /// and `imageCacheHeight` parameters, the [placeholder] and [image]
+  /// [ImageProviders] should be composed in a [ResizeImage].
   ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
   /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and

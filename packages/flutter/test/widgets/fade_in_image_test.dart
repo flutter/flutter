@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../painting/image_test_utils.dart';
 import '../painting/image_data.dart';
+import '../painting/image_test_utils.dart';
 
 const Duration animationDuration = Duration(milliseconds: 50);
 
@@ -265,7 +265,7 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
     });
 
-    testWidgets('placeholder cacheWidth and cacheHeight is passed through', (WidgetTester tester) async {
+    testWidgets('memory placeholder cacheWidth and cacheHeight is passed through', (WidgetTester tester) async {
       final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
       final FadeInImage image = FadeInImage.memoryNetwork(
         placeholder: testBytes,
@@ -276,13 +276,13 @@ Future<void> main() async {
         imageCacheHeight: 50,
       );
 
-      final DecoderCallback decode1 = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+      final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
         expect(cacheWidth, 20);
         expect(cacheHeight, 30);
         return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
       };
-
-      image.placeholder.load(await image.placeholder.obtainKey(ImageConfiguration.empty), decode1);
+      final ResizeImage resizeImage = image.placeholder;
+      resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
     });
 
     group('semantics', () {
