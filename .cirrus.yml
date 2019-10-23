@@ -22,7 +22,8 @@ environment:
 # LINUX SHARDS
 task:
   container:
-    image: gcr.io/flutter-cirrus/build-flutter-image:latest
+    #image: gcr.io/flutter-cirrus/build-flutter-image:latest
+    dockerfile: dev/ci/docker_linux/Dockerfile
     cpu: $CPU
     memory: $MEMORY
   environment:
