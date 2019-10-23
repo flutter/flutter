@@ -215,6 +215,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-linux
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -223,6 +224,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-linux
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -231,6 +233,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-linux
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -239,6 +242,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3-linux
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -247,6 +251,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-4-linux
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -255,6 +260,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-5_last-linux
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -308,12 +314,6 @@ task:
         - tool_tests-commands-linux
         - tool_tests-integration-linux
         - build_tests-linux
-        - hostonly_devicelab_tests-0-linux
-        - hostonly_devicelab_tests-1-linux
-        - hostonly_devicelab_tests-2-linux
-        - hostonly_devicelab_tests-3-linux
-        - hostonly_devicelab_tests-4-linux
-        - hostonly_devicelab_tests-5_last-linux
         - firebase_test_lab_tests-linux
       environment:
         # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
@@ -399,36 +399,43 @@ task:
 
     - name: build_tests-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - dart --enable-asserts dev\bots\test.dart
 
     - name: hostonly_devicelab_tests-0-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+        allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-4-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-5_last-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -533,30 +540,35 @@ task:
 
     - name: hostonly_devicelab_tests-1-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-4-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-5_last-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      allow_failures: true # https://github.com/flutter/flutter/issues/43369
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
@@ -585,12 +597,6 @@ task:
         - tool_tests-commands-macos
         - tool_tests-integration-macos
         - build_tests-macos
-        - hostonly_devicelab_tests-0-macos
-        - hostonly_devicelab_tests-1-macos
-        - hostonly_devicelab_tests-2-macos
-        - hostonly_devicelab_tests-3-macos
-        - hostonly_devicelab_tests-4-macos
-        - hostonly_devicelab_tests-5_last-macos
         - firebase_test_lab_tests-linux
       environment:
         # Apple Fastlane password.
@@ -619,12 +625,6 @@ docker_builder:
     - tool_tests-commands-linux
     - tool_tests-integration-linux
     - build_tests-linux
-    - hostonly_devicelab_tests-0-linux
-    - hostonly_devicelab_tests-1-linux
-    - hostonly_devicelab_tests-2-linux
-    - hostonly_devicelab_tests-3-linux
-    - hostonly_devicelab_tests-4-linux
-    - hostonly_devicelab_tests-5_last-linux
     - firebase_test_lab_tests-linux
   script:
     - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
