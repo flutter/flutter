@@ -51,7 +51,7 @@ RUN bash "${NODEJS_INSTALL}/nodejs_install.sh"
 # Install the rest of the dependencies.
 RUN apt-get install -y --no-install-recommends \
   locales \
-  golang \
+  gcc \
   ruby \
   ruby-dev \
   nodejs \
@@ -110,21 +110,20 @@ RUN /root/patch_firebase.sh
 
 # Install dashing
 # This is why we need golang installed.
+RUN curl 'https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz' | tar xvz
+ENV GOBINARY=/go/bin/go
+
 RUN mkdir -p /opt/gopath/bin
 ENV GOPATH=/opt/gopath
 ENV PATH="${GOPATH}/bin:${PATH}"
-RUN go get -u github.com/technosophos/dashing
+RUN $GOBINARY get -u github.com/technosophos/dashing
 
 # Set locale to en_US
 RUN locale-gen en_US "en_US.UTF-8" && dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
 
-# Install coveralls and Firebase
-# This is why we need ruby installed.
 # Skip all the documentation (-N) since it's just on CI.
-RUN gem install coveralls -N
 RUN gem install bundler -N
-# Install fastlane which is used on Linux to build and deploy Android
-# builds to the Play Store.
-RUN gem install fastlane -N
+COPY Gemfile /Gemfile
+RUN bundle install --system
 
