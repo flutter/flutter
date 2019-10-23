@@ -47,6 +47,7 @@ Float64List kTestTransform = () {
 }();
 
 void signalNativeTest() native 'SignalNativeTest';
+void signalNativeCount(int count) native 'SignalNativeCount';
 void signalNativeMessage(String message) native 'SignalNativeMessage';
 void notifySemanticsEnabled(bool enabled) native 'NotifySemanticsEnabled';
 void notifyAccessibilityFeatures(bool reduceMotion) native 'NotifyAccessibilityFeatures';
@@ -442,4 +443,12 @@ void can_display_platform_view_with_pixel_ratio() {
     window.render(builder.build());
   };
   window.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void can_receive_locale_updates() {
+  window.onLocaleChanged = (){
+    signalNativeCount(window.locales.length);
+  };
+  signalNativeTest();
 }

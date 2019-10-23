@@ -2751,5 +2751,63 @@ TEST_F(
   latch.Wait();
 }
 
+TEST_F(EmbedderTest, CanUpdateLocales) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("can_receive_locale_updates");
+  fml::AutoResetWaitableEvent latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Wait for the application to attach the listener.
+  latch.Wait();
+
+  FlutterLocale locale1 = {};
+  locale1.struct_size = sizeof(locale1);
+  locale1.language_code = "";  // invalid
+  locale1.country_code = "US";
+  locale1.script_code = "";
+  locale1.variant_code = nullptr;
+
+  FlutterLocale locale2 = {};
+  locale2.struct_size = sizeof(locale2);
+  locale2.language_code = "zh";
+  locale2.country_code = "CN";
+  locale2.script_code = "Hans";
+  locale2.variant_code = nullptr;
+
+  std::vector<const FlutterLocale*> locales;
+  locales.push_back(&locale1);
+  locales.push_back(&locale2);
+
+  ASSERT_EQ(
+      FlutterEngineUpdateLocales(engine.get(), locales.data(), locales.size()),
+      kInvalidArguments);
+
+  // Fix the invalid code.
+  locale1.language_code = "en";
+
+  ASSERT_EQ(
+      FlutterEngineUpdateLocales(engine.get(), locales.data(), locales.size()),
+      kSuccess);
+
+  fml::AutoResetWaitableEvent check_latch;
+  context.AddNativeCallback(
+      "SignalNativeCount",
+      CREATE_NATIVE_ENTRY([&check_latch](Dart_NativeArguments args) {
+        ASSERT_EQ(tonic::DartConverter<int>::FromDart(
+                      Dart_GetNativeArgument(args, 0)),
+                  2);
+        check_latch.Signal();
+      }));
+  check_latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
