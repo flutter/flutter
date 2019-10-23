@@ -1260,7 +1260,12 @@ abstract class RangeSliderValueIndicatorShape {
   ///
   /// [labelPainter] helps determine the width of the shape. It is variable
   /// width because it is derived from a formatted string.
-  Size getPreferredSize(bool isEnabled, bool isDiscrete, { TextPainter labelPainter });
+  Size getPreferredSize(
+    bool isEnabled,
+    bool isDiscrete, {
+    TextPainter labelPainter,
+    MediaQueryData mediaQueryData,
+  });
 
   /// Determines the best offset to keep this shape on the screen.
   ///
@@ -2554,11 +2559,11 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete, {
-    @required MediaQueryData mediaQueryData,
     @required TextPainter labelPainter,
+    @required MediaQueryData mediaQueryData,
   }) {
     assert(mediaQueryData != null);
-    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, mediaQueryData);
   }
 
   @override
@@ -2597,9 +2602,14 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
   static const _RectangularSliderValueIndicatorPathPainter _pathPainter = _RectangularSliderValueIndicatorPathPainter();
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete, {TextPainter labelPainter, MediaQueryData mediaQueryData}) {
+  Size getPreferredSize(
+    bool isEnabled,
+    bool isDiscrete, {
+    TextPainter labelPainter,
+    MediaQueryData mediaQueryData,
+  }) {
     assert(labelPainter != null);
-    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, mediaQueryData);
   }
 
   @override
@@ -2666,9 +2676,13 @@ class _RectangularSliderValueIndicatorPathPainter {
     bool isEnabled,
     bool isDiscrete,
     TextPainter labelPainter,
+    MediaQueryData mediaQueryData,
   ) {
     assert(labelPainter != null);
-    return Size(labelPainter.width + 2 * _labelPadding, labelPainter.height + _labelPadding);
+    return Size(
+      _upperRectangleWidth(labelPainter, 1, mediaQueryData.textScaleFactor),
+      labelPainter.height + _labelPadding,
+    );
   }
 
   double getHorizontalShift({
@@ -2790,9 +2804,15 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   static const _PaddleSliderValueIndicatorPathPainter _pathPainter = _PaddleSliderValueIndicatorPathPainter();
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete, { @required TextPainter labelPainter }) {
+  Size getPreferredSize(
+    bool isEnabled,
+    bool isDiscrete, {
+    @required TextPainter labelPainter,
+    @required MediaQueryData mediaQueryData
+  }) {
     assert(labelPainter != null);
-    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter);
+    assert(mediaQueryData != null);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, mediaQueryData);
   }
 
   @override
@@ -2847,9 +2867,15 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
   static const _PaddleSliderValueIndicatorPathPainter _pathPainter = _PaddleSliderValueIndicatorPathPainter();
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete, { @required TextPainter labelPainter }) {
+  Size getPreferredSize(
+    bool isEnabled,
+    bool isDiscrete, {
+    @required TextPainter labelPainter,
+    @required MediaQueryData mediaQueryData,
+  }) {
     assert(labelPainter != null);
-    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter);
+    assert(mediaQueryData != null);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, mediaQueryData);
   }
 
   @override
@@ -2956,9 +2982,11 @@ class _PaddleSliderValueIndicatorPathPainter {
     bool isEnabled,
     bool isDiscrete,
     TextPainter labelPainter,
+    MediaQueryData mediaQueryData,
   ) {
     assert(labelPainter != null);
-    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    assert(mediaQueryData != null);
+    final double textScaleFactor = mediaQueryData.textScaleFactor;
     return Size(labelPainter.width + 2 * _labelPadding * textScaleFactor, _preferredHeight * textScaleFactor);
   }
 

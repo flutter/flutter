@@ -393,7 +393,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               SliderTheme(
-                data: SliderThemeData(
+                data: const SliderThemeData(
                   showValueIndicator: ShowValueIndicator.always,
                   rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
                 ),

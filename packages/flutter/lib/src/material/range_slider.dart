@@ -1334,8 +1334,18 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         activationAnimation: _valueIndicatorAnimation,
         mediaQueryData: mediaQueryData,
       );
-      final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _startLabelPainter).width / 2;
-      final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _endLabelPainter).width / 2;
+      final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(
+        isEnabled,
+        isDiscrete,
+        labelPainter: _startLabelPainter,
+        mediaQueryData: mediaQueryData,
+      ).width / 2;
+      final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(
+        isEnabled,
+        isDiscrete,
+        labelPainter: _endLabelPainter,
+        mediaQueryData: mediaQueryData,
+      ).width / 2;
       double innerOverflow = startHalfWidth + endHalfWidth;
       switch (textDirection) {
         case TextDirection.ltr:
