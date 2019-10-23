@@ -1456,6 +1456,26 @@ FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
                                                const FlutterLocale** locales,
                                                size_t locales_count);
 
+//------------------------------------------------------------------------------
+/// @brief      Returns if the Flutter engine instance will run AOT compiled
+///             Dart code. This call has no threading restrictions.
+///
+///             For embedder code that is configured for both AOT and JIT mode
+///             Dart execution based on the Flutter engine being linked to, this
+///             runtime check may be used to appropriately configure the
+///             `FlutterProjectArgs`. In JIT mode execution, the kernel
+///             snapshots must be present in the Flutter assets directory
+///             specified in the `FlutterProjectArgs`. For AOT execution, the
+///             fields `vm_snapshot_data`, `vm_snapshot_instructions`,
+///             `isolate_snapshot_data` and `isolate_snapshot_instructions`
+///             (along with their size fields) must be specified in
+///             `FlutterProjectArgs`.
+///
+/// @return     True, if AOT Dart code is run. JIT otherwise.
+///
+FLUTTER_EXPORT
+bool FlutterEngineRunsAOTCompiledDartCode(void);
+
 #if defined(__cplusplus)
 }  // extern "C"
 #endif
