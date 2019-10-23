@@ -9,7 +9,11 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'common.dart';
+
 export 'package:process/process.dart' show ProcessManager;
+
+typedef VoidCallback = void Function();
 
 /// A command for [FakeProcessManager].
 @immutable
@@ -19,28 +23,29 @@ class FakeCommand {
     this.workingDirectory,
     this.environment,
     this.duration = const Duration(),
-    @required this.exitCode,
-    @required this.stdout,
-    @required this.stderr,
+    this.onRun,
+    this.exitCode = 0,
+    this.stdout = '',
+    this.stderr = '',
   }) : assert(command != null),
        assert(duration != null),
+       assert(exitCode != null),
        assert(stdout != null),
        assert(stderr != null);
 
   /// The exact commands that must be matched for this [FakeCommand] to be
-  /// selected from those given to the [FakeProcessManager].
+  /// considered correct.
   final List<String> command;
 
   /// The exact working directory that must be matched for this [FakeCommand] to
-  /// be selected from those given to the [FakeProcessManager].
+  /// be considered correct.
   ///
-  /// If this is null, then it matches any working directory.
+  /// If this is null, the working directory is ignored.
   final String workingDirectory;
 
-  /// The environment that must be matched for this [FakeCommand] to be selected
-  /// from those given to the [FakeProcessManager].
+  /// The environment that must be matched for this [FakeCommand] to be considered correct.
   ///
-  /// If this is null, then it matches any environment.
+  /// If this is null, then the environment is ignored.
   ///
   /// Otherwise, each key in this environment must be present and must have a
   /// value that matches the one given here for the [FakeCommand] to match.
@@ -52,6 +57,10 @@ class FakeCommand {
   /// If you set this to a non-zero time, you should use a [FakeAsync] zone,
   /// otherwise the test will be artificially slow.
   final Duration duration;
+
+  /// A callback that is run after [duration] expires but before the [exitCode]
+  /// (and output) are passed back.
+  final VoidCallback onRun;
 
   /// The process' exit code.
   ///
@@ -110,13 +119,20 @@ class _FakeProcess implements Process {
   _FakeProcess(
     this._exitCode,
     Duration duration,
+    VoidCallback onRun,
     this.pid,
     this._stderr,
     this.stdin,
     this._stdout,
-  ) : exitCode = Future<void>.delayed(duration).then((void value) => _exitCode),
+  ) : exitCode = Future<void>.delayed(duration).then((void value) {
+        if (onRun != null) {
+          onRun();
+        }
+        return _exitCode;
+      }),
       stderr = Stream<List<int>>.value(utf8.encode(_stderr)),
       stdout = Stream<List<int>>.value(utf8.encode(_stdout));
+
   final int _exitCode;
 
   @override
@@ -145,44 +161,42 @@ class _FakeProcess implements Process {
   }
 }
 
-/// A fake [ProcessManager] which responds to particular commands with particular results.
-///
-/// On creation, pass in a list of [FakeCommand] objects. When the [ProcessManager] methods
-/// such as [start] are invoked, the first matching [FakeCommand] is found and its settings
-/// are used to simulate the result of running that command.
-///
-/// If no command is found, then one is implied which immediately returns exit
-/// code 0 with no output.
-class FakeProcessManager implements ProcessManager {
-  FakeProcessManager(this._commands);
+abstract class FakeProcessManager implements ProcessManager {
+  /// A fake [ProcessManager] which responds to all commands as if they had run
+  /// instantaneously with an exit code of 0 and no output.
+  factory FakeProcessManager.any() = _FakeAnyProcessManager;
 
-  final List<FakeCommand> _commands;
+  /// A fake [ProcessManager] which responds to particular commands with
+  /// particular results.
+  ///
+  /// On creation, pass in a list of [FakeCommand] objects. When the
+  /// [ProcessManager] methods such as [start] are invoked, the next
+  /// [FakeCommand] must match (otherwise the test fails); its settings are used
+  /// to simulate the result of running that command.
+  ///
+  /// If no command is found, then one is implied which immediately returns exit
+  /// code 0 with no output.
+  ///
+  /// There is no logic to ensure that all the listed commands are run. Use
+  /// [FakeCommand.onRun] to set a flag, or specify a sentinel command as your
+  /// last command and verify its execution is successful, to ensure that all
+  /// the specified commands are actually called.
+  factory FakeProcessManager.list(List<FakeCommand> commands) = _SequenceProcessManager;
 
-  FakeCommand _findCommand(List<String> command, String workingDirectory, Map<String, String> environment) {
-    for (FakeCommand candidate in _commands) {
-      if (candidate._matches(command, workingDirectory, environment)) {
-        return candidate;
-      }
-    }
-    return FakeCommand(
-      command: command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      duration: const Duration(),
-      exitCode: 0,
-      stdout: '',
-      stderr: '',
-    );
-  }
+  FakeProcessManager._();
+
+  @protected
+  FakeCommand findCommand(List<String> command, String workingDirectory, Map<String, String> environment);
 
   int _pid = 9999;
 
   _FakeProcess _runCommand(List<String> command, String workingDirectory, Map<String, String> environment) {
     _pid += 1;
-    final FakeCommand fakeCommand = _findCommand(command, workingDirectory, environment);
+    final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment);
     return _FakeProcess(
       fakeCommand.exitCode,
       fakeCommand.duration,
+      fakeCommand.onRun,
       _pid,
       fakeCommand.stdout,
       null, // stdin
@@ -246,5 +260,43 @@ class FakeProcessManager implements ProcessManager {
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     assert(false, 'ProcessManager.killPid() should not be used directly in flutter_tools.');
     return false;
+  }
+}
+
+class _FakeAnyProcessManager extends FakeProcessManager {
+  _FakeAnyProcessManager() : super._();
+
+  @override
+  FakeCommand findCommand(List<String> command, String workingDirectory, Map<String, String> environment) {
+    return FakeCommand(
+      command: command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      duration: const Duration(),
+      exitCode: 0,
+      stdout: '',
+      stderr: '',
+    );
+  }
+}
+
+class _SequenceProcessManager extends FakeProcessManager {
+  _SequenceProcessManager(this._commands) : super._();
+
+  final List<FakeCommand> _commands;
+
+  @override
+  FakeCommand findCommand(List<String> command, String workingDirectory, Map<String, String> environment) {
+    expect(_commands, isNotEmpty,
+      reason: 'ProcessManager was told to execute $command (in $workingDirectory) '
+              'but the FakeProcessManager.list expected no more processes.'
+    );
+    expect(_commands.first._matches(command, workingDirectory, environment), isTrue,
+      reason: 'ProcessManager was told to execute $command '
+              '(in $workingDirectory, with environment $environment) '
+              'but the next process that was expected was ${_commands.first.command} '
+              '(in ${_commands.first.workingDirectory}, with environment ${_commands.first.environment})}.'
+    );
+    return _commands.removeAt(0);
   }
 }

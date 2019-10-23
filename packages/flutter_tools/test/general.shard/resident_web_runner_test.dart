@@ -176,6 +176,7 @@ void main() {
 
   test('Can hot reload after attaching', () => testbed.run(() async {
     _setupMocks();
+    final BufferLogger bufferLogger = logger;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -189,6 +190,7 @@ void main() {
     });
     final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
+    expect(bufferLogger.statusText, contains('Reloaded application in'));
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
@@ -206,6 +208,7 @@ void main() {
 
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
+    final BufferLogger bufferLogger = logger;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -214,11 +217,12 @@ void main() {
     when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
       return true;
     });
-    when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
+    when(mockVmService.callServiceExtension('fullReload')).thenAnswer((Invocation _) async {
       return Response.parse(<String, Object>{'type': 'Success'});
     });
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
+    expect(bufferLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
@@ -227,8 +231,8 @@ void main() {
       'cd29': 'false',
       'cd30': 'true',
     })).called(1);
-    verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
-    verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
     verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
@@ -255,7 +259,31 @@ void main() {
     Usage: () => MockFlutterUsage(),
   }));
 
-  test('Fails on vmservice response error', () => testbed.run(() async {
+  test('Fails on vmservice response error for hot restart', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+      return true;
+    });
+    when(mockVmService.callServiceExtension('fullReload')).thenAnswer((Invocation _) async {
+      return Response.parse(<String, Object>{'type': 'Failed'});
+    });
+    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    expect(result.code, 1);
+    expect(result.message, contains('Failed'));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockFlutterUsage(),
+  }));
+
+  test('Fails on vmservice response error for hot reload', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -268,7 +296,7 @@ void main() {
     when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
       return Response.parse(<String, Object>{'type': 'Failed'});
     });
-    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
     expect(result.code, 1);
     expect(result.message, contains('Failed'));
@@ -290,7 +318,7 @@ void main() {
       return true;
     });
     when(mockVmService.callServiceExtension('hotRestart')).thenThrow(RPCError('', 2, '123'));
-    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
     expect(result.code, 1);
     expect(result.message, contains('Page requires refresh'));
@@ -301,6 +329,8 @@ void main() {
     final BufferLogger bufferLogger = logger;
 
     expect(bufferLogger.statusText, contains('Warning'));
+    expect(bufferLogger.statusText, contains('https://flutter.dev/web'));
+    expect(bufferLogger.statusText, isNot(contains('https://flutter.dev/web.')));
   }));
 
   test('debugDumpApp', () => testbed.run(() async {
@@ -433,6 +463,26 @@ void main() {
 
     verify(mockVmService.callServiceExtension('ext.flutter.profileWidgetBuilds',
         args: <String, Object>{'enabled': true})).called(1);
+  }));
+
+  test('debugTogglePlatform', () => testbed.run(() async {
+    _setupMocks();
+    final BufferLogger bufferLogger = logger;
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callServiceExtension('ext.flutter.platformOverride'))
+      .thenAnswer((Invocation _) async {
+        return Response.parse(<String, Object>{'value': 'iOS'});
+    });
+
+    await residentWebRunner.debugTogglePlatform();
+
+    expect(bufferLogger.statusText, contains('Switched operating system to android'));
+    verify(mockVmService.callServiceExtension('ext.flutter.platformOverride',
+        args: <String, Object>{'value': 'android'})).called(1);
   }));
 
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {

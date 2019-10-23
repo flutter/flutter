@@ -190,13 +190,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// See also:
   ///
-  /// * [Layer.findAll], which is used by this method to find all
+  /// * [Layer.findAllAnnotations], which is used by this method to find all
   ///   [AnnotatedRegionLayer]s annotated for mouse tracking.
   Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels
     // here.
-    return layer.findAll<MouseTrackerAnnotation>(
+    return layer.findAllAnnotations<MouseTrackerAnnotation>(
       position * configuration.devicePixelRatio
     ).annotations;
   }
@@ -243,12 +243,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     final Rect bounds = paintBounds;
     final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
     final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
-    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top)?.annotation;
+    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom)?.annotation;
+        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
         break;
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:

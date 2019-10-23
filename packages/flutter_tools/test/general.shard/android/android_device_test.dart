@@ -348,6 +348,14 @@ Use the 'android' tool to install them:
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('knownPhysical Samsung SM G570M', () async {
+      hardware = 'samsungexynos7570';
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('knownEmulator', () async {
       hardware = 'goldfish';
       final AndroidDevice device = AndroidDevice('test');
@@ -390,7 +398,7 @@ flutter:
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('isSupportedForProject is true with editable host app', () async {
@@ -402,7 +410,7 @@ flutter:
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('isSupportedForProject is false with no host app and no module', () async {
@@ -413,7 +421,7 @@ flutter:
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   group('emulatorId', () {
