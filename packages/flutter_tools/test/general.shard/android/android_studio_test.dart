@@ -66,7 +66,7 @@ void main() {
           equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
       Platform: () => linuxPlatform(),
@@ -86,7 +86,7 @@ void main() {
           equals(fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
       Platform: () => macPlatform(),
@@ -116,7 +116,7 @@ void main() {
           equals(fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
       Platform: () => macPlatform(),

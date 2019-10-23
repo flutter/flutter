@@ -47,7 +47,7 @@ void _testProjectFileInvalidator({@required bool asyncScanning}) {
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('Non-existent files are ignored', () async {
@@ -62,6 +62,6 @@ void _testProjectFileInvalidator({@required bool asyncScanning}) {
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
