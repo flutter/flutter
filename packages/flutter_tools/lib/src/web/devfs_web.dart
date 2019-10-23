@@ -146,7 +146,7 @@ class WebAssetServer {
       }
       final int start = offsets[0];
       final int end = offsets[1];
-      if (end >= bytes.lengthInBytes || start < 0) {
+      if (end > bytes.lengthInBytes || start < 0) {
         printTrace('Invalid byte slice: [$start, $end]');
         continue;
       }
