@@ -36,7 +36,7 @@ public class TextInputPluginTest {
         testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
         View testView = new View(RuntimeEnvironment.application);
         TextInputPlugin textInputPlugin = new TextInputPlugin(testView, mock(DartExecutor.class), mock(PlatformViewsController.class));
-        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, TextInputChannel.TextCapitalization.NONE, null, null, null));
+        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, true, TextInputChannel.TextCapitalization.NONE, null, null, null));
         // There's a pending restart since we initialized the text input client. Flush that now.
         textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("", 0, 0));
 
@@ -61,7 +61,7 @@ public class TextInputPluginTest {
         testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
         View testView = new View(RuntimeEnvironment.application);
         TextInputPlugin textInputPlugin = new TextInputPlugin(testView, mock(DartExecutor.class), mock(PlatformViewsController.class));
-        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, TextInputChannel.TextCapitalization.NONE, null, null, null));
+        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, true, TextInputChannel.TextCapitalization.NONE, null, null, null));
         // There's a pending restart since we initialized the text input client. Flush that now.
         textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("", 0, 0));
 
@@ -83,7 +83,7 @@ public class TextInputPluginTest {
         testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
         View testView = new View(RuntimeEnvironment.application);
         TextInputPlugin textInputPlugin = new TextInputPlugin(testView, mock(DartExecutor.class), mock(PlatformViewsController.class));
-        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, TextInputChannel.TextCapitalization.NONE, null, null, null));
+        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, true, TextInputChannel.TextCapitalization.NONE, null, null, null));
         // There's a pending restart since we initialized the text input client. Flush that now.
         textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("", 0, 0));
 
@@ -102,7 +102,7 @@ public class TextInputPluginTest {
 
         View testView = new View(RuntimeEnvironment.application);
         TextInputPlugin textInputPlugin = new TextInputPlugin(testView, mock(DartExecutor.class), mock(PlatformViewsController.class));
-        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, TextInputChannel.TextCapitalization.NONE, null, null, null));
+        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, true, TextInputChannel.TextCapitalization.NONE, null, null, null));
         // There's a pending restart since we initialized the text input client. Flush that now.
         textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("", 0, 0));
         assertEquals(1, testImm.getRestartCount(testView));
