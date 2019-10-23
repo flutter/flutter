@@ -706,6 +706,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }) : _filter = filter,
        super(settings: settings);
 
+  /// The filter to add to the barrier.
+  ///
+  /// If given, this filter will be applied to the modal barrier using
+  /// [BackdropFilter]. This allows blur effects, for example.
   final ui.ImageFilter _filter;
 
   // The API for general users of this class

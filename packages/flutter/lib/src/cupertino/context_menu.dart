@@ -24,14 +24,14 @@ typedef _DismissCallback = void Function(
 /// A function that produces the preview when the CupertinoContextMenu is open.
 ///
 /// Called every time the animation value changes.
-typedef PreviewBuilder = Widget Function(
+typedef ContextMenuPreviewBuilder = Widget Function(
   BuildContext context,
   Animation<double> animation,
   Widget child,
 );
 
-// A function that proxies to PreviewBuilder without the child.
-typedef _PreviewBuilderChildless = Widget Function(
+// A function that proxies to ContextMenuPreviewBuilder without the child.
+typedef _ContextMenuPreviewBuilderChildless = Widget Function(
   BuildContext context,
   Animation<double> animation,
 );
@@ -137,8 +137,8 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// When the [CupertinoContextMenu] is long-pressed, the menu will open and
   /// this widget (or the widget returned by [previewBuilder], if provided) will
-  /// be moved to the [Overlay] and placed inside of an [Expanded] widget. This
-  /// allows the child to resize to fit in the full-screen Overlay, if it
+  /// be moved to the new route and placed inside of an [Expanded] widget. This
+  /// allows the child to resize to fit in its place in the new route, if it
   /// doesn't size itself.
   ///
   /// When the [CupertinoContextMenu] is "closed", this widget acts like a
@@ -150,7 +150,7 @@ class CupertinoContextMenu extends StatefulWidget {
 
   /// The actions that are shown in the menu.
   ///
-  /// This parameter cannot be null, and items in the List must be
+  /// This parameter cannot be null or empty, and items in the List must be
   /// [CupertinoContextMenuAction]s.
   final List<CupertinoContextMenuAction> actions;
 
@@ -164,10 +164,10 @@ class CupertinoContextMenu extends StatefulWidget {
   /// sharp corners when in the page.
   ///
   /// In addition to the current [BuildContext], the function is also called
-  /// with an [Animation] and the [child]. The animation is used internally to
-  /// animate the CupertinoContextMenu open. It can be used to animate the
-  /// preview in sync with the opening of the CupertinoContextMenu. The child
-  /// parameter provides access to the child displayed when the
+  /// with an [Animation] and the [child]. The animation goes from 0 to 1 when
+  /// the CupertinoContextMenu opens, and from 1 to 0 when it closes, and it can
+  /// be used to animate the preview in sync with this opening and closing. The
+  /// child parameter provides access to the child displayed when the
   /// CupertinoContextMenu is closed.
   ///
   /// {@tool sample}
@@ -215,7 +215,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// ```
   ///
   /// {@end-tool}
-  final PreviewBuilder previewBuilder;
+  final ContextMenuPreviewBuilder previewBuilder;
 
   @override
   _CupertinoContextMenuState createState() => _CupertinoContextMenuState();
@@ -242,6 +242,12 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   // Determine the _ContextMenuLocation based on the location of the original
   // child in the screen.
+  //
+  // The location of the original child is used to determine how to horizontally
+  // align the content of the open CupertinoContextMenu. For example, if the
+  // child is near the center of the screen, it will also appear in the center
+  // of the screen when the menu is open, and the actions will be centered below
+  // it.
   _ContextMenuLocation get _contextMenuOrientation {
     final Rect childRect = _getRect(_childGlobalKey);
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -414,7 +420,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 // a "bounce" animation where it shrinks and then grows. This is implemented
 // by hiding the original child and placing _DecoyChild on top of it in an
 // Overlay. The use of an Overlay allows the _DecoyChild to appear on top of
-// siblines of the original child.
+// siblings of the original child.
 class _DecoyChild extends StatefulWidget {
   const _DecoyChild({
     Key key,
@@ -534,7 +540,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     @required List<CupertinoContextMenuAction> actions,
     @required _ContextMenuLocation contextMenuOrientation,
     this.barrierLabel,
-    _PreviewBuilderChildless builder,
+    _ContextMenuPreviewBuilderChildless builder,
     ui.ImageFilter filter,
     Rect previousChildRect,
     RouteSettings settings,
@@ -557,7 +563,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     Duration(milliseconds: 335);
 
   final List<CupertinoContextMenuAction> _actions;
-  final _PreviewBuilderChildless _builder;
+  final _ContextMenuPreviewBuilderChildless _builder;
   final GlobalKey _childGlobalKey = GlobalKey();
   final _ContextMenuLocation _contextMenuOrientation;
   bool _externalOffstage = false;
