@@ -12,16 +12,13 @@ import 'package:http_multi_server/http_multi_server.dart';
 import 'package:image/image.dart';
 import 'package:package_resolver/package_resolver.dart';
 import 'package:path/path.dart' as p;
-import 'package:pedantic/pedantic.dart';
 import 'package:pool/pool.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:shelf_packages_handler/shelf_packages_handler.dart';
-import 'package:stack_trace/stack_trace.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:typed_data/typed_buffers.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
@@ -40,16 +37,11 @@ import 'package:test_core/src/runner/load_exception.dart'; // ignore: implementa
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip;
 
-import 'chrome_installer.dart';
+import 'browser.dart';
+import 'chrome.dart';
 import 'common.dart';
 import 'environment.dart' as env;
 import 'goldens.dart';
-
-/// The port number Chrome exposes for debugging.
-const int _kChromeDevtoolsPort = 12345;
-const int _kMaxScreenshotWidth = 1024;
-const int _kMaxScreenshotHeight = 1024;
-const double _kMaxDiffRateFailure = 0.28/100; // 0.28%
 
 class BrowserPlatform extends PlatformPlugin {
   /// Starts the server.
@@ -149,7 +141,7 @@ class BrowserPlatform extends PlatformPlugin {
     final bool write = requestData['write'];
     final double maxDiffRate = requestData['maxdiffrate'];
     final Map<String, dynamic> region = requestData['region'];
-    final String result = await _diffScreenshot(filename, write, maxDiffRate ?? _kMaxDiffRateFailure, region);
+    final String result = await _diffScreenshot(filename, write, maxDiffRate ?? kMaxDiffRateFailure, region);
     return shelf.Response.ok(json.encode(result));
   }
 
@@ -189,7 +181,7 @@ To automatically create this file call matchGoldenFile('$filename', write: true)
     }
 
     final wip.ChromeConnection chromeConnection =
-        wip.ChromeConnection('localhost', _kChromeDevtoolsPort);
+        wip.ChromeConnection('localhost', kDevtoolsPort);
     final wip.ChromeTab chromeTab = await chromeConnection.getTab(
         (wip.ChromeTab chromeTab) => chromeTab.url.contains('localhost'));
     final wip.WipConnection wipConnection = await chromeTab.connect();
@@ -211,8 +203,8 @@ To automatically create this file call matchGoldenFile('$filename', write: true)
     // Setting hardware-independent screen parameters:
     // https://chromedevtools.github.io/devtools-protocol/tot/Emulation
     await wipConnection.sendCommand('Emulation.setDeviceMetricsOverride', {
-      'width': _kMaxScreenshotWidth,
-      'height': _kMaxScreenshotHeight,
+      'width': kMaxScreenshotWidth,
+      'height': kMaxScreenshotHeight,
       'deviceScaleFactor': 1,
       'mobile': false,
     });
@@ -838,227 +830,6 @@ class _BrowserEnvironment implements Environment {
       this.remoteDebuggerUrl, this.onRestart);
 
   CancelableOperation displayPause() => _manager._displayPause();
-}
-
-/// An interface for running browser instances.
-///
-/// This is intentionally coarse-grained: browsers are controlled primary from
-/// inside a single tab. Thus this interface only provides support for closing
-/// the browser and seeing if it closes itself.
-///
-/// Any errors starting or running the browser process are reported through
-/// [onExit].
-abstract class Browser {
-  String get name;
-
-  /// The Observatory URL for this browser.
-  ///
-  /// This will return `null` for browsers that aren't running the Dart VM, or
-  /// if the Observatory URL can't be found.
-  Future<Uri> get observatoryUrl => null;
-
-  /// The remote debugger URL for this browser.
-  ///
-  /// This will return `null` for browsers that don't support remote debugging,
-  /// or if the remote debugging URL can't be found.
-  Future<Uri> get remoteDebuggerUrl => null;
-
-  /// The underlying process.
-  ///
-  /// This will fire once the process has started successfully.
-  Future<Process> get _process => _processCompleter.future;
-  final _processCompleter = Completer<Process>();
-
-  /// Whether [close] has been called.
-  var _closed = false;
-
-  /// A future that completes when the browser exits.
-  ///
-  /// If there's a problem starting or running the browser, this will complete
-  /// with an error.
-  Future get onExit => _onExitCompleter.future;
-  final _onExitCompleter = Completer();
-
-  /// Standard IO streams for the underlying browser process.
-  final _ioSubscriptions = <StreamSubscription>[];
-
-  /// Creates a new browser.
-  ///
-  /// This is intended to be called by subclasses. They pass in [startBrowser],
-  /// which asynchronously returns the browser process. Any errors in
-  /// [startBrowser] (even those raised asynchronously after it returns) are
-  /// piped to [onExit] and will cause the browser to be killed.
-  Browser(Future<Process> startBrowser()) {
-    // Don't return a Future here because there's no need for the caller to wait
-    // for the process to actually start. They should just wait for the HTTP
-    // request instead.
-    runZoned(() async {
-      var process = await startBrowser();
-      _processCompleter.complete(process);
-
-      var output = Uint8Buffer();
-      drainOutput(Stream<List<int>> stream) {
-        try {
-          _ioSubscriptions
-              .add(stream.listen(output.addAll, cancelOnError: true));
-        } on StateError catch (_) {}
-      }
-
-      // If we don't drain the stdout and stderr the process can hang.
-      drainOutput(process.stdout);
-      drainOutput(process.stderr);
-
-      var exitCode = await process.exitCode;
-
-      // This hack dodges an otherwise intractable race condition. When the user
-      // presses Control-C, the signal is sent to the browser and the test
-      // runner at the same time. It's possible for the browser to exit before
-      // the [Browser.close] is called, which would trigger the error below.
-      //
-      // A negative exit code signals that the process exited due to a signal.
-      // However, it's possible that this signal didn't come from the user's
-      // Control-C, in which case we do want to throw the error. The only way to
-      // resolve the ambiguity is to wait a brief amount of time and see if this
-      // browser is actually closed.
-      if (!_closed && exitCode < 0) {
-        await Future.delayed(Duration(milliseconds: 200));
-      }
-
-      if (!_closed && exitCode != 0) {
-        var outputString = utf8.decode(output);
-        var message = '$name failed with exit code $exitCode.';
-        if (outputString.isNotEmpty) {
-          message += '\nStandard output:\n$outputString';
-        }
-
-        throw Exception(message);
-      }
-
-      _onExitCompleter.complete();
-    }, onError: (error, StackTrace stackTrace) {
-      // Ignore any errors after the browser has been closed.
-      if (_closed) return;
-
-      // Make sure the process dies even if the error wasn't fatal.
-      _process.then((process) => process.kill());
-
-      if (stackTrace == null) stackTrace = Trace.current();
-      if (_onExitCompleter.isCompleted) return;
-      _onExitCompleter.completeError(
-          Exception('Failed to run $name: ${getErrorMessage(error)}.'),
-          stackTrace);
-    });
-  }
-
-  /// Kills the browser process.
-  ///
-  /// Returns the same [Future] as [onExit], except that it won't emit
-  /// exceptions.
-  Future close() async {
-    _closed = true;
-
-    // If we don't manually close the stream the test runner can hang.
-    // For example this happens with Chrome Headless.
-    // See SDK issue: https://github.com/dart-lang/sdk/issues/31264
-    for (var stream in _ioSubscriptions) {
-      unawaited(stream.cancel());
-    }
-
-    (await _process).kill();
-
-    // Swallow exceptions. The user should explicitly use [onExit] for these.
-    return onExit.catchError((_) {});
-  }
-}
-
-/// A class for running an instance of Chrome.
-///
-/// Most of the communication with the browser is expected to happen via HTTP,
-/// so this exposes a bare-bones API. The browser starts as soon as the class is
-/// constructed, and is killed when [close] is called.
-///
-/// Any errors starting or running the process are reported through [onExit].
-class Chrome extends Browser {
-  @override
-  final name = 'Chrome';
-
-  @override
-  final Future<Uri> remoteDebuggerUrl;
-
-  static String version;
-
-  /// Starts a new instance of Chrome open to the given [url], which may be a
-  /// [Uri] or a [String].
-  factory Chrome(Uri url, {bool debug = false}) {
-    assert(version != null);
-    var remoteDebuggerCompleter = Completer<Uri>.sync();
-    return Chrome._(() async {
-      final BrowserInstallation installation = await getOrInstallChrome(
-        version,
-        infoLog: isCirrus ? stdout : _DevNull(),
-      );
-
-      // A good source of various Chrome CLI options:
-      // https://peter.sh/experiments/chromium-command-line-switches/
-      //
-      // Things to try:
-      // --font-render-hinting
-      // --enable-font-antialiasing
-      // --gpu-rasterization-msaa-sample-count
-      // --disable-gpu
-      // --disallow-non-exact-resource-reuse
-      // --disable-font-subpixel-positioning
-      final bool isChromeNoSandbox = Platform.environment['CHROME_NO_SANDBOX'] == 'true';
-      var dir = createTempDir();
-      var args = [
-        '--user-data-dir=$dir',
-        url.toString(),
-        if (!debug) '--headless',
-        if (isChromeNoSandbox) '--no-sandbox',
-        '--window-size=$_kMaxScreenshotWidth,$_kMaxScreenshotHeight', // When headless, this is the actual size of the viewport
-        '--disable-extensions',
-        '--disable-popup-blocking',
-        '--bwsi',
-        '--no-first-run',
-        '--no-default-browser-check',
-        '--disable-default-apps',
-        '--disable-translate',
-        '--remote-debugging-port=$_kChromeDevtoolsPort',
-      ];
-
-      final Process process = await Process.start(installation.executable, args);
-
-      remoteDebuggerCompleter.complete(getRemoteDebuggerUrl(
-          Uri.parse('http://localhost:$_kChromeDevtoolsPort')));
-
-      unawaited(process.exitCode
-          .then((_) => Directory(dir).deleteSync(recursive: true)));
-
-      return process;
-    }, remoteDebuggerCompleter.future);
-  }
-
-  Chrome._(Future<Process> startBrowser(), this.remoteDebuggerUrl)
-      : super(startBrowser);
-}
-
-/// A string sink that swallows all input.
-class _DevNull implements StringSink {
-  @override
-  void write(Object obj) {
-  }
-
-  @override
-  void writeAll(Iterable objects, [String separator = ""]) {
-  }
-
-  @override
-  void writeCharCode(int charCode) {
-  }
-
-  @override
-  void writeln([Object obj = ""]) {
-  }
 }
 
 bool get isCirrus => Platform.environment['CIRRUS_CI'] == 'true';

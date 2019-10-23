@@ -8,6 +8,12 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+/// The port number for debugging.
+const int kDevtoolsPort = 12345;
+const int kMaxScreenshotWidth = 1024;
+const int kMaxScreenshotHeight = 1024;
+const double kMaxDiffRateFailure = 0.28 / 100; // 0.28%
+
 class BrowserInstallerException implements Exception {
   BrowserInstallerException(this.message);
 
@@ -60,20 +66,16 @@ class _LinuxBinding implements PlatformBinding {
       path.join(versionDir.path, 'chrome-linux', 'chrome');
 
   @override
-  String getFirefoxDownloadUrl(String version) {
-    return 'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/linux-x86_64/en-US/firefox-${version}.tar.bz2';
-  }
+  String getFirefoxDownloadUrl(String version) =>
+      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/linux-x86_64/en-US/firefox-${version}.tar.bz2';
 
   @override
-  String getFirefoxExecutablePath(io.Directory versionDir) {
-    // TODO: implement getFirefoxExecutablePath
-    return null;
-  }
+  String getFirefoxExecutablePath(io.Directory versionDir) =>
+      path.join(versionDir.path, 'firefox', 'firefox');
 
   @override
-  String getFirefoxLatestVersionUrl() {
-    return 'https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US';
-  }
+  String getFirefoxLatestVersionUrl() =>
+      'https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US';
 }
 
 class _MacBinding implements PlatformBinding {
@@ -87,7 +89,6 @@ class _MacBinding implements PlatformBinding {
   String getChromeDownloadUrl(String version) =>
       '$_kBaseDownloadUrl/Mac%2F$version%2Fchrome-mac.zip?alt=media';
 
-  @override
   String getChromeExecutablePath(io.Directory versionDir) => path.join(
       versionDir.path,
       'chrome-mac',
@@ -97,28 +98,24 @@ class _MacBinding implements PlatformBinding {
       'Chromium');
 
   @override
-  String getFirefoxDownloadUrl(String version) {
-    // TODO: implement getFirefoxDownloadUrl
-    return null;
-  }
+  String getFirefoxDownloadUrl(String version) =>
+      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/mac/en-US/firefox-${version}.dmg';
 
   @override
   String getFirefoxExecutablePath(io.Directory versionDir) {
-    // TODO: implement getFirefoxExecutablePath
-    return null;
+    throw UnimplementedError();
   }
 
   @override
-  String getFirefoxLatestVersionUrl() {
-    return 'https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US';
-  }
+  String getFirefoxLatestVersionUrl() =>
+      'https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US';
 }
 
 class BrowserInstallation {
-  const BrowserInstallation({
-    @required this.version,
-    @required this.executable,
-  });
+  const BrowserInstallation(
+      {@required this.version,
+      @required this.executable,
+      fetchLatestChromeVersion});
 
   /// Browser version.
   final String version;
@@ -126,3 +123,20 @@ class BrowserInstallation {
   /// Path the the browser executable.
   final String executable;
 }
+
+/// A string sink that swallows all input.
+class DevNull implements StringSink {
+  @override
+  void write(Object obj) {}
+
+  @override
+  void writeAll(Iterable objects, [String separator = ""]) {}
+
+  @override
+  void writeCharCode(int charCode) {}
+
+  @override
+  void writeln([Object obj = ""]) {}
+}
+
+bool get isCirrus => io.Platform.environment['CIRRUS_CI'] == 'true';

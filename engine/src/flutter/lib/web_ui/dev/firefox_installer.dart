@@ -10,6 +10,59 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 import 'environment.dart';
 
+/// Returns the installation of Firefox, installing it if necessary.
+///
+/// If [requestedVersion] is null, uses the version specified on the
+/// command-line. If not specified on the command-line, uses the version
+/// specified in the "browser_lock.yaml" file.
+///
+/// If [requestedVersion] is not null, installs that version. The value
+/// may be "latest" (the latest stable Firefox version), "system"
+/// (manually installed Firefox on the current operating system), or an
+/// exact version number such as 69.0.3. Versions of Firefox can be found here:
+///
+/// https://download-installer.cdn.mozilla.net/pub/firefox/releases/
+Future<BrowserInstallation> getOrInstallFirefox(
+  String requestedVersion, {
+  StringSink infoLog,
+}) async {
+  // These tests are aimed to run only on the Linux containers in Cirrus.
+  // Therefore Firefox installation is implemented only for Linux now.
+  if (!io.Platform.isLinux) {
+    throw UnimplementedError();
+  }
+
+  infoLog ??= io.stdout;
+
+  if (requestedVersion == 'system') {
+    return BrowserInstallation(
+      version: 'system',
+      executable: await _findSystemFirefoxExecutable(),
+    );
+  }
+
+  FirefoxInstaller installer;
+  try {
+    installer = requestedVersion == 'latest'
+        ? await FirefoxInstaller.latest()
+        : FirefoxInstaller(version: requestedVersion);
+
+    if (installer.isInstalled) {
+      infoLog.writeln(
+          'Installation was skipped because Firefox version ${installer.version} is already installed.');
+    } else {
+      infoLog.writeln('Installing Firefox version: ${installer.version}');
+      await installer.install();
+      final BrowserInstallation installation = installer.getInstallation();
+      infoLog.writeln(
+          'Installations complete. To launch it run ${installation.executable}');
+    }
+    return installer.getInstallation();
+  } finally {
+    installer?.close();
+  }
+}
+
 /// Manages the installation of a particular [version] of Firefox.
 class FirefoxInstaller {
   factory FirefoxInstaller({
@@ -96,7 +149,7 @@ class FirefoxInstaller {
     ));
 
     final io.File downloadedFile =
-        io.File(path.join(versionDir.path, 'firefox.zip'));
+        io.File(path.join(versionDir.path, 'firefox-${version}.tar.bz2'));
     await download.stream.pipe(downloadedFile.openWrite());
 
     return downloadedFile;
@@ -105,12 +158,36 @@ class FirefoxInstaller {
   /// Uncompress the downloaded browser files.
   /// See [version].
   Future<void> _uncompress(io.File downloadedFile) async {
-    /// TODO(nturgut): Implement Install.
+    final io.ProcessResult unzipResult = await io.Process.run('tar', <String>[
+      '-x',
+      '-f',
+      downloadedFile.path,
+      '-C',
+      versionDir.path,
+    ]);
+
+    if (unzipResult.exitCode != 0) {
+      throw BrowserInstallerException(
+          'Failed to unzip the downloaded Firefox archive ${downloadedFile.path}.\n'
+          'The unzip process exited with code ${unzipResult.exitCode}.');
+    }
   }
 
   void close() {
     client.close();
   }
+}
+
+Future<String> _findSystemFirefoxExecutable() async {
+  final io.ProcessResult which =
+      await io.Process.run('which', <String>['firefox']);
+
+  if (which.exitCode != 0) {
+    throw BrowserInstallerException(
+        'Failed to locate system Firefox installation.');
+  }
+
+  return which.stdout;
 }
 
 /// Fetches the latest available Chrome build version.
