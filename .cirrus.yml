@@ -462,6 +462,7 @@ task:
     - which flutter
     - sudo gem install cocoapods
     - sudo gem install xcpretty
+    - sudo gem install fastlane
     - git clean -xffd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
