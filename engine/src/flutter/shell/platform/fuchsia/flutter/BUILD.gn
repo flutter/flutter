@@ -256,6 +256,9 @@ executable("flutter_runner_unittests") {
     "accessibility_bridge.h",
     "accessibility_bridge_unittest.cc",
     "flutter_runner_fakes.h",
+    "fuchsia_intl.cc",
+    "fuchsia_intl.h",
+    "fuchsia_intl_unittest.cc",
     "logging.h",
     "platform_view.cc",
     "platform_view.h",
@@ -297,6 +300,13 @@ fuchsia_archive("flutter_runner_tests") {
   ]
 
   binary = "$target_name"
+
+  resources = [
+    {
+      path = rebase_path("//third_party/icu/common/icudtl.dat")
+      dest = "icudtl.dat"
+    },
+  ]
 
   meta_dir = "$flutter_root/shell/platform/fuchsia/flutter/meta"
 

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_ENGINE_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_ENGINE_H_
 
+#include <fuchsia/intl/cpp/fidl.h>
 #include <fuchsia/io/cpp/fidl.h>
 #include <fuchsia/ui/gfx/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
@@ -58,6 +59,8 @@ class Engine final {
   std::unique_ptr<flutter::Shell> shell_;
   zx::event vsync_event_;
   fml::WeakPtrFactory<Engine> weak_factory_;
+  // A stub for the FIDL protocol fuchsia.intl.PropertyProvider.
+  fuchsia::intl::PropertyProviderPtr intl_property_provider_;
 
   void OnMainIsolateStart();
 

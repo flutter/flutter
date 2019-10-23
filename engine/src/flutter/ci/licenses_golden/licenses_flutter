@@ -951,6 +951,9 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/extract_far.dart
