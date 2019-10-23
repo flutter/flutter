@@ -14,7 +14,7 @@ export 'common.dart' show
   MouseCursor,
   MouseCursorPlatformDelegate,
   SystemMouseCursorShape,
-  ActivateMouseCursorDetails;
+  MouseCursorActivateDetails;
 
 // A mouse cursor based on resources provided by the platform.
 //
@@ -31,10 +31,12 @@ class _SystemMouseCursor extends MouseCursor {
   final String description;
 
   @override
-  Future<bool> activate(ActivateMouseCursorDetails details) {
+  Future<bool> activate(MouseCursorActivateDetails details) {
     return details.platformDelegate.activateSystemCursor(
-      device: details.device,
-      shape: shape,
+      MouseCursorPlatformActivateSystemCursorDetails(
+        device: details.device,
+        shape: shape,
+      ),
     );
   }
 
@@ -53,7 +55,7 @@ class _EnsuredImplementedSystemMouseCursor extends _SystemMouseCursor {
   ) : super(shape, description);
 
   @override
-  Future<bool> activate(ActivateMouseCursorDetails details) async {
+  Future<bool> activate(MouseCursorActivateDetails details) async {
     final bool implemented = await super.activate(details);
     assert(implemented);
     return implemented;
@@ -105,14 +107,28 @@ class SystemMouseCursors {
   static const MouseCursor grabbing = _SystemMouseCursor(SystemMouseCursorShape.grabbing, 'grabbing');
 }
 
-/// TODOC
+/// The base class of a manager that maintains states related to mouse cursor
+/// and provides a simple interface to operate [MouseCursor]s.
+///
+/// See also:
+///
+///  * [StandardMouseCursorManager], which implements the platform-specific
+///    code based on the platform that this program is running on.
+///  * [MouseTracker], which uses this class.
 abstract class MouseCursorManager {
-  /// TODOC
+  /// The delegate of the platform that this manager operates.
+  ///
+  /// It is provided to [MouseCursor] to perform platform operations.
   MouseCursorPlatformDelegate get platformDelegate;
 
-  /// TODOC
+  /// Set the cursor of pointer `device` to `cursor`.
+  ///
+  /// This method handles states or fallbacks.
+  ///
+  /// This method resolves if the operation is successful, or throws errors if
+  /// any occur.
   Future<void> setDeviceCursor(int device, MouseCursor cursor) async {
-    final ActivateMouseCursorDetails details = ActivateMouseCursorDetails(
+    final MouseCursorActivateDetails details = MouseCursorActivateDetails(
       device: device,
       platformDelegate: platformDelegate,
     );
@@ -124,21 +140,27 @@ abstract class MouseCursorManager {
   }
 }
 
-/// TODOC
+/// The [MouseCursorManager] that implements the platform-specific code based on
+/// the platform that this program is running on.
+///
+/// See also:
+///
+///  * [MouseTracker], which owns an instance of this class.
 class StandardMouseCursorManager extends MouseCursorManager {
   /// Create a [MouseCursorManager] by providing the channel.
   ///
-  /// The `channel` must not be null.
+  /// The `mouseCursorChannel` is used to create platform delegates, and must
+  /// not be null.
   StandardMouseCursorManager(
     MethodChannel mouseCursorChannel,
   ) : assert(mouseCursorChannel != null) {
-    _delegate = _createDelegate(mouseCursorChannel);
-    assert(_delegate != null);
+    _platformDelegate = _createDelegate(mouseCursorChannel);
+    assert(_platformDelegate != null);
   }
 
   @override
-  MouseCursorPlatformDelegate get platformDelegate => _delegate;
-  MouseCursorPlatformDelegate _delegate;
+  MouseCursorPlatformDelegate get platformDelegate => _platformDelegate;
+  MouseCursorPlatformDelegate _platformDelegate;
 
   MouseCursorPlatformDelegate _createDelegate(MethodChannel channel) {
     if (Platform.isLinux) {
@@ -146,7 +168,7 @@ class StandardMouseCursorManager extends MouseCursorManager {
     } else if (Platform.isAndroid) {
       return MouseCursorAndroidDelegate(mouseCursorChannel: channel);
     } else {
-      return const MouseCursorUnsupportedDelegate();
+      return const MouseCursorUnsupportedPlatformDelegate();
     }
   }
 }

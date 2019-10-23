@@ -83,8 +83,8 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
   }
 
   @override
-  Future<bool> activateSystemCursor({int device, SystemMouseCursorShape shape}) async {
-    switch (shape) {
+  Future<bool> activateSystemCursor(MouseCursorPlatformActivateSystemCursorDetails details) async {
+    switch (details.shape) {
       case SystemMouseCursorShape.none:
         return _hideCursor();
       case SystemMouseCursorShape.basic:
@@ -96,9 +96,15 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
       case SystemMouseCursorShape.forbidden:
         return false;
       case SystemMouseCursorShape.grab:
-        return activateSystemCursor(device: device, shape: SystemMouseCursorShape.click);
+        return activateSystemCursor(MouseCursorPlatformActivateSystemCursorDetails(
+          device: details.device,
+          shape: SystemMouseCursorShape.click,
+        ));
       case SystemMouseCursorShape.grabbing:
-        return activateSystemCursor(device: device, shape: SystemMouseCursorShape.click);
+        return activateSystemCursor(MouseCursorPlatformActivateSystemCursorDetails(
+          device: details.device,
+          shape: SystemMouseCursorShape.click,
+        ));
       default:
         break;
     }
