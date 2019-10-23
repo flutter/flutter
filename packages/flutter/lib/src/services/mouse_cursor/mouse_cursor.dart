@@ -9,6 +9,7 @@ import '../platform_channel.dart';
 import 'android.dart';
 import 'common.dart';
 import 'glfw.dart';
+import 'macos.dart';
 
 export 'common.dart' show
   MouseCursor,
@@ -167,6 +168,8 @@ class StandardMouseCursorManager extends MouseCursorManager {
       return MouseCursorGLFWDelegate(mouseCursorChannel: channel);
     } else if (Platform.isAndroid) {
       return MouseCursorAndroidDelegate(mouseCursorChannel: channel);
+    } else if (Platform.isMacOS) {
+      return MouseCursorMacOSDelegate(mouseCursorChannel: channel);
     } else {
       return const MouseCursorUnsupportedPlatformDelegate();
     }
