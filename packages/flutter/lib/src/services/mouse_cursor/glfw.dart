@@ -17,19 +17,27 @@ class _GLFWMouseCursorActions {
 
   final MethodChannel mouseCursorChannel;
 
-  // Set cursor as a sytem cursor specified by `systemConstant`, and/or hidden.
-  //
-  // If `hidden` is true, `systemConstant` is ignored.
+  // Set cursor as a sytem cursor specified by `systemConstant`.
   Future<void> setAsSystemCursor({
     @required int systemConstant,
-    @required bool hidden,
   }) {
     assert(systemConstant != null);
-    assert(hidden != null);
     return mouseCursorChannel.invokeMethod<void>(
       'setAsSystemCursor',
       <String, dynamic>{
         'systemConstant': systemConstant,
+      },
+    );
+  }
+
+  // Hide cursor, or unhide cursor.
+  Future<void> setHidden({
+    @required bool hidden,
+  }) {
+    assert(hidden != null);
+    return mouseCursorChannel.invokeMethod<void>(
+      'setHidden',
+      <String, dynamic>{
         'hidden': hidden,
       },
     );
@@ -64,21 +72,24 @@ class MouseCursorGLFWDelegate extends MouseCursorPlatformDelegate {
   /// used internally to set system cursor.
   static const int kSystemConstantHand = 0x00036004;
 
+  bool _isHidden = false;
+
   Future<bool> _activateSystemConstant(int systemConstant) async {
+    if (_isHidden) {
+      _isHidden = false;
+      await _GLFWMouseCursorActions(mouseCursorChannel)
+        .setHidden(hidden: false);
+    }
     await _GLFWMouseCursorActions(mouseCursorChannel)
-      .setAsSystemCursor(
-        systemConstant: systemConstant,
-        hidden: false,
-      );
+      .setAsSystemCursor(systemConstant: systemConstant);
     return true;
   }
 
   Future<bool> _hideCursor() async {
-    await _GLFWMouseCursorActions(mouseCursorChannel)
-      .setAsSystemCursor(
-        systemConstant: 0,
-        hidden: true,
-      );
+    if (!_isHidden) {
+      _isHidden = true;
+      await _GLFWMouseCursorActions(mouseCursorChannel).setHidden(hidden: true);
+    }
     return true;
   }
 

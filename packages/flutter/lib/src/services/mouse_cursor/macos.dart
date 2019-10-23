@@ -43,7 +43,7 @@ class _MacOSMouseCursorActions {
 }
 
 /// The implementation of [MouseCursorPlatformDelegate] that controls
-/// [MacOS](https://developer.apple.com/documentation) over a method channel.
+/// [macOS](https://developer.apple.com/documentation) over a method channel.
 class MouseCursorMacOSDelegate extends MouseCursorPlatformDelegate {
   /// Create a [MouseCursorMacOSDelegate] by providing the method channel to use.
   ///
@@ -54,82 +54,82 @@ class MouseCursorMacOSDelegate extends MouseCursorPlatformDelegate {
   /// The method channel to control the platform with.
   final MethodChannel mouseCursorChannel;
 
-  // System cursor constants are used to set system cursor on MacOS.
+  // System cursor constants are used to set system cursor on macOS.
   // The list should be kept in sync with
   // [NSCursor constants](https://developer.apple.com/documentation/appkit/nscursor#overview).
-  // However, MacOS doesn't define system constants for system cursors,
+  // However, macOS doesn't define system constants for system cursors,
   // therefore the values should be kept in sync with Flutter's
   // `FlutterMouseCursorPlugin.mm`.
 
-  /// The constant that represents MacOS's `NSCursor.arrowCursor`,
+  /// The constant that represents macOS's `NSCursor.arrowCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantArrow = 0x0001;
 
-  /// The constant that represents MacOS's `NSCursor.iBeamCursor`,
+  /// The constant that represents macOS's `NSCursor.iBeamCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantIBeam = 0x0002;
 
-  /// The constant that represents MacOS's `NSCursor.crosshairCursor`,
+  /// The constant that represents macOS's `NSCursor.crosshairCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantCrosshair = 0x0003;
 
-  /// The constant that represents MacOS's `NSCursor.closedHandCursor`,
+  /// The constant that represents macOS's `NSCursor.closedHandCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantClosedHand = 0x0004;
 
-  /// The constant that represents MacOS's `NSCursor.openHandCursor`,
+  /// The constant that represents macOS's `NSCursor.openHandCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantOpenHand = 0x0005;
 
-  /// The constant that represents MacOS's `NSCursor.pointingHandCursor`,
+  /// The constant that represents macOS's `NSCursor.pointingHandCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantPointingHand = 0x0006;
 
-  /// The constant that represents MacOS's `NSCursor.resizeLeftCursor`,
+  /// The constant that represents macOS's `NSCursor.resizeLeftCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantResizeLeft = 0x0007;
 
-  /// The constant that represents MacOS's `NSCursor.resizeRightCursor`,
+  /// The constant that represents macOS's `NSCursor.resizeRightCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantResizeRight = 0x0008;
 
-  /// The constant that represents MacOS's `NSCursor.resizeLeftRightCursor`,
+  /// The constant that represents macOS's `NSCursor.resizeLeftRightCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantResizeLeftRight = 0x0009;
 
-  /// The constant that represents MacOS's `NSCursor.resizeUpCursor`,
+  /// The constant that represents macOS's `NSCursor.resizeUpCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantResizeUp = 0x000a;
 
-  /// The constant that represents MacOS's `NSCursor.resizeDownCursor`,
+  /// The constant that represents macOS's `NSCursor.resizeDownCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantResizeDown = 0x000b;
 
-  /// The constant that represents MacOS's `NSCursor.resizeUpDownCursor`,
+  /// The constant that represents macOS's `NSCursor.resizeUpDownCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantResizeUpDown = 0x000c;
 
-  /// The constant that represents MacOS's `NSCursor.disappearingItemCursor`,
+  /// The constant that represents macOS's `NSCursor.disappearingItemCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantDisappearingItem = 0x000d;
 
-  /// The constant that represents MacOS's `NSCursor.iBeamCursorForVerticalLayoutCursor`,
+  /// The constant that represents macOS's `NSCursor.iBeamCursorForVerticalLayoutCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantIBeamCursorForVerticalLayout = 0x000e;
 
-  /// The constant that represents MacOS's `NSCursor.operationNotAllowed`,
+  /// The constant that represents macOS's `NSCursor.operationNotAllowed`,
   /// used internally to set system cursor.
   static const int kSystemConstantOperationNotAllowed = 0x000f;
 
-  /// The constant that represents MacOS's `NSCursor.dragLinkCursor`,
+  /// The constant that represents macOS's `NSCursor.dragLinkCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantDragLink = 0x0010;
 
-  /// The constant that represents MacOS's `NSCursor.dragCopyCursor`,
+  /// The constant that represents macOS's `NSCursor.dragCopyCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantDragCopy = 0x0011;
 
-  /// The constant that represents MacOS's `NSCursor.contextualMenuCursor`,
+  /// The constant that represents macOS's `NSCursor.contextualMenuCursor`,
   /// used internally to set system cursor.
   static const int kSystemConstantContextualMenu = 0x0012;
 
