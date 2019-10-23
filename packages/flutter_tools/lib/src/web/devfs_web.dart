@@ -14,13 +14,20 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart';
 
-/// A web server which handles serving JavaScript manifests and assets.
+/// A web server which handles serving JavaScript and assets.
 ///
 /// This is only used in development mode.
 class WebAssetServer {
   @visibleForTesting
   WebAssetServer(this._httpServer) {
-    _httpServer.listen(_handleRequest);
+    _httpServer.listen((HttpRequest request) {
+      try {
+        return _handleRequest(request);
+      } catch (err) {
+        request.response.statusCode = HttpStatus.internalServerError;
+        return request.response.close();
+      }
+    });
   }
 
   // Fallback to "application/octet-stream" on null which
