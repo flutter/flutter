@@ -120,17 +120,15 @@ class ResidentWebRunner extends ResidentRunner {
       return printHelpDetails();
     }
     const String fire = '🔥';
-    const String rawMessage =
-        '  To hot restart (and rebuild state), press "r" or "R".';
+    const String rawMessage = '  To hot restart changes while running, press "r". '
+      'To hot restart (and refresh the browser), press "R".';
     final String message = terminal.color(
       fire + terminal.bolden(rawMessage),
       TerminalColor.red,
     );
-    const String warning = '👻 ';
-    printStatus(warning * 20);
-    printStatus('Warning: Flutter\'s support for building web applications is highly experimental.');
-    printStatus('For more information see https://github.com/flutter/flutter/issues/34082.');
-    printStatus(warning * 20);
+    printStatus('Warning: Flutter\'s support for web development is not stable yet and hasn\'t');
+    printStatus('been thoroughly tested in production environments.');
+    printStatus('For more information see https://flutter.dev/web');
     printStatus('');
     printStatus(message);
     const String quitMessage = 'To quit, press "q".';
@@ -183,12 +181,14 @@ class ResidentWebRunner extends ResidentRunner {
         );
         // When connecting to a browser, update the message with a seemsSlow notification
         // to handle the case where we fail to connect.
-        if (debuggingOptions.browserLaunch) {
-          buildStatus.stop();
+        buildStatus.stop();
+        statusActive = false;
+        if (debuggingOptions.browserLaunch && supportsServiceProtocol) {
           buildStatus = logger.startProgress(
             'Attempting to connect to browser instance..',
             timeout: const Duration(seconds: 30),
           );
+          statusActive = true;
         }
         await device.startApp(package,
           mainPath: target,
@@ -201,8 +201,10 @@ class ResidentWebRunner extends ResidentRunner {
           _connectionResult = await _webFs.connect(debuggingOptions);
           unawaited(_connectionResult.debugConnection.onDone.whenComplete(() => exit(0)));
         }
-        buildStatus.stop();
-        statusActive = false;
+        if (statusActive) {
+          buildStatus.stop();
+          statusActive = false;
+        }
         appStartedCompleter?.complete();
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
@@ -295,16 +297,21 @@ class ResidentWebRunner extends ResidentRunner {
       final Duration recompileDuration = timer.elapsed;
       flutterUsage.sendTiming('hot', 'web-recompile', recompileDuration);
       try {
-        final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
-        printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+        final vmservice.Response reloadResponse = fullRestart
+           ? await _vmService.callServiceExtension('fullReload')
+           : await _vmService.callServiceExtension('hotRestart');
+        final String verb = fullRestart ? 'Restarted' : 'Reloaded';
+        printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
 
         // Send timing analytics for full restart and for refresh.
         final bool wasSuccessful = reloadResponse.type == 'Success';
         if (!wasSuccessful) {
           return OperationResult(1, reloadResponse.toString());
         }
-        flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
-        flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+        if (!fullRestart) {
+          flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
+          flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+        }
         return OperationResult.ok;
       } on vmservice.RPCError {
         return OperationResult(1, 'Page requires refresh.');
@@ -377,6 +384,34 @@ class ResidentWebRunner extends ResidentRunner {
     try {
       await _vmService.callServiceExtension(
           'ext.flutter.debugDumpSemanticsTreeInTraversalOrder');
+    } on vmservice.RPCError {
+      return;
+    }
+  }
+
+  @override
+  Future<void> debugTogglePlatform() async {
+    try {
+      final vmservice.Response response = await _vmService.callServiceExtension(
+          'ext.flutter.platformOverride');
+      final String currentPlatform = response.json['value'];
+      String nextPlatform;
+      switch (currentPlatform) {
+        case 'android':
+          nextPlatform = 'iOS';
+          break;
+        case 'iOS':
+          nextPlatform = 'android';
+          break;
+      }
+      if (nextPlatform == null) {
+        return;
+      }
+      await _vmService.callServiceExtension(
+        'ext.flutter.platformOverride', args: <String, Object>{
+          'value': nextPlatform,
+        });
+      printStatus('Switched operating system to $nextPlatform');
     } on vmservice.RPCError {
       return;
     }

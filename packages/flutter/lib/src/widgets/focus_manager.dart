@@ -897,8 +897,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
     properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
-    properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
-    properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
+    properties.add(FlagProperty('hasFocus', value: hasFocus && !hasPrimaryFocus, ifTrue: 'IN FOCUS PATH', defaultValue: false));
+    properties.add(FlagProperty('hasPrimaryFocus', value: hasPrimaryFocus, ifTrue: 'PRIMARY FOCUS', defaultValue: false));
   }
 
   @override
@@ -952,7 +952,16 @@ class FocusScopeNode extends FocusNode {
   FocusScopeNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
-  }) : super(debugLabel: debugLabel, onKey: onKey);
+    bool skipTraversal = false,
+    bool canRequestFocus = true,
+  })  : assert(skipTraversal != null),
+        assert(canRequestFocus != null),
+        super(
+          debugLabel: debugLabel,
+          onKey: onKey,
+          canRequestFocus: canRequestFocus,
+          skipTraversal: skipTraversal,
+        );
 
   @override
   FocusScopeNode get nearestScope => this;

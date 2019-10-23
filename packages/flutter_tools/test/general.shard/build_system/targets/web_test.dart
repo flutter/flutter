@@ -6,6 +6,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:mockito/mockito.dart';
@@ -212,6 +213,25 @@ void main() {
       environment.buildDir.childFile('main.dart').absolute.path,
     ];
     verify(processManager.run(expected)).called(1);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(),
+  }));
+
+  test('Dart2JSTarget produces expected depfile', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    when(processManager.run(any)).thenAnswer((Invocation invocation) async {
+      environment.buildDir.childFile('main.dart.js.deps')
+        ..writeAsStringSync('file:///a.dart');
+      return FakeProcessResult(exitCode: 0);
+    });
+    await const Dart2JSTarget().build(environment);
+
+    expect(environment.buildDir.childFile('dart2js.d').existsSync(), true);
+    final Depfile depfile = Depfile.parse(environment.buildDir.childFile('dart2js.d'));
+
+    expect(depfile.inputs.single.path, fs.path.absolute('a.dart'));
+    expect(depfile.outputs.single.path,
+      environment.buildDir.childFile('main.dart.js').absolute.path);
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(),
   }));

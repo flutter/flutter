@@ -1,6 +1,6 @@
 package {{androidIdentifier}}
 
-{{#useNewAndroidEmbedding}}
+{{#useAndroidEmbeddingV2}}
 {{#androidX}}
 import androidx.annotation.NonNull;
 {{/androidX}}
@@ -15,7 +15,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 
 /** {{pluginClass}} */
 public class {{pluginClass}}: FlutterPlugin, MethodCallHandler {
-  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPluginBinding) {
+  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "{{projectName}}")
     channel.setMethodCallHandler({{pluginClass}}());
   }
@@ -27,9 +27,12 @@ public class {{pluginClass}}: FlutterPlugin, MethodCallHandler {
       result.notImplemented()
     }
   }
+
+  override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+  }
 }
-{{/useNewAndroidEmbedding}}
-{{^useNewAndroidEmbedding}}
+{{/useAndroidEmbeddingV2}}
+{{^useAndroidEmbeddingV2}}
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -53,4 +56,4 @@ class {{pluginClass}}: MethodCallHandler {
     }
   }
 }
-{{/useNewAndroidEmbedding}}
+{{/useAndroidEmbeddingV2}}
