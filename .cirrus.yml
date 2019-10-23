@@ -627,7 +627,7 @@ docker_builder:
     #  - hostonly_devicelab_tests-4-linux
     #  - hostonly_devicelab_tests-5_last-linux
     #  - firebase_test_lab_tests-linux
-  script:
+  build_script:
     - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
     - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
     - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
