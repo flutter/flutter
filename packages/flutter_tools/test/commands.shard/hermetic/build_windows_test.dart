@@ -67,7 +67,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -82,7 +82,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -102,7 +102,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
