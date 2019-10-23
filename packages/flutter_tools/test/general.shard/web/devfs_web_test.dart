@@ -37,6 +37,7 @@ void main() {
 
   setUp(() {
     windows = MockPlatform();
+    when(windows.environment).thenReturn(const <String, String>{});
     when(windows.isWindows).thenReturn(true);
     testbed = Testbed(setup: () {
       mockHttpServer = MockHttpServer();
@@ -54,7 +55,9 @@ void main() {
       when(response.close()).thenAnswer((Invocation invocation) async {
         closeCompleter.complete();
       });
-      webAssetServer = WebAssetServer(mockHttpServer);
+      webAssetServer = WebAssetServer(mockHttpServer, onError: (dynamic error, StackTrace stackTrace) {
+        closeCompleter.completeError(error, stackTrace);
+      });
     });
   });
 
@@ -65,6 +68,18 @@ void main() {
 
   test('Throws a tool exit if bind fails with a SocketException', () => testbed.run(() async {
     expect(WebAssetServer.start('hello', 1234), throwsA(isInstanceOf<ToolExit>()));
+  }));
+
+  test('Can catch exceptions through the onError callback', () => testbed.run(() async {
+    when(response.close()).thenAnswer((Invocation invocation) {
+      throw StateError('Something bad');
+    });
+    webAssetServer.writeFile('/foo.js', 'main() {}');
+
+    when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
+    requestController.add(request);
+
+    expect(closeCompleter.future, throwsA(isInstanceOf<StateError>()));
   }));
 
   test('Handles against malformed manifest', () => testbed.run(() async {
@@ -100,6 +115,18 @@ void main() {
     verify(headers.add('Content-Length', source.lengthSync())).called(1);
     verify(headers.add('Content-Type', 'application/javascript')).called(1);
     verify(response.add(source.readAsBytesSync())).called(1);
+  }));
+
+  test('serves JavaScript files from in memory cache not from manifest', () => testbed.run(() async {
+    webAssetServer.writeFile('/foo.js', 'main() {}');
+
+    when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
+    requestController.add(request);
+    await closeCompleter.future;
+
+    verify(headers.add('Content-Length', 9)).called(1);
+    verify(headers.add('Content-Type', 'application/javascript')).called(1);
+    verify(response.add(any)).called(1);
   }));
 
   test('handles missing JavaScript files from in memory cache', () => testbed.run(() async {
@@ -152,7 +179,7 @@ void main() {
     verify(response.statusCode = 404).called(1);
   }));
 
-  test('serves asset files files from in filesystem with known mime type', () => testbed.run(() async {
+  test('serves asset files from in filesystem with known mime type', () => testbed.run(() async {
     final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
@@ -165,6 +192,23 @@ void main() {
     verify(headers.add('Content-Type', 'image/png')).called(1);
     verify(response.addStream(any)).called(1);
   }));
+
+  test('serves asset files from in filesystem with known mime type on Windows', () => testbed.run(() async {
+    final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
+
+    when(request.uri).thenReturn(Uri.parse('http://foobar/assets/foo.png'));
+    requestController.add(request);
+    await closeCompleter.future;
+
+    verify(headers.add('Content-Length', source.lengthSync())).called(1);
+    verify(headers.add('Content-Type', 'image/png')).called(1);
+    verify(response.addStream(any)).called(1);
+  }, overrides: <Type,  Generator>{
+    Platform: () => windows,
+  }));
+
 
   test('serves asset files files from in filesystem with unknown mime type and length > 12', () => testbed.run(() async {
     final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo'))

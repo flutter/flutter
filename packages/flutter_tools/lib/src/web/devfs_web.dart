@@ -19,14 +19,9 @@ import '../globals.dart';
 /// This is only used in development mode.
 class WebAssetServer {
   @visibleForTesting
-  WebAssetServer(this._httpServer) {
+  WebAssetServer(this._httpServer, { @required void Function(dynamic, StackTrace) onError }) {
     _httpServer.listen((HttpRequest request) {
-      try {
-        return _handleRequest(request);
-      } catch (err) {
-        request.response.statusCode = HttpStatus.internalServerError;
-        return request.response.close();
-      }
+      _handleRequest(request).catchError(onError);
     });
   }
 
@@ -35,10 +30,16 @@ class WebAssetServer {
   static const String _kDefaultMimeType = 'application/octet-stream';
 
   /// Start the web asset server on a [hostname] and [port].
+  ///
+  /// Unhandled exceptions will throw a [ToolExit] with the error and stack
+  /// trace.
   static Future<WebAssetServer> start(String hostname, int port) async {
     try {
       final HttpServer httpServer = await HttpServer.bind(hostname, port);
-      return WebAssetServer(httpServer);
+      return WebAssetServer(httpServer, onError: (dynamic error, StackTrace stackTrace) {
+        httpServer.close(force: true);
+        throwToolExit('Unhandled exception in web development server:\n$error\n$stackTrace');
+      });
     } on SocketException catch (err) {
       throwToolExit('Failed to bind web development server:\n$err');
     }
@@ -89,7 +90,7 @@ class WebAssetServer {
     // If both of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
-      final String assetPath = file.path.replaceFirst('/assets/', '');
+      final String assetPath = request.uri.path.replaceFirst('/assets/', '');
       file = fs.file(fs.path.join(getAssetBuildDirectory(), fs.path.relative(assetPath)));
     }
 
