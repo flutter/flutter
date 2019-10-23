@@ -1004,7 +1004,6 @@ abstract class SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    double canvasWidth,
     MediaQueryData mediaQueryData,
   });
 
@@ -1272,7 +1271,7 @@ abstract class RangeSliderValueIndicatorShape {
     Offset center,
     TextPainter labelPainter,
     Animation<double> activationAnimation,
-    double canvasWidth,
+    MediaQueryData mediaQueryData,
   }) {
     return 0;
   }
@@ -1311,12 +1310,12 @@ abstract class RangeSliderValueIndicatorShape {
     bool isDiscrete,
     bool isOnTop,
     TextPainter labelPainter,
+    MediaQueryData mediaQueryData,
     RenderBox parentBox,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
     Thumb thumb,
-    double canvasWidth,
   });
 }
 
@@ -2546,6 +2545,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
   }
 }
 
+/// TODO(antrob): docs
 class RectangularSliderValueIndicatorShape extends SliderComponentShape {
   /// Create a slider value indicator that resembles a rectangular tooltip.
   const RectangularSliderValueIndicatorShape();
@@ -2573,22 +2573,28 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    double canvasWidth,
     MediaQueryData mediaQueryData,
   }) {
     final Canvas canvas = context.canvas;
-    final double textScaleFactor = mediaQueryData.textScaleFactor;
-    final double scale = activationAnimation.value * textScaleFactor;
-    _pathPainter.paint(parentBox, canvas, center, scale, labelPainter, canvasWidth, Colors.grey[600], null);
+    final double scale = activationAnimation.value;
+    _pathPainter.paint(
+      parentBox: parentBox,
+      canvas: canvas,
+      center: center,
+      scale: scale,
+      labelPainter: labelPainter,
+      mediaQueryData: mediaQueryData,
+      backgroundPaintColor: Colors.grey[600] // TODO(antrob): get this from color scheme
+    );
   }
 }
 
+/// TODO(antrob): docs
 class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShape {
+  /// Create a range slider value indicator that resembles a rectangular tooltip.
   const RectangularRangeSliderValueIndicatorShape();
 
   static const _RectangularSliderValueIndicatorPathPainter _pathPainter = _RectangularSliderValueIndicatorPathPainter();
-
-  static const double _labelTextDesignSize = 14.0;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete, {TextPainter labelPainter, MediaQueryData mediaQueryData}) {
@@ -2602,13 +2608,13 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     Offset center,
     TextPainter labelPainter,
     Animation<double> activationAnimation,
-    double canvasWidth,
+    MediaQueryData mediaQueryData,
   }) {
     return _pathPainter.getHorizontalShift(
       parentBox: parentBox,
       center: center,
       labelPainter: labelPainter,
-      canvasWidth: canvasWidth,
+      mediaQueryData: mediaQueryData,
       scale: activationAnimation.value,
     );
   }
@@ -2622,17 +2628,26 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     bool isDiscrete,
     bool isOnTop,
     TextPainter labelPainter,
+    double textScaleFactor,
     RenderBox parentBox,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
     Thumb thumb,
-    double canvasWidth,
+    MediaQueryData mediaQueryData,
   }) {
     final Canvas canvas = context.canvas;
-    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
-    final double scale = activationAnimation.value * textScaleFactor;
-    _pathPainter.paint(parentBox, canvas, center, scale, labelPainter, canvasWidth, Colors.grey[600], isOnTop ? sliderTheme.overlappingShapeStrokeColor : null);
+    final double scale = activationAnimation.value;
+    _pathPainter.paint(
+      parentBox: parentBox,
+      canvas: canvas,
+      center: center,
+      scale: scale,
+      labelPainter: labelPainter,
+      mediaQueryData: mediaQueryData,
+      backgroundPaintColor: Colors.grey[600],
+      strokePaintColor: isOnTop ? sliderTheme.overlappingShapeStrokeColor : null,
+    );
   }
 }
 
@@ -2660,44 +2675,49 @@ class _RectangularSliderValueIndicatorPathPainter {
     RenderBox parentBox,
     Offset center,
     TextPainter labelPainter,
-    double canvasWidth,
+    MediaQueryData mediaQueryData,
     double scale,
   }) {
     const double edgePadding = 8.0;
-    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
+    final double textScaleFactor = mediaQueryData.textScaleFactor;
+    final double screenWidth = mediaQueryData.size.width;
+    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
 
     // The rectangle must be shifted towards the center so that it minimizes the
     // chance of it rendering outside the bounds of the render box. If the shift
     // is negative, then the lobe is shifted from right to left, and if it is
     // positive, then the lobe is shifted from left to right.
     final double overflowLeft = math.max(0, rectangleWidth / 2 - center.dx + edgePadding);
-    final double overflowRight = math.max(0, rectangleWidth / 2 - (canvasWidth - center.dx - edgePadding));
+    final double overflowRight = math.max(0, rectangleWidth / 2 - (screenWidth - center.dx - edgePadding));
+    print('rectangleWidth $rectangleWidth');
+    print('overflowLeft $overflowLeft');
+    print('overflowRight $overflowRight');
     return overflowLeft - overflowRight;
   }
 
-  double _upperRectangleWidth(TextPainter labelPainter, double textScaleFactor) {
-    return math.max(_minLabelWidth * textScaleFactor, labelPainter.width) + _labelPadding * 2;
+  double _upperRectangleWidth(TextPainter labelPainter, double scale, double textScaleFactor) {
+    final double unscaledWidth = math.max(_minLabelWidth * textScaleFactor, labelPainter.width) + _labelPadding * 2;
+    return unscaledWidth * scale;
   }
 
-  void paint(
+  void paint({
     RenderBox parentBox,
     Canvas canvas,
     Offset center,
     double scale,
     TextPainter labelPainter,
-    double canvasWidth,
+    MediaQueryData mediaQueryData,
     Color backgroundPaintColor,
     Color strokePaintColor,
-    ) {
-    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
+  }) {
+    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, mediaQueryData.textScaleFactor);
     final double horizontalShift = getHorizontalShift(
       parentBox: parentBox,
       center: center,
       labelPainter: labelPainter,
-      canvasWidth: canvasWidth,
+      mediaQueryData: mediaQueryData,
       scale: scale,
     );
-    print(scale);
     final Rect upperRect = Rect.fromLTWH(
       -rectangleWidth / 2 + horizontalShift,
       0,
@@ -2787,8 +2807,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    double canvasWidth,
-      MediaQueryData mediaQueryData,
+    MediaQueryData mediaQueryData,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2808,7 +2827,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
       Paint()..color = enableColor.evaluate(enableAnimation),
       activationAnimation.value,
       labelPainter,
-      canvasWidth,
+      mediaQueryData,
       null,
     );
   }
@@ -2839,14 +2858,14 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     Offset center,
     TextPainter labelPainter,
     Animation<double> activationAnimation,
-    double canvasWidth,
+    MediaQueryData mediaQueryData,
   }) {
     return _pathPainter.getHorizontalShift(
       parentBox: parentBox,
       center: center,
       labelPainter: labelPainter,
       scale: activationAnimation.value,
-      canvasWidth: canvasWidth
+      mediaQueryData: mediaQueryData,
     );
   }
 
@@ -2864,7 +2883,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     TextDirection textDirection,
     Thumb thumb,
     double value,
-    double canvasWidth,
+    MediaQueryData mediaQueryData,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2885,7 +2904,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
       Paint()..color = enableColor.evaluate(enableAnimation),
       activationAnimation.value,
       labelPainter,
-      canvasWidth,
+      mediaQueryData,
       isOnTop ? sliderTheme.overlappingShapeStrokeColor : null,
     );
   }
@@ -2909,7 +2928,7 @@ class _PaddleSliderValueIndicatorPathPainter {
   static const double _bottomLobeRadius = 10.0;
   static const double _labelPadding = 8.0;
   static const double _distanceBetweenTopBottomCenters = 40.0;
-  static const double _middleNeckWidth = 2.0;
+  static const double _middleNeckWidth = 3.0;
   static const double _bottomNeckRadius = 4.5;
   // The base of the triangle between the top lobe center and the centers of
   // the two top neck arcs.
@@ -2955,16 +2974,16 @@ class _PaddleSliderValueIndicatorPathPainter {
     Offset center,
     TextPainter labelPainter,
     double scale,
-    double canvasWidth,
+    MediaQueryData mediaQueryData,
   }) {
-    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    final double textScaleFactor = mediaQueryData.textScaleFactor;
     final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
     final double labelHalfWidth = labelPainter.width / 2.0;
     final double halfWidthNeeded = math.max(
       0.0,
       inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
     );
-    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, textScaleFactor * scale, center, canvasWidth);
+    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, textScaleFactor * scale, center, mediaQueryData.size.width);
     return shift * textScaleFactor;
   }
 
@@ -2977,7 +2996,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     Offset center,
     double canvasWidth,
   ) {
-    const double edgeMargin = 0.0;
+    const double edgeMargin = 8.0;
     final Rect topLobeRect = Rect.fromLTWH(
       -_topLobeRadius - halfWidthNeeded,
       -_topLobeRadius - _distanceBetweenTopBottomCenters,
@@ -2990,19 +3009,15 @@ class _PaddleSliderValueIndicatorPathPainter {
     final Offset bottomRight = (topLobeRect.bottomRight * scale) + center;
     double shift = 0.0;
 
-//    final double startGlobal = parentBox.localToGlobal(Offset.zero).dx;
-    final double startGlobal = 0;
-    if (topLeft.dx < startGlobal + edgeMargin) {
-      shift = startGlobal + edgeMargin - topLeft.dx;
+    if (topLeft.dx < edgeMargin) {
+      shift = edgeMargin - topLeft.dx;
     }
 
-//    final double endGlobal = parentBox.localToGlobal(Offset(canvasWidth, parentBox.size.height)).dx;
     final double endGlobal = canvasWidth;
     if (bottomRight.dx > endGlobal - edgeMargin) {
       shift = endGlobal - edgeMargin - bottomRight.dx;
     }
 
-    print(shift);
     shift = scale == 0.0 ? 0.0 : shift / scale;
     if (shift < 0.0) {
       // Shifting to the left.
@@ -3011,7 +3026,6 @@ class _PaddleSliderValueIndicatorPathPainter {
       // Shifting to the right.
       shift = math.min(shift, halfWidthNeeded);
     }
-//    print(shift);
     return shift;
   }
 
@@ -3022,12 +3036,12 @@ class _PaddleSliderValueIndicatorPathPainter {
     Paint paint,
     double scale,
     TextPainter labelPainter,
-    double canvasWidth,
+    MediaQueryData mediaQueryData,
     Color strokePaintColor,
   ) {
     // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.
-    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    final double textScaleFactor = mediaQueryData.textScaleFactor;
     final double overallScale = scale * textScaleFactor;
     final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
     final double labelHalfWidth = labelPainter.width / 2.0;
@@ -3069,7 +3083,8 @@ class _PaddleSliderValueIndicatorPathPainter {
       inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
     );
 
-    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, overallScale, center, canvasWidth);
+    final double screenWidth = mediaQueryData.size.width;
+    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, overallScale, center, screenWidth);
     final double leftWidthNeeded = halfWidthNeeded - shift;
     final double rightWidthNeeded = halfWidthNeeded + shift;
 
@@ -3078,7 +3093,8 @@ class _PaddleSliderValueIndicatorPathPainter {
     final double leftAmount = math.max(0.0, math.min(1.0, leftWidthNeeded / _neckTriangleBase));
     final double rightAmount = math.max(0.0, math.min(1.0, rightWidthNeeded / _neckTriangleBase));
     // The angle between the top neck arc's center and the top lobe's center
-    // and vertical.
+    // and vertical. The base amount is chosen so that the neck is smooth, even when the lobe is
+    // shifted due to its size.
     final double leftTheta = (1.0 - leftAmount) * _thirtyDegrees;
     final double rightTheta = (1.0 - rightAmount) * _thirtyDegrees;
     // The center of the top left neck arc.

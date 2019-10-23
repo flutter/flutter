@@ -245,10 +245,11 @@ class _SlidersState extends State<_Sliders> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
+          SizedBox(height: 40),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -277,16 +278,17 @@ class _SlidersState extends State<_Sliders> {
               SliderTheme(
                 data: SliderThemeData(
                   showValueIndicator: ShowValueIndicator.always,
+                  valueIndicatorShape: PaddleSliderValueIndicatorShape(),
                 ),
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
-                    textScaleFactor: 2,
+                    textScaleFactor: 3.11,
                   ),
                   child: Slider.adaptive(
                     value: _continuousValue,
                     min: 0.0,
                     max: 100.0,
-                    label: '${_continuousValue.round().toString()}',
+                    label: '${(_continuousValue).toStringAsFixed(4)}',
                     onChanged: (double value) {
                       setState(() {
                         _continuousValue = value;
@@ -383,7 +385,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
@@ -392,8 +394,13 @@ class _RangeSlidersState extends State<_RangeSliders> {
             children: <Widget>[
               SliderTheme(
                 data: SliderThemeData(
-                  showValueIndicator: ShowValueIndicator.always
+                  showValueIndicator: ShowValueIndicator.always,
+                  rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
                 ),
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaleFactor: 3.11,
+                  ),
                 child: RangeSlider(
                   values: _continuousValues,
                   min: 0.0,
@@ -406,6 +413,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
                   },
                 ),
               ),
+    ),
               const Text('Continuous'),
             ],
           ),

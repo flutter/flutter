@@ -525,7 +525,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   static const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape();
-//  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = PaddleRangeSliderValueIndicatorShape();
   static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
   static const double _defaultMinThumbSeparation = 8;
@@ -1303,7 +1302,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         textDirection: _textDirection,
         thumb: bottomThumb,
         value: bottomValue,
-        canvasWidth: mediaQueryData.size.width,
+        mediaQueryData: mediaQueryData,
       );
     }
 
@@ -1326,14 +1325,14 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         center: startThumbCenter,
         labelPainter: _startLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
-        canvasWidth: mediaQueryData.size.width,
+        mediaQueryData: mediaQueryData,
       );
       final double endOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
         parentBox: this,
         center: endThumbCenter,
         labelPainter: _endLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
-        canvasWidth: mediaQueryData.size.width,
+        mediaQueryData: mediaQueryData,
       );
       final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _startLabelPainter).width / 2;
       final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _endLabelPainter).width / 2;
@@ -1362,7 +1361,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         textDirection: _textDirection,
         thumb: topThumb,
         value: topValue,
-        canvasWidth: mediaQueryData.size.width,
+        mediaQueryData: mediaQueryData,
       );
     }
 
