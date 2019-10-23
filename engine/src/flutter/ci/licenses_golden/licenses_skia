@@ -1,4 +1,4 @@
-Signature: 7a58a7e8b60f1b1e69ae079305b161c1
+Signature: e91c49302698328fa1e7e4b79acc4850
 
 UNUSED LICENSES:
 
@@ -3841,9 +3841,15 @@ FILE: ../../../third_party/skia/src/gpu/GrUtil.h
 FILE: ../../../third_party/skia/src/gpu/GrWaitRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWaitRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrColorMatrixFragmentProcessor.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrHSLToRGBFilterEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrRGBToHSLFilterEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSaturateProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHSLToRGBFilterEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHSLToRGBFilterEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRGBToHSLFilterEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRGBToHSLFilterEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrSaturateProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrSaturateProcessor.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadBuffer.h
