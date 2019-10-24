@@ -504,6 +504,7 @@ void main() {
       verifyNoMoreInteractions(pageRouteAware);
     });
   });
+
   testWidgets('Can autofocus a TextField nested in a Focus in a route.', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -532,6 +533,262 @@ void main() {
 
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
+
+  group('TrasitionRoute', () {
+    testWidgets('secondary animation is kDismissed when next route finishes pop', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: navigator,
+          home: const Text('home'),
+        )
+      );
+
+      // Push page one, its secondary animation is kAlwaysDismissedAnimation.
+      ProxyAnimation secondaryAnimationProxyPageOne;
+      ProxyAnimation animationPageOne;
+      navigator.currentState.push(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationProxyPageOne = secondaryAnimation;
+            animationPageOne = animation;
+            return const Text('Page One');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent;
+      expect(animationPageOne.value, 1.0);
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+
+      // Push page two, the secondary animation of page one is the primary
+      // animation of page two.
+      ProxyAnimation secondaryAnimationProxyPageTwo;
+      ProxyAnimation animationPageTwo;
+      navigator.currentState.push(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationProxyPageTwo = secondaryAnimation;
+            animationPageTwo = animation;
+            return const Text('Page Two');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent;
+      expect(animationPageTwo.value, 1.0);
+      expect(secondaryAnimationPageTwo.parent, kAlwaysDismissedAnimation);
+      expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
+
+      // Pop page two, the secondary animation of page one becomes
+      // kAlwaysDismissedAnimation.
+      navigator.currentState.pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
+      await tester.pumpAndSettle();
+      expect(animationPageTwo.value, 0.0);
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+    });
+
+    testWidgets('secondary animation is kDismissed when next route is removed', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+          MaterialApp(
+            navigatorKey: navigator,
+            home: const Text('home'),
+          )
+      );
+
+      // Push page one, its secondary animation is kAlwaysDismissedAnimation.
+      ProxyAnimation secondaryAnimationProxyPageOne;
+      ProxyAnimation animationPageOne;
+      navigator.currentState.push(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationProxyPageOne = secondaryAnimation;
+            animationPageOne = animation;
+            return const Text('Page One');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent;
+      expect(animationPageOne.value, 1.0);
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+
+      // Push page two, the secondary animation of page one is the primary
+      // animation of page two.
+      ProxyAnimation secondaryAnimationProxyPageTwo;
+      ProxyAnimation animationPageTwo;
+      Route<void> secondRoute;
+      navigator.currentState.push(
+        secondRoute = PageRouteBuilder<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationProxyPageTwo = secondaryAnimation;
+            animationPageTwo = animation;
+            return const Text('Page Two');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent;
+      expect(animationPageTwo.value, 1.0);
+      expect(secondaryAnimationPageTwo.parent, kAlwaysDismissedAnimation);
+      expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
+
+      // Remove the second route, the secondary animation of page one is
+      // kAlwaysDismissedAnimation again.
+      navigator.currentState.removeRoute(secondRoute);
+      await tester.pump();
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+    });
+
+    testWidgets('secondary animation is kDismissed after train hopping finishes and pop', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+          MaterialApp(
+            navigatorKey: navigator,
+            home: const Text('home'),
+          )
+      );
+
+      // Push page one, its secondary animation is kAlwaysDismissedAnimation.
+      ProxyAnimation secondaryAnimationProxyPageOne;
+      ProxyAnimation animationPageOne;
+      navigator.currentState.push(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationProxyPageOne = secondaryAnimation;
+            animationPageOne = animation;
+            return const Text('Page One');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent;
+      expect(animationPageOne.value, 1.0);
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+
+      // Push page two, the secondary animation of page one is the primary
+      // animation of page two.
+      ProxyAnimation animationPageTwo;
+      navigator.currentState.push(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            animationPageTwo = animation;
+            return const Text('Page Two');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
+
+      // Replace with a different route while push is ongoing to trigger
+      // TrainHopping.
+      ProxyAnimation animationPageThree;
+      navigator.currentState.pushReplacement(
+        TestPageRouteBuilder(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            animationPageThree = animation;
+            return const Text('Page Three');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
+      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent;
+      expect(trainHopper.currentTrain, animationPageTwo.parent);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(secondaryAnimationPageOne.parent, isNot(isA<TrainHoppingAnimation>()));
+      expect(secondaryAnimationPageOne.parent, animationPageThree.parent);
+      expect(trainHopper.currentTrain, isNull); // Has been disposed.
+      await tester.pumpAndSettle();
+      expect(secondaryAnimationPageOne.parent, animationPageThree.parent);
+
+      // Pop page three.
+      navigator.currentState.pop();
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+    });
+
+    testWidgets('secondary animation is kDismissed when train hopping is interrupted', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+          MaterialApp(
+            navigatorKey: navigator,
+            home: const Text('home'),
+          )
+      );
+
+      // Push page one, its secondary animation is kAlwaysDismissedAnimation.
+      ProxyAnimation secondaryAnimationProxyPageOne;
+      ProxyAnimation animationPageOne;
+      navigator.currentState.push(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            secondaryAnimationProxyPageOne = secondaryAnimation;
+            animationPageOne = animation;
+            return const Text('Page One');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent;
+      expect(animationPageOne.value, 1.0);
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+
+      // Push page two, the secondary animation of page one is the primary
+      // animation of page two.
+      ProxyAnimation animationPageTwo;
+      navigator.currentState.push(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            animationPageTwo = animation;
+            return const Text('Page Two');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
+
+      // Replace with a different route while push is ongoing to trigger
+      // TrainHopping.
+      navigator.currentState.pushReplacement(
+        TestPageRouteBuilder(
+          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+            return const Text('Page Three');
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
+      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent;
+      expect(trainHopper.currentTrain, animationPageTwo.parent);
+
+      // Pop page three while replacement push is ongoing.
+      navigator.currentState.pop();
+      await tester.pump();
+      expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
+      final TrainHoppingAnimation trainHopper2 = secondaryAnimationPageOne.parent;
+      expect(trainHopper2.currentTrain, animationPageTwo.parent);
+      expect(trainHopper.currentTrain, isNull); // Has been disposed.
+      await tester.pumpAndSettle();
+      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
+      expect(trainHopper2.currentTrain, isNull); // Has been disposed.
+    });
+  });
 }
 
 class MockPageRoute extends Mock implements PageRoute<dynamic> { }
@@ -539,3 +796,12 @@ class MockPageRoute extends Mock implements PageRoute<dynamic> { }
 class MockRoute extends Mock implements Route<dynamic> { }
 
 class MockRouteAware extends Mock implements RouteAware { }
+
+class TestPageRouteBuilder extends PageRouteBuilder<void> {
+  TestPageRouteBuilder({RoutePageBuilder pageBuilder}) : super(pageBuilder: pageBuilder);
+
+  @override
+  Animation<double> createAnimation() {
+    return CurvedAnimation(parent: super.createAnimation(), curve: Curves.easeOutExpo);
+  }
+}

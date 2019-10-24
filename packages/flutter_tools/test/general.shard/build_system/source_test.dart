@@ -41,7 +41,6 @@ void main() {
   test('configures implicit vs explict correctly', () => testbed.run(() {
     expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
     expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
-    expect(Source.function((Environment environment) => <File>[]).implicit, true);
     expect(Source.behavior(TestBehavior()).implicit, true);
   }));
 

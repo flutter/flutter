@@ -81,4 +81,15 @@ void main() {
     // Does not throw.
     fileCache.persist();
   }));
+
+  test('handles hashing missing files', () => testbed.run(() async {
+    final FileHashStore fileCache = FileHashStore(environment);
+    fileCache.initialize();
+
+    final List<File> results = await fileCache.hashFiles(<File>[fs.file('hello.dart')]);
+
+    expect(results, hasLength(1));
+    expect(results.single.path, 'hello.dart');
+    expect(fileCache.currentHashes, isNot(contains(fs.path.absolute('hello.dart'))));
+  }));
 }
