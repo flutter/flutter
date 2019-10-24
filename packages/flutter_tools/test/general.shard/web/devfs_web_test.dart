@@ -50,7 +50,7 @@ void main() {
       response = MockHttpResponse();
       headers = MockHttpHeaders();
       closeCompleter = Completer<void>();
-      when(mockHttpServer.listen(any)).thenAnswer((Invocation invocation) {
+      when(mockHttpServer.listen(any, onError: anyNamed('onError'))).thenAnswer((Invocation invocation) {
         final Function callback = invocation.positionalArguments.first;
         return requestController.stream.listen(callback);
       });
