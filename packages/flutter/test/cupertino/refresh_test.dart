@@ -73,8 +73,6 @@ void main() {
 
   final Function uiTestGroup = () {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -95,13 +93,9 @@ void main() {
         tester.getTopLeft(find.widgetWithText(Container, '0')),
         const Offset(0.0, 0.0),
       );
-
-      debugDefaultTargetPlatformOverride = null;
-    });
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
     testWidgets('calls the indicator builder when starting to overscroll', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -135,47 +129,36 @@ void main() {
         tester.getTopLeft(find.widgetWithText(Container, '0')),
         const Offset(0.0, 50.0),
       );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-      debugDefaultTargetPlatformOverride = null;
-    });
-
-    testWidgets(
-      "don't call the builder if overscroll doesn't move slivers like on Android",
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.android;
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+    testWidgets("don't call the builder if overscroll doesn't move slivers like on Android", (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        // Drag down but not enough to trigger the refresh.
-        await tester.drag(find.text('0'), const Offset(0.0, 50.0));
-        await tester.pump();
+      // Drag down but not enough to trigger the refresh.
+      await tester.drag(find.text('0'), const Offset(0.0, 50.0));
+      await tester.pump();
 
-        verifyNoMoreInteractions(mockHelper);
+      verifyNoMoreInteractions(mockHelper);
 
-        expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')),
-          const Offset(0.0, 0.0),
-        );
-
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        const Offset(0.0, 0.0),
+      );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.android ]);
 
     testWidgets('let the builder update as canceled drag scrolls away', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -227,13 +210,9 @@ void main() {
         tester.getTopLeft(find.widgetWithText(Container, '0')),
         const Offset(0.0, 0.0),
       );
-
-      debugDefaultTargetPlatformOverride = null;
-    });
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
     testWidgets('drag past threshold triggers refresh task', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       final List<MethodCall> platformCallLog = <MethodCall>[];
 
       SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -294,179 +273,163 @@ void main() {
         platformCallLog.last,
         isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.mediumImpact'),
       );
-      debugDefaultTargetPlatformOverride = null;
-    });
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-    testWidgets(
-      'refreshing task keeps the sliver expanded forever until done',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    testWidgets('refreshing task keeps the sliver expanded forever until done', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+                onRefresh: onRefresh,
+              ),
+              buildAListOfStuff(),
+            ],
+          ),
+        ),
+      );
 
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                  onRefresh: onRefresh,
-                ),
-                buildAListOfStuff(),
-              ],
+      await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
+      await tester.pump();
+      // Let it start snapping back.
+      await tester.pump(const Duration(milliseconds: 50));
+
+      verifyInOrder(<void>[
+        mockHelper.builder(
+          any,
+          RefreshIndicatorMode.armed,
+          150.0,
+          100.0, // Default value.
+          60.0, // Default value.
+        ),
+        mockHelper.refreshTask(),
+        mockHelper.builder(
+          any,
+          RefreshIndicatorMode.armed,
+          argThat(moreOrLessEquals(127.10396988577114)),
+          100.0, // Default value.
+          60.0, // Default value.
+        ),
+      ]);
+
+      // Reaches refresh state and sliver's at 60.0 in height after a while.
+      await tester.pump(const Duration(seconds: 1));
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.refresh,
+        60.0,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
+
+      // Stays in that state forever until future completes.
+      await tester.pump(const Duration(seconds: 1000));
+      verifyNoMoreInteractions(mockHelper);
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        const Offset(0.0, 60.0),
+      );
+
+      refreshCompleter.complete(null);
+      await tester.pump();
+
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.done,
+        60.0,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
+      verifyNoMoreInteractions(mockHelper);
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
+
+    testWidgets('refreshing task keeps the sliver expanded forever until completes with error', (WidgetTester tester) async {
+      final FlutterError error = FlutterError('Oops');
+      double errorCount = 0;
+
+      runZoned(
+        () async {
+          refreshCompleter = Completer<void>.sync();
+
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  CupertinoSliverRefreshControl(
+                    builder: builder,
+                    onRefresh: onRefresh,
+                  ),
+                  buildAListOfStuff(),
+                ],
+              ),
             ),
-          ),
-        );
+          );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
-        await tester.pump();
-        // Let it start snapping back.
-        await tester.pump(const Duration(milliseconds: 50));
+          await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
+          await tester.pump();
+          // Let it start snapping back.
+          await tester.pump(const Duration(milliseconds: 50));
 
-        verifyInOrder(<void>[
-          mockHelper.builder(
-            any,
-            RefreshIndicatorMode.armed,
-            150.0,
-            100.0, // Default value.
-            60.0, // Default value.
-          ),
-          mockHelper.refreshTask(),
-          mockHelper.builder(
-            any,
-            RefreshIndicatorMode.armed,
-            argThat(moreOrLessEquals(127.10396988577114)),
-            100.0, // Default value.
-            60.0, // Default value.
-          ),
-        ]);
-
-        // Reaches refresh state and sliver's at 60.0 in height after a while.
-        await tester.pump(const Duration(seconds: 1));
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.refresh,
-          60.0,
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
-
-        // Stays in that state forever until future completes.
-        await tester.pump(const Duration(seconds: 1000));
-        verifyNoMoreInteractions(mockHelper);
-        expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')),
-          const Offset(0.0, 60.0),
-        );
-
-        refreshCompleter.complete(null);
-        await tester.pump();
-
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.done,
-          60.0,
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
-        verifyNoMoreInteractions(mockHelper);
-
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
-
-    testWidgets(
-      'refreshing task keeps the sliver expanded forever until completes with error',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-        final FlutterError error = FlutterError('Oops');
-        double errorCount = 0;
-
-        runZoned(
-          () async {
-            refreshCompleter = Completer<void>.sync();
-
-            await tester.pumpWidget(
-              Directionality(
-                textDirection: TextDirection.ltr,
-                child: CustomScrollView(
-                  slivers: <Widget>[
-                    CupertinoSliverRefreshControl(
-                      builder: builder,
-                      onRefresh: onRefresh,
-                    ),
-                    buildAListOfStuff(),
-                  ],
-                ),
-              ),
-            );
-
-            await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
-            await tester.pump();
-            // Let it start snapping back.
-            await tester.pump(const Duration(milliseconds: 50));
-
-            verifyInOrder(<void>[
-              mockHelper.builder(
-                any,
-                RefreshIndicatorMode.armed,
-                150.0,
-                100.0, // Default value.
-                60.0, // Default value.
-              ),
-              mockHelper.refreshTask(),
-              mockHelper.builder(
-                any,
-                RefreshIndicatorMode.armed,
-                argThat(moreOrLessEquals(127.10396988577114)),
-                100.0, // Default value.
-                60.0, // Default value.
-              ),
-            ]);
-
-            // Reaches refresh state and sliver's at 60.0 in height after a while.
-            await tester.pump(const Duration(seconds: 1));
-            verify(mockHelper.builder(
+          verifyInOrder(<void>[
+            mockHelper.builder(
               any,
-              RefreshIndicatorMode.refresh,
-              60.0,
+              RefreshIndicatorMode.armed,
+              150.0,
               100.0, // Default value.
               60.0, // Default value.
-            ));
-
-            // Stays in that state forever until future completes.
-            await tester.pump(const Duration(seconds: 1000));
-            verifyNoMoreInteractions(mockHelper);
-            expect(
-              tester.getTopLeft(find.widgetWithText(Container, '0')),
-              const Offset(0.0, 60.0),
-            );
-
-            refreshCompleter.completeError(error);
-            await tester.pump();
-
-            verify(mockHelper.builder(
+            ),
+            mockHelper.refreshTask(),
+            mockHelper.builder(
               any,
-              RefreshIndicatorMode.done,
-              60.0,
+              RefreshIndicatorMode.armed,
+              argThat(moreOrLessEquals(127.10396988577114)),
               100.0, // Default value.
               60.0, // Default value.
-            ));
-            verifyNoMoreInteractions(mockHelper);
-          },
-          onError: (dynamic e) {
-            expect(e, error);
-            expect(errorCount, 0);
-            errorCount++;
-          },
-        );
+            ),
+          ]);
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
+          // Reaches refresh state and sliver's at 60.0 in height after a while.
+          await tester.pump(const Duration(seconds: 1));
+          verify(mockHelper.builder(
+            any,
+            RefreshIndicatorMode.refresh,
+            60.0,
+            100.0, // Default value.
+            60.0, // Default value.
+          ));
+
+          // Stays in that state forever until future completes.
+          await tester.pump(const Duration(seconds: 1000));
+          verifyNoMoreInteractions(mockHelper);
+          expect(
+            tester.getTopLeft(find.widgetWithText(Container, '0')),
+            const Offset(0.0, 60.0),
+          );
+
+          refreshCompleter.completeError(error);
+          await tester.pump();
+
+          verify(mockHelper.builder(
+            any,
+            RefreshIndicatorMode.done,
+            60.0,
+            100.0, // Default value.
+            60.0, // Default value.
+          ));
+          verifyNoMoreInteractions(mockHelper);
+        },
+        onError: (dynamic e) {
+          expect(e, error);
+          expect(errorCount, 0);
+          errorCount++;
+        },
+      );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
     testWidgets('expanded refreshing sliver scrolls normally', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       refreshIndicator = const Center(child: Text('-1'));
 
       await tester.pumpWidget(
@@ -540,13 +503,9 @@ void main() {
         tester.getRect(find.widgetWithText(Center, '0')),
         const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
       );
-
-      debugDefaultTargetPlatformOverride = null;
-    });
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
     testWidgets('expanded refreshing sliver goes away when done', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       refreshIndicator = const Center(child: Text('-1'));
 
       await tester.pumpWidget(
@@ -615,13 +574,9 @@ void main() {
         tester.getRect(find.widgetWithText(Center, '0')),
         const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
       );
-
-      debugDefaultTargetPlatformOverride = null;
-    });
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
     testWidgets('builder still called when sliver snapped back more than 90%', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       refreshIndicator = const Center(child: Text('-1'));
 
       await tester.pumpWidget(
@@ -703,336 +658,298 @@ void main() {
         60.0, // Default value.
       ));
       expect(find.text('-1'), findsOneWidget);
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-      debugDefaultTargetPlatformOverride = null;
-    });
+    testWidgets('retracting sliver during done cannot be pulled to refresh again until fully retracted', (WidgetTester tester) async {
+      refreshIndicator = const Center(child: Text('-1'));
 
-    testWidgets(
-      'retracting sliver during done cannot be pulled to refresh again until fully retracted',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        refreshIndicator = const Center(child: Text('-1'));
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                  onRefresh: onRefresh,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+                onRefresh: onRefresh,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
-        await tester.pump();
-        verify(mockHelper.refreshTask());
+      await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
+      await tester.pump();
+      verify(mockHelper.refreshTask());
 
-        refreshCompleter.complete(null);
-        await tester.pump();
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.done,
-          150.0, // Still overscrolled here.
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
+      refreshCompleter.complete(null);
+      await tester.pump();
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.done,
+        150.0, // Still overscrolled here.
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
 
-        // Let it start going away but not fully.
-        await tester.pump(const Duration(milliseconds: 100));
-        // The refresh indicator is still building.
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.done,
-          91.31180913199277,
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
-        expect(
-          tester.getBottomLeft(find.widgetWithText(Center, '-1')).dy,
-          moreOrLessEquals(91.311809131992776),
-        );
+      // Let it start going away but not fully.
+      await tester.pump(const Duration(milliseconds: 100));
+      // The refresh indicator is still building.
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.done,
+        91.31180913199277,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
+      expect(
+        tester.getBottomLeft(find.widgetWithText(Center, '-1')).dy,
+        moreOrLessEquals(91.311809131992776),
+      );
 
-        // Start another drag by an amount that would have been enough to
-        // trigger another refresh if it were in the right state.
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
-        await tester.pump();
+      // Start another drag by an amount that would have been enough to
+      // trigger another refresh if it were in the right state.
+      await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
+      await tester.pump();
 
-        // Instead, it's still in the done state because the sliver never
-        // fully retracted.
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.done,
-          147.3772721631821,
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
+      // Instead, it's still in the done state because the sliver never
+      // fully retracted.
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.done,
+        147.3772721631821,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
 
-        // Now let it fully go away.
-        await tester.pump(const Duration(seconds: 5));
-        expect(find.text('-1'), findsNothing);
-        expect(
-          tester.getRect(find.widgetWithText(Center, '0')),
-          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-        );
+      // Now let it fully go away.
+      await tester.pump(const Duration(seconds: 5));
+      expect(find.text('-1'), findsNothing);
+      expect(
+        tester.getRect(find.widgetWithText(Center, '0')),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+      );
 
-        // Start another drag. It's now in drag mode.
-        await tester.drag(find.text('0'), const Offset(0.0, 40.0), touchSlopY: 0.0);
-        await tester.pump();
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.drag,
-          40.0,
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
+      // Start another drag. It's now in drag mode.
+      await tester.drag(find.text('0'), const Offset(0.0, 40.0), touchSlopY: 0.0);
+      await tester.pump();
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.drag,
+        40.0,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
+    testWidgets('sliver held in overscroll when task finishes completes normally', (WidgetTester tester) async {
+      refreshIndicator = const Center(child: Text('-1'));
 
-    testWidgets(
-      'sliver held in overscroll when task finishes completes normally',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        refreshIndicator = const Center(child: Text('-1'));
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                  onRefresh: onRefresh,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+                onRefresh: onRefresh,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
-        // Start a refresh.
-        await gesture.moveBy(const Offset(0.0, 150.0));
-        await tester.pump();
-        verify(mockHelper.refreshTask());
+      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      // Start a refresh.
+      await gesture.moveBy(const Offset(0.0, 150.0));
+      await tester.pump();
+      verify(mockHelper.refreshTask());
 
-        // Complete the task while held down.
-        refreshCompleter.complete(null);
-        await tester.pump();
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.done,
-          150.0, // Still overscrolled here.
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
-        expect(
-          tester.getRect(find.widgetWithText(Center, '0')),
-          const Rect.fromLTRB(0.0, 150.0, 800.0, 350.0),
-        );
+      // Complete the task while held down.
+      refreshCompleter.complete(null);
+      await tester.pump();
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.done,
+        150.0, // Still overscrolled here.
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
+      expect(
+        tester.getRect(find.widgetWithText(Center, '0')),
+        const Rect.fromLTRB(0.0, 150.0, 800.0, 350.0),
+      );
 
-        await gesture.up();
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 5));
-        expect(find.text('-1'), findsNothing);
-        expect(
-          tester.getRect(find.widgetWithText(Center, '0')),
-          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-        );
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 5));
+      expect(find.text('-1'), findsNothing);
+      expect(
+        tester.getRect(find.widgetWithText(Center, '0')),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+      );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
+    testWidgets('sliver scrolled away when task completes properly removes itself', (WidgetTester tester) async {
+      if (testListLength < 4) {
+        // This test only makes sense when the list is long enough that
+        // the indicator can be scrolled away while refreshing.
+        return;
+      }
+      refreshIndicator = const Center(child: Text('-1'));
 
-    testWidgets(
-      'sliver scrolled away when task completes properly removes itself',
-      (WidgetTester tester) async {
-        if (testListLength < 4) {
-          // This test only makes sense when the list is long enough that
-          // the indicator can be scrolled away while refreshing.
-          return;
-        }
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        refreshIndicator = const Center(child: Text('-1'));
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                  onRefresh: onRefresh,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+                onRefresh: onRefresh,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        // Start a refresh.
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0));
-        await tester.pump();
-        verify(mockHelper.refreshTask());
+      // Start a refresh.
+      await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+      await tester.pump();
+      verify(mockHelper.refreshTask());
 
-        await tester.drag(find.text('0'), const Offset(0.0, -300.0));
-        await tester.pump();
+      await tester.drag(find.text('0'), const Offset(0.0, -300.0));
+      await tester.pump();
 
-        // Refresh indicator still being told to layout the same way.
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.refresh,
-          60.0,
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
+      // Refresh indicator still being told to layout the same way.
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.refresh,
+        60.0,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
 
-        // Now the sliver is scrolled off screen.
-        expect(
-          tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-          moreOrLessEquals(-175.38461538461536),
-        );
-        expect(
-          tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-          moreOrLessEquals(-115.38461538461536),
-        );
+      // Now the sliver is scrolled off screen.
+      expect(
+        tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
+        moreOrLessEquals(-175.38461538461536),
+      );
+      expect(
+        tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
+        moreOrLessEquals(-115.38461538461536),
+      );
 
-        // Complete the task while scrolled away.
-        refreshCompleter.complete(null);
-        // The sliver is instantly gone since there is no overscroll physics
-        // simulation.
-        await tester.pump();
+      // Complete the task while scrolled away.
+      refreshCompleter.complete(null);
+      // The sliver is instantly gone since there is no overscroll physics
+      // simulation.
+      await tester.pump();
 
-        // The next item's position is not disturbed.
-        expect(
-          tester.getTopLeft(find.widgetWithText(Center, '0')).dy,
-          moreOrLessEquals(-115.38461538461536),
-        );
+      // The next item's position is not disturbed.
+      expect(
+        tester.getTopLeft(find.widgetWithText(Center, '0')).dy,
+        moreOrLessEquals(-115.38461538461536),
+      );
 
-        // Scrolling past the first item still results in a new overscroll.
-        // The layout extent is gone.
-        await tester.drag(find.text('1'), const Offset(0.0, 120.0));
-        await tester.pump();
+      // Scrolling past the first item still results in a new overscroll.
+      // The layout extent is gone.
+      await tester.drag(find.text('1'), const Offset(0.0, 120.0));
+      await tester.pump();
 
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.drag,
-          4.615384615384642,
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.drag,
+        4.615384615384642,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
 
-        // Snaps away normally.
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 2));
-        expect(find.text('-1'), findsNothing);
-        expect(
-          tester.getRect(find.widgetWithText(Center, '0')),
-          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-        );
+      // Snaps away normally.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.text('-1'), findsNothing);
+      expect(
+        tester.getRect(find.widgetWithText(Center, '0')),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+      );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
+    testWidgets("don't do anything unless it can be overscrolled at the start of the list", (WidgetTester tester) async {
+      refreshIndicator = const Center(child: Text('-1'));
 
-    testWidgets(
-      "don't do anything unless it can be overscrolled at the start of the list",
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        refreshIndicator = const Center(child: Text('-1'));
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                buildAListOfStuff(),
-                CupertinoSliverRefreshControl( // it's in the middle now.
-                  builder: builder,
-                  onRefresh: onRefresh,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              buildAListOfStuff(),
+              CupertinoSliverRefreshControl( // it's in the middle now.
+                builder: builder,
+                onRefresh: onRefresh,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        await tester.fling(find.byType(Container).first, const Offset(0.0, 200.0), 2000.0);
+      await tester.fling(find.byType(Container).first, const Offset(0.0, 200.0), 2000.0);
 
-        await tester.fling(find.byType(Container).first, const Offset(0.0, -200.0), 3000.0);
+      await tester.fling(find.byType(Container).first, const Offset(0.0, -200.0), 3000.0);
 
-        verifyNoMoreInteractions(mockHelper);
+      verifyNoMoreInteractions(mockHelper);
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
+    testWidgets('without an onRefresh, builder is called with arm for one frame then sliver goes away', (WidgetTester tester) async {
+      refreshIndicator = const Center(child: Text('-1'));
 
-    testWidgets(
-      'without an onRefresh, builder is called with arm for one frame then sliver goes away',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        refreshIndicator = const Center(child: Text('-1'));
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
-        await tester.pump();
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.armed,
-          150.0,
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
+      await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
+      await tester.pump();
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.armed,
+        150.0,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
 
-        await tester.pump(const Duration(milliseconds: 10));
-        verify(mockHelper.builder(
-          any,
-          RefreshIndicatorMode.done, // Goes to done on the next frame.
-          148.6463892921364,
-          100.0, // Default value.
-          60.0, // Default value.
-        ));
+      await tester.pump(const Duration(milliseconds: 10));
+      verify(mockHelper.builder(
+        any,
+        RefreshIndicatorMode.done, // Goes to done on the next frame.
+        148.6463892921364,
+        100.0, // Default value.
+        60.0, // Default value.
+      ));
 
-        await tester.pump(const Duration(seconds: 5));
-        expect(find.text('-1'), findsNothing);
-        expect(
-          tester.getRect(find.widgetWithText(Center, '0')),
-          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-        );
+      await tester.pump(const Duration(seconds: 5));
+      expect(find.text('-1'), findsNothing);
+      expect(
+        tester.getRect(find.widgetWithText(Center, '0')),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+      );
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
   };
 
   final Function stateMachineTestGroup = () {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1051,13 +968,9 @@ void main() {
         CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
-
-      debugDefaultTargetPlatformOverride = null;
-    });
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
     testWidgets('goes to drag and returns to inactive in a small drag', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1086,13 +999,9 @@ void main() {
         CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
-
-      debugDefaultTargetPlatformOverride = null;
-    });
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
     testWidgets('goes to armed the frame it passes the threshold', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1122,288 +1031,251 @@ void main() {
         CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
         RefreshIndicatorMode.armed,
       );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-      debugDefaultTargetPlatformOverride = null;
-    });
-
-    testWidgets(
-      'goes to refresh the frame it crossed back the refresh threshold',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                  onRefresh: onRefresh,
-                  refreshTriggerPullDistance: 90.0,
-                  refreshIndicatorExtent: 50.0,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+    testWidgets('goes to refresh the frame it crossed back the refresh threshold', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+                onRefresh: onRefresh,
+                refreshTriggerPullDistance: 90.0,
+                refreshIndicatorExtent: 50.0,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
-        await gesture.moveBy(const Offset(0.0, 90.0)); // Arm it.
-        await tester.pump();
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.armed,
-        );
+      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      await gesture.moveBy(const Offset(0.0, 90.0)); // Arm it.
+      await tester.pump();
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.armed,
+      );
 
-        await gesture.moveBy(const Offset(0.0, -80.0)); // Overscrolling, need to move more than -40.
-        await tester.pump();
-        expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
-          moreOrLessEquals(49.775111111111116), // Below 50 now.
-        );
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.refresh,
-        );
+      await gesture.moveBy(const Offset(0.0, -80.0)); // Overscrolling, need to move more than -40.
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+        moreOrLessEquals(49.775111111111116), // Below 50 now.
+      );
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.refresh,
+      );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
-
-    testWidgets(
-      'goes to done internally as soon as the task finishes',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                  onRefresh: onRefresh,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+    testWidgets('goes to done internally as soon as the task finishes', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+                onRefresh: onRefresh,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 100.0), touchSlopY: 0.0);
-        await tester.pump();
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.armed,
-        );
-        // The sliver scroll offset correction is applied on the next frame.
-        await tester.pump();
+      await tester.drag(find.text('0'), const Offset(0.0, 100.0), touchSlopY: 0.0);
+      await tester.pump();
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.armed,
+      );
+      // The sliver scroll offset correction is applied on the next frame.
+      await tester.pump();
 
-        await tester.pump(const Duration(seconds: 2));
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.refresh,
-        );
-        expect(
-          tester.getRect(find.widgetWithText(Container, '0')),
-          const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
-        );
+      await tester.pump(const Duration(seconds: 2));
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.refresh,
+      );
+      expect(
+        tester.getRect(find.widgetWithText(Container, '0')),
+        const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
+      );
 
-        refreshCompleter.complete(null);
-        // The task completed between frames. The internal state goes to done
-        // right away even though the sliver gets a new offset correction the
-        // next frame.
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.done,
-        );
+      refreshCompleter.complete(null);
+      // The task completed between frames. The internal state goes to done
+      // right away even though the sliver gets a new offset correction the
+      // next frame.
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.done,
+      );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
-
-    testWidgets(
-      'goes back to inactive when retracting back past 10% of arming distance',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                  onRefresh: onRefresh,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+    testWidgets('goes back to inactive when retracting back past 10% of arming distance', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+                onRefresh: onRefresh,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
-        await gesture.moveBy(const Offset(0.0, 150.0));
-        await tester.pump();
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.armed,
-        );
+      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      await gesture.moveBy(const Offset(0.0, 150.0));
+      await tester.pump();
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.armed,
+      );
 
-        refreshCompleter.complete(null);
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.done,
-        );
-        await tester.pump();
+      refreshCompleter.complete(null);
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.done,
+      );
+      await tester.pump();
 
-        // Now back in overscroll mode.
-        await gesture.moveBy(const Offset(0.0, -200.0));
-        await tester.pump();
-        expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
-          moreOrLessEquals(27.944444444444457),
-        );
-        // Need to bring it to 100 * 0.1 to reset to inactive.
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.done,
-        );
+      // Now back in overscroll mode.
+      await gesture.moveBy(const Offset(0.0, -200.0));
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+        moreOrLessEquals(27.944444444444457),
+      );
+      // Need to bring it to 100 * 0.1 to reset to inactive.
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.done,
+      );
 
-        await gesture.moveBy(const Offset(0.0, -35.0));
-        await tester.pump();
-        expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
-          moreOrLessEquals(9.313890708161875),
-        );
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.inactive,
-        );
+      await gesture.moveBy(const Offset(0.0, -35.0));
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+        moreOrLessEquals(9.313890708161875),
+      );
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.inactive,
+      );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
-
-    testWidgets(
-      'goes back to inactive if already scrolled away when task completes',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: builder,
-                  onRefresh: onRefresh,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+    testWidgets('goes back to inactive if already scrolled away when task completes', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: builder,
+                onRefresh: onRefresh,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
-        await gesture.moveBy(const Offset(0.0, 150.0));
-        await tester.pump();
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.armed,
-        );
-        await tester.pump(); // Sliver scroll offset correction is applied one frame later.
+      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      await gesture.moveBy(const Offset(0.0, 150.0));
+      await tester.pump();
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.armed,
+      );
+      await tester.pump(); // Sliver scroll offset correction is applied one frame later.
 
-        await gesture.moveBy(const Offset(0.0, -300.0));
-        await tester.pump();
-        // The refresh indicator is offscreen now.
-        expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
-          moreOrLessEquals(-145.0332383665717),
-        );
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
-          RefreshIndicatorMode.refresh,
-        );
+      await gesture.moveBy(const Offset(0.0, -300.0));
+      await tester.pump();
+      // The refresh indicator is offscreen now.
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+        moreOrLessEquals(-145.0332383665717),
+      );
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+        RefreshIndicatorMode.refresh,
+      );
 
-        refreshCompleter.complete(null);
-        // The sliver layout extent is removed on next frame.
-        await tester.pump();
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
-          RefreshIndicatorMode.inactive,
-        );
-        // Nothing moved.
-        expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
-          moreOrLessEquals(-145.0332383665717),
-        );
-        await tester.pump(const Duration(seconds: 2));
-        // Everything stayed as is.
-        expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
-          moreOrLessEquals(-145.0332383665717),
-        );
+      refreshCompleter.complete(null);
+      // The sliver layout extent is removed on next frame.
+      await tester.pump();
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+        RefreshIndicatorMode.inactive,
+      );
+      // Nothing moved.
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+        moreOrLessEquals(-145.0332383665717),
+      );
+      await tester.pump(const Duration(seconds: 2));
+      // Everything stayed as is.
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+        moreOrLessEquals(-145.0332383665717),
+      );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
+    testWidgets("don't have to build any indicators or occupy space during refresh", (WidgetTester tester) async {
+      refreshIndicator = const Center(child: Text('-1'));
 
-    testWidgets(
-      "don't have to build any indicators or occupy space during refresh",
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-        refreshIndicator = const Center(child: Text('-1'));
-
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverRefreshControl(
-                  builder: null,
-                  onRefresh: onRefresh,
-                  refreshIndicatorExtent: 0.0,
-                ),
-                buildAListOfStuff(),
-              ],
-            ),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                builder: null,
+                onRefresh: onRefresh,
+                refreshIndicatorExtent: 0.0,
+              ),
+              buildAListOfStuff(),
+            ],
           ),
-        );
+        ),
+      );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0));
-        await tester.pump();
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
-          RefreshIndicatorMode.armed,
-        );
+      await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+      await tester.pump();
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+        RefreshIndicatorMode.armed,
+      );
 
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 5));
-        // In refresh mode but has no UI.
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
-          RefreshIndicatorMode.refresh,
-        );
-        expect(
-          tester.getRect(find.widgetWithText(Center, '0')),
-          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-        );
-        verify(mockHelper.refreshTask()); // The refresh function still called.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 5));
+      // In refresh mode but has no UI.
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+        RefreshIndicatorMode.refresh,
+      );
+      expect(
+        tester.getRect(find.widgetWithText(Center, '0')),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+      );
+      verify(mockHelper.refreshTask()); // The refresh function still called.
 
-        refreshCompleter.complete(null);
-        await tester.pump();
-        // Goes to inactive right away since the sliver is already collapsed.
-        expect(
-          CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
-          RefreshIndicatorMode.inactive,
-        );
-
-        debugDefaultTargetPlatformOverride = null;
-      },
-    );
+      refreshCompleter.complete(null);
+      await tester.pump();
+      // Goes to inactive right away since the sliver is already collapsed.
+      expect(
+        CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
+        RefreshIndicatorMode.inactive,
+      );
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 
     testWidgets('buildSimpleRefreshIndicator dark mode', (WidgetTester tester) async {
       const CupertinoDynamicColor color = CupertinoColors.inactiveGray;

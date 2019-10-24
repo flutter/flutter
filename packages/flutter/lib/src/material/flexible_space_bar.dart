@@ -166,7 +166,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Whether the title should be centered.
   ///
   /// By default this property is true if the current target platform
-  /// is [TargetPlatform.iOS], false otherwise.
+  /// is [TargetPlatform.iOS] or [TargetPlatform.macOS], false otherwise.
   final bool centerTitle;
 
   /// Collapse effect while scrolling.

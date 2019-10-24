@@ -623,8 +623,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('does not include routeName on iOS', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    testWidgets('does not include routeName', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final _TestSearchDelegate delegate = _TestSearchDelegate();
       await tester.pumpWidget(TestHomePage(
@@ -637,9 +636,8 @@ void main() {
       expect(semantics, hasSemantics(buildExpected(routeName: ''),
           ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
-      debugDefaultTargetPlatformOverride = null;
       semantics.dispose();
-    });
+    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
   });
 }
 

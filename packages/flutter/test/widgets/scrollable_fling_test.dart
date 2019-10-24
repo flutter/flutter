@@ -43,7 +43,7 @@ void main() {
     await tester.pump(); // trigger fling
     expect(getCurrentOffset(), dragOffset);
     await tester.pump(const Duration(seconds: 5));
-    final double result1 = getCurrentOffset();
+    final double androidResult = getCurrentOffset();
 
     await pumpTest(tester, TargetPlatform.iOS);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
@@ -52,9 +52,19 @@ void main() {
     await tester.pump(); // trigger fling
     expect(getCurrentOffset(), moreOrLessEquals(210.71026666666666));
     await tester.pump(const Duration(seconds: 5));
-    final double result2 = getCurrentOffset();
+    final double iOSResult = getCurrentOffset();
 
-    expect(result1, lessThan(result2)); // iOS (result2) is slipperier than Android (result1)
+    await pumpTest(tester, TargetPlatform.macOS);
+    await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
+    // Scroll starts ease into the scroll on iOS.
+    expect(getCurrentOffset(), moreOrLessEquals(210.71026666666666));
+    await tester.pump(); // trigger fling
+    expect(getCurrentOffset(), moreOrLessEquals(210.71026666666666));
+    await tester.pump(const Duration(seconds: 5));
+    final double macOSResult = getCurrentOffset();
+
+    expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
+    expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
   });
 
   testWidgets('fling and tap to stop', (WidgetTester tester) async {

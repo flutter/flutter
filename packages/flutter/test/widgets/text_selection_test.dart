@@ -552,7 +552,6 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/37032.
   testWidgets("selection handle's GestureDetector should not cover the entire screen", (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final TextEditingController controller = TextEditingController(text: 'a');
 
     await tester.pumpWidget(
@@ -583,9 +582,7 @@ void main() {
 
     expect(hitRect.size.width, lessThan(textFieldRect.size.width));
     expect(hitRect.size.height, lessThan(textFieldRect.size.height));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
