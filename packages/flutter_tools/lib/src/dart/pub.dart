@@ -208,7 +208,11 @@ class _DefaultPub implements Pub {
         'The time now is: $now'
       );
     } else {
-      dotPackages.setLastModifiedSync(now);
+      try {
+        dotPackages.setLastModifiedSync(now);
+      } on FileSystemException {
+        // We don't have permission to change this file.
+      }
       final DateTime newDotPackagesTimestamp = dotPackages.lastModifiedSync();
       if (newDotPackagesTimestamp.isBefore(originalPubspecYamlModificationTime)) {
         printError(
