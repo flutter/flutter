@@ -110,11 +110,11 @@ RUN /usr/bin/npm --verbose install -g firebase-tools
 COPY patch_firebase.sh /root/patch_firebase.sh
 RUN /root/patch_firebase.sh
 
-# Install dashing
-# This is why we need golang installed.
+# Install golang more recent than in repo (necessary for dashing to build)
 RUN curl 'https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz' | tar xvz
 ENV GOBINARY=/go/bin/go
 
+# Install dashing
 RUN mkdir -p /opt/gopath/bin
 ENV GOPATH=/opt/gopath
 ENV PATH="${GOPATH}/bin:${PATH}"
@@ -128,4 +128,3 @@ ENV LANG en_US.UTF-8
 RUN gem install bundler -N
 COPY Gemfile /Gemfile
 RUN bundle install --system
-
