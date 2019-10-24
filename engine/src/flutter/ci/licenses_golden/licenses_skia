@@ -1,4 +1,4 @@
-Signature: e91c49302698328fa1e7e4b79acc4850
+Signature: 6d05cec6a2623df9eae5a4d8b956d8b0
 
 UNUSED LICENSES:
 
@@ -1562,6 +1562,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm64-Debug-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel2XL-GPU-Adreno540-arm64-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel3-GPU-Adreno630-arm64-Debug-All-Android_Vulkan.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel3a-GPU-Adreno615-arm64-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-TecnoSpark3Pro-GPU-PowerVRGE8320-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-ChromeOS-Clang-AcerChromebookR13Convertible-GPU-PowerVRGX6250-arm-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Chromecast-Clang-Chorizo-CPU-Cortex_A7-arm-Release-All.json
