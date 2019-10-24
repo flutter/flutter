@@ -292,11 +292,7 @@ class IOSDevice extends Device {
         printError('');
         return LaunchResult.failed();
       } else {
-        final String plistPath = fs.path.join(buildResult.output, 'Info.plist');
-        packageId = PlistParser.instance.getValueFromFile(
-          plistPath,
-          PlistParser.kCFBundleIdentifierKey,
-        );
+        packageId = buildResult.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
       }
 
     } else {
