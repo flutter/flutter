@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'mouse_cursor.dart';
+import 'mouse_cursor_platform.dart';
 import 'platform_channel.dart';
 
 // The channel interface with the platform.

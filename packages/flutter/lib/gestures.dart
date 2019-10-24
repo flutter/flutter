@@ -21,6 +21,7 @@ export 'src/gestures/hit_test.dart';
 export 'src/gestures/long_press.dart';
 export 'src/gestures/lsq_solver.dart';
 export 'src/gestures/monodrag.dart';
+export 'src/gestures/mouse_cursor.dart';
 export 'src/gestures/mouse_tracking.dart';
 export 'src/gestures/multidrag.dart';
 export 'src/gestures/multitap.dart';

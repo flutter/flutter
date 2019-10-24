@@ -5811,13 +5811,16 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///    have buttons pressed.
 class MouseRegion extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards mouse events to callbacks.
+  ///
+  /// By default, all callbacks are empty, `cursor` is unset, and `opaque` is
+  /// `true`.
   const MouseRegion({
     Key key,
     this.onEnter,
     this.onExit,
     this.onHover,
     this.opaque = true,
-    this.cursor = SystemMouseCursors.basic,
+    this.cursor,
     Widget child,
   }) : assert(opaque != null),
        super(key: key, child: child);

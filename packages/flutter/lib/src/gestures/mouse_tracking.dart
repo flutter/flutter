@@ -7,9 +7,9 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 
 import 'events.dart';
+import 'mouse_cursor.dart';
 import 'pointer_router.dart';
 
 /// Signature for listening to [PointerEnterEvent] events.
