@@ -30,27 +30,32 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   await injectPlugins(flutterProject, checkProjects: true);
   final Status status = logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
-  final BuildResult result = await buildSystem.build(const WebReleaseBundle(), Environment(
-    outputDir: fs.directory(getWebBuildDirectory()),
-    projectDir: fs.currentDirectory,
-    buildDir: flutterProject.directory
-      .childDirectory('.dart_tool')
-      .childDirectory('flutter_build'),
-    defines: <String, String>{
-      kBuildMode: getNameForBuildMode(buildInfo.mode),
-      kTargetFile: target,
-      kInitializePlatform: initializePlatform.toString(),
-      kHasWebPlugins: hasWebPlugins.toString(),
-    },
-  ));
-  if (!result.success) {
-    for (ExceptionMeasurement measurement in result.exceptions.values) {
-      printError(measurement.stackTrace.toString());
-      printError(measurement.exception.toString());
+  try {
+    final BuildResult result = await buildSystem.build(const WebReleaseBundle(), Environment(
+      outputDir: fs.directory(getWebBuildDirectory()),
+      projectDir: fs.currentDirectory,
+      buildDir: flutterProject.directory
+        .childDirectory('.dart_tool')
+        .childDirectory('flutter_build'),
+      defines: <String, String>{
+        kBuildMode: getNameForBuildMode(buildInfo.mode),
+        kTargetFile: target,
+        kInitializePlatform: initializePlatform.toString(),
+        kHasWebPlugins: hasWebPlugins.toString(),
+      },
+    ));
+    if (!result.success) {
+      for (ExceptionMeasurement measurement in result.exceptions.values) {
+        printError(measurement.stackTrace.toString());
+        printError(measurement.exception.toString());
+      }
+      throwToolExit('Failed to compile application for the Web.');
     }
-    throwToolExit('Failed to compile application for the Web.');
+  } catch (err) {
+    throwToolExit(err.toString());
+  } finally {
+    status.stop();
   }
-  status.stop();
   flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 

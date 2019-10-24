@@ -5,14 +5,18 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
@@ -599,6 +603,29 @@ void main() {
 
     expect(await fs.file('foo').readAsString(), testUri.toString());
   }));
+
+  test('FlutterDevice uses dartdevc configuration when targeting web', () => testbed.run(() async {
+    final MockDevice mockDevice = MockDevice();
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.web_javascript;
+    });
+
+    final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
+      mockDevice,
+      buildMode: BuildMode.debug,
+      flutterProject: FlutterProject.current(),
+      target: null,
+      trackWidgetCreation: true,
+    )).generator;
+
+    expect(residentCompiler.targetModel, TargetModel.dartdevc);
+    expect(residentCompiler.sdkRoot,
+      artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
+    expect(residentCompiler.platformDill,
+      artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
+  }));
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
@@ -608,6 +635,7 @@ class MockDevFS extends Mock implements DevFS {}
 class MockIsolate extends Mock implements Isolate {}
 class MockDevice extends Mock implements Device {}
 class MockUsage extends Mock implements Usage {}
+class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, this.views)

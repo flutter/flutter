@@ -7,7 +7,6 @@ import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'features.dart';
 
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
@@ -75,9 +74,6 @@ class AndroidPlugin extends PluginPlatform {
   String get _embeddingVersion => _cachedEmbeddingVersion ??= _getEmbeddingVersion();
 
   String _getEmbeddingVersion() {
-    if (!featureFlags.isNewAndroidEmbeddingEnabled) {
-      return '1';
-    }
     assert(pluginPath != null);
     final String baseMainPath = fs.path.join(
       pluginPath,
