@@ -15,6 +15,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -1813,7 +1814,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
           builder: (BuildContext context, Widget child) {
-            return Container(
+            return Ink(
               decoration: ShapeDecoration(
                 shape: shape,
                 color: getBackgroundColor(chipTheme),
