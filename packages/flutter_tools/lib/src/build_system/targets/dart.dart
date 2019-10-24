@@ -197,7 +197,7 @@ class KernelSnapshot extends Target {
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
       targetModel: TargetModel.flutter,
-      outputFilePath: environment.buildDir.childFile('app.dill').path,
+      outputFilePath: dillOutput,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: targetFileAbsolute,
