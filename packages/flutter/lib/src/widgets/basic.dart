@@ -647,7 +647,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// The [clipBehavior] argument must not be null or [Clip.none].
   const ClipRRect({
     Key key,
-    this.borderRadius,
+    this.borderRadius = BorderRadius.zero,
     this.clipper,
     this.clipBehavior = Clip.antiAlias,
     Widget child,
