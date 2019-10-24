@@ -21,6 +21,7 @@ void main() {
   MockIosProject iosProject;
   MockMacOSProject macosProject;
   MockAndroidProject androidProject;
+  MockWebProject webProject;
   File packagesFile;
   Directory dummyPackageDirectory;
 
@@ -44,6 +45,10 @@ void main() {
     when(flutterProject.android).thenReturn(androidProject);
     when(androidProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('android').childDirectory('app'));
     when(androidProject.hostAppGradleRoot).thenReturn(flutterProject.directory.childDirectory('android'));
+    webProject = MockWebProject();
+    when(flutterProject.web).thenReturn(webProject);
+    when(webProject.libDirectory).thenReturn(flutterProject.directory.childDirectory('lib'));
+    when(webProject.existsSync()).thenReturn(true);
 
     // Set up a simple .packages file for all the tests to use, pointing to one package.
     dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
@@ -392,6 +397,54 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => featureFlags,
     });
+
+    testUsingContext('Registrant for web doesn\'t escape slashes in imports', () async {
+      when(flutterProject.isModule).thenReturn(true);
+      when(featureFlags.isWebEnabled).thenReturn(true);
+
+      // injectPlugins will crash if there is no AndroidManifest
+      final File androidManifest = flutterProject.directory
+        .childDirectory('android')
+        .childFile('AndroidManifest.xml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
+      when(androidProject.appManifestFile).thenReturn(androidManifest);
+
+      final Directory webPluginWithNestedFile =
+          fs.systemTempDirectory.createTempSync('web_plugin_with_nested');
+      webPluginWithNestedFile.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: WebPlugin
+        fileName: src/web_plugin.dart
+''');
+      webPluginWithNestedFile
+        .childDirectory('lib')
+        .childDirectory('src')
+        .childFile('web_plugin.dart')
+        ..createSync(recursive: true);
+
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync('''
+web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toString()}
+''');
+
+      await injectPlugins(flutterProject);
+
+      final File registrant = flutterProject.directory
+          .childDirectory('lib')
+          .childFile('generated_plugin_registrant.dart');
+
+      expect(registrant.existsSync(), isTrue);
+      expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => featureFlags,
+    });
   });
 }
 
@@ -401,3 +454,4 @@ class MockFlutterProject extends Mock implements FlutterProject {}
 class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockWebProject extends Mock implements WebProject {}
