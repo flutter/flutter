@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
