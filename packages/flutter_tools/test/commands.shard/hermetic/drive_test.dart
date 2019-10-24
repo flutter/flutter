@@ -540,7 +540,7 @@ void main() {
           expect(optionValue(), setToTrue ? isTrue : isFalse);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+          ProcessManager: () => FakeProcessManager.any(),
         });
       }
 
