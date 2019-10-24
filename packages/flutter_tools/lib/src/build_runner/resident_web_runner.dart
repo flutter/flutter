@@ -259,7 +259,7 @@ class ResidentWebRunner extends ResidentRunner {
       unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
       // Always run main after connecting because start paused doesn't work yet.
-      if (!debuggingOptions.startPaused) {
+      if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
         _connectionResult.appConnection.runMain();
       } else {
         StreamSubscription<void> resumeSub;

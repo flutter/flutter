@@ -83,6 +83,9 @@ void main() {
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
+    when(mockVmService.onDebugEvent).thenAnswer((Invocation _) {
+      return const Stream<Event>.empty();
+    });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
 
