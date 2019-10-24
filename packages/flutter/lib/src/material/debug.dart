@@ -81,7 +81,7 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
         ),
         ErrorHint(
           'To introduce a MaterialLocalizations, either use a '
-          ' MaterialApp at the root of your application to include them '
+          'MaterialApp at the root of your application to include them '
           'automatically, or add a Localization widget with a '
           'MaterialLocalizations delegate.'
         ),

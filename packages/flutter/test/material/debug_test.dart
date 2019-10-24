@@ -55,8 +55,8 @@ void main() {
     expect(
       error.diagnostics[3].toStringDeep(),
       equalsIgnoringHashCodes(
-        'To introduce a MaterialLocalizations, either use a  MaterialApp\n'
-        'at the root of your application to include them automatically, or\n'
+        'To introduce a MaterialLocalizations, either use a MaterialApp at\n'
+        'the root of your application to include them automatically, or\n'
         'add a Localization widget with a MaterialLocalizations delegate.\n',
       ),
     );
@@ -69,8 +69,8 @@ void main() {
       '   by a Localizations widget ancestor.\n'
       '   Localizations are used to generate many different messages,\n'
       '   labels,and abbreviations which are used by the material library.\n'
-      '   To introduce a MaterialLocalizations, either use a  MaterialApp\n'
-      '   at the root of your application to include them automatically, or\n'
+      '   To introduce a MaterialLocalizations, either use a MaterialApp at\n'
+      '   the root of your application to include them automatically, or\n'
       '   add a Localization widget with a MaterialLocalizations delegate.\n'
       '   The specific widget that could not find a MaterialLocalizations\n'
       '   ancestor was:\n'
