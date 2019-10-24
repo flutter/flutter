@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
@@ -83,7 +84,13 @@ class CleanCommand extends FlutterCommand {
 
   @visibleForTesting
   void deleteFile(FileSystemEntity file) {
-    if (!file.existsSync()) {
+    // This will throw a FileSystemException if the directory is missing permissions.
+    try {
+      if (!file.existsSync()) {
+        return;
+      }
+    } on FileSystemException catch (err) {
+      printError('Cannot clean ${file.path}.\n$err');
       return;
     }
     final Status deletionStatus = logger.startProgress('Deleting ${file.basename}...', timeout: timeoutConfiguration.fastOperation);
