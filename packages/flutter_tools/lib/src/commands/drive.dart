@@ -276,7 +276,6 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       observatoryPort: command.observatoryPort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
-      dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,

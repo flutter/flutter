@@ -43,15 +43,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addFlag('cache-sksl',
         negatable: false,
-        help: 'Only cache the shader in SkSL instead of binary or GLSL.',
-      )
-      ..addFlag('dump-skp-on-shader-compilation',
-        negatable: false,
-        help: 'Automatically dump the skp that triggers new shader compilations. '
-            'This is useful for wrting custom ShaderWarmUp to reduce jank. '
-            'By default, this is not enabled to reduce the overhead. '
-            'This is only available in profile or debug build. ',
-      )
+        help: 'Only cache the shader in SkSL instead of binary or GLSL.',)
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
@@ -71,7 +63,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get traceStartup => argResults['trace-startup'];
   bool get cacheSkSL => argResults['cache-sksl'];
-  bool get dumpSkpOnShaderCompilation => argResults['dump-skp-on-shader-compilation'];
 
   String get route => argResults['route'];
 }
@@ -106,6 +97,13 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         help: 'Enable tracing to the system tracer. This is only useful on '
               'platforms where such a tracer is available (Android and Fuchsia).',
+      )
+      ..addFlag('dump-skp-on-shader-compilation',
+        negatable: false,
+        help: 'Automatically dump the skp that triggers new shader compilations. '
+              'This is useful for wrting custom ShaderWarmUp to reduce jank. '
+              'By default, this is not enabled to reduce the overhead. '
+              'This is only available in profile or debug build. ',
       )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
@@ -311,7 +309,7 @@ class RunCommand extends RunCommandBase {
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
-        dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
+        dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
         cacheSkSL: cacheSkSL,
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
