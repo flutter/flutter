@@ -7,8 +7,8 @@ import 'package:meta/meta.dart';
 /// The JavaScript bootstrap script to support in-browser hot restart.
 ///
 /// The [requireUrl] loads our cached RequireJS script file. The [mapperUrl]
-/// loads the special Dart stack trace mapper. [mainModule] is the name of the
-/// actual main.dart module that needs to be loaded by the bootsrap script.
+/// loads the special Dart stack trace mapper. The [entrypoint] is the
+/// actual main.dart file.
 ///
 /// This file is served when the browser requests "main.dart.js" in debug mode,
 /// and is responsible for bootstraping the RequireJS modules and attaching
@@ -16,7 +16,7 @@ import 'package:meta/meta.dart';
 String generateBootstrapScript({
   @required String requireUrl,
   @required String mapperUrl,
-  @required String mainModule,
+  @required String entrypoint,
 }) {
   return '''
 "use strict";
@@ -39,42 +39,57 @@ document.head.appendChild(requireEl);
 
 // Invoked by connected chrome debugger for hot reload/restart support.
 window.\$hotReloadHook = function(modules) {
-  if (modules == null) {
-    return;
-  }
-  // If no modules change, only invoke main.
-  if (modules.length == 0) {
-    window.\$hotReload();
-  }
-  var reloadCount = 0;
-  for (var i = 0; i < modules.length; i++) {
-    require.undef(modules[i]);
-    require([modules[i]], function(module) {
-      reloadCount += 1;
-      // once we've reloaded every module, trigger the hot reload.
-      if (reloadCount == modules.length) {
-        window.\$hotReload();
-      }
-    });
-  }
+  return new Promise(function(resolve, reject) {
+    if (modules == null) {
+      reject();
+    }
+    // If no modules change, return immediately.
+    if (modules.length == 0) {
+      resolve();
+    }
+    var reloadCount = 0;
+    for (var i = 0; i < modules.length; i++) {
+      require.undef(modules[i]);
+      require([modules[i]], function(module) {
+        reloadCount += 1;
+        // once we've reloaded every module, trigger the hot reload.
+        if (reloadCount == modules.length) {
+          require(["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
+            window.\$mainEntrypoint = app.main.main;
+            window.\$hotReload(resolve);
+          });
+        }
+      });
+    }
+  });
+}
+''';
 }
 
+/// Generate a synthetic main module which captures the application's main
+/// method.
+String generateMainModule({@required String entrypoint}) {
+  return '''
 // Create the main module loaded below.
-define("main_module", ["$mainModule", "dart_sdk"], function(app, dart_sdk) {
+define("main_module", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._isolate_helper.startRootIsolate(() => {}, []);
   dart_sdk._debugger.registerDevtoolsFormatter();
+  dart_sdk.ui.webOnlyInitializePlatform();
 
   // Attach the main entrypoint and hot reload functionality to the window.
-  window.\$mainEntrypoint = app.main;
+  window.\$mainEntrypoint = app.main.main;
   if (window.\$hotReload == null) {
-    window.\$hotReload = function() {
-      dart_sdk.developer.invokeExtension('ext.flutter.disassemble', {});
+    window.\$hotReload = function(cb) {
+      dart_sdk.developer.invokeExtension("ext.flutter.disassemble", "{}");
       dart_sdk.dart.hotRestart();
       window.\$mainEntrypoint();
+      if (cb != null) {
+        cb();
+      }
     }
   }
-  app.main();
+  app.main.main();
 });
 
 // Require JS configuration.
