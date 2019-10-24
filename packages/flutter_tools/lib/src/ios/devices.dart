@@ -25,7 +25,6 @@ import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
-import 'plist_parser.dart';
 
 class IOSDeploy {
   const IOSDeploy();
