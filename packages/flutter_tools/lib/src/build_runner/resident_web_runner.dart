@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:build_daemon/client.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
@@ -212,6 +213,18 @@ class ResidentWebRunner extends ResidentRunner {
         );
       });
       return result;
+    } on VersionSkew {
+      // Thrown if an older build daemon is already running.
+      throwToolExit(
+        'Another build daemon is already running with an older version.\n'
+        'Try exiting other Flutter processes in this project and try again.'
+      );
+    } on OptionsSkew {
+      // Thrown if a build daemon is already running with different configuration.
+      throwToolExit(
+        'Another build daemon is already running with different configuration.\n'
+        'Try exiting other Flutter processes in this project and try again.'
+      );
     } on WebSocketException {
       throwToolExit('Failed to connect to WebSocket.');
     } on BuildException {
