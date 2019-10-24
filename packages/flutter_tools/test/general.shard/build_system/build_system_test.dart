@@ -114,7 +114,7 @@ void main() {
     expect(buildResult.hasException, false);
   }));
 
-  test('Throws exception if it does not produce a specified output', () => testbed.run(() async {
+  test('Does not throw exception if it does not produce a specified output', () => testbed.run(() async {
     final Target badTarget = TestTarget((Environment environment) async {})
       ..inputs = const <Source>[
         Source.pattern('{PROJECT_DIR}/foo.dart'),
@@ -124,8 +124,7 @@ void main() {
       ];
     final BuildResult result = await buildSystem.build(badTarget, environment);
 
-    expect(result.hasException, true);
-    expect(result.exceptions.values.single.exception, isInstanceOf<FileSystemException>());
+    expect(result.hasException, false);
   }));
 
   test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {

@@ -48,7 +48,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-    }, timeout: allowForCreateFlutterProject);
+    });
 
     testUsingContext('split per abi', () async {
       final String projectPath = await createProject(tempDir,
@@ -65,7 +65,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-    }, timeout: allowForCreateFlutterProject);
+    });
 
     testUsingContext('build type', () async {
       final String projectPath = await createProject(tempDir,
@@ -92,7 +92,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-    }, timeout: allowForCreateFlutterProject);
+    });
   });
 
   group('Gradle', () {
@@ -223,8 +223,7 @@ flutter:
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
-    },
-    timeout: allowForCreateFlutterProject);
+    });
 
     testUsingContext('shrinking is disabled when --no-shrink is passed', () async {
       final String projectPath = await createProject(tempDir,
@@ -255,8 +254,7 @@ flutter:
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
-    },
-    timeout: allowForCreateFlutterProject);
+    });
 
     testUsingContext('guides the user when the shrinker fails', () async {
       final String projectPath = await createProject(tempDir,
@@ -312,8 +310,7 @@ flutter:
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
       Usage: () => mockUsage,
-    },
-    timeout: allowForCreateFlutterProject);
+    });
 
     testUsingContext('reports when the app isn\'t using AndroidX', () async {
       final String projectPath = await createProject(tempDir,
@@ -366,8 +363,7 @@ flutter:
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
       Usage: () => mockUsage,
-    },
-    timeout: allowForCreateFlutterProject);
+    });
 
     testUsingContext('reports when the app is using AndroidX', () async {
       final String projectPath = await createProject(tempDir,
@@ -422,8 +418,7 @@ flutter:
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
       Usage: () => mockUsage,
-    },
-    timeout: allowForCreateFlutterProject);
+    });
   });
 }
 

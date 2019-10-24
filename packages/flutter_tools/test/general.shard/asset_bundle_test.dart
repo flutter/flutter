@@ -38,7 +38,7 @@ void main() {
       expect(ab.entries.length, greaterThan(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('empty pubspec', () async {
@@ -56,7 +56,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('wildcard directories are updated when filesystem changes', () async {
@@ -96,7 +96,7 @@ flutter:
       expect(bundle.entries.length, 5);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('handle removal of wildcard directories', () async {
@@ -146,7 +146,7 @@ name: example''')
       expect(bundle.entries.length, 4);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     // https://github.com/flutter/flutter/issues/42723
@@ -175,7 +175,7 @@ flutter:
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 

@@ -27,7 +27,7 @@
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
 import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
-    stderr, stdin, Stdout, stdout;
+    stderr, stdin, Stdin, StdinException, Stdout, stdout;
 
 import 'package:meta/meta.dart';
 
@@ -181,6 +181,36 @@ class Stdio {
   io.IOSink get stderr => io.stderr;
 
   bool get hasTerminal => io.stdout.hasTerminal;
+
+  static bool _stdinHasTerminal;
+
+  /// Determines whether there is a terminal attached.
+  ///
+  /// [io.Stdin.hasTerminal] only covers a subset of cases. In this check the
+  /// echoMode is toggled on and off to catch cases where the tool running in
+  /// a docker container thinks there is an attached terminal. This can cause
+  /// runtime errors such as "inappropriate ioctl for device" if not handled.
+  bool get stdinHasTerminal {
+    if (_stdinHasTerminal != null) {
+      return _stdinHasTerminal;
+    }
+    if (stdin is! io.Stdin) {
+      return _stdinHasTerminal = false;
+    }
+    final io.Stdin ioStdin = stdin;
+    if (!ioStdin.hasTerminal) {
+      return _stdinHasTerminal = false;
+    }
+    try {
+      final bool currentEchoMode = ioStdin.echoMode;
+      ioStdin.echoMode = !currentEchoMode;
+      ioStdin.echoMode = currentEchoMode;
+    } on io.StdinException {
+      return _stdinHasTerminal = false;
+    }
+    return _stdinHasTerminal = true;
+  }
+
   int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
   int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
   bool get supportsAnsiEscapes => hasTerminal && io.stdout.supportsAnsiEscapes;
@@ -190,6 +220,7 @@ Stdio get stdio => context.get<Stdio>() ?? const Stdio();
 io.Stdout get stdout => stdio.stdout;
 Stream<List<int>> get stdin => stdio.stdin;
 io.IOSink get stderr => stdio.stderr;
+bool get stdinHasTerminal => stdio.stdinHasTerminal;
 
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {
