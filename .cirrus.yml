@@ -432,7 +432,7 @@ task:
     - date
     - which flutter
     - ruby --version
-    - sudo gem install bundler -N
+    - sudo gem install bundler -v 2.0.2 -N
     - bundle install --system --gemfile=dev/ci/mac/Gemfile
     - cat dev/ci/mac/Gemfile.lock
     - git clean -xffd
