@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
@@ -216,6 +217,8 @@ class ResidentWebRunner extends ResidentRunner {
       throwToolExit('Failed to connect to WebSocket.');
     } on BuildException {
       throwToolExit('Failed to build application for the Web.');
+    } on ChromeDebugException catch (err) {
+      throwToolExit(err.toString());
     } on SocketException catch (err) {
       throwToolExit(err.toString());
     } on StateError catch (err) {
