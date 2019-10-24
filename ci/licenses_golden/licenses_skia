@@ -1,4 +1,4 @@
-Signature: f886e42b4431f66b5b529cc0a243e367
+Signature: f190028f7952baaf9c1b331324eb994d
 
 UNUSED LICENSES:
 
@@ -5009,6 +5009,8 @@ FILE: ../../../third_party/skia/modules/skplaintexteditor/src/stringslice.cpp
 FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.cpp
 FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.h
 FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
+FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.cpp
+FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrSampleMaskProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrSampleMaskProcessor.h
