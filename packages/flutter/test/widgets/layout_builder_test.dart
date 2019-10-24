@@ -587,40 +587,4 @@ void main() {
     await tester.pump();
     expect(hitCounts, const <int> [0, 0, 0]);
   });
-
-  testWidgets('LayoutBuilder calculates baseline from child', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: <Widget>[
-            LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return const Text('First', style: TextStyle(fontSize: 10));
-              },
-            ),
-            LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return const Text('Second', style: TextStyle(fontSize: 30));
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    // The Ahem font extends 0.2 * fontSize below the baseline.
-    // So the two row elements line up like this:
-    //
-    //  First  Second
-    //  -------------   baseline
-    //    2      6      space below the baseline = 0.2 * fontSize
-    //  -------------   widget text dy values
-
-    final double firstTextDy = tester.getBottomLeft(find.text('First')).dy;
-    final double secondTextDy = tester.getBottomLeft(find.text('Second')).dy;
-    expect(firstTextDy, closeTo(secondTextDy - 4.0, 0.001));
-  }, skip: isBrowser);
 }
