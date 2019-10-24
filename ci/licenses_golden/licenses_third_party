@@ -1,4 +1,4 @@
-Signature: 2fa9542b052e62d47f99557a8925c2ca
+Signature: 9ed618c27026cb80a60f6ecb559ba445
 
 UNUSED LICENSES:
 
@@ -7671,6 +7671,7 @@ FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_callbacks.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_structs.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_structs.dart
+FILE: ../../../third_party/dart/samples/ffi/samples_test.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/example/main.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/sqlite.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/bindings.dart
