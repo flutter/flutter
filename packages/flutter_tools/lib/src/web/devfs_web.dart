@@ -22,7 +22,8 @@ class WebAssetServer {
   WebAssetServer(this._httpServer, { @required void Function(dynamic, StackTrace) onError }) {
     _httpServer.listen((HttpRequest request) {
       _handleRequest(request).catchError(onError);
-    });
+      // TODO(jonahwilliams): test the onError callback when https://github.com/dart-lang/sdk/issues/39094 is fixed.
+    }, onError: onError);
   }
 
   // Fallback to "application/octet-stream" on null which
