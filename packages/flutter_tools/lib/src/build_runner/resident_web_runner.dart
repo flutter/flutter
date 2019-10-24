@@ -217,8 +217,10 @@ class ResidentWebRunner extends ResidentRunner {
       throwToolExit('Failed to connect to WebSocket.');
     } on BuildException {
       throwToolExit('Failed to build application for the Web.');
-    } on ChromeDebugException catch (err) {
-      throwToolExit(err.toString());
+    } on ChromeDebugException catch (err, stackTrace) {
+      throwToolExit(
+        'Failed to establish connection with Chrome. Try running the application again.\n'
+        'If this problem persists, please file an issue with the details below:\n$err\n$stackTrace');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
     } on StateError catch (err) {
