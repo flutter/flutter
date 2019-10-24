@@ -20,7 +20,7 @@ import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
-     mustache.Template(template).renderString(context);
+     mustache.Template(template, htmlEscapeValues: false).renderString(context);
   final File file = fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
