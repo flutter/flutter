@@ -10,6 +10,8 @@
 # for performing pushes to production, and so this image is quite a bit larger
 # than strictly needed for just building Flutter apps.
 
+# Note: updating past stretch (Debian 9) will bump Java past version 8,
+# which will break the Android SDK.
 FROM debian:stretch
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
