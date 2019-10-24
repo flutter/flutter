@@ -556,4 +556,52 @@ void main() {
       isNot(paints..rrect(color: _kSystemFill.color)),
     );
   });
+
+  testWidgets('Thumb color can be overridden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSlider(
+            thumbColor: CupertinoColors.systemPurple,
+            onChanged: (double value) { },
+            value: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(CupertinoSlider),
+      paints
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect(color: CupertinoColors.systemPurple.color)
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSlider(
+            thumbColor: CupertinoColors.activeOrange,
+            onChanged: (double value) { },
+            value: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+        find.byType(CupertinoSlider),
+        paints
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect(color: CupertinoColors.activeOrange.color)
+    );
+  });
 }

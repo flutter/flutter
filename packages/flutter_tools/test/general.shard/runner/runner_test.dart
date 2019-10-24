@@ -71,6 +71,7 @@ void main() {
         'FLUTTER_ROOT': '/',
       }),
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
     });
   });
@@ -140,8 +141,15 @@ class CrashingUsage implements Usage {
     String category,
     String parameter, {
     String label,
+    int value,
     Map<String, String> parameters,
-  }) => _impl.sendEvent(category, parameter, label: label, parameters: parameters);
+  }) => _impl.sendEvent(
+    category,
+    parameter,
+    label: label,
+    value: value,
+    parameters: parameters,
+  );
 
   @override
   void sendTiming(

@@ -334,7 +334,7 @@ void main() {
       expect(startDetails, hasLength(1));
       expect(updateDetails.single.globalPosition, within(distance: 0.0001, from: const Offset(400 + kTouchSlop + 3, 300 + kTouchSlop + 4)));
       expect(updateDetails.single.delta, within(distance: 0.1, from: const Offset(5, 0.0))); // sqrt(3^2 + 4^2)
-      expect(updateDetails.single.primaryDelta, within(distance: 0.1, from: 5.0)); // sqrt(3^2 + 4^2)
+      expect(updateDetails.single.primaryDelta, within<double>(distance: 0.1, from: 5.0)); // sqrt(3^2 + 4^2)
     });
   });
 
@@ -662,7 +662,7 @@ void main() {
       expect(startDetails, hasLength(1));
       expect(updateDetails.single.globalPosition, within(distance: 0.0001, from: const Offset(400 + kTouchSlop - 4, 300 + kTouchSlop + 3)));
       expect(updateDetails.single.delta, within(distance: 0.1, from: const Offset(0.0, 5.0))); // sqrt(3^2 + 4^2)
-      expect(updateDetails.single.primaryDelta, within(distance: 0.1, from: 5.0)); // sqrt(3^2 + 4^2)
+      expect(updateDetails.single.primaryDelta, within<double>(distance: 0.1, from: 5.0)); // sqrt(3^2 + 4^2)
     });
   });
 }

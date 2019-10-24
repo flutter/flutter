@@ -40,6 +40,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'aar',
+        '--no-pub',
         ...?arguments,
         target,
       ]);
@@ -56,7 +57,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-    }, timeout: allowForCreateFlutterProject);
+    });
 
     testUsingContext('indicate that project is a plugin', () async {
       final String projectPath = await createProject(tempDir,
@@ -68,7 +69,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-    }, timeout: allowForCreateFlutterProject);
+    });
 
     testUsingContext('indicate the target platform', () async {
       final String projectPath = await createProject(tempDir,
@@ -81,7 +82,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-    }, timeout: allowForCreateFlutterProject);
+    });
   });
 
   group('Gradle', () {
