@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:dwds/dwds.dart';
 import 'package:build_daemon/client.dart';
 import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
