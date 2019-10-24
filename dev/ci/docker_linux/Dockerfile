@@ -126,5 +126,8 @@ ENV LANG en_US.UTF-8
 
 # Skip all the documentation (-N) since it's just on CI.
 RUN gem install bundler -N
+
 COPY Gemfile /Gemfile
+COPY Gemfile.lock /Gemfile.lock
+
 RUN bundle install --system
