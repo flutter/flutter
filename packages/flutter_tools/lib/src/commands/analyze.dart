@@ -89,7 +89,6 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    print('object');
     if (argResults['flutter-repo']) {
       await processUtils.stream(
         <String>[
