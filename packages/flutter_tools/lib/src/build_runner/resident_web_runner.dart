@@ -262,7 +262,6 @@ class ResidentWebRunner extends ResidentRunner {
       if (!debuggingOptions.startPaused) {
         _connectionResult.appConnection.runMain();
       } else {
-        // I'm not sure if this is necessary.
         StreamSubscription<void> resumeSub;
         resumeSub = _connectionResult.debugConnection.vmService.onDebugEvent.listen((vmservice.Event event) {
           if (event.type == vmservice.EventKind.kResume) {
@@ -270,7 +269,6 @@ class ResidentWebRunner extends ResidentRunner {
             resumeSub.cancel();
           }
         });
-        //
       }
     }
     if (websocketUri != null) {
