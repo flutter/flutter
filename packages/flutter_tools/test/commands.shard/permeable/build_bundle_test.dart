@@ -234,6 +234,25 @@ void main() {
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  testUsingContext('handles unhandled build exceptions', () async {
+    fs.file('lib/main.dart').createSync(recursive: true);
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+    when(buildSystem.build(any, any)).thenThrow(const FileSystemException());
+
+    expect(runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--debug',
+      '--target-platform=android-arm',
+    ]), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => MockBuildSystem(),
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 class MockBundleBuilder extends Mock implements BundleBuilder {}

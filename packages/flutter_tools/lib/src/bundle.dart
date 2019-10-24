@@ -122,22 +122,26 @@ Future<void> buildWithAssemble({
   final Target target = buildMode == BuildMode.debug
     ? const CopyFlutterBundle()
     : const ReleaseCopyFlutterBundle();
-  final BuildResult result = await buildSystem.build(target, environment);
+  try {
+    final BuildResult result = await buildSystem.build(target, environment);
 
-  if (!result.success) {
-    for (ExceptionMeasurement measurement in result.exceptions.values) {
-      printError(measurement.exception.toString());
-      printError(measurement.stackTrace.toString());
+    if (!result.success) {
+      for (ExceptionMeasurement measurement in result.exceptions.values) {
+        printError(measurement.exception.toString());
+        printError(measurement.stackTrace.toString());
+      }
+      throwToolExit('Failed to build bundle.');
     }
-    throwToolExit('Failed to build bundle.');
-  }
-  if (depfilePath != null) {
-    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-    final File outputDepfile = fs.file(depfilePath);
-    if (!outputDepfile.parent.existsSync()) {
-      outputDepfile.parent.createSync(recursive: true);
+    if (depfilePath != null) {
+      final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+      final File outputDepfile = fs.file(depfilePath);
+      if (!outputDepfile.parent.existsSync()) {
+        outputDepfile.parent.createSync(recursive: true);
+      }
+      depfile.writeToFile(outputDepfile);
     }
-    depfile.writeToFile(outputDepfile);
+  } catch (err) {
+    throwToolExit('Failed to build bundle.$err');
   }
 }
 
