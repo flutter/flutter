@@ -158,7 +158,8 @@ void main() {
       fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
       fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
       '--libraries-spec=' + fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
-      '-O1', // lowest optimizations.
+      '-O4', // highest optimizations
+      '--no-minify', // but uses unminified names for debugging
       '-o',
       environment.buildDir.childFile('main.dart.js').absolute.path,
       '--packages=.packages',
