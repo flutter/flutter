@@ -34,11 +34,15 @@ void main() {
   Completer<void> closeCompleter;
   WebAssetServer webAssetServer;
   MockPlatform windows;
+  MockPlatform linux;
 
   setUp(() {
     windows = MockPlatform();
+    linux = MockPlatform();
     when(windows.environment).thenReturn(const <String, String>{});
     when(windows.isWindows).thenReturn(true);
+    when(linux.isWindows).thenReturn(false);
+    when(linux.environment).thenReturn(const <String, String>{});
     testbed = Testbed(setup: () {
       mockHttpServer = MockHttpServer();
       requestController = StreamController<HttpRequest>.broadcast();
@@ -169,6 +173,8 @@ void main() {
 
     verify(headers.add('Content-Length', source.lengthSync())).called(1);
     verify(response.addStream(any)).called(1);
+  }, overrides: <Type,  Generator>{
+    Platform: () => linux,
   }));
 
   test('Handles missing Dart files from filesystem', () => testbed.run(() async {
