@@ -1,4 +1,4 @@
-Signature: 77ba8904412d3918c5f2f1de2ab0102c
+Signature: 17aff6202de730f1f648b4ec5c26666f
 
 UNUSED LICENSES:
 
@@ -7665,6 +7665,7 @@ FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_x64.cc
 FILE: ../../../third_party/dart/samples/ffi/coordinate.dart
 FILE: ../../../third_party/dart/samples/ffi/dylib_utils.dart
+FILE: ../../../third_party/dart/samples/ffi/sample_ffi_bitfield.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_data.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_dynamic_library.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions.dart
