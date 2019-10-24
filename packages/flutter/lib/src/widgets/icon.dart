@@ -176,6 +176,7 @@ class Icon extends StatelessWidget {
       text: TextSpan(
         text: String.fromCharCode(icon.codePoint),
         style: TextStyle(
+          height: 1, // Line height should be 1 for vertical align center.
           inherit: false,
           color: iconColor,
           fontSize: iconSize,
