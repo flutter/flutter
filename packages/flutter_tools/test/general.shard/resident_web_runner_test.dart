@@ -83,6 +83,9 @@ void main() {
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
+    when(mockVmService.onDebugEvent).thenAnswer((Invocation _) {
+      return const Stream<Event>.empty();
+    });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
 
@@ -172,6 +175,27 @@ void main() {
     await connectionInfoCompleter.future;
 
     expect(bufferLogger.statusText, contains('THIS MESSAGE IS IMPORTANT'));
+  }));
+
+  test('Does not run main with --start-paused', () => testbed.run(() async {
+    residentWebRunner = ResidentWebRunner(
+      mockWebDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
+      ipv6: true,
+    );
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final StreamController<Event> controller = StreamController<Event>.broadcast();
+    when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
+      return controller.stream;
+    });
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    verifyNever(mockAppConnection.runMain());
   }));
 
   test('Can hot reload after attaching', () => testbed.run(() async {
