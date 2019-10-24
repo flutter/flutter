@@ -92,6 +92,12 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
   });
 
+  test('ClipRRect constructs with the right default values', () {
+    const ClipRRect clipRRect = ClipRRect();
+    expect(clipRRect.clipBehavior, equals(Clip.antiAlias));
+    expect(clipRRect.borderRadius, equals(BorderRadius.zero));
+  });
+
   testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(_UpdateCountedClipRRect());
 
