@@ -431,9 +431,8 @@ task:
   setup_script:
     - date
     - which flutter
-    - sudo gem install cocoapods -N
-    - sudo gem install xcpretty -N
-    - sudo gem install fastlane -N
+    - sudo gem install bundler -N
+    - bundle install --system --gemfile=dev/ci/mac/Gemfile
     - git clean -xffd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
