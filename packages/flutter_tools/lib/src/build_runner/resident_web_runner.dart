@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:build_daemon/client.dart';
+import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
@@ -212,10 +214,26 @@ class ResidentWebRunner extends ResidentRunner {
         );
       });
       return result;
+    } on VersionSkew {
+      // Thrown if an older build daemon is already running.
+      throwToolExit(
+        'Another build daemon is already running with an older version.\n'
+        'Try exiting other Flutter processes in this project and try again.'
+      );
+    } on OptionsSkew {
+      // Thrown if a build daemon is already running with different configuration.
+      throwToolExit(
+        'Another build daemon is already running with different configuration.\n'
+        'Try exiting other Flutter processes in this project and try again.'
+      );
     } on WebSocketException {
       throwToolExit('Failed to connect to WebSocket.');
     } on BuildException {
       throwToolExit('Failed to build application for the Web.');
+    } on ChromeDebugException catch (err, stackTrace) {
+      throwToolExit(
+        'Failed to establish connection with Chrome. Try running the application again.\n'
+        'If this problem persists, please file an issue with the details below:\n$err\n$stackTrace');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
     } on StateError catch (err) {
@@ -259,7 +277,17 @@ class ResidentWebRunner extends ResidentRunner {
       unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
       // Always run main after connecting because start paused doesn't work yet.
-      _connectionResult.appConnection.runMain();
+      if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
+        _connectionResult.appConnection.runMain();
+      } else {
+        StreamSubscription<void> resumeSub;
+        resumeSub = _connectionResult.debugConnection.vmService.onDebugEvent.listen((vmservice.Event event) {
+          if (event.type == vmservice.EventKind.kResume) {
+            _connectionResult.appConnection.runMain();
+            resumeSub.cancel();
+          }
+        });
+      }
     }
     if (websocketUri != null) {
       printStatus('Debug service listening on $websocketUri');

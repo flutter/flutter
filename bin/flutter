@@ -150,6 +150,15 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART="$DART_SDK_PATH/bin/dart"
 PUB="$DART_SDK_PATH/bin/pub"
 
+# If running over git-bash, overrides the default UNIX
+# executables with win32 executables
+case "$(uname -s)" in
+  MINGW32*)
+    DART="$DART.exe"
+    PUB="$PUB.bat"
+    ;;
+esac
+
 # Test if running as superuser – but don't warn if running within Docker
 if [[ "$EUID" == "0" && ! -f /.dockerenv ]]; then
   echo "   Woah! You appear to be trying to run flutter as root."
