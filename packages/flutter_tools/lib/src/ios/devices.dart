@@ -290,10 +290,8 @@ class IOSDevice extends Device {
         await diagnoseXcodeBuildFailure(buildResult);
         printError('');
         return LaunchResult.failed();
-      } else {
-        packageId = buildResult.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
       }
-
+      packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
     } else {
       if (!await installApp(package)) {
         return LaunchResult.failed();
