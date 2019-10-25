@@ -62,9 +62,9 @@ const int kWebBatchSize = 20;
 // TODO(yjbanov): we're getting rid of these blacklists as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestDirectoryBlacklist = <String>[
   'cupertino',
-  'examples',
 ];
 const List<String> kWebTestFileBlacklist = <String>[
+  'test/examples/sector_layout_test.dart',
   'test/widgets/heroes_test.dart',
   'test/widgets/text_test.dart',
   'test/widgets/selectable_text_test.dart',
@@ -74,13 +74,9 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/raw_keyboard_listener_test.dart',
   'test/widgets/editable_text_test.dart',
   'test/widgets/widget_inspector_test.dart',
-  'test/widgets/draggable_test.dart',
   'test/widgets/shortcuts_test.dart',
   'test/material/text_form_field_test.dart',
-  'test/material/banner_theme_test.dart',
-  'test/material/popup_menu_test.dart',
   'test/material/data_table_test.dart',
-  'test/material/toggle_buttons_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
