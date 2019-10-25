@@ -41,17 +41,43 @@ class SkPath implements ui.Path {
 
   @override
   void addArc(ui.Rect oval, double startAngle, double sweepAngle) {
-    throw 'addArc';
+    _skPath.callMethod('addArc', <dynamic>[
+      makeSkRect(oval),
+      startAngle,
+      sweepAngle,
+    ]);
   }
 
   @override
   void addOval(ui.Rect oval) {
-    _skPath.callMethod('addOval', <js.JsObject>[makeSkRect(oval)]);
+    _skPath.callMethod('addOval', <dynamic>[makeSkRect(oval), true, 0]);
   }
 
   @override
   void addPath(ui.Path path, ui.Offset offset, {Float64List matrix4}) {
-    throw 'addPath';
+    List<double> skMatrix;
+    if (matrix4 == null) {
+      skMatrix = makeSkMatrix(
+          Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage);
+    } else {
+      skMatrix = makeSkMatrix(matrix4);
+      skMatrix[2] += offset.dx;
+      skMatrix[5] += offset.dy;
+    }
+    final SkPath otherPath = path;
+    _skPath.callMethod('addPath', <dynamic>[
+      otherPath._skPath,
+      skMatrix[0],
+      skMatrix[1],
+      skMatrix[2],
+      skMatrix[3],
+      skMatrix[4],
+      skMatrix[5],
+      skMatrix[6],
+      skMatrix[7],
+      skMatrix[8],
+      false,
+    ]);
   }
 
   @override
@@ -135,7 +161,7 @@ class SkPath implements ui.Path {
 
   @override
   void conicTo(double x1, double y1, double x2, double y2, double w) {
-    throw 'conicTo';
+    _skPath.callMethod('conicTo', <double>[x1, y1, x2, y2, w]);
   }
 
   @override
@@ -249,25 +275,39 @@ class SkPath implements ui.Path {
   }
 
   @override
-  List<Subpath> get subpaths => throw 'subpaths';
+  List<Subpath> get subpaths {
+    throw UnimplementedError(
+        'Path.subpaths is not supported in the CanvasKit backend.');
+  }
 
   @override
   ui.Path transform(Float64List matrix4) {
-    throw 'transform';
+    final js.JsObject newPath = _skPath.callMethod('copy');
+    newPath.callMethod('transform', <js.JsArray>[makeSkMatrix(matrix4)]);
+    return SkPath._fromSkPath(newPath);
   }
 
-  // TODO(het): Remove these.
   @override
-  Ellipse get webOnlyPathAsCircle => null;
+  Ellipse get webOnlyPathAsCircle {
+    throw new UnimplementedError(
+        'webOnlyPathAsCircle is not used in the CanvasKit backend.');
+  }
 
   @override
-  ui.Rect get webOnlyPathAsRect => null;
+  ui.Rect get webOnlyPathAsRect {
+    throw new UnimplementedError(
+        'webOnlyPathAsRect is not used in the CanvasKit backend.');
+  }
 
   @override
-  ui.RRect get webOnlyPathAsRoundedRect => null;
+  ui.RRect get webOnlyPathAsRoundedRect {
+    throw new UnimplementedError(
+        'webOnlyPathAsRoundedRect is not used in the CanvasKit backend.');
+  }
 
   @override
   List<dynamic> webOnlySerializeToCssPaint() {
-    return null;
+    throw new UnimplementedError(
+        'webOnlySerializeToCssPaint is not used in the CanvasKit backend.');
   }
 }

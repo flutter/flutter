@@ -203,42 +203,24 @@ void drawSkShadow(
   final double shadowX = (bounds.left + bounds.right) / 2.0;
   final double shadowY = bounds.top - 600.0;
 
-  final ui.Color ambientColor =
-      ui.Color.fromARGB((color.alpha * ambientAlpha).round(), 0, 0, 0);
+  ui.Color inAmbient = color.withAlpha((color.alpha * ambientAlpha).round());
+  ui.Color inSpot = color.withAlpha((color.alpha * spotAlpha).round());
 
-  // This is a port of SkShadowUtils::ComputeTonalColors
-  final int minSpot = math.min(color.red, math.min(color.green, color.blue));
-  final int maxSpot = math.max(color.red, math.max(color.green, color.blue));
-  final double luminance = 0.5 * (maxSpot + minSpot) / 255.0;
-  final double originalAlpha = (color.alpha * spotAlpha) / 255.0;
-  final double alphaAdjust =
-      (2.6 + (-2.66667 + 1.06667 * originalAlpha) * originalAlpha) *
-          originalAlpha;
-  double colorAlpha =
-      (3.544762 + (-4.891428 + 2.3466 * luminance) * luminance) * luminance;
-  colorAlpha = (colorAlpha * alphaAdjust).clamp(0.0, 1.0);
+  final js.JsObject inTonalColors = js.JsObject.jsify(<String, int>{
+    'ambient': inAmbient.value,
+    'spot': inSpot.value,
+  });
 
-  final double greyscaleAlpha =
-      (originalAlpha * (1.0 - 0.4 * luminance)).clamp(0.0, 1.0);
-
-  final double colorScale = colorAlpha * (1.0 - greyscaleAlpha);
-  final double tonalAlpha = colorScale + greyscaleAlpha;
-  final double unPremulScale = colorScale / tonalAlpha;
-
-  final ui.Color spotColor = ui.Color.fromARGB(
-    (tonalAlpha * 255.999).round(),
-    (unPremulScale * color.red).round(),
-    (unPremulScale * color.green).round(),
-    (unPremulScale * color.blue).round(),
-  );
+  final js.JsObject tonalColors =
+      canvasKit.callMethod('computeTonalColors', <js.JsObject>[inTonalColors]);
 
   skCanvas.callMethod('drawShadow', <dynamic>[
     path._skPath,
     js.JsArray<double>.from(<double>[0, 0, elevation]),
     js.JsArray<double>.from(<double>[shadowX, shadowY, 600]),
     800,
-    ambientColor.value,
-    spotColor.value,
+    tonalColors['ambient'],
+    tonalColors['spot'],
     flags,
   ]);
 }
