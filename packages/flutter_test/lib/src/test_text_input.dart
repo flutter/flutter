@@ -123,6 +123,27 @@ class TestTextInput {
     );
   }
 
+  /// Simulates the user closing the text input connection.
+  ///
+  /// Example via sending the application to the backend or closing a virtual
+  /// keyboard.
+  void closeConnection() {
+    // Not using the `expect` function because in the case of a FlutterDriver
+    // test this code does not run in a package:test test zone.
+    if (_client == 0)
+      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+    _binaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.onConnectionClosed',
+           <dynamic>[_client,],
+        ),
+      ),
+      (ByteData data) { /* response from framework is discarded */ },
+    );
+  }
+
   /// Simulates the user typing the given text.
   void enterText(String text) {
     updateEditingValue(TextEditingValue(

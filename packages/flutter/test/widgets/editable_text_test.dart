@@ -554,6 +554,46 @@ void main() {
         equals('TextInputAction.done'));
   });
 
+  testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
+    Future<void> verifyVisibility(bool expectedVisibility) async {
+      expect(tester.testTextInput.isVisible, expectedVisibility);
+    }
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    await verifyVisibility(true);
+
+    tester.testTextInput.closeConnection();
+
+    await tester.idle();
+
+    await verifyVisibility(false);
+  });
+
   /// Toolbar is not used in Flutter Web. Skip this check.
   ///
   /// Web is using native dom elements (it is also used as platform input)

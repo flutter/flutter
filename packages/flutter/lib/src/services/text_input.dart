@@ -633,6 +633,9 @@ abstract class TextInputClient {
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
+
+  /// Connection close request is received.
+  void connectionClosed();
 }
 
 /// An interface for interacting with a text input control.
@@ -813,6 +816,9 @@ class _TextInputClientHandler {
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        break;
+      case 'TextInputClient.onConnectionClosed':
+        _currentConnection._client.connectionClosed();
         break;
       default:
         throw MissingPluginException();
