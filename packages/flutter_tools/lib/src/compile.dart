@@ -289,7 +289,6 @@ class KernelCompiler {
     String fileSystemScheme,
     String initializeFromDill,
     String platformDill,
-    bool bytecode = false,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -355,8 +354,6 @@ class KernelCompiler {
         '--platform',
         platformDill,
       ],
-      if (bytecode)
-        '--gen-bytecode',
       ...?extraFrontEndOptions,
       mainUri?.toString() ?? mainPath,
     ];

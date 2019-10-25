@@ -458,10 +458,6 @@ class LocalEngineArtifacts extends Artifacts {
         return genSnapshotPath;
       }
     }
-    final String rootPath = fs.path.join(_hostEngineOutPath, genSnapshotName);
-    if (processManager.canRun(rootPath)) {
-      return rootPath;
-    }
     throw Exception('Unable to find $genSnapshotName');
   }
 

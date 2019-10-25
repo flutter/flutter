@@ -123,7 +123,7 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AppSnapshot(),
+    KernelSnapshot(),
   ];
 }
 
@@ -225,55 +225,10 @@ class KernelSnapshot extends Target {
       linkPlatformKernelIn: true,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
-      bytecode: false,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
     }
-  }
-}
-
-class AppSnapshot extends Target {
-  const AppSnapshot();
-
-  @override
-  String get name => 'app_snapshot';
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/vm_snapshot_data'),
-    Source.pattern('{BUILD_DIR}/isolate_snapshot_data'),
-  ];
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-  ];
-
-  @override
-  Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
-      throw MissingDefineException(kBuildMode, 'kernel_snapshot');
-    }
-//    final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
-//    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-
-    await genSnapshot.run(
-      snapshotType: SnapshotType(getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())), BuildMode.debug),
-      additionalArgs: <String>[
-        '--snapshot-kind=app',
-        '--vm_snapshot_data=${environment.buildDir.childFile('vm_snapshot_data').path}',
-        '--isolate_snapshot_data=${environment.buildDir.childFile('isolate_snapshot_data').path}',
-        '',
-        '',
-        environment.buildDir.childFile('app.dill').path,
-      ]
-    );
   }
 }
 

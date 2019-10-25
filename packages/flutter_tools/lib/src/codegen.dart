@@ -148,7 +148,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       depFilePath: depFilePath,
       targetModel: targetModel,
       initializeFromDill: initializeFromDill,
-      bytecode: bytecode,
     );
   }
 }

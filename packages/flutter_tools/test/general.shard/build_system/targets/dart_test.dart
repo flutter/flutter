@@ -208,7 +208,6 @@ flutter_tools:lib/''');
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
       linkPlatformKernelIn: false,
-      bytecode: false,
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -220,39 +219,6 @@ flutter_tools:lib/''');
         kBuildMode: 'debug',
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       }));
-  }, overrides: <Type, Generator>{
-    KernelCompilerFactory: () => MockKernelCompilerFactory(),
-  }));
-
-  test('kernel_snapshot supports a minimal jit release build', () => testbed.run(() async {
-    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
-    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
-      return mockKernelCompiler;
-    });
-    when(mockKernelCompiler.compile(
-      sdkRoot: anyNamed('sdkRoot'),
-      aot: false,
-      enableAsserts: false,
-      trackWidgetCreation: false,
-      targetModel: anyNamed('targetModel'),
-      targetProductVm: true,
-      outputFilePath: anyNamed('outputFilePath'),
-      depFilePath: anyNamed('depFilePath'),
-      packagesPath: anyNamed('packagesPath'),
-      mainPath: anyNamed('mainPath'),
-      linkPlatformKernelIn: false,
-      bytecode: false,
-    )).thenAnswer((Invocation _) async {
-      return const CompilerOutput('example', 0, <Uri>[]);
-    });
-
-    await const KernelSnapshot().build(Environment(
-        outputDir: fs.currentDirectory,
-        projectDir: fs.currentDirectory,
-        defines: <String, String>{
-          kBuildMode: 'jit_release',
-          kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
-        }));
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
