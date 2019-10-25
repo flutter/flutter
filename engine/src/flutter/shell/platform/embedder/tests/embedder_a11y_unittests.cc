@@ -21,9 +21,6 @@ namespace testing {
 
 using Embedder11yTest = testing::EmbedderTest;
 
-// TODO: This test has been disabled as it is flaky (more reproducible in
-// profile more). Multiple calls to a11y changed handler in Dart code is
-// suspected. https://github.com/flutter/flutter/issues/35218
 TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
   auto& context = GetEmbedderContext();
 
