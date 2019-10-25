@@ -130,6 +130,7 @@ void a11y_main() async { // ignore: non_constant_identifier_names
       rect: Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
       transform: kTestTransform,
       additionalActions: Int32List.fromList(<int>[21]),
+      platformViewId: 0x3f3,
     )
     ..updateCustomAction(
       id: 21,

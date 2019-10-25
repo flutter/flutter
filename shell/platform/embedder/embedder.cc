@@ -737,6 +737,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                 &node.childrenInHitTestOrder[0],
                 node.customAccessibilityActions.size(),
                 &node.customAccessibilityActions[0],
+                node.platformViewId,
             };
             ptr(&embedder_node, user_data);
           }
