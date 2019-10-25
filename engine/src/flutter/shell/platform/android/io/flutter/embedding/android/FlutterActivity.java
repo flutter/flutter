@@ -399,6 +399,7 @@ public class FlutterActivity extends Activity
 
     delegate = new FlutterActivityAndFragmentDelegate(this);
     delegate.onAttach(this);
+    delegate.onActivityCreated(savedInstanceState);
 
     configureWindowForTransparency();
     setContentView(createFlutterView());
@@ -555,6 +556,12 @@ public class FlutterActivity extends Activity
     super.onStop();
     delegate.onStop();
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_STOP);
+  }
+
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    delegate.onSaveInstanceState(outState);
   }
 
   @Override

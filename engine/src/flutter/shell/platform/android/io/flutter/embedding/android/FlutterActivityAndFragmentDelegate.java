@@ -142,8 +142,6 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
   void onAttach(@NonNull Context context) {
     ensureAlive();
 
-    initializeFlutter(context);
-
     // When "retain instance" is true, the FlutterEngine will survive configuration
     // changes. Therefore, we create a new one only if one does not already exist.
     if (flutterEngine == null) {
@@ -176,13 +174,6 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     }
 
     host.configureFlutterEngine(flutterEngine);
-  }
-
-  private void initializeFlutter(@NonNull Context context) {
-    FlutterMain.ensureInitializationComplete(
-        context.getApplicationContext(),
-        host.getFlutterShellArgs().toArray()
-    );
   }
 
   /**
@@ -223,7 +214,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     // FlutterView.
     Log.d(TAG, "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
         + " this FlutterFragment.");
-    flutterEngine = new FlutterEngine(host.getContext());
+    flutterEngine = new FlutterEngine(host.getContext(), host.getFlutterShellArgs().toArray());
     isFlutterEngineFromHost = false;
   }
 
@@ -255,6 +246,15 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     flutterSplashView.displayFlutterViewWithSplash(flutterView, host.provideSplashScreen());
 
     return flutterSplashView;
+  }
+
+  void onActivityCreated(@Nullable Bundle bundle) {
+    Log.v(TAG, "onActivityCreated. Giving plugins an opportunity to restore state.");
+    ensureAlive();
+
+    if (host.shouldAttachEngineToActivity()) {
+      flutterEngine.getActivityControlSurface().onRestoreInstanceState(bundle);
+    }
   }
 
   /**
@@ -402,6 +402,15 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     Log.v(TAG, "onDestroyView()");
     ensureAlive();
     flutterView.removeOnFirstFrameRenderedListener(flutterUiDisplayListener);
+  }
+
+  void onSaveInstanceState(@Nullable Bundle bundle) {
+    Log.v(TAG, "onSaveInstanceState. Giving plugins an opportunity to save state.");
+    ensureAlive();
+
+    if (host.shouldAttachEngineToActivity()) {
+      flutterEngine.getActivityControlSurface().onSaveInstanceState(bundle);
+    }
   }
 
   /**

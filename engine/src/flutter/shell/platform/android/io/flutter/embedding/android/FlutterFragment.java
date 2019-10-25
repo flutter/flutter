@@ -587,6 +587,12 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   }
 
   @Override
+  public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    super.onActivityCreated(savedInstanceState);
+    delegate.onActivityCreated(savedInstanceState);
+  }
+
+  @Override
   public void onStart() {
     super.onStart();
     delegate.onStart();
@@ -620,6 +626,12 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   public void onDestroyView() {
     super.onDestroyView();
     delegate.onDestroyView();
+  }
+
+  @Override
+  public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    delegate.onSaveInstanceState(outState);
   }
 
   @Override
