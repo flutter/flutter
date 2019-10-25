@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 
 // The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
-const double _kOpenScale = 1.05;
+const double _kOpenScale = 1.1;
 
 typedef _DismissCallback = void Function(
   BuildContext context,
