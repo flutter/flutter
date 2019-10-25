@@ -913,7 +913,8 @@ class TextStyle extends Diagnosticable {
 
   /// Interpolate between two text styles.
   ///
-  /// This will not work well if the styles don't set the same fields.
+  /// This will not work well if the styles don't set the same fields, or if
+  /// the [inherit] fields are different.
   ///
   /// {@macro dart.ui.shadow.lerp}
   ///
@@ -926,7 +927,6 @@ class TextStyle extends Diagnosticable {
   /// based on the [backgroundColor] property).
   static TextStyle lerp(TextStyle a, TextStyle b, double t) {
     assert(t != null);
-    assert(a == null || b == null || a.inherit == b.inherit);
     if (a == null && b == null) {
       return null;
     }
@@ -992,7 +992,7 @@ class TextStyle extends Diagnosticable {
     }
 
     return TextStyle(
-      inherit: b.inherit,
+      inherit: t < 0.5 ? a.inherit : b.inherit,
       color: a.foreground == null && b.foreground == null ? Color.lerp(a.color, b.color, t) : null,
       backgroundColor: a.background == null && b.background == null ? Color.lerp(a.backgroundColor, b.backgroundColor, t) : null,
       fontFamily: t < 0.5 ? a.fontFamily : b.fontFamily,

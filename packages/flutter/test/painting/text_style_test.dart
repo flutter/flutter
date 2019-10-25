@@ -167,6 +167,10 @@ void main() {
     expect(s9.height, isNull);
     expect(s9.color, isNull);
 
+    // Check that we can lerp with different inherit flags
+    final TextStyle s10 = TextStyle.lerp(s1, const TextStyle(inherit: false), 0.75);
+    expect(s10.inherit, isFalse);
+
     final ui.TextStyle ts5 = s5.getTextStyle();
     expect(ts5, equals(ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
     expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
