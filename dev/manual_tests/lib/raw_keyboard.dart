@@ -102,6 +102,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('vendorId: ${data.vendorId} (${_asHex(data.vendorId)})'));
             dataText.add(Text('productId: ${data.productId} (${_asHex(data.productId)})'));
             dataText.add(Text('flags: ${data.flags} (${_asHex(data.flags)})'));
+            dataText.add(Text('repeatCount: ${data.repeatCount} (${_asHex(data.repeatCount)})'));
           } else if (data is RawKeyEventDataFuchsia) {
             dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)})'));
             dataText.add(Text('hidUsage: ${data.hidUsage} (${_asHex(data.hidUsage)})'));
