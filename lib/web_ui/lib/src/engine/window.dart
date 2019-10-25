@@ -141,6 +141,9 @@ class EngineWindow extends ui.Window {
             domRenderer.setTitle(arguments['label']);
             domRenderer.setThemeColor(ui.Color(arguments['primaryColor']));
             return;
+          case 'SystemSound.play':
+            // There are no default system sounds on web.
+            return;
         }
         break;
 
