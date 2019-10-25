@@ -38,7 +38,7 @@ Future<void> buildFuchsia({
   @required FuchsiaProject fuchsiaProject,
   @required String target, // E.g., lib/main.dart
   BuildInfo buildInfo = BuildInfo.debug,
-  String runnerPackageSource = 'flutter_tool',
+  String runnerPackageSource = FuchsiaPackageServer.toolHost,
 }) async {
   final Directory outDir = fs.directory(getFuchsiaBuildDirectory());
   if (!outDir.existsSync()) {
