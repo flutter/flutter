@@ -458,6 +458,11 @@ typedef struct {
   double bottom;
 } FlutterRect;
 
+/// The identifier of the platform view. This identifier is specified by the
+/// application when a platform view is added to the scene via the
+/// `SceneBuilder.addPlatformView` call.
+typedef int64_t FlutterPlatformViewIdentifier;
+
 /// `FlutterSemanticsNode` ID used as a sentinel to signal the end of a batch of
 /// semantics node updates.
 FLUTTER_EXPORT
@@ -529,6 +534,9 @@ typedef struct {
   /// Array of `FlutterSemanticsCustomAction` IDs associated with this node.
   /// Has length `custom_accessibility_actions_count`.
   const int32_t* custom_accessibility_actions;
+  /// Identifier of the platform view associated with this semantics node, or
+  /// zero if none.
+  FlutterPlatformViewIdentifier platform_view_id;
 } FlutterSemanticsNode;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
@@ -652,11 +660,6 @@ typedef struct {
   /// store.
   VoidCallback destruction_callback;
 } FlutterSoftwareBackingStore;
-
-/// The identifier of the platform view. This identifier is specified by the
-/// application when a platform view is added to the scene via the
-/// `SceneBuilder.addPlatformView` call.
-typedef int64_t FlutterPlatformViewIdentifier;
 
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterPlatformView).
