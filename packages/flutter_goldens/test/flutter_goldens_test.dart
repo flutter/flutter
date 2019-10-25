@@ -519,17 +519,6 @@ void main() {
     });
 
     group('Skipping', () {
-      FlutterSkippingGoldenFileComparator comparator;
-      final MockSkiaGoldClient mockSkiaClient = MockSkiaGoldClient();
-      setUp(() {
-        final Directory basedir = fs.directory('flutter/test/library/')
-          ..createSync(recursive: true);
-        comparator = FlutterSkippingGoldenFileComparator(
-          basedir.uri,
-          mockSkiaClient,
-        );
-      });
-
       test('correctly determines testing environment', () {
         platform = FakePlatform(
           environment: <String, String>{
