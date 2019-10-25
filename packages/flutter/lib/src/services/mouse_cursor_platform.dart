@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'mouse_cursor_android.dart';
@@ -47,6 +48,10 @@ class StandardMouseCursorManager extends MouseCursorManager {
   MouseCursorPlatformDelegate _platformDelegate;
 
   MouseCursorPlatformDelegate _createDelegate(MethodChannel channel) {
+    // Must check kIsWeb first; Platform.isXXX is unsupported on Web and will
+    // throw errors.
+    if (kIsWeb)
+      return const MouseCursorUnsupportedPlatformDelegate();
     if (Platform.isLinux) {
       return MouseCursorGLFWDelegate(mouseCursorChannel: channel);
     } else if (Platform.isAndroid) {
