@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("$flutter_root/tools/fuchsia/fuchsia_debug_symbols.gni")
+
 # Creates a Fuchsia archive (.far) file using PM from the Fuchsia SDK.
 template("fuchsia_archive") {
   assert(defined(invoker.binary), "package must define binary")
@@ -72,6 +74,13 @@ template("fuchsia_archive") {
              },
              "json")
 
+  _dbg_symbols_target = "${target_name}_dbg_symbols"
+  fuchsia_debug_symbols(_dbg_symbols_target) {
+    deps = pkg.deps
+    testonly = pkg_testonly
+    binary = invoker.binary
+  }
+
   pkg_dir_deps = pkg.deps + [ ":$cmx_target" ]
 
   action("${target_name}_dir") {
@@ -86,7 +95,10 @@ template("fuchsia_archive") {
 
   action(target_name) {
     script = "$flutter_root/tools/fuchsia/gen_package.py"
-    deps = pkg_dir_deps + [ ":${target_name}_dir" ]
+    deps = pkg_dir_deps + [
+             ":${target_name}_dir",
+             ":${_dbg_symbols_target}",
+           ]
     sources = copy_outputs
 
     inputs = []
