@@ -74,6 +74,10 @@ def main():
   if not os.path.exists(os.path.join(pkg_dir, 'meta', 'package')):
     CreateMetaPackage(pkg_dir, args.far_name)
 
+  output_dir = os.path.abspath(pkg_dir + '_out')
+  if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
   manifest_file = None
   if args.manifest_file is not None:
     assert os.path.exists(args.manifest_file)
@@ -81,7 +85,7 @@ def main():
   else:
     manifest_file = GenerateManifest(args.package_dir)
 
-  strace_out = os.path.abspath(os.path.join(os.path.dirname(pkg_dir), 'strace_out'))
+  strace_out = os.path.join(output_dir, 'strace_out')
 
   pm_command_base = [
       'strace',
@@ -90,7 +94,7 @@ def main():
       strace_out,
       args.pm_bin,
       '-o',
-      os.path.abspath(os.path.join(pkg_dir, os.pardir)),
+      output_dir,
       '-k',
       args.signing_key,
       '-m',
@@ -100,8 +104,12 @@ def main():
   # Build and then archive the package
   # Use check_output so if anything goes wrong we get the output.
   try:
-    for pm_command in ['build', 'archive']:
-      pm_command_args = pm_command_base + [pm_command]
+    pm_commands = [
+        ['build'],
+        ['archive', '--output='+ os.path.join(os.path.dirname(output_dir), args.far_name + "-0")],
+    ]
+    for pm_command in pm_commands:
+      pm_command_args = pm_command_base + pm_command
       sys.stderr.write("===== Running %s\n" % pm_command_args)
       subprocess.check_output(pm_command_args)
   except subprocess.CalledProcessError as e:
@@ -109,6 +117,12 @@ def main():
     with open(manifest_file, 'r') as manifest:
       sys.stdout.write(manifest.read())
     print('==================== End manifest contents =====================================')
+    meta_contents_path = os.path.join(output_dir, 'meta', 'contents')
+    if os.path.exists(meta_contents_path):
+      print('==================== meta/contents =============================================')
+      with open(meta_contents_path, 'r') as meta_contents:
+        sys.stdout.write(meta_contents.read())
+      print('==================== End meta/contents =========================================')
     print('==================== Strace output =============================================')
     with open(strace_out, 'r') as strace:
       sys.stdout.write(strace.read())
