@@ -64,17 +64,17 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
 
   @Override
   public BinaryMessenger messenger() {
-    return pluginBinding != null ? pluginBinding.getFlutterEngine().getDartExecutor() : null;
+    return pluginBinding != null ? pluginBinding.getBinaryMessenger() : null;
   }
 
   @Override
   public TextureRegistry textures() {
-    return pluginBinding != null ? pluginBinding.getFlutterEngine().getRenderer() : null;
+    return pluginBinding != null ? pluginBinding.getTextureRegistry() : null;
   }
 
   @Override
   public PlatformViewRegistry platformViewRegistry() {
-    return pluginBinding != null ? pluginBinding.getFlutterEngine().getPlatformViewsController().getRegistry() : null;
+    return pluginBinding != null ? pluginBinding.getPlatformViewRegistry() : null;
   }
 
   @Override

@@ -5,7 +5,9 @@
 package io.flutter.embedding.engine.plugins.service;
 
 import android.app.Service;
+import android.arch.lifecycle.Lifecycle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Binding that gives {@link ServiceAware} plugins access to an associated {@link Service}.
@@ -18,6 +20,12 @@ public interface ServicePluginBinding {
    */
   @NonNull
   Service getService();
+
+  /**
+   * Returns the {@link Lifecycle} associated with the attached {@code Service}.
+   */
+  @Nullable
+  Lifecycle getLifecycle();
 
   /**
    * Adds the given {@code listener} to be notified when the associated {@link Service} goes

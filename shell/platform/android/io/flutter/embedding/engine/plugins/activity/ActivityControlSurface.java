@@ -7,6 +7,7 @@ package io.flutter.embedding.engine.plugins.activity;
 import android.app.Activity;
 import android.arch.lifecycle.Lifecycle;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -98,4 +99,19 @@ public interface ActivityControlSurface {
    * {@link FlutterEngine} and the associated method in the {@link Activity} is invoked.
    */
   void onUserLeaveHint();
+
+  /**
+   * Call this method from the {@link Activity} or {@code Fragment} that is attached to this
+   * {@code ActivityControlSurface}'s {@link FlutterEngine} when the associated method is invoked
+   * in the {@link Activity} or {@code Fragment}.
+   */
+  void onSaveInstanceState(@NonNull Bundle bundle);
+
+  /**
+   * Call this method from the {@link Activity} or {@code Fragment} that is attached to this
+   * {@code ActivityControlSurface}'s {@link FlutterEngine} when {@link Activity#onCreate(Bundle)}
+   * or {@code Fragment#onActivityCreated(Bundle)} is invoked in the {@link Activity} or
+   * {@code Fragment}.
+   */
+  void onRestoreInstanceState(@Nullable Bundle bundle);
 }
