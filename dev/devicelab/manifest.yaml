@@ -396,6 +396,7 @@ tasks:
     description: >
       Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
+    flaky: true # Currently broken due to infra outage.
     required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery_ios32__transition_perf:
@@ -403,6 +404,7 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       32-bit iOS (iPhone 4S).
     stage: devicelab_ios
+    flaky: true # Currently broken due to infra outage.
     required_agent_capabilities: ["mac/ios32"]
 
   flavors_test_ios:
