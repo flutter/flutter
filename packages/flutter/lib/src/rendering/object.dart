@@ -385,6 +385,18 @@ class PaintingContext extends ClipContext {
     childContext.stopRecordingIfNeeded();
   }
 
+  void pushVirtualLayer(ContainerLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+    assert(painter != null);
+    if (childLayer.hasChildren) {
+      childLayer.removeAllChildren();
+    }
+    // Following: appendLayer(childLayer) but with assertion removed
+    childLayer.remove();
+    _containerLayer.append(childLayer);
+    final PaintingContext childContext = VirtualPaintingContext(this, childLayer, estimatedBounds);
+    painter(childContext, offset);
+  }
+
   /// Creates a compatible painting context to paint onto [childLayer].
   @protected
   PaintingContext createChildContext(ContainerLayer childLayer, Rect bounds) {
@@ -572,6 +584,28 @@ class PaintingContext extends ClipContext {
 
   @override
   String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
+}
+
+class VirtualPaintingContext extends PaintingContext {
+  VirtualPaintingContext(this.owner, ContainerLayer containerLayer, Rect estimatedBounds)
+    : super(containerLayer, estimatedBounds);
+
+  final PaintingContext owner;
+
+  @override
+  Canvas get canvas => owner.canvas;
+
+  @override
+  void appendLayer(Layer layer) {
+    layer.remove();
+    _containerLayer.append(layer);
+  }
+
+  @override
+  void stopRecordingIfNeeded() {
+    owner.stopRecordingIfNeeded();
+    super.stopRecordingIfNeeded();
+  }
 }
 
 /// An abstract set of layout constraints.
