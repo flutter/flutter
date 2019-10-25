@@ -109,7 +109,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     TargetModel targetModel = TargetModel.flutter,
     String initializeFromDill,
     String platformDill,
-    bool bytecode = false,
   }) async {
     if (fileSystemRoots != null || fileSystemScheme != null || depFilePath != null || targetModel != null || sdkRoot != null || packagesPath != null) {
       printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel,'
