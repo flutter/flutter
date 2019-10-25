@@ -84,10 +84,6 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
   }
 }
 
-class ClosureTracker {
-  static bool called = false;
-}
-
 Future<void> main() async {
   // These must run outside test zone to complete
   final ui.Image targetImage = await createTestImage();
