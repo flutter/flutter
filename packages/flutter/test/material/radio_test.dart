@@ -276,10 +276,7 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(painterKey),
-      matchesGoldenFile(
-        'radio.ink_ripple.png',
-        version: null,
-      ),
+      matchesGoldenFile('radio.ink_ripple.png'),
     );
   }, skip: isBrowser);
 }
