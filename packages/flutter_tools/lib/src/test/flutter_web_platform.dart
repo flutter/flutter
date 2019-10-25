@@ -139,7 +139,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         requireJs.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
-    } else if (request.requestedUri.path.contains('Ahem.ttf')) {
+    } else if (request.requestedUri.path.contains('ahem.ttf')) {
       return shelf.Response.ok(ahem.openRead());
     } else if (request.requestedUri.path.contains('dart_sdk.js')) {
       return shelf.Response.ok(

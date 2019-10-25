@@ -50,7 +50,7 @@ const int kDeviceLabShardCount = 4;
 /// and make sure it runs _all_ shards.
 ///
 /// The last shard also runs the Web plugin tests.
-const int kWebShardCount = 6;
+const int kWebShardCount = 8;
 
 /// Maximum number of Web tests to run in a single `flutter test`. We found that
 /// large batches can get flaky, possibly because we reuse a single instance of
@@ -63,7 +63,6 @@ const int kWebBatchSize = 20;
 const List<String> kWebTestDirectoryBlacklist = <String>[
   'cupertino',
   'examples',
-  'material',
 ];
 const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/heroes_test.dart',
@@ -77,6 +76,11 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/widget_inspector_test.dart',
   'test/widgets/draggable_test.dart',
   'test/widgets/shortcuts_test.dart',
+  'test/material/text_form_field_test.dart',
+  'test/material/banner_theme_test.dart',
+  'test/material/popup_menu_test.dart',
+  'test/material/data_table_test.dart',
+  'test/material/toggle_buttons_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
