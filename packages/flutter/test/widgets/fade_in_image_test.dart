@@ -280,18 +280,18 @@ Future<void> main() async {
         imageCacheHeight: 50,
       );
 
+      bool called = false;
       final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
         expect(cacheWidth, 20);
         expect(cacheHeight, 30);
-        ClosureTracker.called = true;
+        called = true;
         return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
       };
       final ImageProvider resizeImage = image.placeholder;
-      expect(image.placeholder is ResizeImage, true);
-      ClosureTracker.called = false;
-      expect(ClosureTracker.called, false);
+      expect(image.placeholder, isA<ResizeImage>());
+      expect(called, false);
       ImageStreamCompleter isc = resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
-      expect(ClosureTracker.called, true);
+      expect(called, true);
     });
 
     testWidgets('do not resize when null cache dimensions', (WidgetTester tester) async {
@@ -301,19 +301,19 @@ Future<void> main() async {
         image: 'test.com',
       );
 
+      bool called = false;
       final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
         expect(cacheWidth, null);
         expect(cacheHeight, null);
-        ClosureTracker.called = true;
+        called = true;
         return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
       };
       // image.placeholder should be an instance of MemoryImage instead of ResizeImage
       final ImageProvider memoryImage = image.placeholder;
-      expect(image.placeholder is MemoryImage, true);
-      ClosureTracker.called = false;
-      expect(ClosureTracker.called, false);
+      expect(image.placeholder, isA<MemoryImage>());
+      expect(called, false);
       memoryImage.load(await memoryImage.obtainKey(ImageConfiguration.empty), decode);
-      expect(ClosureTracker.called, true);
+      expect(called, true);
     });
 
     group('semantics', () {
