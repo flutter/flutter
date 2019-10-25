@@ -1055,7 +1055,7 @@ class Paint {
       _paintData = _paintData.clone();
       _frozen = false;
     }
-    _paintData.color = value;
+   _paintData.color = value.runtimeType == Color ? value : Color(value.value);
   }
 
   /// Whether the colors of the image are inverted when drawn.
