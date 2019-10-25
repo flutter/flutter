@@ -84,6 +84,10 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
   }
 }
 
+class ClosureTracker {
+  static bool called = false;
+}
+
 Future<void> main() async {
   // These must run outside test zone to complete
   final ui.Image targetImage = await createTestImage();
@@ -279,10 +283,15 @@ Future<void> main() async {
       final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
         expect(cacheWidth, 20);
         expect(cacheHeight, 30);
+        ClosureTracker.called = true;
         return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
       };
-      final ResizeImage resizeImage = image.placeholder;
-      resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+      final ImageProvider resizeImage = image.placeholder;
+      expect(image.placeholder is ResizeImage, true);
+      ClosureTracker.called = false;
+      expect(ClosureTracker.called, false);
+      ImageStreamCompleter isc = resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+      expect(ClosureTracker.called, true);
     });
 
     testWidgets('do not resize when null cache dimensions', (WidgetTester tester) async {
@@ -295,12 +304,16 @@ Future<void> main() async {
       final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
         expect(cacheWidth, null);
         expect(cacheHeight, null);
+        ClosureTracker.called = true;
         return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
       };
       // image.placeholder should be an instance of MemoryImage instead of ResizeImage
-      final MemoryImage memoryImage = image.placeholder;
+      final ImageProvider memoryImage = image.placeholder;
       expect(image.placeholder is MemoryImage, true);
+      ClosureTracker.called = false;
+      expect(ClosureTracker.called, false);
       memoryImage.load(await memoryImage.obtainKey(ImageConfiguration.empty), decode);
+      expect(ClosureTracker.called, true);
     });
 
     group('semantics', () {
