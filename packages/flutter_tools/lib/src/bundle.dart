@@ -140,8 +140,10 @@ Future<void> buildWithAssemble({
       }
       depfile.writeToFile(outputDepfile);
     }
-  } catch (err) {
-    throwToolExit('Failed to build bundle.$err');
+  } catch (err, stackTrace) {
+    printError(err.toString());
+    printError(stackTrace.toString());
+    throwToolExit('Failed to build bundle.');
   }
 }
 
