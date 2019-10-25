@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import 'rendering_tester.dart';
 
-class FakeEditableTextState extends TextSelectionDelegate {
+class FakeEditableTextState with TextSelectionDelegate {
   @override
   TextEditingValue get textEditingValue { return const TextEditingValue(); }
 
@@ -586,5 +586,5 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-  });
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42772
 }

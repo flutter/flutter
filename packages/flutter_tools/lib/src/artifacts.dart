@@ -40,6 +40,8 @@ enum Artifact {
   kernelWorkerSnapshot,
   /// The root of the web implementation of the dart SDK.
   flutterWebSdk,
+  /// The summary dill for the dartdevc target.
+  webPlatformKernelDill,
   iosDeploy,
   ideviceinfo,
   ideviceId,
@@ -126,6 +128,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
       return 'FlutterMacOS.podspec';
+    case Artifact.webPlatformKernelDill:
+      return 'flutter_ddc_sdk.dill';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -290,6 +294,8 @@ class CachedArtifacts extends Artifacts {
         return _getFlutterPatchedSdkPath(mode);
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
+      case Artifact.webPlatformKernelDill:
+        return fs.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.dart2jsSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.dartdevcSnapshot:
@@ -422,6 +428,8 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.flutterMacOSPodspec:
         return fs.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
+      case Artifact.webPlatformKernelDill:
+        return fs.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

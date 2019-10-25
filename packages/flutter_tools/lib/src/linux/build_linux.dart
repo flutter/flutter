@@ -5,12 +5,10 @@
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -54,21 +52,12 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   );
   int result;
   try {
-    final Process process = await processManager.start(<String>[
+    result = await processUtils.stream(<String>[
       'make',
       '-C',
       linuxProject.makeFile.parent.path,
       'BUILD=$buildFlag',
     ]);
-    process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printError);
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printTrace);
-    result = await process.exitCode;
   } on ArgumentError {
     throwToolExit('make not found. Run \'flutter doctor\' for more information.');
   } finally {

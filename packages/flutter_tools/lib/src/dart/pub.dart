@@ -114,13 +114,13 @@ abstract class Pub {
   /// understand usage.
   Future<void> batch(
     List<String> arguments, {
-      @required PubContext context,
-      String directory,
-      MessageFilter filter,
-      String failureMessage = 'pub failed',
-      @required bool retry,
-      bool showTraceForErrors,
-    });
+    @required PubContext context,
+    String directory,
+    MessageFilter filter,
+    String failureMessage = 'pub failed',
+    @required bool retry,
+    bool showTraceForErrors,
+  });
 
 
   /// Runs pub in 'interactive' mode.
@@ -129,8 +129,8 @@ abstract class Pub {
   /// stdout/stderr stream of pub to the corresponding streams of this process.
   Future<void> interactively(
     List<String> arguments, {
-      String directory,
-    });
+    String directory,
+  });
 }
 
 class _DefaultPub implements Pub {
@@ -157,6 +157,8 @@ class _DefaultPub implements Pub {
       }
       return;
     }
+
+    final DateTime originalPubspecYamlModificationTime = pubSpecYaml.lastModifiedSync();
 
     if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
       final String command = upgrade ? 'upgrade' : 'get';
@@ -189,11 +191,34 @@ class _DefaultPub implements Pub {
     if (!dotPackages.existsSync()) {
       throwToolExit('$directory: pub did not create .packages file.');
     }
-
-    if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync())) {
-      throwToolExit('$directory: pub did not update .packages file '
-          '(pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; '
-          '.packages timestamp: ${dotPackages.lastModifiedSync()}).');
+    if (pubSpecYaml.lastModifiedSync() != originalPubspecYamlModificationTime) {
+      throwToolExit('$directory: unexpected concurrent modification of pubspec.yaml while running pub.');
+    }
+    // We don't check if dotPackages was actually modified, because as far as we can tell sometimes
+    // pub will decide it does not need to actually modify it.
+    // Since we rely on the file having a more recent timestamp, though, we do manually force the
+    // file to be more recently modified.
+    final DateTime now = DateTime.now();
+    if (now.isBefore(originalPubspecYamlModificationTime)) {
+      printError(
+        'Warning: File "${fs.path.absolute(pubSpecYaml.path)}" was created in the future. '
+        'Optimizations that rely on comparing time stamps will be unreliable. Check your '
+        'system clock for accuracy.\n'
+        'The timestamp was: $originalPubspecYamlModificationTime\n'
+        'The time now is: $now'
+      );
+    } else {
+      dotPackages.setLastModifiedSync(now);
+      final DateTime newDotPackagesTimestamp = dotPackages.lastModifiedSync();
+      if (newDotPackagesTimestamp.isBefore(originalPubspecYamlModificationTime)) {
+        printError(
+          'Warning: Failed to set timestamp of "${fs.path.absolute(dotPackages.path)}". '
+          'Tried to set timestamp to $now, but new timestamp is $newDotPackagesTimestamp.'
+        );
+        if (newDotPackagesTimestamp.isAfter(now)) {
+          printError('Maybe the file was concurrently modified?');
+        }
+      }
     }
   }
 
@@ -201,17 +226,19 @@ class _DefaultPub implements Pub {
   @override
   Future<void> batch(
     List<String> arguments, {
-      @required PubContext context,
-      String directory,
-      MessageFilter filter,
-      String failureMessage = 'pub failed',
-      @required bool retry,
-      bool showTraceForErrors,
-    }) async {
+    @required PubContext context,
+    String directory,
+    MessageFilter filter,
+    String failureMessage = 'pub failed',
+    @required bool retry,
+    bool showTraceForErrors,
+  }) async {
     showTraceForErrors ??= isRunningOnBot;
 
+    String lastPubMessage = 'no message';
     bool versionSolvingFailed = false;
     String filterWrapper(String line) {
+      lastPubMessage = line;
       if (line.contains('version solving failed')) {
         versionSolvingFailed = true;
       }
@@ -227,19 +254,25 @@ class _DefaultPub implements Pub {
     int attempts = 0;
     int duration = 1;
     int code;
-    while (true) {
+    loop: while (true) {
       attempts += 1;
       code = await processUtils.stream(
         _pubCommand(arguments),
         workingDirectory: directory,
-        mapFunction: filterWrapper,
+        mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
         environment: _createPubEnvironment(context),
       );
-      if (code != 69) { // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
-        break;
+      String message;
+      switch (code) {
+        case 69: // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
+          message = 'server unavailable';
+          break;
+        default:
+          break loop;
       }
+      assert(message != null);
       versionSolvingFailed = false;
-      printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
+      printStatus('$failureMessage ($message) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
       await Future<void>.delayed(Duration(seconds: duration));
       if (duration < 64) {
         duration *= 2;
@@ -259,14 +292,14 @@ class _DefaultPub implements Pub {
     ).send();
 
     if (code != 0) {
-      throwToolExit('$failureMessage ($code)', exitCode: code);
+      throwToolExit('$failureMessage ($code; $lastPubMessage)', exitCode: code);
     }
   }
 
   @override
   Future<void> interactively(
     List<String> arguments, {
-      String directory,
+    String directory,
   }) async {
     Cache.releaseLockEarly();
     final io.Process process = await processUtils.start(

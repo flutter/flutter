@@ -75,6 +75,7 @@ flutter:
       expect(flutterProject.flutterPluginsFile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () {
@@ -85,6 +86,7 @@ flutter:
       expect(flutterProject.flutterPluginsFile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () {
@@ -95,6 +97,7 @@ flutter:
       expect(flutterProject.flutterPluginsFile.existsSync(), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
@@ -108,6 +111,7 @@ flutter:
       expect(macosProject.podManifestLock.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -144,7 +148,13 @@ flutter:
 
     testUsingContext('Registrant uses old embedding in app project', () async {
       when(flutterProject.isModule).thenReturn(false);
-      when(featureFlags.isNewAndroidEmbeddingEnabled).thenReturn(false);
+
+      final File androidManifest = flutterProject.directory
+        .childDirectory('android')
+        .childFile('AndroidManifest.xml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
+      when(androidProject.appManifestFile).thenReturn(androidManifest);
 
       await injectPlugins(flutterProject);
 
@@ -157,12 +167,12 @@ flutter:
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => featureFlags,
     });
 
     testUsingContext('Registrant uses new embedding if app uses new embedding', () async {
       when(flutterProject.isModule).thenReturn(false);
-      when(featureFlags.isNewAndroidEmbeddingEnabled).thenReturn(true);
 
       final File androidManifest = flutterProject.directory
         .childDirectory('android')
@@ -182,12 +192,12 @@ flutter:
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => featureFlags,
     });
 
     testUsingContext('Registrant uses shim for plugins using old embedding if app uses new embedding', () async {
       when(flutterProject.isModule).thenReturn(false);
-      when(featureFlags.isNewAndroidEmbeddingEnabled).thenReturn(true);
 
       final File androidManifest = flutterProject.directory
         .childDirectory('android')
@@ -278,13 +288,13 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => featureFlags,
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
     });
 
     testUsingContext('Registrant doesn\'t use new embedding if app doesn\'t use new embedding', () async {
       when(flutterProject.isModule).thenReturn(false);
-      when(featureFlags.isNewAndroidEmbeddingEnabled).thenReturn(true);
 
       final File androidManifest = flutterProject.directory
         .childDirectory('android')
@@ -304,12 +314,19 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => featureFlags,
     });
 
     testUsingContext('Registrant uses old embedding in module project', () async {
       when(flutterProject.isModule).thenReturn(true);
-      when(featureFlags.isNewAndroidEmbeddingEnabled).thenReturn(false);
+
+      final File androidManifest = flutterProject.directory
+        .childDirectory('android')
+        .childFile('AndroidManifest.xml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
+      when(androidProject.appManifestFile).thenReturn(androidManifest);
 
       await injectPlugins(flutterProject);
 
@@ -322,12 +339,12 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => featureFlags,
     });
 
     testUsingContext('Registrant uses new embedding if module uses new embedding', () async {
       when(flutterProject.isModule).thenReturn(true);
-      when(featureFlags.isNewAndroidEmbeddingEnabled).thenReturn(true);
 
       final File androidManifest = flutterProject.directory
         .childDirectory('android')
@@ -347,12 +364,12 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => featureFlags,
     });
 
     testUsingContext('Registrant doesn\'t use new embedding if module doesn\'t use new embedding', () async {
       when(flutterProject.isModule).thenReturn(true);
-      when(featureFlags.isNewAndroidEmbeddingEnabled).thenReturn(true);
 
       final File androidManifest = flutterProject.directory
         .childDirectory('android')
@@ -372,6 +389,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => featureFlags,
     });
   });

@@ -22,8 +22,11 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:process/process.dart';
 
 import 'context.dart';
+import 'fake_process_manager.dart';
+import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
@@ -32,6 +35,7 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
   FileSystem: () => MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
+  ProcessManager: () => FakeProcessManager.any(),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
@@ -695,7 +699,8 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isNewAndroidEmbeddingEnabled = false,
+    this.isAndroidEmbeddingV2Enabled = false,
+    this.isWebIncrementalCompilerEnabled = false,
 });
 
   @override
@@ -711,37 +716,88 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowsEnabled;
 
   @override
-  final bool isNewAndroidEmbeddingEnabled;
+  final bool isAndroidEmbeddingV2Enabled;
+
+  @override
+  final bool isWebIncrementalCompilerEnabled;
+
+  @override
+  bool isEnabled(Feature feature) {
+    switch (feature) {
+      case flutterWebFeature:
+        return isWebEnabled;
+      case flutterLinuxDesktopFeature:
+        return isLinuxEnabled;
+      case flutterMacOSDesktopFeature:
+        return isMacOSEnabled;
+      case flutterWindowsDesktopFeature:
+        return isWindowsEnabled;
+      case flutterAndroidEmbeddingV2Feature:
+        return isAndroidEmbeddingV2Enabled;
+      case flutterWebIncrementalCompiler:
+        return isWebIncrementalCompilerEnabled;
+    }
+    return false;
+  }
 }
 
-class ThrowingPub implements Pub {
+class DelegateLogger implements Logger {
+  DelegateLogger(this.delegate);
+
+  final Logger delegate;
+  Status status;
+
   @override
-  Future<void> batch(List<String> arguments, {
-    PubContext context,
-    String directory,
-    MessageFilter filter,
-    String failureMessage = 'pub failed',
-    bool retry,
-    bool showTraceForErrors,
-  }) {
-    throw UnsupportedError('Attempted to inovke pub during test.');
+  bool get quiet => delegate.quiet;
+
+  @override
+  set quiet(bool value) => delegate.quiet;
+
+  @override
+  bool get hasTerminal => delegate.hasTerminal;
+
+  @override
+  bool get isVerbose => delegate.isVerbose;
+
+  @override
+  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
+    delegate.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
   }
 
   @override
-  Future<void> get({
-    PubContext context,
-    String directory,
-    bool skipIfAbsent = false,
-    bool upgrade = false,
-    bool offline = false,
-    bool checkLastModified = true,
-    bool skipPubspecYamlCheck = false,
-  }) {
-    throw UnsupportedError('Attempted to inovke pub during test.');
+  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
+    delegate.printStatus(message,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
   }
 
   @override
-  Future<void> interactively(List<String> arguments, {String directory}) {
-    throw UnsupportedError('Attempted to inovke pub during test.');
+  void printTrace(String message) {
+    delegate.printTrace(message);
   }
+
+  @override
+  void sendNotification(String message, {String progressId}) {
+    delegate.sendNotification(message, progressId: progressId);
+  }
+
+  @override
+  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
+    return status;
+  }
+
+  @override
+  bool get supportsColor => delegate.supportsColor;
 }

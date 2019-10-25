@@ -64,6 +64,7 @@ void main() {
       Cache.releaseLockEarly();
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('throws tool exit when lockfile open fails', () async {
@@ -72,6 +73,7 @@ void main() {
       expect(() async => await Cache.lock(), throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () async {
@@ -100,6 +102,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
@@ -115,6 +118,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     test('should not be up to date, if some cached artifact is not', () {
@@ -206,10 +210,11 @@ void main() {
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   test('Unstable artifacts', () {
-    expect(DevelopmentArtifact.web.unstable, true);
+    expect(DevelopmentArtifact.web.unstable, false);
     expect(DevelopmentArtifact.linux.unstable, true);
     expect(DevelopmentArtifact.macOS.unstable, true);
     expect(DevelopmentArtifact.windows.unstable, true);
@@ -256,6 +261,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
       HttpClientFactory: () => () => fakeHttpClient,
       OperatingSystemUtils: () => mockOperatingSystemUtils,
       Platform: () => fakePlatform,
@@ -308,6 +314,32 @@ void main() {
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => processManager,
+    });
+  });
+
+  group('Unsigned mac artifacts', () {
+    MockCache mockCache;
+
+    setUp(() {
+      mockCache = MockCache();
+    });
+
+    testUsingContext('use unsigned when specified', () async {
+      when(mockCache.useUnsignedMacBinaries).thenReturn(true);
+
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      expect(iosUsbArtifacts.archiveUri.toString(), contains('/unsigned/'));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+    });
+
+    testUsingContext('not use unsigned when not specified', () async {
+      when(mockCache.useUnsignedMacBinaries).thenReturn(false);
+
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      expect(iosUsbArtifacts.archiveUri.toString(), isNot(contains('/unsigned/')));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
     });
   });
 }
