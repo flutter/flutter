@@ -51,13 +51,8 @@ int main(int argc, const char** argv) {
 
 #if !defined(DART_PRODUCT)
 #if defined(AOT_RUNTIME)
-  RegisterProfilerSymbols(
-      "pkg/data/libdart_precompiled_runtime.dartprofilersymbols",
-      "libdart_precompiled_runtime.so");
   RegisterProfilerSymbols("pkg/data/dart_aot_runner.dartprofilersymbols", "");
 #else
-  RegisterProfilerSymbols("pkg/data/libdart_jit.dartprofilersymbols",
-                          "libdart_jit.so");
   RegisterProfilerSymbols("pkg/data/dart_jit_runner.dartprofilersymbols", "");
 #endif  // defined(AOT_RUNTIME)
 #endif  // !defined(DART_PRODUCT)
