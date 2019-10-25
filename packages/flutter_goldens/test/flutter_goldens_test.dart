@@ -517,6 +517,22 @@ void main() {
         );
       });
     });
+
+    group('Skipping', () {
+      test('correctly determines testing environment', () {
+        platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+            'SWARMING_TASK_ID' : '1234567890',
+          },
+          operatingSystem: 'macos'
+        );
+        expect(
+          FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
+          isTrue,
+        );
+      });
+    });
   });
 }
 

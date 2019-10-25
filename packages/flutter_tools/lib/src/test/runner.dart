@@ -71,6 +71,7 @@ Future<int> runTests(
     final bool result = await webCompilationProxy.initialize(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
+      testFiles: testFiles,
       projectName: flutterProject.manifest.appName,
       initializePlatform: true,
     );
