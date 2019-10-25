@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
-import 'mouse_cursor_platform.dart';
 import 'platform_channel.dart';
 
 // The channel interface with the platform.
@@ -42,8 +42,14 @@ class _MacOSPlatformActions {
   }
 }
 
-/// The implementation of [MouseCursorPlatformDelegate] that controls
-/// [macOS](https://developer.apple.com/documentation) over a method channel.
+/// Controls mouse cursor behaviors on an
+/// [macOS](https://developer.apple.com/documentation)
+/// shell over a method channel.
+///
+/// See also:
+///
+///  * [StandardMouseCursorManager], which uses this class on the macOS
+///    platform.
 class MouseCursorMacOSDelegate extends MouseCursorPlatformDelegate {
   /// Create a [MouseCursorMacOSDelegate] by providing the method channel to use.
   ///

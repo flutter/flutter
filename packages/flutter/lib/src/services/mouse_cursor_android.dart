@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
-import 'mouse_cursor_platform.dart';
 import 'platform_channel.dart';
 
 // The channel interface with the platform.
@@ -31,9 +31,14 @@ class _AndroidPlatformActions {
   }
 }
 
-/// The implementation of [MouseCursorPlatformDelegate] that controls an
-/// [Android](https://developer.android.com/reference) shell over a method
-/// channel.
+/// Controls mouse cursor behaviors on an
+/// [Android](https://developer.android.com/reference)
+/// shell over a method channel.
+///
+/// See also:
+///
+///  * [StandardMouseCursorManager], which uses this class on the Android
+///    platform.
 class MouseCursorAndroidDelegate extends MouseCursorPlatformDelegate {
   /// Create a [MouseCursorAndroidDelegate] by providing the method channel to use.
   ///

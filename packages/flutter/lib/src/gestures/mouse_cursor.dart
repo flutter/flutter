@@ -2,10 +2,108 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+
+/// Internal identifiers for the system cursors supported by Flutter.
+///
+/// Each value of [MouseCursorSystemShape] corresponds to a [MouseCursor] object
+/// in [SystemMouseCursors].
+///
+/// This enum is only used for [MouseCursorPlatformDelegate] to implement system
+/// cursors on platforms. To assign widgets with system cursors, use the objects
+/// defined in [SystemMouseCursors] instead.
+///
+/// See also:
+///
+///  * [SystemMouseCursors], which contains usable [MouseCursor] objects that
+///    correspond to values of this type.
+///  * [MouseCursorPlatformDelegate], which uses this type to define how
+///    system cursors are implemented on platforms.
+enum MouseCursorSystemShape {
+  /// The shape that corresponds to [SystemCursors.none].
+  none,
+
+  /// The shape that corresponds to [SystemCursors.basic].
+  ///
+  /// This shape must be implemented by all platforms.
+  basic,
+
+  /// The shape that corresponds to [SystemCursors.click].
+  click,
+
+  /// The shape that corresponds to [SystemCursors.text].
+  text,
+
+  /// The shape that corresponds to [SystemCursors.forbidden].
+  forbidden,
+
+  /// The shape that corresponds to [SystemCursors.grab].
+  grab,
+
+  /// The shape that corresponds to [SystemCursors.grabbing].
+  grabbing,
+}
+
+/// Details for [MouseCursorPlatformDelegate.activateSystemCursor], such as the
+/// target device and the system cursor shape.
+@immutable
+class MouseCursorPlatformActivateSystemCursorDetails {
+  /// Create details for a [MouseCursorPlatformDelegate.activateSystemCursor]
+  /// call.
+  ///
+  /// All parameters must not be null.
+  const MouseCursorPlatformActivateSystemCursorDetails({
+    @required this.device,
+    @required this.systemShape,
+  }) : assert(device != null), assert(systemShape != null);
+
+  /// The pointer device that should change cursor.
+  final int device;
+
+  /// The kind of system cursor that should change to.
+  final MouseCursorSystemShape systemShape;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != MouseCursorPlatformActivateSystemCursorDetails)
+      return false;
+    final MouseCursorPlatformActivateSystemCursorDetails typed = other;
+    return typed.device == device && typed.systemShape == systemShape;
+  }
+
+  @override
+  int get hashCode => hashValues(device, systemShape);
+
+  @override
+  String toString() {
+    return '$runtimeType(device: $device, systemShape: $systemShape)';
+  }
+}
+
+/// An interface for the operations that a [MouseCursor] can use to control the
+/// platform.
+///
+/// This interface is implemented by each platform that supports mouse cursor.
+///
+/// See also:
+///
+///  * [MouseCursor], whose subclasses and methods use this class to perform
+///    operations.
+///  * [MouseCursorManager], which takes this class as a parameter.
+abstract class MouseCursorPlatformDelegate {
+  /// Create a [MouseCursorPlatformDelegate].
+  const MouseCursorPlatformDelegate();
+
+  /// Asks the platform to change the cursor of `device` to the system cursor
+  /// specified by `systemShape`.
+  ///
+  /// It resolves to `true` if the operation is successful, `false` if the
+  /// operation is unsupported by the platform, or rejects to error if the
+  /// operation is implemented but an error occurs.
+  Future<bool> activateSystemCursor(MouseCursorPlatformActivateSystemCursorDetails details);
+}
 
 /// Details for [MouseCursor.activate], such as the target device and the
 /// platform.
@@ -148,6 +246,44 @@ class _EnsuredImplementedSystemMouseCursor extends _SystemMouseCursor {
   }
 }
 
+/// The base class of a manager that maintains states related to mouse cursor
+/// and provides a simple interface to operate [MouseCursor]s.
+///
+/// Widgets should not use [MouseCursorManager] directly, instead they should
+/// assign [MouseCursor]s to regions, and then [MouseTracker] will handle cursor
+/// changes accordingly.
+///
+/// See also:
+///
+///  * [MouseCursor], which talks more about handling mouse cursors.
+///  * [StandardMouseCursorManager], which implements the platform-specific
+///    code based on the platform that this program is running on.
+///  * [MouseTracker], which uses this class.
+abstract class MouseCursorManager {
+  /// The delegate of the platform that this manager operates.
+  ///
+  /// It is provided to [MouseCursor] to perform platform operations.
+  MouseCursorPlatformDelegate get platformDelegate;
+
+  /// Set the cursor of pointer `device` to `cursor`.
+  ///
+  /// This method handles states or fallbacks.
+  ///
+  /// This method resolves if the operation is successful, or throws errors if
+  /// any occur.
+  Future<void> setDeviceCursor(int device, MouseCursor cursor) async {
+    final MouseCursorActivateDetails details = MouseCursorActivateDetails(
+      device: device,
+      platformDelegate: platformDelegate,
+    );
+    final bool implemented = await cursor.activate(details);
+    if (!implemented) {
+      final bool basicImplemented = await SystemMouseCursors.basic.activate(details);
+      assert(basicImplemented);
+    }
+  }
+}
+
 /// A collection of system [MouseCursor]s.
 ///
 /// System cursors are mouse cursors that are included in a platform, available
@@ -193,77 +329,4 @@ class SystemMouseCursors {
   /// A cursor that indicates something that is being dragged. Typically the
   /// shape of a closed hand.
   static const MouseCursor grabbing = _SystemMouseCursor(MouseCursorSystemShape.grabbing, 'grabbing');
-}
-
-/// The base class of a manager that maintains states related to mouse cursor
-/// and provides a simple interface to operate [MouseCursor]s.
-///
-/// Widgets should not use [MouseCursorManager] directly, instead they should
-/// assign [MouseCursor]s to regions, and then [MouseTracker] will handle cursor
-/// changes accordingly.
-///
-/// See also:
-///
-///  * [MouseCursor], which talks more about handling mouse cursors.
-///  * [StandardMouseCursorManager], which implements the platform-specific
-///    code based on the platform that this program is running on.
-///  * [MouseTracker], which uses this class.
-abstract class MouseCursorManager {
-  /// The delegate of the platform that this manager operates.
-  ///
-  /// It is provided to [MouseCursor] to perform platform operations.
-  MouseCursorPlatformDelegate get platformDelegate;
-
-  /// Set the cursor of pointer `device` to `cursor`.
-  ///
-  /// This method handles states or fallbacks.
-  ///
-  /// This method resolves if the operation is successful, or throws errors if
-  /// any occur.
-  Future<void> setDeviceCursor(int device, MouseCursor cursor) async {
-    final MouseCursorActivateDetails details = MouseCursorActivateDetails(
-      device: device,
-      platformDelegate: platformDelegate,
-    );
-    final bool implemented = await cursor.activate(details);
-    if (!implemented) {
-      final bool basicImplemented = await SystemMouseCursors.basic.activate(details);
-      assert(basicImplemented);
-    }
-  }
-}
-
-/// The [MouseCursorManager] that implements the platform-specific code based on
-/// the platform that this program is running on.
-///
-/// See also:
-///
-///  * [MouseTracker], which owns an instance of this class.
-class StandardMouseCursorManager extends MouseCursorManager {
-  /// Create a [MouseCursorManager] by providing the channel.
-  ///
-  /// The `mouseCursorChannel` is used to create platform delegates, and must
-  /// not be null.
-  StandardMouseCursorManager(
-    MethodChannel mouseCursorChannel,
-  ) : assert(mouseCursorChannel != null) {
-    _platformDelegate = _createDelegate(mouseCursorChannel);
-    assert(_platformDelegate != null);
-  }
-
-  @override
-  MouseCursorPlatformDelegate get platformDelegate => _platformDelegate;
-  MouseCursorPlatformDelegate _platformDelegate;
-
-  MouseCursorPlatformDelegate _createDelegate(MethodChannel channel) {
-    if (Platform.isLinux) {
-      return MouseCursorGLFWDelegate(mouseCursorChannel: channel);
-    } else if (Platform.isAndroid) {
-      return MouseCursorAndroidDelegate(mouseCursorChannel: channel);
-    } else if (Platform.isMacOS) {
-      return MouseCursorMacOSDelegate(mouseCursorChannel: channel);
-    } else {
-      return const MouseCursorUnsupportedPlatformDelegate();
-    }
-  }
 }
