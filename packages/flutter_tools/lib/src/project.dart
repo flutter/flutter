@@ -451,7 +451,12 @@ class IosProject implements XcodeBasedProject {
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
-    _deleteIfExistsSync(ephemeralDirectory);
+    try {
+      _deleteIfExistsSync(ephemeralDirectory);
+    } on FileSystemException catch (err) {
+      printError('Failed to regnerate module directory $ephemeralDirectory:\n$err');
+      return;
+    }
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
