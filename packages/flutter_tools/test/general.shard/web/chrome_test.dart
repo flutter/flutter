@@ -5,9 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:mockito/mockito.dart';
@@ -29,6 +31,7 @@ void main() {
       Platform: () => platform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
       FileSystem: () => mockFileSystem,
+      Signals: () => MockSignals(),
     });
   });
 
@@ -67,6 +70,7 @@ void main() {
     });
 
     await chromeLauncher.launch('example_url', skipCheck: true);
+    verify(signals.addHandler(ProcessSignal.SIGTERM, any)).called(1);
   }));
 }
 
@@ -75,3 +79,5 @@ class MockPlatform extends Mock implements Platform {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockDirectory extends Mock implements Directory {}
+class MockSignals extends Mock implements Signals {}
+

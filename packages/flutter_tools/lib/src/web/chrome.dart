@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/signals.dart';
 import '../convert.dart';
 
 /// The [ChromeLauncher] instance.
@@ -114,6 +115,10 @@ class ChromeLauncher {
     ];
 
     final Process process = await processManager.start(args);
+    // Register a signal handler so chrome is killed by ctrl+c, for example.
+   signals.addHandler(ProcessSignal.SIGTERM, (ProcessSignal processSignal) {
+      process.kill();
+    });
 
     // Wait until the DevTools are listening before trying to connect.
     await process.stderr
