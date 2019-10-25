@@ -105,9 +105,9 @@ class CopyFlutterBundle extends Target {
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
-    if (buildMode == BuildMode.debug || buildMode == BuildMode.jitRelease) {
-      final String vmSnapshotData = environment.buildDir.childFile('vm_snapshot_data').path;
-      final String isolateSnapshotData = environment.buildDir.childFile('isolate_snapshot_data').path;
+    if (buildMode == BuildMode.debug) {
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
           .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
       fs.file(vmSnapshotData)
@@ -222,7 +222,7 @@ class KernelSnapshot extends Target {
       targetModel: TargetModel.flutter,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
-      linkPlatformKernelIn: true,
+      linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
     );

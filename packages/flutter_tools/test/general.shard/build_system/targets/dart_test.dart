@@ -207,7 +207,6 @@ flutter_tools:lib/''');
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
-      linkPlatformKernelIn: false,
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -422,7 +421,6 @@ class FakeKernelCompiler implements KernelCompiler {
     String fileSystemScheme,
     String platformDill,
     String initializeFromDill,
-    bool bytecode = false,
   }) async {
     fs.file(outputFilePath).createSync(recursive: true);
     return CompilerOutput(outputFilePath, 0, null);

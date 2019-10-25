@@ -113,7 +113,7 @@ class AndroidBuildInfo {
   final Iterable<AndroidArch> targetArchs;
 }
 
-/// The type of build.
+/// A summary of the compilation strategy used for Dart.
 class BuildMode {
   const BuildMode._(this.name);
 
@@ -131,10 +131,18 @@ class BuildMode {
     throw ArgumentError('$value is not a supported build mode');
   }
 
+  /// Built in JIT mode with no optimizations, enabled asserts, and an observatory.
   static const BuildMode debug = BuildMode._('debug');
+
+  /// Built in AOT mode with some optimizations and an observatory.
   static const BuildMode profile = BuildMode._('profile');
+
+  /// Built in AOT mode with all optimizations and no observatory.
   static const BuildMode release = BuildMode._('release');
+
+  /// Built in JIT mode with all optimizations and no observatory.
   static const BuildMode jitRelease = BuildMode._('jit_release');
+
   static const List<BuildMode> values = <BuildMode>[
     debug,
     profile,
