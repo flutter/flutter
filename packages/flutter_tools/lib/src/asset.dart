@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/context.dart';
@@ -514,7 +515,17 @@ class _AssetDirectoryCache {
 
     if (_cache[directory] == null) {
       final List<String> paths = <String>[];
-      for (FileSystemEntity entity in fs.directory(directory).listSync(recursive: true)) {
+      List<FileSystemEntity> entities;
+      try {
+        entities = fs.directory(directory).listSync(recursive: true);
+      } on FileSystemException catch (err) {
+        throwToolExit('Failed to list directory $directory.\n$err\n'
+          'This might happen if the directory is missing read permissions or is '
+          'incorrectly specified in the asset manifest.'
+        );
+      }
+
+      for (FileSystemEntity entity in entities) {
         final String path = entity.path;
         if (fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude))) {
           paths.add(path);
