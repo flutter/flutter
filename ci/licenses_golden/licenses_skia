@@ -1,4 +1,4 @@
-Signature: 7bc14e943ca1c0d88be22579aaabb533
+Signature: 2a796bbfe486471b01903a5231fe0f44
 
 UNUSED LICENSES:
 
@@ -1354,6 +1354,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/skimage/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skp/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skparagraph/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/svg/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/text_blob_traces/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/valgrind/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_ninja/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_toolchain/VERSION
@@ -3908,6 +3909,7 @@ ORIGIN: ../../../third_party/skia/bench/ParagraphBench.cpp + ../../../third_part
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/ParagraphBench.cpp
 FILE: ../../../third_party/skia/bench/ShaperBench.cpp
+FILE: ../../../third_party/skia/bench/SkGlyphCacheBench.h
 FILE: ../../../third_party/skia/docs/examples/Alpha_Constants_a.cpp
 FILE: ../../../third_party/skia/docs/examples/Alpha_Constants_b.cpp
 FILE: ../../../third_party/skia/docs/examples/Alpha_Type_Opaque.cpp
