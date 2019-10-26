@@ -21,9 +21,6 @@ import io.flutter.view.FlutterMain;
 /**
  * Configures, bootstraps, and starts executing Dart code.
  * <p>
- * WARNING: THIS CLASS IS EXPERIMENTAL. DO NOT SHIP A DEPENDENCY ON THIS CODE.
- * IF YOU USE IT, WE WILL BREAK YOU.
- * <p>
  * To specify a top-level Dart function to execute, use a {@link DartEntrypoint} to tell
  * {@link DartExecutor} where to find the Dart code to execute, and which Dart function to use as
  * the entrypoint. To execute the entrypoint, pass the {@link DartEntrypoint} to
@@ -46,7 +43,9 @@ public class DartExecutor implements BinaryMessenger {
   @NonNull
   private final AssetManager assetManager;
   @NonNull
-  private final DartMessenger messenger;
+  private final DartMessenger dartMessenger;
+  @NonNull
+  private final BinaryMessenger binaryMessenger;
   private boolean isApplicationRunning = false;
   @Nullable
   private String isolateServiceId;
@@ -67,8 +66,9 @@ public class DartExecutor implements BinaryMessenger {
   public DartExecutor(@NonNull FlutterJNI flutterJNI, @NonNull AssetManager assetManager) {
     this.flutterJNI = flutterJNI;
     this.assetManager = assetManager;
-    this.messenger = new DartMessenger(flutterJNI);
-    messenger.setMessageHandler("flutter/isolate", isolateChannelMessageHandler);
+    this.dartMessenger = new DartMessenger(flutterJNI);
+    dartMessenger.setMessageHandler("flutter/isolate", isolateChannelMessageHandler);
+    this.binaryMessenger = new DefaultBinaryMessenger(dartMessenger);
   }
 
   /**
@@ -84,7 +84,7 @@ public class DartExecutor implements BinaryMessenger {
    */
   public void onAttachedToJNI() {
     Log.v(TAG, "Attached to JNI. Registering the platform message handler for this Dart execution context.");
-    flutterJNI.setPlatformMessageHandler(messenger);
+    flutterJNI.setPlatformMessageHandler(dartMessenger);
   }
 
   /**
@@ -158,48 +158,49 @@ public class DartExecutor implements BinaryMessenger {
     isApplicationRunning = true;
   }
 
-  //------ START BinaryMessenger -----
-
   /**
-   * Sends the given {@code message} from Android to Dart over the given {@code channel}.
-   *
-   * @param channel the name of the logical channel used for the message.
-   * @param message the message payload, a direct-allocated {@link ByteBuffer} with the message bytes
+   * Returns a {@link BinaryMessenger} that can be used to send messages to, and receive
+   * messages from, Dart code that this {@code DartExecutor} is executing.
    */
+  @NonNull
+  public BinaryMessenger getBinaryMessenger() {
+    return binaryMessenger;
+  }
+
+  //------ START BinaryMessenger (Deprecated: use getBinaryMessenger() instead) -----
+  /**
+   * @deprecated
+   * Use {@link #getBinaryMessenger()} instead.
+   */
+  @Deprecated
   @Override
   @UiThread
   public void send(@NonNull String channel, @Nullable ByteBuffer message) {
-    messenger.send(channel, message, null);
+    binaryMessenger.send(channel, message);
   }
 
   /**
-   * Sends the given {@code messages} from Android to Dart over the given {@code channel} and
-   * then has the provided {@code callback} invoked when the Dart side responds.
-   *
-   * @param channel  the name of the logical channel used for the message.
-   * @param message  the message payload, a direct-allocated {@link ByteBuffer} with the message bytes
-   *                 between position zero and current position, or null.
-   * @param callback a callback invoked when the Dart application responds to the message
+   * @deprecated
+   * Use {@link #getBinaryMessenger()} instead.
    */
+  @Deprecated
   @Override
   @UiThread
   public void send(@NonNull String channel, @Nullable ByteBuffer message, @Nullable BinaryMessenger.BinaryReply callback) {
-    messenger.send(channel, message, callback);
+    binaryMessenger.send(channel, message, callback);
   }
 
   /**
-   * Sets the given {@link io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler} as the
-   * singular handler for all incoming messages received from the Dart side of this Dart execution
-   * context.
-   *
-   * @param channel the name of the channel.
-   * @param handler a {@link BinaryMessageHandler} to be invoked on incoming messages, or null.
+   * @deprecated
+   * Use {@link #getBinaryMessenger()} instead.
    */
+  @Deprecated
   @Override
   @UiThread
   public void setMessageHandler(@NonNull String channel, @Nullable BinaryMessenger.BinaryMessageHandler handler) {
-    messenger.setMessageHandler(channel, handler);
+    binaryMessenger.setMessageHandler(channel, handler);
   }
+  //------ END BinaryMessenger -----
 
   /**
    * Returns the number of pending channel callback replies.
@@ -217,10 +218,8 @@ public class DartExecutor implements BinaryMessenger {
    */
   @UiThread
   public int getPendingChannelResponseCount() {
-    return messenger.getPendingChannelResponseCount();
+    return dartMessenger.getPendingChannelResponseCount();
   }
-
-  //------ END BinaryMessenger -----
 
   /**
    * Returns an identifier for this executor's primary isolate.  This identifier can be used
@@ -343,6 +342,55 @@ public class DartExecutor implements BinaryMessenger {
       return "DartCallback( bundle path: " + pathToBundle
           + ", library path: " + callbackHandle.callbackLibraryPath
           + ", function: " + callbackHandle.callbackName + " )";
+    }
+  }
+
+  private static class DefaultBinaryMessenger implements BinaryMessenger {
+    private final DartMessenger messenger;
+
+    private DefaultBinaryMessenger(@NonNull DartMessenger messenger) {
+      this.messenger = messenger;
+    }
+
+    /**
+     * Sends the given {@code message} from Android to Dart over the given {@code channel}.
+     *
+     * @param channel the name of the logical channel used for the message.
+     * @param message the message payload, a direct-allocated {@link ByteBuffer} with the message bytes
+     */
+    @Override
+    @UiThread
+    public void send(@NonNull String channel, @Nullable ByteBuffer message) {
+      messenger.send(channel, message, null);
+    }
+
+    /**
+     * Sends the given {@code messages} from Android to Dart over the given {@code channel} and
+     * then has the provided {@code callback} invoked when the Dart side responds.
+     *
+     * @param channel  the name of the logical channel used for the message.
+     * @param message  the message payload, a direct-allocated {@link ByteBuffer} with the message bytes
+     *                 between position zero and current position, or null.
+     * @param callback a callback invoked when the Dart application responds to the message
+     */
+    @Override
+    @UiThread
+    public void send(@NonNull String channel, @Nullable ByteBuffer message, @Nullable BinaryMessenger.BinaryReply callback) {
+      messenger.send(channel, message, callback);
+    }
+
+    /**
+     * Sets the given {@link io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler} as the
+     * singular handler for all incoming messages received from the Dart side of this Dart execution
+     * context.
+     *
+     * @param channel the name of the channel.
+     * @param handler a {@link BinaryMessageHandler} to be invoked on incoming messages, or null.
+     */
+    @Override
+    @UiThread
+    public void setMessageHandler(@NonNull String channel, @Nullable BinaryMessenger.BinaryMessageHandler handler) {
+      messenger.setMessageHandler(channel, handler);
     }
   }
 }
