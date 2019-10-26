@@ -45,7 +45,7 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  device_info:\n  package_info:\n',
+        '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {

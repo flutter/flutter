@@ -50,7 +50,7 @@ const int kDeviceLabShardCount = 4;
 /// and make sure it runs _all_ shards.
 ///
 /// The last shard also runs the Web plugin tests.
-const int kWebShardCount = 6;
+const int kWebShardCount = 8;
 
 /// Maximum number of Web tests to run in a single `flutter test`. We found that
 /// large batches can get flaky, possibly because we reuse a single instance of
@@ -59,13 +59,9 @@ const int kWebBatchSize = 20;
 
 /// Tests that we don't run on Web for various reasons.
 //
-// TODO(yjbanov): we're getting rid of these blacklists as part of https://github.com/flutter/flutter/projects/60
-const List<String> kWebTestDirectoryBlacklist = <String>[
-  'cupertino',
-  'examples',
-  'material',
-];
+// TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileBlacklist = <String>[
+  'test/examples/sector_layout_test.dart',
   'test/widgets/heroes_test.dart',
   'test/widgets/text_test.dart',
   'test/widgets/selectable_text_test.dart',
@@ -75,8 +71,27 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/raw_keyboard_listener_test.dart',
   'test/widgets/editable_text_test.dart',
   'test/widgets/widget_inspector_test.dart',
-  'test/widgets/draggable_test.dart',
   'test/widgets/shortcuts_test.dart',
+  'test/material/text_form_field_test.dart',
+  'test/material/data_table_test.dart',
+
+  // TODO(yjbanov): CupertinoDynamicColor breaks the web engine. The fix
+  //                is on the engine side: https://github.com/flutter/engine/pull/13359
+  'test/cupertino/colors_test.dart',
+  'test/cupertino/dialog_test.dart',
+  'test/cupertino/nav_bar_test.dart',
+  'test/cupertino/nav_bar_transition_test.dart',
+  'test/cupertino/refresh_test.dart',
+  'test/cupertino/switch_test.dart',
+  'test/cupertino/text_field_test.dart',
+  'test/cupertino/date_picker_test.dart',
+  'test/cupertino/slider_test.dart',
+  'test/cupertino/text_field_test.dart',
+  'test/cupertino/segmented_control_test.dart',
+  'test/cupertino/scaffold_test.dart',
+  'test/cupertino/route_test.dart',
+  'test/cupertino/route_test.dart',
+  'test/cupertino/activity_indicator_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -455,7 +470,6 @@ Future<void> _runWebTests() async {
   final List<String> allTests = flutterPackageTestDirectory
     .listSync()
     .whereType<Directory>()
-    .where((Directory directory) => !kWebTestDirectoryBlacklist.contains(path.basename(directory.path)))
     .expand((Directory directory) => directory
       .listSync(recursive: true)
       .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))

@@ -565,13 +565,13 @@ void main() {
     await expectation;
   }));
 
-  test('Successfully turns AppInstanceId error into ToolExit', () => testbed.run(() async {
+  test('Successfully turns AppConnectionException into ToolExit', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Completer<void> unhandledErrorCompleter = Completer<void>();
     when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
       unawaited(unhandledErrorCompleter.future.then((void value) {
-        throw StateError('Could not connect to application with appInstanceId: c0ae0750-ee91-11e9-cea6-35d95a968356');
+        throw AppConnectionException('Could not connect to application with appInstanceId: c0ae0750-ee91-11e9-cea6-35d95a968356');
       }));
       return ConnectionResult(mockAppConnection, mockDebugConnection);
     });
@@ -655,6 +655,25 @@ void main() {
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ), throwsA(isInstanceOf<Exception>()));
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+  test('Successfully turns MissingPortFile error into ToolExit', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw MissingPortFile();
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsA(isInstanceOf<ToolExit>()));
 
     unhandledErrorCompleter.complete();
     await expectation;

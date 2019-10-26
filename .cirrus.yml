@@ -150,7 +150,6 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-      allow_failures: true
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -160,7 +159,6 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-      allow_failures: true
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -170,7 +168,6 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-      allow_failures: true
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -180,7 +177,6 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-      allow_failures: true
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -190,17 +186,33 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-      allow_failures: true
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: web_tests-5_last-linux # last Web shard must end with _last
+    - name: web_tests-5-linux
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
       environment:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-      allow_failures: true
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: web_tests-6-linux
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the Web shards needed more than 6G of RAM.
+        CPU: 2
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: web_tests-7_last-linux # last Web shard must end with _last
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of October 2019, the Web shards needed more than 6G of RAM.
+        CPU: 2
+        MEMORY: 8G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
