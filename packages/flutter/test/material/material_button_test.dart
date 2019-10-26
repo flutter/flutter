@@ -13,8 +13,7 @@ import '../widgets/semantics_tester.dart';
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
-  });
-  
+  });  
   testWidgets('MaterialButton defaults', (WidgetTester tester) async {
     final Finder rawButtonMaterial = find.descendant(
       of: find.byType(MaterialButton),
@@ -92,7 +91,7 @@ void main() {
     expect(material.type, MaterialType.transparency);
   });
 
-  testWidgets('Do MaterialButton work with hover', (WidgetTester tester) async {
+  testWidgets('Does MaterialButton work with hover', (WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 
     await tester.pumpWidget(
@@ -117,7 +116,7 @@ void main() {
     await gesture.removePointer();
   });
 
-  testWidgets('Do MaterialButton work with focus', (WidgetTester tester) async {
+  testWidgets('Does MaterialButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton Node');
@@ -211,6 +210,29 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor)..rect(color: highlightColor));
     expect(material.elevation, equals(highlightElevation));
     await gesture2.up();
+  });
+
+  testWidgets('MaterialButton\'s disabledColor takes precedence over its default disabled color.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/30012.
+
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(MaterialButton),
+      matching: find.byType(Material),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          disabledColor: Color(0xff00ff00),
+          onPressed: null,
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    final Material material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.color, const Color(0xff00ff00));
   });
 
   testWidgets('Default MaterialButton meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -311,7 +333,7 @@ void main() {
 
     const Rect expectedClipRect = Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
     final Path expectedClipPath = Path()
-     ..addRRect(RRect.fromRectAndRadius(
+      ..addRRect(RRect.fromRectAndRadius(
          expectedClipRect,
          const Radius.circular(2.0),
      ));
@@ -414,31 +436,11 @@ void main() {
     );
 
     expect(
-        tester.renderObject(find.byKey(buttonKey)),
-        paintsExactlyCountTimes(#clipPath, 0),
+      tester.renderObject(find.byKey(buttonKey)),
+      paintsExactlyCountTimes(#clipPath, 0),
     );
   });
-
-  testWidgets('Disabled MaterialButton has correct default text color', (WidgetTester tester) async {
-    const String testText = 'Disabled';
-    const Widget buttonWidget = Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        child: Center(
-          child: MaterialButton(
-            onPressed: null,
-            child: Text(testText), // button is disabled
-          ),
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(buttonWidget);
-
-    final RichText text = tester.widget<RichText>(find.byType(RichText));
-    expect(text.text.style.color, Colors.black38);
-  });
-
+  
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -649,28 +651,5 @@ void main() {
       matching: find.byType(Material),
     );
     expect(tester.widget<Material>(rawButtonMaterial).shape, const StadiumBorder());
-  });
-
-  testWidgets('MaterialButton disabled default is correct.', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/30012.
-
-    final Finder rawButtonMaterial = find.descendant(
-      of: find.byType(MaterialButton),
-      matching: find.byType(Material),
-    );
-
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: MaterialButton(
-          disabledColor: Color(0xff00ff00),
-          onPressed: null,
-          child: Text('button'),
-        ),
-      ),
-    );
-
-    final Material material = tester.widget<Material>(rawButtonMaterial);
-    expect(material.color, const Color(0xff00ff00));
   });
 }
