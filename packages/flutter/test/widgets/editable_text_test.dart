@@ -555,10 +555,6 @@ void main() {
   });
 
   testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
-    Future<void> verifyVisibility(bool expectedVisibility) async {
-      expect(tester.testTextInput.isVisible, expectedVisibility);
-    }
-
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -585,13 +581,119 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    await verifyVisibility(true);
+    expect(tester.testTextInput.isVisible, true);
 
     tester.testTextInput.closeConnection();
 
     await tester.idle();
 
-    await verifyVisibility(false);
+    expect(tester.testTextInput.isVisible, false);
+  });
+
+  testWidgets('closed connection reopened when user focused', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.isVisible, true);
+
+    tester.testTextInput.closeConnection();
+
+    await tester.idle();
+
+    expect(tester.testTextInput.isVisible, false);
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test2';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test2'));
+    expect(tester.testTextInput.isVisible, true);
+  });
+
+  testWidgets('closed connection reopened when user focused on another field', (WidgetTester tester) async {
+    final EditableText testNameField = 
+      EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        maxLines: null,
+        keyboardType: TextInputType.text,
+        style: textStyle,
+        cursorColor: cursorColor,
+      );
+
+    final EditableText testPhoneField =
+      EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: TextInputType.phone,
+        maxLines: 3,
+        style: textStyle,
+        cursorColor: cursorColor,
+      );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: ListView(
+              children: <Widget>[
+                testNameField,
+                testPhoneField,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byWidget(testNameField));
+    await tester.showKeyboard(find.byWidget(testNameField));
+    controller.text = 'test';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.isVisible, true);
+
+    tester.testTextInput.closeConnection();
+
+    await tester.idle();
+
+    expect(tester.testTextInput.isVisible, false);
+
+    await tester.tap(find.byWidget(testPhoneField));
+    await tester.showKeyboard(find.byWidget(testPhoneField));
+    controller.text = '650123123';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('650123123'));
+    expect(tester.testTextInput.isVisible, true);
   });
 
   /// Toolbar is not used in Flutter Web. Skip this check.
