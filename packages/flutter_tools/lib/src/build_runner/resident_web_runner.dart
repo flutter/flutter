@@ -234,15 +234,14 @@ class ResidentWebRunner extends ResidentRunner {
       throwToolExit(
         'Failed to establish connection with Chrome. Try running the application again.\n'
         'If this problem persists, please file an issue with the details below:\n$err\n$stackTrace');
+    } on AppConnectionException {
+      throwToolExit(
+        'Failed to establish connection with the application instance in Chrome.\n'
+        'This can happen if the websocket connection used by the web tooling is '
+        'unabled to correctly establish a connection, for example due to a firewall.'
+      );
     } on SocketException catch (err) {
       throwToolExit(err.toString());
-    } on StateError catch (err) {
-      // Handle known state error.
-      final String message = err.toString();
-      if (message.contains('Could not connect to application with appInstanceId')) {
-        throwToolExit(message);
-      }
-      rethrow;
     } finally {
       if (statusActive) {
         buildStatus.stop();
