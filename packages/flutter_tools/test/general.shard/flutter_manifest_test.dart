@@ -652,7 +652,7 @@ flutter:
         },
         overrides: <Type, Generator>{
           FileSystem: () => filesystem,
-          ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+          ProcessManager: () => FakeProcessManager.any(),
         },
       );
     }

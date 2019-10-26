@@ -7,8 +7,8 @@ import 'package:meta/meta.dart';
 /// The JavaScript bootstrap script to support in-browser hot restart.
 ///
 /// The [requireUrl] loads our cached RequireJS script file. The [mapperUrl]
-/// loads the special Dart stack trace mapper. [mainModule] is the name of the
-/// actual main.dart module that needs to be loaded by the bootsrap script.
+/// loads the special Dart stack trace mapper. The [entrypoint] is the
+/// actual main.dart file.
 ///
 /// This file is served when the browser requests "main.dart.js" in debug mode,
 /// and is responsible for bootstraping the RequireJS modules and attaching
@@ -16,7 +16,6 @@ import 'package:meta/meta.dart';
 String generateBootstrapScript({
   @required String requireUrl,
   @required String mapperUrl,
-  @required String mainModule,
   @required String entrypoint,
 }) {
   return '''
@@ -67,6 +66,8 @@ window.\$hotReloadHook = function(modules) {
 ''';
 }
 
+/// Generate a synthetic main module which captures the application's main
+/// method.
 String generateMainModule({@required String entrypoint}) {
   return '''
 // Create the main module loaded below.

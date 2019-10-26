@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -32,10 +34,15 @@ void main() {
   Completer<void> closeCompleter;
   WebAssetServer webAssetServer;
   MockPlatform windows;
+  MockPlatform linux;
 
   setUp(() {
     windows = MockPlatform();
+    linux = MockPlatform();
+    when(windows.environment).thenReturn(const <String, String>{});
     when(windows.isWindows).thenReturn(true);
+    when(linux.isWindows).thenReturn(false);
+    when(linux.environment).thenReturn(const <String, String>{});
     testbed = Testbed(setup: () {
       mockHttpServer = MockHttpServer();
       requestController = StreamController<HttpRequest>.broadcast();
@@ -43,7 +50,7 @@ void main() {
       response = MockHttpResponse();
       headers = MockHttpHeaders();
       closeCompleter = Completer<void>();
-      when(mockHttpServer.listen(any)).thenAnswer((Invocation invocation) {
+      when(mockHttpServer.listen(any, onError: anyNamed('onError'))).thenAnswer((Invocation invocation) {
         final Function callback = invocation.positionalArguments.first;
         return requestController.stream.listen(callback);
       });
@@ -52,7 +59,9 @@ void main() {
       when(response.close()).thenAnswer((Invocation invocation) async {
         closeCompleter.complete();
       });
-      webAssetServer = WebAssetServer(mockHttpServer);
+      webAssetServer = WebAssetServer(mockHttpServer, onError: (dynamic error, StackTrace stackTrace) {
+        closeCompleter.completeError(error, stackTrace);
+      });
     });
   });
 
@@ -61,26 +70,46 @@ void main() {
     await requestController.close();
   });
 
+  test('Throws a tool exit if bind fails with a SocketException', () => testbed.run(() async {
+    expect(WebAssetServer.start('hello', 1234), throwsA(isInstanceOf<ToolExit>()));
+  }));
+
+  test('Can catch exceptions through the onError callback', () => testbed.run(() async {
+    when(response.close()).thenAnswer((Invocation invocation) {
+      throw StateError('Something bad');
+    });
+    webAssetServer.writeFile('/foo.js', 'main() {}');
+
+    when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
+    requestController.add(request);
+
+    expect(closeCompleter.future, throwsA(isInstanceOf<StateError>()));
+  }));
+
   test('Handles against malformed manifest', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
 
     // Missing ending offset.
     final File manifestMissingOffset = fs.file('manifestA')
-      ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0]}));
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0]}));
     // Non-file URI.
     final File manifestNonFileScheme = fs.file('manifestA')
-      ..writeAsStringSync(json.encode(<String, Object>{'http:///foo.js': <int>[0, 10]}));
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, 10]}));
 
-    await webAssetServer.write(source, manifestMissingOffset);
-    webAssetServer.write(source, manifestNonFileScheme);
+    final File manifestOutOfBounds = fs.file('manifest')
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, 100]}));
+
+    expect(webAssetServer.write(source, manifestMissingOffset), isEmpty);
+    expect(webAssetServer.write(source, manifestNonFileScheme), isEmpty);
+    expect(webAssetServer.write(source, manifestOutOfBounds), isEmpty);
   }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
     final File manifest = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0, source.lengthSync()]}));
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, source.lengthSync()]}));
     webAssetServer.write(source, manifest);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
@@ -92,11 +121,23 @@ void main() {
     verify(response.add(source.readAsBytesSync())).called(1);
   }));
 
+  test('serves JavaScript files from in memory cache not from manifest', () => testbed.run(() async {
+    webAssetServer.writeFile('/foo.js', 'main() {}');
+
+    when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
+    requestController.add(request);
+    await closeCompleter.future;
+
+    verify(headers.add('Content-Length', 9)).called(1);
+    verify(headers.add('Content-Type', 'application/javascript')).called(1);
+    verify(response.add(any)).called(1);
+  }));
+
   test('handles missing JavaScript files from in memory cache', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
     final File manifest = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'file:///foo.js': <int>[0, source.lengthSync()]}));
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, source.lengthSync()]}));
     webAssetServer.write(source, manifest);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/bar.js'));
@@ -132,6 +173,8 @@ void main() {
 
     verify(headers.add('Content-Length', source.lengthSync())).called(1);
     verify(response.addStream(any)).called(1);
+  }, overrides: <Type,  Generator>{
+    Platform: () => linux,
   }));
 
   test('Handles missing Dart files from filesystem', () => testbed.run(() async {
@@ -142,7 +185,7 @@ void main() {
     verify(response.statusCode = 404).called(1);
   }));
 
-  test('serves asset files files from in filesystem with known mime type', () => testbed.run(() async {
+  test('serves asset files from in filesystem with known mime type', () => testbed.run(() async {
     final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
@@ -155,6 +198,23 @@ void main() {
     verify(headers.add('Content-Type', 'image/png')).called(1);
     verify(response.addStream(any)).called(1);
   }));
+
+  test('serves asset files from in filesystem with known mime type on Windows', () => testbed.run(() async {
+    final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
+
+    when(request.uri).thenReturn(Uri.parse('http://foobar/assets/foo.png'));
+    requestController.add(request);
+    await closeCompleter.future;
+
+    verify(headers.add('Content-Length', source.lengthSync())).called(1);
+    verify(headers.add('Content-Type', 'image/png')).called(1);
+    verify(response.addStream(any)).called(1);
+  }, overrides: <Type,  Generator>{
+    Platform: () => windows,
+  }));
+
 
   test('serves asset files files from in filesystem with unknown mime type and length > 12', () => testbed.run(() async {
     final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo'))

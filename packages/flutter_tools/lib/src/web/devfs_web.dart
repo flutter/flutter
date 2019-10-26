@@ -4,29 +4,32 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter_tools/src/asset.dart';
-import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/compile.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 
 import '../artifacts.dart';
+import '../asset.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../compile.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../globals.dart';
 import 'bootstrap.dart';
 
-/// A web server which handles serving JavaScript manifests and assets.
+/// A web server which handles serving JavaScript and assets.
 ///
 /// This is only used in development mode.
 class WebAssetServer {
   @visibleForTesting
-  WebAssetServer(this._httpServer) {
-    _httpServer.listen(_handleRequest);
+  WebAssetServer(this._httpServer, { @required void Function(dynamic, StackTrace) onError }) {
+    _httpServer.listen((HttpRequest request) {
+      _handleRequest(request).catchError(onError);
+      // TODO(jonahwilliams): test the onError callback when https://github.com/dart-lang/sdk/issues/39094 is fixed.
+    }, onError: onError);
   }
 
   // Fallback to "application/octet-stream" on null which
@@ -34,8 +37,21 @@ class WebAssetServer {
   static const String _kDefaultMimeType = 'application/octet-stream';
 
   /// Start the web asset server on a [hostname] and [port].
+  ///
+  /// Unhandled exceptions will throw a [ToolExit] with the error and stack
+  /// trace.
   static Future<WebAssetServer> start(String hostname, int port) async {
-    return WebAssetServer(await HttpServer.bind(hostname, port));
+    try {
+      final HttpServer httpServer = await HttpServer.bind(hostname, port);
+      return WebAssetServer(httpServer, onError: (dynamic error, StackTrace stackTrace) {
+        httpServer.close(force: true);
+        throwToolExit('Unhandled exception in web development server:\n$error\n$stackTrace');
+      });
+    } on SocketException catch (err) {
+      throwToolExit('Failed to bind web development server:\n$err');
+    }
+    assert(false);
+    return null;
   }
 
   final HttpServer _httpServer;
@@ -81,7 +97,7 @@ class WebAssetServer {
     // If both of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
-      final String assetPath = file.path.replaceFirst('/assets/', '');
+      final String assetPath = request.uri.path.replaceFirst('/assets/', '');
       file = fs.file(fs.path.join(getAssetBuildDirectory(), fs.path.relative(assetPath)));
     }
 
@@ -137,6 +153,10 @@ class WebAssetServer {
       }
       final int start = offsets[0];
       final int end = offsets[1];
+      if (start < 0 || end > bytes.lengthInBytes) {
+        printTrace('Invalid byte index: [$start, $end]');
+        continue;
+      }
       final Uint8List byteView = Uint8List.view(bytes.buffer, start, end - start);
       _files[filePath] = byteView;
       modules.add(filePath);
@@ -223,7 +243,6 @@ class WebDevFS implements DevFS {
       _webAssetServer.writeFile('/main.dart.js', generateBootstrapScript(
         requireUrl: requireJS.path,
         mapperUrl: null,
-        mainModule: 'main_module.js',
         entrypoint: mainPath,
       ));
       _webAssetServer.writeFile('/main_module.js', generateMainModule(

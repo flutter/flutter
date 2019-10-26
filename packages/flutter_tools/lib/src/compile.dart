@@ -201,26 +201,25 @@ class PackageUriMapper {
   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
-    return;
-    // for (String packageName in packageMap.keys) {
-    //   final String prefix = packageMap[packageName].toString();
-    //   // Only perform a multi-root mapping if there are multiple roots.
-    //   if (fileSystemScheme != null
-    //     && fileSystemRoots != null
-    //     && fileSystemRoots.length > 1
-    //     && prefix.contains(fileSystemScheme)) {
-    //     _packageName = packageName;
-    //     _uriPrefixes = fileSystemRoots
-    //       .map((String name) => Uri.file(name, windows: platform.isWindows).toString())
-    //       .toList();
-    //     return;
-    //   }
-    //   if (scriptUri.startsWith(prefix)) {
-    //     _packageName = packageName;
-    //     _uriPrefixes = <String>[prefix];
-    //     return;
-    //   }
-    // }
+    for (String packageName in packageMap.keys) {
+      final String prefix = packageMap[packageName].toString();
+      // Only perform a multi-root mapping if there are multiple roots.
+      if (fileSystemScheme != null
+        && fileSystemRoots != null
+        && fileSystemRoots.length > 1
+        && prefix.contains(fileSystemScheme)) {
+        _packageName = packageName;
+        _uriPrefixes = fileSystemRoots
+          .map((String name) => Uri.file(name, windows: platform.isWindows).toString())
+          .toList();
+        return;
+      }
+      if (scriptUri.startsWith(prefix)) {
+        _packageName = packageName;
+        _uriPrefixes = <String>[prefix];
+        return;
+      }
+    }
   }
 
   String _packageName;
@@ -514,7 +513,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String sdkRoot, {
     @required this.buildMode,
     this.causalAsyncStacks = true,
-    this.trackWidgetCreation = false,
+    this.trackWidgetCreation = true,
     this.packagesPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
@@ -798,6 +797,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   String _mapFilename(String filename, PackageUriMapper packageUriMapper) {
+    // TODO(jonahwilliams): remove once package uri fix rolls thorugh.
+    if (targetModel == TargetModel.dartdevc) {
+      return filename;
+    }
     return _doMapFilename(filename, packageUriMapper) ?? filename;
   }
 

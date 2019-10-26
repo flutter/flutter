@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:build_daemon/client.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -34,6 +35,7 @@ void main() {
   MockVmService mockVmService;
   MockWebDevice mockWebDevice;
   MockAppConnection mockAppConnection;
+  MockFlutterDevice mockFlutterDevice;
 
   setUp(() {
     mockWebFs = MockFlutterWebFs();
@@ -41,10 +43,12 @@ void main() {
     mockVmService = MockVmService();
     mockWebDevice = MockWebDevice();
     mockAppConnection = MockAppConnection();
+    mockFlutterDevice = MockFlutterDevice();
+    when(mockFlutterDevice.device).thenReturn(mockWebDevice);
     testbed = Testbed(
       setup: () {
         residentWebRunner = ResidentWebRunner(
-          mockWebDevice,
+          mockFlutterDevice,
           flutterProject: FlutterProject.current(),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           ipv6: true,
@@ -83,12 +87,16 @@ void main() {
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
+    when(mockVmService.onDebugEvent).thenAnswer((Invocation _) {
+      return const Stream<Event>.empty();
+    });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
 
   test('runner with web server device does not support debugging', () => testbed.run(() {
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
     final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
-      WebServerDevice(),
+      mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
@@ -99,8 +107,9 @@ void main() {
   }));
 
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
+     when(mockFlutterDevice.device).thenReturn(MockWebDevice());
     final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
-      MockWebDevice(),
+      mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
@@ -172,6 +181,27 @@ void main() {
     await connectionInfoCompleter.future;
 
     expect(bufferLogger.statusText, contains('THIS MESSAGE IS IMPORTANT'));
+  }));
+
+  test('Does not run main with --start-paused', () => testbed.run(() async {
+    residentWebRunner = ResidentWebRunner(
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
+      ipv6: true,
+    );
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final StreamController<Event> controller = StreamController<Event>.broadcast();
+    when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
+      return controller.stream;
+    });
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    verifyNever(mockAppConnection.runMain());
   }));
 
   test('Can hot reload after attaching', () => testbed.run(() async {
@@ -540,13 +570,70 @@ void main() {
     await expectation;
   }));
 
-  test('Successfully turns AppInstanceId error into ToolExit', () => testbed.run(() async {
+  test('Successfully turns AppConnectionException into ToolExit', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Completer<void> unhandledErrorCompleter = Completer<void>();
     when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
       unawaited(unhandledErrorCompleter.future.then((void value) {
-        throw StateError('Could not connect to application with appInstanceId: c0ae0750-ee91-11e9-cea6-35d95a968356');
+        throw AppConnectionException('Could not connect to application with appInstanceId: c0ae0750-ee91-11e9-cea6-35d95a968356');
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsA(isInstanceOf<ToolExit>()));
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+  test('Successfully turns ChromeDebugError into ToolExit', () => testbed.run(() async {
+     _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw ChromeDebugException(<String, dynamic>{});
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsA(isInstanceOf<ToolExit>()));
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+  test('Successfully turns OptionsSkew error into ToolExit', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw OptionsSkew();
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsA(isInstanceOf<ToolExit>()));
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+  test('Successfully turns VersionSkew error into ToolExit', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw VersionSkew();
       }));
       return ConnectionResult(mockAppConnection, mockDebugConnection);
     });
@@ -612,3 +699,4 @@ class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
+class MockFlutterDevice extends Mock implements FlutterDevice {}

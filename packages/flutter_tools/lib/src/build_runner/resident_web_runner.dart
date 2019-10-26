@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/web/devfs_web.dart';
+import 'package:build_daemon/client.dart';
+import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
@@ -169,6 +171,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     printStatus('Launching ${getDisplayPath(target)} on ${device.device.name} in $modeName mode...');
+
     if (featureFlags.isWebIncrementalCompilerEnabled) {
       return _runExperimental(
         connectionInfoCompleter: connectionInfoCompleter,
@@ -178,9 +181,94 @@ class ResidentWebRunner extends ResidentRunner {
       );
     }
 
+    Status buildStatus;
+    bool statusActive = false;
+    try {
+      // dwds does not handle uncaught exceptions from its servers. To work
+      // around this, we need to catch all uncaught exceptions and determine if
+      // they are fatal or not.
+      buildStatus = logger.startProgress('Building application for the web...', timeout: null);
+      statusActive = true;
+      final int result = await asyncGuard(() async {
+        _webFs = await webFsFactory(
+          target: target,
+          flutterProject: flutterProject,
+          buildInfo: debuggingOptions.buildInfo,
+          initializePlatform: debuggingOptions.initializePlatform,
+          hostname: debuggingOptions.hostname,
+          port: debuggingOptions.port,
+          skipDwds: device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
+        );
+        // When connecting to a browser, update the message with a seemsSlow notification
+        // to handle the case where we fail to connect.
+        buildStatus.stop();
+        statusActive = false;
+        if (debuggingOptions.browserLaunch && supportsServiceProtocol) {
+          buildStatus = logger.startProgress(
+            'Attempting to connect to browser instance..',
+            timeout: const Duration(seconds: 30),
+          );
+          statusActive = true;
+        }
+        await device.device.startApp(package,
+          mainPath: target,
+          debuggingOptions: debuggingOptions,
+          platformArgs: <String, Object>{
+            'uri': _webFs.uri,
+          },
+        );
+        if (supportsServiceProtocol) {
+          _connectionResult = await _webFs.connect(debuggingOptions);
+          unawaited(_connectionResult.debugConnection.onDone.whenComplete(() => exit(0)));
+        }
+        if (statusActive) {
+          buildStatus.stop();
+          statusActive = false;
+        }
+        appStartedCompleter?.complete();
+        return attach(
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+        );
+      });
+      return result;
+    } on VersionSkew {
+      // Thrown if an older build daemon is already running.
+      throwToolExit(
+        'Another build daemon is already running with an older version.\n'
+        'Try exiting other Flutter processes in this project and try again.'
+      );
+    } on OptionsSkew {
+      // Thrown if a build daemon is already running with different configuration.
+      throwToolExit(
+        'Another build daemon is already running with different configuration.\n'
+        'Try exiting other Flutter processes in this project and try again.'
+      );
+    } on WebSocketException {
+      throwToolExit('Failed to connect to WebSocket.');
+    } on BuildException {
+      throwToolExit('Failed to build application for the Web.');
+    } on ChromeDebugException catch (err, stackTrace) {
+      throwToolExit(
+        'Failed to establish connection with Chrome. Try running the application again.\n'
+        'If this problem persists, please file an issue with the details below:\n$err\n$stackTrace');
+    } on AppConnectionException {
+      throwToolExit(
+        'Failed to establish connection with the application instance in Chrome.\n'
+        'This can happen if the websocket connection used by the web tooling is '
+        'unabled to correctly establish a connection, for example due to a firewall.'
+      );
+    } on SocketException catch (err) {
+      throwToolExit(err.toString());
+    } finally {
+      if (statusActive) {
+        buildStatus.stop();
+      }
+    }
+    return 1;
   }
 
-  @override
+   @override
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
@@ -191,6 +279,49 @@ class ResidentWebRunner extends ResidentRunner {
         appStartedCompleter: appStartedCompleter,
       );
     }
+
+    Uri websocketUri;
+    if (supportsServiceProtocol) {
+      // Cleanup old subscriptions. These will throw if there isn't anything
+      // listening, which is fine because that is what we want to ensure.
+      try {
+        await _vmService.streamCancel('Stdout');
+      } on vmservice.RPCError {
+        // Ignore this specific error.
+      }
+      try {
+        await _vmService.streamListen('Stdout');
+      } on vmservice.RPCError  {
+        // Ignore this specific error.
+      }
+      _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
+        final String message = utf8.decode(base64.decode(log.bytes)).trim();
+        printStatus(message);
+      });
+      unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
+      websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
+      // Always run main after connecting because start paused doesn't work yet.
+      if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
+        _connectionResult.appConnection.runMain();
+      } else {
+        StreamSubscription<void> resumeSub;
+        resumeSub = _connectionResult.debugConnection.vmService.onDebugEvent.listen((vmservice.Event event) {
+          if (event.type == vmservice.EventKind.kResume) {
+            _connectionResult.appConnection.runMain();
+            resumeSub.cancel();
+          }
+        });
+      }
+    }
+    if (websocketUri != null) {
+      printStatus('Debug service listening on $websocketUri');
+    }
+    connectionInfoCompleter?.complete(
+      DebugConnectionInfo(wsUri: websocketUri)
+    );
+    final int result = await waitForAppToFinish();
+    await cleanupAtFinish();
+    return result;
   }
 
   @override
@@ -200,14 +331,84 @@ class ResidentWebRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
+    final Stopwatch timer = Stopwatch()..start();
+    final Status status = logger.startProgress(
+      'Performing hot restart...',
+      timeout: supportsServiceProtocol
+          ? timeoutConfiguration.fastOperation
+          : timeoutConfiguration.slowOperation,
+      progressId: 'hot.restart',
+    );
+
     if (featureFlags.isWebIncrementalCompilerEnabled) {
-      return _restartExperimental(
+      final OperationResult result = await _restartExperimental(
         fullRestart: fullRestart,
         pauseAfterRestart: pauseAfterRestart,
         reason: reason,
         benchmarkMode: benchmarkMode,
       );
+      status.stop();
+      flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      return result;
     }
+
+    final bool success = await _webFs.recompile();
+    if (!success) {
+      status.stop();
+      return OperationResult(1, 'Failed to recompile application.');
+    }
+    if (supportsServiceProtocol) {
+      // Send an event for only recompilation.
+      final Duration recompileDuration = timer.elapsed;
+      flutterUsage.sendTiming('hot', 'web-recompile', recompileDuration);
+      try {
+        final vmservice.Response reloadResponse = fullRestart
+           ? await _vmService.callServiceExtension('fullReload')
+           : await _vmService.callServiceExtension('hotRestart');
+        final String verb = fullRestart ? 'Restarted' : 'Reloaded';
+        printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+
+        // Send timing analytics for full restart and for refresh.
+        final bool wasSuccessful = reloadResponse.type == 'Success';
+        if (!wasSuccessful) {
+          return OperationResult(1, reloadResponse.toString());
+        }
+        if (!fullRestart) {
+          flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
+          flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+        }
+        return OperationResult.ok;
+      } on vmservice.RPCError {
+        return OperationResult(1, 'Page requires refresh.');
+      } finally {
+        status.stop();
+        HotEvent('restart',
+          targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
+          sdkName: await device.device.sdkNameAndVersion,
+          emulator: false,
+          fullRestart: true,
+          reason: reason,
+        ).send();
+      }
+    }
+    // Allows browser refresh hot restart on non-debug builds.
+    if (device is ChromeDevice && debuggingOptions.browserLaunch) {
+      try {
+        final Chrome chrome = await ChromeLauncher.connectedInstance;
+        final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+          return chromeTab.url.contains(debuggingOptions.hostname);
+        });
+        final WipConnection wipConnection = await chromeTab.connect();
+        await wipConnection.sendCommand('Page.reload');
+        status.stop();
+        return OperationResult.ok;
+      } catch (err) {
+        // Ignore error and continue with posted message;
+      }
+    }
+    status.stop();
+    printStatus('Recompile complete. Page requires refresh.');
+    return OperationResult.ok;
   }
 
   Future<int> _runExperimental({

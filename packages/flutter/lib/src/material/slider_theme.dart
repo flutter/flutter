@@ -2620,6 +2620,7 @@ class _PaddleSliderTrackShapePathPainter {
   // Adds an arc to the path that has the attributes passed in. This is
   // a convenience to make adding arcs have less boilerplate.
   static void _addArc(Path path, Offset center, double radius, double startAngle, double endAngle) {
+    assert(center.isFinite);
     final Rect arcRect = Rect.fromCircle(center: center, radius: radius);
     path.arcTo(arcRect, startAngle, endAngle - startAngle, false);
   }
@@ -2692,6 +2693,12 @@ class _PaddleSliderTrackShapePathPainter {
     TextPainter labelPainter,
     Color strokePaintColor,
   ) {
+    if (scale == 0.0) {
+      // Zero scale essentially means "do not draw anything", so it's safe to just return. Otherwise,
+      // our math below will attempt to divide by zero and send needless NaNs to the engine.
+      return;
+    }
+
     // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.
     final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
