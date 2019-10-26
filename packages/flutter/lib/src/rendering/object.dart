@@ -65,11 +65,18 @@ class PaintingContext extends ClipContext {
   /// Typically only called by [PaintingContext.repaintCompositedChild]
   /// and [pushLayer].
   @protected
-  PaintingContext(this._containerLayer, this.estimatedBounds)
+  PaintingContext(ContainerLayer _containerLayer, this.estimatedBounds)
     : assert(_containerLayer != null),
-      assert(estimatedBounds != null);
+      assert(estimatedBounds != null),
+      _containerLayerStack = <ContainerLayer>[_containerLayer];
 
-  final ContainerLayer _containerLayer;
+  final List<ContainerLayer> _containerLayerStack;
+  ContainerLayer get _containerLayer {
+    final ContainerLayer stackTop = _containerLayerStack.last;
+    if (_containerLayerStack.length > 1)
+      assert(stackTop is VirtualLayer);
+    return stackTop;
+  }
 
   /// An estimate of the bounds within which the painting context's [canvas]
   /// will record painting commands. This can be useful for debugging.
@@ -232,6 +239,20 @@ class PaintingContext extends ClipContext {
     _containerLayer.append(layer);
   }
 
+  @protected
+  void withVirtualLayer(VirtualLayer layer, VoidCallback task) {
+    layer.remove();
+    _containerLayer.append(layer);
+    _containerLayerStack.add(layer);
+    final int beforeStackDepth = _containerLayerStack.length;
+    try {
+      task();
+    } finally {
+      assert(_containerLayerStack.length == beforeStackDepth);
+      _containerLayerStack.removeLast();
+    }
+  }
+
   bool get _isRecording {
     final bool hasCanvas = _canvas != null;
     assert(() {
@@ -385,16 +406,14 @@ class PaintingContext extends ClipContext {
     childContext.stopRecordingIfNeeded();
   }
 
-  void pushVirtualLayer(ContainerLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+  void pushVirtualLayer(VirtualLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
     assert(painter != null);
     if (childLayer.hasChildren) {
       childLayer.removeAllChildren();
     }
-    // Following: appendLayer(childLayer) but with assertion removed
-    childLayer.remove();
-    _containerLayer.append(childLayer);
-    final PaintingContext childContext = VirtualPaintingContext(this, childLayer, estimatedBounds);
-    painter(childContext, offset);
+    withVirtualLayer(childLayer, () {
+      painter(this, offset);
+    });
   }
 
   /// Creates a compatible painting context to paint onto [childLayer].
@@ -584,28 +603,6 @@ class PaintingContext extends ClipContext {
 
   @override
   String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
-}
-
-class VirtualPaintingContext extends PaintingContext {
-  VirtualPaintingContext(this.owner, ContainerLayer containerLayer, Rect estimatedBounds)
-    : super(containerLayer, estimatedBounds);
-
-  final PaintingContext owner;
-
-  @override
-  Canvas get canvas => owner.canvas;
-
-  @override
-  void appendLayer(Layer layer) {
-    layer.remove();
-    _containerLayer.append(layer);
-  }
-
-  @override
-  void stopRecordingIfNeeded() {
-    owner.stopRecordingIfNeeded();
-    super.stopRecordingIfNeeded();
-  }
 }
 
 /// An abstract set of layout constraints.

@@ -2283,6 +2283,14 @@ class FollowerLayer extends ContainerLayer {
   }
 }
 
+class VirtualLayer extends ContainerLayer {
+  @override
+  ui.EngineLayer get engineLayer {
+    assert(false, '$runtimeType is a virtual layer, and can not own a engine layer.');
+    return null;
+  }
+}
+
 /// A composited layer which annotates its children with a value. Pushing this
 /// layer to the tree is the common way of adding an annotation.
 ///
@@ -2304,7 +2312,7 @@ class FollowerLayer extends ContainerLayer {
 ///
 /// This layer is opaque to a type of annotation if any child is also opaque, or
 /// if [opaque] is true and the layer's annotation is added.
-class AnnotatedRegionLayer<T> extends ContainerLayer {
+class AnnotatedRegionLayer<T> extends VirtualLayer {
   /// Creates a new layer that annotates its children with [value].
   ///
   /// The [value] provided cannot be null.
