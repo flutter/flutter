@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/web/devfs_web.dart';
 import 'package:build_daemon/client.dart';
 import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
@@ -18,6 +16,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -31,6 +30,7 @@ import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../web/chrome.dart';
+import '../web/devfs_web.dart';
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'web_fs.dart';
