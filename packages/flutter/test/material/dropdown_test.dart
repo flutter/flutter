@@ -375,7 +375,7 @@ void main() {
     }
   });
 
-  testWidgets('DropdownButton does not item list without given value', (WidgetTester tester) async {
+  testWidgets('DropdownButton value should only appear in one menu item', (WidgetTester tester) async {
     final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'd']
       .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
@@ -1947,7 +1947,7 @@ void main() {
     }
   });
 
-  testWidgets('DropdownButtonFormField does not item list without given value', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField value should only appear in one menu item', (WidgetTester tester) async {
     final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'd']
       .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
