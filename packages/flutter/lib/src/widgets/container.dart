@@ -310,6 +310,7 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
+    this.clipBehaviour,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
@@ -385,6 +386,10 @@ class Container extends StatelessWidget {
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
+  /// clipBehaviour for [BoxDecoration.borderRadius]
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehaviour;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
     if (decoration == null || decoration.padding == null)
@@ -433,6 +438,17 @@ class Container extends StatelessWidget {
 
     if (transform != null)
       current = Transform(transform: transform, child: current);
+
+    if (clipBehaviour != null &&
+        clipBehaviour != Clip.none &&
+        decoration is BoxDecoration) {
+      final BoxDecoration _decoration = decoration;
+      current = ClipRRect(
+        borderRadius: _decoration.borderRadius,
+        clipBehavior: clipBehaviour,
+        child: current,
+      );
+    }
 
     return current;
   }
