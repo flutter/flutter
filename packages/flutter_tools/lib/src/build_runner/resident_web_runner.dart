@@ -236,6 +236,10 @@ class ResidentWebRunner extends ResidentRunner {
         'If this problem persists, please file an issue with the details below:\n$err\n$stackTrace');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
+    } on MissingPortFile {
+      throwToolExit(
+        'Failed to connect to build daemon.\nThe daemon either failed to '
+        'start or was killed by another process.');
     } on StateError catch (err) {
       // Handle known state error.
       final String message = err.toString();
