@@ -21,10 +21,12 @@ import io.flutter.plugin.common.StandardMessageCodecTest;
 import io.flutter.plugin.editing.TextInputPluginTest;
 import io.flutter.plugin.platform.SingleViewPresentationTest;
 import io.flutter.util.PreconditionsTest;
+import test.io.flutter.embedding.engine.dart.DartExecutorTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
     //FlutterActivityAndFragmentDelegateTest.class, //TODO(mklim): Fix and re-enable this
+    DartExecutorTest.class,
     FlutterActivityTest.class,
     FlutterAndroidComponentTest.class,
     FlutterEngineCacheTest.class,
