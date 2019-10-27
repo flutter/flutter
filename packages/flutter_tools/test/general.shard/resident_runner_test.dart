@@ -448,6 +448,19 @@ void main() {
     verify(mockDevice.stopApp(any)).called(1);
   }));
 
+  test('FlutterDevice will not NPE when checking for a paused isolate', () => testbed.run(() async {
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      mockDevice,
+      <FlutterView>[ mockFlutterView ],
+    );
+    when(mockIsolate.pauseEvent).thenReturn(null);
+    when(mockDevice.supportsFlutterExit).thenReturn(true);
+
+    await flutterDevice.exitApps();
+
+    verify(mockIsolate.flutterExit());
+  }));
+
   test('FlutterDevice will exit an un-paused isolate', () => testbed.run(() async {
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,

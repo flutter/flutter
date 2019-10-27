@@ -206,7 +206,6 @@ class FlutterDevice {
     }
     for (FlutterView view in flutterViews) {
       if (view != null && view.uiIsolate != null) {
-        assert(!view.uiIsolate.pauseEvent.isPauseEvent);
         futures.add(view.uiIsolate.flutterExit());
       }
     }
