@@ -122,7 +122,7 @@ class ResidentWebRunner extends ResidentRunner {
 
   Future<void> _cleanupAndExit() async {
     await _cleanup();
-    exit(0);
+    appFinished();
   }
 
   @override
