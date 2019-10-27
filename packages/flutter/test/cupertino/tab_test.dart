@@ -118,6 +118,33 @@ void main() {
     expect(find.text('second route'), findsOneWidget);
   });
 
+  testWidgets('Test tab view hot reload', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = GlobalKey();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabView(
+          navigatorKey: key,
+          builder: (BuildContext context) => const Text('first route'),
+        ),
+      ),
+    );
+
+
+    await tester.pump();
+    expect(find.text('first route'), findsOneWidget);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabView(
+          navigatorKey: key,
+          builder: (BuildContext context) => const Text('hot reload succeeded'),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('hot reload succeeded'), findsOneWidget);
+  });
+
   testWidgets('Changing the key resets the navigator', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
     await tester.pumpWidget(

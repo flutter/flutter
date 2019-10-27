@@ -172,10 +172,19 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     WidgetBuilder routeBuilder;
     String title;
     if (name == Navigator.defaultRouteName && widget.builder != null) {
-      routeBuilder = widget.builder;
+      // We wrap the builder in a closure so that if the builder associated with
+      // the widget changes, the routeBuilder we pass to the PageRoute will
+      // reflect the new builder and not the old builder.
+      // Without wrapping the builder, hot reload will run the old builder
+      // instead of the new builder.
+      routeBuilder = (BuildContext context) {
+        return widget.builder(context);
+      };
       title = widget.defaultTitle;
     } else if (widget.routes != null) {
-      routeBuilder = widget.routes[name];
+      routeBuilder = (BuildContext context) {
+        return widget.routes[name](context);
+      };
     }
     if (routeBuilder != null) {
       return CupertinoPageRoute<dynamic>(
