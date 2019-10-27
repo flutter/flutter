@@ -485,14 +485,14 @@ abstract class CachedArtifact extends ArtifactSet {
   @visibleForTesting
   String get storageBaseUrl {
     final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    if (overrideUrl == null) {
+      return 'https://storage.googleapis.com';
+    }
     // verify that this is a valid URI.
     try {
       Uri.parse(overrideUrl);
     } on FormatException catch (err) {
       throwToolExit('"FLUTTER_STORAGE_BASE_URL" contains an invalid URI:\n$err');
-    }
-    if (overrideUrl == null) {
-      return 'https://storage.googleapis.com';
     }
     _maybeWarnAboutStorageOverride(overrideUrl);
     return overrideUrl;
