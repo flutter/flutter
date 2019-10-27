@@ -198,7 +198,7 @@ class FlutterDevice {
     if (flutterViews.any((FlutterView view) {
       return view != null &&
              view.uiIsolate != null &&
-             view.uiIsolate.pauseEvent.isPauseEvent;
+             view.uiIsolate.pauseEvent?.isPauseEvent == true;
       }
     )) {
       await device.stopApp(package);
