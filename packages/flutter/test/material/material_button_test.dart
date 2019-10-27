@@ -13,7 +13,8 @@ import '../widgets/semantics_tester.dart';
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
-  });  
+  });
+
   testWidgets('MaterialButton defaults', (WidgetTester tester) async {
     final Finder rawButtonMaterial = find.descendant(
       of: find.byType(MaterialButton),
@@ -440,7 +441,7 @@ void main() {
       paintsExactlyCountTimes(#clipPath, 0),
     );
   });
-  
+
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
