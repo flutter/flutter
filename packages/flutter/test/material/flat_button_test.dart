@@ -334,11 +334,12 @@ void main() {
     );
   });
 
-  testWidgets('FlatButton responds to tap and onLongPress when enabled', (WidgetTester tester) async {
+  testWidgets('FlatButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
 
-    int pressedCount = 0;
+    bool wasPressed;
+    Finder flatButton;
 
-    Widget buildFrame({VoidCallback onPressed, VoidCallback onLongPress}) {
+    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlatButton(child: const Text('button'), onPressed: onPressed, onLongPress: onLongPress),
@@ -346,37 +347,41 @@ void main() {
     }
 
     // onPressed not null, onLongPress null.
+    wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { pressedCount += 1; }, onLongPress: null),
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
     );
-    expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, true);
-    await tester.tap(find.byType(FlatButton));
+    flatButton = find.byType(FlatButton);
+    expect(tester.widget<FlatButton>(flatButton).enabled, true);
+    await tester.tap(flatButton);
     await tester.pumpAndSettle();
-    expect(pressedCount, 1);
+    expect(wasPressed, true);
 
     // onPressed null, onLongPress not null.
-    pressedCount = 0;
+    wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { pressedCount += 1; }),
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
     );
-    expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, true);
-    await tester.longPress(find.byType(FlatButton));
+    flatButton = find.byType(FlatButton);
+    expect(tester.widget<FlatButton>(flatButton).enabled, true);
+    await tester.longPress(flatButton);
     await tester.pumpAndSettle();
-    expect(pressedCount, 1);
+    expect(wasPressed, true);
 
     // onPressed null, onLongPress null.
-    pressedCount = 0;
+    wasPressed = false;
     await tester.pumpWidget(
       buildFrame(onPressed: null, onLongPress: null),
     );
-    expect(tester.widget<FlatButton>(find.byType(FlatButton)).enabled, false);
-    await tester.tap(find.byType(FlatButton));
-    await tester.longPress(find.byType(FlatButton));
+    flatButton = find.byType(FlatButton);
+    expect(tester.widget<FlatButton>(flatButton).enabled, false);
+    await tester.tap(flatButton);
+    await tester.longPress(flatButton);
     await tester.pumpAndSettle();
-    expect(pressedCount, 0);
+    expect(wasPressed, false);
   });
 
-  testWidgets('FlatButton onPressed and onLongPress callbacks are distincly recognized', (WidgetTester tester) async {
+  testWidgets('FlatButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 

@@ -408,49 +408,54 @@ void main() {
     expect(box, paints..rect(color: hoverColor));
   });
 
-  testWidgets('RawMaterialButton responds to tap and onLongPress when enabled', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
 
-    int pressedCount = 0;
+    bool wasPressed;
+    Finder rawMaterialButton;
 
-    Widget buildFrame({VoidCallback onPressed, VoidCallback onLongPress}) {
+    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: RawMaterialButton(onPressed: onPressed, onLongPress: onLongPress),
+        child: RawMaterialButton(child: const Text('button'), onPressed: onPressed, onLongPress: onLongPress),
       );
     }
 
     // onPressed not null, onLongPress null.
+    wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { pressedCount += 1; }, onLongPress: null),
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
     );
-    expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).enabled, true);
-    await tester.tap(find.byType(RawMaterialButton));
+    rawMaterialButton = find.byType(RawMaterialButton);
+    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
+    await tester.tap(rawMaterialButton);
     await tester.pumpAndSettle();
-    expect(pressedCount, 1);
+    expect(wasPressed, true);
 
     // onPressed null, onLongPress not null.
-    pressedCount = 0;
+    wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { pressedCount += 1; }),
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
     );
-    expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).enabled, true);
-    await tester.longPress(find.byType(RawMaterialButton));
+    rawMaterialButton = find.byType(RawMaterialButton);
+    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
+    await tester.longPress(rawMaterialButton);
     await tester.pumpAndSettle();
-    expect(pressedCount, 1);
+    expect(wasPressed, true);
 
     // onPressed null, onLongPress null.
-    pressedCount = 0;
+    wasPressed = false;
     await tester.pumpWidget(
       buildFrame(onPressed: null, onLongPress: null),
     );
-    expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).enabled, false);
-    await tester.tap(find.byType(RawMaterialButton));
-    await tester.longPress(find.byType(RawMaterialButton));
+    rawMaterialButton = find.byType(RawMaterialButton);
+    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);
+    await tester.tap(rawMaterialButton);
+    await tester.longPress(rawMaterialButton);
     await tester.pumpAndSettle();
-    expect(pressedCount, 0);
+    expect(wasPressed, false);
   });
 
-  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distincly recognized', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 
