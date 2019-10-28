@@ -55,13 +55,6 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
   );
 }
 
-ImageProvider<dynamic> _resizeIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
-  if (cacheWidth != null || cacheHeight != null) {
-    return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
-  }
-  return provider;
-}
-
 /// Prefetches an image into the image cache.
 ///
 /// Returns a [Future] that will complete when the first image yielded by the
@@ -358,7 +351,7 @@ class Image extends StatefulWidget {
     Map<String, String> headers,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -410,7 +403,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
@@ -573,7 +566,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, scale != null
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, scale != null
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
          : AssetImage(name, bundle: bundle, package: package)
        ),
@@ -630,7 +623,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),

@@ -514,7 +514,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String sdkRoot, {
     @required this.buildMode,
     this.causalAsyncStacks = true,
-    this.trackWidgetCreation = false,
+    this.trackWidgetCreation = true,
     this.packagesPath,
     this.fileSystemRoots,
     this.fileSystemScheme,

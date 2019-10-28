@@ -190,7 +190,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// change the controller's [value].
   set selection(TextSelection newSelection) {
     if (newSelection.start > text.length || newSelection.end > text.length)
-      throw FlutterError('invalid text selection: $newSelection');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('invalid text selection: $newSelection')]);
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
@@ -422,6 +422,7 @@ class EditableText extends StatefulWidget {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),

@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -202,6 +203,18 @@ void main() {
         );
       }
     });
+
+    testUsingContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {
+      when(platform.environment).thenReturn(const <String, String>{
+        'FLUTTER_STORAGE_BASE_URL': ' http://foo',
+      });
+      final Cache cache = Cache();
+      final CachedArtifact artifact = MaterialFonts(cache);
+
+      expect(() => artifact.storageBaseUrl, throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      Platform: () => MockPlatform(),
+    });
   });
 
   testUsingContext('flattenNameSubdirs', () {
@@ -379,3 +392,4 @@ class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockPlatform extends Mock implements Platform {}

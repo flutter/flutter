@@ -3350,6 +3350,38 @@ void main() {
     expect(scrollable.controller.position.pixels, equals(14));
     expect(scrollable.controller.position.pixels, equals(renderEditable.maxScrollExtent));
   }, skip: isBrowser);
+
+  testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    expect(
+      () {
+        EditableText(
+          backgroundCursorColor: cursorColor,
+          controller: controller,
+          cursorColor: cursorColor,
+          focusNode: focusNode,
+          maxLines: 1,
+          obscureText: true,
+          style: textStyle,
+        );
+      },
+      returnsNormally,
+    );
+    expect(
+      () {
+        EditableText(
+          backgroundCursorColor: cursorColor,
+          controller: controller,
+          cursorColor: cursorColor,
+          focusNode: focusNode,
+          maxLines: 2,
+          obscureText: true,
+          style: textStyle,
+        );
+      },
+      throwsAssertionError,
+    );
+  });
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {
