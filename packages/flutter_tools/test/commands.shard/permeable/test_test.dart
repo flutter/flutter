@@ -62,7 +62,8 @@ void main() {
 
     testUsingContext('report which user created widget caused the error - no flag', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory);
+      return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory,
+         extraArguments: const <String>['--no-track-widget-creation']);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
     testUsingContext('report correct created widget caused the error', () async {

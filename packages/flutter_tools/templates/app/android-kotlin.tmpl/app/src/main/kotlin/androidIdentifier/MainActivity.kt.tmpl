@@ -12,9 +12,9 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity: FlutterActivity() {
-  override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
-    GeneratedPluginRegistrant.registerWith(flutterEngine);
-  }
+    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        GeneratedPluginRegistrant.registerWith(flutterEngine);
+    }
 }
 {{/useAndroidEmbeddingV2}}
 {{^useAndroidEmbeddingV2}}
@@ -23,9 +23,9 @@ import io.flutter.app.FlutterActivity
 import io.flutter.plugins.GeneratedPluginRegistrant
 
 class MainActivity: FlutterActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    GeneratedPluginRegistrant.registerWith(this)
-  }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        GeneratedPluginRegistrant.registerWith(this)
+    }
 }
 {{/useAndroidEmbeddingV2}}

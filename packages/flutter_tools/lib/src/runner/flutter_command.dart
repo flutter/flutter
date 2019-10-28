@@ -361,7 +361,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'track-widget-creation',
       hide: !hasEffect && !verboseHelp,
-      defaultsTo: false, // this will soon be changed to true
+      defaultsTo: true,
       help: 'Track widget creation locations. This enables features such as the widget inspector. '
             'This parameter is only functional in debug mode (i.e. when compiling JIT, not AOT).',
     );
@@ -734,7 +734,8 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
       // No artifacts currently supported.
       return null;

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:build_daemon/client.dart';
+import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
@@ -120,8 +122,8 @@ class ResidentWebRunner extends ResidentRunner {
       return printHelpDetails();
     }
     const String fire = '🔥';
-    const String rawMessage =
-        '  To hot restart (and rebuild state), press "r" or "R".';
+    const String rawMessage = '  To hot restart changes while running, press "r". '
+      'To hot restart (and refresh the browser), press "R".';
     final String message = terminal.color(
       fire + terminal.bolden(rawMessage),
       TerminalColor.red,
@@ -212,19 +214,34 @@ class ResidentWebRunner extends ResidentRunner {
         );
       });
       return result;
+    } on VersionSkew {
+      // Thrown if an older build daemon is already running.
+      throwToolExit(
+        'Another build daemon is already running with an older version.\n'
+        'Try exiting other Flutter processes in this project and try again.'
+      );
+    } on OptionsSkew {
+      // Thrown if a build daemon is already running with different configuration.
+      throwToolExit(
+        'Another build daemon is already running with different configuration.\n'
+        'Try exiting other Flutter processes in this project and try again.'
+      );
     } on WebSocketException {
       throwToolExit('Failed to connect to WebSocket.');
     } on BuildException {
       throwToolExit('Failed to build application for the Web.');
+    } on ChromeDebugException catch (err, stackTrace) {
+      throwToolExit(
+        'Failed to establish connection with Chrome. Try running the application again.\n'
+        'If this problem persists, please file an issue with the details below:\n$err\n$stackTrace');
+    } on AppConnectionException {
+      throwToolExit(
+        'Failed to establish connection with the application instance in Chrome.\n'
+        'This can happen if the websocket connection used by the web tooling is '
+        'unabled to correctly establish a connection, for example due to a firewall.'
+      );
     } on SocketException catch (err) {
       throwToolExit(err.toString());
-    } on StateError catch (err) {
-      // Handle known state error.
-      final String message = err.toString();
-      if (message.contains('Could not connect to application with appInstanceId')) {
-        throwToolExit(message);
-      }
-      rethrow;
     } finally {
       if (statusActive) {
         buildStatus.stop();
@@ -259,7 +276,17 @@ class ResidentWebRunner extends ResidentRunner {
       unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
       // Always run main after connecting because start paused doesn't work yet.
-      _connectionResult.appConnection.runMain();
+      if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
+        _connectionResult.appConnection.runMain();
+      } else {
+        StreamSubscription<void> resumeSub;
+        resumeSub = _connectionResult.debugConnection.vmService.onDebugEvent.listen((vmservice.Event event) {
+          if (event.type == vmservice.EventKind.kResume) {
+            _connectionResult.appConnection.runMain();
+            resumeSub.cancel();
+          }
+        });
+      }
     }
     if (websocketUri != null) {
       printStatus('Debug service listening on $websocketUri');
@@ -297,16 +324,21 @@ class ResidentWebRunner extends ResidentRunner {
       final Duration recompileDuration = timer.elapsed;
       flutterUsage.sendTiming('hot', 'web-recompile', recompileDuration);
       try {
-        final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
-        printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+        final vmservice.Response reloadResponse = fullRestart
+           ? await _vmService.callServiceExtension('fullReload')
+           : await _vmService.callServiceExtension('hotRestart');
+        final String verb = fullRestart ? 'Restarted' : 'Reloaded';
+        printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
 
         // Send timing analytics for full restart and for refresh.
         final bool wasSuccessful = reloadResponse.type == 'Success';
         if (!wasSuccessful) {
           return OperationResult(1, reloadResponse.toString());
         }
-        flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
-        flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+        if (!fullRestart) {
+          flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
+          flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+        }
         return OperationResult.ok;
       } on vmservice.RPCError {
         return OperationResult(1, 'Page requires refresh.');

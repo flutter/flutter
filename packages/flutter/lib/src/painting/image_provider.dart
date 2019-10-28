@@ -540,6 +540,18 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
   /// The height the image should decode to and cache.
   final int height;
 
+  /// Composes the `provider` in a [ResizeImage] only when `cacheWidth` and
+  /// `cacheHeight` are not both null.
+  ///
+  /// When `cacheWidth` and `cacheHeight` are both null, this will return the
+  /// `provider` directly.
+  static ImageProvider<dynamic> resizeIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
+    if (cacheWidth != null || cacheHeight != null) {
+      return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
+    }
+    return provider;
+  }
+
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
     final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {

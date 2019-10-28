@@ -42,7 +42,7 @@ final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNE
 ///
 /// WARNING: if you change this number, also change .cirrus.yml
 /// and make sure it runs _all_ shards.
-const int kDeviceLabShardCount = 6;
+const int kDeviceLabShardCount = 4;
 
 /// The number of Cirrus jobs that run Web tests in parallel.
 ///
@@ -50,7 +50,7 @@ const int kDeviceLabShardCount = 6;
 /// and make sure it runs _all_ shards.
 ///
 /// The last shard also runs the Web plugin tests.
-const int kWebShardCount = 6;
+const int kWebShardCount = 8;
 
 /// Maximum number of Web tests to run in a single `flutter test`. We found that
 /// large batches can get flaky, possibly because we reuse a single instance of
@@ -59,13 +59,9 @@ const int kWebBatchSize = 20;
 
 /// Tests that we don't run on Web for various reasons.
 //
-// TODO(yjbanov): we're getting rid of these blacklists as part of https://github.com/flutter/flutter/projects/60
-const List<String> kWebTestDirectoryBlacklist = <String>[
-  'cupertino',
-  'examples',
-  'material',
-];
+// TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileBlacklist = <String>[
+  'test/examples/sector_layout_test.dart',
   'test/widgets/heroes_test.dart',
   'test/widgets/text_test.dart',
   'test/widgets/selectable_text_test.dart',
@@ -75,8 +71,27 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/raw_keyboard_listener_test.dart',
   'test/widgets/editable_text_test.dart',
   'test/widgets/widget_inspector_test.dart',
-  'test/widgets/draggable_test.dart',
   'test/widgets/shortcuts_test.dart',
+  'test/material/text_form_field_test.dart',
+  'test/material/data_table_test.dart',
+
+  // TODO(yjbanov): CupertinoDynamicColor breaks the web engine. The fix
+  //                is on the engine side: https://github.com/flutter/engine/pull/13359
+  'test/cupertino/colors_test.dart',
+  'test/cupertino/dialog_test.dart',
+  'test/cupertino/nav_bar_test.dart',
+  'test/cupertino/nav_bar_transition_test.dart',
+  'test/cupertino/refresh_test.dart',
+  'test/cupertino/switch_test.dart',
+  'test/cupertino/text_field_test.dart',
+  'test/cupertino/date_picker_test.dart',
+  'test/cupertino/slider_test.dart',
+  'test/cupertino/text_field_test.dart',
+  'test/cupertino/segmented_control_test.dart',
+  'test/cupertino/scaffold_test.dart',
+  'test/cupertino/route_test.dart',
+  'test/cupertino/route_test.dart',
+  'test/cupertino/activity_indicator_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -455,7 +470,6 @@ Future<void> _runWebTests() async {
   final List<String> allTests = flutterPackageTestDirectory
     .listSync()
     .whereType<Directory>()
-    .where((Directory directory) => !kWebTestDirectoryBlacklist.contains(path.basename(directory.path)))
     .expand((Directory directory) => directory
       .listSync(recursive: true)
       .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
@@ -735,33 +749,27 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   // seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     // Keep this in alphabetical order.
-    () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment, testEmbeddingV2: false),
+    () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment),
     if (Platform.isMacOS) () => _runDevicelabTest('flutter_create_offline_test_mac'),
     if (Platform.isLinux) () => _runDevicelabTest('flutter_create_offline_test_linux'),
     if (Platform.isWindows) () => _runDevicelabTest('flutter_create_offline_test_windows'),
     // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
-    if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment),
+
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: false),
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    if (!Platform.isMacOS) () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: false),
+    if (!Platform.isMacOS) () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+
     // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
     // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
-    () => _runDevicelabTest('plugin_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    () => _runDevicelabTest('plugin_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
   ]..shuffle(math.Random(0));
 
   final int testsPerShard = tests.length ~/ kDeviceLabShardCount;
@@ -789,6 +797,10 @@ Future<void> _runHostOnlyDeviceLabTests() async {
 
 Future<void> _runDevicelabTest(String testName, {
   Map<String, String> environment,
+  // testEmbeddingV2 is only supported by certain specific devicelab tests.
+  // Don't use it unless you're sure the test actually supports it.
+  // You can check by looking to see if the test examines the environment
+  // for the ENABLE_ANDROID_EMBEDDING_V2 variable.
   bool testEmbeddingV2 = false,
 }) async {
   await runCommand(
