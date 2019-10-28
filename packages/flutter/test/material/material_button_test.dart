@@ -335,9 +335,9 @@ void main() {
     const Rect expectedClipRect = Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
     final Path expectedClipPath = Path()
       ..addRRect(RRect.fromRectAndRadius(
-         expectedClipRect,
-         const Radius.circular(2.0),
-     ));
+          expectedClipRect,
+          const Radius.circular(2.0),
+      ));
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
