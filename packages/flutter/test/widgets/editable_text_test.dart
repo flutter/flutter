@@ -634,7 +634,7 @@ void main() {
   });
 
   testWidgets('closed connection reopened when user focused on another field', (WidgetTester tester) async {
-    final EditableText testNameField = 
+    final EditableText testNameField =
       EditableText(
         backgroundCursorColor: Colors.grey,
         controller: controller,
