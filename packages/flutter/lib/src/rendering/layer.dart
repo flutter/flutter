@@ -2292,11 +2292,11 @@ class FollowerLayer extends ContainerLayer {
 ///
 ///  * [AnnotatedRegionLayer], which extends this class to add annotation.
 class VirtualLayer extends ContainerLayer {
-  @override
-  ui.EngineLayer get engineLayer {
-    assert(false, '$runtimeType is a virtual layer, and can not own a engine layer.');
-    return null;
-  }
+  // Prevent virtual layer being extended, so that we can ensure it doesn't
+  // provide rendering utility.
+  //
+  // Currently the only subclass of [VirtualLayer] is [AnnotatedRegionLayer].
+  VirtualLayer._();
 }
 
 /// A composited layer which annotates its children with a value. Pushing this
@@ -2331,7 +2331,8 @@ class AnnotatedRegionLayer<T> extends VirtualLayer {
     this.opaque = false,
   }) : assert(value != null),
        assert(opaque != null),
-       offset = offset ?? Offset.zero;
+       offset = offset ?? Offset.zero,
+       super._();
 
   /// The annotated object, which is added to the result if all restrictions are
   /// met.
