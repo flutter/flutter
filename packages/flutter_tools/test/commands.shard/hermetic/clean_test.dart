@@ -80,6 +80,24 @@ void main() {
       Logger: () => BufferLogger(),
       Xcode: () => mockXcode,
     });
+
+    testUsingContext('$CleanCommand handles missing permissions;', () async {
+      when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
+
+      final MockFile mockFile = MockFile();
+      when(mockFile.existsSync()).thenThrow(const FileSystemException('OS error: Access Denied'));
+      when(mockFile.path).thenReturn('foo.dart');
+
+      final BufferLogger logger = context.get<Logger>();
+      final CleanCommand command = CleanCommand();
+      command.deleteFile(mockFile);
+      expect(logger.errorText, contains('Cannot clean foo.dart'));
+      verifyNever(mockFile.deleteSync(recursive: true));
+    }, overrides: <Type, Generator>{
+      Platform: () => windowsPlatform,
+      Logger: () => BufferLogger(),
+      Xcode: () => mockXcode,
+    });
   }
 
   test1();
