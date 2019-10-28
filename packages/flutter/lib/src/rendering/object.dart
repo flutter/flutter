@@ -239,8 +239,7 @@ class PaintingContext extends ClipContext {
     _containerLayer.append(layer);
   }
 
-  @protected
-  void withVirtualLayer(VirtualLayer layer, VoidCallback task) {
+  void _withVirtualLayer(VirtualLayer layer, VoidCallback task) {
     layer.remove();
     _containerLayer.append(layer);
     _containerLayerStack.add(layer);
@@ -248,6 +247,7 @@ class PaintingContext extends ClipContext {
     try {
       task();
     } finally {
+      assert(_containerLayer == layer);
       assert(_containerLayerStack.length == beforeStackDepth);
       _containerLayerStack.removeLast();
     }
@@ -392,6 +392,8 @@ class PaintingContext extends ClipContext {
   /// See also:
   ///
   ///  * [addLayer], for pushing a leaf layer whose canvas is not used.
+  ///  * [pushVirtualLayer], for pushing a layer without switching rendering
+  ///    context.
   void pushLayer(ContainerLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
     assert(painter != null);
     // If a layer is being reused, it may already contain children. We remove
@@ -406,12 +408,35 @@ class PaintingContext extends ClipContext {
     childContext.stopRecordingIfNeeded();
   }
 
+  /// Push the given virtual layer to the layer tree, and calls the `painter`
+  /// callback with that layer.
+  ///
+  /// Since virtual layers should not affect rendering, this method does not
+  /// interrupt the recording or create new context for the child, avoiding
+  /// the overhead of [pushLayer].
+  ///
+  /// The given layer must be an unattached orphan. (Providing a newly created
+  /// object, rather than reusing an existing layer, satisfies that
+  /// requirement.)
+  ///
+  /// The `offset` is the offset to pass to the `painter`.
+  ///
+  /// If the `childPaintBounds` are not specified then the current layer's paint
+  /// bounds are used. This is appropriate if the child layer does not apply any
+  /// transformation or clipping to its contents. The `childPaintBounds`, if
+  /// specified, must be in the coordinate system of the new layer, and should
+  /// not go outside the current layer's paint bounds.
+  ///
+  /// See also:
+  ///
+  ///  * [pushLayer], for adding a layer and using its canvas to paint with that
+  ///    layer.
   void pushVirtualLayer(VirtualLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
     assert(painter != null);
     if (childLayer.hasChildren) {
       childLayer.removeAllChildren();
     }
-    withVirtualLayer(childLayer, () {
+    _withVirtualLayer(childLayer, () {
       painter(this, offset);
     });
   }

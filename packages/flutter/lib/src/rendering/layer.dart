@@ -2283,6 +2283,14 @@ class FollowerLayer extends ContainerLayer {
   }
 }
 
+/// A layer that indicates to the compositor that it does not contribute to
+/// rendering, but only adds metadata to the layer tree.
+///
+/// It can only be added to the layer tree using [PaintingContext.pushVirtualLayer].
+///
+/// See also:
+///
+///  * [AnnotatedRegionLayer], which extends this class to add annotation.
 class VirtualLayer extends ContainerLayer {
   @override
   ui.EngineLayer get engineLayer {
