@@ -33,7 +33,7 @@ void main() {
   ResidentWebRunner residentWebRunner;
   MockDebugConnection mockDebugConnection;
   MockVmService mockVmService;
-  MockWebDevice mockWebDevice;
+  MockChromeDevice mockChromeDevice;
   MockAppConnection mockAppConnection;
   MockFlutterDevice mockFlutterDevice;
 
@@ -41,10 +41,10 @@ void main() {
     mockWebFs = MockFlutterWebFs();
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
-    mockWebDevice = MockWebDevice();
+    mockChromeDevice = MockChromeDevice();
     mockAppConnection = MockAppConnection();
     mockFlutterDevice = MockFlutterDevice();
-    when(mockFlutterDevice.device).thenReturn(mockWebDevice);
+    when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
     testbed = Testbed(
       setup: () {
         residentWebRunner = ResidentWebRunner(
@@ -103,11 +103,14 @@ void main() {
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
+
+    when(mockFlutterDevice.device).thenReturn(MockChromeDevice());
+
     expect(residentWebRunner.debuggingEnabled, true);
   }));
 
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
-     when(mockFlutterDevice.device).thenReturn(MockWebDevice());
+     when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
     final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
@@ -518,7 +521,7 @@ void main() {
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
     _setupMocks();
     bool debugClosed = false;
-    when(mockWebDevice.stopApp(any)).thenAnswer((Invocation invocation) async {
+    when(mockChromeDevice.stopApp(any)).thenAnswer((Invocation invocation) async {
       if (debugClosed) {
         throw StateError('debug connection closed twice');
       }
@@ -539,7 +542,7 @@ void main() {
 
   test('Prints target and device name on run', () => testbed.run(() async {
     _setupMocks();
-    when(mockWebDevice.name).thenReturn('Chromez');
+    when(mockChromeDevice.name).thenReturn('Chromez');
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -692,7 +695,7 @@ void main() {
 }
 
 class MockFlutterUsage extends Mock implements Usage {}
-class MockWebDevice extends Mock implements ChromeDevice {}
+class MockChromeDevice extends Mock implements ChromeDevice {}
 class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
 class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}
