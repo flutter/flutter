@@ -58,6 +58,12 @@ enum Artifact {
   skyEnginePath,
   /// The location of the macOS engine podspec file.
   flutterMacOSPodspec,
+
+  // Fuchsia artifacts from the engine prebuilts.
+  fuchsiaKernelCompiler,
+  fuchsiaPlatformDill,
+  fuchsiaPatchedSdk,
+  fuchsiaFlutterJitRunner,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -130,6 +136,17 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'FlutterMacOS.podspec';
     case Artifact.webPlatformKernelDill:
       return 'flutter_ddc_sdk.dill';
+    case Artifact.fuchsiaKernelCompiler:
+      return 'kernel_compiler.snapshot';
+    case Artifact.fuchsiaPlatformDill:
+      return 'platform_strong.dill';
+    case Artifact.fuchsiaPatchedSdk:
+      return 'flutter_runner_patched_sdk';
+    case Artifact.fuchsiaFlutterJitRunner:
+      if (mode == BuildMode.debug || mode == BuildMode.profile) {
+        return 'flutter_jit_runner-0.far';
+      }
+      return 'flutter_jit_product_runner-0.far';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -190,8 +207,10 @@ class CachedArtifacts extends Artifacts {
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
         return _getDarwinArtifactPath(artifact, platform, mode);
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+        return _getFuchsiaArtifactPath(artifact, platform, mode);
       case TargetPlatform.linux_x64:
-      case TargetPlatform.fuchsia:
       case TargetPlatform.windows_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -252,6 +271,28 @@ class CachedArtifacts extends Artifacts {
         return cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iproxy:
         return cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
+      default:
+        assert(false, 'Artifact $artifact not available for platform $platform.');
+        return null;
+    }
+  }
+
+  String _getFuchsiaArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    final String artifactFileName = _artifactToFileName(artifact, platform, mode);
+    final String root = fs.path.join(
+      cache.getArtifactDirectory('flutter_runner').path,
+      'flutter',
+      fuchsiaArchForTargetPlatform(platform),
+      getNameForBuildMode(mode),
+    );
+    switch (artifact) {
+      case Artifact.fuchsiaKernelCompiler:
+        return fs.path.join(root, 'jit', 'dart_binaries', artifactFileName);
+      case Artifact.fuchsiaPlatformDill:
+        return fs.path.join(root, 'jit', 'flutter_runner_patched_sdk', artifactFileName);
+      case Artifact.fuchsiaPatchedSdk:
+      case Artifact.fuchsiaFlutterJitRunner:
+        return fs.path.join(root, 'jit', artifactFileName);
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -339,7 +380,8 @@ class CachedArtifacts extends Artifacts {
         }
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
         return fs.path.join(engineDir, platformName + suffix);
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         assert(mode == null, 'Platform $platform does not support different build modes.');
@@ -430,6 +472,12 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
       case Artifact.webPlatformKernelDill:
         return fs.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
+      case Artifact.fuchsiaKernelCompiler:
+      case Artifact.fuchsiaPlatformDill:
+      case Artifact.fuchsiaPatchedSdk:
+      case Artifact.fuchsiaFlutterJitRunner:
+        assert(false, 'Invalid local engine artifact $artifact.');
+        return null;
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

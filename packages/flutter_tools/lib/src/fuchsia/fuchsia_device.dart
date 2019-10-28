@@ -272,17 +272,30 @@ class FuchsiaDevice extends Device {
       }
 
       // Start up a package server.
-      const String packageServerName = 'flutter_tool';
+      const String packageServerName = FuchsiaPackageServer.toolHost;
       fuchsiaPackageServer = FuchsiaPackageServer(
           packageRepo.path, packageServerName, host, port);
       if (!await fuchsiaPackageServer.start()) {
         printError('Failed to start the Fuchsia package server');
         return LaunchResult.failed();
       }
+
+      // Serve the application's package.
       final File farArchive = package.farArchive(
           debuggingOptions.buildInfo.mode);
       if (!await fuchsiaPackageServer.addPackage(farArchive)) {
         printError('Failed to add package to the package server');
+        return LaunchResult.failed();
+      }
+
+      // Serve the flutter_runner.
+      final File flutterRunnerArchive = fs.file(artifacts.getArtifactPath(
+        Artifact.fuchsiaFlutterJitRunner,
+        platform: await targetPlatform,
+        mode: debuggingOptions.buildInfo.mode,
+      ));
+      if (!await fuchsiaPackageServer.addPackage(flutterRunnerArchive)) {
+        printError('Failed to add flutter_runner package to the package server');
         return LaunchResult.failed();
       }
 
@@ -292,6 +305,18 @@ class FuchsiaDevice extends Device {
         return LaunchResult.failed();
       }
       serverRegistered = true;
+
+      // Tell the package controller to prefetch the flutter_runner.
+      String flutterRunnerName = 'flutter_jit_runner';
+      if (!debuggingOptions.buildInfo.isDebug &&
+          !debuggingOptions.buildInfo.isProfile) {
+        flutterRunnerName = 'flutter_jit_product_runner';
+      }
+      if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
+          this, fuchsiaPackageServer, flutterRunnerName)) {
+        printError('Failed to get pkgctl to prefetch the flutter_runner');
+        return LaunchResult.failed();
+      }
 
       // Tell the package controller to prefetch the app.
       if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
@@ -353,8 +378,30 @@ class FuchsiaDevice extends Device {
     return true;
   }
 
+  TargetPlatform _targetPlatform;
+
+  Future<TargetPlatform> _queryTargetPlatform() async {
+    final RunResult result = await shell('uname -m');
+    if (result.exitCode != 0) {
+      printError('Could not determine Fuchsia target platform type:\n$result\n'
+                 'Defaulting to arm64.');
+      return TargetPlatform.fuchsia_arm64;
+    }
+    final String machine = result.stdout.trim();
+    switch (machine) {
+      case 'aarch64':
+        return TargetPlatform.fuchsia_arm64;
+      case 'x86_64':
+        return TargetPlatform.fuchsia_x64;
+      default:
+        printError('Unknown Fuchsia target platform "$machine". '
+                   'Defaulting to arm64.');
+        return TargetPlatform.fuchsia_arm64;
+    }
+  }
+
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia;
+  Future<TargetPlatform> get targetPlatform async => _targetPlatform ??= await _queryTargetPlatform();
 
   @override
   Future<String> get sdkNameAndVersion async {
@@ -389,8 +436,16 @@ class FuchsiaDevice extends Device {
   OverrideArtifacts get artifactOverrides {
     return _artifactOverrides ??= OverrideArtifacts(
       parent: Artifacts.instance,
-      platformKernelDill: fuchsiaArtifacts.platformKernelDill,
-      flutterPatchedSdk: fuchsiaArtifacts.flutterPatchedSdk,
+      platformKernelDill: fs.file(artifacts.getArtifactPath(
+        Artifact.fuchsiaPlatformDill,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.debug,
+      )),
+      flutterPatchedSdk: fs.file(artifacts.getArtifactPath(
+        Artifact.fuchsiaPatchedSdk,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.debug,
+      )),
     );
   }
   OverrideArtifacts _artifactOverrides;
@@ -535,7 +590,7 @@ class FuchsiaIsolateDiscoveryProtocol {
       'Waiting for a connection from $_isolateName on ${_device.name}...',
       timeout: null, // could take an arbitrary amount of time
     );
-    _pollingTimer ??= Timer(_pollDuration, _findIsolate);
+    unawaited(_findIsolate());  // Completes the _foundUri Future.
     return _foundUri.future.then((Uri uri) {
       _uri = uri;
       return uri;

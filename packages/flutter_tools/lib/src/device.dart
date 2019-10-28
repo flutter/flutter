@@ -178,7 +178,8 @@ class DeviceManager {
     if (hasSpecifiedAllDevices) {
       devices = <Device>[
         for (Device device in devices)
-          if (await device.targetPlatform != TargetPlatform.fuchsia &&
+          if (await device.targetPlatform != TargetPlatform.fuchsia_arm64 &&
+              await device.targetPlatform != TargetPlatform.fuchsia_x64 &&
               await device.targetPlatform != TargetPlatform.web_javascript)
             device,
       ];
@@ -339,7 +340,8 @@ abstract class Device {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
       default:
         return false;
     }
