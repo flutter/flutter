@@ -974,6 +974,29 @@ void main() {
     expect(find.byType(Tooltip), findsNWidgets(3));
     expect(find.byTooltip('Test tooltip',), findsNWidgets(3));
   });
+
+  testWidgets('Allow Widget for PopupMenuButton.icon', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<int>>[
+                const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('Tap me please!'),
+                ),
+              ];
+            },
+            tooltip: 'Test tooltip',
+            icon: const Text('PopupMenuButton icon'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('PopupMenuButton icon'), findsOneWidget);
+  });
 }
 
 class TestApp extends StatefulWidget {
