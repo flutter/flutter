@@ -15,8 +15,6 @@ import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 
-import 'fuchsia_sdk.dart';
-
 /// This is a simple wrapper around the custom kernel compiler from the Fuchsia
 /// SDK.
 class FuchsiaKernelCompiler {
@@ -30,20 +28,32 @@ class FuchsiaKernelCompiler {
     BuildInfo buildInfo = BuildInfo.debug,
   }) async {
     // TODO(zra): Use filesystem root and scheme information from buildInfo.
-    if (fuchsiaArtifacts.kernelCompiler == null) {
-      throwToolExit('Fuchisa kernel compiler not found');
-    }
     const String multiRootScheme = 'main-root';
     final String packagesFile = fuchsiaProject.project.packagesFile.path;
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
     final String fsRoot = fuchsiaProject.project.directory.path;
-    final String relativePackagesFile =
-        fs.path.relative(packagesFile, from: fsRoot);
+    final String relativePackagesFile = fs.path.relative(packagesFile, from: fsRoot);
     final String manifestPath = fs.path.join(outDir, '$appName.dilpmanifest');
+    final String kernelCompiler = artifacts.getArtifactPath(
+      Artifact.fuchsiaKernelCompiler,
+      platform: TargetPlatform.fuchsia_x64,  // This file is not arch-specific.
+      mode: BuildMode.debug,
+    );
+    if (!fs.isFileSync(kernelCompiler)) {
+      throwToolExit('Fuchisa kernel compiler not found at "$kernelCompiler"');
+    }
+    final String platformDill = artifacts.getArtifactPath(
+      Artifact.fuchsiaPlatformDill,
+      platform: TargetPlatform.fuchsia_x64,  // This file is not arch-specific.
+      mode: buildInfo.mode,
+    );
+    if (!fs.isFileSync(platformDill)) {
+      throwToolExit('Fuchisa platform file not found at "$platformDill"');
+    }
     List<String> flags = <String>[
       '--target', 'flutter_runner',
-      '--platform', fuchsiaArtifacts.platformKernelDill.path,
+      '--platform', platformDill,
       '--filesystem-scheme', 'main-root',
       '--filesystem-root', fsRoot,
       '--packages', '$multiRootScheme:///$relativePackagesFile',
@@ -82,7 +92,7 @@ class FuchsiaKernelCompiler {
 
     final List<String> command = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
-      fuchsiaArtifacts.kernelCompiler.path,
+      artifacts.getArtifactPath(Artifact.fuchsiaKernelCompiler),
       ...flags,
     ];
     final Process process = await processUtils.start(command);
