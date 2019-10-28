@@ -451,8 +451,11 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 }
 
 /// A [FlutterGoldenFileComparator] for skipping golden image tests when the
-/// current environment is not supported. This comparator is used in post-submit
-/// checks on LUCI.
+/// current environment is not supported.
+///
+/// The [FlutterLocalFileComparator] is a catch-all for testing environments not
+/// covered by the other [FlutterGoldenFileComparator]s. This comparator is used
+/// in post-submit checks on LUCI and with some Cirrus shards.
 ///
 /// See also:
 ///
@@ -490,8 +493,8 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     print(
-      'Skipping "$golden" test : Golden file testing is unavailble in LUCI'
-        'environment.'
+      'Skipping "$golden" test : Golden file testing is unavailable on LUCI and '
+        'some Cirrus shards.'
     );
     return true;
   }
@@ -503,6 +506,7 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
   /// skipped.
   static bool isAvailableForEnvironment(Platform platform) {
     final String luci = platform.environment['SWARMING_TASK_ID'] ?? '';
-    return luci.isNotEmpty;
+    final String cirrus = platform.environment['CIRRUS_CI'] ?? '';
+    return luci.isNotEmpty || cirrus.isNotEmpty;
   }
 }

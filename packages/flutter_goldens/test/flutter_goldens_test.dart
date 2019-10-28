@@ -519,7 +519,7 @@ void main() {
     });
 
     group('Skipping', () {
-      test('correctly determines testing environment', () {
+      test('correctly determines testing environment on LUCI', () {
         platform = FakePlatform(
           environment: <String, String>{
             'FLUTTER_ROOT': _kFlutterRoot,
@@ -530,6 +530,33 @@ void main() {
         expect(
           FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
           isTrue,
+        );
+      });
+
+      test('correctly determines testing environment on Cirrus', () {
+        platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+            'CIRRUS_CI' : 'yep',
+          },
+          operatingSystem: 'macos'
+        );
+        expect(
+          FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
+          isTrue,
+        );
+      });
+
+      test('correctly determines not a testing environment', () {
+        platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+          },
+          operatingSystem: 'macos'
+        );
+        expect(
+          FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
+          isFalse,
         );
       });
     });
