@@ -7,8 +7,10 @@ import 'dart:async';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
@@ -62,6 +64,9 @@ void main() {
 
   test('Can successfully run and connect without vmservice', () => testbed.run(() async {
     _setupMocks();
+    final DelegateLogger delegateLogger = logger;
+    final MockStatus mockStatus = MockStatus();
+    delegateLogger.status = mockStatus;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -69,6 +74,9 @@ void main() {
     final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
     expect(debugConnectionInfo.wsUri, null);
+    verify(mockStatus.stop()).called(1);
+  }, overrides: <Type, Generator>{
+    Logger: () => DelegateLogger(BufferLogger()),
   }));
 
   test('Can full restart after attaching', () => testbed.run(() async {
@@ -109,3 +117,5 @@ class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
 class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockVmService extends Mock implements VmService {}
+class MockStatus extends Mock implements Status {}
+

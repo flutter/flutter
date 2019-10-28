@@ -16,9 +16,6 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-/// Test case timeout for tests involving project analysis.
-const Timeout allowForSlowAnalyzeTests = Timeout.factor(5.0);
-
 final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
@@ -54,7 +51,7 @@ void main() {
         ],
       );
       expect(libMain.existsSync(), isTrue);
-    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -65,7 +62,7 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>['No issues found!'],
       );
-    }, timeout: allowForSlowAnalyzeTests, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -80,6 +77,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
+
     // Analyze in the current directory - no arguments
     testUsingContext('working directory with errors', () async {
       // Break the code to produce the "The parameter 'onPressed' is required" hint
@@ -110,7 +108,7 @@ void main() {
         exitMessageContains: '2 issues found.',
         toolExit: true,
       );
-    }, timeout: allowForSlowAnalyzeTests, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
       ...noColorTerminalOverride,
     });
@@ -140,7 +138,7 @@ void main() {
         exitMessageContains: '3 issues found.',
         toolExit: true,
       );
-    }, timeout: allowForSlowAnalyzeTests, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
       ...noColorTerminalOverride
     });
