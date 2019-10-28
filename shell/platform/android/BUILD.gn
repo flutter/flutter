@@ -141,7 +141,6 @@ android_java_sources = [
   "io/flutter/embedding/android/SplashScreen.java",
   "io/flutter/embedding/android/SplashScreenProvider.java",
   "io/flutter/embedding/engine/FlutterEngine.java",
-  "io/flutter/embedding/engine/FlutterEngineAndroidLifecycle.java",
   "io/flutter/embedding/engine/FlutterEngineCache.java",
   "io/flutter/embedding/engine/FlutterEnginePluginRegistry.java",
   "io/flutter/embedding/engine/FlutterJNI.java",

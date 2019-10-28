@@ -5,7 +5,6 @@
 package io.flutter.embedding.engine.plugins;
 
 import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -86,28 +85,25 @@ public interface FlutterPlugin {
    * {@link ActivityAware} and/or {@link ServiceAware} interfaces, where a {@link Lifecycle}
    * reference can be obtained.
    */
-  class FlutterPluginBinding implements LifecycleOwner {
+  class FlutterPluginBinding {
         private final Context applicationContext;
         private final FlutterEngine flutterEngine;
         private final BinaryMessenger binaryMessenger;
         private final TextureRegistry textureRegistry;
         private final PlatformViewRegistry platformViewRegistry;
-        private final Lifecycle lifecycle;
 
         public FlutterPluginBinding(
             @NonNull Context applicationContext,
             @NonNull FlutterEngine flutterEngine,
             @NonNull BinaryMessenger binaryMessenger,
             @NonNull TextureRegistry textureRegistry,
-            @NonNull PlatformViewRegistry platformViewRegistry,
-            @NonNull Lifecycle lifecycle
+            @NonNull PlatformViewRegistry platformViewRegistry
         ) {
             this.applicationContext = applicationContext;
             this.flutterEngine = flutterEngine;
             this.binaryMessenger = binaryMessenger;
             this.textureRegistry = textureRegistry;
             this.platformViewRegistry = platformViewRegistry;
-            this.lifecycle = lifecycle;
         }
 
         @NonNull
@@ -139,17 +135,6 @@ public interface FlutterPlugin {
         @NonNull
         public PlatformViewRegistry getPlatformViewRegistry() {
           return platformViewRegistry;
-        }
-
-        /**
-         * @deprecated
-         * Use ActivityPluginBinding Lifecycle or ServicePluginBinding Lifecycle instead.
-         */
-        @Deprecated
-        @Override
-        @NonNull
-        public Lifecycle getLifecycle() {
-            return lifecycle;
         }
     }
 }

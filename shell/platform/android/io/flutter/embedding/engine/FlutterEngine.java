@@ -4,8 +4,6 @@
 
 package io.flutter.embedding.engine;
 
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -68,7 +66,7 @@ import io.flutter.plugin.platform.PlatformViewsController;
  * {@link DartExecutor} is run. Each Isolate is a self-contained Dart environment and cannot
  * communicate with each other except via Isolate ports.
  */
-public class FlutterEngine implements LifecycleOwner {
+public class FlutterEngine {
   private static final String TAG = "FlutterEngine";
 
   @NonNull
@@ -79,8 +77,6 @@ public class FlutterEngine implements LifecycleOwner {
   private final DartExecutor dartExecutor;
   @NonNull
   private final FlutterEnginePluginRegistry pluginRegistry;
-  @NonNull
-  private final FlutterEngineAndroidLifecycle androidLifecycle;
 
   // System channels.
   @NonNull
@@ -205,11 +201,9 @@ public class FlutterEngine implements LifecycleOwner {
 
     platformViewsController = new PlatformViewsController();
 
-    androidLifecycle = new FlutterEngineAndroidLifecycle(this);
     this.pluginRegistry = new FlutterEnginePluginRegistry(
       context.getApplicationContext(),
-      this,
-        androidLifecycle
+      this
     );
   }
 
@@ -394,13 +388,6 @@ public class FlutterEngine implements LifecycleOwner {
   @NonNull
   public ContentProviderControlSurface getContentProviderControlSurface() {
     return pluginRegistry;
-  }
-
-  // TODO(mattcarroll): determine if we really need to expose this from FlutterEngine vs making PluginBinding a LifecycleOwner
-  @NonNull
-  @Override
-  public Lifecycle getLifecycle() {
-    return androidLifecycle;
   }
 
   /**

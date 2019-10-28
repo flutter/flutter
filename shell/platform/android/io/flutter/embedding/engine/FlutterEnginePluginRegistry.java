@@ -53,8 +53,6 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   private final FlutterEngine flutterEngine;
   @NonNull
   private final FlutterPlugin.FlutterPluginBinding pluginBinding;
-  @NonNull
-  private final FlutterEngineAndroidLifecycle flutterEngineAndroidLifecycle;
 
   // ActivityAware
   @NonNull
@@ -91,18 +89,15 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
   FlutterEnginePluginRegistry(
       @NonNull Context appContext,
-      @NonNull FlutterEngine flutterEngine,
-      @NonNull FlutterEngineAndroidLifecycle lifecycle
+      @NonNull FlutterEngine flutterEngine
   ) {
     this.flutterEngine = flutterEngine;
-    flutterEngineAndroidLifecycle = lifecycle;
     pluginBinding = new FlutterPlugin.FlutterPluginBinding(
         appContext,
         flutterEngine,
         flutterEngine.getDartExecutor(),
         flutterEngine.getRenderer(),
-        flutterEngine.getPlatformViewsController().getRegistry(),
-        lifecycle
+        flutterEngine.getPlatformViewsController().getRegistry()
     );
   }
 
@@ -112,11 +107,6 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     // BroadcastReceiver, ContentProvider. This must happen before removing all plugins so that the
     // plugins have an opportunity to clean up references as a result of component detachment.
     detachFromAndroidComponent();
-
-    // Push FlutterEngine's Lifecycle to the DESTROYED state. This must happen before removing all
-    // plugins so that the plugins have an opportunity to clean up references as a result of moving
-    // to the DESTROYED state.
-    flutterEngineAndroidLifecycle.destroy();
 
     // Remove all registered plugins.
     removeAll();
@@ -296,7 +286,6 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
     this.activity = activity;
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
-    this.flutterEngineAndroidLifecycle.setBackingLifecycle(lifecycle);
 
     // Activate the PlatformViewsController. This must happen before any plugins attempt
     // to use it, otherwise an error stack trace will appear that says there is no
@@ -331,7 +320,6 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
       // Deactivate PlatformViewsController.
       flutterEngine.getPlatformViewsController().detach();
 
-      flutterEngineAndroidLifecycle.setBackingLifecycle(null);
       activity = null;
       activityPluginBinding = null;
     } else {
@@ -350,7 +338,6 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
       // Deactivate PlatformViewsController.
       flutterEngine.getPlatformViewsController().detach();
 
-      flutterEngineAndroidLifecycle.setBackingLifecycle(null);
       activity = null;
       activityPluginBinding = null;
     } else {
@@ -434,7 +421,6 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
     this.service = service;
     this.servicePluginBinding = new FlutterEngineServicePluginBinding(service, lifecycle);
-    flutterEngineAndroidLifecycle.setBackingLifecycle(lifecycle);
 
     // Notify all ServiceAware plugins that they are now attached to a new Service.
     for (ServiceAware serviceAware : serviceAwarePlugins.values()) {
@@ -451,7 +437,6 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
         serviceAware.onDetachedFromService();
       }
 
-      flutterEngineAndroidLifecycle.setBackingLifecycle(null);
       service = null;
       servicePluginBinding = null;
     } else {
