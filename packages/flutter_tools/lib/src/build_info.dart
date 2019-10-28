@@ -113,35 +113,78 @@ class AndroidBuildInfo {
   final Iterable<AndroidArch> targetArchs;
 }
 
-/// The type of build.
-enum BuildMode {
-  debug,
-  profile,
-  release,
-}
+/// A summary of the compilation strategy used for Dart.
+class BuildMode {
+  const BuildMode._(this.name);
 
-const List<String> _kBuildModes = <String>[
-  'debug',
-  'profile',
-  'release',
-];
+  factory BuildMode.fromName(String value) {
+    switch (value) {
+      case 'debug':
+        return BuildMode.debug;
+      case 'profile':
+        return BuildMode.profile;
+      case 'release':
+        return BuildMode.release;
+      case 'jit_release':
+        return BuildMode.jitRelease;
+    }
+    throw ArgumentError('$value is not a supported build mode');
+  }
+
+  /// Built in JIT mode with no optimizations, enabled asserts, and an observatory.
+  static const BuildMode debug = BuildMode._('debug');
+
+  /// Built in AOT mode with some optimizations and an observatory.
+  static const BuildMode profile = BuildMode._('profile');
+
+  /// Built in AOT mode with all optimizations and no observatory.
+  static const BuildMode release = BuildMode._('release');
+
+  /// Built in JIT mode with all optimizations and no observatory.
+  static const BuildMode jitRelease = BuildMode._('jit_release');
+
+  static const List<BuildMode> values = <BuildMode>[
+    debug,
+    profile,
+    release,
+    jitRelease,
+  ];
+  static const Set<BuildMode> releaseModes = <BuildMode>{
+    release,
+    jitRelease,
+  };
+  static const Set<BuildMode> jitModes = <BuildMode>{
+    debug,
+    jitRelease,
+  };
+
+  /// Whether this mode is considered release.
+  ///
+  /// Useful for determining whether we should enable/disable asserts or
+  /// other development features.
+  bool get isRelease => releaseModes.contains(this);
+
+  /// Whether this mode is using the jit runtime.
+  bool get isJit => jitModes.contains(this);
+
+  /// Whether this mode is using the precompiled runtime.
+  bool get isPrecompiled => !isJit;
+
+  /// The name for this build mode.
+  final String name;
+
+  @override
+  String toString() => name;
+}
 
 /// Return the name for the build mode, or "any" if null.
 String getNameForBuildMode(BuildMode buildMode) {
-  return _kBuildModes[buildMode.index];
+  return buildMode.name;
 }
 
 /// Returns the [BuildMode] for a particular `name`.
 BuildMode getBuildModeForName(String name) {
-  switch (name) {
-    case 'debug':
-      return BuildMode.debug;
-    case 'profile':
-      return BuildMode.profile;
-    case 'release':
-      return BuildMode.release;
-  }
-  return null;
+  return BuildMode.fromName(name);
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
