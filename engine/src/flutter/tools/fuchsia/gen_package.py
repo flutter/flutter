@@ -24,8 +24,7 @@ def GenerateManifest(package_dir):
       common_prefix = os.path.commonprefix([root, package_dir])
       rel_path = os.path.relpath(os.path.join(root, f), common_prefix)
       from_package = os.path.abspath(os.path.join(package_dir, rel_path))
-      assert from_package, 'Failed to create from_package for %s' % os.path.join(
-          root, f)
+      assert from_package, 'Failed to create from_package for %s' % os.path.join(root, f)
       full_paths.append('%s=%s' % (rel_path, from_package))
   parent_dir = os.path.abspath(os.path.join(package_dir, os.pardir))
   manifest_file_name = os.path.basename(package_dir) + '.manifest'
@@ -34,6 +33,22 @@ def GenerateManifest(package_dir):
     for item in full_paths:
       f.write("%s\n" % item)
   return manifest_path
+
+
+def CreateFarPackage(pm_bin, package_dir, signing_key, dst_dir):
+  manifest_path = GenerateManifest(package_dir)
+
+  pm_command_base = [
+      pm_bin, '-m', manifest_path, '-k', signing_key, '-o', dst_dir
+  ]
+
+  # Build the package
+  subprocess.check_output(pm_command_base + ['build'])
+
+  # Archive the package
+  subprocess.check_output(pm_command_base + ['archive'])
+
+  return 0
 
 
 def main():
@@ -91,42 +106,27 @@ def main():
   try:
     pm_commands = [
         ['build'],
-        [
-            'archive', '--output=' +
-            os.path.join(os.path.dirname(output_dir), args.far_name + "-0")
-        ],
+        ['archive', '--output='+ os.path.join(os.path.dirname(output_dir), args.far_name + "-0")],
     ]
     for pm_command in pm_commands:
       pm_command_args = pm_command_base + pm_command
       sys.stderr.write("===== Running %s\n" % pm_command_args)
       subprocess.check_output(pm_command_args)
   except subprocess.CalledProcessError as e:
-    print(
-        '==================== Manifest contents ========================================='
-    )
+    print('==================== Manifest contents =========================================')
     with open(manifest_file, 'r') as manifest:
       sys.stdout.write(manifest.read())
-    print(
-        '==================== End manifest contents ====================================='
-    )
+    print('==================== End manifest contents =====================================')
     meta_contents_path = os.path.join(output_dir, 'meta', 'contents')
     if os.path.exists(meta_contents_path):
-      print(
-          '==================== meta/contents ============================================='
-      )
+      print('==================== meta/contents =============================================')
       with open(meta_contents_path, 'r') as meta_contents:
         sys.stdout.write(meta_contents.read())
-      print(
-          '==================== End meta/contents ========================================='
-      )
-    print(
-        '==================== Strace output ============================================='
-    )
+      print('==================== End meta/contents =========================================')
+    print('==================== Strace output =============================================')
     with open(strace_out, 'r') as strace:
       sys.stdout.write(strace.read())
-    print(
-        '==================== End strace output ========================================='
-    )
+    print('==================== End strace output =========================================')
     raise
 
   return 0
