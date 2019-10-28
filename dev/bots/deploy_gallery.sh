@@ -84,7 +84,8 @@ elif [[ "$OS" == "darwin" ]]; then
     fi
   )
   echo "iOS Flutter Gallery built"
-  if [[ -z "$CIRRUS_PR" ]]; then
+  #if [[ -z "$CIRRUS_PR" ]]; then
+  if [[ -n "$CIRRUS_PR" ]]; then # TODO DON'T CHECK ME IN!
     if [[ "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
       echo "Archiving with distribution profile and deploying to TestFlight..."
       (
@@ -99,7 +100,8 @@ elif [[ "$OS" == "darwin" ]]; then
       echo "Testing archiving with distribution profile..."
       (
         cd examples/flutter_gallery/ios
-        fastlane build_and_deploy_testflight
+        BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/mac/Gemfile"
+        bundle exec fastlane build_and_deploy_testflight
       )
       echo "(Not deploying; Flutter Gallery is only deployed to TestFlight for tagged dev branch commits.)"
     fi
