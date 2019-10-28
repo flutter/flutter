@@ -1,4 +1,4 @@
-Signature: 19f5e2f6437a48be9f24e7285cd6b6da
+Signature: fae0e04beb4586247c282b11ad5cde71
 
 UNUSED LICENSES:
 
@@ -7481,7 +7481,6 @@ FILE: ../../../third_party/dart/runtime/observatory/web/favicon.ico
 FILE: ../../../third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi_dbc_trampoline_x64_linux_mac.S
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
@@ -7556,7 +7555,6 @@ FILE: ../../../third_party/dart/runtime/bin/ifaddrs-android.h
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_android.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi.cc
-FILE: ../../../third_party/dart/runtime/lib/ffi.h
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/lib/wasm.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/bit.h
@@ -7616,7 +7614,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/type_propagator_test
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/typed_data_aot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi_dbc_trampoline.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_fingerprints.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_fingerprints.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.cc
@@ -7635,12 +7632,10 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_offsets_list.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm64.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_arm64.cc
-FILE: ../../../third_party/dart/runtime/vm/constants_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_kbc.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_x64.cc
@@ -8842,33 +8837,19 @@ FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.h
 FILE: ../../../third_party/dart/runtime/vm/clustered_snapshot.cc
 FILE: ../../../third_party/dart/runtime/vm/clustered_snapshot.h
-FILE: ../../../third_party/dart/runtime/vm/code_patcher_dbc.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_dbc.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_dbc.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_dbc.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_dbc_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/branch_optimizer.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/branch_optimizer.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_compiler_dbc.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.h
-FILE: ../../../third_party/dart/runtime/vm/constants_dbc.h
-FILE: ../../../third_party/dart/runtime/vm/cpu_dbc.cc
-FILE: ../../../third_party/dart/runtime/vm/cpu_dbc.h
 FILE: ../../../third_party/dart/runtime/vm/cpuinfo_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/vm/dart_api_state.cc
-FILE: ../../../third_party/dart/runtime/vm/debugger_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/become.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/become.h
 FILE: ../../../third_party/dart/runtime/vm/heap/safepoint.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/safepoint.h
-FILE: ../../../third_party/dart/runtime/vm/instructions_dbc.cc
-FILE: ../../../third_party/dart/runtime/vm/instructions_dbc.h
 FILE: ../../../third_party/dart/runtime/vm/isolate_reload.cc
 FILE: ../../../third_party/dart/runtime/vm/isolate_reload.h
 FILE: ../../../third_party/dart/runtime/vm/isolate_reload_test.cc
@@ -8881,17 +8862,12 @@ FILE: ../../../third_party/dart/runtime/vm/kernel_loader.cc
 FILE: ../../../third_party/dart/runtime/vm/kernel_loader.h
 FILE: ../../../third_party/dart/runtime/vm/lockers.cc
 FILE: ../../../third_party/dart/runtime/vm/native_symbol_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/vm/object_dbc_test.cc
 FILE: ../../../third_party/dart/runtime/vm/object_reload.cc
 FILE: ../../../third_party/dart/runtime/vm/object_service.cc
 FILE: ../../../third_party/dart/runtime/vm/os_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/vm/os_thread_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/vm/os_thread_fuchsia.h
-FILE: ../../../third_party/dart/runtime/vm/runtime_entry_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/signal_handler_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/vm/simulator_dbc.cc
-FILE: ../../../third_party/dart/runtime/vm/simulator_dbc.h
-FILE: ../../../third_party/dart/runtime/vm/stack_frame_dbc.h
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/vm/token_position.cc
 FILE: ../../../third_party/dart/runtime/vm/token_position.h
