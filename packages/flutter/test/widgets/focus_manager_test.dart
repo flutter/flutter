@@ -66,12 +66,9 @@ void main() {
       FocusNode(
         debugLabel: 'Label',
       ).debugFillProperties(builder);
-      final List<String> description = builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
+      final List<String> description = builder.properties.where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode n) => n.toString()).toList();
       expect(description, <String>[
-        'context: null',
-        'canRequestFocus: true',
-        'hasFocus: false',
-        'hasPrimaryFocus: false'
+        'debugLabel: "Label"',
       ]);
     });
   });
@@ -624,12 +621,9 @@ void main() {
       FocusScopeNode(
         debugLabel: 'Scope Label',
       ).debugFillProperties(builder);
-      final List<String> description = builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
+      final List<String> description = builder.properties.where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode n) => n.toString()).toList();
       expect(description, <String>[
-        'context: null',
-        'canRequestFocus: true',
-        'hasFocus: false',
-        'hasPrimaryFocus: false'
+        'debugLabel: "Scope Label"',
       ]);
     });
     testWidgets('debugDescribeFocusTree produces correct output', (WidgetTester tester) async {
@@ -669,36 +663,43 @@ void main() {
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← [root]\n'
           ' │\n'
           ' └─rootScope: FocusScopeNode#00000(Root Focus Scope)\n'
-          '   │ IN FOCUS PATH\n'
+          '   │ FOCUSED\n'
+          '   │ debugLabel: "Root Focus Scope"\n'
           '   │ focusedChildren: FocusScopeNode#00000\n'
           '   │\n'
           '   ├─Child 1: FocusScopeNode#00000(Scope 1)\n'
           '   │ │ context: Container-[GlobalKey#00000]\n'
+          '   │ │ debugLabel: "Scope 1"\n'
           '   │ │\n'
           '   │ └─Child 1: FocusNode#00000(Parent 1)\n'
           '   │   │ context: Container-[GlobalKey#00000]\n'
+          '   │   │ debugLabel: "Parent 1"\n'
           '   │   │\n'
           '   │   ├─Child 1: FocusNode#00000(Child 1)\n'
           '   │   │   context: Container-[GlobalKey#00000]\n'
+          '   │   │   debugLabel: "Child 1"\n'
           '   │   │\n'
           '   │   └─Child 2: FocusNode#00000\n'
           '   │       context: Container-[GlobalKey#00000]\n'
           '   │\n'
           '   └─Child 2: FocusScopeNode#00000\n'
           '     │ context: Container-[GlobalKey#00000]\n'
-          '     │ IN FOCUS PATH\n'
+          '     │ FOCUSED\n'
           '     │ focusedChildren: FocusNode#00000(Child 4)\n'
           '     │\n'
           '     └─Child 1: FocusNode#00000(Parent 2)\n'
           '       │ context: Container-[GlobalKey#00000]\n'
-          '       │ IN FOCUS PATH\n'
+          '       │ FOCUSED\n'
+          '       │ debugLabel: "Parent 2"\n'
           '       │\n'
           '       ├─Child 1: FocusNode#00000(Child 3)\n'
           '       │   context: Container-[GlobalKey#00000]\n'
+          '       │   debugLabel: "Child 3"\n'
           '       │\n'
           '       └─Child 2: FocusNode#00000(Child 4)\n'
           '           context: Container-[GlobalKey#00000]\n'
-          '           PRIMARY FOCUS\n'
+          '           FOCUSED\n'
+          '           debugLabel: "Child 4"\n'
         ));
     });
   });
