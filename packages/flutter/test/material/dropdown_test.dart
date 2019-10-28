@@ -42,6 +42,8 @@ Widget buildFrame({
   Widget disabledHint,
   Widget underline,
   List<String> items = menuItems,
+  List<Widget> Function(BuildContext) selectedItemBuilder,
+  double itemHeight = kMinInteractiveDimension,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
   Size mediaSize,
@@ -79,6 +81,8 @@ Widget buildFrame({
                 child: Text(item, key: ValueKey<String>(item + 'Text')),
               );
             }).toList(),
+            selectedItemBuilder: selectedItemBuilder,
+            itemHeight: itemHeight,
           ),
         ),
       ),
@@ -1089,7 +1093,8 @@ void main() {
     Widget build({ List<String> items, ValueChanged<String> onChanged }) => buildFrame(
       items: items,
       onChanged: onChanged,
-      buttonKey: buttonKey, value: null,
+      buttonKey: buttonKey,
+      value: null,
       hint: const Text('enabled'),
       disabledHint: const Text('disabled'));
 
@@ -1118,6 +1123,311 @@ void main() {
     expect(enabledHintBox.localToGlobal(Offset.zero), equals(disabledHintBox.localToGlobal(Offset.zero)));
     expect(enabledHintBox.size, equals(disabledHintBox.size));
   });
+
+  testWidgets('hint displays when the items list is empty, items is null, and disabledHint is null', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    Widget build({ List<String> items }){
+      return buildFrame(
+        items: items,
+        buttonKey: buttonKey,
+        value: null,
+        hint: const Text('hint used when disabled'),
+        disabledHint: null,
+      );
+    }
+    // [hint] should display when [items] is null and [disabledHint] is not defined
+    await tester.pumpWidget(build(items: null));
+    expect(find.text('hint used when disabled'), findsOneWidget);
+
+    // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
+    await tester.pumpWidget(build(items: <String>[]));
+    expect(find.text('hint used when disabled'), findsOneWidget);
+  });
+
+  testWidgets('disabledHint is null by default', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    Widget build({ List<String> items }){
+      return buildFrame(
+        items: items,
+        buttonKey: buttonKey,
+        value: null,
+        hint: const Text('hint used when disabled'),
+      );
+    }
+    // [hint] should display when [items] is null and [disabledHint] is not defined
+    await tester.pumpWidget(build(items: null));
+    expect(find.text('hint used when disabled'), findsOneWidget);
+
+    // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
+    await tester.pumpWidget(build(items: <String>[]));
+    expect(find.text('hint used when disabled'), findsOneWidget);
+  });
+
+  testWidgets('Size of largest widget is used DropdownButton when selectedItemBuilder is non-null', (WidgetTester tester) async {
+    final List<String> items = <String>['25', '50', '100'];
+    const String selectedItem = '25';
+
+    await tester.pumpWidget(buildFrame(
+      // To test the size constraints, the selected item should not be the
+      // largest item. This validates that the button sizes itself according
+      // to the largest item regardless of which one is selected.
+      value: selectedItem,
+      items: items,
+      itemHeight: null,
+      selectedItemBuilder: (BuildContext context) {
+        return items.map<Widget>((String item) {
+          return Container(
+            height: double.parse(item),
+            width: double.parse(item),
+            child: Center(child: Text(item)),
+          );
+        }).toList();
+      },
+      onChanged: (String newValue) {},
+    ));
+
+    final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
+      find.widgetWithText(Row, '25'),
+    );
+    // DropdownButton should be the height of the largest item
+    expect(dropdownButtonRenderBox.size.height, 100);
+    // DropdownButton should be width of largest item added to the icon size
+    expect(dropdownButtonRenderBox.size.width, 100 + 24.0);
+  });
+
+  testWidgets(
+    'Enabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
+    'is non-null and hint is defined, but smaller than largest selected item widget',
+    (WidgetTester tester) async {
+      final List<String> items = <String>['25', '50', '100'];
+
+      await tester.pumpWidget(buildFrame(
+        value: null,
+        // [hint] widget is smaller than largest selected item widget
+        hint: Container(
+          height: 50,
+          width: 50,
+          child: const Text('hint')
+        ),
+        items: items,
+        itemHeight: null,
+        selectedItemBuilder: (BuildContext context) {
+          return items.map<Widget>((String item) {
+            return Container(
+              height: double.parse(item),
+              width: double.parse(item),
+              child: Center(child: Text(item)),
+            );
+          }).toList();
+        },
+        onChanged: (String newValue) {},
+      ));
+
+      final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
+        find.widgetWithText(Row, 'hint'),
+      );
+      // DropdownButton should be the height of the largest item
+      expect(dropdownButtonRenderBox.size.height, 100);
+      // DropdownButton should be width of largest item added to the icon size
+      expect(dropdownButtonRenderBox.size.width, 100 + 24.0);
+    },
+  );
+
+  testWidgets(
+    'Enabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
+    'is non-null and hint is defined, but larger than largest selected item widget',
+    (WidgetTester tester) async {
+      final List<String> items = <String>['25', '50', '100'];
+      const String selectedItem = '25';
+
+      await tester.pumpWidget(buildFrame(
+        // To test the size constraints, the selected item should not be the
+        // largest item. This validates that the button sizes itself according
+        // to the largest item regardless of which one is selected.
+        value: selectedItem,
+        // [hint] widget is larger than largest selected item widget
+        hint: Container(
+          height: 125,
+          width: 125,
+          child: const Text('hint')
+        ),
+        items: items,
+        itemHeight: null,
+        selectedItemBuilder: (BuildContext context) {
+          return items.map<Widget>((String item) {
+            return Container(
+              height: double.parse(item),
+              width: double.parse(item),
+              child: Center(child: Text(item)),
+            );
+          }).toList();
+        },
+        onChanged: (String newValue) {},
+      ));
+
+      final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
+        find.widgetWithText(Row, '25'),
+      );
+      // DropdownButton should be the height of the largest item (hint inclusive)
+      expect(dropdownButtonRenderBox.size.height, 125);
+      // DropdownButton should be width of largest item (hint inclusive) added to the icon size
+      expect(dropdownButtonRenderBox.size.width, 125 + 24.0);
+    },
+  );
+
+  testWidgets(
+    'Disabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
+    'is non-null, and hint is defined, but smaller than largest selected item widget',
+    (WidgetTester tester) async {
+      final List<String> items = <String>['25', '50', '100'];
+
+      await tester.pumpWidget(buildFrame(
+        value: null,
+        // [hint] widget is smaller than largest selected item widget
+        hint: Container(
+          height: 50,
+          width: 50,
+          child: const Text('hint')
+        ),
+        items: items,
+        itemHeight: null,
+        selectedItemBuilder: (BuildContext context) {
+          return items.map<Widget>((String item) {
+            return Container(
+              height: double.parse(item),
+              width: double.parse(item),
+              child: Center(child: Text(item)),
+            );
+          }).toList();
+        },
+        onChanged: null,
+      ));
+
+      final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
+        find.widgetWithText(Row, 'hint'),
+      );
+      // DropdownButton should be the height of the largest item
+      expect(dropdownButtonRenderBox.size.height, 100);
+      // DropdownButton should be width of largest item added to the icon size
+      expect(dropdownButtonRenderBox.size.width, 100 + 24.0);
+    },
+  );
+
+  testWidgets(
+    'Disabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
+    'is non-null and hint is defined, but larger than largest selected item widget',
+    (WidgetTester tester) async {
+      final List<String> items = <String>['25', '50', '100'];
+
+      await tester.pumpWidget(buildFrame(
+        value: null,
+        // [hint] widget is larger than largest selected item widget
+        hint: Container(
+          height: 125,
+          width: 125,
+          child: const Text('hint')
+        ),
+        items: items,
+        itemHeight: null,
+        selectedItemBuilder: (BuildContext context) {
+          return items.map<Widget>((String item) {
+            return Container(
+              height: double.parse(item),
+              width: double.parse(item),
+              child: Center(child: Text(item)),
+            );
+          }).toList();
+        },
+        onChanged: null,
+      ));
+
+      final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
+        find.widgetWithText(Row, '25'),
+      );
+      // DropdownButton should be the height of the largest item (hint inclusive)
+      expect(dropdownButtonRenderBox.size.height, 125);
+      // DropdownButton should be width of largest item (hint inclusive) added to the icon size
+      expect(dropdownButtonRenderBox.size.width, 125 + 24.0);
+    },
+  );
+
+  testWidgets(
+    'Disabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
+    'is non-null, and disabledHint is defined, but smaller than largest selected item widget',
+    (WidgetTester tester) async {
+      final List<String> items = <String>['25', '50', '100'];
+
+      await tester.pumpWidget(buildFrame(
+        value: null,
+        // [hint] widget is smaller than largest selected item widget
+        disabledHint: Container(
+          height: 50,
+          width: 50,
+          child: const Text('hint')
+        ),
+        items: items,
+        itemHeight: null,
+        selectedItemBuilder: (BuildContext context) {
+          return items.map<Widget>((String item) {
+            return Container(
+              height: double.parse(item),
+              width: double.parse(item),
+              child: Center(child: Text(item)),
+            );
+          }).toList();
+        },
+        onChanged: null,
+      ));
+
+      final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
+        find.widgetWithText(Row, 'hint'),
+      );
+      // DropdownButton should be the height of the largest item
+      expect(dropdownButtonRenderBox.size.height, 100);
+      // DropdownButton should be width of largest item added to the icon size
+      expect(dropdownButtonRenderBox.size.width, 100 + 24.0);
+    },
+  );
+
+  testWidgets(
+    'Disabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
+    'is non-null and disabledHint is defined, but larger than largest selected item widget',
+    (WidgetTester tester) async {
+      final List<String> items = <String>['25', '50', '100'];
+
+      await tester.pumpWidget(buildFrame(
+        value: null,
+        // [hint] widget is larger than largest selected item widget
+        disabledHint: Container(
+          height: 125,
+          width: 125,
+          child: const Text('hint')
+        ),
+        items: items,
+        itemHeight: null,
+        selectedItemBuilder: (BuildContext context) {
+          return items.map<Widget>((String item) {
+            return Container(
+              height: double.parse(item),
+              width: double.parse(item),
+              child: Center(child: Text(item)),
+            );
+          }).toList();
+        },
+        onChanged: null,
+      ));
+
+      final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
+        find.widgetWithText(Row, '25'),
+      );
+      // DropdownButton should be the height of the largest item (hint inclusive)
+      expect(dropdownButtonRenderBox.size.height, 125);
+      // DropdownButton should be width of largest item (hint inclusive) added to the icon size
+      expect(dropdownButtonRenderBox.size.width, 125 + 24.0);
+    },
+  );
 
   testWidgets('Dropdown in middle showing middle item', (WidgetTester tester) async {
     final List<DropdownMenuItem<int>> items =
@@ -1397,7 +1707,7 @@ void main() {
                   selectedItem = string;
                 }),
                 selectedItemBuilder: (BuildContext context) {
-                  return items.map((String item) {
+                  return items.map<Widget>((String item) {
                     return Text('You have selected: $item');
                   }).toList();
                 },
@@ -1611,6 +1921,67 @@ void main() {
     await tester.pumpWidget(build(items: <String>[]));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
+  });
+
+  testWidgets('Dropdown form field - hint displays when the items list is empty, items is null, and disabledHint is null', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    Widget build({ List<String> items }){
+      return buildFormFrame(
+        items: items,
+        buttonKey: buttonKey,
+        value: null,
+        hint: const Text('hint used when disabled'),
+        disabledHint: null,
+      );
+    }
+    // [hint] should display when [items] is null and [disabledHint] is not defined
+    await tester.pumpWidget(build(items: null));
+    expect(find.text('hint used when disabled'), findsOneWidget);
+
+    // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
+    await tester.pumpWidget(build(items: <String>[]));
+    expect(find.text('hint used when disabled'), findsOneWidget);
+  });
+
+  testWidgets('Dropdown form field - disabledHint is null by default', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    Widget build({ List<String> items }){
+      return buildFormFrame(
+        items: items,
+        buttonKey: buttonKey,
+        value: null,
+        hint: const Text('hint used when disabled'),
+      );
+    }
+    // [hint] should display when [items] is null and [disabledHint] is not defined
+    await tester.pumpWidget(build(items: null));
+    expect(find.text('hint used when disabled'), findsOneWidget);
+
+    // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
+    await tester.pumpWidget(build(items: <String>[]));
+    expect(find.text('hint used when disabled'), findsOneWidget);
+  });
+
+  testWidgets('Dropdown form field - disabledHint is null by default', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    Widget build({ List<String> items }){
+      return buildFormFrame(
+        items: items,
+        buttonKey: buttonKey,
+        value: null,
+        hint: const Text('hint used when disabled'),
+      );
+    }
+    // [hint] should display when [items] is null and [disabledHint] is not defined
+    await tester.pumpWidget(build(items: null));
+    expect(find.text('hint used when disabled'), findsOneWidget);
+
+    // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
+    await tester.pumpWidget(build(items: <String>[]));
+    expect(find.text('hint used when disabled'), findsOneWidget);
   });
 
   testWidgets('Dropdown form field - disabledHint displays when onChanged is null', (WidgetTester tester) async {
