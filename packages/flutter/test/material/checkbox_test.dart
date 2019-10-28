@@ -67,12 +67,11 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
-      isFocusable: true,
     ));
 
     await tester.pumpWidget(Material(
@@ -82,13 +81,12 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
       isEnabled: true,
       hasTapAction: true,
-      isFocusable: true,
     ));
 
     await tester.pumpWidget(const Material(
@@ -98,10 +96,9 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
-      isFocusable: true,
     ));
 
     await tester.pumpWidget(const Material(
@@ -111,7 +108,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -133,14 +130,13 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       label: 'foo',
       textDirection: TextDirection.ltr,
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
-      isFocusable: true,
     ));
     handle.dispose();
   });
@@ -206,7 +202,6 @@ void main() {
         SemanticsFlag.hasCheckedState,
         SemanticsFlag.hasEnabledState,
         SemanticsFlag.isEnabled,
-        SemanticsFlag.isFocusable,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));
@@ -227,7 +222,6 @@ void main() {
         SemanticsFlag.hasEnabledState,
         SemanticsFlag.isEnabled,
         SemanticsFlag.isChecked,
-        SemanticsFlag.isFocusable,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));
@@ -247,7 +241,6 @@ void main() {
         SemanticsFlag.hasCheckedState,
         SemanticsFlag.hasEnabledState,
         SemanticsFlag.isEnabled,
-        SemanticsFlag.isFocusable,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));
@@ -281,7 +274,7 @@ void main() {
     );
 
     await tester.tap(find.byType(Checkbox));
-    final RenderObject object = tester.firstRenderObject(find.byType(Focus));
+    final RenderObject object = tester.firstRenderObject(find.byType(Checkbox));
 
     expect(checkboxValue, true);
     expect(semanticEvent, <String, dynamic>{
@@ -311,9 +304,7 @@ void main() {
     }
 
     RenderToggleable getCheckboxRenderer() {
-      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
-        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
-      }));
+      return tester.renderObject<RenderToggleable>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(false));
@@ -365,9 +356,7 @@ void main() {
     }
 
     RenderToggleable getCheckboxRenderer() {
-      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
-        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
-      }));
+      return tester.renderObject<RenderToggleable>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(checkColor: const Color(0xFFFFFFFF)));
@@ -387,181 +376,4 @@ void main() {
     expect(getCheckboxRenderer(), paints..rrect(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
   });
 
-  testWidgets('Checkbox is focusable and has correct focus color', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    bool value = true;
-    Widget buildApp({bool enabled = true}) {
-      return MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Checkbox(
-                value: value,
-                onChanged: enabled ? (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                } : null,
-                focusColor: Colors.orange[500],
-                autofocus: true,
-                focusNode: focusNode,
-              );
-            }),
-          ),
-        ),
-      );
-    }
-    await tester.pumpWidget(buildApp());
-
-    await tester.pumpAndSettle();
-    expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(
-      Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..circle(color: Colors.orange[500])
-        ..rrect(
-            color: const Color(0xff1e88e5),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: Colors.white),
-    );
-
-    // Check the false value.
-    value = false;
-    await tester.pumpWidget(buildApp());
-    await tester.pumpAndSettle();
-    expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(
-      Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..circle(color: Colors.orange[500])
-        ..drrect(
-            color: const Color(0x8a000000),
-            outer: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)),
-        inner: RRect.fromLTRBR(393.0,
-            293.0, 407.0, 307.0, const Radius.circular(-1.0))),
-    );
-
-    // Check what happens when disabled.
-    value = false;
-    await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pumpAndSettle();
-    expect(focusNode.hasPrimaryFocus, isFalse);
-    expect(
-      Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..drrect(
-            color: const Color(0x61000000),
-            outer: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)),
-            inner: RRect.fromLTRBR(393.0,
-                293.0, 407.0, 307.0, const Radius.circular(-1.0))),
-    );
-  });
-
-  testWidgets('Checkbox can be hovered and has correct hover color', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    bool value = true;
-    Widget buildApp({bool enabled = true}) {
-      return MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Checkbox(
-                value: value,
-                onChanged: enabled ? (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                } : null,
-                hoverColor: Colors.orange[500],
-              );
-            }),
-          ),
-        ),
-      );
-    }
-    await tester.pumpWidget(buildApp());
-    await tester.pumpAndSettle();
-    expect(
-      Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..rrect(
-            color: const Color(0xff1e88e5),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
-    );
-
-    // Start hovering
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
-
-    await tester.pumpWidget(buildApp());
-    await tester.pumpAndSettle();
-    expect(
-      Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..rrect(
-            color: const Color(0xff1e88e5),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
-    );
-
-    // Check what happens when disabled.
-    await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pumpAndSettle();
-    expect(
-      Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..rrect(
-            color: const Color(0x61000000),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
-    );
-  });
-
-  testWidgets('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    bool value = true;
-    Widget buildApp({bool enabled = true}) {
-      return MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Checkbox(
-                value: value,
-                onChanged: enabled ? (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                } : null,
-                focusColor: Colors.orange[500],
-                autofocus: true,
-              );
-            }),
-          ),
-        ),
-      );
-    }
-    await tester.pumpWidget(buildApp());
-    await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
-    expect(value, isFalse);
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
-    expect(value, isTrue);
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pumpAndSettle();
-    expect(value, isFalse);
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pumpAndSettle();
-    expect(value, isTrue);
-  });
 }
