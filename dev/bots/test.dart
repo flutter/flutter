@@ -74,10 +74,6 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/shortcuts_test.dart',
   'test/material/text_form_field_test.dart',
   'test/material/data_table_test.dart',
-
-  // TODO(yjbanov): CupertinoDynamicColor breaks the web engine. The fix
-  //                is on the engine side: https://github.com/flutter/engine/pull/13359
-  'test/cupertino/colors_test.dart',
   'test/cupertino/dialog_test.dart',
   'test/cupertino/nav_bar_test.dart',
   'test/cupertino/nav_bar_transition_test.dart',
@@ -88,8 +84,6 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/cupertino/slider_test.dart',
   'test/cupertino/text_field_test.dart',
   'test/cupertino/segmented_control_test.dart',
-  'test/cupertino/scaffold_test.dart',
-  'test/cupertino/route_test.dart',
   'test/cupertino/route_test.dart',
   'test/cupertino/activity_indicator_test.dart',
 ];
