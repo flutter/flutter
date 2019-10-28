@@ -47,6 +47,10 @@ public interface ActivityAware {
    * new {@link Activity} has been created with the new configuration options. That method provides
    * a new {@link ActivityPluginBinding}, which references the newly created and associated
    * {@link Activity}.
+   * <p>
+   * Any {@code Lifecycle} listeners that were registered in
+   * {@link #onAttachedToActivity(ActivityPluginBinding)} should be deregistered here to avoid a
+   * possible memory leak and other side effects.
    */
   void onDetachedFromActivityForConfigChanges();
 
@@ -76,6 +80,11 @@ public interface ActivityAware {
    * By the end of this method, the {@link Activity} that was made available in
    * {@link #onAttachedToActivity(ActivityPluginBinding)} is no longer valid. Any references to the
    * associated {@link Activity} or {@link ActivityPluginBinding} should be cleared.
+   * <p>
+   * Any {@code Lifecycle} listeners that were registered in
+   * {@link #onAttachedToActivity(ActivityPluginBinding)} or
+   * {@link #onReattachedToActivityForConfigChanges(ActivityPluginBinding)} should be deregistered
+   * here to avoid a possible memory leak and other side effects.
    */
   void onDetachedFromActivity();
 }

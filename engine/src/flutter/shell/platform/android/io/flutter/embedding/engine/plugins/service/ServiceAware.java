@@ -19,6 +19,10 @@ public interface ServiceAware {
   /**
    * Callback triggered when a {@code ServiceAware} {@link FlutterPlugin} is detached from a
    * {@link Service}.
+   * <p>
+   * Any {@code Lifecycle} listeners that were registered in
+   * {@link #onAttachedToService(ServicePluginBinding)} should be deregistered here to avoid a
+   * possible memory leak and other side effects.
    */
   void onDetachedFromService();
 
