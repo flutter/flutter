@@ -645,4 +645,81 @@ void main() {
     await tester.pumpWidget(buildFrame(UniqueKey()));
     await tester.pump();
   });
+
+  group('Scrollable title and content', () {
+    testWidgets('Title is scrollable', (WidgetTester tester) async {
+      final Key titleKey = UniqueKey();
+      final AlertDialog dialog = AlertDialog(
+        title: Container(
+          key: titleKey,
+          color: Colors.green,
+          height: 1000,
+        ),
+      );
+      await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      final RenderBox box = tester.renderObject(find.byKey(titleKey));
+      final Offset originalOffset = box.localToGlobal(Offset.zero);
+      await tester.drag(find.byKey(titleKey), const Offset(0.0, -200.0));
+      expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -200.0)));
+    });
+
+    testWidgets('Content is scrollable', (WidgetTester tester) async {
+      final Key contentKey = UniqueKey();
+      final AlertDialog dialog = AlertDialog(
+        content: Container(
+          key: contentKey,
+          color: Colors.orange,
+          height: 1000,
+        ),
+      );
+      await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      final RenderBox box = tester.renderObject(find.byKey(contentKey));
+      final Offset originalOffset = box.localToGlobal(Offset.zero);
+      await tester.drag(find.byKey(contentKey), const Offset(0.0, -200.0));
+      expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -200.0)));
+    });
+
+    testWidgets('Title and content are scrollable', (WidgetTester tester) async {
+      final Key titleKey = UniqueKey();
+      final Key contentKey = UniqueKey();
+      final AlertDialog dialog = AlertDialog(
+        title: Container(
+          key: titleKey,
+          color: Colors.green,
+          height: 400,
+        ),
+        content: Container(
+          key: contentKey,
+          color: Colors.orange,
+          height: 400,
+        ),
+      );
+      await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      final RenderBox title = tester.renderObject(find.byKey(titleKey));
+      final RenderBox content = tester.renderObject(find.byKey(contentKey));
+      final Offset titleOriginalOffset = title.localToGlobal(Offset.zero);
+      final Offset contentOriginalOffset = content.localToGlobal(Offset.zero);
+
+      // Dragging the title widget should scroll both the title
+      // and the content widgets.
+      await tester.drag(find.byKey(titleKey), const Offset(0.0, -200.0));
+      expect(title.localToGlobal(Offset.zero), equals(titleOriginalOffset.translate(0.0, -200.0)));
+      expect(content.localToGlobal(Offset.zero), equals(contentOriginalOffset.translate(0.0, -200.0)));
+
+      // Dragging the content widget should scroll both the title
+      // and the content widgets.
+      await tester.drag(find.byKey(contentKey), const Offset(0.0, 200.0));
+      expect(title.localToGlobal(Offset.zero), equals(titleOriginalOffset));
+      expect(content.localToGlobal(Offset.zero), equals(contentOriginalOffset));
+    });
+  });
 }

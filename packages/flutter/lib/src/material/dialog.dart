@@ -133,15 +133,6 @@ class Dialog extends StatelessWidget {
 /// of actions. The title is displayed above the content and the actions are
 /// displayed below the content.
 ///
-/// If the content is too large to fit on the screen vertically, the dialog will
-/// display the title and the actions and let the content overflow, which is
-/// rarely desired. Consider using a scrolling widget for [content], such as
-/// [SingleChildScrollView], to avoid overflow. (However, be aware that since
-/// [AlertDialog] tries to size itself using the intrinsic dimensions of its
-/// children, widgets such as [ListView], [GridView], and [CustomScrollView],
-/// which use lazy viewports, will not work. If this is a problem, consider
-/// using [Dialog] directly.)
-///
 /// For dialogs that offer the user a choice between several options, consider
 /// using a [SimpleDialog].
 ///
@@ -161,13 +152,11 @@ class Dialog extends StatelessWidget {
 ///     builder: (BuildContext context) {
 ///       return AlertDialog(
 ///         title: Text('Rewind and remember'),
-///         content: SingleChildScrollView(
-///           child: ListBody(
-///             children: <Widget>[
-///               Text('You will never be satisfied.'),
-///               Text('You\’re like me. I’m never satisfied.'),
-///             ],
-///           ),
+///         content: Column(
+///           children: <Widget>[
+///             Text('You will never be satisfied.'),
+///             Text('You\’re like me. I’m never satisfied.'),
+///           ],
 ///         ),
 ///         actions: <Widget>[
 ///           FlatButton(
@@ -321,25 +310,34 @@ class AlertDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          if (title != null)
-            Padding(
-              padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
-              child: DefaultTextStyle(
-                style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
-                child: Semantics(
-                  child: title,
-                  namesRoute: true,
-                  container: true,
-                ),
-              ),
-            ),
-          if (content != null)
+          if (title != null || content != null)
             Flexible(
-              child: Padding(
-                padding: contentPadding,
-                child: DefaultTextStyle(
-                  style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
-                  child: content,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    if (title != null)
+                      Padding(
+                        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+                        child: DefaultTextStyle(
+                          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
+                          child: Semantics(
+                            child: title,
+                            namesRoute: true,
+                            container: true,
+                          ),
+                        ),
+                      ),
+                    if (content != null)
+                      Padding(
+                        padding: contentPadding,
+                        child: DefaultTextStyle(
+                          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+                          child: content,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
