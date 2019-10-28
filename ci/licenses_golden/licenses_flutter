@@ -824,6 +824,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterAppDe
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineUnittests.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.mm
@@ -835,6 +836,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/fixtures/flutter_desktop_test.dart
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/module.modulemap
 FILE: ../../../flutter/shell/platform/embedder/assets/EmbedderInfo.plist
 FILE: ../../../flutter/shell/platform/embedder/assets/embedder.modulemap

@@ -58,8 +58,10 @@ group("flutter") {
   # If on the host, compile all unittests targets.
   if (current_toolchain == host_toolchain) {
     if (is_mac) {
-      public_deps +=
-          [ "$flutter_root/shell/platform/darwin:flutter_channels_unittests" ]
+      public_deps += [
+        "$flutter_root/shell/platform/darwin:flutter_channels_unittests",
+        "$flutter_root/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+      ]
     }
 
     public_deps += [
