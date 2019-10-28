@@ -10,6 +10,8 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
 
+static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
+
 namespace flutter {
 
 GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceDelegate* delegate,
@@ -68,7 +70,9 @@ GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceDelegate* delegate,
   command_queue_ = metal_queue;
 }
 
-GPUSurfaceMetal::~GPUSurfaceMetal() = default;
+GPUSurfaceMetal::~GPUSurfaceMetal() {
+  ReleaseUnusedDrawableIfNecessary();
+}
 
 // |Surface|
 bool GPUSurfaceMetal::IsValid() {
@@ -93,65 +97,48 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& size)
     return nullptr;
   }
 
-  const auto scale = layer_.get().contentsScale;
+  ReleaseUnusedDrawableIfNecessary();
 
-  auto next_drawable = fml::scoped_nsprotocol<id<CAMetalDrawable>>([[layer_ nextDrawable] retain]);
-  if (!next_drawable) {
-    FML_LOG(ERROR) << "Could not acquire next metal drawable.";
-    return nullptr;
-  }
-
-  auto metal_texture = fml::scoped_nsprotocol<id<MTLTexture>>([next_drawable.get().texture retain]);
-  if (!metal_texture) {
-    FML_LOG(ERROR) << "Could not acquire metal texture from drawable.";
-    return nullptr;
-  }
-
-  GrMtlTextureInfo metal_texture_info;
-  metal_texture_info.fTexture.reset(SkCFSafeRetain(metal_texture.get()));
-
-  GrBackendRenderTarget metal_render_target(bounds.width * scale,   // width
-                                            bounds.height * scale,  // height
-                                            1,                      // sample count
-                                            metal_texture_info      // metal texture info
+  auto surface = SkSurface::MakeFromCAMetalLayer(context_.get(),            // context
+                                                 layer_.get(),              // layer
+                                                 kTopLeft_GrSurfaceOrigin,  // origin
+                                                 1,                         // sample count
+                                                 kBGRA_8888_SkColorType,    // color type
+                                                 nullptr,                   // colorspace
+                                                 nullptr,                   // surface properties
+                                                 &next_drawable_  // drawable (transfer out)
   );
-
-  auto command_buffer =
-      fml::scoped_nsprotocol<id<MTLCommandBuffer>>([[command_queue_.get() commandBuffer] retain]);
-
-  SkSurface::RenderTargetReleaseProc release_proc = [](SkSurface::ReleaseContext context) {
-    [reinterpret_cast<id>(context) release];
-  };
-
-  auto surface =
-      SkSurface::MakeFromBackendRenderTarget(context_.get(),            // context
-                                             metal_render_target,       // backend render target
-                                             kTopLeft_GrSurfaceOrigin,  // origin
-                                             kBGRA_8888_SkColorType,    // color type
-                                             nullptr,                   // colorspace
-                                             nullptr,                   // surface properties
-                                             release_proc,              // release proc
-                                             metal_texture.release()    // release context (texture)
-      );
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not create the SkSurface from the metal texture.";
     return nullptr;
   }
 
-  bool hasExternalViewEmbedder = delegate_->GetExternalViewEmbedder() != nullptr;
-
-  // External views need to present with transaction. When presenting with
-  // transaction, we have to block, otherwise we risk presenting the drawable
-  // after the CATransaction has completed.
-  // See:
-  // https://developer.apple.com/documentation/quartzcore/cametallayer/1478157-presentswithtransaction
-  // TODO(dnfield): only do this if transactions are actually being used.
-  // https://github.com/flutter/flutter/issues/24133
-  auto submit_callback = [drawable = next_drawable, command_buffer, hasExternalViewEmbedder](
-                             const SurfaceFrame& surface_frame, SkCanvas* canvas) -> bool {
+  auto submit_callback = [this](const SurfaceFrame& surface_frame, SkCanvas* canvas) -> bool {
     canvas->flush();
-    if (!hasExternalViewEmbedder) {
+
+    if (next_drawable_ == nullptr) {
+      FML_DLOG(ERROR) << "Could not acquire next Metal drawable from the SkSurface.";
+      return false;
+    }
+
+    const auto has_external_view_embedder = delegate_->GetExternalViewEmbedder() != nullptr;
+
+    auto command_buffer =
+        fml::scoped_nsprotocol<id<MTLCommandBuffer>>([[command_queue_.get() commandBuffer] retain]);
+
+    fml::scoped_nsprotocol<id<CAMetalDrawable>> drawable(
+        reinterpret_cast<id<CAMetalDrawable>>(next_drawable_));
+    next_drawable_ = nullptr;
+
+    // External views need to present with transaction. When presenting with
+    // transaction, we have to block, otherwise we risk presenting the drawable
+    // after the CATransaction has completed.
+    // See:
+    // https://developer.apple.com/documentation/quartzcore/cametallayer/1478157-presentswithtransaction
+    // TODO(dnfield): only do this if transactions are actually being used.
+    // https://github.com/flutter/flutter/issues/24133
+    if (!has_external_view_embedder) {
       [command_buffer.get() presentDrawable:drawable.get()];
       [command_buffer.get() commit];
     } else {
@@ -188,6 +175,18 @@ flutter::ExternalViewEmbedder* GPUSurfaceMetal::GetExternalViewEmbedder() {
 bool GPUSurfaceMetal::MakeRenderContextCurrent() {
   // This backend has no such concept.
   return true;
+}
+
+void GPUSurfaceMetal::ReleaseUnusedDrawableIfNecessary() {
+  // If the previous surface frame was not submitted before  a new one is acquired, the old drawable
+  // needs to be released. An RAII wrapper may not be used because this needs to interoperate with
+  // Skia APIs.
+  if (next_drawable_ == nullptr) {
+    return;
+  }
+
+  CFRelease(next_drawable_);
+  next_drawable_ = nullptr;
 }
 
 }  // namespace flutter
