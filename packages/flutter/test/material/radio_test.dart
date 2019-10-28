@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -445,14 +446,15 @@ void main() {
     int groupValue = 1;
     const Key radioKey0 = Key('radio0');
     const Key radioKey1 = Key('radio1');
-    final FocusNode focusNode1 = FocusNode(debugLabel: 'radio1');
+    const Key radioKey2 = Key('radio2');
+    final FocusNode focusNode2 = FocusNode(debugLabel: 'radio2');
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Container(
-                width: 100,
+                width: 200,
                 height: 100,
                 color: Colors.white,
                 child: Row(
@@ -479,7 +481,18 @@ void main() {
                       } : null,
                       hoverColor: Colors.orange[500],
                       groupValue: groupValue,
-                      focusNode: focusNode1,
+                    ),
+                    Radio<int>(
+                      key: radioKey2,
+                      value: 2,
+                      onChanged: enabled ? (int newValue) {
+                        setState(() {
+                          groupValue = newValue;
+                        });
+                      } : null,
+                      hoverColor: Colors.orange[500],
+                      groupValue: groupValue,
+                      focusNode: focusNode2,
                     ),
                   ],
                 ),
@@ -495,14 +508,15 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
-    expect(groupValue, equals(0));
+    // On web, radios don't respond to the enter key.
+    expect(groupValue, kIsWeb ? equals(1) : equals(0));
 
-    focusNode1.requestFocus();
+    focusNode2.requestFocus();
     await tester.pumpAndSettle();
 
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
-    expect(groupValue, equals(1));
+    expect(groupValue, equals(2));
   });
 
 }

@@ -67,7 +67,27 @@ void main() {
     focusNode.requestFocus();
     await tester.pump();
 
+    // Web doesn't react to enter, just space.
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump(const Duration(milliseconds: 10));
+
+    if (!kIsWeb) {
+      final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+      expect(splash, paints..circle(color: splashColor));
+    }
+
+    await tester.pumpAndSettle();
+
+    expect(pressed, kIsWeb ? isFalse : isTrue);
+
+    pressed = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+
+    expect(pressed, isTrue);
+
+    pressed = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump(const Duration(milliseconds: 10));
 
     final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as dynamic;
@@ -81,7 +101,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
 
-    expect(pressed, kIsWeb ? isFalse : isTrue);
+    expect(pressed, isTrue);
   });
 
   testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
