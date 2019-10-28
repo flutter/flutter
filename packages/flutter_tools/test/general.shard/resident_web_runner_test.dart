@@ -532,6 +532,23 @@ void main() {
     verifyNever(mockDebugConnection.close());
   }));
 
+  test('cleans up Chrome if tab is closed', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<void> onDone = Completer<void>();
+    when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
+      return onDone.future;
+    });
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Future<int> result = residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    );
+    await connectionInfoCompleter.future;
+    onDone.complete();
+
+    await result;
+    verify(mockWebFs.stop()).called(1);
+  }));
+
   test('Prints target and device name on run', () => testbed.run(() async {
     _setupMocks();
     when(mockWebDevice.name).thenReturn('Chromez');
