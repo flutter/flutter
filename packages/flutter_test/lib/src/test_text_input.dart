@@ -125,8 +125,9 @@ class TestTextInput {
   
   /// Simulates the user closing the text input connection.
   ///
-  /// Example via sending the application to the backend or closing a virtual
-  /// keyboard.
+  /// For example:
+  /// - User pressed the home button and sent the application to background.
+  /// - User closed the virtual keyboard.
   void closeConnection() {
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
