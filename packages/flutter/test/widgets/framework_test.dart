@@ -657,6 +657,59 @@ void main() {
     );
     test.includeChild = false;
   });
+
+  testWidgets('scheduleBuild while debugBuildingDirtyElements is true', (WidgetTester tester) async {
+    /// ignore here is required for testing purpose because changing the flag properly is hard
+    // ignore: invalid_use_of_protected_member
+    tester.binding.debugBuildingDirtyElements = true;
+    FlutterError error;
+    try {
+      tester.binding.buildOwner.scheduleBuildFor(
+        DirtyElementWithCustomBuildOwner(tester.binding.buildOwner, Container()));
+    } on FlutterError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error.diagnostics.length, 3);
+      expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics.last.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'This might be because setState() was called from a layout or\n'
+          'paint callback. If a change is needed to the widget tree, it\n'
+          'should be applied as the tree is being built. Scheduling a change\n'
+          'for the subsequent frame instead results in an interface that\n'
+          'lags behind by one frame. If this was done to make your build\n'
+          'dependent on a size measured at layout time, consider using a\n'
+          'LayoutBuilder, CustomSingleChildLayout, or\n'
+          'CustomMultiChildLayout. If, on the other hand, the one frame\n'
+          'delay is the desired effect, for example because this is an\n'
+          'animation, consider scheduling the frame in a post-frame callback\n'
+          'using SchedulerBinding.addPostFrameCallback or using an\n'
+          'AnimationController to trigger the animation.\n',
+        ),
+      );
+      expect(
+        error.toStringDeep(),
+        'FlutterError\n'
+        '   Build scheduled during frame.\n'
+        '   While the widget tree was being built, laid out, and painted, a\n'
+        '   new frame was scheduled to rebuild the widget tree.\n'
+        '   This might be because setState() was called from a layout or\n'
+        '   paint callback. If a change is needed to the widget tree, it\n'
+        '   should be applied as the tree is being built. Scheduling a change\n'
+        '   for the subsequent frame instead results in an interface that\n'
+        '   lags behind by one frame. If this was done to make your build\n'
+        '   dependent on a size measured at layout time, consider using a\n'
+        '   LayoutBuilder, CustomSingleChildLayout, or\n'
+        '   CustomMultiChildLayout. If, on the other hand, the one frame\n'
+        '   delay is the desired effect, for example because this is an\n'
+        '   animation, consider scheduling the frame in a post-frame callback\n'
+        '   using SchedulerBinding.addPostFrameCallback or using an\n'
+        '   AnimationController to trigger the animation.\n',
+      );
+    }
+  });
 }
 
 class NullChildTest extends Widget {
@@ -680,4 +733,24 @@ class NullChildElement extends Element {
 
   @override
   void performRebuild() { }
+}
+
+
+class DirtyElementWithCustomBuildOwner extends Element {
+  DirtyElementWithCustomBuildOwner(BuildOwner buildOwner, Widget widget)
+    : _owner = buildOwner, super(widget);
+
+  final BuildOwner _owner;
+
+  @override
+  void forgetChild(Element child) {}
+
+  @override
+  void performRebuild() {}
+
+  @override
+  BuildOwner get owner => _owner;
+
+  @override
+  bool get dirty => true;
 }

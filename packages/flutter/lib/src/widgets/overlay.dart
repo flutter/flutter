@@ -238,17 +238,16 @@ class Overlay extends StatefulWidget {
     final OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
     assert(() {
       if (debugRequiredFor != null && result == null) {
-        final String additional = context.widget != debugRequiredFor
-          ? '\nThe context from which that widget was searching for an overlay was:\n  $context'
-          : '';
-        throw FlutterError(
-          'No Overlay widget found.\n'
-          '${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.\n'
-          'The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.\n'
-          'The specific widget that failed to find an overlay was:\n'
-          '  $debugRequiredFor'
-          '$additional'
-        );
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[
+          ErrorSummary('No Overlay widget found.'),
+          ErrorDescription('${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.'),
+          ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.'),
+          DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
+          if (context.widget != debugRequiredFor)
+            context.describeElement('The context from which that widget was searching for an overlay was')
+        ];
+
+        throw FlutterError.fromParts(information);
       }
       return true;
     }());

@@ -1033,4 +1033,60 @@ void main() {
     expect(find.byKey(keyA), findsNothing);
     expect(find.byKey(keyAB), findsNothing);
   });
+
+  group('error control test', () {
+    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(Navigator(
+        key: navigatorKey,
+        onGenerateRoute: (_) => null,
+      ));
+      final dynamic exception = tester.takeException();
+      expect(exception, isNotNull);
+      expect(exception, isFlutterError);
+      final FlutterError error = exception;
+      expect(error, isNotNull);
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   If a Navigator has no onUnknownRoute, then its onGenerateRoute\n'
+          '   must never return null.\n'
+          '   When trying to build the route "/", onGenerateRoute returned\n'
+          '   null, but there was no onUnknownRoute callback specified.\n'
+          '   The Navigator was:\n'
+          '     NavigatorState#4d6bf(lifecycle state: created)\n',
+        ),
+      );
+    });
+
+    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(Navigator(
+        key: navigatorKey,
+        onGenerateRoute: (_) => null,
+        onUnknownRoute: (_) => null,
+      ));
+      final dynamic exception = tester.takeException();
+      expect(exception, isNotNull);
+      expect(exception, isFlutterError);
+      final FlutterError error = exception;
+      expect(error, isNotNull);
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   A Navigator\'s onUnknownRoute returned null.\n'
+          '   When trying to build the route "/", both onGenerateRoute and\n'
+          '   onUnknownRoute returned null. The onUnknownRoute callback should\n'
+          '   never return null.\n'
+          '   The Navigator was:\n'
+          '     NavigatorState#38036(lifecycle state: created)\n',
+        ),
+      );
+    });
+  });
+
 }

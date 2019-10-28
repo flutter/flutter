@@ -9,6 +9,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/test_api.dart' as test_package;
 import 'package:test_api/src/frontend/async_matcher.dart' show AsyncMatcher;
@@ -662,6 +663,41 @@ void main() {
       expect(find.text('Item 15', skipOffstage: true), findsOneWidget);
     });
   });
+
+  testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
+      FlutterError error;
+      final Ticker ticker = tester.createTicker((Duration duration) {});
+      ticker.start();
+      try {
+        tester.verifyTickersWereDisposed('');
+      } on FlutterError catch (e) {
+        error = e;
+      } finally {
+        expect(error, isNotNull);
+        expect(error.diagnostics.length, 4);
+        expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+        expect(
+          error.diagnostics[2].toStringDeep(),
+          'Tickers used by AnimationControllers should be disposed by\n'
+          'calling dispose() on the AnimationController itself. Otherwise,\n'
+          'the ticker will leak.\n',
+        );
+        expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
+        expect(error.diagnostics.last.value, ticker);
+        expect(error.toStringDeep(), startsWith(
+          'FlutterError\n'
+          '   A Ticker was active .\n'
+          '   All Tickers must be disposed.\n'
+          '   Tickers used by AnimationControllers should be disposed by\n'
+          '   calling dispose() on the AnimationController itself. Otherwise,\n'
+          '   the ticker will leak.\n'
+          '   The offending ticker was:\n'
+          '     _TestTicker()\n',
+        ));
+      }
+      ticker.stop();
+  });
+
 }
 
 class FakeMatcher extends AsyncMatcher {
@@ -678,4 +714,29 @@ class FakeMatcher extends AsyncMatcher {
 
   @override
   Description describe(Description description) => description.add('--fake--');
+}
+
+class _SingleTickerTest extends StatefulWidget {
+  const _SingleTickerTest({Key key}) : super(key: key);
+
+  @override
+  _SingleTickerTestState createState() => _SingleTickerTestState();
+}
+
+class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
+  AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 100),
+    )  ;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
 }

@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../widgets/semantics_tester.dart';
 
@@ -1675,6 +1675,248 @@ void main() {
 
     await tester.pumpWidget(buildFrame(false, null));
     expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
+  });
+
+  group('FlutterError control test', () {
+    testWidgets('showBottomSheet() while Scaffold has bottom sheet',
+      (WidgetTester tester) async {
+        final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              key: key,
+              body: Center(
+                child: Container(),
+              ),
+              bottomSheet: Container(
+                child: const Text('Bottom sheet'),
+              ),
+            ),
+          ),
+        );
+        FlutterError error;
+        try {
+          key.currentState.showBottomSheet<void>((BuildContext context) {
+            final ThemeData themeData = Theme.of(context);
+            return Container(
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: themeData.disabledColor))
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: themeData.accentColor,
+                    fontSize: 24.0,
+                  ),
+                ),
+              ),
+            );
+          },);
+        } on FlutterError catch (e) {
+          error = e;
+        } finally {
+          expect(error, isNotNull);
+          expect(error.toStringDeep(), equalsIgnoringHashCodes(
+            'FlutterError\n'
+            '   Scaffold.bottomSheet cannot be specified while a bottom\n'
+            '   sheetdisplayed with showBottomSheet() is still visible.\n'
+            '   Rebuild the Scaffold with a null bottomSheet before calling\n'
+            '   showBottomSheet().\n',
+          ));
+        }
+      }
+    );
+
+    testWidgets('didUpdate bottomSheet while a previous bottom sheet is still displayed',
+        (WidgetTester tester) async {
+        final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
+        const Key buttonKey = Key('button');
+        final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+        FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+        int state = 0;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Scaffold(
+                  key: key,
+                  body: Container(),
+                  floatingActionButton: FloatingActionButton(
+                    key: buttonKey,
+                    onPressed: () {
+                      state += 1;
+                      setState(() {});
+                    }
+                  ),
+                  bottomSheet: state == 0 ? null : const SizedBox(),
+                );
+              }
+            ),
+          ),
+        );
+        key.currentState.showBottomSheet<void>((_) => Container());
+        await tester.tap(find.byKey(buttonKey));
+        await tester.pump();
+        expect(errors, isNotEmpty);
+        expect(errors.first.exception, isFlutterError);
+        final FlutterError error = errors.first.exception;
+        expect(error.diagnostics.length, 2);
+        expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+        expect(
+          error.diagnostics.last.toStringDeep(),
+          'Use the PersistentBottomSheetController returned by\n'
+          'showBottomSheet() to close the old bottom sheet before creating a\n'
+          'Scaffold with a (non null) bottomSheet.\n',
+        );
+        expect(
+          error.toStringDeep(),
+          'FlutterError\n'
+          '   Scaffold.bottomSheet cannot be specified while a bottom sheet\n'
+          '   displayed with showBottomSheet() is still visible.\n'
+          '   Use the PersistentBottomSheetController returned by\n'
+          '   showBottomSheet() to close the old bottom sheet before creating a\n'
+          '   Scaffold with a (non null) bottomSheet.\n'
+        );
+    });
+
+    testWidgets('Call to Scaffold.of() without context', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
+                return Container();
+              });
+              return Container();
+            },
+          ),
+        ),
+      );
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception;
+      expect(error.diagnostics.length, 5);
+      expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[2].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'There are several ways to avoid this problem. The simplest is to\n'
+          'use a Builder to get a context that is "under" the Scaffold. For\n'
+          'an example of this, please see the documentation for\n'
+          'Scaffold.of():\n'
+          '  https://api.flutter.dev/flutter/material/Scaffold/of.html\n',
+        ),
+      );
+      expect(error.diagnostics[3].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[3].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'A more efficient solution is to split your build function into\n'
+          'several widgets. This introduces a new context from which you can\n'
+          'obtain the Scaffold. In this solution, you would have an outer\n'
+          'widget that creates the Scaffold populated by instances of your\n'
+          'new inner widgets, and then in these inner widgets you would use\n'
+          'Scaffold.of().\n'
+          'A less elegant but more expedient solution is assign a GlobalKey\n'
+          'to the Scaffold, then use the key.currentState property to obtain\n'
+          'the ScaffoldState rather than using the Scaffold.of() function.\n',
+        ),
+      );
+      expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+      expect(error.toStringDeep(),
+        'FlutterError\n'
+        '   Scaffold.of() called with a context that does not contain a\n'
+        '   Scaffold.\n'
+        '   No Scaffold ancestor could be found starting from the context\n'
+        '   that was passed to Scaffold.of(). This usually happens when the\n'
+        '   context provided is from the same StatefulWidget as that whose\n'
+        '   build function actually creates the Scaffold widget being sought.\n'
+        '   There are several ways to avoid this problem. The simplest is to\n'
+        '   use a Builder to get a context that is "under" the Scaffold. For\n'
+        '   an example of this, please see the documentation for\n'
+        '   Scaffold.of():\n'
+        '     https://api.flutter.dev/flutter/material/Scaffold/of.html\n'
+        '   A more efficient solution is to split your build function into\n'
+        '   several widgets. This introduces a new context from which you can\n'
+        '   obtain the Scaffold. In this solution, you would have an outer\n'
+        '   widget that creates the Scaffold populated by instances of your\n'
+        '   new inner widgets, and then in these inner widgets you would use\n'
+        '   Scaffold.of().\n'
+        '   A less elegant but more expedient solution is assign a GlobalKey\n'
+        '   to the Scaffold, then use the key.currentState property to obtain\n'
+        '   the ScaffoldState rather than using the Scaffold.of() function.\n'
+        '   The context used was:\n'
+        '     Builder\n'
+      );
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('Call to Scaffold.geometryOf() without context', (WidgetTester tester) async {
+      ValueListenable<ScaffoldGeometry> geometry;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              geometry = Scaffold.geometryOf(context);
+              return Container();
+            },
+          ),
+        ),
+      );
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(geometry, isNull);
+      final FlutterError error = exception;
+      expect(error.diagnostics.length, 5);
+      expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[2].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'There are several ways to avoid this problem. The simplest is to\n'
+          'use a Builder to get a context that is "under" the Scaffold. For\n'
+          'an example of this, please see the documentation for\n'
+          'Scaffold.of():\n'
+          '  https://api.flutter.dev/flutter/material/Scaffold/of.html\n',
+        ),
+      );
+      expect(error.diagnostics[3].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[3].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'A more efficient solution is to split your build function into\n'
+          'several widgets. This introduces a new context from which you can\n'
+          'obtain the Scaffold. In this solution, you would have an outer\n'
+          'widget that creates the Scaffold populated by instances of your\n'
+          'new inner widgets, and then in these inner widgets you would use\n'
+          'Scaffold.geometryOf().\n',
+        ),
+      );
+      expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+      expect(error.toStringDeep(),
+        'FlutterError\n'
+        '   Scaffold.geometryOf() called with a context that does not contain\n'
+        '   a Scaffold.\n'
+        '   This usually happens when the context provided is from the same\n'
+        '   StatefulWidget as that whose build function actually creates the\n'
+        '   Scaffold widget being sought.\n'
+        '   There are several ways to avoid this problem. The simplest is to\n'
+        '   use a Builder to get a context that is "under" the Scaffold. For\n'
+        '   an example of this, please see the documentation for\n'
+        '   Scaffold.of():\n'
+        '     https://api.flutter.dev/flutter/material/Scaffold/of.html\n'
+        '   A more efficient solution is to split your build function into\n'
+        '   several widgets. This introduces a new context from which you can\n'
+        '   obtain the Scaffold. In this solution, you would have an outer\n'
+        '   widget that creates the Scaffold populated by instances of your\n'
+        '   new inner widgets, and then in these inner widgets you would use\n'
+        '   Scaffold.geometryOf().\n'
+        '   The context used was:\n'
+        '     Builder\n'
+      );
+      await tester.pumpAndSettle();
+    });
   });
 }
 
