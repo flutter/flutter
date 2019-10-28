@@ -94,15 +94,19 @@ class _FrameCallbackEntry {
       if (rescheduling) {
         assert(() {
           if (debugCurrentCallbackStack == null) {
-            throw FlutterError(
-              'scheduleFrameCallback called with rescheduling true, but no callback is in scope.\n'
-              'The "rescheduling" argument should only be set to true if the '
-              'callback is being reregistered from within the callback itself, '
-              'and only then if the callback itself is entirely synchronous. '
-              'If this is the initial registration of the callback, or if the '
-              'callback is asynchronous, then do not use the "rescheduling" '
-              'argument.'
-            );
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('scheduleFrameCallback called with rescheduling true, but no callback is in scope.'),
+              ErrorDescription(
+                'The "rescheduling" argument should only be set to true if the '
+                'callback is being reregistered from within the callback itself, '
+                'and only then if the callback itself is entirely synchronous.'
+              ),
+              ErrorHint(
+                'If this is the initial registration of the callback, or if the '
+                'callback is asynchronous, then do not use the "rescheduling" '
+                'argument.'
+              )
+            ]);
           }
           return true;
         }());
