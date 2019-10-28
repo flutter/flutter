@@ -280,6 +280,7 @@ class _DetailedEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return FlatButton(
       onPressed: () {},
       child: SizedBox(
@@ -296,18 +297,18 @@ class _DetailedEventCard extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.body1.copyWith(fontSize: 16),
+                        style: textTheme.body1.copyWith(fontSize: 16),
                       ),
                       Text(
                         subtitle,
-                        style: Theme.of(context).textTheme.body1.copyWith(color: RallyColors.gray60),
+                        style: textTheme.body1.copyWith(color: RallyColors.gray60),
                       )
                     ],
                   ),
                   const Spacer(),
                   Text(
                     '\$${usdFormat.format(amount)}',
-                    style: Theme.of(context).textTheme.body2.copyWith(fontSize: 20, color: RallyColors.gray),
+                    style: textTheme.body2.copyWith(fontSize: 20, color: RallyColors.gray),
                   ),
                 ],
               ),
