@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection' show Queue;
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
 
@@ -65,17 +66,14 @@ class PaintingContext extends ClipContext {
   /// Typically only called by [PaintingContext.repaintCompositedChild]
   /// and [pushLayer].
   @protected
-  PaintingContext(ContainerLayer _containerLayer, this.estimatedBounds)
-    : assert(_containerLayer != null),
-      assert(estimatedBounds != null),
-      _containerLayerStack = <ContainerLayer>[_containerLayer];
+  PaintingContext(this._rootContainerLayer, this.estimatedBounds)
+    : assert(_rootContainerLayer != null),
+      assert(estimatedBounds != null);
 
-  final List<ContainerLayer> _containerLayerStack;
+  final ContainerLayer _rootContainerLayer;
+  final Queue<VirtualLayer> _virtualLayerStack = Queue<VirtualLayer>();
   ContainerLayer get _containerLayer {
-    final ContainerLayer stackTop = _containerLayerStack.last;
-    if (_containerLayerStack.length > 1)
-      assert(stackTop is VirtualLayer);
-    return stackTop;
+    return _virtualLayerStack.isEmpty ? _rootContainerLayer : _virtualLayerStack.last;
   }
 
   /// An estimate of the bounds within which the painting context's [canvas]
@@ -242,14 +240,14 @@ class PaintingContext extends ClipContext {
   void _withVirtualLayer(VirtualLayer layer, VoidCallback task) {
     layer.remove();
     _containerLayer.append(layer);
-    _containerLayerStack.add(layer);
-    final int beforeStackDepth = _containerLayerStack.length;
+    _virtualLayerStack.add(layer);
+    final int beforeStackDepth = _virtualLayerStack.length;
     try {
       task();
     } finally {
       assert(_containerLayer == layer);
-      assert(_containerLayerStack.length == beforeStackDepth);
-      _containerLayerStack.removeLast();
+      assert(_virtualLayerStack.length == beforeStackDepth);
+      _virtualLayerStack.removeLast();
     }
   }
 
@@ -292,7 +290,7 @@ class PaintingContext extends ClipContext {
     _currentLayer = PictureLayer(estimatedBounds);
     _recorder = ui.PictureRecorder();
     _canvas = Canvas(_recorder);
-    _containerLayer.append(_currentLayer);
+    _rootContainerLayer.append(_currentLayer);
   }
 
   /// Stop recording to a canvas if recording has started.
@@ -627,7 +625,7 @@ class PaintingContext extends ClipContext {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
+  String toString() => '$runtimeType#$hashCode(layer: $_rootContainerLayer, canvas bounds: $estimatedBounds)';
 }
 
 /// An abstract set of layout constraints.
