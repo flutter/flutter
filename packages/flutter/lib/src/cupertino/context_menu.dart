@@ -148,6 +148,8 @@ class CupertinoContextMenu extends StatefulWidget {
 
   /// The actions that are shown in the menu.
   ///
+  /// These actions are typically [CupertinoContextMenuAction]s.
+  ///
   /// This parameter cannot be null or empty.
   final List<Widget> actions;
 
