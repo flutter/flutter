@@ -100,7 +100,7 @@ elif [[ "$OS" == "darwin" ]]; then
       echo "Testing archiving with distribution profile..."
       (
         cd examples/flutter_gallery/ios
-        BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/mac/Gemfile"
+        export BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/mac/Gemfile"
         bundle exec fastlane build_and_deploy_testflight
       )
       echo "(Not deploying; Flutter Gallery is only deployed to TestFlight for tagged dev branch commits.)"
