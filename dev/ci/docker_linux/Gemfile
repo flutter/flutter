@@ -1,5 +1,0 @@
-source "https://rubygems.org"
-
-# Install fastlane which is used on Linux to build and deploy Android
-# builds to the Play Store.
-gem 'fastlane', '2.134.0'
