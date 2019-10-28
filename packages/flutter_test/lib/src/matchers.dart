@@ -127,6 +127,12 @@ const Matcher isInCard = _IsInCard();
 ///  * [isInCard], the opposite.
 const Matcher isNotInCard = _IsNotInCard();
 
+/// Asserts that the object represents the same color as [color] when used to paint.
+///
+/// Specifically this matcher checks the object is of type [Color] and its [Color.value]
+/// equals to that of the given [color].
+Matcher isSameColorAs(Color color) => _ColorMatcher(targetColor: color);
+
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
@@ -1607,6 +1613,24 @@ class _CoversSameAreaAs extends Matcher {
   @override
   Description describe(Description description) =>
     description.add('covers expected area and only expected area');
+}
+
+class _ColorMatcher extends Matcher {
+  const _ColorMatcher({
+      @required this.targetColor,
+  }) : assert(targetColor != null);
+
+  final Color targetColor;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is Color)
+      return item.value == targetColor.value;
+    return false;
+  }
+
+  @override
+  Description describe(Description description) => description.add('matches color $targetColor');
 }
 
 Future<ui.Image> _captureImage(Element element) {
