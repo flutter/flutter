@@ -245,6 +245,10 @@ void _buildCoverageMap(
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
   for (String scriptId in scripts.keys) {
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
+    // Ranges may sometimes be null for a report.
+    if (sourceReport['ranges'] == null) {
+      continue;
+    }
     for (Map<String, dynamic> range in sourceReport['ranges']) {
       final Map<String, dynamic> coverage = range['coverage'];
       // Coverage reports may sometimes be null for a Script.
