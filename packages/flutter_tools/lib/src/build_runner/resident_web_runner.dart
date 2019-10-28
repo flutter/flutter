@@ -113,7 +113,16 @@ class ResidentWebRunner extends ResidentRunner {
     await _stdOutSub?.cancel();
     await _webFs?.stop();
     await device.stopApp(null);
+    if (ChromeLauncher.hasChromeInstance) {
+      final Chrome chrome = await ChromeLauncher.connectedInstance;
+      await chrome.close();
+    }
     _exited = true;
+  }
+
+  Future<void> _cleanupAndExit() async {
+    await _cleanup();
+    appFinished();
   }
 
   @override
@@ -201,7 +210,7 @@ class ResidentWebRunner extends ResidentRunner {
         );
         if (supportsServiceProtocol) {
           _connectionResult = await _webFs.connect(debuggingOptions);
-          unawaited(_connectionResult.debugConnection.onDone.whenComplete(() => exit(0)));
+          unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
         }
         if (statusActive) {
           buildStatus.stop();
@@ -240,8 +249,21 @@ class ResidentWebRunner extends ResidentRunner {
         'This can happen if the websocket connection used by the web tooling is '
         'unabled to correctly establish a connection, for example due to a firewall.'
       );
+     } on MissingPortFile {
+      throwToolExit(
+        'Failed to connect to build daemon.\nThe daemon either failed to '
+        'start or was killed by another process.');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
+    } on StateError catch (err) {
+      final String message = err.toString();
+      if (message.contains('Unable to start build daemon')) {
+        throwToolExit(
+          'Failed to start build daemon. The process might have '
+          'exited unexpectedly during startup. Try running the application '
+          'again.');
+      }
+      rethrow;
     } finally {
       if (statusActive) {
         buildStatus.stop();

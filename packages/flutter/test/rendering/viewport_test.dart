@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -978,5 +979,164 @@ void main() {
     tester.renderObject(find.byWidget(children[1], skipOffstage: false)).showOnScreen();
     await tester.pumpAndSettle();
     expect(controller.offset, 300.0);
+  });
+
+  group('unbounded constraints control test', () {
+    Widget buildNestedWidget([Axis a1 = Axis.vertical, Axis a2 = Axis.horizontal]) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            child: ListView(
+              scrollDirection: a1,
+              children: List<Widget>.generate(10, (int y) {
+                return Container(
+                  child: ListView(
+                    scrollDirection: a2,
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> expectFlutterError({
+      Widget widget,
+      WidgetTester tester,
+      String message,
+    }) async {
+      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+      try {
+        await tester.pumpWidget(widget);
+      } finally {
+        FlutterError.onError = oldHandler;
+      }
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isFlutterError);
+      expect(errors.first.exception.toStringDeep(), message);
+    }
+
+    testWidgets('Horizontal viewport was given unbounded height', (WidgetTester tester) async {
+      await expectFlutterError(
+        widget: buildNestedWidget(),
+        tester: tester,
+        message:
+          'FlutterError\n'
+          '   Horizontal viewport was given unbounded height.\n'
+          '   Viewports expand in the cross axis to fill their container and\n'
+          '   constrain their children to match their extent in the cross axis.\n'
+          '   In this case, a horizontal viewport was given an unlimited amount\n'
+          '   of vertical space in which to expand.\n',
+      );
+    });
+
+    testWidgets('Horizontal viewport was given unbounded width', (WidgetTester tester) async {
+      await expectFlutterError(
+        widget: buildNestedWidget(Axis.horizontal, Axis.horizontal),
+        tester: tester,
+        message:
+          'FlutterError\n'
+          '   Horizontal viewport was given unbounded width.\n'
+          '   Viewports expand in the scrolling direction to fill their\n'
+          '   container.In this case, a horizontal viewport was given an\n'
+          '   unlimited amount of horizontal space in which to expand. This\n'
+          '   situation typically happens when a scrollable widget is nested\n'
+          '   inside another scrollable widget.\n'
+          '   If this widget is always nested in a scrollable widget there is\n'
+          '   no need to use a viewport because there will always be enough\n'
+          '   horizontal space for the children. In this case, consider using a\n'
+          '   Row instead. Otherwise, consider using the "shrinkWrap" property\n'
+          '   (or a ShrinkWrappingViewport) to size the width of the viewport\n'
+          '   to the sum of the widths of its children.\n'
+      );
+    });
+
+    testWidgets('Vertical viewport was given unbounded width', (WidgetTester tester) async {
+      await expectFlutterError(
+        widget: buildNestedWidget(Axis.horizontal, Axis.vertical),
+        tester: tester,
+        message:
+          'FlutterError\n'
+          '   Vertical viewport was given unbounded width.\n'
+          '   Viewports expand in the cross axis to fill their container and\n'
+          '   constrain their children to match their extent in the cross axis.\n'
+          '   In this case, a vertical viewport was given an unlimited amount\n'
+          '   of horizontal space in which to expand.\n'
+      );
+    });
+
+    testWidgets('Vertical viewport was given unbounded height', (WidgetTester tester) async {
+      await expectFlutterError(
+        widget: buildNestedWidget(Axis.vertical, Axis.vertical),
+        tester: tester,
+        message:
+          'FlutterError\n'
+          '   Vertical viewport was given unbounded height.\n'
+          '   Viewports expand in the scrolling direction to fill their\n'
+          '   container. In this case, a vertical viewport was given an\n'
+          '   unlimited amount of vertical space in which to expand. This\n'
+          '   situation typically happens when a scrollable widget is nested\n'
+          '   inside another scrollable widget.\n'
+          '   If this widget is always nested in a scrollable widget there is\n'
+          '   no need to use a viewport because there will always be enough\n'
+          '   vertical space for the children. In this case, consider using a\n'
+          '   Column instead. Otherwise, consider using the "shrinkWrap"\n'
+          '   property (or a ShrinkWrappingViewport) to size the height of the\n'
+          '   viewport to the sum of the heights of its children.\n'
+      );
+    });
+  });
+
+  test('Viewport debugThrowIfNotCheckingIntrinsics() control test', () {
+    final RenderViewport renderViewport = RenderViewport(
+      crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
+    );
+    FlutterError error;
+    try {
+      renderViewport.computeMinIntrinsicHeight(0);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   RenderViewport does not support returning intrinsic dimensions.\n'
+      '   Calculating the intrinsic dimensions would require instantiating\n'
+      '   every child of the viewport, which defeats the point of viewports\n'
+      '   being lazy.\n'
+      '   If you are merely trying to shrink-wrap the viewport in the main\n'
+      '   axis direction, consider a RenderShrinkWrappingViewport render\n'
+      '   object (ShrinkWrappingViewport widget), which achieves that\n'
+      '   effect without implementing the intrinsic dimension API.\n',
+    );
+
+    final RenderShrinkWrappingViewport renderShrinkWrappingViewport = RenderShrinkWrappingViewport(
+      crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
+    );
+    error = null;
+    try {
+      renderShrinkWrappingViewport.computeMinIntrinsicHeight(0);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   RenderShrinkWrappingViewport does not support returning intrinsic\n'
+      '   dimensions.\n'
+      '   Calculating the intrinsic dimensions would require instantiating\n'
+      '   every child of the viewport, which defeats the point of viewports\n'
+      '   being lazy.\n'
+      '   If you are merely trying to shrink-wrap the viewport in the main\n'
+      '   axis direction, you should be able to achieve that effect by just\n'
+      '   giving the viewport loose constraints, without needing to measure\n'
+      '   its intrinsic dimensions.\n',
+    );
   });
 }
