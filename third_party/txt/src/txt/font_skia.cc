@@ -52,6 +52,7 @@ static void FontSkia_SetSkiaFont(sk_sp<SkTypeface> typeface,
                                  SkFont* skFont,
                                  const minikin::MinikinPaint& paint) {
   skFont->setTypeface(std::move(typeface));
+  skFont->setLinearMetrics((paint.paintFlags & minikin::LinearTextFlag) != 0);
   // TODO: set more paint parameters from Minikin
   skFont->setSize(paint.size);
 }

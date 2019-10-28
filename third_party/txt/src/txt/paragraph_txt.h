@@ -129,6 +129,7 @@ class ParagraphTxt : public Paragraph {
  private:
   friend class ParagraphBuilderTxt;
   FRIEND_TEST(ParagraphTest, SimpleParagraph);
+  FRIEND_TEST(ParagraphTest, SimpleParagraphSmall);
   FRIEND_TEST(ParagraphTest, SimpleRedParagraph);
   FRIEND_TEST(ParagraphTest, RainbowParagraph);
   FRIEND_TEST(ParagraphTest, DefaultStyleParagraph);
