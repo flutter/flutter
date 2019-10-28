@@ -255,6 +255,15 @@ class ResidentWebRunner extends ResidentRunner {
         'start or was killed by another process.');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
+    } on StateError catch (err) {
+      final String message = err.toString();
+      if (message.contains('Unable to start build daemon')) {
+        throwToolExit(
+          'Failed to start build daemon. The process might have '
+          'exited unexpectedly during startup. Try running the application '
+          'again.');
+      }
+      rethrow;
     } finally {
       if (statusActive) {
         buildStatus.stop();
