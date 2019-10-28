@@ -249,6 +249,10 @@ class ResidentWebRunner extends ResidentRunner {
         'This can happen if the websocket connection used by the web tooling is '
         'unabled to correctly establish a connection, for example due to a firewall.'
       );
+     } on MissingPortFile {
+      throwToolExit(
+        'Failed to connect to build daemon.\nThe daemon either failed to '
+        'start or was killed by another process.');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
     } finally {
