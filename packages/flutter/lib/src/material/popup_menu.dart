@@ -978,11 +978,13 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// to set the padding to zero.
   final EdgeInsetsGeometry padding;
 
-  /// If provided, the widget used for this button.
+  /// If provided, [child] is the widget used for this button
+  /// and the button will utilize an [InkWell] for taps.
   final Widget child;
 
-  /// If provided, the icon used for this button.
-  final Icon icon;
+  /// If provided, the [icon] is used for this button
+  /// and the button will behave like an [IconButton].
+  final Widget icon;
 
   /// The offset applied to the Popup Menu Button.
   ///
