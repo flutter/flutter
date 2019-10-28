@@ -362,12 +362,15 @@ class XcodeProjectInterpreter {
 /// environment without requiring settings changes in the Xcode project.
 List<String> environmentVariablesAsXcodeBuildSettings() {
   const String xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
-  return platform.environment.entries
-    .where(
-      (MapEntry<String, String> mapEntry) => mapEntry.key.startsWith(xcodeBuildSettingPrefix))
-    .expand<String>(
-      (MapEntry<String, String> mapEntry) => <String>['${mapEntry.key.substring(xcodeBuildSettingPrefix.length)}=${mapEntry.value}'])
-    .toList();
+  final Iterable<MapEntry<String, String>> xcodeEnvironmentVariables = platform.environment.entries.where((MapEntry<String, String> mapEntry) {
+    return mapEntry.key.startsWith(xcodeBuildSettingPrefix);
+  });
+  final Iterable<String> xcodeBuildSettingsKeyValue = xcodeEnvironmentVariables.expand<String>((MapEntry<String, String> mapEntry) {
+    // Remove FLUTTER_XCODE_ prefix from the environment variable to get the build setting.
+    final String trimmedBuildSettingKey = mapEntry.key.substring(xcodeBuildSettingPrefix.length);
+    return <String>['$trimmedBuildSettingKey=${mapEntry.value}'];
+  });
+  return xcodeBuildSettingsKeyValue.toList();
 }
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
