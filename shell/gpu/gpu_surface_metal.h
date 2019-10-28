@@ -31,6 +31,7 @@ class GPUSurfaceMetal : public Surface {
   fml::scoped_nsobject<CAMetalLayer> layer_;
   sk_sp<GrContext> context_;
   fml::scoped_nsprotocol<id<MTLCommandQueue>> command_queue_;
+  GrMTLHandle next_drawable_ = nullptr;
 
   // |Surface|
   bool IsValid() override;
@@ -49,6 +50,8 @@ class GPUSurfaceMetal : public Surface {
 
   // |Surface|
   bool MakeRenderContextCurrent() override;
+
+  void ReleaseUnusedDrawableIfNecessary();
 
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceMetal);
 };
