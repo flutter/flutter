@@ -276,7 +276,7 @@ Future<GradleProject> _readGradleProject(
 /// Handle Gradle error thrown when Gradle needs to download additional
 /// Android SDK components (e.g. Platform Tools), and the license
 /// for that component has not been accepted.
-void throwToolExitIfLicenseNotAccepted(Exception exception) {
+void throwToolExitIfLicenseNotAccepted(dynamic exception) {
   const String licenseNotAcceptedMatcher =
     r'You have not accepted the license agreements of the following SDK components:'
     r'\s*\[(.+)\]';
