@@ -122,7 +122,7 @@ class TestTextInput {
       (ByteData data) { /* response from framework is discarded */ },
     );
   }
-
+  
   /// Simulates the user closing the text input connection.
   ///
   /// Example via sending the application to the backend or closing a virtual
