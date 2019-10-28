@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -190,5 +192,52 @@ void main() {
       expect(smallListOverscrollApplied, greaterThan(1.0));
       expect(smallListOverscrollApplied, lessThan(20.0));
     });
+  });
+
+  test('ClampingScrollPhysics assertion test', () {
+    const ClampingScrollPhysics physics = ClampingScrollPhysics();
+    const double pixels = 500;
+    final ScrollMetrics position = FixedScrollMetrics(
+      pixels: pixels,
+      minScrollExtent: 0,
+      maxScrollExtent: 1000,
+      viewportDimension: 0,
+      axisDirection: AxisDirection.down,
+    );
+    expect(position.pixels, pixels);
+    FlutterError error;
+    try {
+      physics.applyBoundaryConditions(position, pixels);
+    } on FlutterError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error.diagnostics.length, 4);
+      expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<ScrollPhysics>>());
+      expect(error.diagnostics[2].style, DiagnosticsTreeStyle.errorProperty);
+      expect(error.diagnostics[2].value, physics);
+      expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ScrollMetrics>>());
+      expect(error.diagnostics[3].style, DiagnosticsTreeStyle.errorProperty);
+      expect(error.diagnostics[3].value, position);
+      // RegExp matcher is required here due to flutter web and flutter mobile generating
+      // slightly different floating point numbers
+      // in Flutter web 0.0 sometimes just appears as 0. or 0
+      expect(error.toStringDeep(), matches(RegExp(
+        r'''FlutterError
+   ClampingScrollPhysics\.applyBoundaryConditions\(\) was called
+   redundantly\.
+   The proposed new position\, 500(\.\d*)?, is exactly equal to the current
+   position of the given FixedScrollMetrics, 500(\.\d*)?\.
+   The applyBoundaryConditions method should only be called when the
+   value is going to actually change the pixels, otherwise it is
+   redundant\.
+   The physics object in question was\:
+     ClampingScrollPhysics
+   The position object in question was\:
+     FixedScrollMetrics\(500(\.\d*)?..\[0(\.\d*)?\]..500(\.\d*)?\)
+''',
+        multiLine: true,
+      )));
+    }
   });
 }
