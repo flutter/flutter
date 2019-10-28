@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_linux.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/linux/makefile.dart';
@@ -46,7 +47,7 @@ void main() {
       return const Stream<List<int>>.empty();
     });
     when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-      return const Stream<List<int>>.empty();
+      return Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('STDOUT STUFF')]);
     });
     when(linuxPlatform.isLinux).thenReturn(true);
     when(linuxPlatform.isWindows).thenReturn(false);
@@ -133,6 +134,25 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
     ), throwsToolExit(message: 'make not found. Run \'flutter doctor\' for more information.'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => mockProcessManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Linux build does not spew stdout to status logger', () async {
+    final BufferLogger bufferLogger = logger;
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    expectMakeInvocationWithMode('debug');
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--debug']
+    );
+    expect(bufferLogger.statusText, isNot(contains('STDOUT STUFF')));
+    expect(bufferLogger.traceText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,

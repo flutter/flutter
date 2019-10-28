@@ -79,7 +79,7 @@ Future<void> buildMacOS({
       'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-    ]);
+    ], trace: true);
   } finally {
     status.cancel();
   }
