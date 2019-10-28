@@ -1059,7 +1059,10 @@ void main() {
                         TestSemantics(
                           label: 'one',
                           textDirection: TextDirection.ltr,
-                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isFocused,
+                            SemanticsFlag.isFocusable,
+                          ],
                           tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                           actions: <SemanticsAction>[SemanticsAction.tap],
                         ),
@@ -1916,6 +1919,7 @@ void main() {
   });
 
   testWidgets('DropdownButton can be focused, and has focusColor', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
@@ -1940,9 +1944,6 @@ void main() {
   testWidgets('DropdownButton is activated with the enter/space key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
     String value = 'one';
-    void didChangeValue(String newValue) {
-      value = newValue;
-    }
 
     Widget buildFrame() {
       return MaterialApp(
@@ -1953,7 +1954,11 @@ void main() {
                 return DropdownButton<String>(
                   focusNode: focusNode,
                   autofocus: true,
-                  onChanged: didChangeValue,
+                  onChanged: (String newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
                   value: value,
                   itemHeight: null,
                   items: menuItems.map<DropdownMenuItem<String>>((String item) {
@@ -1981,9 +1986,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
     expect(value, equals('one'));
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown); // Focus 'one'
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown); // Focus 'two'
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Focus 'two'
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select 'two', should work on web too.
     await tester.pump();
@@ -1992,5 +1995,130 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     expect(value, equals('two'));
+  });
+
+  testWidgets('Selected element is focused when dropdown is opened', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    String value = 'one';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButton<String>(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  onChanged: (String newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  value: value,
+                  itemHeight: null,
+                  items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      key: ValueKey<String>(item),
+                      value: item,
+                      child: Text(item, key: ValueKey<String>('Text $item')),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ),
+      )
+    );
+
+    await tester.pump(); // Pump a frame for autofocus to take effect.
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu open animation
+    expect(value, equals('one'));
+    expect(Focus.of(tester.element(find.byKey(const ValueKey<String>('one')).last)).hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Focus 'two'
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select 'two' and close the dropdown.
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu close animation
+
+    expect(value, equals('two'));
+
+    // Now make sure that "two" is focused when we re-open the dropdown.
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu open animation
+    expect(value, equals('two'));
+    final Element element =tester.element(find.byKey(const ValueKey<String>('two')).last);
+    final FocusNode node = Focus.of(element);
+    expect(node.hasFocus, isTrue);
+  });
+
+  testWidgets('Selected element is correctly focused with a large dropdown', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    int value = 1;
+    final List<int> hugeMenuItems = List<int>.generate(50, (int index) => index);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButton<int>(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  onChanged: (int newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  value: value,
+                  itemHeight: null,
+                  items: hugeMenuItems.map<DropdownMenuItem<int>>((int item) {
+                    return DropdownMenuItem<int>(
+                      key: ValueKey<int>(item),
+                      value: item,
+                      child: Text(item.toString(), key: ValueKey<String>('Text $item')),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(); // Pump a frame for autofocus to take effect.
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu open animation
+    expect(value, equals(1));
+    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(1)).last)).hasPrimaryFocus, isTrue);
+
+    for (int i = 0; i < 41; ++i) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Move to the next one.
+      await tester.pumpAndSettle(const Duration(milliseconds: 200)); // Wait for it to animate the menu.
+    }
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select '42' and close the dropdown.
+    await tester.pumpAndSettle(const Duration(seconds: 1)); // Finish the menu close animation
+    expect(value, equals(42));
+
+    // Now make sure that "42" is focused when we re-open the dropdown.
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu open animation
+    expect(value, equals(42));
+    final Element element =tester.element(find.byKey(const ValueKey<int>(42)).last);
+    final FocusNode node = Focus.of(element);
+    expect(node.hasFocus, isTrue);
   });
 }

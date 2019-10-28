@@ -170,6 +170,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
       Widget child = FadeTransition(
         opacity: opacity,
         child: InkWell(
+          autofocus: itemIndex == route.selectedIndex,
           child: Container(
             padding: widget.padding,
             child: route.items[itemIndex],
@@ -178,6 +179,15 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             context,
             _DropdownRouteResult<T>(route.items[itemIndex].item.value),
           ),
+          onFocusChange: (bool focused) {
+            if (focused) {
+              widget.route.scrollController.animateTo(
+                route.getItemOffset(itemIndex),
+                curve: Curves.easeInOut,
+                duration: const Duration(milliseconds: 100),
+              );
+            }
+          },
         ),
       );
       if (kIsWeb) {
@@ -201,7 +211,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           resize: _resize,
           // This offset is passed as a callback, not a value, because it must
           // be retrieved at paint time (after layout), not at build time.
-          getSelectedItemOffset: route.getSelectedItemOffset,
+          getSelectedItemOffset: () => route.getItemOffset(route.selectedIndex),
         ),
         child: Semantics(
           scopesRoute: true,
@@ -382,12 +392,12 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     navigator?.removeRoute(this);
   }
 
-  double getSelectedItemOffset() {
+  double getItemOffset(int index) {
     double offset = kMaterialListPadding.top;
-    if (items.isNotEmpty && selectedIndex > 0) {
+    if (items.isNotEmpty && index > 0) {
       assert(items.length == itemHeights?.length);
       offset += itemHeights
-        .sublist(0, selectedIndex)
+        .sublist(0, index)
         .reduce((double total, double height) => total + height);
     }
     return offset;
@@ -401,7 +411,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     final double maxMenuHeight = availableHeight - 2.0 * _kMenuItemHeight;
     final double buttonTop = buttonRect.top;
     final double buttonBottom = math.min(buttonRect.bottom, availableHeight);
-    final double selectedItemOffset = getSelectedItemOffset();
+    final double selectedItemOffset = getItemOffset(selectedIndex);
 
     // If the button is placed on the bottom or top of the screen, its top or
     // bottom may be less than [_kMenuItemHeight] from the edge of the screen.
@@ -520,7 +530,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
 // each menu item. These sizes are used to compute the offset of the selected
 // item so that _DropdownRoutePage can align the vertical center of the
 // selected item lines up with the vertical center of the dropdown button,
-// as closely as posible.
+// as closely as possible.
 class _MenuItem<T> extends SingleChildRenderObjectWidget {
   const _MenuItem({
     Key key,
@@ -978,6 +988,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   FocusNode get focusNode => widget.focusNode ?? _internalNode;
   bool _hasPrimaryFocus = false;
   Map<LocalKey, ActionFactory> _actionMap;
+  FocusHighlightMode _focusHighlightMode;
 
   // Only used if needed to create _internalNode.
   FocusNode _createFocusNode() {
@@ -996,12 +1007,16 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       if (!kIsWeb) ActivateAction.key: _createAction,
     };
     focusNode.addListener(_handleFocusChanged);
+    final FocusManager focusManager = WidgetsBinding.instance.focusManager;
+    _focusHighlightMode = focusManager.highlightMode;
+    focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
+    WidgetsBinding.instance.focusManager.removeHighlightModeListener(_handleFocusHighlightModeChange);
     focusNode.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
     super.dispose();
@@ -1019,6 +1034,15 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         _hasPrimaryFocus = focusNode.hasPrimaryFocus;
       });
     }
+  }
+
+  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _focusHighlightMode = mode;
+    });
   }
 
   @override
@@ -1152,6 +1176,16 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return result;
   }
 
+  bool get _showHighlight {
+    switch (_focusHighlightMode) {
+      case FocusHighlightMode.touch:
+        return false;
+      case FocusHighlightMode.traditional:
+        return _hasPrimaryFocus;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1219,10 +1253,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     Widget result = DefaultTextStyle(
       style: _textStyle,
       child: Container(
-        decoration: BoxDecoration(
-          color:_hasPrimaryFocus ? widget.focusColor ?? Theme.of(context).focusColor : null,
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        ),
+        decoration: _showHighlight
+            ? BoxDecoration(
+                color: widget.focusColor ?? Theme.of(context).focusColor,
+                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+              )
+            : null,
         padding: padding.resolve(Directionality.of(context)),
         height: widget.isDense ? _denseButtonHeight : null,
         child: Row(
