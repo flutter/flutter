@@ -4,20 +4,17 @@
 
 import 'dart:html' as html;
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart';
 import 'package:test/test.dart';
 
-import '../../matchers.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
 void main() async {
   const double screenWidth = 600.0;
   const double screenHeight = 800.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-  final Paint testPaint = Paint()..color = const Color(0xFFFF0000);
 
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
@@ -163,7 +160,6 @@ void main() async {
   test('Should draw transformed arc.', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    const double yStart = 20;
 
     final Path path = Path();
     path.moveTo(350, 280);
@@ -198,7 +194,6 @@ void main() async {
   test('Should draw transformed rrect.', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    const double yStart = 20;
 
     final Path path = Path();
     path.addRRect(RRect.fromLTRBR(50, 50, 300, 200, Radius.elliptical(4, 8)));

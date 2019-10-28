@@ -3893,8 +3893,9 @@ class Picture extends NativeFieldWrapperClass2 {
 
   /// Creates an image from this picture.
   ///
-  /// The picture is rasterized using the number of pixels specified by the
-  /// given width and height.
+  /// The returned image will be `width` pixels wide and `height` pixels high.
+  /// The picture is rasterized within the 0 (left), 0 (top), `width` (right),
+  /// `height` (bottom) bounds. Content outside these bounds is clipped.
   ///
   /// Although the image is returned synchronously, the picture is actually
   /// rasterized the first time the image is drawn and then cached.
