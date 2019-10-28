@@ -98,8 +98,7 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send onConnectionClosed message.
-      final ByteData messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1],
         'method': 'TextInputClient.onConnectionClosed',
       });
