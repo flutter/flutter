@@ -81,7 +81,7 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   @override
   final String description = 'Update the packages inside the Flutter repo.';
-  
+
   @override
   final List<String> aliases = <String>['upgrade-packages'];
 
