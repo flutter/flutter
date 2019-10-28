@@ -22,7 +22,7 @@ environment:
 # LINUX SHARDS
 task:
   container:
-    dockerfile: "dev/ci/docker_linux/Dockerfile"
+    image: gcr.io/flutter-cirrus/build-flutter-image:latest
     cpu: $CPU
     memory: $MEMORY
   environment:
@@ -34,7 +34,6 @@ task:
     CPU: 1 # 0.1-8 without compute credits, 0.1-30 with (yes, you can go fractional)
     MEMORY: 4G # 256M-24G without compute credits, 256M-90G with
     CIRRUS_WORKING_DIR: "/tmp/$FLUTTER_SDK_PATH_WITH_SPACE"
-    CIRRUS_DOCKER_CONTEXT: "dev/ci/docker_linux"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
   pub_cache:
@@ -443,8 +442,8 @@ task:
   setup_script:
     - date
     - which flutter
-    - sudo gem install bundler -v 2.0.2 -N
-    - bundle install --system --gemfile=dev/ci/mac/Gemfile
+    - sudo gem install cocoapods
+    - sudo gem install xcpretty
     - git clean -xffd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
@@ -576,10 +575,7 @@ task:
         - ./dev/bots/deploy_gallery.sh
 
 docker_builder:
-  # Only build a new docker image when we tag a release (for dev, beta, or
-  # release.) Note: tagging a commit and pushing to a release branch are
-  # different cirrus triggers. See a tag CI run at e.g.
-  # https://cirrus-ci.com/github/flutter/flutter/v1.2.3
+  # Only build a new docker image when we tag a release (for dev, beta, or release.)
   only_if: $CIRRUS_TAG != ''
   environment:
     GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
@@ -598,8 +594,7 @@ docker_builder:
     - hostonly_devicelab_tests-2-linux
     - hostonly_devicelab_tests-3_last-linux
     - firebase_test_lab_tests-linux
-  build_script:
-    - cd "$CIRRUS_WORKING_DIR/dev/ci/docker_linux"
-    - ./docker_build.sh
-    - ./docker_login.sh
-    - ./docker_push.sh
+  script:
+    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
+    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
+    - "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"

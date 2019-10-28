@@ -3259,9 +3259,24 @@ void main() {
     expect(controller.selection.start, lessThanOrEqualTo(0));
     expect(controller.selection.end, lessThanOrEqualTo(0));
 
-    expect(() {
+    FlutterError error;
+    try {
       controller.selection = const TextSelection.collapsed(offset: 10);
-    }, throwsFlutterError);
+    } on FlutterError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error.diagnostics.length, 1);
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   invalid text selection: TextSelection(baseOffset: 10,\n'
+          '   extentOffset: 10, affinity: TextAffinity.downstream,\n'
+          '   isDirectional: false)\n',
+        ),
+      );
+    }
   });
 
   testWidgets('maxLength limits input.', (WidgetTester tester) async {
@@ -6530,7 +6545,7 @@ void main() {
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
       autofocus: true,
-      obscureText: true,
+      obscureText: false,
       autocorrect: false,
       maxLines: 10,
       maxLength: 100,
@@ -6554,7 +6569,6 @@ void main() {
       'decoration: InputDecoration(labelText: "foo")',
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
-      'obscureText: true',
       'autocorrect: false',
       'maxLines: 10',
       'maxLength: 100',

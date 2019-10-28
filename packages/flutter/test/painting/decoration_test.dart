@@ -10,8 +10,8 @@ import 'dart:ui' as ui show Image, ImageByteFormat, ColorFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:quiver/testing/async.dart';
-import '../flutter_test_alternative.dart';
 
+import '../flutter_test_alternative.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
 
@@ -230,6 +230,43 @@ void main() {
     expect(call.positionalArguments[3].isAntiAlias, false);
     expect(call.positionalArguments[3].colorFilter, colorFilter);
     expect(call.positionalArguments[3].filterQuality, FilterQuality.low);
+  });
+
+  test(
+      'DecorationImage with null textDirection configuration should throw Error', () {
+    final DecorationImage backgroundImage = DecorationImage(
+      image: SynchronousTestImageProvider(),
+      matchTextDirection: true,
+    );
+    final BoxDecoration boxDecoration = BoxDecoration(
+        image: backgroundImage);
+    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
+      assert(false);
+    });
+    final TestCanvas canvas = TestCanvas(<Invocation>[]);
+    FlutterError error;
+    try {
+      boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(
+          size: Size(100.0, 100.0), textDirection: null));
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.diagnostics.length, 4);
+    expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<DecorationImage>>());
+    expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ImageConfiguration>>());
+    expect(error.toStringDeep(),
+      'FlutterError\n'
+      '   ImageDecoration.matchTextDirection can only be used when a\n'
+      '   TextDirection is available.\n'
+      '   When DecorationImagePainter.paint() was called, there was no text\n'
+      '   direction provided in the ImageConfiguration object to match.\n'
+      '   The DecorationImage was:\n'
+      '     DecorationImage(SynchronousTestImageProvider(), center, match\n'
+      '     text direction)\n'
+      '   The ImageConfiguration was:\n'
+      '     ImageConfiguration(size: Size(100.0, 100.0))\n'
+    );
   });
 
   test('BoxDecoration.lerp - shapes', () {

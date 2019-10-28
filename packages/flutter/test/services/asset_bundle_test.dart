@@ -56,4 +56,24 @@ void main() {
     expect(key.name, 'one');
     expect(key.scale, 1.0);
   });
+
+  test('NetworkAssetBundle control test', () async {
+    final Uri uri = Uri.http('example.org', '/path');
+    final NetworkAssetBundle bundle = NetworkAssetBundle(uri);
+    FlutterError error;
+    try {
+      await bundle.load('key');
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.diagnostics.length, 2);
+    expect(error.diagnostics.last, isInstanceOf<IntProperty>());
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   Unable to load asset: key\n'
+      '   HTTP status code: 404\n',
+    );
+  }, skip: true);
 }
