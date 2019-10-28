@@ -645,23 +645,27 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     // should not trigger a new frame.
     assert(() {
       if (debugBuildingDirtyElements) {
-        throw FlutterError(
-          'Build scheduled during frame.\n'
-          'While the widget tree was being built, laid out, and painted, '
-          'a new frame was scheduled to rebuild the widget tree. '
-          'This might be because setState() was called from a layout or '
-          'paint callback. '
-          'If a change is needed to the widget tree, it should be applied '
-          'as the tree is being built. Scheduling a change for the subsequent '
-          'frame instead results in an interface that lags behind by one frame. '
-          'If this was done to make your build dependent on a size measured at '
-          'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
-          'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
-          'is the desired effect, for example because this is an '
-          'animation, consider scheduling the frame in a post-frame callback '
-          'using SchedulerBinding.addPostFrameCallback or '
-          'using an AnimationController to trigger the animation.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Build scheduled during frame.'),
+          ErrorDescription(
+            'While the widget tree was being built, laid out, and painted, '
+            'a new frame was scheduled to rebuild the widget tree.'
+          ),
+          ErrorHint(
+            'This might be because setState() was called from a layout or '
+            'paint callback. '
+            'If a change is needed to the widget tree, it should be applied '
+            'as the tree is being built. Scheduling a change for the subsequent '
+            'frame instead results in an interface that lags behind by one frame. '
+            'If this was done to make your build dependent on a size measured at '
+            'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
+            'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
+            'is the desired effect, for example because this is an '
+            'animation, consider scheduling the frame in a post-frame callback '
+            'using SchedulerBinding.addPostFrameCallback or '
+            'using an AnimationController to trigger the animation.',
+          )
+        ]);
       }
       return true;
     }());
