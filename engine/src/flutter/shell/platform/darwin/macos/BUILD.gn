@@ -8,6 +8,7 @@ import("//build/config/mac/mac_sdk.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/platform/darwin/common/framework_shared.gni")
 import("$flutter_root/shell/platform/glfw/config.gni")
+import("$flutter_root/testing/testing.gni")
 
 group("macos") {
   deps = [
@@ -41,10 +42,8 @@ _flutter_framework_headers = [
 _flutter_framework_headers_copy_dir =
     "$_flutter_framework_dir/Versions/A/Headers"
 
-shared_library("create_flutter_framework_dylib") {
+source_set("flutter_framework_source") {
   visibility = [ ":*" ]
-
-  output_name = "$_flutter_framework_name"
 
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
@@ -83,6 +82,43 @@ shared_library("create_flutter_framework_dylib") {
   ]
 }
 
+shared_library("flutter_framework_dylib") {
+  visibility = [ ":*" ]
+
+  output_name = "$_flutter_framework_name"
+
+  deps = [
+    ":flutter_framework_source",
+  ]
+}
+
+test_fixtures("flutter_desktop_darwin_fixtures") {
+  dart_main = "framework/Source/fixtures/flutter_desktop_test.dart"
+
+  fixtures = [ "//third_party/icu/common/icudtl.dat" ]
+}
+
+executable("flutter_desktop_darwin_unittests") {
+  testonly = true
+
+  sources = [
+    "framework/Source/FlutterEngineUnittests.mm",
+  ]
+
+  cflags_objcc = [ "-fobjc-arc" ]
+
+  deps = [
+    ":flutter_desktop_darwin_fixtures",
+    ":flutter_framework_source",
+    "$flutter_root/shell/platform/darwin/common:framework_shared",
+    "$flutter_root/shell/platform/embedder:embedder_with_symbol_prefix",
+    "$flutter_root/testing",
+    "$flutter_root/testing:dart",
+    "$flutter_root/testing:skia",
+    "$flutter_root/testing:testing_lib",
+  ]
+}
+
 action("copy_dylib_and_update_framework_install_name") {
   visibility = [ ":*" ]
   script = "$flutter_root/sky/tools/change_install_name.py"
@@ -108,7 +144,7 @@ action("copy_dylib_and_update_framework_install_name") {
   ]
 
   deps = [
-    ":create_flutter_framework_dylib",
+    ":flutter_framework_dylib",
   ]
 }
 

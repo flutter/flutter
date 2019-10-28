@@ -33,6 +33,13 @@
  */
 @property(nonatomic, readonly) std::vector<const char*> argv;
 
+/**
+ * Instead of looking up the assets and ICU data path in the application bundle, this initializer
+ * allows callers to create a Dart project with custom locations specified for the both.
+ */
+- (nonnull instancetype)initWithAssetsPath:(nonnull NSString*)assets
+                               ICUDataPath:(nonnull NSString*)icuPath NS_DESIGNATED_INITIALIZER;
+
 @end
 
 #endif  // SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERDARTPROJECT_INTERNAL_H_
