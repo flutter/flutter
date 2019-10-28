@@ -98,7 +98,8 @@ class FileHashStore {
     } on FileSystemException catch (err) {
       printError(
         'Failed to read file store at ${cacheFile.path} due to $err.\n'
-        'Build artifacts will not be cached.'
+        'Build artifacts will not be cached. Try clearing the cache directories '
+        'with "flutter clean"',
       );
       return;
     }
@@ -112,6 +113,7 @@ class FileHashStore {
       return;
     }
     if (fileStorage.version != _kVersion) {
+      printTrace('file cache format updating, clearing old hashes.');
       cacheFile.deleteSync();
       return;
     }
@@ -142,7 +144,8 @@ class FileHashStore {
     } on FileSystemException catch (err) {
       printError(
         'Failed to persist file store at ${cacheFile.path} due to $err.\n'
-        'Build artifacts will not be cached.'
+        'Build artifacts will not be cached. Try clearing the cache directories '
+        'with "flutter clean"',
       );
     }
     printTrace('Done persisting file store');
