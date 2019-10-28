@@ -470,7 +470,6 @@ void main() {
     outlineButton = find.byType(OutlineButton);
     expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
     await tester.tap(outlineButton);
-    await tester.pumpAndSettle();
     expect(wasPressed, true);
 
     // onPressed null, onLongPress not null.
@@ -481,20 +480,14 @@ void main() {
     outlineButton = find.byType(OutlineButton);
     expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
     await tester.longPress(outlineButton);
-    await tester.pumpAndSettle();
     expect(wasPressed, true);
 
     // onPressed null, onLongPress null.
-    wasPressed = false;
     await tester.pumpWidget(
       buildFrame(onPressed: null, onLongPress: null),
     );
     outlineButton = find.byType(OutlineButton);
     expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
-    await tester.tap(outlineButton);
-    await tester.longPress(outlineButton);
-    await tester.pumpAndSettle();
-    expect(wasPressed, false);
   });
 
   testWidgets('Outline button doesn\'t crash if disabled during a gesture', (WidgetTester tester) async {

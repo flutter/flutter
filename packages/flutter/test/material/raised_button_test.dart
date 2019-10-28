@@ -271,7 +271,6 @@ void main() {
     raisedButton = find.byType(RaisedButton);
     expect(tester.widget<RaisedButton>(raisedButton).enabled, true);
     await tester.tap(raisedButton);
-    await tester.pumpAndSettle();
     expect(wasPressed, true);
 
     // onPressed null, onLongPress not null.
@@ -282,20 +281,14 @@ void main() {
     raisedButton = find.byType(RaisedButton);
     expect(tester.widget<RaisedButton>(raisedButton).enabled, true);
     await tester.longPress(raisedButton);
-    await tester.pumpAndSettle();
     expect(wasPressed, true);
 
     // onPressed null, onLongPress null.
-    wasPressed = false;
     await tester.pumpWidget(
       buildFrame(onPressed: null, onLongPress: null),
     );
     raisedButton = find.byType(RaisedButton);
     expect(tester.widget<RaisedButton>(raisedButton).enabled, false);
-    await tester.tap(raisedButton);
-    await tester.longPress(raisedButton);
-    await tester.pumpAndSettle();
-    expect(wasPressed, false);
   });
 
   testWidgets('RaisedButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {

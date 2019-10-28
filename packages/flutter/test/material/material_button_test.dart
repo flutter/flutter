@@ -88,7 +88,6 @@ void main() {
     materialButton = find.byType(MaterialButton);
     expect(tester.widget<MaterialButton>(materialButton).enabled, true);
     await tester.tap(materialButton);
-    await tester.pumpAndSettle();
     expect(wasPressed, true);
 
     // onPressed null, onLongPress not null.
@@ -99,20 +98,14 @@ void main() {
     materialButton = find.byType(MaterialButton);
     expect(tester.widget<MaterialButton>(materialButton).enabled, true);
     await tester.longPress(materialButton);
-    await tester.pumpAndSettle();
     expect(wasPressed, true);
 
     // onPressed null, onLongPress null.
-    wasPressed = false;
     await tester.pumpWidget(
       buildFrame(onPressed: null, onLongPress: null),
     );
     materialButton = find.byType(MaterialButton);
     expect(tester.widget<MaterialButton>(materialButton).enabled, false);
-    await tester.tap(materialButton);
-    await tester.longPress(materialButton);
-    await tester.pumpAndSettle();
-    expect(wasPressed, false);
   });
 
   testWidgets('MaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
