@@ -91,7 +91,7 @@ presented.
    which includes advice for designing APIs for Flutter, and how to
    format code in the framework.
 
-8. [Our design doc template](https://docs.google.com/document/d/1SFRO8U2toOlAaZ38dsuEU7Wm5fn41wvBCWKiwADqfmw/edit?usp=sharing),
+8. [Flutter design doc template](https://docs.google.com/document/d/1SFRO8U2toOlAaZ38dsuEU7Wm5fn41wvBCWKiwADqfmw/edit?usp=sharing),
    which should be used when proposing a new technical design.  This is a good
    practice to do before coding more intricate changes.
 
