@@ -370,7 +370,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains('There should be one item with [DropdownButton]\'s value'),
+        contains('There should be exactly one item with [DropdownButton]\'s value'),
       );
     }
   });
@@ -401,7 +401,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains('There should be one item with [DropdownButton]\'s value'),
+        contains('There should be exactly one item with [DropdownButton]\'s value'),
       );
     }
   });
@@ -1942,7 +1942,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains('There should be one item with [DropdownButton]\'s value'),
+        contains('There should be exactly one item with [DropdownButton]\'s value'),
       );
     }
   });
@@ -1973,7 +1973,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains('There should be one item with [DropdownButton]\'s value'),
+        contains('There should be exactly one item with [DropdownButton]\'s value'),
       );
     }
   });
