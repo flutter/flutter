@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
 import 'flat_button.dart';
+import 'icon_button.dart';
+import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
@@ -24,7 +26,7 @@ const double _kToolbarContentDistanceBelow = 16.0;
 const double _kToolbarContentDistance = 8.0;
 
 /// Manages a copy/paste text selection toolbar.
-class _TextSelectionToolbar extends StatelessWidget {
+class _TextSelectionToolbar extends StatefulWidget {
   const _TextSelectionToolbar({
     Key key,
     this.handleCut,
@@ -39,13 +41,38 @@ class _TextSelectionToolbar extends StatelessWidget {
   final VoidCallback handleSelectAll;
 
   @override
+  _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
+}
+
+class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
+  // TODO(imlegend19): Add animations for opening the submenu and reduce the length of the toolbar, https://github.com/flutter/flutter/issues/35826
+
+  // Any menu items that overflow the screen are placed into a
+  // submenu. If this happens, this bool indicates whether or not
+  // the menu is open.
+  bool _submenuIsOpen = false;
+
+  @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
     final List<Widget> items = <Widget>[
-      if (handleCut != null) FlatButton(child: Text(localizations.cutButtonLabel), onPressed: handleCut),
-      if (handleCopy != null) FlatButton(child: Text(localizations.copyButtonLabel), onPressed: handleCopy),
-      if (handlePaste != null) FlatButton(child: Text(localizations.pasteButtonLabel), onPressed: handlePaste),
-      if (handleSelectAll != null) FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll),
+      if (widget.handleCut != null)
+        FlatButton(
+            child: Text(localizations.cutButtonLabel),
+            onPressed: widget.handleCut),
+      if (widget.handleCopy != null)
+        FlatButton(
+            child: Text(localizations.copyButtonLabel),
+            onPressed: widget.handleCopy),
+      if (widget.handlePaste != null)
+        FlatButton(
+            child: Text(localizations.pasteButtonLabel),
+            onPressed: widget.handlePaste),
+      if (widget.handleSelectAll != null)
+        FlatButton(
+            child: Text(localizations.selectAllButtonLabel),
+            onPressed: widget.handleSelectAll),
     ];
 
     // If there is no option available, build an empty widget.
@@ -53,11 +80,67 @@ class _TextSelectionToolbar extends StatelessWidget {
       return Container(width: 0.0, height: 0.0);
     }
 
+    if (items.length <= 3) {
+      return _buildSelectionToolbar(items);
+    } else {
+      final List<Widget> displayItems = <Widget>[
+        items[0],
+        items[1],
+        items[2],
+        FlatButton.icon(
+          onPressed: () {
+            setState(() {
+              _submenuIsOpen = true;
+            });
+          },
+          icon: const Icon(Icons.more_vert),
+          label: const Text(''),
+        )
+      ];
+
+      if (_submenuIsOpen) {
+        return _buildSelectionMenu(localizations.selectAllButtonLabel);
+      } else {
+        return _buildSelectionToolbar(displayItems);
+      }
+    }
+  }
+
+  Widget _buildSelectionMenu(String selectAllButtonLabel) {
+    return Material(
+      elevation: 1.0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          FlatButton(
+            child: Text(selectAllButtonLabel),
+            onPressed: widget.handleSelectAll,
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              setState(() {
+                _submenuIsOpen = false;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectionToolbar(List<Widget> items) {
     return Material(
       elevation: 1.0,
       child: Container(
         height: _kToolbarHeight,
-        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: items,
+        ),
       ),
     );
   }
@@ -66,7 +149,11 @@ class _TextSelectionToolbar extends StatelessWidget {
 /// Centers the toolbar around the given position, ensuring that it remains on
 /// screen.
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
-  _TextSelectionToolbarLayout(this.screenSize, this.globalEditableRegion, this.position);
+  _TextSelectionToolbarLayout(
+    this.screenSize,
+    this.globalEditableRegion,
+    this.position,
+  );
 
   /// The size of the screen at the time that the toolbar was last laid out.
   final Size screenSize;
@@ -112,14 +199,14 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
 /// Draws a single text selection handle which points up and to the left.
 class _TextSelectionHandlePainter extends CustomPainter {
-  _TextSelectionHandlePainter({ this.color });
+  _TextSelectionHandlePainter({this.color});
 
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()..color = color;
-    final double radius = size.width/2.0;
+    final double radius = size.width / 2.0;
     canvas.drawCircle(Offset(radius, radius), radius, paint);
     canvas.drawRect(Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
   }
@@ -133,7 +220,8 @@ class _TextSelectionHandlePainter extends CustomPainter {
 class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override
-  Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
+  Size getHandleSize(double textLineHeight) =>
+      const Size(_kHandleSize, _kHandleSize);
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override
@@ -151,15 +239,20 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField
     // when there is not enough space above the TextField to show it.
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final double toolbarHeightNeeded = MediaQuery.of(context).padding.top
-      + _kToolbarScreenPadding
-      + _kToolbarHeight
-      + _kToolbarContentDistance;
-    final double availableHeight = globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
+    final double toolbarHeightNeeded = MediaQuery.of(context).padding.top +
+        _kToolbarScreenPadding +
+        _kToolbarHeight +
+        _kToolbarContentDistance;
+    final double availableHeight =
+        globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
     final bool fitsAbove = toolbarHeightNeeded <= availableHeight;
     final double y = fitsAbove
-        ? startTextSelectionPoint.point.dy - _kToolbarContentDistance - textLineHeight
-        : startTextSelectionPoint.point.dy + _kToolbarHeight + _kToolbarContentDistanceBelow;
+        ? startTextSelectionPoint.point.dy -
+            _kToolbarContentDistance -
+            textLineHeight
+        : startTextSelectionPoint.point.dy +
+            _kToolbarHeight +
+            _kToolbarContentDistanceBelow;
     final Offset preciseMidpoint = Offset(position.dx, y);
 
     return ConstrainedBox(
@@ -174,7 +267,8 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
           handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
           handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-          handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+          handleSelectAll:
+              canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
         ),
       ),
     );
@@ -182,13 +276,14 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style text selection handles.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
+  Widget buildHandle(
+      BuildContext context, TextSelectionHandleType type, double textHeight) {
     final Widget handle = SizedBox(
       width: _kHandleSize,
       height: _kHandleSize,
       child: CustomPaint(
         painter: _TextSelectionHandlePainter(
-          color: Theme.of(context).textSelectionHandleColor
+          color: Theme.of(context).textSelectionHandleColor,
         ),
       ),
     );
@@ -235,10 +330,12 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // everything has already been selected.
     final TextEditingValue value = delegate.textEditingValue;
     return delegate.selectAllEnabled &&
-           value.text.isNotEmpty &&
-           !(value.selection.start == 0 && value.selection.end == value.text.length);
+        value.text.isNotEmpty &&
+        !(value.selection.start == 0 &&
+            value.selection.end == value.text.length);
   }
 }
 
 /// Text selection controls that follow the Material Design specification.
-final TextSelectionControls materialTextSelectionControls = _MaterialTextSelectionControls();
+final TextSelectionControls materialTextSelectionControls =
+    _MaterialTextSelectionControls();
