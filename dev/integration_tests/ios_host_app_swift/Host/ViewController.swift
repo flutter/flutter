@@ -4,7 +4,7 @@ import FlutterPluginRegistrant
 
 class ViewController: UIViewController {
   var flutterEngine : FlutterEngine?;
-  
+
   // Boiler-plate add-to-app demo. Not integration tested anywhere.
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -18,10 +18,11 @@ class ViewController: UIViewController {
   }
 
   @objc func handleButtonAction() {
-    let flutterEngine = self.flutterEngine;
-    GeneratedPluginRegistrant.register(with: flutterEngine);
+    if let flutterEngine = flutterEngine as? FlutterEngine {
+      GeneratedPluginRegistrant.register(with: flutterEngine);
 
-    let flutterViewController = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil)!;
-    self.present(flutterViewController, animated: false, completion: nil)
+      let flutterViewController = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil);
+      self.present(flutterViewController, animated: false, completion: nil)
+    }
   }
 }

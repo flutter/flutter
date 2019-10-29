@@ -62,7 +62,6 @@ const int kWebBatchSize = 20;
 // TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileBlacklist = <String>[
   'test/examples/sector_layout_test.dart',
-  'test/widgets/heroes_test.dart',
   'test/widgets/text_test.dart',
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
