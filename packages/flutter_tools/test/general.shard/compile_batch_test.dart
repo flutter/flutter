@@ -66,6 +66,30 @@ void main() {
     Platform: kNoColorTerminalPlatform,
   });
 
+  testUsingContext('passes no-gen-bytecode to kernel compiler in aot/release mode', () async {
+    when(mockFrontendServer.stdout)
+      .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+        Future<List<int>>.value(utf8.encode(
+          'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
+        ))
+      ));
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
+    await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      buildMode: BuildMode.release,
+      trackWidgetCreation: false,
+      aot: true,
+    );
+
+    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
+    final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
+    expect(argVerification.captured.single, contains('--no-gen-bytecode'));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => mockProcessManager,
+    OutputPreferences: () => OutputPreferences(showColor: false),
+    Platform: kNoColorTerminalPlatform,
+  });
+
   testUsingContext('batch compile single dart failed compilation', () async {
     final BufferLogger bufferLogger = logger;
     when(mockFrontendServer.stdout)
