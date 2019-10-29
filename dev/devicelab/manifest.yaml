@@ -126,13 +126,12 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # windows_chrome_dev_mode:
-  #   description: >
-  #     Run flutter web on the devicelab and hot restart.
-  #   stage: devicelab_win
-  #   required_agent_capabilities: ["windows/android"]
-  #   flaky: true
+  windows_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
 
   # Android on-device tests
 
@@ -346,13 +345,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # linux_chrome_dev_mode:
-  #   description: >
-  #     Run flutter web on the devicelab and hot restart.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-  #   flaky: true
+  linux_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   web_size__compile_test:
     description: >
@@ -519,12 +517,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  # macos_chrome_dev_mode:
-  #   description: >
-  #     Run flutter web on the devicelab and hot restart.
-  #   stage: devicelab_ios
-  #   required_agent_capabilities: ["mac/ios"]
-  #   flaky: true # marked as flaky while infra is under heavy development
+  macos_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true # marked as flaky while infra is under heavy development
 
   build_benchmark_ios:
     description: >
