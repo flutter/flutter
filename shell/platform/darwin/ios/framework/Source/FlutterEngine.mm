@@ -203,6 +203,11 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 - (void)notifyViewControllerDeallocated {
   if (!_allowHeadlessExecution) {
     [self destroyContext];
+  } else {
+    flutter::PlatformViewIOS* platform_view = [self iosPlatformView];
+    if (platform_view) {
+      platform_view->SetOwnerViewController({});
+    }
   }
   _viewController.reset();
 }
