@@ -192,17 +192,19 @@ TEST(MessageLoopTaskQueue, ConcurrentQueueAndTaskCreatingCounts) {
   auto creation_func = [&] {
     for (int i = 0; i < num_queues; i++) {
       fml::TaskQueueId queue_id = task_queues->CreateTaskQueue();
-      created[queue_id - base_queue_id] = true;
+      int limit = queue_id - base_queue_id;
+      created[limit] = true;
 
-      for (int cur_q = 1; cur_q < i; cur_q++) {
-        if (created[cur_q - base_queue_id]) {
-          std::scoped_lock counter(task_count_mutex[cur_q - base_queue_id]);
+      for (int cur_q = 1; cur_q < limit; cur_q++) {
+        if (created[cur_q]) {
+          std::scoped_lock counter(task_count_mutex[cur_q]);
           int cur_num_tasks = rand() % 10;
           for (int k = 0; k < cur_num_tasks; k++) {
             task_queues->RegisterTask(
-                fml::TaskQueueId(cur_q), [] {}, fml::TimePoint::Now());
+                fml::TaskQueueId(base_queue_id + cur_q), [] {},
+                fml::TimePoint::Now());
           }
-          num_tasks[cur_q - base_queue_id] += cur_num_tasks;
+          num_tasks[cur_q] += cur_num_tasks;
         }
       }
     }
