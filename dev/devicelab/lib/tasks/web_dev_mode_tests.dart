@@ -113,7 +113,7 @@ TaskFunction createWebDevModeTest() {
         // state. dev compilers loads up from previously compiled JavaScript.
         {
 
-          Stopwatch sw = Stopwatch()..start();
+          final Stopwatch sw = Stopwatch()..start();
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
               flutterCommandArgs('run', options),
