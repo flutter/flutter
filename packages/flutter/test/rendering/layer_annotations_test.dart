@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
-  test('ContainerLayer.findAll returns all results from its children', () {
+  test('ContainerLayer.findAllAnnotations returns all results from its children', () {
     final Layer root = _Layers(
       ContainerLayer(),
       children: <Object>[
@@ -21,7 +21,7 @@ void main() {
     ).build();
 
     expect(
-      root.findAll<int>(Offset.zero).entries.toList(),
+      root.findAllAnnotations<int>(Offset.zero).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 3, localPosition: Offset.zero),
         const AnnotationEntry<int>(annotation: 2, localPosition: Offset.zero),
@@ -40,12 +40,11 @@ void main() {
       ]
     ).build();
 
-    final AnnotationEntry<int> result = root.find<int>(Offset.zero);
-    expect(result.annotation, 3);
-    expect(result.localPosition, Offset.zero);
+    final int result = root.find<int>(Offset.zero);
+    expect(result, 3);
   });
 
-  test('ContainerLayer.findAll returns empty result when finding nothing', () {
+  test('ContainerLayer.findAllAnnotations returns empty result when finding nothing', () {
     final Layer root = _Layers(
       ContainerLayer(),
       children: <Object>[
@@ -55,7 +54,7 @@ void main() {
       ]
     ).build();
 
-    expect(root.findAll<double>(Offset.zero).entries.isEmpty, isTrue);
+    expect(root.findAllAnnotations<double>(Offset.zero).entries.isEmpty, isTrue);
   });
 
   test('ContainerLayer.find returns null when finding nothing', () {
@@ -71,7 +70,7 @@ void main() {
     expect(root.find<double>(Offset.zero), isNull);
   });
 
-  test('ContainerLayer.findAll stops at the first opaque child', () {
+  test('ContainerLayer.findAllAnnotations stops at the first opaque child', () {
     final Layer root = _Layers(
       ContainerLayer(),
       children: <Object>[
@@ -82,7 +81,7 @@ void main() {
     ).build();
 
     expect(
-      root.findAll<int>(Offset.zero).entries.toList(),
+      root.findAllAnnotations<int>(Offset.zero).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 3, localPosition: Offset(0, 0)),
         const AnnotationEntry<int>(annotation: 2, localPosition: Offset(0, 0)),
@@ -90,7 +89,7 @@ void main() {
     );
   });
 
-  test('ContainerLayer.findAll returns children\'s opacity (true)', () {
+  test('ContainerLayer.findAllAnnotations returns children\'s opacity (true)', () {
     final Layer root = _appendAnnotationIfNotOpaque(1000,
       _Layers(
         ContainerLayer(),
@@ -101,14 +100,14 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(Offset.zero).entries.toList(),
+      root.findAllAnnotations<int>(Offset.zero).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: Offset(0, 0)),
       ]),
     );
   });
 
-  test('ContainerLayer.findAll returns children\'s opacity (false)', () {
+  test('ContainerLayer.findAllAnnotations returns children\'s opacity (false)', () {
     final Layer root = _appendAnnotationIfNotOpaque(1000,
       _Layers(
         ContainerLayer(),
@@ -119,7 +118,7 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(Offset.zero).entries.toList(),
+      root.findAllAnnotations<int>(Offset.zero).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: Offset(0, 0)),
         const AnnotationEntry<int>(annotation: 1000, localPosition: Offset(0, 0)),
@@ -127,7 +126,7 @@ void main() {
     );
   });
 
-  test('ContainerLayer.findAll returns false as opacity when finding nothing', () {
+  test('ContainerLayer.findAllAnnotations returns false as opacity when finding nothing', () {
     final Layer root = _appendAnnotationIfNotOpaque(1000,
       _Layers(
         ContainerLayer(),
@@ -138,14 +137,14 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(Offset.zero).entries.toList(),
+      root.findAllAnnotations<int>(Offset.zero).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: Offset(0, 0)),
       ]),
     );
   });
 
-  test('OffsetLayer.findAll respects offset', () {
+  test('OffsetLayer.findAllAnnotations respects offset', () {
     const Offset insidePosition = Offset(-5, 5);
     const Offset outsidePosition = Offset(5, 5);
 
@@ -159,20 +158,20 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(insidePosition).entries.toList(),
+      root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: Offset(5, 5)),
       ]),
     );
     expect(
-      root.findAll<int>(outsidePosition).entries.toList(),
+      root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: Offset(5, 5)),
       ]),
     );
   });
 
-  test('ClipRectLayer.findAll respects clipRect', () {
+  test('ClipRectLayer.findAllAnnotations respects clipRect', () {
     const Offset insidePosition = Offset(11, 11);
     const Offset outsidePosition = Offset(19, 19);
 
@@ -191,20 +190,20 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(insidePosition).entries.toList(),
+      root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
-      root.findAll<int>(outsidePosition).entries.toList(),
+      root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
 
-  test('ClipRRectLayer.findAll respects clipRRect', () {
+  test('ClipRRectLayer.findAllAnnotations respects clipRRect', () {
     // For a curve of radius 4 centered at (4, 4),
     // location (1, 1) is outside, while (2, 2) is inside.
     // Here we shift this RRect by (10, 10).
@@ -230,20 +229,20 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(insidePosition).entries.toList(),
+      root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
-      root.findAll<int>(outsidePosition).entries.toList(),
+      root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
 
-  test('ClipPathLayer.findAll respects clipPath', () {
+  test('ClipPathLayer.findAllAnnotations respects clipPath', () {
     // For this triangle, location (1, 1) is inside, while (2, 2) is outside.
     //         2
     //    —————
@@ -274,20 +273,20 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(insidePosition).entries.toList(),
+      root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
-      root.findAll<int>(outsidePosition).entries.toList(),
+      root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
 
-  test('TransformLayer.findAll respects transform', () {
+  test('TransformLayer.findAllAnnotations respects transform', () {
     // Matrix `transform` enlarges the target by (2x, 4x), then shift it by
     // (10, 20).
     final Matrix4 transform = Matrix4.diagonal3Values(2, 4, 1)
@@ -312,20 +311,20 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(insidePosition).entries.toList(),
+      root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: Offset(15, 15)),
       ]),
     );
     expect(
-      root.findAll<int>(outsidePosition).entries.toList(),
+      root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
 
-  test('TransformLayer.findAll skips when transform is irreversible', () {
+  test('TransformLayer.findAllAnnotations skips when transform is irreversible', () {
     final Matrix4 transform = Matrix4.diagonal3Values(1, 0, 1);
 
     final Layer root = _appendAnnotationIfNotOpaque(1000,
@@ -338,14 +337,14 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(Offset.zero).entries.toList(),
+      root.findAllAnnotations<int>(Offset.zero).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: Offset.zero),
       ]),
     );
   });
 
-  test('PhysicalModelLayer.findAll respects clipPath', () {
+  test('PhysicalModelLayer.findAllAnnotations respects clipPath', () {
     // For this triangle, location (1, 1) is inside, while (2, 2) is outside.
     //         2
     //    —————
@@ -381,13 +380,13 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(insidePosition).entries.toList(),
+      root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
-      root.findAll<int>(outsidePosition).entries.toList(),
+      root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
@@ -395,7 +394,7 @@ void main() {
   });
 
 
-  test('LeaderLayer.findAll respects offset', () {
+  test('LeaderLayer.findAllAnnotations respects offset', () {
     const Offset insidePosition = Offset(-5, 5);
     const Offset outsidePosition = Offset(5, 5);
 
@@ -412,20 +411,20 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(insidePosition).entries.toList(),
+      root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: Offset(5, 5)),
       ]),
     );
     expect(
-      root.findAll<int>(outsidePosition).entries.toList(),
+      root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
 
-  test('AnnotatedRegionLayer.findAll should append to the list '
+  test('AnnotatedRegionLayer.findAllAnnotations should append to the list '
     'and return the given opacity (false) during a successful hit', () {
     const Offset position = Offset(5, 5);
 
@@ -439,7 +438,7 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(position).entries.toList(),
+      root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
@@ -448,7 +447,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAll should append to the list '
+  test('AnnotatedRegionLayer.findAllAnnotations should append to the list '
     'and return the given opacity (true) during a successful hit', () {
     const Offset position = Offset(5, 5);
 
@@ -462,7 +461,7 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(position).entries.toList(),
+      root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
@@ -470,7 +469,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAll has default opacity as false', () {
+  test('AnnotatedRegionLayer.findAllAnnotations has default opacity as false', () {
     const Offset position = Offset(5, 5);
 
     final Layer root = _appendAnnotationIfNotOpaque(1000,
@@ -483,7 +482,7 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(position).entries.toList(),
+      root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
@@ -492,7 +491,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAll should still check children and return'
+  test('AnnotatedRegionLayer.findAllAnnotations should still check children and return'
     'children\'s opacity (false) during a failed hit', () {
     const Offset position = Offset(5, 5);
 
@@ -506,7 +505,7 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(position).entries.toList(),
+      root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1000, localPosition: position),
@@ -514,7 +513,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAll should still check children and return'
+  test('AnnotatedRegionLayer.findAllAnnotations should still check children and return'
     'children\'s opacity (true) during a failed hit', () {
     const Offset position = Offset(5, 5);
 
@@ -528,14 +527,14 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(position).entries.toList(),
+      root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
       ]),
     );
   });
 
-  test('AnnotatedRegionLayer.findAll should not add to children\'s opacity '
+  test('AnnotatedRegionLayer.findAllAnnotations should not add to children\'s opacity '
     'during a successful hit if it is not opaque', () {
     const Offset position = Offset(5, 5);
 
@@ -549,7 +548,7 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(position).entries.toList(),
+      root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
@@ -558,7 +557,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAll should add to children\'s opacity '
+  test('AnnotatedRegionLayer.findAllAnnotations should add to children\'s opacity '
     'during a successful hit if it is opaque', () {
     const Offset position = Offset(5, 5);
 
@@ -572,7 +571,7 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(position).entries.toList(),
+      root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
@@ -580,7 +579,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAll should clip its annotation '
+  test('AnnotatedRegionLayer.findAllAnnotations should clip its annotation '
     'using size and offset (positive)', () {
     // The target position would have fallen outside if not for the offset.
     const Offset position = Offset(100, 100);
@@ -606,7 +605,7 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(position).entries.toList(),
+      root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
@@ -615,7 +614,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAll should clip its annotation '
+  test('AnnotatedRegionLayer.findAllAnnotations should clip its annotation '
     'using size and offset (negative)', () {
     // The target position would have fallen inside if not for the offset.
     const Offset position = Offset(10, 10);
@@ -634,7 +633,7 @@ void main() {
     );
 
     expect(
-      root.findAll<int>(position).entries.toList(),
+      root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1000, localPosition: position),

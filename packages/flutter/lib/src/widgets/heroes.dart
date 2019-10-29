@@ -262,14 +262,15 @@ class Hero extends StatefulWidget {
     void inviteHero(StatefulElement hero, Object tag) {
       assert(() {
         if (result.containsKey(tag)) {
-          throw FlutterError(
-            'There are multiple heroes that share the same tag within a subtree.\n'
-            'Within each subtree for which heroes are to be animated (i.e. a PageRoute subtree), '
-            'each Hero must have a unique non-null tag.\n'
-            'In this case, multiple heroes had the following tag: $tag\n'
-            'Here is the subtree for one of the offending heroes:\n'
-            '${hero.toStringDeep(prefixLineOne: "# ")}'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('There are multiple heroes that share the same tag within a subtree.'),
+            ErrorDescription(
+              'Within each subtree for which heroes are to be animated (i.e. a PageRoute subtree), '
+              'each Hero must have a unique non-null tag.\n'
+              'In this case, multiple heroes had the following tag: $tag\n'
+            ),
+            DiagnosticsProperty<StatefulElement>('Here is the subtree for one of the offending heroes', hero, linePrefix: '# ', style: DiagnosticsTreeStyle.dense),
+          ]);
         }
         return true;
       }());

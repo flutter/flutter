@@ -57,7 +57,7 @@ void main() {
       webDevice = _MockDevice('webby', 'webby')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
       fuchsiaDevice = _MockDevice('fuchsiay', 'fuchsiay')
-        ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia);
+        ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
     });
 
     testUsingContext('chooses ephemeral device', () async {

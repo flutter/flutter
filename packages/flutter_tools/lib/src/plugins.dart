@@ -20,7 +20,7 @@ import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
-     mustache.Template(template).renderString(context);
+     mustache.Template(template, htmlEscapeValues: false).renderString(context);
   final File file = fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
@@ -360,9 +360,6 @@ List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String typ
 /// Returns the version of the Android embedding that the current
 /// [project] is using.
 String _getAndroidEmbeddingVersion(FlutterProject project) {
-  if (!featureFlags.isNewAndroidEmbeddingEnabled) {
-    return '1';
-  }
   assert(project.android != null);
   final File androidManifest = project.android.appManifestFile;
   assert(androidManifest.existsSync());
@@ -454,10 +451,13 @@ const String _objcPluginRegistryHeaderTemplate = '''//
 
 #import <{{framework}}/{{framework}}.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GeneratedPluginRegistrant : NSObject
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 @end
 
+NS_ASSUME_NONNULL_END
 #endif /* GeneratedPluginRegistrant_h */
 ''';
 
@@ -466,10 +466,15 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 //
 
 #import "GeneratedPluginRegistrant.h"
-{{#plugins}}
-#import <{{name}}/{{class}}.h>
-{{/plugins}}
 
+{{#plugins}}
+#if __has_include(<{{name}}/{{class}}.h>)
+#import <{{name}}/{{class}}.h>
+#else
+@import {{name}};
+#endif
+
+{{/plugins}}
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {

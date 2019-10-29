@@ -123,16 +123,9 @@ class VMService {
         final bool force = params.asMap['force'] ?? false;
         final bool pause = params.asMap['pause'] ?? false;
 
-        if (isolateId is! String || isolateId.isEmpty) {
+        if (isolateId.isEmpty) {
           throw rpc.RpcException.invalidParams('Invalid \'isolateId\': $isolateId');
         }
-        if (force is! bool) {
-          throw rpc.RpcException.invalidParams('Invalid \'force\': $force');
-        }
-        if (pause is! bool) {
-          throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
-        }
-
         try {
           await reloadSources(isolateId, force: force, pause: pause);
           return <String, String>{'type': 'Success'};
@@ -146,6 +139,46 @@ class VMService {
 
       _peer.sendNotification('registerService', <String, String>{
         'service': 'reloadSources',
+        'alias': 'Flutter Tools',
+      });
+
+      // Register a special method for hot UI. while this is implemented
+      // currently in the same way as hot reload, it leaves the tool free
+      // to change to a more efficient implementation in the future.
+      _peer.registerMethod('reloadMethod', (rpc.Parameters params) async {
+        final String isolateId = params['isolateId'].value;
+        final String libraryId = params['library'].value;
+        final String classId = params['class'].value;
+        final String methodId = params['method'].value;
+        final String methodBody = params['methodBody'].value;
+
+        if (libraryId.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'libraryId\': $libraryId');
+        }
+        if (classId.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'classId\': $classId');
+        }
+        if (methodId.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'methodId\': $methodId');
+        }
+        if (methodBody.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'methodBody\': $methodBody');
+        }
+
+        printTrace('reloadMethod not yet supported, falling back to hot reload');
+
+        try {
+          await reloadSources(isolateId);
+          return <String, String>{'type': 'Success'};
+        } on rpc.RpcException {
+          rethrow;
+        } catch (e, st) {
+          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
+              'Error during Sources Reload: $e\n$st');
+        }
+      });
+      _peer.sendNotification('registerService', <String, String>{
+        'service': 'reloadMethod',
         'alias': 'Flutter Tools',
       });
     }
@@ -840,8 +873,12 @@ class VM extends ServiceObjectOwner {
         }
         return view;
       default:
-        throw VMServiceObjectLoadError(
-            'VM.getFromMap called for something other than an isolate', map);
+        // If we don't have a model object for this service object type, as a
+        // fallback return a ServiceMap object.
+        final ServiceObject serviceObject = ServiceMap._empty(owner);
+        // We have now constructed an empty service object, call update to populate it.
+        serviceObject.updateFromMap(map);
+        return serviceObject;
     }
   }
 

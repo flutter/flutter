@@ -23,9 +23,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
-  'test': '1.6.3',         //  | Tests are timing out at 1.6.4
-  'test_api': '0.2.5',     //  |
-  'test_core': '0.2.5',    //  |
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
 };
 
@@ -84,6 +81,9 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   @override
   final String description = 'Update the packages inside the Flutter repo.';
+
+  @override
+  final List<String> aliases = <String>['upgrade-packages'];
 
   @override
   final bool hidden;

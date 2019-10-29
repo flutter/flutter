@@ -537,17 +537,15 @@ class _RenderMenuItem extends RenderProxyBox {
   }
 }
 
-/// An item in a menu created by a [DropdownButton].
-///
-/// The type `T` is the type of the value the entry represents. All the entries
-/// in a given menu must represent values with consistent types.
-class DropdownMenuItem<T> extends StatelessWidget {
+// The container widget for a menu item created by a [DropdownButton]. It
+// provides the default configuration for [DropdownMenuItem]s, as well as a
+// [DropdownButton]'s hint and disabledHint widgets.
+class _DropdownMenuItemContainer extends StatelessWidget {
   /// Creates an item for a dropdown menu.
   ///
   /// The [child] argument is required.
-  const DropdownMenuItem({
+  const _DropdownMenuItemContainer({
     Key key,
-    this.value,
     @required this.child,
   }) : assert(child != null),
        super(key: key);
@@ -557,11 +555,6 @@ class DropdownMenuItem<T> extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  /// The value to return if the user selects this menu item.
-  ///
-  /// Eventually returned in a call to [DropdownButton.onChanged].
-  final T value;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -570,6 +563,27 @@ class DropdownMenuItem<T> extends StatelessWidget {
       child: child,
     );
   }
+}
+
+/// An item in a menu created by a [DropdownButton].
+///
+/// The type `T` is the type of the value the entry represents. All the entries
+/// in a given menu must represent values with consistent types.
+class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
+  /// Creates an item for a dropdown menu.
+  ///
+  /// The [child] argument is required.
+  const DropdownMenuItem({
+    Key key,
+    this.value,
+    @required Widget child,
+  }) : assert(child != null),
+       super(key: key, child: child);
+
+  /// The value to return if the user selects this menu item.
+  ///
+  /// Eventually returned in a call to [DropdownButton.onChanged].
+  final T value;
 }
 
 /// An inherited widget that causes any descendant [DropdownButton]
@@ -658,7 +672,9 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// If the [onChanged] callback is null or the list of [items] is null
 /// then the dropdown button will be disabled, i.e. its arrow will be
 /// displayed in grey and it will not respond to input. A disabled button
-/// will display the [disabledHint] widget if it is non-null.
+/// will display the [disabledHint] widget if it is non-null. However, if
+/// [disabledHint] is null and [hint] is non-null, the [hint] widget will
+/// instead be displayed.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -676,6 +692,8 @@ class DropdownButton<T> extends StatefulWidget {
   /// must be equal to one of the [DropDownMenuItem] values. If [items] or
   /// [onChanged] is null, the button will be disabled, the down arrow
   /// will be greyed out, and the [disabledHint] will be shown (if provided).
+  /// If [disabledHint] is null and [hint] is non-null, [hint] will instead be
+  /// shown.
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified). The boolean [isDense] and
@@ -698,11 +716,23 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense = false,
     this.isExpanded = false,
     this.itemHeight = kMinInteractiveDimension,
-  }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+    this.focusColor,
+    this.focusNode,
+    this.autofocus = false,
+  }) : assert(items == null || items.isEmpty || value == null ||
+              items.where((DropdownMenuItem<T> item) {
+                return item.value == value;
+              }).length == 1,
+                'There should be exactly one item with [DropdownButton]\'s value: '
+                '$value. \n'
+                'Either zero or 2 or more [DropdownMenuItem]s were detected '
+                'with the same value',
+              ),
        assert(elevation != null),
        assert(iconSize != null),
        assert(isDense != null),
        assert(isExpanded != null),
+       assert(autofocus != null),
        assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
        super(key: key);
 
@@ -711,20 +741,28 @@ class DropdownButton<T> extends StatefulWidget {
   /// If the [onChanged] callback is null or the list of items is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non-null.
+  /// will display the [disabledHint] widget if it is non-null. If
+  /// [disabledHint] is also null but [hint] is non-null, [hint] will instead
+  /// be displayed.
   final List<DropdownMenuItem<T>> items;
 
-  /// The value of the currently selected [DropdownMenuItem], or null if no
-  /// item has been selected. If `value` is null then the menu is popped up as
-  /// if the first item were selected.
+  /// The value of the currently selected [DropdownMenuItem].
+  ///
+  /// If [value] is null and [hint] is non-null, the [hint] widget is
+  /// displayed as a placeholder for the dropdown button's value.
   final T value;
 
-  /// A placeholder widget that is displayed if no item is selected, i.e. if [value] is null.
+  /// A placeholder widget that is displayed by the dropdown button.
+  ///
+  /// If [value] is null, this widget is displayed as a placeholder for
+  /// the dropdown button's value. This widget is also displayed if the button
+  /// is disabled ([items] or [onChanged] is null) and [disabledHint] is null.
   final Widget hint;
 
   /// A message to show when the dropdown is disabled.
   ///
-  /// Displayed if [items] or [onChanged] is null.
+  /// Displayed if [items] or [onChanged] is null. If [hint] is non-null and
+  /// [disabledHint] is null, the [hint] widget will be displayed instead.
   final Widget disabledHint;
 
   /// {@template flutter.material.dropdownButton.onChanged}
@@ -733,7 +771,9 @@ class DropdownButton<T> extends StatefulWidget {
   /// If the [onChanged] callback is null or the list of [items] is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non-null.
+  /// will display the [disabledHint] widget if it is non-null. If
+  /// [disabledHint] is also null but [hint] is non-null, [hint] will instead
+  /// be displayed.
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
 
@@ -900,6 +940,15 @@ class DropdownButton<T> extends StatefulWidget {
   /// [kMinInteractiveDimension].
   final double itemHeight;
 
+  /// The color for the button's [Material] when it has the input focus.
+  final Color focusColor;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   @override
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
 }
@@ -908,17 +957,33 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   int _selectedIndex;
   _DropdownRoute<T> _dropdownRoute;
   Orientation _lastOrientation;
+  FocusNode _internalNode;
+  FocusNode get focusNode => widget.focusNode ?? _internalNode;
+  bool _hasPrimaryFocus = false;
+  Map<LocalKey, ActionFactory> _actionMap;
+
+  // Only used if needed to create _internalNode.
+  FocusNode _createFocusNode() {
+    return FocusNode(debugLabel: '${widget.runtimeType}');
+  }
 
   @override
   void initState() {
     super.initState();
     _updateSelectedIndex();
+    if (widget.focusNode == null) {
+      _internalNode ??= _createFocusNode();
+    }
+    _actionMap = <LocalKey, ActionFactory>{ ActivateAction.key: _createAction };
+    focusNode.addListener(_handleFocusChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
+    focusNode.removeListener(_handleFocusChanged);
+    _internalNode?.dispose();
     super.dispose();
   }
 
@@ -928,9 +993,25 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     _lastOrientation = null;
   }
 
+  void _handleFocusChanged() {
+    if (_hasPrimaryFocus != focusNode.hasPrimaryFocus) {
+      setState(() {
+        _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+      });
+    }
+  }
+
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      if (widget.focusNode == null) {
+        _internalNode ??= _createFocusNode();
+      }
+      _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+      focusNode.addListener(_handleFocusChanged);
+    }
     _updateSelectedIndex();
   }
 
@@ -990,6 +1071,15 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       if (widget.onChanged != null)
         widget.onChanged(newValue.result);
     });
+  }
+
+  Action _createAction() {
+    return CallbackAction(
+      ActivateAction.key,
+      onInvoke: (FocusNode node, Intent intent) {
+        _handleTap();
+      },
+    );
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1059,28 +1149,25 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (_enabled) {
       items = widget.selectedItemBuilder == null
         ? List<Widget>.from(widget.items)
-        : widget.selectedItemBuilder(context).map<Widget>((Widget item) {
-            return Container(
-              constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-              alignment: AlignmentDirectional.centerStart,
-              child: item,
-            );
-          }).toList();
+        : widget.selectedItemBuilder(context);
     } else {
-      items = <Widget>[];
+      items = widget.selectedItemBuilder == null
+        ? <Widget>[]
+        : widget.selectedItemBuilder(context);
     }
 
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
-      final Widget emplacedHint = _enabled
-        ? widget.hint
-        : DropdownMenuItem<Widget>(child: widget.disabledHint ?? widget.hint);
+      Widget displayedHint = _enabled ? widget.hint : widget.disabledHint ?? widget.hint;
+      if (widget.selectedItemBuilder == null)
+        displayedHint = _DropdownMenuItemContainer(child: displayedHint);
+
       hintIndex = items.length;
       items.add(DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
-          child: emplacedHint,
           ignoringSemantics: false,
+          child: displayedHint,
         ),
       ));
     }
@@ -1112,6 +1199,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     Widget result = DefaultTextStyle(
       style: _textStyle,
       child: Container(
+        decoration: BoxDecoration(
+          color:_hasPrimaryFocus ? widget.focusColor ?? Theme.of(context).focusColor : null,
+          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+        ),
         padding: padding.resolve(Directionality.of(context)),
         height: widget.isDense ? _denseButtonHeight : null,
         child: Row(
@@ -1161,10 +1252,18 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     return Semantics(
       button: true,
-      child: GestureDetector(
-        onTap: _enabled ? _handleTap : null,
-        behavior: HitTestBehavior.opaque,
-        child: result,
+      child: Actions(
+        actions: _actionMap,
+        child: Focus(
+          canRequestFocus: _enabled,
+          focusNode: focusNode,
+          autofocus: widget.autofocus,
+          child: GestureDetector(
+            onTap: _enabled ? _handleTap : null,
+            behavior: HitTestBehavior.opaque,
+            child: result,
+          ),
+        ),
       ),
     );
   }
@@ -1196,7 +1295,15 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool isDense = false,
     bool isExpanded = false,
     double itemHeight,
-  }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+  }) : assert(items == null || items.isEmpty || value == null ||
+              items.where((DropdownMenuItem<T> item) {
+                return item.value == value;
+              }).length == 1,
+                'There should be exactly one item with [DropdownButton]\'s value: '
+                '$value. \n'
+                'Either zero or 2 or more [DropdownMenuItem]s were detected '
+                'with the same value',
+              ),
        assert(decoration != null),
        assert(elevation != null),
        assert(iconSize != null),
