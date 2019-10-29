@@ -135,7 +135,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 }
 
 void main() {
-  testWidgets('DropdownFormField with autovalidation test', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String value = 'one';
     int _validateCalled = 0;
 
@@ -184,7 +184,7 @@ void main() {
     expect(value, equals('three'));
   });
 
-  testWidgets('DropdownFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     // There shouldn't be overflow when expanded although list contains longer items.
@@ -219,7 +219,7 @@ void main() {
     );
   });
 
-  testWidgets('DropdownFormField with isDense:true aligns selected menu item', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     const String value = 'two';
 
@@ -262,7 +262,7 @@ void main() {
     }
   });
 
-  testWidgets('DropdownFormField - custom text style', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - custom text style', (WidgetTester tester) async {
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();
 
@@ -301,7 +301,7 @@ void main() {
     expect(richText.text.style.fontSize, 20.0);
   });
 
-  testWidgets('DropdownFormField - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String> items }){
@@ -325,7 +325,7 @@ void main() {
   });
 
   testWidgets(
-    'DropdownFormField - hint displays when the items list is '
+    'DropdownButtonFormField - hint displays when the items list is '
     'empty, items is null, and disabledHint is null',
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
@@ -349,7 +349,7 @@ void main() {
     },
   );
 
-  testWidgets('DropdownFormField - disabledHint is null by default', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String> items }){
@@ -369,7 +369,7 @@ void main() {
     expect(find.text('hint used when disabled'), findsOneWidget);
   });
 
-  testWidgets('DropdownFormField - disabledHint is null by default', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String> items }){
@@ -389,7 +389,7 @@ void main() {
     expect(find.text('hint used when disabled'), findsOneWidget);
   });
 
-  testWidgets('DropdownFormField - disabledHint displays when onChanged is null', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabledHint displays when onChanged is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String> items, ValueChanged<String> onChanged }){
@@ -407,7 +407,7 @@ void main() {
     expect(find.text('disabled'), findsOneWidget);
   });
 
-  testWidgets('DropdownFormField - disabled hint should be of same size as enabled hint', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabled hint should be of same size as enabled hint', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String> items}){
@@ -432,7 +432,7 @@ void main() {
     expect(enabledHintBox.size, equals(disabledHintBox.size));
   });
 
-  testWidgets('DropdownFormField - Custom icon size and colors', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - Custom icon size and colors', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
@@ -465,7 +465,7 @@ void main() {
     expect(disabledRichText.text.style.color, Colors.orange);
   });
 
-  testWidgets('DropdownFormField - default elevation', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - default elevation', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(buildFormFrame(
@@ -486,7 +486,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('DropdownFormField - custom elevation', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
     debugDisableShadows = false;
     final Key buttonKeyOne = UniqueKey();
     final Key buttonKeyTwo = UniqueKey();
