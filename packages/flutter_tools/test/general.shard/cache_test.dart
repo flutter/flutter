@@ -337,7 +337,7 @@ void main() {
       mockCache = MockCache();
     });
 
-    testUsingContext('verifies executables for libimobiledeivce in isUpToDateInner', () async {
+    testUsingContext('verifies executables for libimobiledevice in isUpToDateInner', () async {
       final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('libimobiledevice', mockCache);
       when(mockCache.getArtifactDirectory(any)).thenReturn(fs.currentDirectory);
       iosUsbArtifacts.location.createSync();
