@@ -32,6 +32,7 @@ import io.flutter.embedding.engine.plugins.broadcastreceiver.BroadcastReceiverPl
 import io.flutter.embedding.engine.plugins.contentprovider.ContentProviderAware;
 import io.flutter.embedding.engine.plugins.contentprovider.ContentProviderControlSurface;
 import io.flutter.embedding.engine.plugins.contentprovider.ContentProviderPluginBinding;
+import io.flutter.embedding.engine.plugins.lifecycle.HiddenLifecycleReference;
 import io.flutter.embedding.engine.plugins.service.ServiceAware;
 import io.flutter.embedding.engine.plugins.service.ServiceControlSurface;
 import io.flutter.embedding.engine.plugins.service.ServicePluginBinding;
@@ -535,7 +536,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     @NonNull
     private final Activity activity;
     @NonNull
-    private final Lifecycle lifecycle;
+    private final HiddenLifecycleReference hiddenLifecycleReference;
     @NonNull
     private final Set<io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener> onRequestPermissionsResultListeners = new HashSet<>();
     @NonNull
@@ -549,7 +550,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
     public FlutterEngineActivityPluginBinding(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
       this.activity = activity;
-      this.lifecycle = lifecycle;
+      this.hiddenLifecycleReference = new HiddenLifecycleReference(lifecycle);
     }
 
     @Override
@@ -560,8 +561,8 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
     @NonNull
     @Override
-    public Lifecycle getLifecycle() {
-      return lifecycle;
+    public Object getLifecycle() {
+      return hiddenLifecycleReference;
     }
 
     @Override
@@ -685,13 +686,13 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     @NonNull
     private final Service service;
     @Nullable
-    private final Lifecycle lifecycle;
+    private final HiddenLifecycleReference hiddenLifecycleReference;
     @NonNull
     private final Set<ServiceAware.OnModeChangeListener> onModeChangeListeners = new HashSet<>();
 
     FlutterEngineServicePluginBinding(@NonNull Service service, @Nullable Lifecycle lifecycle) {
       this.service = service;
-      this.lifecycle = lifecycle;
+      hiddenLifecycleReference = lifecycle != null ? new HiddenLifecycleReference(lifecycle) : null;
     }
 
     @Override
@@ -702,8 +703,8 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
     @Nullable
     @Override
-    public Lifecycle getLifecycle() {
-      return lifecycle;
+    public Object getLifecycle() {
+      return hiddenLifecycleReference;
     }
 
     @Override

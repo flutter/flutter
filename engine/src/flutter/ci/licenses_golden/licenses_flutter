@@ -615,6 +615,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugin
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/contentprovider/ContentProviderAware.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/contentprovider/ContentProviderControlSurface.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/contentprovider/ContentProviderPluginBinding.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/lifecycle/HiddenLifecycleReference.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServiceAware.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServiceControlSurface.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServicePluginBinding.java
