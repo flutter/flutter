@@ -994,15 +994,15 @@ void main() {
     );
 
     // The initial route /A/B/C should've been pushed successfully.
-    expect(find.byKey(keyRoot), findsOneWidget);
-    expect(find.byKey(keyA), findsOneWidget);
+    expect(find.byKey(keyRoot, skipOffstage: false), findsOneWidget);
+    expect(find.byKey(keyA, skipOffstage: false), findsOneWidget);
     expect(find.byKey(keyABC), findsOneWidget);
 
     keyNav.currentState.pop();
     await tester.pumpAndSettle();
-    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyRoot, skipOffstage: false), findsOneWidget);
     expect(find.byKey(keyA), findsOneWidget);
-    expect(find.byKey(keyABC), findsNothing);
+    expect(find.byKey(keyABC, skipOffstage: false), findsNothing);
   });
 
   testWidgets('The full initial route has to be matched', (WidgetTester tester) async {

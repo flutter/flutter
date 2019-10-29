@@ -698,6 +698,4 @@ void main() {
     expect(find.byKey(root), findsNothing);
     expect(find.byKey(top), findsOneWidget);
   });
-
-  }
 }
