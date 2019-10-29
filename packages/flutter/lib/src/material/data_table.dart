@@ -618,7 +618,7 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex != dataColumnIndex || !sortAscending) : null,
+        onSort: column.onSort != null ? () => column.onSort(dataColumnIndex, sortColumnIndex != dataColumnIndex || !sortAscending) : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
       );
