@@ -1100,6 +1100,7 @@ class IosUsbArtifacts extends CachedArtifact {
     'openssl',
     'ideviceinstaller',
     'ios-deploy',
+    'libzip',
   ];
 
   @override
