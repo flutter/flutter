@@ -57,6 +57,26 @@ static NSString* kBackgroundFetchCapatibility = @"fetch";
   [[self class] handleStatusBarTouches:touches withEvent:event];
 }
 
+// Do not remove, some clients may be calling these via `super`.
+- (void)applicationDidEnterBackground:(UIApplication*)application {
+}
+
+// Do not remove, some clients may be calling these via `super`.
+- (void)applicationWillEnterForeground:(UIApplication*)application {
+}
+
+// Do not remove, some clients may be calling these via `super`.
+- (void)applicationWillResignActive:(UIApplication*)application {
+}
+
+// Do not remove, some clients may be calling these via `super`.
+- (void)applicationDidBecomeActive:(UIApplication*)application {
+}
+
+// Do not remove, some clients may be calling these via `super`.
+- (void)applicationWillTerminate:(UIApplication*)application {
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (void)application:(UIApplication*)application
