@@ -5696,8 +5696,9 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
-      expect(find.byType(FlatButton), findsNWidgets(4));
+      // Selected text shows 3 buttons: cut, copy, paste
+      // Select All in the more option
+      expect(find.byType(FlatButton), findsNWidgets(3));
     },
   );
 
@@ -5746,8 +5747,9 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
-      // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
-      expect(find.byType(FlatButton), findsNWidgets(4));
+      // Selected text shows 3 buttons: cut, copy, paste
+      // Select All in the more option
+      expect(find.byType(FlatButton), findsNWidgets(3));
     },
   );
 
@@ -6035,8 +6037,9 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
-      // Collapsed toolbar shows 4 buttons: cut, copy, paste, select all
-      expect(find.byType(FlatButton), findsNWidgets(4));
+      // Collapsed toolbar shows 3 buttons: cut, copy, paste
+      // Select All in the more option
+      expect(find.byType(FlatButton), findsNWidgets(3));
     },
   );
 
