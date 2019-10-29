@@ -372,7 +372,7 @@ void main() {
     await tester.longPress(materialButton);
     expect(didLongPressButton, isTrue);
   });
-        
+
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in icon_button_test.dart. If you change this one, you may want to also change that one.
   testWidgets('MaterialButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
