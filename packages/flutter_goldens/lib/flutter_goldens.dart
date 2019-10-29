@@ -331,7 +331,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       }
     }
 
-    return skiaClient.testIsIgnoredForPullRequest(
+    return skiaClient.testIsIgnored(
       platform.environment['CIRRUS_PR'] ?? '',
       golden.path,
     );
@@ -342,7 +342,10 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   static bool isAvailableForEnvironment(Platform platform) {
     final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
     final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
-    return cirrusCI.isNotEmpty && cirrusPR.isNotEmpty;
+    final String goldServiceAccount = platform.environment['GOLD_SERVICE_ACCOUNT'] ?? '';
+    return cirrusCI.isNotEmpty
+      && cirrusPR.isNotEmpty
+      && goldServiceAccount.isNotEmpty;
   }
 }
 
@@ -490,7 +493,7 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     print(
-      'Skipping "$golden" test : Golden file testing is unavailble in LUCI'
+      'Skipping "$golden" test : Golden file testing is unavailable in LUCI '
         'environment.'
     );
     return true;

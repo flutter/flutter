@@ -250,8 +250,8 @@ class SkiaGoldClient {
   /// request are ignored on Flutter Gold.
   ///
   /// This is only relevant when used by the [FlutterPreSubmitFileComparator].
-  /// In order to land a change to an exiting golden file, an ignore must be set
-  /// up in Flutter Gold. This will serve as a flag to permit the change to
+  /// In order to land a change to an existing golden file, an ignore must be
+  /// set up in Flutter Gold. This will serve as a flag to permit the change to
   /// land, and protect against any unwanted changes.
   Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
     bool ignoreIsActive = false;
@@ -270,16 +270,32 @@ class SkiaGoldClient {
         for(Map<String, dynamic> ignore in ignores) {
           final List<String> ignoredQueries = ignore['query'].split('&');
           final String ignoredPullRequest = ignore['note'].split('/').last;
+          final DateTime expiration = DateTime.parse(ignore['expires']);
           if (ignoredQueries.contains('name=$testName') &&
-            ignoredPullRequest == pullRequest) {
+            expiration.isBefore(DateTime.now())) {
             ignoreIsActive = true;
+            if (ignoredPullRequest != pullRequest) {
+              print('An ignore is active for this test for pull reqest:');
+              print('');
+              print('https://flutter-gold.skia.org/ignores');
+            }
             break;
           }
         }
       } on FormatException catch(_) {
-        print('Formatting error detected requesting ignores from Flutter Gold.\n'
-          'rawResponse: $rawResponse');
-        rethrow;
+        if (rawResponse.contains('stream timeout')) {
+          final StringBuffer buf = StringBuffer()
+            ..writeln('Stream timeout on /ignores api.')
+            ..writeln('This may be caused by a triage breakdown.')
+            ..writeln('Check https://flutter-gold.skia.org/ignores, or')
+            ..writeln('https://flutter-gold.skia.org/?query=source_type%3Dflutter')
+            ..writeln('for untriaged golden files.');
+          throw NonZeroExitCode(1, buf.toString());
+        } else {
+          print('Formatting error detected requesting /ignores from Flutter Gold.'
+              '\nrawResponse: $rawResponse');
+          rethrow;
+        }
       }
     },
       SkiaGoldHttpOverrides(),
@@ -309,9 +325,15 @@ class SkiaGoldClient {
         isValid = digest.isValid(platform, testName, expectation);
 
       } on FormatException catch(_) {
-        print('Formatting error detected requesting digest from Flutter Gold.\n'
-          'rawResponse: $rawResponse');
-        rethrow;
+        if (rawResponse.contains('stream timeout')) {
+          final StringBuffer buf = StringBuffer()
+            ..writeln('Stream timeout on /details api.');
+          throw NonZeroExitCode(1, buf.toString());
+        } else {
+          print('Formatting error detected requesting /ignores from Flutter Gold.'
+            '\nrawResponse: $rawResponse');
+          rethrow;
+        }
       }
     },
       SkiaGoldHttpOverrides(),
