@@ -163,6 +163,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/plugins/contentprovider/ContentProviderAware.java",
   "io/flutter/embedding/engine/plugins/contentprovider/ContentProviderControlSurface.java",
   "io/flutter/embedding/engine/plugins/contentprovider/ContentProviderPluginBinding.java",
+  "io/flutter/embedding/engine/plugins/lifecycle/HiddenLifecycleReference.java",
   "io/flutter/embedding/engine/plugins/service/ServiceAware.java",
   "io/flutter/embedding/engine/plugins/service/ServiceControlSurface.java",
   "io/flutter/embedding/engine/plugins/service/ServicePluginBinding.java",

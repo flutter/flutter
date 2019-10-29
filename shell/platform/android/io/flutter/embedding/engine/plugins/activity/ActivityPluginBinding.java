@@ -5,7 +5,6 @@
 package io.flutter.embedding.engine.plugins.activity;
 
 import android.app.Activity;
-import android.arch.lifecycle.Lifecycle;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,10 +25,17 @@ public interface ActivityPluginBinding {
   Activity getActivity();
 
   /**
-   * Returns the {@link Lifecycle} associated with the attached {@code Activity}.
+   * Returns the {@code Lifecycle} associated with the attached {@code Activity}.
+   * <p>
+   * Use the flutter_plugin_android_lifecycle plugin to turn the returned {@code Object}
+   * into a {@code Lifecycle} object. See
+   * (https://github.com/flutter/plugins/tree/master/packages/flutter_plugin_android_lifecycle).
+   * Flutter plugins that rely on {@code Lifecycle} are forced to use the
+   * flutter_plugin_android_lifecycle plugin so that the version of the Android Lifecycle library is
+   * exposed to pub, which allows Flutter to manage different versions library over time.
    */
   @NonNull
-  Lifecycle getLifecycle();
+  Object getLifecycle();
 
   /**
    * Adds a listener that is invoked whenever the associated {@link Activity}'s
