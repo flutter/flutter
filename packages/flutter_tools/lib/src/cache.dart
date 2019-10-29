@@ -1102,6 +1102,10 @@ class IosUsbArtifacts extends CachedArtifact {
     'ios-deploy',
   ];
 
+  // For unknown reasons, users are getting into bad states where libimobiledevice is
+  // downloaded but some executables are missing from the zip. The names here are
+  // used for additional download checks below, so we can redownload if they are
+  // missing.
   static const Map<String, List<String>> _kExecutables = <String, List<String>>{
     'libimobiledevice': <String>[
       'idevice_id',
