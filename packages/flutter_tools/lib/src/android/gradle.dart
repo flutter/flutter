@@ -253,7 +253,7 @@ Future<GradleProject> _readGradleProject(
       environment: gradleEnv,
     );
     project = GradleProject.fromAppProperties(propertiesRunResult.stdout, tasksRunResult.stdout);
-  } catch (exception) {
+  } on Exception catch (exception) {
     if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.managed) {
       status.cancel();
       // Handle known exceptions.
@@ -276,7 +276,7 @@ Future<GradleProject> _readGradleProject(
 /// Handle Gradle error thrown when Gradle needs to download additional
 /// Android SDK components (e.g. Platform Tools), and the license
 /// for that component has not been accepted.
-void throwToolExitIfLicenseNotAccepted(dynamic exception) {
+void throwToolExitIfLicenseNotAccepted(Exception exception) {
   const String licenseNotAcceptedMatcher =
     r'You have not accepted the license agreements of the following SDK components:'
     r'\s*\[(.+)\]';
