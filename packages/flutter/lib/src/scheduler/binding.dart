@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -199,17 +199,50 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
     if (!kReleaseMode) {
       int frameNumber = 0;
-
-      // use frameTimings. https://github.com/flutter/flutter/issues/38838
-      // ignore: deprecated_member_use
-      window.onReportTimings = (List<FrameTiming> timings) {
+      addTimingsCallback((List<FrameTiming> timings) {
         for (FrameTiming frameTiming in timings) {
           frameNumber += 1;
           _profileFramePostEvent(frameNumber, frameTiming);
         }
+      });
+    }
+  }
+
+  /// Add a [TimingsCallback] that receives [FrameTiming] sent from the engine.
+  ///
+  /// This can be used, for example, to monitor the performance in release mode,
+  /// or to get a signal when the first frame is rasterized.
+  void addTimingsCallback(TimingsCallback callback) {
+    // TODO(liyuqian): once this is merged, modify the doc of
+    //  [Window.onReportTimings] inside the engine repo to recommend using this
+    // API instead of using [Window.onReportTimings] directly.
+    _timingsCallbacksEnabled[callback] = true;
+    if (_timingsCallbacks.length == 1) {
+      assert(window.onReportTimings == null);
+      window.onReportTimings = (List<FrameTiming> timings) {
+        for (TimingsCallback callback in _timingsCallbacks) {
+          callback(timings);
+        }
       };
     }
   }
+
+  /// Removes a callback that was earlier added by [addTimingsCallback].
+  void removeTimingsCallback(TimingsCallback callback) {
+    assert(_timingsCallbacksEnabled.containsKey(callback));
+    _timingsCallbacksEnabled[callback] = false;
+    if (_timingsCallbacks.isEmpty) {
+      window.onReportTimings = null;
+    }
+  }
+
+  // A map is maintained instead of a simple list because while we're iterating
+  // through [_timingsCallbacks], a callback can be removed. Having a `List` and
+  // simply calling `List.remove` would result in "Concurrent modification
+  // during iteration" exception.
+  final Map<TimingsCallback, bool> _timingsCallbacksEnabled = <TimingsCallback, bool>{};
+  Iterable<TimingsCallback> get _timingsCallbacks =>
+      _timingsCallbacksEnabled.keys.where((TimingsCallback c) => _timingsCallbacksEnabled[c]);
 
   /// The current [SchedulerBinding], if one has been created.
   static SchedulerBinding get instance => _instance;
