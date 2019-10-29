@@ -85,8 +85,7 @@ elif [[ "$OS" == "darwin" ]]; then
     fi
   )
   echo "iOS Flutter Gallery built"
-  #if [[ -z "$CIRRUS_PR" ]]; then
-  if [[ -n "$CIRRUS_PR" ]]; then # TODO DON'T CHECK ME IN!
+  if [[ -z "$CIRRUS_PR" ]]; then
     if [[ "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
       echo "Archiving with distribution profile and deploying to TestFlight..."
       (
