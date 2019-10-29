@@ -416,7 +416,11 @@ void main() {
     Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: RawMaterialButton(child: const Text('button'), onPressed: onPressed, onLongPress: onLongPress),
+        child: RawMaterialButton(
+          child: const Text('button'),
+          onPressed: onPressed,
+          onLongPress: onLongPress,
+        ),
       );
     }
 
