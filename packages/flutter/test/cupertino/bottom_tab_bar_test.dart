@@ -218,7 +218,7 @@ void main() {
       matching: find.byType(RichText),
     ));
 
-    expect(actualActive.text.style.color.value, CupertinoColors.activeOrange.darkColor.value);
+    expect(actualActive.text.style.color, isSameColorAs(CupertinoColors.activeBlue.darkColor));
   });
 
   testWidgets('Use active icon', (WidgetTester tester) async {

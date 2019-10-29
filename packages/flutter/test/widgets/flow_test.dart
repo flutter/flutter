@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestFlowDelegate extends FlowDelegate {
   TestFlowDelegate({this.startOffset}) : super(repaint: startOffset);
@@ -43,6 +43,21 @@ class OpacityFlowDelegate extends FlowDelegate {
 
   @override
   bool shouldRepaint(OpacityFlowDelegate oldDelegate) => opacity != oldDelegate.opacity;
+}
+
+// OpacityFlowDelegate that paints one of its children twice
+class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
+  DuplicatePainterOpacityFlowDelegate(double opacity) : super(opacity);
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    for (int i = 0; i < context.childCount; ++i) {
+      context.paintChild(i, opacity: opacity);
+    }
+    if (context.childCount > 0) {
+      context.paintChild(0, opacity: opacity);
+    }
+  }
 }
 
 void main() {
@@ -98,6 +113,28 @@ void main() {
     log.clear();
     await tester.tapAt(const Offset(20.0, 90.0));
     expect(log, equals(<int>[0]));
+  });
+
+  testWidgets('paintChild gets called twice', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Flow(
+        delegate: DuplicatePainterOpacityFlowDelegate(1.0),
+        children: <Widget>[
+          Container(width: 100.0, height: 100.0),
+          Container(width: 100.0, height: 100.0),
+        ],
+      ),
+    );
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    final FlutterError error = exception;
+    expect(error.toStringDeep(), equalsIgnoringHashCodes(
+      'FlutterError\n'
+      '   Cannot call paintChild twice for the same child.\n'
+      '   The flow delegate of type DuplicatePainterOpacityFlowDelegate\n'
+      '   attempted to paint child 0 multiple times, which is not\n'
+      '   permitted.\n'
+    ));
   });
 
   testWidgets('Flow opacity layer', (WidgetTester tester) async {

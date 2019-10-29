@@ -293,9 +293,10 @@ class XcodeProjectInterpreter {
       '-target',
       target,
       '-showBuildSettings',
+      ...environmentVariablesAsXcodeBuildSettings()
     ];
     try {
-      // showBuildSettings is reported to ocassionally timeout. Here, we give it
+      // showBuildSettings is reported to occasionally timeout. Here, we give it
       // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
       // When there is a timeout, we retry once.
       final RunResult result = await processUtils.run(
@@ -329,6 +330,7 @@ class XcodeProjectInterpreter {
       scheme,
       '-quiet',
       'clean',
+      ...environmentVariablesAsXcodeBuildSettings()
     ], workingDirectory: fs.currentDirectory.path);
   }
 
@@ -352,6 +354,21 @@ class XcodeProjectInterpreter {
     }
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
+}
+
+/// Environment variables prefixed by FLUTTER_XCODE_ will be passed as build configurations to xcodebuild.
+/// This allows developers to pass arbitrary build settings in without the tool needing to make a flag
+/// for or be aware of each one. This could be used to set code signing build settings in a CI
+/// environment without requiring settings changes in the Xcode project.
+List<String> environmentVariablesAsXcodeBuildSettings() {
+  const String xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
+  return platform.environment.entries.where((MapEntry<String, String> mapEntry) {
+    return mapEntry.key.startsWith(xcodeBuildSettingPrefix);
+  }).expand<String>((MapEntry<String, String> mapEntry) {
+    // Remove FLUTTER_XCODE_ prefix from the environment variable to get the build setting.
+    final String trimmedBuildSettingKey = mapEntry.key.substring(xcodeBuildSettingPrefix.length);
+    return <String>['$trimmedBuildSettingKey=${mapEntry.value}'];
+  }).toList();
 }
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {

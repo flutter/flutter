@@ -532,6 +532,23 @@ void main() {
     verifyNever(mockDebugConnection.close());
   }));
 
+  test('cleans up Chrome if tab is closed', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<void> onDone = Completer<void>();
+    when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
+      return onDone.future;
+    });
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Future<int> result = residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    );
+    await connectionInfoCompleter.future;
+    onDone.complete();
+
+    await result;
+    verify(mockWebFs.stop()).called(1);
+  }));
+
   test('Prints target and device name on run', () => testbed.run(() async {
     _setupMocks();
     when(mockWebDevice.name).thenReturn('Chromez');
@@ -641,6 +658,26 @@ void main() {
     await expectation;
   }));
 
+  test('Successfully turns failed startup StateError error into ToolExit', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw StateError('Unable to start build daemon');
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsA(isInstanceOf<ToolExit>()));
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+
   test('Rethrows Exception type', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -655,6 +692,25 @@ void main() {
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ), throwsA(isInstanceOf<Exception>()));
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+  test('Successfully turns MissingPortFile error into ToolExit', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw MissingPortFile();
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsA(isInstanceOf<ToolExit>()));
 
     unhandledErrorCompleter.complete();
     await expectation;
