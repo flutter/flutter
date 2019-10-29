@@ -1102,6 +1102,13 @@ class IosUsbArtifacts extends CachedArtifact {
     'ios-deploy',
   ];
 
+  static const Map<String, List<String>> _kExecutables = <String, List<String>>{
+    'libimobiledevice': <String>[
+      'idevice_id',
+      'ideviceinfo',
+    ],
+  };
+
   @override
   Map<String, String> get environment {
     return <String, String>{
@@ -1110,9 +1117,26 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @override
+  bool isUpToDateInner() {
+    final List<String> executables =_kExecutables[name];
+    if (executables == null) {
+      return true;
+    }
+    for (String executable in executables) {
+      if (!location.childFile(executable).existsSync()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
   Future<void> updateInner() {
     if (!platform.isMacOS && !cache.includeAllPlatforms) {
       return Future<void>.value();
+    }
+    if (location.existsSync()) {
+      location.deleteSync(recursive: true);
     }
     return _downloadZipArchive('Downloading $name...', archiveUri, location);
   }
