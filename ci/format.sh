@@ -75,4 +75,4 @@ if [[ ! -z "$TRAILING_SPACES" ]]; then
 fi
 
 # Check GN format consistency
-./ci/check_gn_format.py --dry-run true --root-directory . --gn-binary "third_party/gn/gn"
+./ci/check_gn_format.py --dry-run --root-directory . --gn-binary "third_party/gn/gn"
