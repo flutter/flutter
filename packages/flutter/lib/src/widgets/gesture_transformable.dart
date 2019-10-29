@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -390,6 +391,16 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
   double _currentRotation = 0.0;
   _GestureType gestureType;
 
+  // This value was eyeballed as something that feels right for a photo viewer.
+  static const double _kDrag = 0.0000135;
+
+  // Given a velocity and drag, calculate the time at which motion will come to
+  // a stop, within the margin of effectivelyMotionless.
+  static double _getFinalTime(double velocity, double drag) {
+    const double effectivelyMotionless = 10.0;
+    return math.log(effectivelyMotionless / velocity) / math.log(drag / 100);
+  }
+
   // The transformation matrix that gives the initial home position.
   Matrix4 get _initialTransform {
     Matrix4 matrix = Matrix4.identity();
@@ -743,30 +754,39 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
     final Vector3 translationVector = _transform.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
     final FrictionSimulation frictionSimulationX = FrictionSimulation(
-      // TODO(justinmc): Share this value with scroll_simulation.dart
-      0.135,
+      _kDrag,
       translation.dx,
       details.velocity.pixelsPerSecond.dx,
     );
     final FrictionSimulation frictionSimulationY = FrictionSimulation(
-      // TODO(justinmc): Share this value with scroll_simulation.dart
-      0.135,
+      _kDrag,
       translation.dy,
       details.velocity.pixelsPerSecond.dy,
+    );
+    final double tFinal = _getFinalTime(
+      details.velocity.pixelsPerSecond.distance,
+      _kDrag,
     );
     _animation = Tween<Offset>(
       begin: translation,
       end: Offset(frictionSimulationX.finalX, frictionSimulationY.finalX),
-    ).animate(_controller);
-    // The fastest possible velocity is 8000 px/s. Limit the longest animation
-    // to 500ms and scale the duration so fast velocities animate for longer.
-    _controller.duration = Duration(milliseconds: details.velocity.pixelsPerSecond.distance ~/ 16);
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.decelerate,
+    ));
+    _controller.duration = Duration(milliseconds: (tFinal * 1000).round());
     _animation.addListener(_onAnimate);
-    _controller.fling();
+    _controller.forward();
   }
 
   // Handle inertia drag animation.
   void _onAnimate() {
+    if (!_controller.isAnimating) {
+      _animation?.removeListener(_onAnimate);
+      _animation = null;
+      _controller.reset();
+      return;
+    }
     setState(() {
       // Translate _transform such that the resulting translation is
       // _animation.value.
@@ -777,11 +797,6 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       final Offset translationChangeScene = animationScene - translationScene;
       _transform = matrixTranslate(_transform, translationChangeScene);
     });
-    if (!_controller.isAnimating) {
-      _animation?.removeListener(_onAnimate);
-      _animation = null;
-      _controller.reset();
-    }
   }
 
   // Handle reset to home transform animation.
