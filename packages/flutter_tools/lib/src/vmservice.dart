@@ -147,6 +147,24 @@ class VMService {
       // to change to a more efficient implementation in the future.
       _peer.registerMethod('reloadMethod', (rpc.Parameters params) async {
         final String isolateId = params['isolateId'].value;
+        final String libraryId = params['library'].value;
+        final String classId = params['class'].value;
+        final String methodId = params['method'].value;
+        final String methodBody = params['methodBody'].value;
+
+        if (libraryId.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'libraryId\': $libraryId');
+        }
+        if (classId.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'classId\': $classId');
+        }
+        if (methodId.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'methodId\': $methodId');
+        }
+        if (methodBody.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'methodBody\': $methodBody');
+        }
+
         printTrace('reloadMethod not yet supported, falling back to hot reload');
 
         try {
