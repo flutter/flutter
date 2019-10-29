@@ -112,7 +112,7 @@ class RallyLineChartPainter extends CustomPainter {
           return startMillis <= e.date.millisecondsSinceEpoch && e.date.millisecondsSinceEpoch <= endMillis;
         },
       ).toList();
-      lastAmount += filteredEvents.fold<double>(0, (double sum, DetailedEventData e) => sum + e.amount);
+      lastAmount += sumOf<DetailedEventData>(filteredEvents, (DetailedEventData e) => e.amount);
       final double x = i / numDays * rect.width;
       final double y = (maxAmount - lastAmount) / maxAmount * rect.height;
       points.add(Offset(x, y));

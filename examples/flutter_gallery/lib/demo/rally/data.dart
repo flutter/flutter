@@ -13,36 +13,25 @@
 // limitations under the License.
 
 /// Calculates the sum of the primary amounts of a list of [AccountData].
-double sumAccountDataPrimaryAmount(List<AccountData> items) {
-  return items.fold(
-    0,
-    (double sum, AccountData next) => sum + next.primaryAmount,
-  );
-}
+double sumAccountDataPrimaryAmount(List<AccountData> items) => sumOf<AccountData>(items, (AccountData item) => item.primaryAmount);
 
 /// Calculates the sum of the primary amounts of a list of [BillData].
-double sumBillDataPrimaryAmount(List<BillData> items) {
-  return items.fold(
-    0,
-    (double sum, BillData next) => sum + next.primaryAmount,
-  );
-}
+double sumBillDataPrimaryAmount(List<BillData> items) => sumOf<BillData>(items, (BillData item) => item.primaryAmount);
 
 /// Calculates the sum of the primary amounts of a list of [BudgetData].
-double sumBudgetDataPrimaryAmount(List<BudgetData> items) {
-  return items.fold(
-    0,
-    (double sum, BudgetData next) => sum + next.primaryAmount,
-  );
-}
+double sumBudgetDataPrimaryAmount(List<BudgetData> items) => sumOf<BudgetData>(items, (BudgetData item) => item.primaryAmount);
 
 /// Calculates the sum of the amounts used of a list of [BudgetData].
-double sumBudgetDataAmountUsed(List<BudgetData> items) {
-  return items.fold(
-    0,
-    (double sum, BudgetData next) => sum + next.amountUsed,
-  );
+double sumBudgetDataAmountUsed(List<BudgetData> items) => sumOf<BudgetData>(items, (BudgetData item) => item.amountUsed);
+
+/// Utility function to sum up values in a list.
+double sumOf<T>(List<T> list, double getValue(T elt)) {
+  double sum = 0;
+  for (T elt in list)
+    sum += getValue(elt);
+  return sum;
 }
+
 
 /// A data model for an account.
 ///
