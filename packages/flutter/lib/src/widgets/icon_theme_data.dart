@@ -8,6 +8,8 @@ import 'dart:ui' as ui show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'framework.dart' show BuildContext;
+
 /// Defines the color, opacity, and size of icons.
 ///
 /// Used by [IconTheme] to control the color, opacity, and size of icons in a
@@ -53,6 +55,24 @@ class IconThemeData extends Diagnosticable {
       size: other.size,
     );
   }
+
+  /// Called by [IconTheme.of] to convert this instance to an [IconThemeData]
+  /// that fits the given [BuildContext].
+  ///
+  /// This method gives the ambient [IconThemeData] a chance to update itself,
+  /// after it's been retrieved by [IconTheme.of], and before being returned as
+  /// the final result. For instance, [CupertinoIconThemeData] overrides this method
+  /// to resolve [color], in case [color] is a [CupertinoDynamicColor] and needs
+  /// to be resolved against the given [BuildContext] before it can be used as a
+  /// regular [Color].
+  ///
+  /// The default implementation returns this [IconThemeData] as-is.
+  ///
+  /// See also:
+  ///
+  /// * [CupertinoIconThemeData.resolve] an implementation that resolves
+  ///   [CupertinoIconThemeData.color] before returning.
+  IconThemeData resolve(BuildContext context) => this;
 
   /// Whether all the properties of this object are non-null.
   bool get isConcrete => color != null && opacity != null && size != null;

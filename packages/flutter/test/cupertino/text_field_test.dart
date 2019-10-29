@@ -503,10 +503,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_cursor_test.cupertino.0.png',
-        version: 3,
-      ),
+      matchesGoldenFile('text_field_cursor_test.cupertino.0.png'),
     );
   });
 
@@ -536,10 +533,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_cursor_test.cupertino.1.png',
-        version: 3,
-      ),
+      matchesGoldenFile('text_field_cursor_test.cupertino.1.png'),
     );
   });
 
@@ -2755,7 +2749,7 @@ void main() {
         tester.renderObject<RenderEditable>(
           find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
         ).text.style.color,
-        CupertinoColors.white,
+        isSameColorAs(CupertinoColors.white),
       );
     },
   );
@@ -2905,7 +2899,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(renderEditable.cursorColor, CupertinoColors.activeOrange.darkColor);
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue.darkColor);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -3042,10 +3036,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_test.disabled.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_field_test.disabled.png'),
     );
   });
 

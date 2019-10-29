@@ -254,7 +254,7 @@ void main() {
       AndroidSdk: () => mockAndroidSdk,
       Artifacts: () => mockArtifacts,
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       GenSnapshot: () => genSnapshot,
       Xcode: () => mockXcode,
       Logger: () => bufferLogger,
