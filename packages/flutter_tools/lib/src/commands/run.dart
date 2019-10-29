@@ -41,8 +41,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         negatable: false,
         help: 'Include verbose logging from the flutter engine.',
       )
+      ..addFlag('cache-sksl',
+        negatable: false,
+        help: 'Only cache the shader in SkSL instead of binary or GLSL.',)
       ..addOption('route',
         help: 'Which route to load when running the app.',
+      )
+      ..addOption('vmservice-out-file',
+        help: 'A file to write the attached vmservice uri to after an'
+          ' application is started.',
+        valueHelp: 'project/example/out.txt'
       );
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
@@ -54,6 +62,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   }
 
   bool get traceStartup => argResults['trace-startup'];
+  bool get cacheSkSL => argResults['cache-sksl'];
 
   String get route => argResults['route'];
 }
@@ -301,11 +310,14 @@ class RunCommand extends RunCommandBase {
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
         dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
+        cacheSkSL: cacheSkSL,
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
         initializePlatform: argResults['web-initialize-platform'],
         hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
         port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
+        browserLaunch: featureFlags.isWebEnabled ? argResults['web-browser-launch'] : null,
+        vmserviceOutFile: argResults['vmservice-out-file'],
       );
     }
   }

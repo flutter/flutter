@@ -146,6 +146,7 @@ BuildApp() {
     RunCommand find "${derived_dir}/engine/Flutter.framework" -type f \( -name '*.h' -o -name '*.modulemap' -o -name '*.plist' \) -exec chmod a-w "{}" \;
   else
     RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    RunCommand cp -- "${flutter_podspec}" "${derived_dir}"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
     # Make headers, plists, and modulemap files read-only to discourage editing.
     RunCommand find "${derived_dir}/Flutter.framework" -type f \( -name '*.h' -o -name '*.modulemap' -o -name '*.plist' \) -exec chmod a-w "{}" \;

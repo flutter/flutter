@@ -39,8 +39,8 @@ void main() {
             label: 'test',
             rect: TestSemantics.fullScreen,
           ),
-        ]
-      )
+        ],
+      ),
     ));
 
     // remove one
@@ -63,8 +63,8 @@ void main() {
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             rect: TestSemantics.fullScreen,
           ),
-        ]
-      )
+        ],
+      ),
     ));
 
     // change what it says
@@ -89,8 +89,8 @@ void main() {
             textDirection: TextDirection.ltr,
             rect: TestSemantics.fullScreen,
           ),
-        ]
-      )
+        ],
+      ),
     ));
 
     // add a node

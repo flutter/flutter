@@ -116,7 +116,7 @@ void main() {
             return Container();
           }
         ),
-      )
+      ),
     );
     expect(ButtonBarTheme.of(capturedContext), equals(buttonBarTheme));
     expect(ButtonBarTheme.of(capturedContext).buttonMinWidth, equals(42.0));
@@ -142,7 +142,7 @@ void main() {
             );
           }
         ),
-      )
+      ),
     );
     expect(ButtonBarTheme.of(capturedContext), equals(buttonBarTheme));
     expect(ButtonBarTheme.of(capturedContext).buttonMinWidth, equals(84.0));

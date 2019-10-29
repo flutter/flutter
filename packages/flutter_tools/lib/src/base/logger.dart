@@ -146,6 +146,14 @@ abstract class Logger {
     bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   });
+
+  /// Send a progress notification that is instant.
+  ///
+  /// Only surfaces a value in machine modes, Loggers may ignore this message in
+  /// non-machine modes. Like [startProgress] but with a single event.
+  void sendNotification(String message, {
+    String progressId,
+  });
 }
 
 class StdoutLogger extends Logger {
@@ -250,6 +258,9 @@ class StdoutLogger extends Logger {
   void _clearStatus() {
     _status = null;
   }
+
+  @override
+  void sendNotification(String message, {String progressId}) { }
 }
 
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
@@ -341,6 +352,9 @@ class BufferLogger extends Logger {
     _status.clear();
     _trace.clear();
   }
+
+  @override
+  void sendNotification(String message, {String progressId}) { }
 }
 
 class VerboseLogger extends Logger {
@@ -453,6 +467,9 @@ class VerboseLogger extends Logger {
       parent.printStatus(prefix + indentMessage);
     }
   }
+
+  @override
+  void sendNotification(String message, {String progressId}) { }
 }
 
 enum _LogType { error, status, trace }

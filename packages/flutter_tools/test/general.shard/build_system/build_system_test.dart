@@ -106,27 +106,25 @@ void main() {
     );
   });
 
-  test('Throws exception if asked to build with missing inputs', () => testbed.run(() async {
+  test('Does not throw exception if asked to build with missing inputs', () => testbed.run(() async {
     // Delete required input file.
     fs.file('foo.dart').deleteSync();
     final BuildResult buildResult = await buildSystem.build(fooTarget, environment);
 
-    expect(buildResult.hasException, true);
-    expect(buildResult.exceptions.values.single.exception, isInstanceOf<MissingInputException>());
+    expect(buildResult.hasException, false);
   }));
 
-  test('Throws exception if it does not produce a specified output', () => testbed.run(() async {
+  test('Does not throw exception if it does not produce a specified output', () => testbed.run(() async {
     final Target badTarget = TestTarget((Environment environment) async {})
       ..inputs = const <Source>[
         Source.pattern('{PROJECT_DIR}/foo.dart'),
       ]
       ..outputs = const <Source>[
-        Source.pattern('{BUILD_DIR}/out')
+        Source.pattern('{BUILD_DIR}/out'),
       ];
     final BuildResult result = await buildSystem.build(badTarget, environment);
 
-    expect(result.hasException, true);
-    expect(result.exceptions.values.single.exception, isInstanceOf<FileSystemException>());
+    expect(result.hasException, false);
   }));
 
   test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {
@@ -235,6 +233,31 @@ void main() {
     expect(environment.buildDir.childFile('foo.out').existsSync(), false);
   }));
 
+  test('Does not crash when filesytem and cache are out of sync', () => testbed.run(() async {
+    final TestTarget testTarget = TestTarget((Environment environment) async {
+      environment.buildDir.childFile('foo.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
+    fs.file('foo.dart').createSync();
+
+    await buildSystem.build(testTarget, environment);
+
+    expect(environment.buildDir.childFile('foo.out').existsSync(), true);
+    environment.buildDir.childFile('foo.out').deleteSync();
+
+    final TestTarget testTarget2 = TestTarget((Environment environment) async {
+      environment.buildDir.childFile('bar.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/bar.out')];
+
+    await buildSystem.build(testTarget2, environment);
+
+    expect(environment.buildDir.childFile('bar.out').existsSync(), true);
+    expect(environment.buildDir.childFile('foo.out').existsSync(), false);
+  }));
+
   test('reruns build if stamp is corrupted', () => testbed.run(() async {
     final TestTarget testTarget = TestTarget((Environment envionment) async {
       environment.buildDir.childFile('foo.out').createSync();
@@ -268,7 +291,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     expect(fooTarget.toJson(environment), <String, dynamic>{
       'inputs':  <Object>[
-        '/foo.dart'
+        '/foo.dart',
       ],
       'outputs': <Object>[
         fs.path.join(environment.buildDir.path, 'out'),
@@ -287,6 +310,35 @@ void main() {
 
     expect(() => checkCycles(barTarget), throwsA(isInstanceOf<CycleException>()));
   });
+
+  test('Target with depfile dependency will not run twice without invalidation', () => testbed.run(() async {
+    int called = 0;
+    final TestTarget target = TestTarget((Environment environment) async {
+      environment.buildDir.childFile('example.d')
+        .writeAsStringSync('a.txt: b.txt');
+      fs.file('a.txt').writeAsStringSync('a');
+      called += 1;
+    })
+      ..inputs = const <Source>[Source.depfile('example.d')]
+      ..outputs = const <Source>[Source.depfile('example.d')];
+    fs.file('b.txt').writeAsStringSync('b');
+
+    await buildSystem.build(target, environment);
+
+    expect(fs.file('a.txt').existsSync(), true);
+    expect(called, 1);
+
+    // Second build is up to date due to depfil parse.
+    await buildSystem.build(target, environment);
+    expect(called, 1);
+  }));
+
+  test('output directory is an input to the build',  () => testbed.run(() async {
+    final Environment environmentA = Environment(projectDir: fs.currentDirectory, outputDir: fs.directory('a'));
+    final Environment environmentB = Environment(projectDir: fs.currentDirectory, outputDir: fs.directory('b'));
+
+    expect(environmentA.buildDir.path, isNot(environmentB.buildDir.path));
+  }));
 }
 
 class MockPlatform extends Mock implements Platform {}

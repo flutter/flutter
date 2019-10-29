@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,7 @@ Future<ui.Image> createTestImage() {
 Key firstKey = const Key('first');
 Key secondKey = const Key('second');
 Key thirdKey = const Key('third');
+Key simpleKey = const Key('simple');
 
 Key homeRouteKey = const Key('homeRoute');
 Key routeTwoKey = const Key('routeTwo');
@@ -51,6 +54,10 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         FlatButton(
           child: const Text('twoInset'),
           onPressed: () { Navigator.pushNamed(context, '/twoInset'); },
+        ),
+        FlatButton(
+          child: const Text('simple'),
+          onPressed: () { Navigator.pushNamed(context, '/simple'); },
         ),
       ],
     ),
@@ -106,6 +113,19 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           onPressed: () { Navigator.push(context, ThreeRoute()); },
         ),
       ],
+    ),
+  ),
+  // This route is the same as /two except that Hero 'a' is shifted to the right by
+  // 50 pixels. When the hero's in-flight bounds between / and /twoInset are animated
+  // using MaterialRectArcTween (the default) they'll follow a different path
+  // then when the flight starts at /twoInset and returns to /.
+  '/simple': (BuildContext context) => CupertinoPageScaffold(
+    child: Center(
+      child: Hero(
+        tag: 'a',
+        transitionOnUserGestures: transitionFromUserGestures,
+        child: Container(height: 150.0, width: 150.0, key: simpleKey),
+      ),
     ),
   ),
 };
@@ -166,6 +186,7 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
+  assert(testImage != null);
 
   setUp(() {
     transitionFromUserGestures = false;
@@ -296,7 +317,7 @@ Future<void> main() async {
       find.ancestor(
         of: find.byKey(firstKey, skipOffstage: false),
         matching: find.byType(Offstage, skipOffstage: false),
-      ).first
+      ).first,
     );
     // Original hero should stay hidden.
     expect(first.offstage, isTrue);
@@ -527,7 +548,31 @@ Future<void> main() async {
 
     await tester.tap(find.text('push'));
     await tester.pump();
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    final FlutterError error = exception;
+    expect(error.diagnostics.length, 3);
+    final DiagnosticsNode last = error.diagnostics.last;
+    expect(last, isInstanceOf<DiagnosticsProperty<StatefulElement>>());
+    expect(
+      last.toStringDeep(),
+      equalsIgnoringHashCodes(
+        '# Here is the subtree for one of the offending heroes: Hero\n',
+      ),
+    );
+    expect(last.style, DiagnosticsTreeStyle.dense);
+    expect(
+      error.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   There are multiple heroes that share the same tag within a\n'
+        '   subtree.\n'
+        '   Within each subtree for which heroes are to be animated (i.e. a\n'
+        '   PageRoute subtree), each Hero must have a unique non-null tag.\n'
+        '   In this case, multiple heroes had the following tag: a\n'
+        '   ├# Here is the subtree for one of the offending heroes: Hero\n',
+      ),
+    );
   });
 
   testWidgets('Hero push transition interrupted by a pop', (WidgetTester tester) async {
@@ -717,7 +762,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     // Pushes route
@@ -819,7 +864,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     // Pushes route
@@ -897,7 +942,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     // Pushes route
@@ -1025,7 +1070,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     // Pushes routeB
@@ -1124,7 +1169,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     expect(find.text('456'), findsOneWidget);
@@ -1739,7 +1784,7 @@ Future<void> main() async {
             );
           },
         ),
-      )
+      ),
     );
 
     nestedNavigator.currentState.push(MaterialPageRoute<void>(
@@ -2215,7 +2260,7 @@ Future<void> main() async {
                 child: Image(
                   image: imageProvider,
                   key: imageKey2,
-                )
+                ),
               ),
             ),
           );
@@ -2256,6 +2301,38 @@ Future<void> main() async {
       );
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/38183.
+  testWidgets('Remove user gesture driven flights when the gesture is invalid', (WidgetTester tester) async {
+    transitionFromUserGestures = true;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        platform: TargetPlatform.iOS,
+      ),
+      routes: routes,
+    ));
+
+    await tester.tap(find.text('simple'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(simpleKey), findsOneWidget);
+
+    // Tap once to trigger a flight.
+    await tester.tapAt(const Offset(10, 200));
+    await tester.pumpAndSettle();
+
+    // Wait till the previous gesture is accepted.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Tap again to trigger another flight, see if it throws.
+    await tester.tapAt(const Offset(10, 200));
+    await tester.pumpAndSettle();
+
+    // The simple route should still be on top.
+    expect(find.byKey(simpleKey), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/40239.
   testWidgets(

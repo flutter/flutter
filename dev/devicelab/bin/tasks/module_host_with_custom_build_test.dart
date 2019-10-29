@@ -11,7 +11,9 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+
+final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
 
 /// Tests that the Android app containing a Flutter module can be built when
 /// it has custom build types and flavors.
@@ -53,7 +55,14 @@ Future<void> main() async {
       final Directory hostAppDir = Directory(path.join(tempDir.path, 'hello_host_app_with_custom_build'));
       mkdir(hostAppDir);
       recursiveCopy(
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'module_host_with_custom_build')),
+        Directory(
+          path.join(
+            flutterDirectory.path,
+            'dev',
+            'integration_tests',
+             useAndroidEmbeddingV2 ? 'module_host_with_custom_build_v2_embedding' : 'module_host_with_custom_build',
+          ),
+        ),
         hostAppDir,
       );
       copy(
@@ -65,14 +74,30 @@ Future<void> main() async {
         Directory(path.join(hostAppDir.path, 'gradle', 'wrapper')),
       );
 
+      final Function clean = () async {
+        section('Clean');
+        await inDirectory(hostAppDir, () async {
+          await exec(gradlewExecutable,
+            <String>['clean'],
+            environment: <String, String>{
+              'JAVA_HOME': javaHome,
+            },
+          );
+        });
+      };
+
+      if (!Platform.isWindows) {
+        section('Make $gradlewExecutable executable');
+        await inDirectory(hostAppDir, () async {
+          await exec('chmod', <String>['+x', gradlewExecutable]);
+        });
+      }
+
       section('Build debug APKs');
 
       section('Run app:assembleDemoDebug');
 
       await inDirectory(hostAppDir, () async {
-        if (!Platform.isWindows) {
-          await exec('chmod', <String>['+x', 'gradlew']);
-        }
         await exec(gradlewExecutable,
           <String>['app:assembleDemoDebug'],
           environment: <String, String>{
@@ -98,30 +123,59 @@ Future<void> main() async {
 
       section('Verify snapshots in app-demo-debug.apk');
 
-      final Iterable<String> demoDebugFiles = await getFilesInApk(demoDebugApk);
       checkItContains<String>(<String>[
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
-      ], demoDebugFiles);
+        ...flutterAssets,
+        ...debugAssets,
+      ], await getFilesInApk(demoDebugApk));
 
-      section('Clean');
+      await clean();
+
+      // Change the order of the task and ensure that flutter_assets are in the APK.
+      // https://github.com/flutter/flutter/pull/41333
+      section('Run app:assembleDemoDebug - Merge assets before processing manifest');
 
       await inDirectory(hostAppDir, () async {
         await exec(gradlewExecutable,
-          <String>['clean'],
+          <String>[
+            // Normally, `app:processDemoDebugManifest` runs before `app:mergeDemoDebugAssets`.
+            // In this case, we run `app:mergeDemoDebugAssets` first.
+            'app:mergeDemoDebugAssets',
+            'app:processDemoDebugManifest',
+            'app:assembleDemoDebug',
+          ],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
           },
         );
       });
 
+      final String demoDebugApk2 = path.join(
+        hostAppDir.path,
+        'app',
+        'build',
+        'outputs',
+        'apk',
+        'demo',
+        'debug',
+        'app-demo-debug.apk',
+      );
+
+      if (!exists(File(demoDebugApk2))) {
+        return TaskResult.failure('Failed to build app-demo-debug.apk');
+      }
+
+      section('Verify snapshots in app-demo-debug.apk');
+
+      checkItContains<String>(<String>[
+        ...flutterAssets,
+        ...debugAssets,
+      ], await getFilesInApk(demoDebugApk2));
+
+      await clean();
+
       section('Run app:assembleDemoStaging');
 
-       await inDirectory(hostAppDir, () async {
-        if (!Platform.isWindows) {
-          await exec('chmod', <String>['+x', 'gradlew']);
-        }
+      await inDirectory(hostAppDir, () async {
         await exec(gradlewExecutable,
           <String>['app:assembleDemoStaging'],
           environment: <String, String>{
@@ -147,32 +201,18 @@ Future<void> main() async {
 
       section('Verify snapshots in app-demo-staging.apk');
 
-      final Iterable<String> demoStagingFiles = await getFilesInApk(demoStagingApk);
       checkItContains<String>(<String>[
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
-      ], demoStagingFiles);
+        ...flutterAssets,
+        ...debugAssets,
+      ], await getFilesInApk(demoStagingApk));
 
-      section('Clean');
-
-      await inDirectory(hostAppDir, () async {
-        await exec(gradlewExecutable,
-          <String>['clean'],
-          environment: <String, String>{
-            'JAVA_HOME': javaHome,
-          },
-        );
-      });
+      await clean();
 
       section('Build release APKs');
 
       section('Run app:assembleDemoRelease');
 
       await inDirectory(hostAppDir, () async {
-        if (!Platform.isWindows) {
-          await exec('chmod', <String>['+x', 'gradlew']);
-        }
         await exec(gradlewExecutable,
           <String>['app:assembleDemoRelease'],
           environment: <String, String>{
@@ -198,31 +238,19 @@ Future<void> main() async {
 
       section('Verify AOT blobs in app-demo-release-unsigned.apk');
 
-      final Iterable<String> demoReleaseFiles = await getFilesInApk(demoReleaseApk);
       checkItContains<String>(<String>[
-        'lib/arm64-v8a/libapp.so',
+        ...flutterAssets,
         'lib/arm64-v8a/libflutter.so',
-        'lib/armeabi-v7a/libapp.so',
+        'lib/arm64-v8a/libapp.so',
         'lib/armeabi-v7a/libflutter.so',
-      ], demoReleaseFiles);
+        'lib/armeabi-v7a/libapp.so',
+      ], await getFilesInApk(demoReleaseApk));
 
-      section('Clean');
-
-      await inDirectory(hostAppDir, () async {
-        await exec(gradlewExecutable,
-          <String>['clean'],
-          environment: <String, String>{
-            'JAVA_HOME': javaHome,
-          },
-        );
-      });
+      await clean();
 
       section('Run app:assembleDemoProd');
 
        await inDirectory(hostAppDir, () async {
-        if (!Platform.isWindows) {
-          await exec('chmod', <String>['+x', 'gradlew']);
-        }
         await exec(gradlewExecutable,
           <String>['app:assembleDemoProd'],
           environment: <String, String>{
@@ -248,13 +276,13 @@ Future<void> main() async {
 
       section('Verify AOT blobs in app-demo-prod-unsigned.apk');
 
-      final Iterable<String> demoProdFiles = await getFilesInApk(demoProdApk);
       checkItContains<String>(<String>[
-          'lib/arm64-v8a/libapp.so',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/armeabi-v7a/libapp.so',
-          'lib/armeabi-v7a/libflutter.so',
-      ], demoProdFiles);
+        ...flutterAssets,
+        'lib/arm64-v8a/libapp.so',
+        'lib/arm64-v8a/libflutter.so',
+        'lib/armeabi-v7a/libapp.so',
+        'lib/armeabi-v7a/libflutter.so',
+      ], await getFilesInApk(demoProdApk));
 
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {

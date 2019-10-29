@@ -222,12 +222,12 @@ void main() {
         await deviceUnderTest.takeScreenshot(mockFile);
         verify(mockProcessManager.run(
           <String>[
-              '/usr/bin/xcrun',
-              'simctl',
-              'io',
-              'x',
-              'screenshot',
-              fs.path.join('some', 'path', 'to', 'screenshot.png'),
+            '/usr/bin/xcrun',
+            'simctl',
+            'io',
+            'x',
+            'screenshot',
+            fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],
           environment: null,
           workingDirectory: null,
@@ -486,6 +486,7 @@ flutter:
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
@@ -497,6 +498,7 @@ flutter:
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
@@ -507,5 +509,6 @@ flutter:
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }

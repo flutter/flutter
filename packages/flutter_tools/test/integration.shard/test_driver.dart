@@ -127,8 +127,12 @@ abstract class FlutterTestDriver {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
     _vmService.onSend.listen((String s) => _debugPrint(s, topic: '=vm=>'));
     _vmService.onReceive.listen((String s) => _debugPrint(s, topic: '<=vm='));
+
+    final Completer<void> isolateStarted = Completer<void>();
     _vmService.onIsolateEvent.listen((Event event) {
-      if (event.kind == EventKind.kIsolateExit && event.isolate.id == _flutterIsolateId) {
+      if (event.kind == EventKind.kIsolateStart) {
+        isolateStarted.complete();
+      } else if (event.kind == EventKind.kIsolateExit && event.isolate.id == _flutterIsolateId) {
         // Hot restarts cause all the isolates to exit, so we need to refresh
         // our idea of what the Flutter isolate ID is.
         _flutterIsolateId = null;
@@ -139,6 +143,10 @@ abstract class FlutterTestDriver {
       _vmService.streamListen('Isolate'),
       _vmService.streamListen('Debug'),
     ]);
+
+    if ((await _vmService.getVM()).isolates.isEmpty) {
+      await isolateStarted.future;
+    }
 
     await waitForPause();
     if (pauseOnExceptions) {
@@ -620,11 +628,11 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     Future<void> Function() beforeStart,
   }) async {
     await _setupProcess(<String>[
-        'test',
-        '--disable-service-auth-codes',
-        '--machine',
-        '-d',
-        'flutter-tester',
+      'test',
+      '--disable-service-auth-codes',
+      '--machine',
+      '-d',
+      'flutter-tester',
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile, beforeStart: beforeStart);
   }
 

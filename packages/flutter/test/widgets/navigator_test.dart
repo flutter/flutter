@@ -294,7 +294,7 @@ void main() {
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.popAndPushNamed(context, '/B'); }),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () { Navigator.pop(context); }),
     };
@@ -321,7 +321,7 @@ void main() {
 
   testWidgets('Push and pop should trigger the observers', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
     bool isPushed = false;
@@ -381,7 +381,7 @@ void main() {
 
   testWidgets('Add and remove an observer should work', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
     bool isPushed = false;
@@ -428,7 +428,7 @@ void main() {
 
   testWidgets('replaceNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushReplacementNamed(context, '/B'); }),
       '/B': (BuildContext context) => const OnTapPage(id: 'B'),
     };
@@ -452,7 +452,7 @@ void main() {
     Future<String> value;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { value = Navigator.pushReplacementNamed(context, '/B', result: 'B'); }),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () { Navigator.pop(context, 'B'); }),
     };
@@ -499,7 +499,7 @@ void main() {
 
   testWidgets('removeRoute', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushNamed(context, '/B'); }),
       '/B': (BuildContext context) => const OnTapPage(id: 'B'),
     };
@@ -683,7 +683,7 @@ void main() {
 
   testWidgets('didStartUserGesture observable', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
 
@@ -1033,4 +1033,60 @@ void main() {
     expect(find.byKey(keyA), findsNothing);
     expect(find.byKey(keyAB), findsNothing);
   });
+
+  group('error control test', () {
+    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(Navigator(
+        key: navigatorKey,
+        onGenerateRoute: (_) => null,
+      ));
+      final dynamic exception = tester.takeException();
+      expect(exception, isNotNull);
+      expect(exception, isFlutterError);
+      final FlutterError error = exception;
+      expect(error, isNotNull);
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   If a Navigator has no onUnknownRoute, then its onGenerateRoute\n'
+          '   must never return null.\n'
+          '   When trying to build the route "/", onGenerateRoute returned\n'
+          '   null, but there was no onUnknownRoute callback specified.\n'
+          '   The Navigator was:\n'
+          '     NavigatorState#4d6bf(lifecycle state: created)\n',
+        ),
+      );
+    });
+
+    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(Navigator(
+        key: navigatorKey,
+        onGenerateRoute: (_) => null,
+        onUnknownRoute: (_) => null,
+      ));
+      final dynamic exception = tester.takeException();
+      expect(exception, isNotNull);
+      expect(exception, isFlutterError);
+      final FlutterError error = exception;
+      expect(error, isNotNull);
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   A Navigator\'s onUnknownRoute returned null.\n'
+          '   When trying to build the route "/", both onGenerateRoute and\n'
+          '   onUnknownRoute returned null. The onUnknownRoute callback should\n'
+          '   never return null.\n'
+          '   The Navigator was:\n'
+          '     NavigatorState#38036(lifecycle state: created)\n',
+        ),
+      );
+    });
+  });
+
 }

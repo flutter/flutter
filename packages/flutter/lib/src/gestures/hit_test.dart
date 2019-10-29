@@ -54,7 +54,7 @@ class HitTestEntry {
   final HitTestTarget target;
 
   @override
-  String toString() => '$target';
+  String toString() => '${describeIdentity(this)}($target)';
 
   /// Returns a matrix describing how [PointerEvent]s delivered to this
   /// [HitTestEntry] should be transformed from the global coordinate space of

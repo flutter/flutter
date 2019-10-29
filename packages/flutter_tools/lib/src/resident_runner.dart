@@ -13,6 +13,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -21,6 +22,7 @@ import 'compile.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart';
 import 'globals.dart';
 import 'project.dart';
 import 'run_cold.dart';
@@ -41,6 +43,7 @@ class FlutterDevice {
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+         buildMode: buildMode,
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
@@ -63,13 +66,27 @@ class FlutterDevice {
     ResidentCompiler generator,
   }) async {
     ResidentCompiler generator;
-    if (flutterProject.hasBuilders) {
+    if (featureFlags.isWebIncrementalCompilerEnabled &&
+        await device.targetPlatform == TargetPlatform.web_javascript) {
+      generator = ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildMode),
+        buildMode: buildMode,
+        trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots,
+        fileSystemScheme: fileSystemScheme,
+        targetModel: TargetModel.dartdevc,
+        experimentalFlags: experimentalFlags,
+        platformDill: artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode),
+      );
+    } else if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
+        buildMode: buildMode,
         flutterProject: flutterProject,
       );
     } else {
       generator = ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+        buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
@@ -543,7 +560,7 @@ abstract class ResidentRunner {
        packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
        _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
-          ? fs.systemTempDirectory.createTempSync('_fluttter_tool')
+          ? fs.systemTempDirectory.createTempSync('flutter_tool.')
           : fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle() {
     if (!artifactDirectory.existsSync()) {
@@ -637,6 +654,20 @@ abstract class ResidentRunner {
     final String mode = isRunningProfile ? 'profile' :
         isRunningRelease ? 'release' : 'this';
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
+  }
+
+  @protected
+  void writeVmserviceFile() {
+    if (debuggingOptions.vmserviceOutFile != null) {
+      try {
+        final String address = flutterDevices.first.vmServices.first.wsAddress.toString();
+        final File vmserviceOutFile = fs.file(debuggingOptions.vmserviceOutFile);
+        vmserviceOutFile.createSync(recursive: true);
+        vmserviceOutFile.writeAsStringSync(address);
+      } on FileSystemException {
+        printError('Failed to write vmservice-out-file at ${debuggingOptions.vmserviceOutFile}');
+      }
+    }
   }
 
   Future<void> exit() async {
@@ -993,19 +1024,13 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-    io.ProcessSignal.SIGINT.watch().listen((io.ProcessSignal signal) {
-      _cleanUp(signal);
-      io.exit(0);
-    });
-    io.ProcessSignal.SIGTERM.watch().listen((io.ProcessSignal signal) {
-      _cleanUp(signal);
-      io.exit(0);
-    });
+    signals.addHandler(io.ProcessSignal.SIGINT, _cleanUp);
+    signals.addHandler(io.ProcessSignal.SIGTERM, _cleanUp);
     if (!residentRunner.supportsServiceProtocol || !residentRunner.supportsRestart) {
       return;
     }
-    io.ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-    io.ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+    signals.addHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
+    signals.addHandler(io.ProcessSignal.SIGUSR2, _handleSignal);
   }
 
   /// Returns [true] if the input has been handled by this function.

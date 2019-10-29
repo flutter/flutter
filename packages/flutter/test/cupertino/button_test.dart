@@ -21,7 +21,7 @@ void main() {
       boilerplate(child: const CupertinoButton(
         child: Text('X', style: testStyle),
         onPressed: null,
-      ))
+      )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -38,7 +38,7 @@ void main() {
         child: Text('X', style: testStyle),
         onPressed: null,
         minSize: minSize,
-      ))
+      )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -53,7 +53,7 @@ void main() {
       boilerplate(child: const CupertinoButton(
         child: Text('XXXX', style: testStyle),
         onPressed: null,
-      ))
+      )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -306,12 +306,12 @@ void main() {
       ),
     );
 
-    expect(textStyle.color, CupertinoColors.white);
+    expect(textStyle.color, isSameColorAs(CupertinoColors.white));
     BoxDecoration decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration;
     expect(decoration.color, CupertinoColors.activeBlue);
 
@@ -327,7 +327,7 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color, CupertinoColors.activeOrange);
+    expect(textStyle.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -341,14 +341,14 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color, CupertinoColors.black);
+    expect(textStyle.color, isSameColorAs(CupertinoColors.black));
     decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration;
-    expect(decoration.color, CupertinoColors.activeOrange);
+    expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
   });
 }
 

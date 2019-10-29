@@ -12,10 +12,12 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -28,8 +30,11 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import 'common.dart';
+import 'fake_process_manager.dart';
+import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
+export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>();
@@ -43,12 +48,19 @@ typedef ContextInitializer = void Function(AppContext testContext);
 void testUsingContext(
   String description,
   dynamic testMethod(), {
-  Timeout timeout,
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
+  if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
+    throw StateError(
+      'If you override the FileSystem context you must also provide a ProcessManager, '
+      'otherwise the processes you launch will not be dealing with the same file system '
+      'that you are dealing with in your test.'
+    );
+  }
+
   // Ensure we don't rely on the default [Config] constructor which will
   // leak a sticky $HOME/.flutter_settings behind!
   Directory configDir;
@@ -81,7 +93,7 @@ void testUsingContext(
             when(mock.getAttachedDevices()).thenAnswer((Invocation _) async => <IOSSimulator>[]);
             return mock;
           },
-          OutputPreferences: () => OutputPreferences(showColor: false),
+          OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
@@ -90,6 +102,8 @@ void testUsingContext(
           FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
+          Signals: () => FakeSignals(),
+          Pub: () => ThrowingPub() // prevent accidentally using pub.
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -122,8 +136,7 @@ void testUsingContext(
         },
       );
     });
-  }, timeout: timeout ?? const Timeout(Duration(seconds: 60)),
-      testOn: testOn, skip: skip);
+  }, testOn: testOn, skip: skip);
 }
 
 void _printBufferedErrors(AppContext testContext) {
@@ -301,7 +314,11 @@ class FakeUsage implements Usage {
   void sendCommand(String command, { Map<String, String> parameters }) { }
 
   @override
-  void sendEvent(String category, String parameter, { Map<String, String> parameters }) { }
+  void sendEvent(String category, String parameter, {
+    String label,
+    int value,
+    Map<String, String> parameters,
+  }) { }
 
   @override
   void sendTiming(String category, String variableName, Duration duration, { String label }) { }
@@ -324,10 +341,10 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 9.2';
+  String get versionText => 'Xcode 10.2';
 
   @override
-  int get majorVersion => 9;
+  int get majorVersion => 10;
 
   @override
   int get minorVersion => 2;
@@ -386,4 +403,19 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
           'Consider using a MemoryFileSystem for testing if possible or refactor '
           'code to not require setting fs.currentDirectory.';
   }
+}
+
+class FakeSignals implements Signals {
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    return null;
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) async {
+    return true;
+  }
+
+  @override
+  Stream<Object> get errors => const Stream<Object>.empty();
 }

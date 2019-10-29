@@ -250,9 +250,9 @@ class Hero extends StatefulWidget {
   // should be considered for animation when `navigator` transitions from one
   // PageRoute to another.
   static Map<Object, _HeroState> _allHeroesFor(
-      BuildContext context,
-      bool isUserGestureTransition,
-      NavigatorState navigator,
+    BuildContext context,
+    bool isUserGestureTransition,
+    NavigatorState navigator,
   ) {
     assert(context != null);
     assert(isUserGestureTransition != null);
@@ -262,14 +262,15 @@ class Hero extends StatefulWidget {
     void inviteHero(StatefulElement hero, Object tag) {
       assert(() {
         if (result.containsKey(tag)) {
-          throw FlutterError(
-            'There are multiple heroes that share the same tag within a subtree.\n'
-            'Within each subtree for which heroes are to be animated (i.e. a PageRoute subtree), '
-            'each Hero must have a unique non-null tag.\n'
-            'In this case, multiple heroes had the following tag: $tag\n'
-            'Here is the subtree for one of the offending heroes:\n'
-            '${hero.toStringDeep(prefixLineOne: "# ")}'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('There are multiple heroes that share the same tag within a subtree.'),
+            ErrorDescription(
+              'Within each subtree for which heroes are to be animated (i.e. a PageRoute subtree), '
+              'each Hero must have a unique non-null tag.\n'
+              'In this case, multiple heroes had the following tag: $tag\n'
+            ),
+            DiagnosticsProperty<StatefulElement>('Here is the subtree for one of the offending heroes', hero, linePrefix: '# ', style: DiagnosticsTreeStyle.dense),
+          ]);
         }
         return true;
       }());
@@ -729,6 +730,33 @@ class HeroController extends NavigatorObserver {
     assert(navigator != null);
     assert(route != null);
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, true);
+  }
+
+  @override
+  void didStopUserGesture() {
+    if (navigator.userGestureInProgress)
+      return;
+
+    // If the user horizontal drag gesture initiated the flight (i.e. the back swipe)
+    // didn't move towards the pop direction at all, the animation will not play
+    // and thus the status update callback _handleAnimationUpdate will never be
+    // called when the gesture finishes. In this case the initiated flight needs
+    // to be manually invalidated.
+    bool isInvalidFlight(_HeroFlight flight) {
+      return flight.manifest.isUserGestureTransition
+          && flight.manifest.type == HeroFlightDirection.pop
+          && flight._proxyAnimation.isDismissed;
+    }
+
+    final List<_HeroFlight> invalidFlights = _flights.values
+      .where(isInvalidFlight)
+      .toList(growable: false);
+
+    // Treat these invalidated flights as dismissed. Calling _handleAnimationUpdate
+    // will also remove the flight from _flights.
+    for (_HeroFlight flight in invalidFlights) {
+      flight._handleAnimationUpdate(AnimationStatus.dismissed);
+    }
   }
 
   // If we're transitioning between different page routes, start a hero transition

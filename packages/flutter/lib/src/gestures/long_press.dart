@@ -156,16 +156,20 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// subsequent callbacks ([onLongPressMoveUpdate], [onLongPressUp],
   /// [onLongPressEnd]) will stop. Defaults to null, which means the gesture
   /// can be moved without limit once the long press is accepted.
+  ///
+  /// The [duration] argument can be used to overwrite the default duration
+  /// after which the long press will be recognized.
   LongPressGestureRecognizer({
+    Duration duration,
     double postAcceptSlopTolerance,
     PointerDeviceKind kind,
     Object debugOwner,
   }) : super(
-    deadline: kLongPressTimeout,
-    postAcceptSlopTolerance: postAcceptSlopTolerance,
-    kind: kind,
-    debugOwner: debugOwner,
-  );
+          deadline: duration ?? kLongPressTimeout,
+          postAcceptSlopTolerance: postAcceptSlopTolerance,
+          kind: kind,
+          debugOwner: debugOwner,
+        );
 
   bool _longPressAccepted = false;
   OffsetPair _longPressOrigin;

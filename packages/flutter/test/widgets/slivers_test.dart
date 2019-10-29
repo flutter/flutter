@@ -275,7 +275,7 @@ void main() {
         <Widget>[
           Text('item0', key: Key('0')),
           Text('item1', key: Key('1')),
-        ]
+        ],
       ));
       await tester.pumpWidget(const TestSliverGrid(
         <Widget>[
@@ -283,7 +283,7 @@ void main() {
           Text('item3', key: Key('3')),
           Text('item4', key: Key('4')),
           Text('item1', key: Key('1')),
-        ]
+        ],
       ));
       expect(find.text('item0'), findsOneWidget);
       expect(find.text('item3'), findsOneWidget);
@@ -309,7 +309,7 @@ void main() {
             Text('item0', key: Key('0')),
             Text('item2', key: Key('2')),
             Text('item1', key: Key('1')),
-          ]
+          ],
       ));
       await tester.pumpWidget(const TestSliverFixedExtentList(
           <Widget>[
@@ -318,7 +318,7 @@ void main() {
             Text('item1', key: Key('1')),
             Text('item4', key: Key('4')),
             Text('item2', key: Key('2')),
-          ]
+          ],
       ));
       expect(find.text('item0'), findsOneWidget);
       expect(find.text('item3'), findsOneWidget);
@@ -374,10 +374,10 @@ void main() {
                   return null;
                 },
               ),
-            )
+            ),
           ],
         ),
-      )
+      ),
     );
     await tester.drag(find.text('Page 5'), const Offset(0, -1000));
     // Controller will be temporarily over-scrolled.
@@ -406,10 +406,10 @@ void main() {
                   return null;
                 },
               ),
-            )
+            ),
           ],
         ),
-      )
+      ),
     );
     await tester.drag(find.text('Page 5'), const Offset(0, -210));
     // Controller will be temporarily over-scrolled.

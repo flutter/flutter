@@ -12,6 +12,7 @@ import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'fuchsia/fuchsia_device.dart';
@@ -177,9 +178,10 @@ class DeviceManager {
     if (hasSpecifiedAllDevices) {
       devices = <Device>[
         for (Device device in devices)
-          if (await device.targetPlatform != TargetPlatform.fuchsia &&
+          if (await device.targetPlatform != TargetPlatform.fuchsia_arm64 &&
+              await device.targetPlatform != TargetPlatform.fuchsia_x64 &&
               await device.targetPlatform != TargetPlatform.web_javascript)
-            device
+            device,
       ];
     }
 
@@ -190,7 +192,7 @@ class DeviceManager {
       devices = <Device>[
         for (Device device in devices)
           if (isDeviceSupportedForProject(device, flutterProject))
-            device
+            device,
       ];
     } else if (devices.length == 1 &&
              !hasSpecifiedDeviceId &&
@@ -249,28 +251,32 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   final String name;
   ItemListNotifier<Device> _items;
-  Poller _poller;
+  Timer _timer;
 
   Future<List<Device>> pollingGetDevices();
 
   void startPolling() {
-    if (_poller == null) {
+    if (_timer == null) {
       _items ??= ItemListNotifier<Device>();
-
-      _poller = Poller(() async {
-        try {
-          final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
-          _items.updateWithNewList(devices);
-        } on TimeoutException {
-          printTrace('Device poll timed out. Will retry.');
-        }
-      }, _pollingInterval);
+      _timer = _initTimer();
     }
   }
 
+  Timer _initTimer() {
+    return Timer(_pollingInterval, () async {
+      try {
+        final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+        _items.updateWithNewList(devices);
+      } on TimeoutException {
+        printTrace('Device poll timed out. Will retry.');
+      }
+      _timer = _initTimer();
+    });
+  }
+
   void stopPolling() {
-    _poller?.cancel();
-    _poller = null;
+    _timer?.cancel();
+    _timer = null;
   }
 
   @override
@@ -338,7 +344,8 @@ abstract class Device {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
       default:
         return false;
     }
@@ -473,6 +480,11 @@ abstract class Device {
   static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(printStatus);
   }
+
+  /// Clean up resources allocated by device
+  ///
+  /// For example log readers or port forwarders.
+  void dispose() {}
 }
 
 class DebuggingOptions {
@@ -486,15 +498,18 @@ class DebuggingOptions {
     this.traceSkia = false,
     this.traceSystrace = false,
     this.dumpSkpOnShaderCompilation = false,
+    this.cacheSkSL = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
     this.initializePlatform = true,
     this.hostname,
     this.port,
+    this.browserLaunch = true,
+    this.vmserviceOutFile,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname })
+  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -506,7 +521,9 @@ class DebuggingOptions {
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
-      observatoryPort = null;
+      observatoryPort = null,
+      browserLaunch = true,
+      vmserviceOutFile = null;
 
   final bool debuggingEnabled;
 
@@ -519,6 +536,7 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool traceSystrace;
   final bool dumpSkpOnShaderCompilation;
+  final bool cacheSkSL;
   final bool useTestFonts;
   final bool verboseSystemLogs;
   /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
@@ -526,6 +544,9 @@ class DebuggingOptions {
   final int observatoryPort;
   final String port;
   final String hostname;
+  final bool browserLaunch;
+  /// A file where the vmservice uri should be written after the application is started.
+  final String vmserviceOutFile;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }
@@ -561,6 +582,15 @@ class ForwardedPort {
 
   @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
+
+  /// Kill subprocess (if present) used in forwarding.
+  void dispose() {
+    final Process process = context;
+
+    if (process != null) {
+      process.kill();
+    }
+  }
 }
 
 /// Forward ports from the host machine to the device.
@@ -576,6 +606,9 @@ abstract class DevicePortForwarder {
 
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
+
+  /// Cleanup allocated resources, like forwardedPorts
+  Future<void> dispose() async { }
 }
 
 /// Read the log for a particular device.
@@ -590,6 +623,9 @@ abstract class DeviceLogReader {
 
   /// Process ID of the app on the device.
   int appPid;
+
+  // Clean up resources allocated by log reader e.g. subprocesses
+  void dispose() { }
 }
 
 /// Describes an app running on the device.
@@ -611,6 +647,9 @@ class NoOpDeviceLogReader implements DeviceLogReader {
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();
+
+  @override
+  void dispose() { }
 }
 
 // A portforwarder which does not support forwarding ports.
@@ -625,4 +664,7 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async { }
+
+  @override
+  Future<void> dispose() async { }
 }

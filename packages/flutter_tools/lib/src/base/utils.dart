@@ -8,7 +8,6 @@ import 'dart:math' show Random, max;
 import 'package:intl/intl.dart';
 
 import '../convert.dart';
-import '../globals.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart' as io;
@@ -258,45 +257,6 @@ Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
 
 typedef AsyncCallback = Future<void> Function();
 
-/// A [Timer] inspired class that:
-///   - has a different initial value for the first callback delay
-///   - waits for a callback to be complete before it starts the next timer
-class Poller {
-  Poller(this.callback, this.pollingInterval, { this.initialDelay = Duration.zero }) {
-    Future<void>.delayed(initialDelay, _handleCallback);
-  }
-
-  final AsyncCallback callback;
-  final Duration initialDelay;
-  final Duration pollingInterval;
-
-  bool _canceled = false;
-  Timer _timer;
-
-  Future<void> _handleCallback() async {
-    if (_canceled) {
-      return;
-    }
-
-    try {
-      await callback();
-    } catch (error) {
-      printTrace('Error from poller: $error');
-    }
-
-    if (!_canceled) {
-      _timer = Timer(pollingInterval, _handleCallback);
-    }
-  }
-
-  /// Cancels the poller.
-  void cancel() {
-    _canceled = true;
-    _timer?.cancel();
-    _timer = null;
-  }
-}
-
 /// Returns a [Future] that completes when all given [Future]s complete.
 ///
 /// Uses [Future.wait] but removes null elements from the provided
@@ -307,9 +267,6 @@ class Poller {
 Future<List<T>> waitGroup<T>(Iterable<Future<T>> futures) {
   return Future.wait<T>(futures.where((Future<T> future) => future != null));
 }
-/// The terminal width used by the [wrapText] function if there is no terminal
-/// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
-const int kDefaultTerminalColumns = 100;
 
 /// Smallest column that will be used for text wrapping. If the requested column
 /// width is smaller than this, then this is what will be used.

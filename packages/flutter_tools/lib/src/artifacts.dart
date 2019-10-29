@@ -40,6 +40,8 @@ enum Artifact {
   kernelWorkerSnapshot,
   /// The root of the web implementation of the dart SDK.
   flutterWebSdk,
+  /// The summary dill for the dartdevc target.
+  webPlatformKernelDill,
   iosDeploy,
   ideviceinfo,
   ideviceId,
@@ -56,6 +58,12 @@ enum Artifact {
   skyEnginePath,
   /// The location of the macOS engine podspec file.
   flutterMacOSPodspec,
+
+  // Fuchsia artifacts from the engine prebuilts.
+  fuchsiaKernelCompiler,
+  fuchsiaPlatformDill,
+  fuchsiaPatchedSdk,
+  fuchsiaFlutterJitRunner,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -92,6 +100,9 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
     case Artifact.engineDartBinary:
+      if (platform == TargetPlatform.windows_x64) {
+        return 'dart.exe';
+      }
       return 'dart';
     case Artifact.dart2jsSnapshot:
       return 'dart2js.dart.snapshot';
@@ -123,6 +134,19 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
       return 'FlutterMacOS.podspec';
+    case Artifact.webPlatformKernelDill:
+      return 'flutter_ddc_sdk.dill';
+    case Artifact.fuchsiaKernelCompiler:
+      return 'kernel_compiler.snapshot';
+    case Artifact.fuchsiaPlatformDill:
+      return 'platform_strong.dill';
+    case Artifact.fuchsiaPatchedSdk:
+      return 'flutter_runner_patched_sdk';
+    case Artifact.fuchsiaFlutterJitRunner:
+      if (mode == BuildMode.debug || mode == BuildMode.profile) {
+        return 'flutter_jit_runner-0.far';
+      }
+      return 'flutter_jit_product_runner-0.far';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -155,6 +179,19 @@ abstract class Artifacts {
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
 }
 
+TargetPlatform get _currentHostPlatform {
+  if (platform.isMacOS) {
+    return TargetPlatform.darwin_x64;
+  }
+  if (platform.isLinux) {
+    return TargetPlatform.linux_x64;
+  }
+  if (platform.isWindows) {
+    return TargetPlatform.windows_x64;
+  }
+  throw UnimplementedError('Host OS not supported.');
+}
+
 /// Manages the engine artifacts downloaded to the local cache.
 class CachedArtifacts extends Artifacts {
 
@@ -170,8 +207,10 @@ class CachedArtifacts extends Artifacts {
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
         return _getDarwinArtifactPath(artifact, platform, mode);
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+        return _getFuchsiaArtifactPath(artifact, platform, mode);
       case TargetPlatform.linux_x64:
-      case TargetPlatform.fuchsia:
       case TargetPlatform.windows_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -238,6 +277,28 @@ class CachedArtifacts extends Artifacts {
     }
   }
 
+  String _getFuchsiaArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    final String artifactFileName = _artifactToFileName(artifact, platform, mode);
+    final String root = fs.path.join(
+      cache.getArtifactDirectory('flutter_runner').path,
+      'flutter',
+      fuchsiaArchForTargetPlatform(platform),
+      getNameForBuildMode(mode),
+    );
+    switch (artifact) {
+      case Artifact.fuchsiaKernelCompiler:
+        return fs.path.join(root, 'jit', 'dart_binaries', artifactFileName);
+      case Artifact.fuchsiaPlatformDill:
+        return fs.path.join(root, 'jit', 'flutter_runner_patched_sdk', artifactFileName);
+      case Artifact.fuchsiaPatchedSdk:
+      case Artifact.fuchsiaFlutterJitRunner:
+        return fs.path.join(root, 'jit', artifactFileName);
+      default:
+        assert(false, 'Artifact $artifact not available for platform $platform.');
+        return null;
+    }
+  }
+
   String _getFlutterPatchedSdkPath(BuildMode mode) {
     final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
     return fs.path.join(engineArtifactsPath, 'common',
@@ -265,7 +326,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.engineDartSdkPath:
         return dartSdkPath;
       case Artifact.engineDartBinary:
-        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact));
+        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact, platform));
       case Artifact.platformKernelDill:
         return fs.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
@@ -274,6 +335,8 @@ class CachedArtifacts extends Artifacts {
         return _getFlutterPatchedSdkPath(mode);
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
+      case Artifact.webPlatformKernelDill:
+        return fs.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.dart2jsSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.dartdevcSnapshot:
@@ -317,7 +380,8 @@ class CachedArtifacts extends Artifacts {
         }
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
         return fs.path.join(engineDir, platformName + suffix);
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         assert(mode == null, 'Platform $platform does not support different build modes.');
@@ -334,19 +398,6 @@ class CachedArtifacts extends Artifacts {
     assert(false, 'Invalid platform $platform.');
     return null;
   }
-
-  TargetPlatform get _currentHostPlatform {
-    if (platform.isMacOS) {
-      return TargetPlatform.darwin_x64;
-    }
-    if (platform.isLinux) {
-      return TargetPlatform.linux_x64;
-    }
-    if (platform.isWindows) {
-      return TargetPlatform.windows_x64;
-    }
-    throw UnimplementedError('Host OS not supported.');
-  }
 }
 
 /// Manages the artifacts of a locally built engine.
@@ -359,7 +410,8 @@ class LocalEngineArtifacts extends Artifacts {
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
-    final String artifactFileName = _artifactToFileName(artifact);
+    platform ??= _currentHostPlatform;
+    final String artifactFileName = _artifactToFileName(artifact, platform);
     switch (artifact) {
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', artifactFileName);
@@ -418,6 +470,14 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.flutterMacOSPodspec:
         return fs.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
+      case Artifact.webPlatformKernelDill:
+        return fs.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
+      case Artifact.fuchsiaKernelCompiler:
+      case Artifact.fuchsiaPlatformDill:
+      case Artifact.fuchsiaPatchedSdk:
+      case Artifact.fuchsiaFlutterJitRunner:
+        assert(false, 'Invalid local engine artifact $artifact.');
+        return null;
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

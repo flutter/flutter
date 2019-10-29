@@ -26,7 +26,8 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, Process, ProcessSignal, stderr, stdin, Stdout, stdout;
+import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
+    stderr, stdin, Stdin, StdinException, Stdout, stdout;
 
 import 'package:meta/meta.dart';
 
@@ -38,10 +39,10 @@ export 'dart:io'
     show
         BytesBuilder,
         CompressionOptions,
-        // Directory         NO! Use `file_system.dart`
+        // Directory,         NO! Use `file_system.dart`
         exitCode,
-        // File              NO! Use `file_system.dart`
-        // FileSystemEntity  NO! Use `file_system.dart`
+        // File,              NO! Use `file_system.dart`
+        // FileSystemEntity,  NO! Use `file_system.dart`
         gzip,
         HandshakeException,
         HttpClient,
@@ -51,6 +52,7 @@ export 'dart:io'
         HttpException,
         HttpHeaders,
         HttpRequest,
+        HttpResponse,
         HttpServer,
         HttpStatus,
         InternetAddress,
@@ -62,6 +64,7 @@ export 'dart:io'
         // Platform          NO! use `platform.dart`
         Process,
         ProcessException,
+        // ProcessInfo,      NO! use `io.dart`
         ProcessResult,
         // ProcessSignal     NO! Use [ProcessSignal] below.
         ProcessStartMode,
@@ -179,6 +182,36 @@ class Stdio {
   io.IOSink get stderr => io.stderr;
 
   bool get hasTerminal => io.stdout.hasTerminal;
+
+  static bool _stdinHasTerminal;
+
+  /// Determines whether there is a terminal attached.
+  ///
+  /// [io.Stdin.hasTerminal] only covers a subset of cases. In this check the
+  /// echoMode is toggled on and off to catch cases where the tool running in
+  /// a docker container thinks there is an attached terminal. This can cause
+  /// runtime errors such as "inappropriate ioctl for device" if not handled.
+  bool get stdinHasTerminal {
+    if (_stdinHasTerminal != null) {
+      return _stdinHasTerminal;
+    }
+    if (stdin is! io.Stdin) {
+      return _stdinHasTerminal = false;
+    }
+    final io.Stdin ioStdin = stdin;
+    if (!ioStdin.hasTerminal) {
+      return _stdinHasTerminal = false;
+    }
+    try {
+      final bool currentEchoMode = ioStdin.echoMode;
+      ioStdin.echoMode = !currentEchoMode;
+      ioStdin.echoMode = currentEchoMode;
+    } on io.StdinException {
+      return _stdinHasTerminal = false;
+    }
+    return _stdinHasTerminal = true;
+  }
+
   int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
   int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
   bool get supportsAnsiEscapes => hasTerminal && io.stdout.supportsAnsiEscapes;
@@ -188,3 +221,26 @@ Stdio get stdio => context.get<Stdio>() ?? const Stdio();
 io.Stdout get stdout => stdio.stdout;
 Stream<List<int>> get stdin => stdio.stdin;
 io.IOSink get stderr => stdio.stderr;
+bool get stdinHasTerminal => stdio.stdinHasTerminal;
+
+/// An overridable version of io.ProcessInfo.
+abstract class ProcessInfo {
+  factory ProcessInfo() => _DefaultProcessInfo();
+
+  static ProcessInfo get instance => context.get<ProcessInfo>();
+
+  int get currentRss;
+
+  int get maxRss;
+}
+
+ProcessInfo get processInfo => ProcessInfo.instance;
+
+/// The default implementation of [ProcessInfo], which uses [io.ProcessInfo].
+class _DefaultProcessInfo implements ProcessInfo {
+  @override
+  int get currentRss => io.ProcessInfo.currentRss;
+
+  @override
+  int get maxRss => io.ProcessInfo.maxRss;
+}

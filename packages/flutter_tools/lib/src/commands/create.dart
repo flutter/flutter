@@ -141,7 +141,7 @@ class CreateCommand extends FlutterCommand {
     argParser.addFlag(
       'androidx',
       negatable: true,
-      defaultsTo: false,
+      defaultsTo: true,
       help: 'Generate a project using the AndroidX support libraries',
     );
     // Deprecated
@@ -398,7 +398,7 @@ class CreateCommand extends FlutterCommand {
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
     if (!projectDir.existsSync() || projectDir.listSync().isEmpty) {
-      printStatus('Creating project $relativeDirPath...');
+      printStatus('Creating project $relativeDirPath... androidx: ${argResults['androidx']}');
     } else {
       if (sampleCode != null && !argResults['overwrite']) {
         throwToolExit('Will not overwrite existing project in $relativeDirPath: '
@@ -498,7 +498,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['description'] = description;
     generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
-      await pubGet(
+      await pub.get(
         context: PubContext.create,
         directory: directory.path,
         offline: argResults['offline'],
@@ -517,7 +517,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
-      await pubGet(
+      await pub.get(
         context: PubContext.createPackage,
         directory: directory.path,
         offline: argResults['offline'],
@@ -534,7 +534,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['description'] = description;
     generatedCount += _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
-      await pubGet(
+      await pub.get(
         context: PubContext.createPlugin,
         directory: directory.path,
         offline: argResults['offline'],
@@ -570,7 +570,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     }
 
     if (argResults['pub']) {
-      await pubGet(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
+      await pub.get(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 
@@ -623,6 +623,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidX': androidX,
+      'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       'androidMinApiLevel': android.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'androidFlutterJar': '$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar',

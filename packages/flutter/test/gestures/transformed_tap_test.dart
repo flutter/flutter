@@ -37,7 +37,7 @@ void main() {
             color: Colors.red,
           ),
         ),
-      )
+      ),
     );
 
     await tester.tapAt(tester.getCenter(find.byKey(redContainer)));
@@ -81,7 +81,7 @@ void main() {
                 ),
             ),
           ),
-        )
+        ),
     );
 
     // Move just below kTouchSlop should recognize tap.
@@ -144,7 +144,7 @@ void main() {
                 ),
             ),
           ),
-        )
+        ),
     );
 
     // Move just below kTouchSlop should recognize tap.

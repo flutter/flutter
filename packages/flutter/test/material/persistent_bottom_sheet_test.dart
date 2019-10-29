@@ -52,7 +52,7 @@ void main() {
             );
           },
         ),
-      )
+      ),
     ));
 
     await tester.pumpAndSettle();
@@ -104,7 +104,7 @@ void main() {
       home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body')),
-      )
+      ),
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>(
@@ -258,7 +258,7 @@ void main() {
           onPressed: null,
           child: Text('fab'),
         ),
-      )
+      ),
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>(
@@ -467,7 +467,7 @@ void main() {
       home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body')),
-      )
+      ),
     ));
 
     final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {

@@ -12,7 +12,9 @@ VisualStudioValidator get visualStudioValidator => context.get<VisualStudioValid
 class VisualStudioValidator extends DoctorValidator {
   const VisualStudioValidator() : super('Visual Studio - develop for Windows');
 
-  int get majorVersion => int.tryParse(visualStudio.fullVersion.split('.')[0]);
+  int get majorVersion => visualStudio.fullVersion != null
+      ? int.tryParse(visualStudio.fullVersion.split('.')[0])
+      : null;
 
   @override
   Future<ValidationResult> validate() async {
@@ -52,7 +54,7 @@ class VisualStudioValidator extends DoctorValidator {
             userMessages.visualStudioMissingComponents(
                 visualStudio.workloadDescription,
                 visualStudio.necessaryComponentDescriptions(majorVersion),
-            )
+            ),
         ));
       }
       versionInfo = '${visualStudio.displayName} ${visualStudio.displayVersion}';
@@ -62,7 +64,7 @@ class VisualStudioValidator extends DoctorValidator {
         userMessages.visualStudioMissing(
           visualStudio.workloadDescription,
           visualStudio.necessaryComponentDescriptions(majorVersion),
-        )
+        ),
       ));
     }
 

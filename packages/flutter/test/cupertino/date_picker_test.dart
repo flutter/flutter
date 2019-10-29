@@ -358,8 +358,8 @@ void main() {
                 minuteInterval: 3,
               ),
             ),
-          )
-        )
+          ),
+        ),
       );
 
       // Drag the minute picker to the next slot (03 -> 06).
@@ -889,8 +889,8 @@ void main() {
                 onDateTimeChanged: (_) {},
               ),
             ),
-          )
-        )
+          ),
+        ),
       );
 
       final dynamic exception = tester.takeException();
@@ -916,16 +916,13 @@ void main() {
                 ),
               ),
             ),
-          )
-        )
+          ),
+        ),
       );
 
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesGoldenFile(
-          'date_picker_test.datetime.initial.png',
-          version: 2,
-        ),
+        matchesGoldenFile('date_picker_test.datetime.initial.png'),
       );
 
       // Slightly drag the hour component to make the current hour off-center.
@@ -934,10 +931,7 @@ void main() {
 
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesGoldenFile(
-          'date_picker_test.datetime.drag.png',
-          version: 2,
-        ),
+        matchesGoldenFile('date_picker_test.datetime.drag.png'),
       );
     });
   });
@@ -971,10 +965,7 @@ void main() {
 
     await expectLater(
       find.byType(CupertinoTimerPicker),
-      matchesGoldenFile(
-        'timer_picker_test.datetime.initial.png',
-        version: 1,
-      ),
+      matchesGoldenFile('timer_picker_test.datetime.initial.png'),
     );
 
     // Slightly drag the minute component to make the current minute off-center.
@@ -983,10 +974,7 @@ void main() {
 
     await expectLater(
       find.byType(CupertinoTimerPicker),
-      matchesGoldenFile(
-        'timer_picker_test.datetime.drag.png',
-        version: 1,
-      ),
+      matchesGoldenFile('timer_picker_test.datetime.drag.png'),
     );
   });
 

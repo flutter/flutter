@@ -84,8 +84,8 @@ void main() {
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
           child: FakeEditableText(key: editableTextKey),
-        )
-      )
+        ),
+      ),
     );
   }
 
@@ -284,7 +284,7 @@ void main() {
         pressure: 0.0,
         pressureMin: 0,
         pressureMax: 1,
-      )
+      ),
     );
     await tester.pump(const Duration(milliseconds: 50));
     await gesture.up();

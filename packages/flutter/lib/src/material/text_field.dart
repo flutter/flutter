@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +11,6 @@ import 'package:flutter/gestures.dart';
 
 import 'debug.dart';
 import 'feedback.dart';
-import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -38,17 +35,11 @@ typedef InputCounterWidgetBuilder = Widget Function(
 
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({
-    @required _TextFieldState state
+    @required _TextFieldState state,
   }) : _state = state,
        super(delegate: state);
 
   final _TextFieldState _state;
-
-  @override
-  void onTapDown(TapDownDetails details) {
-    super.onTapDown(details);
-    _state._startSplash(details.globalPosition);
-  }
 
   @override
   void onForcePressStart(ForcePressDetails details) {
@@ -100,14 +91,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
       }
     }
     _state._requestKeyboard();
-    _state._confirmCurrentSplash();
     if (_state.widget.onTap != null)
       _state.widget.onTap();
-  }
-
-  @override
-  void onSingleTapCancel() {
-    _state._cancelCurrentSplash();
   }
 
   @override
@@ -127,13 +112,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
       }
     }
-    _state._confirmCurrentSplash();
-  }
-
-  @override
-  void onDragSelectionStart(DragStartDetails details) {
-    super.onDragSelectionStart(details);
-    _state._startSplash(details.globalPosition);
   }
 }
 
@@ -160,9 +138,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// extra padding introduced by the decoration to save space for the labels.
 ///
 /// If [decoration] is non-null (which is the default), the text field requires
-/// one of its ancestors to be a [Material] widget. When the [TextField] is
-/// tapped an ink splash that paints on the material is triggered, see
-/// [ThemeData.splashFactory].
+/// one of its ancestors to be a [Material] widget.
 ///
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
@@ -301,8 +277,8 @@ class TextField extends StatefulWidget {
   /// is null (the default) and [readOnly] is true.
   ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], and [maxLength]
-  /// arguments must not be null.
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength], and
+  /// [enableSuggestions] arguments must not be null.
   ///
   /// See also:
   ///
@@ -327,6 +303,7 @@ class TextField extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
+    this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
     this.expands = false,
@@ -353,6 +330,7 @@ class TextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -368,9 +346,10 @@ class TextField extends StatefulWidget {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? obscureText ?
+       toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
            selectAll: true,
            paste: true,
@@ -380,7 +359,7 @@ class TextField extends StatefulWidget {
            cut: true,
            selectAll: true,
            paste: true,
-         ),
+         )),
        super(key: key);
 
   /// Controls the text being edited.
@@ -476,6 +455,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.enableSuggestions}
+  final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
@@ -699,6 +681,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
@@ -720,10 +703,7 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin implements TextSelectionGestureDetectorBuilderDelegate {
-  Set<InteractiveInkFeature> _splashes;
-  InteractiveInkFeature _currentSplash;
-
+class _TextFieldState extends State<TextField> implements TextSelectionGestureDetectorBuilderDelegate {
   TextEditingController _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller;
 
@@ -905,78 +885,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
   }
 
-  InteractiveInkFeature _createInkFeature(Offset globalPosition) {
-    final MaterialInkController inkController = Material.of(context);
-    final ThemeData themeData = Theme.of(context);
-    final BuildContext editableContext = editableTextKey.currentContext;
-    final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
-    final Offset position = referenceBox.globalToLocal(globalPosition);
-    final Color color = themeData.splashColor;
-
-    InteractiveInkFeature splash;
-    void handleRemoved() {
-      if (_splashes != null) {
-        assert(_splashes.contains(splash));
-        _splashes.remove(splash);
-        if (_currentSplash == splash)
-          _currentSplash = null;
-        updateKeepAlive();
-      } // else we're probably in deactivate()
-    }
-
-    splash = themeData.splashFactory.create(
-      controller: inkController,
-      referenceBox: referenceBox,
-      position: position,
-      color: color,
-      containedInkWell: true,
-      // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
-      borderRadius: BorderRadius.zero,
-      onRemoved: handleRemoved,
-      textDirection: Directionality.of(context),
-    );
-
-    return splash;
-  }
-
-  void _startSplash(Offset globalPosition) {
-    if (_effectiveFocusNode.hasFocus)
-      return;
-    final InteractiveInkFeature splash = _createInkFeature(globalPosition);
-    _splashes ??= HashSet<InteractiveInkFeature>();
-    _splashes.add(splash);
-    _currentSplash = splash;
-    updateKeepAlive();
-  }
-
-  void _confirmCurrentSplash() {
-    _currentSplash?.confirm();
-    _currentSplash = null;
-  }
-
-  void _cancelCurrentSplash() {
-    _currentSplash?.cancel();
-  }
-
-  @override
-  bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
-
-  @override
-  void deactivate() {
-    if (_splashes != null) {
-      final Set<InteractiveInkFeature> splashes = _splashes;
-      _splashes = null;
-      for (InteractiveInkFeature splash in splashes)
-        splash.dispose();
-      _currentSplash = null;
-    }
-    assert(_currentSplash == null);
-    super.deactivate();
-  }
-
-  void _handleMouseEnter(PointerEnterEvent event) => _handleHover(true);
-  void _handleMouseExit(PointerExitEvent event) => _handleHover(false);
-
   void _handleHover(bool hovering) {
     if (hovering != _isHovering) {
       setState(() {
@@ -987,7 +895,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasMaterial(context));
     // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
     // assert(debugCheckHasMaterialLocalizations(context));
@@ -1054,6 +961,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
+        enableSuggestions: widget.enableSuggestions,
         maxLines: widget.maxLines,
         minLines: widget.minLines,
         expands: widget.expands,
@@ -1104,8 +1012,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     return IgnorePointer(
       ignoring: !_isEnabled,
       child: MouseRegion(
-        onEnter: _handleMouseEnter,
-        onExit: _handleMouseExit,
+        onEnter: (PointerEnterEvent event) => _handleHover(true),
+        onExit: (PointerExitEvent event) => _handleHover(false),
         child: AnimatedBuilder(
           animation: controller, // changes the _currentLength
           builder: (BuildContext context, Widget child) {

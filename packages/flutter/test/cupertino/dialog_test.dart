@@ -60,7 +60,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
+    expect(widget.style.color.withAlpha(255).value, CupertinoColors.destructiveRed.value);
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
@@ -183,7 +183,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
+    expect(widget.style.color.withAlpha(255).value, CupertinoColors.destructiveRed.value);
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
@@ -1022,6 +1022,36 @@ void main() {
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
     expect(transition.opacity.value, closeTo(0.0, 0.001));
+  });
+
+  testWidgets('Actions are accessible by key', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return const CupertinoAlertDialog(
+            title: Text('The Title'),
+            content: Text('The message'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                key: Key('option_1'),
+                child: Text('Option 1'),
+              ),
+              CupertinoDialogAction(
+                key: Key('option_2'),
+                child: Text('Option 2'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(find.byKey(const Key('option_1')), findsOneWidget);
+    expect(find.byKey(const Key('option_2')), findsOneWidget);
+    expect(find.byKey(const Key('option_3')), findsNothing);
   });
 }
 

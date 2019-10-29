@@ -208,6 +208,8 @@ class VisualStudio {
       // Thrown if vswhere doesnt' exist; ignore and return null below.
     } on ProcessException {
       // Ignored, return null below.
+    } on FormatException {
+      // may be thrown if invalid JSON is returned.
     }
     return null;
   }

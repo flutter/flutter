@@ -14,6 +14,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
+import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -37,6 +38,7 @@ enum ExitStatus {
   success,
   warning,
   fail,
+  killed,
 }
 
 /// [FlutterCommand]s' subclasses' [FlutterCommand.runCommand] can optionally
@@ -73,6 +75,8 @@ class FlutterCommandResult {
         return 'warning';
       case ExitStatus.fail:
         return 'fail';
+      case ExitStatus.killed:
+        return 'killed';
       default:
         assert(false);
         return null;
@@ -144,6 +148,14 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: null,
       help: 'The host port to serve the web application from. If not provided, the tool '
         'will select a random open port on the host.',
+      hide: hide,
+    );
+    argParser.addFlag('web-browser-launch',
+      defaultsTo: true,
+      negatable: true,
+      help: 'Whether to automatically launch browsers for web devices '
+        'that do so. Setting this to true allows using the Dart debug extension '
+        'on Chrome and other browsers which support extensions.',
       hide: hide,
     );
   }
@@ -349,7 +361,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'track-widget-creation',
       hide: !hasEffect && !verboseHelp,
-      defaultsTo: false, // this will soon be changed to true
+      defaultsTo: true,
       help: 'Track widget creation locations. This enables features such as the widget inspector. '
             'This parameter is only functional in debug mode (i.e. when compiling JIT, not AOT).',
     );
@@ -439,6 +451,7 @@ abstract class FlutterCommand extends Command<void> {
           flutterUsage.printWelcome();
         }
         final String commandPath = await usagePath;
+        _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult;
         try {
           commandResult = await verifyThenRunCommand(commandPath);
@@ -454,12 +467,29 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void _registerSignalHandlers(String commandPath, DateTime startTime) {
+    final SignalHandler handler = (io.ProcessSignal s) {
+      _sendPostUsage(
+        commandPath,
+        const FlutterCommandResult(ExitStatus.killed),
+        startTime,
+        systemClock.now(),
+      );
+    };
+    signals.addHandler(io.ProcessSignal.SIGTERM, handler);
+    signals.addHandler(io.ProcessSignal.SIGINT, handler);
+  }
+
   /// Logs data about this command.
   ///
   /// For example, the command path (e.g. `build/apk`) and the result,
   /// as well as the time spent running it.
-  void _sendPostUsage(String commandPath, FlutterCommandResult commandResult,
-                      DateTime startTime, DateTime endTime) {
+  void _sendPostUsage(
+    String commandPath,
+    FlutterCommandResult commandResult,
+    DateTime startTime,
+    DateTime endTime,
+  ) {
     if (commandPath == null) {
       return;
     }
@@ -508,7 +538,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     if (shouldRunPub) {
-      await pubGet(context: PubContext.getVerifyContext(name));
+      await pub.get(context: PubContext.getVerifyContext(name));
       final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
@@ -704,7 +734,8 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
       // No artifacts currently supported.
       return null;

@@ -21,6 +21,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
@@ -86,6 +87,7 @@ FlutterPlatform installHook({
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
+  @required BuildMode buildMode,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   bool buildTestAssets = false,
@@ -119,6 +121,7 @@ FlutterPlatform installHook({
     port: port,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
+    buildMode: buildMode,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,
@@ -258,6 +261,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.port,
     this.precompiledDillPath,
     this.precompiledDillFiles,
+    @required this.buildMode,
     this.trackWidgetCreation,
     this.updateGoldens,
     this.buildTestAssets,
@@ -277,6 +281,7 @@ class FlutterPlatform extends PlatformPlugin {
   final int port;
   final String precompiledDillPath;
   final Map<String, String> precompiledDillFiles;
+  final BuildMode buildMode;
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final bool buildTestAssets;
@@ -451,7 +456,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(trackWidgetCreation, flutterProject);
+        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {

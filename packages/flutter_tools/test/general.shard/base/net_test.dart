@@ -127,7 +127,7 @@ void main() {
     ),
     Platform: () => FakePlatform.fromPlatform(const LocalPlatform())
       ..environment = <String, String>{
-        'FLUTTER_STORAGE_BASE_URL': 'example.invalid'
+        'FLUTTER_STORAGE_BASE_URL': 'example.invalid',
       },
   });
 

@@ -19,6 +19,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'popup_menu_theme.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 // Examples can assume:
 // enum Commands { heroAndScholar, hurricaneCame }
@@ -723,7 +724,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     } else {
       // For the sake of backwards compatibility. An (unlikely) app that relied
       // on having menus only inherit from the material Theme could set
-      // captureInheritedThemes to false and get the original behvaior.
+      // captureInheritedThemes to false and get the original behavior.
       if (theme != null)
         menu = Theme(data: theme, child: menu);
     }
@@ -939,7 +940,8 @@ class PopupMenuButton<T> extends StatefulWidget {
        assert(offset != null),
        assert(enabled != null),
        assert(captureInheritedThemes != null),
-       assert(!(child != null && icon != null)), // fails if passed both parameters
+       assert(!(child != null && icon != null),
+           'You can only pass [child] or [icon], not both.'),
        super(key: key);
 
   /// Called when the button is pressed to create the items to show in the menu.
@@ -976,11 +978,13 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// to set the padding to zero.
   final EdgeInsetsGeometry padding;
 
-  /// If provided, the widget used for this button.
+  /// If provided, [child] is the widget used for this button
+  /// and the button will utilize an [InkWell] for taps.
   final Widget child;
 
-  /// If provided, the icon used for this button.
-  final Icon icon;
+  /// If provided, the [icon] is used for this button
+  /// and the button will behave like an [IconButton].
+  final Widget icon;
 
   /// The offset applied to the Popup Menu Button.
   ///
@@ -1080,16 +1084,21 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    return widget.child != null
-      ? InkWell(
+
+    if (widget.child != null)
+      return Tooltip(
+        message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+        child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           child: widget.child,
-        )
-      : IconButton(
-          icon: widget.icon ?? _getIcon(Theme.of(context).platform),
-          padding: widget.padding,
-          tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
-          onPressed: widget.enabled ? showButtonMenu : null,
-        );
+        ),
+      );
+
+    return IconButton(
+      icon: widget.icon ?? _getIcon(Theme.of(context).platform),
+      padding: widget.padding,
+      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+      onPressed: widget.enabled ? showButtonMenu : null,
+    );
   }
 }

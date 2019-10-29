@@ -90,6 +90,7 @@ class AndroidBuildInfo {
     this.targetArchs = const <AndroidArch>[
       AndroidArch.armeabi_v7a,
       AndroidArch.arm64_v8a,
+      AndroidArch.x86_64,
     ],
     this.splitPerAbi = false,
     this.shrink = false,
@@ -112,35 +113,78 @@ class AndroidBuildInfo {
   final Iterable<AndroidArch> targetArchs;
 }
 
-/// The type of build.
-enum BuildMode {
-  debug,
-  profile,
-  release,
-}
+/// A summary of the compilation strategy used for Dart.
+class BuildMode {
+  const BuildMode._(this.name);
 
-const List<String> _kBuildModes = <String>[
-  'debug',
-  'profile',
-  'release',
-];
+  factory BuildMode.fromName(String value) {
+    switch (value) {
+      case 'debug':
+        return BuildMode.debug;
+      case 'profile':
+        return BuildMode.profile;
+      case 'release':
+        return BuildMode.release;
+      case 'jit_release':
+        return BuildMode.jitRelease;
+    }
+    throw ArgumentError('$value is not a supported build mode');
+  }
+
+  /// Built in JIT mode with no optimizations, enabled asserts, and an observatory.
+  static const BuildMode debug = BuildMode._('debug');
+
+  /// Built in AOT mode with some optimizations and an observatory.
+  static const BuildMode profile = BuildMode._('profile');
+
+  /// Built in AOT mode with all optimizations and no observatory.
+  static const BuildMode release = BuildMode._('release');
+
+  /// Built in JIT mode with all optimizations and no observatory.
+  static const BuildMode jitRelease = BuildMode._('jit_release');
+
+  static const List<BuildMode> values = <BuildMode>[
+    debug,
+    profile,
+    release,
+    jitRelease,
+  ];
+  static const Set<BuildMode> releaseModes = <BuildMode>{
+    release,
+    jitRelease,
+  };
+  static const Set<BuildMode> jitModes = <BuildMode>{
+    debug,
+    jitRelease,
+  };
+
+  /// Whether this mode is considered release.
+  ///
+  /// Useful for determining whether we should enable/disable asserts or
+  /// other development features.
+  bool get isRelease => releaseModes.contains(this);
+
+  /// Whether this mode is using the jit runtime.
+  bool get isJit => jitModes.contains(this);
+
+  /// Whether this mode is using the precompiled runtime.
+  bool get isPrecompiled => !isJit;
+
+  /// The name for this build mode.
+  final String name;
+
+  @override
+  String toString() => name;
+}
 
 /// Return the name for the build mode, or "any" if null.
 String getNameForBuildMode(BuildMode buildMode) {
-  return _kBuildModes[buildMode.index];
+  return buildMode.name;
 }
 
 /// Returns the [BuildMode] for a particular `name`.
 BuildMode getBuildModeForName(String name) {
-  switch (name) {
-    case 'debug':
-      return BuildMode.debug;
-    case 'profile':
-      return BuildMode.profile;
-    case 'release':
-      return BuildMode.release;
-  }
-  return null;
+  return BuildMode.fromName(name);
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
@@ -270,7 +314,8 @@ enum TargetPlatform {
   darwin_x64,
   linux_x64,
   windows_x64,
-  fuchsia,
+  fuchsia_arm64,
+  fuchsia_x64,
   tester,
   web_javascript,
 }
@@ -338,8 +383,10 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'linux-x64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
-    case TargetPlatform.fuchsia:
-      return 'fuchsia';
+    case TargetPlatform.fuchsia_arm64:
+      return 'fuchsia-arm64';
+    case TargetPlatform.fuchsia_x64:
+      return 'fuchsia-x64';
     case TargetPlatform.tester:
       return 'flutter-tester';
     case TargetPlatform.web_javascript:
@@ -359,6 +406,10 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.android_x64;
     case 'android-x86':
       return TargetPlatform.android_x86;
+    case 'fuchsia-arm64':
+      return TargetPlatform.fuchsia_arm64;
+    case 'fuchsia-x64':
+      return TargetPlatform.fuchsia_x64;
     case 'ios':
       return TargetPlatform.ios;
     case 'darwin-x64':
@@ -417,6 +468,18 @@ String getPlatformNameForAndroidArch(AndroidArch arch) {
   }
   assert(false);
   return null;
+}
+
+String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
+  switch (targetPlatform) {
+    case TargetPlatform.fuchsia_arm64:
+      return 'arm64';
+    case TargetPlatform.fuchsia_x64:
+      return 'x64';
+    default:
+      assert(false);
+      return null;
+  }
 }
 
 HostPlatform getCurrentHostPlatform() {

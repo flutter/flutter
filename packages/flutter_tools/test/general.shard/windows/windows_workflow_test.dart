@@ -26,7 +26,7 @@ void main() {
       overrides: <Type, Generator>{
         Platform: () => windows,
         FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-      }
+      },
     );
   });
 

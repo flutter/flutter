@@ -296,7 +296,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style = _kActionSheetActionStyle.copyWith(
       color: isDestructiveAction
-        ? CupertinoSystemColors.of(context).systemRed
+        ? CupertinoDynamicColor.resolve(CupertinoColors.systemRed, context)
         : CupertinoTheme.of(context).primaryColor,
     );
 
@@ -362,7 +362,7 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
   Widget build(BuildContext context) {
     final Color backgroundColor = isBeingPressed
       ? _kCancelPressedColor
-      : CupertinoSystemColors.of(context).secondarySystemGroupedBackground;
+      : CupertinoColors.secondarySystemGroupedBackground;
     return GestureDetector(
       excludeFromSemantics: true,
       onTapDown: _onTapDown,

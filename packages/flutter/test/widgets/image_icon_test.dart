@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(
       const Center(
         child: ImageIcon(_kImage),
-      )
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
@@ -45,7 +45,7 @@ void main() {
           null,
           size: 96.0,
         ),
-      )
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
@@ -59,7 +59,7 @@ void main() {
           data: IconThemeData(size: 36.0),
           child: ImageIcon(null),
         ),
-      )
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
@@ -76,7 +76,7 @@ void main() {
             size: 48.0,
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
@@ -90,7 +90,7 @@ void main() {
           data: IconThemeData(),
           child: ImageIcon(null),
         ),
-      )
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));

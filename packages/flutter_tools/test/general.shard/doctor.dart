@@ -27,7 +27,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(
       isLinuxEnabled: true,
       isWindowsEnabled: true,
-    )
+    ),
   }));
 
   test('doctor validators does not include desktop when features are enabled', () => testbed.run(() {
@@ -39,7 +39,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(
       isLinuxEnabled: false,
       isWindowsEnabled: false,
-    )
+    ),
   }));
 
   test('doctor validators includes web when feature is enabled', () => testbed.run(() {
@@ -48,7 +48,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isWebEnabled: true,
-    )
+    ),
   }));
 
   test('doctor validators does not include web when feature is disabled', () => testbed.run(() {
@@ -57,6 +57,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isWebEnabled: false,
-    )
+    ),
   }));
 }

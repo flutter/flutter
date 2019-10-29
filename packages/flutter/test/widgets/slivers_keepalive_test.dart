@@ -499,7 +499,7 @@ class _SwitchingChildListTest extends State<SwitchingChildListTest> {
               SliverFillViewport(
                 viewportFraction: widget.viewportFraction,
                 delegate: SliverChildListDelegate(widget.children),
-              )
+              ),
             ],
           ),
         ),
@@ -535,7 +535,7 @@ class _SwitchingSliverListTest extends State<SwitchingSliverListTest> {
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildListDelegate(widget.children),
-              )
+              ),
             ],
           ),
         ),

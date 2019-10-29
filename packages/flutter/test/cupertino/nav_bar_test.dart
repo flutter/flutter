@@ -194,12 +194,12 @@ void main() {
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },
-            child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x000001),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.darkColor, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.white, index: 0x000100),
           trailing: CupertinoButton(
             onPressed: () { },
-            child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x010000),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.darkColor, index: 0x010000),
           ),
         ),
       ),
@@ -333,8 +333,8 @@ void main() {
     });
 
     expect(opacities, <double> [
-        0.0, // Initially the smaller font title is invisible.
-        1.0, // The larger font title is visible.
+      0.0, // Initially the smaller font title is invisible.
+      1.0, // The larger font title is visible.
     ]);
 
     expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
@@ -358,8 +358,8 @@ void main() {
     });
 
     expect(opacities, <double> [
-        1.0, // Smaller font title now visible
-        0.0, // Larger font title invisible.
+      1.0, // Smaller font title now visible
+      0.0, // Larger font title invisible.
     ]);
 
     // The persistent toolbar doesn't move or change size.
@@ -819,10 +819,7 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile(
-          'nav_bar_test.standard_title.png',
-          version: 2,
-        ),
+        matchesGoldenFile('nav_bar_test.standard_title.png'),
       );
     },
   );
@@ -853,10 +850,7 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile(
-          'nav_bar_test.large_title.png',
-          version: 2,
-        ),
+        matchesGoldenFile('nav_bar_test.large_title.png'),
       );
     },
   );
@@ -962,7 +956,7 @@ void main() {
               child: Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -974,7 +968,7 @@ void main() {
           builder: (BuildContext context) {
             return const CupertinoNavigationBarBackButton();
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -1003,7 +997,7 @@ void main() {
               child: Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -1022,7 +1016,7 @@ void main() {
               child: const Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -1134,7 +1128,7 @@ class _ExpectStyles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle style = DefaultTextStyle.of(context).style;
-    expect(style.color, color);
+    expect(style.color, isSameColorAs(color));
     expect(style.fontFamily, '.SF Pro Text');
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, -0.41);

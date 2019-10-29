@@ -127,6 +127,12 @@ const Matcher isInCard = _IsInCard();
 ///  * [isInCard], the opposite.
 const Matcher isNotInCard = _IsNotInCard();
 
+/// Asserts that the object represents the same color as [color] when used to paint.
+///
+/// Specifically this matcher checks the object is of type [Color] and its [Color.value]
+/// equals to that of the given [color].
+Matcher isSameColorAs(Color color) => _ColorMatcher(targetColor: color);
+
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
@@ -303,9 +309,7 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// The [key] may be either a [Uri] or a [String] representation of a URI.
 ///
 /// The [version] is a number that can be used to differentiate historical
-/// golden files. This parameter is optional. Version numbers are used in golden
-/// file tests for package:flutter. You can learn more about these tests
-/// [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+/// golden files. This parameter is optional.
 ///
 /// This is an asynchronous matcher, meaning that callers should use
 /// [expectLater] when using this matcher and await the future returned by
@@ -336,8 +340,11 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 ///
 /// await expectLater(
 ///   imageFuture,
-///   matchesGoldenFile('save.png'),
-///  );
+///   matchesGoldenFile(
+///     'save.png',
+///     version: 2,
+///   ),
+/// );
 ///
 /// await expectLater(
 ///   find.byType(MyWidget),
@@ -440,7 +447,9 @@ Matcher matchesSemantics({
   bool isChecked = false,
   bool isSelected = false,
   bool isButton = false,
+  bool isLink = false,
   bool isFocused = false,
+  bool isFocusable = false,
   bool isTextField = false,
   bool isReadOnly = false,
   bool hasEnabledState = false,
@@ -489,9 +498,11 @@ Matcher matchesSemantics({
     if (isChecked) SemanticsFlag.isChecked,
     if (isSelected) SemanticsFlag.isSelected,
     if (isButton) SemanticsFlag.isButton,
+    if (isLink) SemanticsFlag.isLink,
     if (isTextField) SemanticsFlag.isTextField,
     if (isReadOnly) SemanticsFlag.isReadOnly,
     if (isFocused) SemanticsFlag.isFocused,
+    if (isFocusable) SemanticsFlag.isFocusable,
     if (hasEnabledState) SemanticsFlag.hasEnabledState,
     if (isEnabled) SemanticsFlag.isEnabled,
     if (isInMutuallyExclusiveGroup) SemanticsFlag.isInMutuallyExclusiveGroup,
@@ -1026,8 +1037,8 @@ double _sizeDistance(Size a, Size b) {
 /// The distance is computed by a [DistanceFunction].
 ///
 /// If `distanceFunction` is null, a standard distance function is used for the
-/// `runtimeType` of the `from` argument. Standard functions are defined for
-/// the following types:
+/// `T` generic argument. Standard functions are defined for the following
+/// types:
 ///
 ///  * [Color], whose distance is the maximum component-wise delta.
 ///  * [Offset], whose distance is the Euclidean distance computed using the
@@ -1050,7 +1061,7 @@ Matcher within<T>({
   @required T from,
   DistanceFunction<T> distanceFunction,
 }) {
-  distanceFunction ??= _kStandardDistanceFunctions[from.runtimeType];
+  distanceFunction ??= _kStandardDistanceFunctions[T];
 
   if (distanceFunction == null) {
     throw ArgumentError(
@@ -1602,6 +1613,24 @@ class _CoversSameAreaAs extends Matcher {
   @override
   Description describe(Description description) =>
     description.add('covers expected area and only expected area');
+}
+
+class _ColorMatcher extends Matcher {
+  const _ColorMatcher({
+      @required this.targetColor,
+  }) : assert(targetColor != null);
+
+  final Color targetColor;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is Color)
+      return item.value == targetColor.value;
+    return false;
+  }
+
+  @override
+  Description describe(Description description) => description.add('matches color $targetColor');
 }
 
 Future<ui.Image> _captureImage(Element element) {
