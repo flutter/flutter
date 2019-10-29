@@ -263,9 +263,7 @@ ios_app("FlutterTests") {
     "flutter_unittests.mm",
   ]
 
-  libs = [
-    "Foundation.framework",
-  ]
+  libs = [ "Foundation.framework" ]
 
   deps = [
     ":flutter_tests_fixtures",
