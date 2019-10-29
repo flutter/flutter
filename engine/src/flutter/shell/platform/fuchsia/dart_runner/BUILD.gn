@@ -153,6 +153,8 @@ template("aot_runner_package") {
       },
     ]
 
+    libraries = common_libs
+
     resources = []
     if (!invoker.product) {
       vmservice_data = rebase_path(
