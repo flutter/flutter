@@ -272,12 +272,12 @@ class SkiaGoldClient {
           final String ignoredPullRequest = ignore['note'].split('/').last;
           final DateTime expiration = DateTime.parse(ignore['expires']);
           if (ignoredQueries.contains('name=$testName') &&
-            expiration.isBefore(DateTime.now())) {
+            expiration.isAfter(DateTime.now())) {
             ignoreIsActive = true;
             if (ignoredPullRequest != pullRequest) {
-              print('An ignore is active for this test for pull reqest:');
-              print('');
-              print('https://flutter-gold.skia.org/ignores');
+              print('An `ignore` is active for this test for pull request:');
+              print('https://github.com/flutter/flutter/pull/$ignoredPullRequest');
+              print('See also: https://flutter-gold.skia.org/ignores for details.');
             }
             break;
           }

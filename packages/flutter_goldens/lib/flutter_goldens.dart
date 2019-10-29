@@ -331,7 +331,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       }
     }
 
-    return skiaClient.testIsIgnored(
+    return skiaClient.testIsIgnoredForPullRequest(
       platform.environment['CIRRUS_PR'] ?? '',
       golden.path,
     );

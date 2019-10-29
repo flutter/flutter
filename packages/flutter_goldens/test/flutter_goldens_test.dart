@@ -221,7 +221,12 @@ void main() {
           url = Uri.parse('https://flutter-gold.skia.org/json/ignores');
           mockHttpRequest = MockHttpClientRequest();
           mockHttpResponse = MockHttpClientResponse(utf8.encode(
-              ignoreResponseTemplate(pullRequestNumber: pullRequestNumber)
+              ignoreResponseTemplate(
+                pullRequestNumber: pullRequestNumber,
+                expires: DateTime.now()
+                  .add(const Duration(days: 1))
+                  .toString(),
+              )
           ));
           when(mockHttpClient.getUrl(url))
             .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
@@ -239,21 +244,38 @@ void main() {
           );
         });
 
-        test('returns false for not ignored test and ignored pull request number', () async {
+        test('returns true for ignored test and not ignored pull request number', () async {
           expect(
             await skiaClient.testIsIgnoredForPullRequest(
               '5678',
               testName,
             ),
-            isFalse,
+            isTrue,
           );
         });
 
-        test('returns false for ignored test and not ignored pull request number', () async {
+        test('returns false for not ignored test and ignored pull request number', () async {
          expect(
             await skiaClient.testIsIgnoredForPullRequest(
               pullRequestNumber,
               'failure.png',
+            ),
+            isFalse,
+          );
+        });
+
+        test('returns false for expired ignore', () async {
+          mockHttpResponse = MockHttpClientResponse(utf8.encode(
+            ignoreResponseTemplate(
+              pullRequestNumber: pullRequestNumber,
+            )
+          ));
+          when(mockHttpRequest.close())
+            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          expect(
+            await skiaClient.testIsIgnoredForPullRequest(
+              pullRequestNumber,
+              testName,
             ),
             isFalse,
           );
@@ -389,6 +411,7 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'CIRRUS_CI' : 'true',
               'CIRRUS_PR' : '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...'
             },
             operatingSystem: 'macos'
           ),
@@ -413,6 +436,7 @@ void main() {
             'FLUTTER_ROOT': _kFlutterRoot,
             'CIRRUS_CI' : 'true',
             'CIRRUS_PR' : '1234',
+            'GOLD_SERVICE_ACCOUNT' : 'service account...'
           },
           operatingSystem: 'macos'
         );
@@ -439,7 +463,7 @@ void main() {
         );
       });
 
-      test('fails test that is not ignored for this PR', () async {
+      test('fails test that is not ignored', () async {
         when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
           .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
         when(mockSkiaClient.testIsIgnoredForPullRequest(
