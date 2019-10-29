@@ -9,7 +9,6 @@ import java.nio.ByteBuffer;
 import java.util.Date;
 
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.*;
