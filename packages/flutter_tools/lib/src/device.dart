@@ -251,28 +251,32 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   final String name;
   ItemListNotifier<Device> _items;
-  Poller _poller;
+  Timer _timer;
 
   Future<List<Device>> pollingGetDevices();
 
   void startPolling() {
-    if (_poller == null) {
+    if (_timer == null) {
       _items ??= ItemListNotifier<Device>();
-
-      _poller = Poller(() async {
-        try {
-          final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
-          _items.updateWithNewList(devices);
-        } on TimeoutException {
-          printTrace('Device poll timed out. Will retry.');
-        }
-      }, _pollingInterval);
+      _timer = _initTimer();
     }
   }
 
+  Timer _initTimer() {
+    return Timer(_pollingInterval, () async {
+      try {
+        final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+        _items.updateWithNewList(devices);
+      } on TimeoutException {
+        printTrace('Device poll timed out. Will retry.');
+      }
+      _timer = _initTimer();
+    });
+  }
+
   void stopPolling() {
-    _poller?.cancel();
-    _poller = null;
+    _timer?.cancel();
+    _timer = null;
   }
 
   @override
