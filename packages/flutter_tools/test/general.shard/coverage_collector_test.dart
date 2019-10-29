@@ -269,7 +269,7 @@ void main() {
       'coverage': <Map<String, Object>>[
         <String, Object>{
           'source': 'some_uri',
-          'script': {
+          'script': <String, Object>{
             'type': '@Script',
             'fixedId': true,
             'id': 'libraries/1/scripts/some_uri',
@@ -318,7 +318,7 @@ void main() {
       'coverage': <Map<String, Object>>[
         <String, Object>{
           'source': 'some_uri',
-          'script': {
+          'script': <String, Object>{
             'type': '@Script',
             'fixedId': true,
             'id': 'libraries/1/scripts/some_uri',
@@ -370,7 +370,7 @@ void main() {
       'coverage': <Map<String, Object>>[
         <String, Object>{
           'source': 'some_uri',
-          'script': {
+          'script': <String, Object>{
             'type': '@Script',
             'fixedId': true,
             'id': 'libraries/1/scripts/some_uri',
@@ -430,7 +430,7 @@ void main() {
       'coverage': <Map<String, Object>>[
         <String, Object>{
           'source': 'some_uri',
-          'script': {
+          'script': <String, Object>{
             'type': '@Script',
             'fixedId': true,
             'id': 'libraries/1/scripts/some_uri',
