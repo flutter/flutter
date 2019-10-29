@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -48,7 +47,6 @@ void main() {
       Shortcuts(
         shortcuts: <LogicalKeySet, Intent>{
           LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-          LogicalKeySet(LogicalKeyboardKey.space): const Intent(SelectAction.key),
         },
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -76,12 +74,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(pressed, isTrue);
-
-    pressed = false;
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pumpAndSettle();
-
-    expect(pressed, kIsWeb ? isFalse : isTrue);
   });
 
   testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
