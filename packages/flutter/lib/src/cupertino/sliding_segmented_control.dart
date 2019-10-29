@@ -371,7 +371,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   void _didChangeControllerValue() {
     assert(
       controller.value == null || widget.children.keys.contains(controller.value),
-      "The controller's value ${controller.value} is not one of the keys in the children map: ${widget.children.keys}",
+      "The controller's value ${controller.value} must be either null "
+      'or one of the keys in the children map: ${widget.children.keys}',
     );
 
     setState(() {
