@@ -36,6 +36,8 @@ void main() {
       ),
     );
 
+    // Scrolling up into the overscroll area causes the appBar to expand in size.
+    // This overscroll effect enlarges the background in step with the appbar.
     final Finder appbarContainer = find.byKey(finderKey);
     final Size sizeBeforeScroll = tester.getSize(appbarContainer);
     await slowDrag(tester, blockKey, const Offset(0.0, 100.0));
@@ -77,6 +79,7 @@ void main() {
       ),
     );
 
+    // Scrolling up into the overscroll area causes the background to blur.
     await slowDrag(tester, blockKey, const Offset(0.0, 100.0));
     await expectLater(
       find.byType(FlexibleSpaceBar),

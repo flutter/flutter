@@ -296,7 +296,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           assert(fadeStart <= fadeEnd);
           final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
           if (opacity > 0.0) {
-
             double height = settings.maxExtent;
 
             // StretchMode.zoomBackground
@@ -353,7 +352,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           }
 
           // StretchMode.fadeTitle
-          if(widget.stretchModes.contains(StretchMode.fadeTitle) &&
+          if (widget.stretchModes.contains(StretchMode.fadeTitle) &&
             constraints.maxHeight > settings.maxExtent) {
             final double stretchOpacity = 1 -
               ((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0);

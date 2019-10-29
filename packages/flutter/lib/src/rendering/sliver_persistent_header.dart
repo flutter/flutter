@@ -18,7 +18,9 @@ import 'viewport.dart';
 import 'viewport_offset.dart';
 
 /// A callback function that's invoked when the [SliverAppBar] is pulled into an
-/// overscroll and stretched to the offset specified by `stretchTriggerOffset`.
+/// overscroll and stretched to the offset specified by
+/// [OverScrollHeaderStretchConfiguration.stretchTriggerOffset].
+///
 /// Must return a [Future].
 typedef StretchCallback = Future<void> Function();
 
@@ -26,17 +28,17 @@ typedef StretchCallback = Future<void> Function();
 ///
 /// See also:
 ///
-///  * [SliverAppBar], which creates a header that can stretched into an
+///  * [SliverAppBar], which creates a header that can be stretched into an
 ///  overscroll area and trigger a callback function.
 class OverScrollHeaderStretchConfiguration {
-  /// Creates an object that specifies how stretched header is to trigger a
+  /// Creates an object that specifies how a stretched header is to trigger a
   /// [StretchCallback].
   OverScrollHeaderStretchConfiguration({
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
   }) : assert(stretchTriggerOffset != null);
 
-  /// The offset of overscroll required to trigger a [StretchCallback].
+  /// The offset of overscroll required to trigger the [onStretchTrigger].
   final double stretchTriggerOffset;
 
   /// The callback function to be executed when a user over-scrolls to the
