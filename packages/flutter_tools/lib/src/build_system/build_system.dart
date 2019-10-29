@@ -406,7 +406,7 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment)
+    final FileHashStore fileCache = FileHashStore(environment, fs)
       ..initialize();
 
     // Perform sanity checks on build.

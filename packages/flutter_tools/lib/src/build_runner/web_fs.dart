@@ -531,6 +531,16 @@ class ConnectionResult {
   final DebugConnection debugConnection;
 }
 
+class WebTestTargetManifest {
+  WebTestTargetManifest(this.buildFilters);
+
+  WebTestTargetManifest.all() : buildFilters = null;
+
+  final List<String> buildFilters;
+
+  bool get hasBuildFilters => buildFilters != null && buildFilters.isNotEmpty;
+}
+
 /// A testable interface for starting a build daemon.
 class BuildDaemonCreator {
   const BuildDaemonCreator();
@@ -547,8 +557,8 @@ class BuildDaemonCreator {
     bool release = false,
     bool profile = false,
     bool hasPlugins = false,
-    bool includeTests = false,
     bool initializePlatform = true,
+    WebTestTargetManifest testTargets,
   }) async {
     try {
       final BuildDaemonClient client = await _connectClient(
@@ -557,8 +567,9 @@ class BuildDaemonCreator {
         profile: profile,
         hasPlugins: hasPlugins,
         initializePlatform: initializePlatform,
+        testTargets: testTargets,
       );
-      _registerBuildTargets(client, includeTests);
+      _registerBuildTargets(client, testTargets);
       return client;
     } on OptionsSkew {
       throwToolExit(
@@ -571,7 +582,7 @@ class BuildDaemonCreator {
 
   void _registerBuildTargets(
     BuildDaemonClient client,
-    bool includeTests,
+    WebTestTargetManifest testTargets,
   ) {
     final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
       ..output = ''
@@ -580,10 +591,15 @@ class BuildDaemonCreator {
     client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
       ..target = 'web'
       ..outputLocation = outputLocation?.toBuilder()));
-    if (includeTests) {
-      client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-        ..target = 'test'
-        ..outputLocation = outputLocation?.toBuilder()));
+    if (testTargets != null) {
+      client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) {
+        b.target = 'test';
+        b.outputLocation = outputLocation?.toBuilder();
+        if (testTargets.hasBuildFilters) {
+          b.buildFilters.addAll(testTargets.buildFilters);
+        }
+        return b;
+      }));
     }
   }
 
@@ -593,29 +609,37 @@ class BuildDaemonCreator {
     bool profile,
     bool hasPlugins,
     bool initializePlatform,
+    WebTestTargetManifest testTargets,
   }) {
     final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
     final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
     final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+
+    // On Windows we need to call the snapshot directly otherwise
+    // the process will start in a disjoint cmd without access to
+    // STDIO.
+    final List<String> args = <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--packages=$flutterToolsPackages',
+      buildScript,
+      'daemon',
+      '--skip-build-script-check',
+      '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:entrypoint=release=$release',
+      '--define', 'flutter_tools:entrypoint=profile=$profile',
+      '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
+      '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform',
+      // The following will cause build runner to only build tests that were requested.
+      if (testTargets != null && testTargets.hasBuildFilters)
+        for (String buildFilter in testTargets.buildFilters)
+          '--build-filter=$buildFilter',
+    ];
+
     return BuildDaemonClient.connect(
       workingDirectory,
-      // On Windows we need to call the snapshot directly otherwise
-      // the process will start in a disjoint cmd without access to
-      // STDIO.
-      <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
-        '--packages=$flutterToolsPackages',
-        buildScript,
-        'daemon',
-        '--skip-build-script-check',
-        '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
-        '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
-        '--define', 'flutter_tools:entrypoint=release=$release',
-        '--define', 'flutter_tools:entrypoint=profile=$profile',
-        '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
-        '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
-        '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform',
-      ],
+      args,
       logHandler: (ServerLog serverLog) {
         switch (serverLog.level) {
           case Level.SEVERE:

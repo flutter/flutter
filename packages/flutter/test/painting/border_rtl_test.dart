@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show DiagnosticLevel, FlutterError;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../rendering/rendering_tester.dart';
 
 class SillyBorder extends BoxBorder {
   @override
@@ -113,6 +115,39 @@ void main() {
     expect(BoxBorder.lerp(visualWithSides10, directionalWithSides10, 2.0), directionalWithSides30);
     expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 2.0), directionalWithSides20);
     expect(() => BoxBorder.lerp(SillyBorder(), const Border(), 2.0), throwsFlutterError);
+  });
+
+  test('BoxBorder.lerp throws correct FlutterError message', () {
+    FlutterError error;
+    try {
+      BoxBorder.lerp(SillyBorder(), const Border(), 2.0);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.diagnostics.length, 3);
+    expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[2].toStringDeep(),
+      equalsIgnoringHashCodes(
+        'For a more general interpolation method, consider using\n'
+        'ShapeBorder.lerp instead.\n',
+      ),
+    );
+    expect(error.toStringDeep(), equalsIgnoringHashCodes(
+      'FlutterError\n'
+      '   BoxBorder.lerp can only interpolate Border and BorderDirectional\n'
+      '   classes.\n'
+      '   BoxBorder.lerp() was called with two objects of type SillyBorder\n'
+      '   and Border:\n'
+      '     SillyBorder()\n'
+      '     Border.all(BorderSide(Color(0xff000000), 0.0,\n'
+      '   BorderStyle.none))\n'
+      '   However, only Border and BorderDirectional classes are supported\n'
+      '   by this method.\n'
+      '   For a more general interpolation method, consider using\n'
+      '   ShapeBorder.lerp instead.\n'
+    ));
   });
 
   test('BoxBorder.getInnerPath / BoxBorder.getOuterPath', () {

@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -64,7 +65,7 @@ void main() {
       Cache.releaseLockEarly();
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('throws tool exit when lockfile open fails', () async {
@@ -73,7 +74,7 @@ void main() {
       expect(() async => await Cache.lock(), throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () async {
@@ -102,7 +103,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
@@ -118,7 +119,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     test('should not be up to date, if some cached artifact is not', () {
@@ -202,6 +203,18 @@ void main() {
         );
       }
     });
+
+    testUsingContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {
+      when(platform.environment).thenReturn(const <String, String>{
+        'FLUTTER_STORAGE_BASE_URL': ' http://foo',
+      });
+      final Cache cache = Cache();
+      final CachedArtifact artifact = MaterialFonts(cache);
+
+      expect(() => artifact.storageBaseUrl, throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      Platform: () => MockPlatform(),
+    });
   });
 
   testUsingContext('flattenNameSubdirs', () {
@@ -210,7 +223,7 @@ void main() {
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   test('Unstable artifacts', () {
@@ -261,7 +274,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       HttpClientFactory: () => () => fakeHttpClient,
       OperatingSystemUtils: () => mockOperatingSystemUtils,
       Platform: () => fakePlatform,
@@ -379,3 +392,4 @@ class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockPlatform extends Mock implements Platform {}

@@ -20,11 +20,11 @@ dart_library("flutter_driver") {
     "//third_party/dart-pkg/pub/json_rpc_2",
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/path",
-    "//third_party/dart-pkg/pub/web_socket_channel",
     "//third_party/dart-pkg/pub/vm_service_client",
+    "//third_party/dart-pkg/pub/web_socket_channel",
   ]
 
   if (is_fuchsia) {
-    deps += [ "$flutter_root/sky/packages/sky_engine:sky_engine_dart" ]
+    deps += [ "//topaz/runtime/sky_engine:sky_engine_dart" ]
   }
 }

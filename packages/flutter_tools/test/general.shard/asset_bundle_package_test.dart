@@ -135,7 +135,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('No assets are bundled when the package has an asset that is not listed', () async {
@@ -163,7 +163,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('One asset is bundled when the package has and lists one asset its pubspec', () async {
@@ -191,7 +191,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext("One asset is bundled when the package has one asset, listed in the app's pubspec", () async {
@@ -219,7 +219,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('One asset and its variant are bundled when the package has an asset and a variant, and lists the asset in its pubspec', () async {
@@ -247,7 +247,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('One asset and its variant are bundled when the package has an asset and a variant, and the app lists the asset in its pubspec', () async {
@@ -278,7 +278,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Two assets are bundled when the package has and lists two assets in its pubspec', () async {
@@ -307,7 +307,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext("Two assets are bundled when the package has two assets, listed in the app's pubspec", () async {
@@ -343,7 +343,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Two assets are bundled when two packages each have and list an asset their pubspec', () async {
@@ -383,7 +383,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext("Two assets are bundled when two packages each have an asset, listed in the app's pubspec", () async {
@@ -426,7 +426,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('One asset is bundled when the app depends on a package, listing in its pubspec an asset from another package', () async {
@@ -461,7 +461,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -491,7 +491,7 @@ $assetsSection
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
   });
 
   group('AssetBundle assets from scanned paths', () {
@@ -523,7 +523,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Two assets are bundled when listing one and scanning second directory', () async {
@@ -554,7 +554,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('One asset is bundled with variant, scanning wrong directory', () async {
@@ -580,7 +580,7 @@ $assetsSection
       assert(bundle.entries['AssetManifest.json'] == null,'Invalid pubspec.yaml should not generate AssetManifest.json'  );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -612,7 +612,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('No asset is bundled with variant, no assets or directories are listed', () async {
@@ -641,7 +641,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Expect error generating manifest, wrong non-existing directory is listed', () async {
@@ -675,7 +675,7 @@ $assetsSection
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
   });
