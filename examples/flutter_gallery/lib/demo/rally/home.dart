@@ -89,11 +89,11 @@ class _HomePageState extends State<HomePage>
 
   List<Widget> _buildTabs(ThemeData theme) {
     return <Widget>[
-      _buildTab(theme, Icons.pie_chart, 'OVERVIEW', 0),
-      _buildTab(theme, Icons.attach_money, 'ACCOUNTS', 1),
-      _buildTab(theme, Icons.money_off, 'BILLS', 2),
-      _buildTab(theme, Icons.table_chart, 'BUDGETS', 3),
-      _buildTab(theme, Icons.settings, 'SETTINGS', 4),
+      _RallyTab(theme, Icons.pie_chart, 'OVERVIEW', 0, _tabController),
+      _RallyTab(theme, Icons.attach_money, 'ACCOUNTS', 1, _tabController),
+      _RallyTab(theme, Icons.money_off, 'BILLS', 2, _tabController),
+      _RallyTab(theme, Icons.table_chart, 'BUDGETS', 3, _tabController),
+      _RallyTab(theme, Icons.settings, 'SETTINGS', 4, _tabController),
     ];
   }
 
@@ -106,26 +106,19 @@ class _HomePageState extends State<HomePage>
       SettingsView(),
     ];
   }
-
-  Widget _buildTab(
-    ThemeData theme,
-    IconData iconData,
-    String title,
-    int index,
-  ) {
-    return _RallyTab(
-      theme.textTheme.button,
-      Icon(iconData),
-      title,
-      _tabController.index == index,
-    );
-  }
 }
 
 class _RallyTab extends StatefulWidget {
-  _RallyTab(this.style, this.icon, String title, this.isExpanded) : titleText = Text(title, style: style);
+  _RallyTab(
+    ThemeData theme,
+    IconData iconData,
+    String title,
+    int tabIndex,
+    TabController tabController,
+  ) : titleText = Text(title, style: theme.textTheme.button),
+      isExpanded = tabController.index == tabIndex,
+      icon = Icon(iconData);
 
-  final TextStyle style;
   final Text titleText;
   final Icon icon;
   final bool isExpanded;
