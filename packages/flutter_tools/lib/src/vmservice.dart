@@ -840,8 +840,12 @@ class VM extends ServiceObjectOwner {
         }
         return view;
       default:
-        throw VMServiceObjectLoadError(
-            'VM.getFromMap called for something other than an isolate', map);
+        // If we don't have a model object for this service object type, as a
+        // fallback return a ServiceMap object.
+        final ServiceObject serviceObject = ServiceMap._empty(owner);
+        // We have now constructed an empty service object, call update to populate it.
+        serviceObject.updateFromMap(map);
+        return serviceObject;
     }
   }
 

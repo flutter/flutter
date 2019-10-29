@@ -31,15 +31,6 @@ const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatfor
     'icudtl.dat',
     'cpp_client_wrapper/',
   ],
-  TargetPlatform.linux_x64: <String>[
-    'libflutter_linux_glfw.so',
-    'flutter_export.h',
-    'flutter_messenger.h',
-    'flutter_plugin_registrar.h',
-    'flutter_glfw.h',
-    'icudtl.dat',
-    'cpp_client_wrapper_glfw/',
-  ]
 };
 
 /// Copies desktop artifacts to local cache directories.
@@ -54,7 +45,7 @@ class UnpackCommand extends FlutterCommand {
   }
 
   @override
-  String get description => 'unpack desktop artifacts';
+  String get description => '(DEPRECATED) unpack desktop artifacts';
 
   @override
   String get name => 'unpack';
@@ -130,8 +121,7 @@ class ArtifactUnpacker {
         cacheStamp = 'windows-sdk';
         break;
       case TargetPlatform.linux_x64:
-        cacheStamp = 'linux-sdk';
-        break;
+        return true;
       default:
         throwToolExit('Unsupported target platform: $platform');
     }

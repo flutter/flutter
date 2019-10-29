@@ -277,8 +277,8 @@ class TextField extends StatefulWidget {
   /// is null (the default) and [readOnly] is true.
   ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], and [maxLength]
-  /// arguments must not be null.
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength], and
+  /// [enableSuggestions] arguments must not be null.
   ///
   /// See also:
   ///
@@ -303,6 +303,7 @@ class TextField extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
+    this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
     this.expands = false,
@@ -329,6 +330,7 @@ class TextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -344,6 +346,7 @@ class TextField extends StatefulWidget {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
@@ -452,6 +455,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.enableSuggestions}
+  final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
@@ -675,6 +681,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
@@ -704,17 +711,6 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   bool _isHovering = false;
-
-  // Disables all directional focus actions inside of a text field, since up and
-  // down shouldn't go to another field, even in a single line text field. We
-  // remap the keys rather than the actions, since someone might want to invoke
-  // a directional navigation action from another key binding.
-  final Map<LogicalKeySet, Intent> _disabledNavigationKeys = <LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const Intent(DoNothingAction.key),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const Intent(DoNothingAction.key),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const Intent(DoNothingAction.key),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const Intent(DoNothingAction.key),
-  };
 
   bool get needsCounter => widget.maxLength != null
     && widget.decoration != null
@@ -947,52 +943,50 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     }
 
     Widget child = RepaintBoundary(
-      child: Shortcuts(
-        shortcuts: _disabledNavigationKeys,
-        child: EditableText(
-          key: editableTextKey,
-          readOnly: widget.readOnly,
-          toolbarOptions: widget.toolbarOptions,
-          showCursor: widget.showCursor,
-          showSelectionHandles: _showSelectionHandles,
-          controller: controller,
-          focusNode: focusNode,
-          keyboardType: widget.keyboardType,
-          textInputAction: widget.textInputAction,
-          textCapitalization: widget.textCapitalization,
-          style: style,
-          strutStyle: widget.strutStyle,
-          textAlign: widget.textAlign,
-          textDirection: widget.textDirection,
-          autofocus: widget.autofocus,
-          obscureText: widget.obscureText,
-          autocorrect: widget.autocorrect,
-          maxLines: widget.maxLines,
-          minLines: widget.minLines,
-          expands: widget.expands,
-          selectionColor: themeData.textSelectionColor,
-          selectionControls: widget.selectionEnabled ? textSelectionControls : null,
-          onChanged: widget.onChanged,
-          onSelectionChanged: _handleSelectionChanged,
-          onEditingComplete: widget.onEditingComplete,
-          onSubmitted: widget.onSubmitted,
-          onSelectionHandleTapped: _handleSelectionHandleTapped,
-          inputFormatters: formatters,
-          rendererIgnoresPointer: true,
-          cursorWidth: widget.cursorWidth,
-          cursorRadius: cursorRadius,
-          cursorColor: cursorColor,
-          cursorOpacityAnimates: cursorOpacityAnimates,
-          cursorOffset: cursorOffset,
-          paintCursorAboveText: paintCursorAboveText,
-          backgroundCursorColor: CupertinoColors.inactiveGray,
-          scrollPadding: widget.scrollPadding,
-          keyboardAppearance: keyboardAppearance,
-          enableInteractiveSelection: widget.enableInteractiveSelection,
-          dragStartBehavior: widget.dragStartBehavior,
-          scrollController: widget.scrollController,
-          scrollPhysics: widget.scrollPhysics,
-        ),
+      child: EditableText(
+        key: editableTextKey,
+        readOnly: widget.readOnly,
+        toolbarOptions: widget.toolbarOptions,
+        showCursor: widget.showCursor,
+        showSelectionHandles: _showSelectionHandles,
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
+        style: style,
+        strutStyle: widget.strutStyle,
+        textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
+        autofocus: widget.autofocus,
+        obscureText: widget.obscureText,
+        autocorrect: widget.autocorrect,
+        enableSuggestions: widget.enableSuggestions,
+        maxLines: widget.maxLines,
+        minLines: widget.minLines,
+        expands: widget.expands,
+        selectionColor: themeData.textSelectionColor,
+        selectionControls: widget.selectionEnabled ? textSelectionControls : null,
+        onChanged: widget.onChanged,
+        onSelectionChanged: _handleSelectionChanged,
+        onEditingComplete: widget.onEditingComplete,
+        onSubmitted: widget.onSubmitted,
+        onSelectionHandleTapped: _handleSelectionHandleTapped,
+        inputFormatters: formatters,
+        rendererIgnoresPointer: true,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: cursorRadius,
+        cursorColor: cursorColor,
+        cursorOpacityAnimates: cursorOpacityAnimates,
+        cursorOffset: cursorOffset,
+        paintCursorAboveText: paintCursorAboveText,
+        backgroundCursorColor: CupertinoColors.inactiveGray,
+        scrollPadding: widget.scrollPadding,
+        keyboardAppearance: keyboardAppearance,
+        enableInteractiveSelection: widget.enableInteractiveSelection,
+        dragStartBehavior: widget.dragStartBehavior,
+        scrollController: widget.scrollController,
+        scrollPhysics: widget.scrollPhysics,
       ),
     );
 

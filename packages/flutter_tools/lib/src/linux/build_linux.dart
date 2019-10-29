@@ -57,7 +57,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
       '-C',
       linuxProject.makeFile.parent.path,
       'BUILD=$buildFlag',
-    ]);
+    ], trace: true);
   } on ArgumentError {
     throwToolExit('make not found. Run \'flutter doctor\' for more information.');
   } finally {

@@ -200,10 +200,12 @@ class CupertinoTextThemeData extends Diagnosticable {
   TextStyle get dateTimePickerTextStyle => _dateTimePickerTextStyle ?? _defaults.dateTimePickerTextStyle;
 
   /// Returns a copy of the current [CupertinoTextThemeData] with all the colors
-  /// resolved against the given [BuildContext]. Throws an exception if any of the
-  /// [InheritedWidget]s required to resolve this [CupertinoTextThemeData] is not
-  /// found in [context], unless [nullOk] is set to true, in which case [CupertinoDynamicColor]s
-  /// that fail to resolve will be used as-is.
+  /// resolved against the given [BuildContext].
+  ///
+  /// Throws an exception if any of the [InheritedWidget]s required to resolve
+  /// this [CupertinoTextThemeData] is not found in [context], unless [nullOk] is
+  /// set to true, in which case [CupertinoDynamicColor]s that fail to resolve will
+  /// be used as-is.
   CupertinoTextThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     return CupertinoTextThemeData._raw(
       _defaults?.resolveFrom(context, nullOk),

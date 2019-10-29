@@ -464,6 +464,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // e.g. `flutter build bundle`.
   buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
   buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
+  buildCommands.addAll(environmentVariablesAsXcodeBuildSettings());
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
@@ -562,7 +563,16 @@ Future<XcodeBuildResult> buildXcodeProject({
     } else {
       printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
     }
-    return XcodeBuildResult(success: true, output: outputDir);
+    return XcodeBuildResult(
+        success: true,
+        output: outputDir,
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: app.project.hostAppRoot.path,
+          buildForPhysicalDevice: buildForDevice,
+          buildSettings: buildSettings,
+      ),
+    );
   }
 }
 

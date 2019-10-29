@@ -27,23 +27,18 @@ void main() {
   MockPlatform linuxPlatform;
   MockPlatform windowsPlatform;
   MockFuchsiaSdk fuchsiaSdk;
-  MockFuchsiaArtifacts fuchsiaArtifacts;
-  MockFuchsiaArtifacts fuchsiaArtifactsNoCompiler;
 
   setUp(() {
     linuxPlatform = MockPlatform();
     windowsPlatform = MockPlatform();
     fuchsiaSdk = MockFuchsiaSdk();
-    fuchsiaArtifacts = MockFuchsiaArtifacts();
-    fuchsiaArtifactsNoCompiler = MockFuchsiaArtifacts();
 
     when(linuxPlatform.isLinux).thenReturn(true);
     when(linuxPlatform.isWindows).thenReturn(false);
+    when(linuxPlatform.isMacOS).thenReturn(false);
     when(windowsPlatform.isWindows).thenReturn(true);
     when(windowsPlatform.isLinux).thenReturn(false);
     when(windowsPlatform.isMacOS).thenReturn(false);
-    when(fuchsiaArtifacts.kernelCompiler).thenReturn(MockFile());
-    when(fuchsiaArtifactsNoCompiler.kernelCompiler).thenReturn(null);
   });
 
   group('Fuchsia build fails gracefully when', () {
@@ -57,8 +52,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
-      FuchsiaArtifacts: () => fuchsiaArtifacts,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('there is no cmx file', () async {
@@ -75,8 +69,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
-      FuchsiaArtifacts: () => fuchsiaArtifacts,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('on Windows platform', () async {
@@ -98,8 +91,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
-      FuchsiaArtifacts: () => fuchsiaArtifacts,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('there is no Fuchsia kernel compiler', () async {
@@ -121,8 +113,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
-      FuchsiaArtifacts: () => fuchsiaArtifactsNoCompiler,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -147,7 +138,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
     FuchsiaSdk: () => fuchsiaSdk,
   });
 }
@@ -233,7 +224,3 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
   final FuchsiaKernelCompiler fuchsiaKernelCompiler =
       MockFuchsiaKernelCompiler();
 }
-
-class MockFile extends Mock implements File {}
-
-class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}

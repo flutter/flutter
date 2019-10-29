@@ -11,7 +11,9 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+
+final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
@@ -43,7 +45,7 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  device_info:\n  package_info:\n',
+        '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -143,7 +145,14 @@ Future<void> main() async {
       final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);
       recursiveCopy(
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_host_app')),
+        Directory(
+          path.join(
+            flutterDirectory.path,
+            'dev',
+            'integration_tests',
+            useAndroidEmbeddingV2 ? 'android_host_app_v2_embedding' : 'android_host_app',
+          ),
+        ),
         hostApp,
       );
       copy(
@@ -191,10 +200,8 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        'AndroidManifest.xml',
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
+        ...debugAssets,
+        ...baseApkFiles,
       ], await getFilesInApk(debugHostApk));
 
       section('Check debug AndroidManifest.xml');
@@ -248,7 +255,7 @@ Future<void> main() async {
 
       checkItContains<String>(<String>[
         ...flutterAssets,
-        'AndroidManifest.xml',
+        ...baseApkFiles,
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',
         'lib/armeabi-v7a/libapp.so',

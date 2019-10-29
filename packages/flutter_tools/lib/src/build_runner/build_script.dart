@@ -278,7 +278,7 @@ Future<void> main() async {
   // we don't have an embedder yet this is the lowest-most layer we can put
   // this stuff in.
   ui.debugEmulateFlutterTesterEnvironment = true;
-  await ui.webOnlyInitializeEngine();
+  await ui.webOnlyInitializePlatform();
   // TODO(flutterweb): remove need for dynamic cast.
   (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
   (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);

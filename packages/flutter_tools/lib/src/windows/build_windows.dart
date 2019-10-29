@@ -74,7 +74,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
       vcvarsScript,
       fs.path.basename(solutionPath),
       configuration,
-    ], workingDirectory: fs.path.dirname(solutionPath));
+    ], workingDirectory: fs.path.dirname(solutionPath), trace: true);
   } finally {
     status.cancel();
   }
