@@ -69,7 +69,7 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     Thumb thumb,
-    bool isSelected,
+    bool isPressed,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -131,7 +131,6 @@ class _CustomThumbShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    double canvasWidth,
     MediaQueryData mediaQueryData,
   }) {
     final Canvas canvas = context.canvas;
@@ -172,8 +171,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    double canvasWidth,
-      MediaQueryData mediaQueryData,
+    MediaQueryData mediaQueryData,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween enableColor = ColorTween(

@@ -1221,7 +1221,7 @@ abstract class RangeSliderThumbShape {
   ///
   /// {@macro flutter.material.rangeSlider.shape.thumb}
   ///
-  /// [isSelected] can be used to give the selected thumb additional selected
+  /// [isPressed] can be used to give the selected thumb additional selected
   /// or pressed state visual feedback, such as a larger shadow.
   void paint(
     PaintingContext context,
@@ -1234,7 +1234,7 @@ abstract class RangeSliderThumbShape {
     TextDirection textDirection,
     SliderThemeData sliderTheme,
     Thumb thumb,
-    bool isSelected,
+    bool isPressed,
   });
 }
 
@@ -2312,7 +2312,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     TextDirection textDirection,
     double value,
     double canvasWidth,
-      MediaQueryData mediaQueryData,
+    MediaQueryData mediaQueryData,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2411,7 +2411,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     Thumb thumb,
-    bool isSelected,
+    bool isPressed,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2463,7 +2463,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
       }
     }
 
-    final double evaluatedElevation = isSelected ? elevationTween.evaluate(activationAnimation) : elevation;
+    final double evaluatedElevation = isPressed ? elevationTween.evaluate(activationAnimation) : elevation;
     final Path shadowPath = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
     canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
 
@@ -2702,9 +2702,6 @@ class _RectangularSliderValueIndicatorPathPainter {
     // positive, then the lobe is shifted from left to right.
     final double overflowLeft = math.max(0, rectangleWidth / 2 - center.dx + edgePadding);
     final double overflowRight = math.max(0, rectangleWidth / 2 - (screenWidth - center.dx - edgePadding));
-    print('rectangleWidth $rectangleWidth');
-    print('overflowLeft $overflowLeft');
-    print('overflowRight $overflowRight');
     return overflowLeft - overflowRight;
   }
 

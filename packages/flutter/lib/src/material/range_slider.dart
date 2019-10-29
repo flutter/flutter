@@ -1316,7 +1316,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: bottomThumb,
-      isSelected: bottomThumb == Thumb.start ? startThumbSelected : endThumbSelected,
+      isPressed: bottomThumb == Thumb.start ? startThumbSelected : endThumbSelected,
     );
 
     if (shouldPaintValueIndicators) {
@@ -1385,7 +1385,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: topThumb,
-      isSelected: topThumb == Thumb.start ? startThumbSelected : endThumbSelected,
+      isPressed: topThumb == Thumb.start ? startThumbSelected : endThumbSelected,
     );
   }
 
