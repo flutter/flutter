@@ -123,7 +123,7 @@ public class FlutterNativeView implements BinaryMessenger {
     @Override
     @UiThread
     public void send(String channel, ByteBuffer message) {
-        dartExecutor.send(channel, message);
+        dartExecutor.getBinaryMessenger().send(channel, message);
     }
 
     @Override
@@ -134,13 +134,13 @@ public class FlutterNativeView implements BinaryMessenger {
             return;
         }
 
-        dartExecutor.send(channel, message, callback);
+        dartExecutor.getBinaryMessenger().send(channel, message, callback);
     }
 
     @Override
     @UiThread
     public void setMessageHandler(String channel, BinaryMessageHandler handler) {
-        dartExecutor.setMessageHandler(channel, handler);
+        dartExecutor.getBinaryMessenger().setMessageHandler(channel, handler);
     }
 
     /*package*/ FlutterJNI getFlutterJNI() {
