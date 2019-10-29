@@ -174,10 +174,10 @@ void main() {
     });
 
     testUsingOsxContext('build settings contains Flutter Xcode environment variables', () async {
-      macOS.environment = <String, String>{
+      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
         'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
         'FLUTTER_XCODE_ARCHS': 'arm64'
-      };
+      });
       when(mockProcessManager.runSync(<String>[
         xcodebuild,
         '-project',
@@ -195,10 +195,10 @@ void main() {
     });
 
     testUsingOsxContext('clean contains Flutter Xcode environment variables', () async {
-      macOS.environment = <String, String>{
+      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
         'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
         'FLUTTER_XCODE_ARCHS': 'arm64'
-      };
+      });
       when(mockProcessManager.runSync(
         any,
         workingDirectory: anyNamed('workingDirectory')))
@@ -394,12 +394,12 @@ Information about project "Runner":
     });
 
     testUsingContext('environment variables as Xcode build settings', () {
-      platform.environment = <String, String>{
+      platform.environment = Map<String, String>.unmodifiable(<String, String>{
         'Ignored': 'Bogus',
         'FLUTTER_NOT_XCODE': 'Bogus',
         'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
         'FLUTTER_XCODE_ARCHS': 'arm64'
-      };
+      });
       final List<String> environmentVariablesAsBuildSettings = environmentVariablesAsXcodeBuildSettings();
       expect(environmentVariablesAsBuildSettings, <String>['CODE_SIGN_STYLE=Manual', 'ARCHS=arm64']);
     }, overrides: <Type, Generator>{
