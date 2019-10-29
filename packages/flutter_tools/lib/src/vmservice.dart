@@ -123,16 +123,9 @@ class VMService {
         final bool force = params.asMap['force'] ?? false;
         final bool pause = params.asMap['pause'] ?? false;
 
-        if (isolateId is! String || isolateId.isEmpty) {
+        if (isolateId.isEmpty) {
           throw rpc.RpcException.invalidParams('Invalid \'isolateId\': $isolateId');
         }
-        if (force is! bool) {
-          throw rpc.RpcException.invalidParams('Invalid \'force\': $force');
-        }
-        if (pause is! bool) {
-          throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
-        }
-
         try {
           await reloadSources(isolateId, force: force, pause: pause);
           return <String, String>{'type': 'Success'};
@@ -154,13 +147,10 @@ class VMService {
       // to change to a more efficient implementation in the future.
       _peer.registerMethod('reloadMethod', (rpc.Parameters params) async {
         final String isolateId = params['isolateId'].value;
-        final bool force = params.asMap['force'] ?? false;
-        final bool pause = params.asMap['pause'] ?? false;
-
         printTrace('reloadMethod not yet supported, falling back to hot reload');
 
         try {
-          await reloadSources(isolateId, force: force, pause: pause);
+          await reloadSources(isolateId);
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
