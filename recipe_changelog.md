@@ -1,5 +1,16 @@
 # Recipe Changelog
 
+## 28 Oct 2019
+
+* Recipe Link: https://chromium-review.googlesource.com/c/chromium/tools/build/+/1885414
+* Reason: We were not uploading dart_aot_runner artifacts.
+
+### 23 Oct 2019
+
+* Recipe Link: https://chromium-review.googlesource.com/c/chromium/tools/build/+/1877152
+* Reason: Clobber the cache directory after each build to clean-up outdated
+    artifacts.
+
 ### 23 Oct 2019
 
 * Recipe Link: https://chromium-review.googlesource.com/c/chromium/tools/build/+/1875314
