@@ -1,6 +1,7 @@
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 
 /// This widget allows 2D transform interactions on its child in relation to its
 /// parent. The user can transform the child by dragging to pan or pinching to
@@ -734,10 +735,8 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
     _animation?.removeListener(_onAnimate);
     _controller.reset();
 
-    // If the scale ended with velocity, animate inertial movement
-    final double velocityTotal = details.velocity.pixelsPerSecond.dx.abs()
-      + details.velocity.pixelsPerSecond.dy.abs();
-    if (velocityTotal == 0) {
+    // If the scale ended with enough velocity, animate inertial movement.
+    if (details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
       return;
     }
 
