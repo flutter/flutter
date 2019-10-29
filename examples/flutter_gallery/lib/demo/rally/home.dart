@@ -37,6 +37,7 @@ class _HomePageState extends State<HomePage>
     super.initState();
     _tabController = TabController(length: tabCount, vsync: this)
      ..addListener(() {
+       // Set state to make sure that the [_RallyTab] widgets get updated when changing tabs.
       setState(() { });
     });
   }
