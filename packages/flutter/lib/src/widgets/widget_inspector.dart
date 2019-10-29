@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
@@ -708,6 +709,10 @@ mixin WidgetInspectorService {
   final List<String> _serializeRing = List<String>(20);
   int _serializeRingIndex = 0;
 
+  // A map of the stringified tuple of file:line:column information to a live
+  // element instance.
+  final Map<String, List<Element>> _activeElements = HashMap<String, List<Element>>();
+
   /// The current [WidgetInspectorService].
   static WidgetInspectorService get instance => _instance;
   static WidgetInspectorService _instance = _WidgetInspectorService();
@@ -743,6 +748,43 @@ mixin WidgetInspectorService {
 
   bool _trackRebuildDirtyWidgets = false;
   bool _trackRepaintWidgets = false;
+
+  /// Inspector internal method to track an [Element] instance.
+  ///
+  /// This is utilized by the `reassembleElements` service extension to perform
+  /// faster invalidations without rebuilding the entire application.
+  void activateElement(Element element) {
+    final String key = _keyForElement(element);
+    if (key == null) {
+      return;
+    }
+    _activeElements[key] ??= <Element>[];
+    _activeElements[key].add(element);
+  }
+
+  /// Inspector internal method to releas tracking of an [Element] instance.
+  ///
+  /// This is utilized by the `reassembleElements` service extension to perform
+  /// faster invalidations without rebuilding the entire application.
+  void deactivateElement(Element element) {
+    final String key = _keyForElement(element);
+    if (key == null) {
+      return;
+    }
+    _activeElements[key]?.remove(element);
+  }
+
+  String _keyForElement(Element element) {
+    if (!isWidgetCreationTracked()) {
+      return null;
+    }
+    final dynamic widget = element.widget;
+    if (widget == null) {
+      return null;
+    }
+    final _Location location = widget._location;
+    return '${location.file}:${location.line}:${location.column}';
+  }
 
   _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
@@ -1034,6 +1076,23 @@ mixin WidgetInspectorService {
             debugOnProfilePaint = null;
           }
         },
+      );
+
+      _registerServiceExtensionCallback(
+        name: 'reassembleElements',
+        callback: (Map<String, String> params) async {
+          final String file = params['file'];
+          final String line = params['line'];
+          final String column = params['column'];
+          final String key = '$file:$line:$column';
+          final List<Element> elements =_activeElements[key];
+          if (elements != null) {
+            for (Element element in elements) {
+              element.markNeedsBuild();
+            }
+          }
+          return const <String, dynamic>{};
+        }
       );
     }
 
