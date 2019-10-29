@@ -208,6 +208,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     }
   }
 
+  final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
+
   /// Add a [TimingsCallback] that receives [FrameTiming] sent from the engine.
   ///
   /// This can be used, for example, to monitor the performance in release mode,
@@ -240,13 +242,28 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   void _executeTimingsCallbacks(List<FrameTiming> timings) {
     final List<TimingsCallback> clonedCallbacks =
-    List<TimingsCallback>.from(_timingsCallbacks);
+        List<TimingsCallback>.from(_timingsCallbacks);
     for (TimingsCallback callback in clonedCallbacks) {
-      callback(timings);
+      try {
+        if (_timingsCallbacks.contains(callback)) {
+          callback(timings);
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          context: ErrorDescription('while executing callbacks for FrameTiming'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<TimingsCallback>(
+              'The TimingsCallback that gets executed was',
+              callback,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
+        ));
+      }
     }
   }
-
-  final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
 
   /// The current [SchedulerBinding], if one has been created.
   static SchedulerBinding get instance => _instance;
