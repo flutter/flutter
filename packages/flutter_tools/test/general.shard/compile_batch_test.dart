@@ -90,7 +90,6 @@ void main() {
     Platform: kNoColorTerminalPlatform,
   });
 
-
   testUsingContext('batch compile single dart failed compilation', () async {
     final BufferLogger bufferLogger = logger;
     when(mockFrontendServer.stdout)
