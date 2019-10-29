@@ -128,7 +128,9 @@ template("dart_snapshot_aot") {
     # Custom ELF loader is used for Mac and Windows.
     elf_object = "$target_gen_dir/assets/app_elf_snapshot.so"
 
-    outputs = [elf_object]
+    outputs = [
+      elf_object,
+    ]
 
     args = [
       "--causal_async_stacks",

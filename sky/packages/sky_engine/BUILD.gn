@@ -4,7 +4,8 @@
 
 import("//build/fuchsia/sdk.gni")
 import("//third_party/dart/sdk/lib/_http/http_sources.gni")
-import("//third_party/dart/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
+import(
+    "//third_party/dart/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
 import("//third_party/dart/sdk/lib/async/async_sources.gni")
 import("//third_party/dart/sdk/lib/collection/collection_sources.gni")
 import("//third_party/dart/sdk/lib/convert/convert_sources.gni")

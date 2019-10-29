@@ -98,7 +98,7 @@ copy("web_ui_library") {
 # Compile the DDC SDK's summary.
 prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline") {
   deps = [
-    "//third_party/dart:create_sdk",        
+    "//third_party/dart:create_sdk",
     "//third_party/dart/pkg:pkg_files_stamp",
     "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
     "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
@@ -140,7 +140,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline") {
 # Compiles the DDC SDK's JS code.
 prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
   deps = [
-    "//third_party/dart:create_sdk",      
+    "//third_party/dart:create_sdk",
     "//third_party/dart/pkg:pkg_files_stamp",
     "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
     "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
