@@ -324,6 +324,8 @@ class KernelCompiler {
       if (aot) ...<String>[
         '--aot',
         '--tfa',
+        // TODO(jonahwilliams): remove when https://github.com/flutter/flutter/issues/43751 is resolved.
+        '--no-gen-bytecode',
       ],
       if (packagesPath != null) ...<String>[
         '--packages',
