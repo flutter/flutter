@@ -21,7 +21,7 @@ fonts_dir = os.path.join(buildroot_dir, 'flutter', 'third_party', 'txt', 'third_
 roboto_font_path = os.path.join(fonts_dir, 'Roboto-Regular.ttf')
 dart_tests_dir = os.path.join(buildroot_dir, 'flutter', 'testing', 'dart',)
 
-time_sensitve_test_flag = '--gtest_filter=-*TimeSensitiveTest*'
+time_sensitve_test_flag = '--gtest_filter="-*TimeSensitiveTest*"'
 
 def IsMac():
   return sys.platform == 'darwin'
