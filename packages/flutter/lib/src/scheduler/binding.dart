@@ -212,37 +212,41 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///
   /// This can be used, for example, to monitor the performance in release mode,
   /// or to get a signal when the first frame is rasterized.
+  ///
+  /// This is preferred over using [Window.onReportTimings] directly because
+  /// [addTimingsCallback] allows multiple callbacks.
+  ///
+  /// If the same callback is added twice, it will be executed twice.
   void addTimingsCallback(TimingsCallback callback) {
     // TODO(liyuqian): once this is merged, modify the doc of
     //  [Window.onReportTimings] inside the engine repo to recommend using this
     // API instead of using [Window.onReportTimings] directly.
-    _timingsCallbacksEnabled[callback] = true;
+    _timingsCallbacks.add(callback);
     if (_timingsCallbacks.length == 1) {
       assert(window.onReportTimings == null);
-      window.onReportTimings = (List<FrameTiming> timings) {
-        for (TimingsCallback callback in _timingsCallbacks) {
-          callback(timings);
-        }
-      };
+      window.onReportTimings = _executeTimingsCallbacks;
     }
+    assert(window.onReportTimings == _executeTimingsCallbacks);
   }
 
   /// Removes a callback that was earlier added by [addTimingsCallback].
   void removeTimingsCallback(TimingsCallback callback) {
-    assert(_timingsCallbacksEnabled.containsKey(callback));
-    _timingsCallbacksEnabled[callback] = false;
+    assert(_timingsCallbacks.contains(callback));
+    _timingsCallbacks.remove(callback);
     if (_timingsCallbacks.isEmpty) {
       window.onReportTimings = null;
     }
   }
 
-  // A map is maintained instead of a simple list because while we're iterating
-  // through [_timingsCallbacks], a callback can be removed. Having a `List` and
-  // simply calling `List.remove` would result in "Concurrent modification
-  // during iteration" exception.
-  final Map<TimingsCallback, bool> _timingsCallbacksEnabled = <TimingsCallback, bool>{};
-  Iterable<TimingsCallback> get _timingsCallbacks =>
-      _timingsCallbacksEnabled.keys.where((TimingsCallback c) => _timingsCallbacksEnabled[c]);
+  void _executeTimingsCallbacks(List<FrameTiming> timings) {
+    final List<TimingsCallback> clonedCallbacks =
+    List<TimingsCallback>.from(_timingsCallbacks);
+    for (TimingsCallback callback in clonedCallbacks) {
+      callback(timings);
+    }
+  }
+
+  final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
 
   /// The current [SchedulerBinding], if one has been created.
   static SchedulerBinding get instance => _instance;
