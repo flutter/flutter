@@ -721,7 +721,7 @@ void main() {
         ),
       ),
     );
-    
+
     final Finder rawButtonMaterial = find.descendant(
       of: find.byType(MaterialButton),
       matching: find.byType(Material),
