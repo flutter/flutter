@@ -78,6 +78,25 @@ public class FlutterViewTest {
     verify(platformViewsController, times(1)).detachFromView();
   }
 
+  @Test
+  public void onConfigurationChanged_fizzlesWhenNullEngine() {
+    FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+
+    Configuration configuration = RuntimeEnvironment.application.getResources().getConfiguration();
+    // 1 invocation of channels.
+    flutterView.attachToFlutterEngine(flutterEngine);
+    // 2 invocations of channels.
+    flutterView.onConfigurationChanged(configuration);
+    flutterView.detachFromFlutterEngine();
+
+    // Should fizzle.
+    flutterView.onConfigurationChanged(configuration);
+
+    verify(flutterEngine, times(2)).getLocalizationChannel();
+    verify(flutterEngine, times(2)).getSettingsChannel();
+  }
+
   // TODO(mattcarroll): turn this into an e2e test. GitHub #42990
   @Test
   public void itSendsLightPlatformBrightnessToFlutter() {

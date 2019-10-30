@@ -269,9 +269,18 @@ public class FlutterView extends FrameLayout {
   @Override
   protected void onConfigurationChanged(@NonNull Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
-    Log.v(TAG, "Configuration changed. Sending locales and user settings to Flutter.");
-    sendLocalesToFlutter(newConfig);
-    sendUserSettingsToFlutter();
+    // We've observed on Android Q that going to the background, changing
+    // orientation, and bringing the app back to foreground results in a sequence
+    // of detatch from flutterEngine, onConfigurationChanged, followed by attach
+    // to flutterEngine.
+    // No-op here so that we avoid NPE; these channels will get notified once
+    // the activity or fragment tell the view to attach to the Flutter engine
+    // again (e.g. in onStart).
+    if (flutterEngine != null) {
+      Log.v(TAG, "Configuration changed. Sending locales and user settings to Flutter.");
+      sendLocalesToFlutter(newConfig);
+      sendUserSettingsToFlutter();
+    }
   }
 
   /**
