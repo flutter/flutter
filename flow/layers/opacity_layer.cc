@@ -46,7 +46,7 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
   // See |EnsureSingleChild|.
   FML_DCHECK(layers().size() == 1);
-  if (!context->has_platform_view && context->raster_cache &&
+  if (context->view_embedder == nullptr && context->raster_cache &&
       SkRect::Intersects(context->cull_rect, paint_bounds())) {
     Layer* child = layers()[0].get();
     SkMatrix ctm = child_matrix;
@@ -75,7 +75,11 @@ void OpacityLayer::Paint(PaintContext& context) const {
   // See |EnsureSingleChild|.
   FML_DCHECK(layers().size() == 1);
 
-  if (context.raster_cache) {
+  // Embedded platform views are changing the canvas in the middle of the paint
+  // traversal. To make sure we paint on the right canvas, when the embedded
+  // platform views preview is enabled (context.view_embedded is not null) we
+  // don't use the cache.
+  if (context.view_embedder == nullptr && context.raster_cache) {
     const SkMatrix& ctm = context.leaf_nodes_canvas->getTotalMatrix();
     RasterCacheResult child_cache =
         context.raster_cache->Get(layers()[0].get(), ctm);
