@@ -17,6 +17,7 @@ public class FlutterFragmentTest {
   @Test
   public void itCreatesDefaultFragmentWithExpectedDefaults() {
     FlutterFragment fragment = FlutterFragment.createDefault();
+    fragment.setDelegate(new FlutterActivityAndFragmentDelegate(fragment));
 
     assertEquals("main", fragment.getDartEntrypointFunctionName());
     assertEquals("/", fragment.getInitialRoute());
@@ -37,6 +38,7 @@ public class FlutterFragmentTest {
         .renderMode(FlutterView.RenderMode.texture)
         .transparencyMode(FlutterView.TransparencyMode.opaque)
         .build();
+    fragment.setDelegate(new FlutterActivityAndFragmentDelegate(fragment));
 
     assertEquals("custom_entrypoint", fragment.getDartEntrypointFunctionName());
     assertEquals("/custom/route", fragment.getInitialRoute());

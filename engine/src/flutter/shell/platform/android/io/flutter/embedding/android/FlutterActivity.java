@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -380,13 +381,29 @@ public class FlutterActivity extends Activity
   // Delegate that runs all lifecycle and OS hook logic that is common between
   // FlutterActivity and FlutterFragment. See the FlutterActivityAndFragmentDelegate
   // implementation for details about why it exists.
-  private FlutterActivityAndFragmentDelegate delegate;
+  @VisibleForTesting
+  protected FlutterActivityAndFragmentDelegate delegate;
 
   @NonNull
   private LifecycleRegistry lifecycle;
 
   public FlutterActivity() {
     lifecycle = new LifecycleRegistry(this);
+  }
+
+  /**
+   * This method exists so that JVM tests can ensure that a delegate exists without
+   * putting this Activity through any lifecycle events, because JVM tests cannot handle
+   * executing any lifecycle methods, at the time of writing this.
+   * <p>
+   * The testing infrastructure should be upgraded to make FlutterActivity tests easy to
+   * write while exercising real lifecycle methods. At such a time, this method should be
+   * removed.
+   */
+  // TODO(mattcarroll): remove this when tests allow for it (https://github.com/flutter/flutter/issues/43798)
+  @VisibleForTesting
+  /* package */ void setDelegate(@NonNull FlutterActivityAndFragmentDelegate delegate) {
+    this.delegate = delegate;
   }
 
   @Override
@@ -674,7 +691,15 @@ public class FlutterActivity extends Activity
    */
   @Override
   public boolean shouldDestroyEngineWithHost() {
-    return getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, false);
+    boolean explicitDestructionRequested = getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, false);
+    if (getCachedEngineId() != null || delegate.isFlutterEngineFromHost()) {
+      // Only destroy a cached engine if explicitly requested by app developer.
+      return explicitDestructionRequested;
+    } else {
+      // If this Activity created the FlutterEngine, destroy it by default unless
+      // explicitly requested not to.
+      return getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, true);
+    }
   }
 
   /**
