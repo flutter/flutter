@@ -15,7 +15,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import yaml
 
 
 def IsLinux():
@@ -23,20 +22,21 @@ def IsLinux():
 
 
 def CreateCIPDDefinition(target_arch, out_dir):
-  pkg_def = {}
-  pkg_def['package'] = 'flutter/fuchsia-debug-symbols-%s' % target_arch
-  desc = 'Flutter and Dart runner debug symbols for Fuchsia. Target architecture: %s.' % target_arch
-  pkg_def['description'] = desc
-  pkg_def['install_mode'] = 'copy'
-  pkg_def['data'] = [{'dir': os.path.basename(os.path.normpath(out_dir))}]
-  return pkg_def
+  dir_name = os.path.basename(os.path.normpath(out_dir))
+  return """
+package: flutter/fuchsia-debug-symbols-%s
+description: Flutter and Dart runner debug symbols for Fuchsia. Target architecture %s.
+install_mode: copy
+data:
+  - dir: %s
+""" % (target_arch, target_arch, dir_name)
 
 
 def WriteCIPDDefinition(target_arch, out_dir):
   _, temp_file = tempfile.mkstemp(suffix='.yaml')
   with open(temp_file, 'w') as f:
-    yaml.dump(
-        CreateCIPDDefinition(target_arch, out_dir), f, default_flow_style=False)
+    cipd_def = CreateCIPDDefinition(target_arch, out_dir)
+    f.write(cipd_def)
   return temp_file
 
 
