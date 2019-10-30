@@ -661,9 +661,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// for the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
 ///
-/// The `navigator` argument defines the [NavigatorState] to use to push the
-/// dialog [Route]. When `navigator` is provided, the root [Navigator] is not
-/// looked up nor used.
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// dialog to the [Navigator] furthest from or nearest to the given `context`.
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
@@ -691,7 +690,7 @@ Future<T> showDialog<T>({
     'is appropriate for widgets built in the dialog.'
   ) Widget child,
   WidgetBuilder builder,
-  NavigatorState navigator,
+  bool useRootNavigator = true,
 }) {
   assert(child == null || builder == null);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -716,6 +715,6 @@ Future<T> showDialog<T>({
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,
-    navigator: navigator,
+    useRootNavigator: useRootNavigator,
   );
 }
