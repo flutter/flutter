@@ -451,6 +451,7 @@ class IOSSimulator extends Device {
   Future<void> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath) {
     // Run compiler to produce kernel file for the application.
     return BundleBuilder().build(
+      platform: TargetPlatform.ios,
       mainPath: mainPath,
       precompiledSnapshot: false,
       buildMode: buildInfo.mode,
