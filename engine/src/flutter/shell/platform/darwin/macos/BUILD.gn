@@ -26,6 +26,7 @@ group("macos") {
 _flutter_framework_name = "FlutterMacOS"
 _flutter_framework_filename = "$_flutter_framework_name.framework"
 _flutter_framework_dir = "$root_out_dir/$_flutter_framework_filename"
+_framework_binary_subpath = "Versions/A/$_flutter_framework_name"
 
 # The headers that will be copied to the framework and be accessed from outside
 # the Flutter engine source root.
@@ -84,8 +85,9 @@ source_set("flutter_framework_source") {
 
 shared_library("flutter_framework_dylib") {
   visibility = [ ":*" ]
-
   output_name = "$_flutter_framework_name"
+
+  ldflags = [ "-Wl,-install_name,@rpath/$_flutter_framework_filename/$_framework_binary_subpath" ]
 
   deps = [
     ":flutter_framework_source",
@@ -119,28 +121,14 @@ executable("flutter_desktop_darwin_unittests") {
   ]
 }
 
-action("copy_dylib_and_update_framework_install_name") {
+copy("copy_dylib") {
   visibility = [ ":*" ]
-  script = "$flutter_root/sky/tools/change_install_name.py"
-  framework_binary_subpath = "Versions/A/$_flutter_framework_name"
 
-  inputs = [
-    script,
-  ]
   sources = [
     "$root_out_dir/lib$_flutter_framework_name.dylib",
   ]
   outputs = [
-    "$_flutter_framework_dir/$framework_binary_subpath",
-  ]
-
-  args = [
-    "--dylib",
-    rebase_path(sources[0]),
-    "--install_name",
-    "@rpath/$_flutter_framework_filename/$framework_binary_subpath",
-    "--output",
-    rebase_path(outputs[0]),
+    "$_flutter_framework_dir/$_framework_binary_subpath",
   ]
 
   deps = [
@@ -225,7 +213,7 @@ action("_generate_symlinks") {
     "$_flutter_framework_name.stamp",
   ]
   deps = [
-    ":copy_dylib_and_update_framework_install_name",
+    ":copy_dylib",
     ":copy_framework_headers",
     ":copy_framework_icu",
     ":copy_framework_info_plist",

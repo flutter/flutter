@@ -42,6 +42,8 @@ shared_library("create_flutter_framework_dylib") {
 
   output_name = "Flutter"
 
+  ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
+
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterAppDelegate_Internal.h",
@@ -137,27 +139,14 @@ shared_library("create_flutter_framework_dylib") {
   ]
 }
 
-action("copy_dylib_and_update_framework_install_name") {
+copy("copy_dylib") {
   visibility = [ ":*" ]
-  script = "$flutter_root/sky/tools/change_install_name.py"
 
-  inputs = [
-    script,
-  ]
   sources = [
     "$root_out_dir/libFlutter.dylib",
   ]
   outputs = [
     "$_flutter_framework_dir/Flutter",
-  ]
-
-  args = [
-    "--dylib",
-    rebase_path(sources[0]),
-    "--install_name",
-    "@rpath/Flutter.framework/Flutter",
-    "--output",
-    rebase_path(outputs[0]),
   ]
 
   deps = [
@@ -275,7 +264,7 @@ ios_app("FlutterTests") {
 group("flutter_framework") {
   deps = [
     ":copy_and_verify_framework_headers",
-    ":copy_dylib_and_update_framework_install_name",
+    ":copy_dylib",
     ":copy_framework_icu",
     ":copy_framework_info_plist",
     ":copy_framework_module_map",

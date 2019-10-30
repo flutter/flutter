@@ -14,6 +14,8 @@ shell_gpu_configuration("embedder_gpu_configuration") {
   enable_metal = false
 }
 
+_framework_binary_subpath = "Versions/A/FlutterEmbedder"
+
 # Template for the embedder build. Used to allow building it multiple times with
 # different flags.
 template("embedder_source_set") {
@@ -138,6 +140,10 @@ shared_library("flutter_engine_library") {
 
   output_name = "flutter_engine"
 
+  if (is_mac && !embedder_for_target) {
+    ldflags = [ "-Wl,-install_name,@rpath/FlutterEmbedder.framework/$_framework_binary_subpath" ]
+  }
+
   deps = [
     ":embedder",
   ]
@@ -204,28 +210,14 @@ if (is_mac && !embedder_for_target) {
     ]
   }
 
-  action("install_dylib") {
+  copy("copy_dylib") {
     visibility = [ ":*" ]
-    script = "$flutter_root/sky/tools/change_install_name.py"
-    framework_binary_subpath = "Versions/A/FlutterEmbedder"
 
-    inputs = [
-      script,
-    ]
     sources = [
       "$root_out_dir/libflutter_engine.dylib",
     ]
     outputs = [
-      "$_flutter_embedder_framework_dir/$framework_binary_subpath",
-    ]
-
-    args = [
-      "--dylib",
-      rebase_path(sources[0]),
-      "--install_name",
-      "@rpath/FlutterEmbedder.framework/$framework_binary_subpath",
-      "--output",
-      rebase_path(outputs[0]),
+      "$_flutter_embedder_framework_dir/$_framework_binary_subpath",
     ]
 
     deps = [
@@ -253,11 +245,11 @@ if (is_mac && !embedder_for_target) {
       "FlutterEmbedder.stamp",
     ]
     deps = [
+      ":copy_dylib",
       ":copy_framework_headers",
       ":copy_icu",
       ":copy_info_plist",
       ":copy_module_map",
-      ":install_dylib",
     ]
   }
 
