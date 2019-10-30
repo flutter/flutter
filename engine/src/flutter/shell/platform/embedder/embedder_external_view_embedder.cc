@@ -95,24 +95,14 @@ void EmbedderExternalViewEmbedder::BeginFrame(SkISize frame_size,
     }
   }
 
-  // If there is no root render target, create one now. This will be accessed by
-  // the rasterizer before the submit call layer to access the surface surface
-  // canvas.
+  // If there is no root render target, create one now.
+  // TODO(43778): This should now be moved to be later in the submit call.
   if (!root_render_target_) {
     root_render_target_ = create_render_target_callback_(
         context, MakeBackingStoreConfig(surface_size));
-  }
-
-  // Install the root surface transformation on the root canvas at the beginning
-  // of each frame.
-  if (root_render_target_) {
-    auto surface = root_render_target_->GetRenderSurface();
-    if (surface) {
-      auto canvas = surface->getCanvas();
-      if (canvas) {
-        canvas->setMatrix(pending_surface_transformation_);
-      }
-    }
+    root_picture_recorder_ = std::make_unique<SkPictureRecorder>();
+    root_picture_recorder_->beginRecording(pending_frame_size_.width(),
+                                           pending_frame_size_.height());
   }
 }
 
@@ -237,8 +227,15 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
     return false;
   }
 
+  // Copy the contents of the root picture recorder onto the root surface
+  // while making sure to take into account any surface transformations.
   if (auto root_canvas = root_render_target_->GetRenderSurface()->getCanvas()) {
+    root_canvas->setMatrix(pending_surface_transformation_);
+    root_canvas->clear(SK_ColorTRANSPARENT);
+    root_canvas->drawPicture(
+        root_picture_recorder_->finishRecordingAsPicture());
     root_canvas->flush();
+    root_picture_recorder_.reset();
   }
 
   {
@@ -349,9 +346,11 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
 }
 
 // |ExternalViewEmbedder|
-sk_sp<SkSurface> EmbedderExternalViewEmbedder::GetRootSurface() {
-  return root_render_target_ ? root_render_target_->GetRenderSurface()
-                             : nullptr;
+SkCanvas* EmbedderExternalViewEmbedder::GetRootCanvas() {
+  if (!root_picture_recorder_) {
+    return nullptr;
+  }
+  return root_picture_recorder_->getRecordingCanvas();
 }
 
 }  // namespace flutter

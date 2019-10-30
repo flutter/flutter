@@ -86,6 +86,7 @@ test_fixtures("fixtures") {
   fixtures = [
     "fixtures/compositor.png",
     "fixtures/gradient.png",
+    "fixtures/verifyb143464703.png",
     "fixtures/gradient_xform.png",
     "fixtures/compositor_software.png",
     "fixtures/compositor_with_platform_layer_on_bottom.png",
