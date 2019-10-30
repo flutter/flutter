@@ -709,9 +709,21 @@ mixin WidgetInspectorService {
   final List<String> _serializeRing = List<String>(20);
   int _serializeRingIndex = 0;
 
-  // A map of the stringified tuple of file:line:column information to a live
-  // element instance.
-  final Map<String, List<Element>> _activeElements = HashMap<String, List<Element>>();
+  // A map of the stringified tuple of _Location to the head and tail of
+  // a doubly-linked list of live element instances.
+  final Map<_Location, _ElementLocation> _activeElements = HashMap<_Location, _ElementLocation>.identity();
+
+  // All active locations in a given file. There should only be a handful per
+  // file, making a linear search fast enough.
+  final Map<String, Set<_Location>> _locations = HashMap<String, Set<_Location>>();
+
+  // Fields used to track active instances of the element for faster
+  // invalidations. Together these form a double-linked list of elements,
+  // where every element corresponds to a Widget with an indentical location.
+  // The expando allows adding previous and next pointers to the element clas
+  // without modifying the public API. Unlike a map, it only weakly retains objects.
+  final Expando<Element> _previousElements = Expando<Element>();
+  final Expando<Element> _nextElements = Expando<Element>();
 
   /// The current [WidgetInspectorService].
   static WidgetInspectorService get instance => _instance;
@@ -754,36 +766,63 @@ mixin WidgetInspectorService {
   /// This is utilized by the `reassembleElements` service extension to perform
   /// faster invalidations without rebuilding the entire application.
   void activateElement(Element element) {
-    final String key = _keyForElement(element);
-    if (key == null) {
+   if (!isWidgetCreationTracked()) {
       return;
-    }
-    _activeElements[key] ??= <Element>[];
-    _activeElements[key].add(element);
-  }
-
-  /// Inspector internal method to releas tracking of an [Element] instance.
-  ///
-  /// This is utilized by the `reassembleElements` service extension to perform
-  /// faster invalidations without rebuilding the entire application.
-  void deactivateElement(Element element) {
-    final String key = _keyForElement(element);
-    if (key == null) {
-      return;
-    }
-    _activeElements[key]?.remove(element);
-  }
-
-  String _keyForElement(Element element) {
-    if (!isWidgetCreationTracked()) {
-      return null;
     }
     final dynamic widget = element.widget;
     if (widget == null) {
-      return null;
+      return;
     }
+    // All location instances are const, so we can use it a a map key
+    // and set value even though it does not implement a meaningful
+    // equality operator.
     final _Location location = widget._location;
-    return '${location.file}:${location.line}:${location.column}';
+    final Set<_Location> locations = _locations[location.file] ??= HashSet<_Location>.identity();
+    locations.add(location);
+
+    final _ElementLocation elementLocation = _activeElements[location];
+    if (elementLocation == null) {
+      _activeElements[location] = _ElementLocation()
+        ..head = element
+        ..tail = element;
+      return;
+    }
+    // The tail pointer is not updated here, since we do not have access to the
+    // private fields which track them. This must be done in [Element.activate]
+    _nextElements[elementLocation.tail] = element;
+    _previousElements[element] = elementLocation.tail;
+    elementLocation.tail = element;
+    return;
+  }
+
+  void deactiveElement(Element element) {
+    final dynamic widget = element.widget;
+    final _Location location = widget._location;
+    final Element previousElement = _previousElements[element];
+    final Element nextElement = _nextElements[element];
+
+    // There is only a single element in the list.
+    if (previousElement == null && nextElement == null) {
+      _activeElements.remove(location);
+      return;
+    }
+
+    // The element is on either end of the list.
+    final _ElementLocation elementLocation = _activeElements[location];
+    if (previousElement == null) {
+      elementLocation.head = nextElement;
+      _previousElements[nextElement] = null;
+      return;
+    }
+    if (previousElement == null) {
+      elementLocation.tail = previousElement;
+      _nextElements[previousElement] = null;
+      return;
+    }
+
+    // The element is in the middle of the list.
+    _nextElements[previousElement] = nextElement;
+    _previousElements[nextElement] = previousElement;
   }
 
   _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
@@ -1080,16 +1119,19 @@ mixin WidgetInspectorService {
 
       _registerServiceExtensionCallback(
         name: 'reassembleElements',
-        callback: (Map<String, String> params) async {
+        callback: (Map<String, dynamic> params) async {
           final String file = params['file'];
-          final String line = params['line'];
-          final String column = params['column'];
-          final String key = '$file:$line:$column';
-          final List<Element> elements =_activeElements[key];
-          if (elements != null) {
-            for (Element element in elements) {
-              element.markNeedsBuild();
-            }
+          final int line = params['line'];
+          final int column = params['column'];
+          final _Location location =_locations[file]
+            ?.firstWhere((_Location location) => location.line == line && location.column == column, orElse: () => null);
+          if (location == null) {
+            return const <String, dynamic>{};
+          }
+          Element currentElement = _activeElements[location]?.head;
+          while (currentElement != null) {
+            currentElement.markNeedsBuild();
+            currentElement = _nextElements[currentElement];
           }
           return const <String, dynamic>{};
         }
@@ -1943,6 +1985,13 @@ mixin WidgetInspectorService {
     _clearStats();
     _resetErrorCount();
   }
+}
+
+// Helper class to maintain both head and tail pointers to a doubly-linked
+// list.
+class _ElementLocation {
+  Element head;
+  Element tail;
 }
 
 /// Accumulator for a count associated with a specific source location.

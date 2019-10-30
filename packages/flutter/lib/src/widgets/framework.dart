@@ -3210,7 +3210,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(() {
       _debugLifecycleState = _ElementLifecycle.active;
       WidgetInspectorService.instance.activateElement(this);
-      // _debugElementLocations['something'] = this;
       return true;
     }());
     if (_dirty)
@@ -3250,7 +3249,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _inheritedWidgets = null;
     _active = false;
     assert(() {
-       WidgetInspectorService.instance.deactivateElement(this);
+      WidgetInspectorService.instance.activateElement(this);
       _debugLifecycleState = _ElementLifecycle.inactive;
       return true;
     }());
