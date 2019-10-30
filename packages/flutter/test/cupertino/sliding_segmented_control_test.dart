@@ -19,7 +19,7 @@ dynamic getRenderSegmentedControl(WidgetTester tester) {
   );
 }
 
-Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false}) {
+Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false }) {
   final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
   final Rect local = renderSegmentedControl.currentThumbRect;
   if (!useGlobalCoordinate)
@@ -32,9 +32,10 @@ Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = 
 double currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale;
 
 Widget setupSimpleSegmentedControl() {
-  final Map<int, Widget> children = <int, Widget>{};
-  children[0] = const Text('Child 1');
-  children[1] = const Text('Child 2');
+  const Map<int, Widget> children = <int, Widget>{
+    0: Text('Child 1'),
+    1: Text('Child 2'),
+  };
   final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
   return boilerplate(
@@ -68,9 +69,10 @@ void main() {
       expect(e.toString(), contains('children'));
     }
 
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
     try {
       await tester.pumpWidget(
@@ -153,20 +155,14 @@ void main() {
   testWidgets('Padding works', (WidgetTester tester) async {
     const Key key = Key('Container');
 
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const SizedBox(
-      height: double.infinity,
-      child: Text('Child 1'),
-    ) ;
-    children[1] = const SizedBox(
-      height: double.infinity,
-      child: Text('Child 2'),
-    ) ;
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
     Future<void> verifyPadding({ EdgeInsets padding }) async {
       final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(vertical: 2, horizontal: 3);
       final Rect segmentedControlRect = tester.getRect(find.byKey(key));
-
 
       expect(
           tester.getTopLeft(find.ancestor(of: find.byWidget(children[0]), matching: find.byType(Opacity))),
@@ -228,10 +224,11 @@ void main() {
   });
 
   testWidgets('Tap changes toggle state', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
-    children[2] = const Text('Child 3');
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+      2: Text('Child 3'),
+    };
 
     final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
@@ -262,10 +259,11 @@ void main() {
   });
 
   testWidgets('Changing controller works', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
-    children[2] = const Text('Child 3');
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+      2: Text('Child 3'),
+    };
 
     final ValueNotifier<int> controller = ValueNotifier<int>(0);
     final ValueNotifier<int> newControlelr = ValueNotifier<int>(null);
@@ -302,10 +300,11 @@ void main() {
   });
 
   testWidgets('Can change controller value in build method', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
-    children[2] = const Text('Child 3');
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+      2: Text('Child 3'),
+    };
 
     int currentIndex = 0;
     StateSetter setState;
@@ -349,9 +348,10 @@ void main() {
   testWidgets(
     'Segmented controls respect theme',
     (WidgetTester tester) async {
-      final Map<int, Widget> children = <int, Widget>{};
-      children[0] = const Text('Child 1');
-      children[1] = const Icon(IconData(1));
+      const Map<int, Widget> children = <int, Widget>{
+        0: Text('Child 1'),
+        1: Icon(IconData(1)),
+      };
 
       final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
@@ -384,9 +384,10 @@ void main() {
   );
 
   testWidgets('SegmentedControl dark mode', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Icon(IconData(1));
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Icon(IconData(1)),
+    };
 
     final ValueNotifier<int> controller = ValueNotifier<int>(0);
     Brightness brightness = Brightness.light;
@@ -436,25 +437,20 @@ void main() {
     'Children can be non-Text or Icon widgets (in this case, '
         'a Container or Placeholder widget)',
     (WidgetTester tester) async {
-      final Map<int, Widget> children = <int, Widget>{};
-      children[0] = const Text('Child 1');
-      children[1] = Container(
-        constraints: const BoxConstraints.tightFor(width: 50.0, height: 50.0),
-      );
-      children[2] = const Placeholder();
+      const Map<int, Widget> children = <int, Widget>{
+        0: Text('Child 1'),
+        1: SizedBox(width: 50, height: 50),
+        2: Placeholder(),
+      };
 
       final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
       await tester.pumpWidget(
-        StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return boilerplate(
-              child: CupertinoSlidingSegmentedControl<int>(
-                children: children,
-                controller: controller,
-              ),
-            );
-          },
+        boilerplate(
+          child: CupertinoSlidingSegmentedControl<int>(
+            children: children,
+            controller: controller,
+          ),
         ),
       );
     },
@@ -467,9 +463,10 @@ void main() {
   });
 
   testWidgets('Null input for value results in no child initially selected', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
     final ValueNotifier<int> controller = ValueNotifier<int>(null);
 
@@ -490,12 +487,12 @@ void main() {
   });
 
   testWidgets('Long press not-selected child interactions', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{
-      0: const Text('Child 1'),
-      1: const Text('Child 2'),
-      2: const Text('Child 3'),
-      3: const Text('Child 4'),
-      4: const Text('Child 5'),
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+      2: Text('Child 3'),
+      3: Text('Child 4'),
+      4: Text('Child 5'),
     };
 
     // Child 3 is intially selected.
@@ -568,16 +565,11 @@ void main() {
   });
 
   testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = Container(
-      constraints: const BoxConstraints.tightFor(height: 100.0),
-    );
-    children[1] = Container(
-      constraints: const BoxConstraints.tightFor(height: 400.0),
-    );
-    children[2] = Container(
-      constraints: const BoxConstraints.tightFor(height: 200.0),
-    );
+    final Map<int, Widget> children = <int, Widget>{
+      0: Container(constraints: const BoxConstraints.tightFor(height: 100.0)),
+      1: Container(constraints: const BoxConstraints.tightFor(height: 400.0)),
+      2: Container(constraints: const BoxConstraints.tightFor(height: 200.0)),
+    };
 
     final ValueNotifier<int> controller = ValueNotifier<int>(null);
 
@@ -602,16 +594,11 @@ void main() {
   });
 
   testWidgets('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = Container(
-      constraints: const BoxConstraints.tightFor(width: 50.0),
-    );
-    children[1] = Container(
-      constraints: const BoxConstraints.tightFor(width: 100.0),
-    );
-    children[2] = Container(
-      constraints: const BoxConstraints.tightFor(width: 200.0),
-    );
+    final Map<int, Widget> children = <int, Widget>{
+      0: Container(constraints: const BoxConstraints.tightFor(width: 50.0)),
+      1: Container(constraints: const BoxConstraints.tightFor(width: 100.0)),
+      2: Container(constraints: const BoxConstraints.tightFor(width: 200.0)),
+    };
 
     final ValueNotifier<int> controller = ValueNotifier<int>(null);
     await tester.pumpWidget(
@@ -636,9 +623,10 @@ void main() {
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
+    const Map<int, Widget> children = <int, Widget>{
+      0: SizedBox(width: 50),
+      1: SizedBox(width: 70),
+    };
 
     final ValueNotifier<int> controller = ValueNotifier<int>(null);
 
@@ -660,13 +648,17 @@ void main() {
       find.byKey(const ValueKey<String>('Segmented Control')),
     );
 
-    expect(segmentedControl.size.width.isFinite, isTrue);
+    expect(
+      segmentedControl.size.width,
+      70 * 2 + 9.25 * 4 + 3 * 2 + 1, // 2 children + 4 child padding + 2 outer padding + 1 separator
+    );
   });
 
   testWidgets('Directionality test - RTL should reverse order of widgets', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
     final ValueNotifier<int> controller = ValueNotifier<int>(null);
     await tester.pumpWidget(
@@ -686,9 +678,10 @@ void main() {
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
     final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
@@ -720,10 +713,11 @@ void main() {
 
   testWidgets('Segmented control semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
     final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
     await tester.pumpWidget(
@@ -918,10 +912,11 @@ void main() {
   });
 
   testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('A');
-    children[1] = const Text('B');
-    children[2] = const Text('C');
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
     final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
     await tester.pumpWidget(
@@ -964,10 +959,7 @@ void main() {
   });
 
   testWidgets('Insert segment while animation is running', (WidgetTester tester) async {
-    final Map<int, Widget> children = SplayTreeMap<int, Widget>(
-      (int a, int b) => a - b,
-      (dynamic key) => true,
-    );
+    final Map<int, Widget> children = SplayTreeMap<int, Widget>((int a, int b) => a - b);
 
     children[0] = const Text('A');
     children[2] = const Text('C');
@@ -1009,9 +1001,10 @@ void main() {
   });
 
   testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
     final ValueNotifier<int> controller = ValueNotifier<int>(0);
     final ScrollController scrollController = ScrollController();
 
