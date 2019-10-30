@@ -278,7 +278,6 @@ class SkiaGoldClient {
               ignoreIsActive = true;
               break;
             } else {
-              // If the ignore has expired, then the failing test
               final StringBuffer buf = StringBuffer()
                 ..writeln('This test has an expired ignore in place, and the')
                 ..writeln('change has not been triaged.')
