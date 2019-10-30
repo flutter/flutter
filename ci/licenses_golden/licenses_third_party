@@ -1,4 +1,4 @@
-Signature: b9a8429547ca1674aa823e8d6e9bfba1
+Signature: 11e32382c56527efdcebb8a776a011be
 
 UNUSED LICENSES:
 
@@ -7560,6 +7560,8 @@ FILE: ../../../third_party/dart/runtime/lib/wasm.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/bit.h
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/main.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/test.cc
+FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/custom_zone.cc
+FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/custom_zone.h
 FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/dart.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/dart.h
 FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/main.cc
