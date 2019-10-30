@@ -437,7 +437,10 @@ class CupertinoDemoTab2 extends StatelessWidget {
       child: CupertinoScrollbar(
         child: ListView(
           children: <Widget>[
-            Tab2Header(),
+            CupertinoUserInterfaceLevel(
+              data: CupertinoUserInterfaceLevelData.elevated,
+              child: Tab2Header(),
+            ),
             ...buildTab2Conversation(),
           ],
         ),
@@ -460,18 +463,18 @@ class Tab2Header extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE5E5E5),
+                decoration: BoxDecoration(
+                  color: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const <Widget>[
+                    children: <Widget>[
                       Text(
                         'SUPPORT TICKET',
                         style: TextStyle(
-                          color: Color(0xFF646464),
+                          color: CupertinoDynamicColor.resolve(CupertinoColors.secondaryLabel, context),
                           letterSpacing: -0.9,
                           fontSize: 14.0,
                           fontWeight: FontWeight.w500,
@@ -480,7 +483,7 @@ class Tab2Header extends StatelessWidget {
                       Text(
                         'Show More',
                         style: TextStyle(
-                          color: Color(0xFF646464),
+                          color: CupertinoDynamicColor.resolve(CupertinoColors.secondaryLabel, context),
                           letterSpacing: -0.6,
                           fontSize: 12.0,
                           fontWeight: FontWeight.w500,
@@ -492,7 +495,7 @@ class Tab2Header extends StatelessWidget {
               ),
               Container(
                 decoration: BoxDecoration(
-                  color: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
+                  color: CupertinoDynamicColor.resolve(CupertinoColors.quaternarySystemFill, context),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
