@@ -38,6 +38,7 @@ class RawMaterialButton extends StatefulWidget {
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
+    this.onLongPress,
     this.onHighlightChanged,
     this.textStyle,
     this.fillColor,
@@ -75,8 +76,21 @@ class RawMaterialButton extends StatefulWidget {
 
   /// Called when the button is tapped or otherwise activated.
   ///
-  /// If this is set to null, the button will be disabled, see [enabled].
+  /// If this callback and [onLongPress] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
   final VoidCallback onPressed;
+
+  /// Called when the button is long-pressed.
+  ///
+  /// If this callback and [onPressed] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
+  final VoidCallback onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -222,8 +236,8 @@ class RawMaterialButton extends StatefulWidget {
   /// Whether the button is enabled or disabled.
   ///
   /// Buttons are disabled by default. To enable a button, set its [onPressed]
-  /// property to a non-null value.
-  bool get enabled => onPressed != null;
+  /// or [onLongPress] properties to a non-null value.
+  bool get enabled => onPressed != null || onLongPress != null;
 
   /// Configures the minimum size of the tap target.
   ///
@@ -352,6 +366,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           hoverColor: widget.hoverColor,
           onHover: _handleHoveredChanged,
           onTap: widget.onPressed,
+          onLongPress: widget.onLongPress,
           customBorder: effectiveShape,
           child: IconTheme.merge(
             data: IconThemeData(color: effectiveTextColor),

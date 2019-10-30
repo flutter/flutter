@@ -250,6 +250,81 @@ void main() {
     expect(textColor(), equals(disabledColor));
     expect(textColor(), isNot(unusedDisabledTextColor));
   });
+
+  testWidgets('RaisedButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+
+    bool wasPressed;
+    Finder raisedButton;
+
+    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          child: const Text('button'),
+          onPressed: onPressed,
+          onLongPress: onLongPress,
+        ),
+      );
+    }
+
+    // onPressed not null, onLongPress null.
+    wasPressed = false;
+    await tester.pumpWidget(
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+    );
+    raisedButton = find.byType(RaisedButton);
+    expect(tester.widget<RaisedButton>(raisedButton).enabled, true);
+    await tester.tap(raisedButton);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress not null.
+    wasPressed = false;
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+    );
+    raisedButton = find.byType(RaisedButton);
+    expect(tester.widget<RaisedButton>(raisedButton).enabled, true);
+    await tester.longPress(raisedButton);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress null.
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: null),
+    );
+    raisedButton = find.byType(RaisedButton);
+    expect(tester.widget<RaisedButton>(raisedButton).enabled, false);
+  });
+
+  testWidgets('RaisedButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+    bool didPressButton = false;
+    bool didLongPressButton = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          onPressed: () {
+            didPressButton = true;
+          },
+          onLongPress: () {
+            didLongPressButton = true;
+          },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final Finder raisedButton = find.byType(RaisedButton);
+    expect(tester.widget<RaisedButton>(raisedButton).enabled, true);
+
+    expect(didPressButton, isFalse);
+    await tester.tap(raisedButton);
+    expect(didPressButton, isTrue);
+
+    expect(didLongPressButton, isFalse);
+    await tester.longPress(raisedButton);
+    expect(didLongPressButton, isTrue);
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
