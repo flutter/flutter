@@ -228,7 +228,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       case TargetPlatform.ios:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       default:
