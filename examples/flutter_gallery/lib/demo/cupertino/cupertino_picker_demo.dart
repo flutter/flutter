@@ -56,24 +56,28 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   }
 
   Widget _buildBottomPicker(Widget picker) {
-    return Container(
-      height: _kPickerSheetHeight,
-      padding: const EdgeInsets.only(top: 6.0),
-      color: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
-      child: DefaultTextStyle(
-        style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-          fontSize: 22.0,
-        ),
-        child: GestureDetector(
-          // Blocks taps from propagating to the modal sheet and popping.
-          onTap: () { },
-          child: SafeArea(
-            top: false,
-            child: picker,
+    return Builder(
+      builder: (BuildContext context) {
+        return Container(
+          height: _kPickerSheetHeight,
+          padding: const EdgeInsets.only(top: 6.0),
+          color: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
+          child: DefaultTextStyle(
+            style: TextStyle(
+              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+              fontSize: 22.0,
+            ),
+            child: GestureDetector(
+              // Blocks taps from propagating to the modal sheet and popping.
+              onTap: () { },
+              child: SafeArea(
+                top: false,
+                child: picker,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -109,9 +113,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Favorite Color'),
           Text(
             coolColorNames[_selectedColorIndex],
-            style: const TextStyle(
-                color: CupertinoColors.inactiveGray
-            ),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ],
       ),
@@ -143,7 +145,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             '${timer.inHours}:'
                 '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
                 '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
-            style: const TextStyle(color: CupertinoColors.inactiveGray),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ],
       ),
@@ -174,7 +176,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Date'),
           Text(
             DateFormat.yMMMMd().format(date),
-            style: const TextStyle(color: CupertinoColors.inactiveGray),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ]
       ),
@@ -205,7 +207,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Time'),
           Text(
             DateFormat.jm().format(time),
-            style: const TextStyle(color: CupertinoColors.inactiveGray),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ],
       ),
@@ -236,7 +238,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Date and Time'),
           Text(
             DateFormat.yMMMd().add_jm().format(dateTime),
-            style: const TextStyle(color: CupertinoColors.inactiveGray),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ],
       ),

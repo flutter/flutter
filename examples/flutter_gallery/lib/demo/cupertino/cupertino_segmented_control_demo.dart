@@ -97,36 +97,43 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                     vertical: 32.0,
                     horizontal: 16.0,
                   ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 64.0,
-                      horizontal: 16.0,
+                  child: CupertinoUserInterfaceLevel(
+                    data: CupertinoUserInterfaceLevelData.elevated,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 64.0,
+                            horizontal: 16.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                            borderRadius: BorderRadius.circular(3.0),
+                            boxShadow: const <BoxShadow>[
+                              BoxShadow(
+                                offset: Offset(0.0, 3.0),
+                                blurRadius: 5.0,
+                                spreadRadius: -1.0,
+                                color: _kKeyUmbraOpacity,
+                              ),
+                              BoxShadow(
+                                offset: Offset(0.0, 6.0),
+                                blurRadius: 10.0,
+                                spreadRadius: 0.0,
+                                color: _kKeyPenumbraOpacity,
+                              ),
+                              BoxShadow(
+                                offset: Offset(0.0, 1.0),
+                                blurRadius: 18.0,
+                                spreadRadius: 0.0,
+                                color: _kAmbientShadowOpacity,
+                              ),
+                            ],
+                          ),
+                          child: icons[controller.value],
+                        );
+                      },
                     ),
-                    decoration: BoxDecoration(
-                      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(3.0),
-                      boxShadow: const <BoxShadow>[
-                        BoxShadow(
-                          offset: Offset(0.0, 3.0),
-                          blurRadius: 5.0,
-                          spreadRadius: -1.0,
-                          color: _kKeyUmbraOpacity,
-                        ),
-                        BoxShadow(
-                          offset: Offset(0.0, 6.0),
-                          blurRadius: 10.0,
-                          spreadRadius: 0.0,
-                          color: _kKeyPenumbraOpacity,
-                        ),
-                        BoxShadow(
-                          offset: Offset(0.0, 1.0),
-                          blurRadius: 18.0,
-                          spreadRadius: 0.0,
-                          color: _kAmbientShadowOpacity,
-                        ),
-                      ],
-                    ),
-                    child: icons[controller.value],
                   ),
                 ),
               ),
