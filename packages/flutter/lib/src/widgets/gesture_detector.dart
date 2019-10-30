@@ -130,8 +130,10 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///
 /// {@tool sample}
 ///
-/// This example turns the light bulb yellow when the "turn lights on" button is
-/// tapped by setting the `_lights` field:
+/// This example of a [Container] containing a black light bulb wrapped in a
+/// [GestureDetector].
+/// It turns the light bulb yellow when the "turn lights on" button is tapped
+/// by setting the `_lights` field:
 ///
 /// ```dart
 /// Container(
@@ -161,6 +163,25 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///         ),
 ///       ),
 ///     ],
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+///
+/// This example of a red [Container] wrapping a [GestureDetector] widget. When
+/// tapped turns the [Container] yellow by setting the `_color` field:
+///
+/// ```dart
+/// Container(
+///   color: _color,
+///   child: GestureDetector(
+///     onTap: () {
+///       setState(() {
+///         _color = Colors.yellow;
+///       });
+///     },
 ///   ),
 /// )
 /// ```
