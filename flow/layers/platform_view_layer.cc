@@ -23,6 +23,7 @@ void PlatformViewLayer::Preroll(PrerollContext* context,
                       "does not support embedding";
     return;
   }
+  context->has_platform_view = true;
   std::unique_ptr<EmbeddedViewParams> params =
       std::make_unique<EmbeddedViewParams>();
   params->offsetPixels =

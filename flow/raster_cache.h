@@ -100,6 +100,8 @@ class RasterCache {
 
   void SetCheckboardCacheImages(bool checkerboard);
 
+  size_t GetCachedEntriesCount() const;
+
  private:
   struct Entry {
     bool used_this_frame = false;
