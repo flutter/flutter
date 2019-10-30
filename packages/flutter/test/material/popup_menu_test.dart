@@ -175,6 +175,123 @@ void main() {
     expect(onCanceledCalled, isFalse);
   });
 
+  testWidgets('disabled PopupMenuButton is not focusabled', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    final GlobalKey childKey = GlobalKey();
+    bool itemBuilderCalled = false;
+    bool onSelectedCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<int>(
+                key: popupButtonKey,
+                child: Container(key: childKey),
+                enabled: false,
+                itemBuilder: (BuildContext context) {
+                  itemBuilderCalled = true;
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                onSelected: (int selected) => onSelectedCalled = true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    Focus.of(childKey.currentContext, nullOk: true).requestFocus();
+    await tester.pump();
+
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+    expect(itemBuilderCalled, isFalse);
+    expect(onSelectedCalled, isFalse);
+  });
+
+  testWidgets('disabled PopupMenuItem is not focusabled', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    final GlobalKey childKey = GlobalKey();
+    bool itemBuilderCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<int>(
+                key: popupButtonKey,
+                itemBuilder: (BuildContext context) {
+                  itemBuilderCalled = true;
+                  return <PopupMenuEntry<int>>[
+                    PopupMenuItem<int>(
+                      enabled: true,
+                      value: 1,
+                      child: Text('Tap me please!', key: childKey),
+                    ),
+                  ];
+                },
+              ),
+              Container(),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    final FocusNode childNode = Focus.of(childKey.currentContext, nullOk: true);
+    childNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(itemBuilderCalled, isTrue);
+
+    expect(childNode.hasPrimaryFocus, isTrue);
+    itemBuilderCalled = false;
+
+    // Close the popup.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              Container(),
+              PopupMenuButton<int>(
+                key: popupButtonKey,
+                itemBuilder: (BuildContext context) {
+                  itemBuilderCalled = true;
+                  return <PopupMenuEntry<int>>[
+                    PopupMenuItem<int>(
+                      enabled: false,
+                      value: 1,
+                      child: Text('Tap me please!', key: childKey),
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // Open the popup again to rebuild the contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(itemBuilderCalled, isTrue);
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+  });
+
   testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
     Widget build(TargetPlatform platform) {
       return MaterialApp(
