@@ -349,16 +349,20 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: Column(
-              children: const <Widget>[
-                ListTile(
+              children: <Widget>[
+                const ListTile(
                   title: Text('one'),
                 ),
                 ListTile(
-                  title: Text('two'),
+                  title: const Text('two'),
+                  onTap: () {},
+                ),
+                const ListTile(
+                  title: Text('three'),
                   selected: true,
                 ),
-                ListTile(
-                  title: Text('three'),
+                const ListTile(
+                  title: Text('four'),
                   enabled: false,
                 ),
               ],
@@ -377,25 +381,31 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocusable,
               ],
               label: 'one',
+            ),
+            TestSemantics.rootChild(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              label: 'two',
             ),
             TestSemantics.rootChild(
               flags: <SemanticsFlag>[
                 SemanticsFlag.isSelected,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocusable,
               ],
-              label: 'two',
+              label: 'three',
             ),
             TestSemantics.rootChild(
               flags: <SemanticsFlag>[
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isFocusable,
               ],
-              label: 'three',
+              label: 'four',
             ),
           ],
         ),
