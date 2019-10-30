@@ -8,6 +8,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import io.flutter.embedding.engine.loader.FlutterLoader;
 
@@ -38,6 +39,9 @@ public class FlutterMain {
      * @param applicationContext The Android application context.
      */
     public static void startInitialization(@NonNull Context applicationContext) {
+        if (isRunningInRobolectricTest) {
+            return;
+        }
         FlutterLoader.getInstance().startInitialization(applicationContext);
     }
 
@@ -53,6 +57,9 @@ public class FlutterMain {
      * @param settings Configuration settings.
      */
     public static void startInitialization(@NonNull Context applicationContext, @NonNull Settings settings) {
+        if (isRunningInRobolectricTest) {
+            return;
+        }
         FlutterLoader.Settings newSettings = new FlutterLoader.Settings();
         newSettings.setLogTag(settings.getLogTag());
         FlutterLoader.getInstance().startInitialization(applicationContext, newSettings);
@@ -67,6 +74,9 @@ public class FlutterMain {
      * @param args Flags sent to the Flutter runtime.
      */
     public static void ensureInitializationComplete(@NonNull Context applicationContext, @Nullable String[] args) {
+        if (isRunningInRobolectricTest) {
+            return;
+        }
         FlutterLoader.getInstance().ensureInitializationComplete(applicationContext, args);
     }
 
@@ -80,6 +90,9 @@ public class FlutterMain {
         @NonNull Handler callbackHandler,
         @NonNull Runnable callback
     ) {
+        if (isRunningInRobolectricTest) {
+            return;
+        }
         FlutterLoader.getInstance().ensureInitializationCompleteAsync(
             applicationContext, args, callbackHandler, callback);
     }
@@ -120,5 +133,22 @@ public class FlutterMain {
     @NonNull
     public static String getLookupKeyForAsset(@NonNull String asset, @NonNull String packageName) {
         return FlutterLoader.getInstance().getLookupKeyForAsset(asset, packageName);
+    }
+
+    private static boolean isRunningInRobolectricTest = false;
+
+    /*
+     * Indicates whether we are currently running in a Robolectric Test.
+     *
+     * <p> Flutter cannot be initialized inside a Robolectric environment since it cannot load
+     * native libraries.
+     *
+     * @deprecated Use the new embedding (io.flutter.embedding) instead which provides better
+     *     modularity for testing.
+     */
+    @Deprecated
+    @VisibleForTesting
+    public static void setIsRunningInRobolectricTest(boolean isRunningInRobolectricTest) {
+        FlutterMain.isRunningInRobolectricTest = isRunningInRobolectricTest;
     }
 }
