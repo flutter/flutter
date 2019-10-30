@@ -773,29 +773,39 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
-    return Actions(
-      actions: _actionMap,
-      child: Focus(
-        focusNode: widget.focusNode,
-        canRequestFocus: widget.canRequestFocus,
-        onFocusChange: _handleFocusUpdate,
-        autofocus: widget.autofocus,
-        child: MouseRegion(
-          onEnter: enabled ? _handleMouseEnter : null,
-          onExit: enabled ? _handleMouseExit : null,
-          child: GestureDetector(
-            onTapDown: enabled ? _handleTapDown : null,
-            onTap: enabled ? () => _handleTap(context) : null,
-            onTapCancel: enabled ? _handleTapCancel : null,
-            onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
-            onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
-            behavior: HitTestBehavior.opaque,
-            excludeFromSemantics: widget.excludeFromSemantics,
-            child: widget.child,
-          ),
-        ),
-      ),
+
+    Widget child = GestureDetector(
+      onTapDown: enabled ? _handleTapDown : null,
+      onTap: enabled ? () => _handleTap(context) : null,
+      onTapCancel: enabled ? _handleTapCancel : null,
+      onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
+      onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
+      behavior: HitTestBehavior.opaque,
+      excludeFromSemantics: widget.excludeFromSemantics,
+      child: widget.child,
     );
+
+    if (enabled) {
+      child = MouseRegion(
+        onEnter: _handleMouseEnter,
+        onExit: _handleMouseExit,
+        child: child,
+      );
+
+      if (widget.canRequestFocus) {
+        child = Actions(
+          actions: _actionMap,
+          child: Focus(
+            focusNode: widget.focusNode,
+            onFocusChange: _handleFocusUpdate,
+            autofocus: widget.autofocus,
+            child: child,
+          ),
+        );
+      }
+    }
+
+    return child;
   }
 }
 
