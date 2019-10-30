@@ -418,6 +418,12 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
     }
   }
 
+  // Return the translation from the Matrix4 as an Offset.
+  static Offset _getMatrixTranslation(Matrix4 matrix) {
+    final Vector3 nextTranslation = matrix.getTranslation();
+    return Offset(nextTranslation.x, nextTranslation.y);
+  }
+
   // The transformation matrix that gives the initial home position.
   Matrix4 get _initialTransform {
     Matrix4 matrix = Matrix4.identity();
@@ -596,25 +602,36 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       -scale * viewportBoundaries.left,
       -scale * viewportBoundaries.top,
     );
-    final Matrix4 nextMatrix = matrix.clone()..translate(
+
+    // Does both the x and y translation fit in the boundaries?
+    final Matrix4 nextMatrixXY = matrix.clone()..translate(
       translation.dx,
       translation.dy,
     );
-    final Vector3 nextTranslationVector = nextMatrix.getTranslation();
-    final Offset nextTranslation = Offset(
-      nextTranslationVector.x,
-      nextTranslationVector.y,
-    );
-    final bool inBoundaries = translationBoundaries.contains(
-      Offset(nextTranslation.dx, nextTranslation.dy),
-    );
-    if (!inBoundaries) {
-      // TODO(justinmc): Instead of canceling translation when it goes out of
-      // bounds, stop translation at boundary.
-      return matrix;
+    if (boundaries.contains(_getMatrixTranslation(nextMatrixXY))) {
+      return nextMatrixXY;
     }
 
-    return nextMatrix;
+    // x and y translation together doesn't fit, but does just x?
+    final Matrix4 nextMatrixX = matrix.clone()..translate(
+      translation.dx,
+      0.0,
+    );
+    if (boundaries.contains(_getMatrixTranslation(nextMatrixX))) {
+      return nextMatrixX;
+    }
+
+    // Neither of above fit, so try if just y translation fits.
+    final Matrix4 nextMatrixY = matrix.clone()..translate(
+      0.0,
+      translation.dy,
+    );
+    if (boundaries.contains(_getMatrixTranslation(nextMatrixY))) {
+      return nextMatrixY;
+    }
+
+    // Nothing fits, so return the unmodified original matrix.
+    return matrix;
   }
 
   // Return a new matrix representing the given matrix after applying the given
