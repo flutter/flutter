@@ -691,7 +691,7 @@ void main() {
     newEntry.opaque = true; // Does neither trigger an assert nor throw.
     expect(newEntry.opaque, isTrue);
 
-    // The new opaqueness is honored when inserted into an overlay:
+    // The new opaqueness is honored when inserted into an overlay.
     overlayKey.currentState.insert(newEntry);
     await tester.pumpAndSettle();
 
