@@ -13,6 +13,7 @@ import 'chip_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'feedback.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -1525,6 +1526,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
 
   final Set<MaterialState> _states = <MaterialState>{};
 
+  final GlobalKey deleteIconKey = GlobalKey();
+
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
 
@@ -1729,15 +1732,27 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     );
   }
 
-  Widget _buildDeleteIcon(BuildContext context, ThemeData theme, ChipThemeData chipTheme) {
+  Widget _buildDeleteIcon(
+    BuildContext context,
+    ThemeData theme,
+    ChipThemeData chipTheme,
+    GlobalKey deleteIconKey,
+  ) {
     if (!hasDeleteButton) {
       return null;
     }
     return _wrapWithTooltip(
       widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
       widget.onDeleted,
-      InkResponse(
-        onTap: widget.isEnabled ? widget.onDeleted : null,
+      GestureDetector(
+        key: deleteIconKey,
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.isEnabled
+            ? () {
+                Feedback.forTap(context);
+                widget.onDeleted();
+            }
+            : null,
         child: IconTheme(
           data: theme.iconTheme.copyWith(
             color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
@@ -1789,6 +1804,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
         onHover: canTap ? _handleHover : null,
+        splashFactory: _LocationAwareInkRippleFactory(
+            hasDeleteButton,
+            context,
+            deleteIconKey,
+        ),
         customBorder: shape,
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
@@ -1820,7 +1840,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   switchInCurve: Curves.fastOutSlowIn,
                 ),
                 deleteIcon: AnimatedSwitcher(
-                  child: _buildDeleteIcon(context, theme, chipTheme),
+                  child: _buildDeleteIcon(context, theme, chipTheme, deleteIconKey),
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
                 ),
@@ -2441,23 +2461,19 @@ class _RenderChip extends RenderBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    if (!size.contains(position))
+    if (!size.contains(position)) {
       return false;
-    RenderBox hitTestChild;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        if (position.dx / size.width > 0.66)
-          hitTestChild = deleteIcon ?? label ?? avatar;
-        else
-          hitTestChild = label ?? avatar;
-        break;
-      case TextDirection.rtl:
-        if (position.dx / size.width < 0.33)
-          hitTestChild = deleteIcon ?? label ?? avatar;
-        else
-          hitTestChild = label ?? avatar;
-        break;
     }
+    final bool tapIsOnDeleteIcon = _tapIsOnDeleteIcon(
+      hasDeleteButton: deleteIcon != null,
+      tapPosition: position,
+      chipSize: size,
+      textDirection: textDirection,
+    );
+    final RenderBox hitTestChild = tapIsOnDeleteIcon
+        ? (deleteIcon ?? label ?? avatar)
+        : (label ?? avatar);
+
     if (hitTestChild != null) {
       final Offset center = hitTestChild.size.center(Offset.zero);
       return result.addWithRawTransform(
@@ -2795,3 +2811,88 @@ class _RenderChip extends RenderBox {
   @override
   bool hitTestSelf(Offset position) => deleteButtonRect.contains(position) || pressRect.contains(position);
 }
+
+class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
+  const _LocationAwareInkRippleFactory(
+    this.hasDeleteButton,
+    this.chipContext,
+    this.deleteIconKey,
+  );
+
+  final bool hasDeleteButton;
+  final BuildContext chipContext;
+  final GlobalKey deleteIconKey;
+
+  @override
+  InteractiveInkFeature create({
+    MaterialInkController controller,
+    RenderBox referenceBox,
+    Offset position,
+    Color color,
+    TextDirection textDirection,
+    bool containedInkWell = false,
+    RectCallback rectCallback,
+    BorderRadius borderRadius,
+    ShapeBorder customBorder,
+    double radius,
+    VoidCallback onRemoved,
+  }) {
+
+    final bool tapIsOnDeleteIcon = _tapIsOnDeleteIcon(
+      hasDeleteButton: hasDeleteButton,
+      tapPosition: position,
+      chipSize: chipContext.size,
+      textDirection: textDirection,
+    );
+
+    final BuildContext splashContext = tapIsOnDeleteIcon
+        ? deleteIconKey.currentContext
+        : chipContext;
+
+    final InteractiveInkFeatureFactory splashFactory = Theme.of(splashContext).splashFactory;
+
+    if (tapIsOnDeleteIcon) {
+      final RenderBox currentBox = referenceBox;
+      referenceBox = deleteIconKey.currentContext.findRenderObject();
+      position = referenceBox.globalToLocal(currentBox.localToGlobal(position));
+      containedInkWell = false;
+    }
+
+    return splashFactory.create(
+      controller: controller,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      textDirection: textDirection,
+      containedInkWell: containedInkWell,
+      rectCallback: rectCallback,
+      borderRadius: borderRadius,
+      customBorder: customBorder,
+      radius: radius,
+      onRemoved: onRemoved,
+    );
+  }
+}
+
+bool _tapIsOnDeleteIcon({
+  bool hasDeleteButton,
+  Offset tapPosition,
+  Size chipSize,
+  TextDirection textDirection,
+}) {
+  bool tapIsOnDeleteIcon;
+  if (!hasDeleteButton) {
+    tapIsOnDeleteIcon = false;
+  } else {
+    switch (textDirection) {
+      case TextDirection.ltr:
+        tapIsOnDeleteIcon = tapPosition.dx / chipSize.width > 0.66;
+        break;
+      case TextDirection.rtl:
+        tapIsOnDeleteIcon = tapPosition.dx / chipSize.width < 0.33;
+        break;
+    }
+  }
+  return tapIsOnDeleteIcon;
+}
+

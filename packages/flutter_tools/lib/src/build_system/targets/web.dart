@@ -137,10 +137,10 @@ class Dart2JSTarget extends Target {
       '--libraries-spec=$specPath',
       if (dart2jsOptimization != null)
         '-$dart2jsOptimization'
-      else if (buildMode == BuildMode.profile)
-        '-O1'
       else
         '-O4',
+      if (buildMode == BuildMode.profile)
+        '--no-minify',
       '-o',
       outputFile.path,
       '--packages=$packageFile',
