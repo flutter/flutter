@@ -363,6 +363,14 @@ example:fiz/lib/''');
     fs.directory('fiz').createSync();
     expect(listDartSources(androidEnvironment), <File>[]);
   }));
+
+  test('Profile/ReleaseCopyFlutterAotBundle copies .so to correct output directory', () => testbed.run(() async {
+    androidEnvironment.buildDir.createSync(recursive: true);
+    androidEnvironment.buildDir.childFile('app.so').createSync();
+    await const ProfileCopyFlutterAotBundle().build(androidEnvironment);
+
+    expect(androidEnvironment.outputDir.childFile('app.so').existsSync(), true);
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
