@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("$flutter_root/common/fuchsia_config.gni")
+
 # The inputs to this template are 'binary_path' and a boolean 'unstripped'.
 # If 'unstripped' is specified, we append '.debug' to the symbols name.
 template("_copy_debug_symbols") {
@@ -23,8 +25,7 @@ template("_copy_debug_symbols") {
       binary_path,
     ]
 
-    _dest_base =
-        "${root_out_dir}/flutter-debug-symbols-${target_os}-${target_cpu}"
+    _dest_base = "${root_out_dir}/flutter-debug-symbols-${flutter_runtime_mode}-${target_os}-${target_cpu}"
 
     args = [
       "--executable-name",
