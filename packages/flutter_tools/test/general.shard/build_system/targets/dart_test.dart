@@ -236,14 +236,12 @@ flutter_tools:lib/''');
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
-
   test('aot_elf_profile throws error if missing target platform', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const AotElfProfile(),
         androidEnvironment..defines.remove(kTargetPlatform));
 
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
-
 
   test('aot_assembly_profile throws error if missing build mode', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(),
