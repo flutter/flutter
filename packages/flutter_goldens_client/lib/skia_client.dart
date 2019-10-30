@@ -276,8 +276,9 @@ class SkiaGoldClient {
           if (ignoredQueries.contains('name=$testName')) {
             if (expiration.isAfter(DateTime.now())) {
               ignoreIsActive = true;
-              break;
             } else {
+              // If any ignore is expired for the given test, throw with
+              // guidance.
               final StringBuffer buf = StringBuffer()
                 ..writeln('This test has an expired ignore in place, and the')
                 ..writeln('change has not been triaged.')

@@ -226,6 +226,7 @@ void main() {
                 expires: DateTime.now()
                   .add(const Duration(days: 1))
                   .toString(),
+                otherTestName: 'unrelatedTest.1'
               )
           ));
           when(mockHttpClient.getUrl(url))
@@ -268,6 +269,48 @@ void main() {
           mockHttpResponse = MockHttpClientResponse(utf8.encode(
             ignoreResponseTemplate(
               pullRequestNumber: pullRequestNumber,
+            )
+          ));
+          when(mockHttpRequest.close())
+            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          final Future<bool> test = skiaClient.testIsIgnoredForPullRequest(
+            pullRequestNumber,
+            testName,
+          );
+          expect(
+            test,
+            throwsException,
+          );
+        });
+
+        test('throws exception for first expired ignore among multiple', () async {
+          mockHttpResponse = MockHttpClientResponse(utf8.encode(
+            ignoreResponseTemplate(
+              pullRequestNumber: pullRequestNumber,
+              otherExpires: DateTime.now()
+                .add(const Duration(days: 1))
+                .toString(),
+            )
+          ));
+          when(mockHttpRequest.close())
+            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          final Future<bool> test = skiaClient.testIsIgnoredForPullRequest(
+            pullRequestNumber,
+            testName,
+          );
+          expect(
+            test,
+            throwsException,
+          );
+        });
+
+        test('throws exception for later expired ignore among multiple', () async {
+          mockHttpResponse = MockHttpClientResponse(utf8.encode(
+            ignoreResponseTemplate(
+              pullRequestNumber: pullRequestNumber,
+              expires: DateTime.now()
+                .add(const Duration(days: 1))
+                .toString(),
             )
           ));
           when(mockHttpRequest.close())

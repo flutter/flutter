@@ -388,7 +388,7 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     print(
       'Skipping "$golden" test : Golden file testing is unavailable on LUCI and '
-        'some Cirrus shards.'
+      'some Cirrus shards.'
     );
     return true;
   }
@@ -414,8 +414,8 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
 ///
 /// The [FlutterLocalFileComparator] is intended to run on local machines and
 /// serve as a smoke test during development. As such, it will not be able to
-/// detect unintended changes on other machines until it they are tested using
-/// the [FlutterPreSubmitFileComparator].
+/// detect unintended changes on environments other than the currently executing
+/// machine, until it they are tested using the [FlutterPreSubmitFileComparator].
 ///
 /// See also:
 ///
@@ -428,7 +428,8 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
 ///    [FlutterGoldenFileComparator] that tests golden images before changes are
 ///    merged into the master branch.
 ///  * [FlutterSkippingGoldenFileComparator], another
-///    [FlutterGoldenFileComparator] that controls .
+///    [FlutterGoldenFileComparator] that controls post-submit testing
+///    conditions that do not execute golden file tests.
 class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalComparisonOutput {
   /// Creates a [FlutterLocalFileComparator] that will test golden file
   /// images against baselines requested from Flutter Gold.
