@@ -634,7 +634,7 @@ abstract class TextInputClient {
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
 
-  /// Connection close request is received.
+  /// Platform notified framework of closed connection due to user activity.
   void connectionClosed();
 }
 
@@ -735,6 +735,15 @@ class TextInputConnection {
         .._currentConnection = null
         .._scheduleHide();
     }
+    assert(!attached);
+  }
+
+  /// User closed the connection.
+  ///
+  /// This method cleans up the [TextInputConnection] after platform notifies
+  /// the framework of closed connection.
+  void connectionClosedReceived() {
+    _clientHandler._currentConnection = null;
     assert(!attached);
   }
 }

@@ -580,14 +580,22 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.isVisible, true);
+    expect(state.wantKeepAlive, true);
 
     tester.testTextInput.closeConnection();
-
     await tester.idle();
 
-    expect(tester.testTextInput.isVisible, false);
+    // Widget does not have focus anymore.
+    expect(state.wantKeepAlive, false);
+    // testTextInput.isVisible is false if the clearClient/hideClient TextInput
+    // messages are sent. For onConnectionClosed message framework does not send
+    // clearClient/hideClient since the platform already informed the framework
+    // of a closed connection.
+    expect(tester.testTextInput.isVisible, true);
   });
 
   testWidgets('closed connection reopened when user focused', (WidgetTester tester) async {
@@ -614,23 +622,27 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
-    controller.text = 'test';
+    controller.text = 'test3';
     await tester.idle();
-    expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.isVisible, true);
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals('test3'));
+    expect(state.wantKeepAlive, true);
 
     tester.testTextInput.closeConnection();
+    await tester.pumpAndSettle();
 
-    await tester.idle();
-
-    expect(tester.testTextInput.isVisible, false);
+    // Widget does not have focus anymore.
+    expect(state.wantKeepAlive, false);
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
     controller.text = 'test2';
-    await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test2'));
-    expect(tester.testTextInput.isVisible, true);
+    // // Widget regained the focus.
+    expect(state.wantKeepAlive, true);
   });
 
   testWidgets('closed connection reopened when user focused on another field', (WidgetTester tester) async {
@@ -675,25 +687,30 @@ void main() {
       ),
     );
 
+    // Tap, enter text.
     await tester.tap(find.byWidget(testNameField));
     await tester.showKeyboard(find.byWidget(testNameField));
     controller.text = 'test';
     await tester.idle();
+
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.isVisible, true);
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byWidget(testNameField));
+    expect(state.wantKeepAlive, true);
 
     tester.testTextInput.closeConnection();
 
-    await tester.idle();
+    // Widget does not have focus anymore.
+    expect(state.wantKeepAlive, false);
 
-    expect(tester.testTextInput.isVisible, false);
-
+    // For the next fields, tap, enter text.
     await tester.tap(find.byWidget(testPhoneField));
     await tester.showKeyboard(find.byWidget(testPhoneField));
     controller.text = '650123123';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('650123123'));
-    expect(tester.testTextInput.isVisible, true);
+    // Widget regained the focus.
+    expect(state.wantKeepAlive, true);
   });
 
   /// Toolbar is not used in Flutter Web. Skip this check.

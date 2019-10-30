@@ -1425,6 +1425,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  void _closeConnectionReceived() {
+    if (_hasInputConnection) {
+      _textInputConnection.connectionClosedReceived();
+      _textInputConnection = null;
+      _lastKnownRemoteTextEditingValue = null;
+      _finalizeEditing(true);
+    }
+  }
+
   void _openOrCloseInputConnectionIfNeeded() {
     if (_hasFocus && widget.focusNode.consumeKeyboardToken()) {
       _openInputConnection();
@@ -1882,7 +1891,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void connectionClosed() {
-    _closeInputConnectionIfNeeded();
+    _closeConnectionReceived();
   }
 }
 
