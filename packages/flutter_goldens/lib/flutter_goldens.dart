@@ -438,9 +438,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   FlutterLocalFileComparator(
     final Uri basedir,
     final SkiaGoldClient skiaClient, {
-      final FileSystem fs = const LocalFileSystem(),
-      final Platform platform = const LocalPlatform(),
-    }) : super(
+    final FileSystem fs = const LocalFileSystem(),
+    final Platform platform = const LocalPlatform(),
+  }) : super(
     basedir,
     skiaClient,
     fs: fs,
@@ -454,9 +454,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   /// purposes only.
   static Future<FlutterGoldenFileComparator> fromDefaultComparator(
     final Platform platform, {
-      SkiaGoldClient goldens,
-      LocalFileComparator defaultComparator,
-    }) async {
+    SkiaGoldClient goldens,
+    LocalFileComparator defaultComparator,
+  }) async {
 
     defaultComparator ??= goldenFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
