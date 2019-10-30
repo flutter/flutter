@@ -355,21 +355,88 @@ void main() {
         );
       });
 
-      test('correctly determines testing environment', () {
-        platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'CIRRUS_CI' : 'true',
-            'CIRRUS_PR' : '',
-            'CIRRUS_BRANCH' : 'master',
-            'GOLD_SERVICE_ACCOUNT' : 'service account...',
-          },
-          operatingSystem: 'macos'
-        );
-        expect(
-          FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
-          isTrue,
-        );
+      group('correctly determines testing environment', () {
+        test('returns true', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '',
+              'CIRRUS_BRANCH': 'master',
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns false - PR active', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'CIRRUS_BRANCH': 'master',
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - no service account', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '',
+              'CIRRUS_BRANCH': 'master',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - not on cirrus', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_ID' : '1234567890',
+              'GOLD_SERVICE_ACCOUNT': 'service account...'
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - not on master', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '',
+              'CIRRUS_BRANCH': 'hotfix',
+              'GOLD_SERVICE_ACCOUNT': 'service account...'
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
       });
     });
 
@@ -406,20 +473,49 @@ void main() {
         ))
           .thenAnswer((_) => Future<bool>.value(false));
       });
+      group('correctly determines testing environment', () {
+        test('returns true', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
 
-      test('correctly determines testing environment', () {
-        platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'CIRRUS_CI' : 'true',
-            'CIRRUS_PR' : '1234',
-          },
-          operatingSystem: 'macos'
-        );
-        expect(
-          FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
-          isTrue,
-        );
+        test('returns false - no PR', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - not on Cirrus', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
       });
 
       test('comparison passes test that is ignored for this PR', () async {
@@ -464,6 +560,51 @@ void main() {
           ),
           isTrue,
         );
+      });
+    });
+
+    group('Skipping', () {
+      group('correctly determines testing environment', () {
+        test('returns true on LUCI', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : '1234567890',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns true on Cirrus', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI' : 'yep',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+        test('returns false', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(
+              platform),
+            isFalse,
+          );
+        });
       });
     });
 
@@ -514,49 +655,6 @@ void main() {
             Uri.parse('flutter.new_golden_test.1'),
           ),
           isTrue,
-        );
-      });
-    });
-
-    group('Skipping', () {
-      test('correctly determines testing environment on LUCI', () {
-        platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'SWARMING_TASK_ID' : '1234567890',
-          },
-          operatingSystem: 'macos'
-        );
-        expect(
-          FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
-          isTrue,
-        );
-      });
-
-      test('correctly determines testing environment on Cirrus', () {
-        platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'CIRRUS_CI' : 'yep',
-          },
-          operatingSystem: 'macos'
-        );
-        expect(
-          FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
-          isTrue,
-        );
-      });
-
-      test('correctly determines not a testing environment', () {
-        platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-          },
-          operatingSystem: 'macos'
-        );
-        expect(
-          FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
-          isFalse,
         );
       });
     });
