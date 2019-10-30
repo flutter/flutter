@@ -46,7 +46,13 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
     ),
   };
 
-  int sharedValue = 0;
+  final ValueNotifier<int> controller = ValueNotifier<int>(0);
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(() { setState(() {}); });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,19 +70,25 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
         child: SafeArea(
           child: Column(
             children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-              ),
+              const Padding(padding: EdgeInsets.all(16.0)),
               SizedBox(
                 width: 500.0,
                 child: CupertinoSegmentedControl<int>(
                   children: children,
                   onValueChanged: (int newValue) {
-                    setState(() {
-                      sharedValue = newValue;
-                    });
+                    controller.value = newValue;
                   },
-                  groupValue: sharedValue,
+                  groupValue: controller.value,
+                ),
+              ),
+              SizedBox(
+                width: 500,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: CupertinoSlidingSegmentedControl<int>(
+                    children: children,
+                    controller: controller,
+                  ),
                 ),
               ),
               Expanded(
@@ -114,7 +126,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                         ),
                       ],
                     ),
-                    child: icons[sharedValue],
+                    child: icons[controller.value],
                   ),
                 ),
               ),
@@ -123,5 +135,11 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }
