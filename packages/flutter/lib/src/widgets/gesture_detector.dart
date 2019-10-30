@@ -51,6 +51,7 @@ export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 // bool _lights;
 // void setState(VoidCallback fn) { }
 // String _last;
+// Color _color;
 
 /// Factory for creating gesture recognizers.
 ///
