@@ -10,17 +10,19 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -1011,6 +1013,8 @@ plugin2=${plugin2.path}
   });
 
   group('gradle build', () {
+    final Usage mockUsage = MockUsage();
+
     MockAndroidSdk mockAndroidSdk;
     MockAndroidStudio mockAndroidStudio;
     MockLocalEngineArtifacts mockArtifacts;
@@ -1086,7 +1090,7 @@ plugin2=${plugin2.path}
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
-          gradleErrors: <GradleHandledError>[
+          localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
                 return line.contains('Some gradle message');
@@ -1098,8 +1102,9 @@ plugin2=${plugin2.path}
                 bool shouldBuildPluginAsAar,
               }) async {
                 handlerCalled = true;
-                return GradleBuildStatus.EXIT;
-              }
+                return GradleBuildStatus.exit;
+              },
+              eventLabel: 'random-event-label',
             ),
           ],
         );
@@ -1110,12 +1115,20 @@ plugin2=${plugin2.path}
 
       expect(handlerCalled, isTrue);
 
+      verify(mockUsage.sendEvent(
+        any,
+        any,
+        label: 'gradle--random-event-label-failure',
+        parameters: anyNamed('parameters'),
+      )).called(1);
+
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
+      Usage: () => mockUsage,
     });
 
     testUsingContext('recognizes common errors - retry build', () async {
@@ -1156,7 +1169,7 @@ plugin2=${plugin2.path}
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
-          gradleErrors: <GradleHandledError>[
+          localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
                 if (line.contains('Some gradle message')) {
@@ -1171,8 +1184,9 @@ plugin2=${plugin2.path}
                 bool usesAndroidX,
                 bool shouldBuildPluginAsAar,
               }) async {
-                return GradleBuildStatus.RETRY;
-              }
+                return GradleBuildStatus.retry;
+              },
+              eventLabel: 'random-event-label',
             ),
           ],
         );
@@ -1182,12 +1196,108 @@ plugin2=${plugin2.path}
 
       expect(testFnCalled, equals(2));
 
+      verify(mockUsage.sendEvent(
+        any,
+        any,
+        label: 'gradle--random-event-label-failure',
+        parameters: anyNamed('parameters'),
+      )).called(1);
+
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('logs success event after a sucessful retry', () async {
+      int testFnCalled = 0;
+      when(mockProcessManager.start(any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')))
+      .thenAnswer((_) {
+        Process process;
+        if (testFnCalled == 0) {
+          process = createMockProcess(
+            exitCode: 1,
+            stdout: 'irrelevant\nSome gradle message\nirrelevant',
+          );
+        } else {
+          process = createMockProcess(
+            exitCode: 0,
+            stdout: 'irrelevant',
+          );
+        }
+        testFnCalled++;
+        return Future<Process>.value(process);
+      });
+
+      fs.directory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fs.directory('android')
+        .childFile('gradle.properties')
+        .createSync(recursive: true);
+
+      fs.directory('android')
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      fs.directory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('apk')
+        .childDirectory('release')
+        .childFile('app-release.apk')
+        ..createSync(recursive: true);
+
+      await buildGradleApp(
+        project: FlutterProject.current(),
+        androidBuildInfo: const AndroidBuildInfo(
+          BuildInfo(
+            BuildMode.release,
+            null,
+          ),
+        ),
+        target: 'lib/main.dart',
+        isBuildingBundle: false,
+        localGradleErrors: <GradleHandledError>[
+          GradleHandledError(
+            test: (String line) {
+              return line.contains('Some gradle message');
+            },
+            handler: ({
+              String line,
+              FlutterProject project,
+              bool usesAndroidX,
+              bool shouldBuildPluginAsAar,
+            }) async {
+              return GradleBuildStatus.retry;
+            },
+            eventLabel: 'random-event-label',
+          ),
+        ],
+      );
+
+      verify(mockUsage.sendEvent(
+        any,
+        any,
+        label: 'gradle--random-event-label-success',
+        parameters: anyNamed('parameters'),
+      )).called(1);
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      Cache: () => cache,
+      FileSystem: () => fs,
+      Platform: () => android,
+      ProcessManager: () => mockProcessManager,
+      Usage: () => mockUsage,
     });
 
     testUsingContext('recognizes common errors - retry build with AAR plugins', () async {
@@ -1229,7 +1339,7 @@ plugin2=${plugin2.path}
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
-          gradleErrors: <GradleHandledError>[
+          localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
                 if (line.contains('Some gradle message')) {
@@ -1247,8 +1357,9 @@ plugin2=${plugin2.path}
                 if (testFnCalled == 2) {
                   builtPluginAsAar = shouldBuildPluginAsAar;
                 }
-                return GradleBuildStatus.RETRY_WITH_AAR_PLUGINS;
-              }
+                return GradleBuildStatus.retryWithAarPlugins;
+              },
+              eventLabel: 'random-event-label',
             ),
           ],
         );
@@ -1259,11 +1370,80 @@ plugin2=${plugin2.path}
       expect(testFnCalled, equals(2));
       expect(builtPluginAsAar, isTrue);
 
+      verify(mockUsage.sendEvent(
+        any,
+        any,
+        label: 'gradle--random-event-label-failure',
+        parameters: anyNamed('parameters'),
+      )).called(1);
+
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('indicates that an APK has been built successfully', () async {
+      when(mockProcessManager.start(any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')))
+      .thenAnswer((_) {
+        return Future<Process>.value(
+          createMockProcess(
+            exitCode: 0,
+            stdout: '',
+          ));
+      });
+
+      fs.directory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fs.directory('android')
+        .childFile('gradle.properties')
+        .createSync(recursive: true);
+
+      fs.directory('android')
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      fs.directory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('apk')
+        .childDirectory('release')
+        .childFile('app-release.apk')
+        ..createSync(recursive: true);
+
+      await buildGradleApp(
+        project: FlutterProject.current(),
+        androidBuildInfo: const AndroidBuildInfo(
+          BuildInfo(
+            BuildMode.release,
+            null,
+          ),
+        ),
+        target: 'lib/main.dart',
+        isBuildingBundle: false,
+        localGradleErrors: <GradleHandledError>[],
+      );
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(
+        logger.statusText,
+        contains('Built build/app/outputs/apk/release/app-release.apk (0.0MB)'),
+      );
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      Cache: () => cache,
+      FileSystem: () => fs,
+      Platform: () => android,
       ProcessManager: () => mockProcessManager,
     });
 
@@ -1388,3 +1568,4 @@ class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockitoAndroidSdk extends Mock implements AndroidSdk {}
+class MockUsage extends Mock implements Usage {}

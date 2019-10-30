@@ -39,8 +39,6 @@ void main() {
   });
 
   group('network errors', () {
-    final Usage mockUsage = MockUsage();
-
     testUsingContext('throws toolExit if gradle fails while downloading', () async {
       const String errorMessage = '''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
@@ -57,7 +55,7 @@ at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.RETRY));
+      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText,
@@ -66,14 +64,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
           'Retrying the update...'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'network-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
 
     testUsingContext('throw toolExit if gradle fails downloading with proxy error', () async {
@@ -94,7 +84,7 @@ at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.RETRY));
+      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText,
@@ -103,14 +93,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
           'Retrying the update...'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'network-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
 
     testUsingContext('throws toolExit if gradle times out waiting for exclusive access to zip', () async {
@@ -122,7 +104,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.RETRY));
+      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText,
@@ -131,14 +113,6 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
           'Retrying the update...'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'network-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
 
     testUsingContext('throws toolExit if remote host closes connection', () async {
@@ -166,7 +140,7 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.RETRY));
+      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText,
@@ -175,14 +149,6 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
           'Retrying the update...'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'network-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
 
     testUsingContext('throws toolExit if file opening fails', () async {
@@ -202,7 +168,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.RETRY));
+      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText,
@@ -211,14 +177,6 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
           'Retrying the update...'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'network-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
 
     testUsingContext('throws toolExit if the connection is reset', () async {
@@ -249,7 +207,7 @@ Exception in thread "main" java.net.SocketException: Connection reset
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.RETRY));
+      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
       final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText,
@@ -258,27 +216,17 @@ Exception in thread "main" java.net.SocketException: Connection reset
           'Retrying the update...'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'network-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
   });
 
   group('permission errors', () {
-    final Usage mockUsage = MockUsage();
-
     testUsingContext('throws toolExit if gradle is missing execute permissions', () async {
       const String errorMessage = '''
 Permission denied
 Command: /home/android/gradlew assembleRelease
 ''';
       expect(testErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
-      expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.EXIT));
+      expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.exit));
 
       final BufferLogger logger = context.get<Logger>();
       expect(
@@ -292,14 +240,6 @@ Command: /home/android/gradlew assembleRelease
           'or move the project to a directory with execute permissions.'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-permission-denied',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
   });
 
@@ -339,17 +279,17 @@ Command: /home/android/gradlew assembleRelease
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'android-x-failure',
+        label: 'gradle--android-x-failure',
         parameters: <String, String>{
           'cd43': 'app-not-using-plugins',
         },
       )).called(1);
 
-      expect(status, equals(GradleBuildStatus.EXIT));
+      expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => MockProcessManager()
+      ProcessManager: () => MockProcessManager(),
+      Usage: () => mockUsage,
     });
 
     testUsingContext('handler - plugins and no AndroidX', () async {
@@ -372,17 +312,17 @@ Command: /home/android/gradlew assembleRelease
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'android-x-failure',
+        label: 'gradle--android-x-failure',
         parameters: <String, String>{
           'cd43': 'app-not-using-androidx',
         },
       )).called(1);
 
-      expect(status, equals(GradleBuildStatus.EXIT));
+      expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => MockProcessManager()
+      ProcessManager: () => MockProcessManager(),
+      Usage: () => mockUsage,
     });
 
     testUsingContext('handler - plugins, AndroidX, and AAR', () async {
@@ -398,17 +338,17 @@ Command: /home/android/gradlew assembleRelease
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'android-x-failure',
+        label: 'gradle--android-x-failure',
         parameters: <String, String>{
           'cd43': 'using-jetifier',
         },
       )).called(1);
 
-      expect(status, equals(GradleBuildStatus.EXIT));
+      expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => MockProcessManager()
+      ProcessManager: () => MockProcessManager(),
+      Usage: () => mockUsage,
     });
 
     testUsingContext('handler - plugins, AndroidX, and no AAR', () async {
@@ -431,22 +371,20 @@ Command: /home/android/gradlew assembleRelease
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'android-x-failure',
+        label: 'gradle--android-x-failure',
         parameters: <String, String>{
           'cd43': 'not-using-jetifier',
         },
       )).called(1);
-      expect(status, equals(GradleBuildStatus.RETRY_WITH_AAR_PLUGINS));
+      expect(status, equals(GradleBuildStatus.retryWithAarPlugins));
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => MockProcessManager(),
+      Usage: () => mockUsage,
     });
   });
 
   group('permission errors', () {
-    final Usage mockUsage = MockUsage();
-
     testUsingContext('pattern', () async {
       const String errorMessage = '''
 Permission denied
@@ -456,7 +394,7 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('handler', () async {
-      expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.EXIT));
+      expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.exit));
 
       final BufferLogger logger = context.get<Logger>();
       expect(
@@ -470,20 +408,10 @@ Command: /home/android/gradlew assembleRelease
           'or move the project to a directory with execute permissions.'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-permission-denied',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
   });
 
   group('license not accepted', () {
-    final Usage mockUsage = MockUsage();
-
     test('pattern', () {
       expect(
         licenseNotAcceptedHandler.test(
@@ -510,24 +438,14 @@ Command: /home/android/gradlew assembleRelease
           'flutter doctor --android-licenses'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'license-not-accepted',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
   });
 
   group('flavor undefined', () {
-    Usage mockUsage = MockUsage();
     MockProcessManager mockProcessManager;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      mockUsage = MockUsage();
     });
 
     test('pattern', () {
@@ -606,17 +524,10 @@ assembleFooTest
           'You must specify a --flavor option to select one of them.'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'flavor-undefined',
-        parameters: anyNamed('parameters'),
-      )).called(1);
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
-      ProcessManager: () => mockProcessManager,
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('handler - without flavor', () async {
@@ -661,17 +572,10 @@ assembleProfile
           'You cannot use the --flavor option.'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'flavor-undefined',
-        parameters: anyNamed('parameters'),
-      )).called(1);
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
-      ProcessManager: () => mockProcessManager,
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
+      ProcessManager: () => mockProcessManager,
     });
   });
 }

@@ -147,7 +147,7 @@ Future<void> checkGradleDependencies() async {
     ],
     throwOnError: true,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
-    environment: gradleEnv,
+    environment: gradleEnvironment,
   );
   androidSdk.reinitialize();
   progress.stop();
@@ -191,12 +191,10 @@ void createSettingsAarGradle(Directory androidDirectory) {
   }
   if (!exactMatch) {
     status.cancel();
-    printError('*******************************************************************************************');
-    printError('Flutter tried to create the file `$newSettingsRelativeFile`, but failed.');
+    printStatus('$warningMark Flutter tried to create the file `$newSettingsRelativeFile`, but failed.');
     // Print how to manually update the file.
-    printError(fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
+    printStatus(fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
         'gradle', 'manual_migration_settings.gradle.md')).readAsStringSync());
-    printError('*******************************************************************************************');
     throwToolExit('Please create the file and run this command again.');
   }
   // Copy the new file.
@@ -215,13 +213,13 @@ void createSettingsAarGradle(Directory androidDirectory) {
 /// * The plugins are built as AARs if [shouldBuildPluginAsAar] is `true`. This isn't set by default
 ///   because it makes the build slower proportional to the number of plugins.
 /// * [retries] is the max number of build retries in case one of the [GradleHandledError] handler
-///   returns [GradleBuildStatus.RETRY] or [GradleBuildStatus.RETRY_WITH_AAR_PLUGINS].
+///   returns [GradleBuildStatus.retry] or [GradleBuildStatus.retryWithAarPlugins].
 Future<void> buildGradleApp({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required bool isBuildingBundle,
-  @required List<GradleHandledError> gradleErrors,
+  @required List<GradleHandledError> localGradleErrors,
   bool shouldBuildPluginAsAar = false,
   int retries = 1,
 }) async {
@@ -333,20 +331,24 @@ Future<void> buildGradleApp({
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
-      environment: gradleEnv,
+      environment: gradleEnvironment,
       mapFunction: (String line) {
-        // This message was removed from 1P plugins,
+        // This message was removed from first-party plugins,
         // but older plugin versions still display this message.
         if (androidXPluginWarningRegex.hasMatch(line)) {
           // Don't pipe.
           return null;
         }
-        if (detectedGradleError == null) {
-          for (final GradleHandledError gradleError in gradleErrors) {
-            if (gradleError.test(line)) {
-              detectedGradleErrorLine = line;
-              detectedGradleError = gradleError;
-            }
+        if (detectedGradleError != null) {
+          // Pipe stdout/sterr from Gradle.
+          return line;
+        }
+        for (final GradleHandledError gradleError in localGradleErrors) {
+          if (gradleError.test(line)) {
+            detectedGradleErrorLine = line;
+            detectedGradleError = gradleError;
+            // The first error match wins.
+            break;
           }
         }
         // Pipe stdout/sterr from Gradle.
@@ -357,53 +359,61 @@ Future<void> buildGradleApp({
     status.stop();
   }
 
-  if (exitCode != 0 && detectedGradleError == null) {
-    BuildEvent('unknown-failure').send();
-    throwToolExit(
-      'Gradle task $assembleTask failed with exit code $exitCode',
-      exitCode: exitCode,
-    );
-  }
+  flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
 
-  if (exitCode != 0 && detectedGradleError != null) {
-    final GradleBuildStatus status = await detectedGradleError.handler(
-      line: detectedGradleErrorLine,
-      project: project,
-      usesAndroidX: usesAndroidX,
-      shouldBuildPluginAsAar: shouldBuildPluginAsAar,
-    );
-    if (status == GradleBuildStatus.RETRY && retries >= 1) {
-      await buildGradleApp(
+  if (exitCode != 0) {
+    if (detectedGradleError == null) {
+      BuildEvent('gradle--unkown-failure').send();
+      throwToolExit(
+        'Gradle task $assembleTask failed with exit code $exitCode',
+        exitCode: exitCode,
+      );
+    } else {
+      final GradleBuildStatus status = await detectedGradleError.handler(
+        line: detectedGradleErrorLine,
         project: project,
-        androidBuildInfo: androidBuildInfo,
-        target: target,
-        isBuildingBundle: isBuildingBundle,
-        gradleErrors: gradleErrors,
+        usesAndroidX: usesAndroidX,
         shouldBuildPluginAsAar: shouldBuildPluginAsAar,
-        retries: retries - 1,
       );
-      return;
-    }
-    if (status == GradleBuildStatus.RETRY_WITH_AAR_PLUGINS &&
-        retries >= 1) {
-      await buildGradleApp(
-        project: project,
-        androidBuildInfo: androidBuildInfo,
-        target: target,
-        isBuildingBundle: isBuildingBundle,
-        gradleErrors: gradleErrors,
-        shouldBuildPluginAsAar: true,
-        retries: retries - 1,
-      );
-      return;
-    }
-    throwToolExit(
-      'Gradle task $assembleTask failed with exit code $exitCode',
-      exitCode: exitCode,
-    );
-  }
 
-  flutterUsage.sendTiming('build', 'gradle', Duration(milliseconds: sw.elapsedMilliseconds));
+      if (retries >= 1) {
+        final String successEventLabel = 'gradle--${detectedGradleError.eventLabel}-success';
+        switch (status) {
+          case GradleBuildStatus.retry:
+            await buildGradleApp(
+              project: project,
+              androidBuildInfo: androidBuildInfo,
+              target: target,
+              isBuildingBundle: isBuildingBundle,
+              localGradleErrors: localGradleErrors,
+              shouldBuildPluginAsAar: shouldBuildPluginAsAar,
+              retries: retries - 1,
+            );
+            BuildEvent(successEventLabel).send();
+            return;
+          case GradleBuildStatus.retryWithAarPlugins:
+            await buildGradleApp(
+              project: project,
+              androidBuildInfo: androidBuildInfo,
+              target: target,
+              isBuildingBundle: isBuildingBundle,
+              localGradleErrors: localGradleErrors,
+              shouldBuildPluginAsAar: true,
+              retries: retries - 1,
+            );
+            BuildEvent(successEventLabel).send();
+            return;
+          case GradleBuildStatus.exit:
+            // noop.
+        }
+      }
+      BuildEvent('gradle--${detectedGradleError.eventLabel}-failure').send();
+      throwToolExit(
+        'Gradle task $assembleTask failed with exit code $exitCode',
+        exitCode: exitCode,
+      );
+    }
+  }
 
   if (isBuildingBundle) {
     final File bundleFile = findBundleFile(project, buildInfo);
@@ -475,7 +485,13 @@ Future<void> buildGradleAar({
   );
 
   final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
-  final String initScript = fs.path.join(flutterRoot, 'packages','flutter_tools', 'gradle', 'aar_init_script.gradle');
+  final String initScript = fs.path.join(
+    flutterRoot,
+    'packages',
+    'flutter_tools',
+    'gradle',
+    'aar_init_script.gradle',
+  );
   final List<String> command = <String>[
     gradleUtils.getExecutable(project),
     '-I=$initScript',
@@ -507,7 +523,7 @@ Future<void> buildGradleAar({
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
-      environment: gradleEnv,
+      environment: gradleEnvironment,
     );
   } finally {
     status.stop();
@@ -549,11 +565,11 @@ String _calculateSha(File file) {
   final Stopwatch sw = Stopwatch()..start();
   final List<int> bytes = file.readAsBytesSync();
   printTrace('calculateSha: reading file took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-read', Duration(milliseconds: sw.elapsedMilliseconds));
+  flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
   sw.reset();
   final String sha = _hex(sha1.convert(bytes).bytes);
   printTrace('calculateSha: computing sha took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-calc', Duration(milliseconds: sw.elapsedMilliseconds));
+  flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
   return sha;
 }
 

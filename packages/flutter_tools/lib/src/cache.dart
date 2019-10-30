@@ -914,7 +914,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
           '--project-cache-dir', tempDir.path,
           'resolveDependencies',
         ],
-        environment: gradleEnv);
+        environment: gradleEnvironment);
       if (processResult.exitCode != 0) {
         printError('Failed to download the Android dependencies');
       }

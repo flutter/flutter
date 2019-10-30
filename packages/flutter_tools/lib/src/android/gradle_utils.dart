@@ -22,16 +22,16 @@ import 'android_sdk.dart';
 import 'android_studio.dart';
 
 /// The environment variables needed to run Gradle.
-Map<String, String> get gradleEnv {
-  final Map<String, String> env = Map<String, String>.from(platform.environment);
+Map<String, String> get gradleEnvironment {
+  final Map<String, String> environment = Map<String, String>.from(platform.environment);
   if (javaPath != null) {
     // Use java bundled with Android Studio.
-    env['JAVA_HOME'] = javaPath;
+    environment['JAVA_HOME'] = javaPath;
   }
   // Don't log analytics for downstream Flutter commands.
   // e.g. `flutter build bundle`.
-  env['FLUTTER_SUPPRESS_ANALYTICS'] = 'true';
-  return env;
+  environment['FLUTTER_SUPPRESS_ANALYTICS'] = 'true';
+  return environment;
 }
 
 /// Gradle utils in the current [AppContext].
@@ -40,15 +40,12 @@ GradleUtils get gradleUtils => context.get<GradleUtils>();
 /// Provides utilities to run a Gradle task,
 /// such as finding the Gradle executable or constructing a Gradle project.
 class GradleUtils {
-  /// Empty constructor.
-  GradleUtils();
-
   /// Gets the Gradle executable path and prepares the Gradle project.
   /// This is the `gradlew` or `gradlew.bat` script in the `android/` directory.
   String getExecutable(FlutterProject project) {
     final Directory androidDir = project.android.hostAppGradleRoot;
     // Update the project if needed.
-    // TODO(egarciad): https://github.com/flutter/flutter/issues/40460.
+    // TODO(egarciad): https://github.com/flutter/flutter/issues/40460
     migrateToR8(androidDir);
     injectGradleWrapperIfNeeded(androidDir);
 
@@ -59,7 +56,10 @@ class GradleUtils {
       printTrace('Using gradle from ${gradle.absolute.path}.');
       return gradle.absolute.path;
     }
-    throwToolExit('Unable to locate gradlew script');
+    throwToolExit(
+      'Unable to locate gradlew script. Please check that ${gradle.path} '
+      'exists or that ${gradle.dirname} can be read.'
+    );
     return null;
   }
 }
@@ -70,7 +70,10 @@ class GradleUtils {
 void migrateToR8(Directory directory) {
   final File gradleProperties = directory.childFile('gradle.properties');
   if (!gradleProperties.existsSync()) {
-    throwToolExit('Expected file ${gradleProperties.path}.');
+    throwToolExit(
+      'Expected file ${gradleProperties.path}. '
+      'Please ensure that this file exists or that ${gradleProperties.dirname} can be read.'
+    );
   }
   final String propertiesContent = gradleProperties.readAsStringSync();
   if (propertiesContent.contains('android.enableR8')) {
@@ -79,14 +82,11 @@ void migrateToR8(Directory directory) {
   }
   printTrace('set `android.enableR8=true` in gradle.properties');
   try {
-    // Add `android.enableR8=true` to the next line in gradle.properties.
     if (propertiesContent.isNotEmpty && !propertiesContent.endsWith('\n')) {
-      gradleProperties
-        .writeAsStringSync('\nandroid.enableR8=true\n', mode: FileMode.append);
-    } else {
-      gradleProperties
-        .writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
+      // Add a new line if the file doesn't end with a new line.
+      gradleProperties.writeAsStringSync('\n', mode: FileMode.append);
     }
+    gradleProperties.writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
   } on FileSystemException {
     throwToolExit(
       'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
@@ -151,10 +151,16 @@ String getGradleVersionForAndroidPlugin(Directory directory) {
 }
 
 /// Returns true if [targetVersion] is within the range [min] and [max] inclusive.
-bool _isWithinVersionRange(String targetVersion, {String min, String max}) {
+bool _isWithinVersionRange(
+  String targetVersion, {
+  @required String min,
+  @required String max,
+}) {
+  assert(min != null);
+  assert(max != null);
   final Version parsedTargetVersion = Version.parse(targetVersion);
   return parsedTargetVersion >= Version.parse(min) &&
-      parsedTargetVersion <= Version.parse(max);
+         parsedTargetVersion <= Version.parse(max);
 }
 
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
@@ -223,14 +229,15 @@ void updateLocalProperties({
   }
 
   void changeIfNecessary(String key, String value) {
-    if (settings.values[key] != value) {
-      if (value == null) {
-        settings.values.remove(key);
-      } else {
-        settings.values[key] = value;
-      }
-      changed = true;
+    if (settings.values[key] == value) {
+      return;
     }
+    if (value == null) {
+      settings.values.remove(key);
+    } else {
+      settings.values[key] = value;
+    }
+    changed = true;
   }
 
   if (androidSdk != null) {

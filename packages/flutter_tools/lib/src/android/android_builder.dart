@@ -15,10 +15,14 @@ import 'android_sdk.dart';
 import 'gradle.dart';
 
 /// The builder in the current context.
-AndroidBuilder get androidBuilder => context.get<AndroidBuilder>() ?? _AndroidBuilderImpl();
+AndroidBuilder get androidBuilder {
+  return context.get<AndroidBuilder>() ?? const _AndroidBuilderImpl();
+}
 
 /// Provides the methods to build Android artifacts.
+// TODO(egarciad): https://github.com/flutter/flutter/issues/43863
 abstract class AndroidBuilder {
+  const AndroidBuilder();
   /// Builds an AAR artifact.
   Future<void> buildAar({
     @required FlutterProject project,
@@ -44,7 +48,7 @@ abstract class AndroidBuilder {
 
 /// Default implementation of [AarBuilder].
 class _AndroidBuilderImpl extends AndroidBuilder {
-  _AndroidBuilderImpl();
+  const _AndroidBuilderImpl();
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -55,11 +59,17 @@ class _AndroidBuilderImpl extends AndroidBuilder {
     @required String outputDir,
   }) async {
     try {
+      Directory outputDirectory =
+        fs.directory(outputDir ?? project.android.buildDirectory);
+      if (project.isModule) {
+        // Module projects artifacts are located in `build/host`.
+        outputDirectory = outputDirectory.childDirectory('host');
+      }
       await buildGradleAar(
         project: project,
         androidBuildInfo: androidBuildInfo,
         target: target,
-        outputDir: fs.directory(outputDir ?? project.android.buildDirectory),
+        outputDir: outputDirectory,
       );
     } finally {
       androidSdk.reinitialize();
@@ -79,7 +89,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         androidBuildInfo: androidBuildInfo,
         target: target,
         isBuildingBundle: false,
-        gradleErrors: gradleErrors,
+        localGradleErrors: gradleErrors,
       );
     } finally {
       androidSdk.reinitialize();
@@ -99,36 +109,10 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         androidBuildInfo: androidBuildInfo,
         target: target,
         isBuildingBundle: true,
-        gradleErrors: gradleErrors,
+        localGradleErrors: gradleErrors,
       );
     } finally {
       androidSdk.reinitialize();
     }
   }
-}
-
-/// A fake implementation of [AndroidBuilder].
-@visibleForTesting
-class FakeAndroidBuilder implements AndroidBuilder {
-  @override
-  Future<void> buildAar({
-    @required FlutterProject project,
-    @required AndroidBuildInfo androidBuildInfo,
-    @required String target,
-    @required String outputDir,
-  }) async {}
-
-  @override
-  Future<void> buildApk({
-    @required FlutterProject project,
-    @required AndroidBuildInfo androidBuildInfo,
-    @required String target,
-  }) async {}
-
-  @override
-  Future<void> buildAab({
-    @required FlutterProject project,
-    @required AndroidBuildInfo androidBuildInfo,
-    @required String target,
-  }) async {}
 }

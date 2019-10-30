@@ -11,7 +11,59 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'gradle_utils.dart';
 
+typedef GradleErrorTest = bool Function(String);
+
+/// A Gradle error handled by the tool.
+class GradleHandledError{
+  const GradleHandledError({
+    this.test,
+    this.handler,
+    this.eventLabel,
+  });
+
+  /// The test function.
+  /// Returns [true] if the current error message should be handled.
+  final GradleErrorTest test;
+
+  /// The handler function.
+  final Future<GradleBuildStatus> Function({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) handler;
+
+  /// The [BuildEvent] label is named gradle--[eventLabel].
+  /// If not empty, the build event is logged along with
+  /// additional metadata such as the attempt number.
+  final String eventLabel;
+}
+
+/// The status of the Gradle build.
+enum GradleBuildStatus{
+  /// The tool cannot recover from the failure and should exit.
+  exit,
+  /// The tool can retry the exact same build.
+  retry,
+  /// The tool can build the plugins as AAR and retry the build.
+  retryWithAarPlugins,
+}
+
+/// Returns a simple test function that evaluates to [true] if
+/// [errorMessage] is contained in the error message.
+GradleErrorTest _lineMatcher(List<String> errorMessages) {
+  return (String line) {
+    return errorMessages.any((String errorMessage) => line.contains(errorMessage));
+  };
+}
+
 /// The list of Gradle errors that the tool can handle.
+///
+/// The handlers are executed in the order in which they appear in the list.
+///
+/// Only the first error handler for which the [test] function returns [true]
+/// is handled. As a result, sort error handlers based on how strict the [test]
+/// function is to eliminate false positives.
 final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   licenseNotAcceptedHandler,
   networkErrorHandler,
@@ -39,9 +91,9 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
       'or move the project to a directory with execute permissions.',
       indent: 4
     );
-    BuildEvent('gradle-permission-denied').send();
-    return GradleBuildStatus.EXIT;
+    return GradleBuildStatus.exit;
   },
+  eventLabel: 'permission-denied',
 );
 
 // Gradle crashes for several known reasons when downloading that are not
@@ -67,9 +119,9 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
       '$warningMark Gradle threw an error while trying to update itself. '
       'Retrying the update...'
     );
-    BuildEvent('network-failure').send();
-    return GradleBuildStatus.RETRY;
-  }
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'network',
 );
 
 // R8 failure.
@@ -87,9 +139,9 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     printStatus('$warningMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
     printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
     printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
-    BuildEvent('r8-failure').send();
-    return GradleBuildStatus.EXIT;
+    return GradleBuildStatus.exit;
   },
+  eventLabel: 'r8',
 );
 
 // AndroidX failure.
@@ -115,7 +167,7 @@ final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
 final GradleHandledError androidXFailureHandler = GradleHandledError(
   test: (String line) {
     return !androidXPluginWarningRegex.hasMatch(line) &&
-      _androidXFailureRegex.hasMatch(line);
+           _androidXFailureRegex.hasMatch(line);
   },
   handler: ({
     String line,
@@ -125,33 +177,48 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
   }) async {
     final bool hasPlugins = project.flutterPluginsFile.existsSync();
     if (!hasPlugins) {
-      // If the app doesn't use any plugin, then it's unclear where the incompatibility is coming from.
-      BuildEvent('android-x-failure', eventError: 'app-not-using-plugins').send();
+      // If the app doesn't use any plugin, then it's unclear where
+      // the incompatibility is coming from.
+      BuildEvent(
+        'gradle--android-x-failure',
+        eventError: 'app-not-using-plugins',
+      ).send();
     }
     if (hasPlugins && !usesAndroidX) {
-      // If the app isn't using AndroidX, then the app is likely using a plugin already migrated to AndroidX.
+      // If the app isn't using AndroidX, then the app is likely using
+      // a plugin already migrated to AndroidX.
       printStatus(
         'AndroidX incompatibilities may have caused this build to fail. '
         'Please migrate your app to AndroidX. See https://goo.gl/CP92wY.'
       );
-      BuildEvent('android-x-failure', eventError: 'app-not-using-androidx').send();
+      BuildEvent(
+        'gradle--android-x-failure',
+        eventError: 'app-not-using-androidx',
+      ).send();
     }
     if (hasPlugins && usesAndroidX && shouldBuildPluginAsAar) {
-      // This is a dependency conflict instead of an AndroidX failure since by this point
-      // the app is using AndroidX, the plugins are built as AARs, Jetifier translated
-      // Support libraries for AndroidX equivalents.
-      BuildEvent('android-x-failure', eventError: 'using-jetifier').send();
+      // This is a dependency conflict instead of an AndroidX failure since
+      // by this point the app is using AndroidX, the plugins are built as
+      // AARs, Jetifier translated Support libraries for AndroidX equivalents.
+      BuildEvent(
+        'gradle--android-x-failure',
+        eventError: 'using-jetifier',
+      ).send();
     }
     if (hasPlugins && usesAndroidX && !shouldBuildPluginAsAar) {
       printStatus(
         'The built failed likely due to AndroidX incompatibilities in a plugin. '
         'The tool is about to try using Jetfier to solve the incompatibility.'
       );
-      BuildEvent('android-x-failure', eventError: 'not-using-jetifier').send();
-      return GradleBuildStatus.RETRY_WITH_AAR_PLUGINS;
+      BuildEvent(
+        'gradle--android-x-failure',
+        eventError: 'not-using-jetifier',
+      ).send();
+      return GradleBuildStatus.retryWithAarPlugins;
     }
-    return GradleBuildStatus.EXIT;
+    return GradleBuildStatus.exit;
   },
+  eventLabel: 'android-x',
 );
 
 /// Handle Gradle error thrown when Gradle needs to download additional
@@ -182,9 +249,9 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
       'To resolve this, please run the following command in a Terminal:\n'
       'flutter doctor --android-licenses'
     );
-    BuildEvent('license-not-accepted').send();
-    return GradleBuildStatus.EXIT;
+    return GradleBuildStatus.exit;
   },
+  eventLabel: 'license-not-accepted',
 );
 
 final RegExp _undefinedTaskPattern = RegExp(r'Task .+ not found in root project.');
@@ -212,7 +279,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       ],
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: gradleEnv,
+      environment: gradleEnvironment,
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};
@@ -253,47 +320,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
         'You must specify a --flavor option to select one of them.'
       );
     }
-    BuildEvent('flavor-undefined').send();
-    return GradleBuildStatus.EXIT;
+    return GradleBuildStatus.exit;
   },
+  eventLabel: 'flavor-undefined',
 );
-
-/// The status of the Gradle build.
-enum GradleBuildStatus{
-  /// The tool cannot recover from the failure and should exit.
-  EXIT,
-  /// The tool can retry the exact same build.
-  RETRY,
-  /// The tool can build the plugins as AAR and retry the build.
-  RETRY_WITH_AAR_PLUGINS,
-}
-
-/// A Gradle handled error.
-///
-/// When the [test] function returns [true], [handler] is called.
-class GradleHandledError{
-  const GradleHandledError({
-    this.test,
-    this.handler,
-  });
-
-  /// The test function.
-  /// Returns [true] if the current error message should be handled.
-  final bool Function(String) test;
-
-  /// The handler function.
-  final Future<GradleBuildStatus> Function({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
-  }) handler;
-}
-
-/// Returns a simple test function that evaluates to [true] if
-/// [errorMessage] is contained in the error message.
-bool Function(String) _lineMatcher(List<String> errorMessages) {
-  return (String line) {
-    return errorMessages.any((String errorMessage) => line.contains(errorMessage));
-  };
-}
