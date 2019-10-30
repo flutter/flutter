@@ -475,9 +475,9 @@ void main() {
 
   testWidgets('ThemeData.mergeThemes merges correctly', (WidgetTester tester) async {
 
-    final cardTheme = CardTheme(elevation: 24);
-    final dialogTheme = DialogTheme(elevation: 24);
-    final buttonTheme = ButtonThemeData(
+    const CardTheme cardTheme = CardTheme(elevation: 24);
+    const DialogTheme dialogTheme = DialogTheme(elevation: 24);
+    final ButtonThemeData buttonTheme = ButtonThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
