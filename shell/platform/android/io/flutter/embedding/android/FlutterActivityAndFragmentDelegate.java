@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -121,8 +122,16 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
    * or {@code Fragment}.
    */
   @Nullable
-  FlutterEngine getFlutterEngine() {
+  /* package */ FlutterEngine getFlutterEngine() {
     return flutterEngine;
+  }
+
+  /**
+   * Returns true if the host {@code Activity}/{@code Fragment} provided a
+   * {@code FlutterEngine}, as opposed to this delegate creating a new one.
+   */
+  /* package */ boolean isFlutterEngineFromHost() {
+    return isFlutterEngineFromHost;
   }
 
   /**
@@ -189,7 +198,8 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
    * If the {@code host} does not provide a {@link FlutterEngine}, then a new {@link FlutterEngine}
    * is instantiated.
    */
-  private void setupFlutterEngine() {
+  @VisibleForTesting
+  /* package */ void setupFlutterEngine() {
     Log.d(TAG, "Setting up FlutterEngine.");
 
     // First, check if the host wants to use a cached FlutterEngine.
