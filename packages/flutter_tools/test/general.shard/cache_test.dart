@@ -330,11 +330,43 @@ void main() {
     });
   });
 
-  group('Unsigned mac artifacts', () {
+  group('macOS artifacts', () {
     MockCache mockCache;
 
     setUp(() {
       mockCache = MockCache();
+    });
+
+    testUsingContext('verifies executables for libimobiledevice in isUpToDateInner', () async {
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('libimobiledevice', mockCache);
+      when(mockCache.getArtifactDirectory(any)).thenReturn(fs.currentDirectory);
+      iosUsbArtifacts.location.createSync();
+      final File ideviceIdFile = iosUsbArtifacts.location.childFile('idevice_id')
+        ..createSync();
+      iosUsbArtifacts.location.childFile('ideviceinfo')
+        ..createSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), true);
+
+      ideviceIdFile.deleteSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), false);
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Does not verify executables for openssl in isUpToDateInner', () async {
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('openssl', mockCache);
+      when(mockCache.getArtifactDirectory(any)).thenReturn(fs.currentDirectory);
+      iosUsbArtifacts.location.createSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), true);
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('use unsigned when specified', () async {
