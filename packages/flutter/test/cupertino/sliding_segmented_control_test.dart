@@ -371,7 +371,7 @@ void main() {
 
       DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
-      expect(textStyle.style.fontWeight, FontWeight.w600);
+      expect(textStyle.style.fontWeight, FontWeight.w500);
 
       await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();

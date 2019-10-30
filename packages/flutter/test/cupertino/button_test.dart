@@ -145,7 +145,7 @@ void main() {
       of: find.byType(CupertinoButton),
       matching: find.byType(FadeTransition),
     ));
-    expect(opacity.opacity.value, 0.1);
+    expect(opacity.opacity.value, 0.4);
   });
 
   testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
