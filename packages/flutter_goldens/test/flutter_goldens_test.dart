@@ -264,7 +264,7 @@ void main() {
           );
         });
 
-        test('returns false for expired ignore', () async {
+        test('provides informative exception for expired ignore', () async {
           mockHttpResponse = MockHttpClientResponse(utf8.encode(
             ignoreResponseTemplate(
               pullRequestNumber: pullRequestNumber,
@@ -272,12 +272,13 @@ void main() {
           ));
           when(mockHttpRequest.close())
             .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          final Future<bool> test = skiaClient.testIsIgnoredForPullRequest(
+            pullRequestNumber,
+            testName,
+          );
           expect(
-            await skiaClient.testIsIgnoredForPullRequest(
-              pullRequestNumber,
-              testName,
-            ),
-            isFalse,
+            test,
+            throwsException,
           );
         });
       });
