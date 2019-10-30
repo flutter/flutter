@@ -4,3 +4,7 @@
 
 export 'src/plugin_event_channel.dart';
 export 'src/plugin_registry.dart';
+
+// This is only in the Web Flutter SDK
+// ignore: undefined_shown_name
+export 'dart:ui' show platformViewRegistry;
