@@ -471,4 +471,53 @@ void main() {
       ),
     );
   });
+
+  testWidgets(
+      'giving clipBehaviour null or Clip.None, will not add a ClipRRect to the tree',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(Container(
+      clipBehaviour: Clip.none,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: const SizedBox(),
+    ));
+
+    expect(
+      find.byType(ClipRRect),
+      findsNothing,
+    );
+
+    await tester.pumpWidget(Container(
+      clipBehaviour: null,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: const SizedBox(),
+    ));
+
+    expect(
+      find.byType(ClipRRect),
+      findsNothing,
+    );
+  });
+
+  testWidgets(
+      'giving clipBehaviour not a null, will add a ClipRRect to the tree',
+      (WidgetTester tester) async {
+    final Container container = Container(
+      clipBehaviour: Clip.hardEdge,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: const SizedBox(),
+    );
+
+    await tester.pumpWidget(container);
+
+    expect(
+      find.byType(ClipRRect),
+      findsOneWidget,
+    );
+  });
 }
