@@ -198,8 +198,16 @@ void main() {
       });
 
       test('Checkbox has correct Android semantics', () async {
+        Future<AndroidSemanticsNode> getCheckboxSemantics(String key) async {
+          return getSemantics(
+            find.descendant(
+              of: find.byValueKey(key),
+              matching: find.byType('_CheckboxRenderObjectWidget'),
+            ),
+          );
+        }
         expect(
-          await getSemantics(find.byValueKey(checkboxKeyValue)),
+          await getCheckboxSemantics(checkboxKeyValue),
           hasAndroidSemantics(
             className: AndroidClassName.checkBox,
             isChecked: false,
@@ -216,7 +224,7 @@ void main() {
         await driver.tap(find.byValueKey(checkboxKeyValue));
 
         expect(
-          await getSemantics(find.byValueKey(checkboxKeyValue)),
+          await getCheckboxSemantics(checkboxKeyValue),
           hasAndroidSemantics(
             className: AndroidClassName.checkBox,
             isChecked: true,
@@ -230,7 +238,7 @@ void main() {
           ),
         );
         expect(
-          await getSemantics(find.byValueKey(disabledCheckboxKeyValue)),
+          await getCheckboxSemantics(disabledCheckboxKeyValue),
           hasAndroidSemantics(
             className: AndroidClassName.checkBox,
             isCheckable: true,
@@ -242,8 +250,16 @@ void main() {
         );
       });
       test('Radio has correct Android semantics', () async {
+        Future<AndroidSemanticsNode> getRadioSemantics(String key) async {
+          return getSemantics(
+            find.descendant(
+              of: find.byValueKey(key),
+              matching: find.byType('_RadioRenderObjectWidget'),
+            ),
+          );
+        }
         expect(
-          await getSemantics(find.byValueKey(radio2KeyValue)),
+          await getRadioSemantics(radio2KeyValue),
           hasAndroidSemantics(
             className: AndroidClassName.radio,
             isChecked: false,
@@ -260,7 +276,7 @@ void main() {
         await driver.tap(find.byValueKey(radio2KeyValue));
 
         expect(
-          await getSemantics(find.byValueKey(radio2KeyValue)),
+          await getRadioSemantics(radio2KeyValue),
           hasAndroidSemantics(
             className: AndroidClassName.radio,
             isChecked: true,
@@ -275,8 +291,16 @@ void main() {
         );
       });
       test('Switch has correct Android semantics', () async {
+        Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
+          return getSemantics(
+            find.descendant(
+              of: find.byValueKey(key),
+              matching: find.byType('_SwitchRenderObjectWidget'),
+            ),
+          );
+        }
         expect(
-          await getSemantics(find.byValueKey(switchKeyValue)),
+          await getSwitchSemantics(switchKeyValue),
           hasAndroidSemantics(
             className: AndroidClassName.toggleSwitch,
             isChecked: false,
@@ -293,7 +317,7 @@ void main() {
         await driver.tap(find.byValueKey(switchKeyValue));
 
         expect(
-          await getSemantics(find.byValueKey(switchKeyValue)),
+          await getSwitchSemantics(switchKeyValue),
           hasAndroidSemantics(
             className: AndroidClassName.toggleSwitch,
             isChecked: true,
@@ -310,8 +334,16 @@ void main() {
 
       // Regression test for https://github.com/flutter/flutter/issues/20820.
       test('Switch can be labeled', () async {
+        Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
+          return getSemantics(
+            find.descendant(
+              of: find.byValueKey(key),
+              matching: find.byType('_SwitchRenderObjectWidget'),
+            ),
+          );
+        }
         expect(
-          await getSemantics(find.byValueKey(labeledSwitchKeyValue)),
+          await getSwitchSemantics(labeledSwitchKeyValue),
           hasAndroidSemantics(
             className: AndroidClassName.toggleSwitch,
             isChecked: false,

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -107,8 +109,13 @@ class Radio<T> extends StatefulWidget {
     @required this.groupValue,
     @required this.onChanged,
     this.activeColor,
+    this.focusColor,
+    this.hoverColor,
     this.materialTapTargetSize,
-  }) : super(key: key);
+    this.focusNode,
+    this.autofocus = false,
+  }) : assert(autofocus != null),
+       super(key: key);
 
   /// The value represented by this radio button.
   final T value;
@@ -161,15 +168,77 @@ class Radio<T> extends StatefulWidget {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// The color for the radio's [Material] when it has the input focus.
+  final Color focusColor;
+
+  /// The color for the radio's [Material] when a pointer is hovering over it.
+  final Color hoverColor;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   @override
   _RadioState<T> createState() => _RadioState<T>();
 }
 
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
-  bool get _enabled => widget.onChanged != null;
+  bool get enabled => widget.onChanged != null;
+  Map<LocalKey, ActionFactory> _actionMap;
+  bool _showHighlight = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _actionMap = <LocalKey, ActionFactory>{
+      SelectAction.key: _createAction,
+      if (!kIsWeb) ActivateAction.key: _createAction,
+    };
+    _updateHighlightMode(WidgetsBinding.instance.focusManager.highlightMode);
+    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
+  }
+
+  void _actionHandler(FocusNode node, Intent intent){
+    if (widget.onChanged != null) {
+      widget.onChanged(widget.value);
+    }
+    final RenderObject renderObject = node.context.findRenderObject();
+    renderObject.sendSemanticsEvent(const TapSemanticEvent());
+  }
+
+  Action _createAction() {
+    return CallbackAction(
+      SelectAction.key,
+      onInvoke: _actionHandler,
+    );
+  }
+
+  void _updateHighlightMode(FocusHighlightMode mode) {
+    switch (WidgetsBinding.instance.focusManager.highlightMode) {
+      case FocusHighlightMode.touch:
+        _showHighlight = false;
+        break;
+      case FocusHighlightMode.traditional:
+        _showHighlight = true;
+        break;
+    }
+  }
+
+  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
+    if (!mounted) {
+      return;
+    }
+    setState(() { _updateHighlightMode(mode); });
+  }
+
+  bool hovering = false;
+  void _handleMouseEnter(PointerEnterEvent event) => setState(() { hovering = true; });
+  void _handleMouseExit(PointerExitEvent event) => setState(() { hovering = false; });
 
   Color _getInactiveColor(ThemeData themeData) {
-    return _enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
+    return enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
   }
 
   void _handleChanged(bool selected) {
@@ -191,13 +260,34 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
         break;
     }
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
-    return _RadioRenderObjectWidget(
-      selected: widget.value == widget.groupValue,
-      activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
-      inactiveColor: _getInactiveColor(themeData),
-      onChanged: _enabled ? _handleChanged : null,
-      additionalConstraints: additionalConstraints,
-      vsync: this,
+    return MouseRegion(
+      onEnter: enabled ? _handleMouseEnter : null,
+      onExit: enabled ? _handleMouseExit : null,
+      child: Actions(
+        actions: _actionMap,
+        child: Focus(
+          focusNode: widget.focusNode,
+          autofocus: widget.autofocus,
+          canRequestFocus: enabled,
+          debugLabel: '${describeIdentity(widget)}(${widget.value})',
+          child: Builder(
+            builder: (BuildContext context) {
+              return _RadioRenderObjectWidget(
+                selected: widget.value == widget.groupValue,
+                activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
+                inactiveColor: _getInactiveColor(themeData),
+                focusColor: widget.focusColor ?? themeData.focusColor,
+                hoverColor: widget.hoverColor ?? themeData.hoverColor,
+                onChanged: enabled ? _handleChanged : null,
+                additionalConstraints: additionalConstraints,
+                vsync: this,
+                hasFocus: enabled && _showHighlight && Focus.of(context).hasFocus,
+                hovering: enabled && _showHighlight && hovering,
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 }
@@ -208,9 +298,13 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     @required this.selected,
     @required this.activeColor,
     @required this.inactiveColor,
+    @required this.focusColor,
+    @required this.hoverColor,
     @required this.additionalConstraints,
     this.onChanged,
     @required this.vsync,
+    @required this.hasFocus,
+    @required this.hovering,
   }) : assert(selected != null),
        assert(activeColor != null),
        assert(inactiveColor != null),
@@ -218,8 +312,12 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
        super(key: key);
 
   final bool selected;
+  final bool hasFocus;
+  final bool hovering;
   final Color inactiveColor;
   final Color activeColor;
+  final Color focusColor;
+  final Color hoverColor;
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
@@ -229,9 +327,13 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     value: selected,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
+    focusColor: focusColor,
+    hoverColor: hoverColor,
     onChanged: onChanged,
     vsync: vsync,
     additionalConstraints: additionalConstraints,
+    hasFocus: hasFocus,
+    hovering: hovering,
   );
 
   @override
@@ -240,9 +342,13 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = selected
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
+      ..focusColor = focusColor
+      ..hoverColor = hoverColor
       ..onChanged = onChanged
       ..additionalConstraints = additionalConstraints
-      ..vsync = vsync;
+      ..vsync = vsync
+      ..hasFocus = hasFocus
+      ..hovering = hovering;
   }
 }
 
@@ -251,17 +357,25 @@ class _RenderRadio extends RenderToggleable {
     bool value,
     Color activeColor,
     Color inactiveColor,
+    Color focusColor,
+    Color hoverColor,
     ValueChanged<bool> onChanged,
     BoxConstraints additionalConstraints,
     @required TickerProvider vsync,
+    bool hasFocus,
+    bool hovering,
   }) : super(
          value: value,
          tristate: false,
          activeColor: activeColor,
          inactiveColor: inactiveColor,
+         focusColor: focusColor,
+         hoverColor: hoverColor,
          onChanged: onChanged,
          additionalConstraints: additionalConstraints,
          vsync: vsync,
+         hasFocus: hasFocus,
+         hovering: hovering,
        );
 
   @override

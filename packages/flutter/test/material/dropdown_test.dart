@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' show window;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -2433,7 +2434,7 @@ void main() {
     expect(find.byKey(buttonKey), isNot(paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0xff00ff00))));
   });
 
-  testWidgets('DropdownButton is activated with the enter key', (WidgetTester tester) async {
+  testWidgets('DropdownButton is activated with the enter/space key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
     String value = 'one';
     void didChangeValue(String newValue) {
@@ -2471,16 +2472,17 @@ void main() {
     await tester.pump(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    // Web doesn't respond to enter, only space.
+    await tester.sendKeyEvent(kIsWeb ? LogicalKeyboardKey.space : LogicalKeyboardKey.enter);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
     expect(value, equals('one'));
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Focus 'one'
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown); // Focus 'one'
     await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Focus 'two'
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown); // Focus 'two'
     await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select 'two'
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select 'two', should work on web too.
     await tester.pump();
 
     await tester.pump();

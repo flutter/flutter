@@ -21,8 +21,8 @@ import 'theme_data.dart';
 ///
 /// The button's size will expand to fit the child widget, if necessary.
 ///
-/// MaterialButtons whose [onPressed] handler is null will be disabled. To have
-/// an enabled button, make sure to pass a non-null value for onPressed.
+/// MaterialButtons whose [onPressed] and [onLongPress] callbacks are null will be disabled. To have
+/// an enabled button, make sure to pass a non-null value for [onPressed] or [onLongPress].
 ///
 /// Rather than using this class directly, consider using [FlatButton],
 /// [OutlineButton], or [RaisedButton], which configure this class with
@@ -51,6 +51,7 @@ class MaterialButton extends StatelessWidget {
   const MaterialButton({
     Key key,
     @required this.onPressed,
+    this.onLongPress,
     this.onHighlightChanged,
     this.textTheme,
     this.textColor,
@@ -88,8 +89,21 @@ class MaterialButton extends StatelessWidget {
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
-  /// If this is set to null, the button will be disabled.
+  /// If this callback and [onLongPress] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
   final VoidCallback onPressed;
+
+  /// The callback that is called when the button is long-pressed.
+  ///
+  /// If this callback and [onPressed] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
+  final VoidCallback onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -287,8 +301,8 @@ class MaterialButton extends StatelessWidget {
   /// Whether the button is enabled or disabled.
   ///
   /// Buttons are disabled by default. To enable a button, set its [onPressed]
-  /// property to a non-null value.
-  bool get enabled => onPressed != null;
+  /// or [onLongPress] properties to a non-null value.
+  bool get enabled => onPressed != null || onLongPress != null;
 
   /// The internal padding for the button's [child].
   ///
@@ -348,6 +362,7 @@ class MaterialButton extends StatelessWidget {
 
     return RawMaterialButton(
       onPressed: onPressed,
+      onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
@@ -377,7 +392,7 @@ class MaterialButton extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
     properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
     properties.add(ColorProperty('textColor', textColor, defaultValue: null));
     properties.add(ColorProperty('disabledTextColor', disabledTextColor, defaultValue: null));
