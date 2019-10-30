@@ -210,7 +210,7 @@ class Shell final : public PlatformView::Delegate,
   ///
   /// @return     A weak pointer to the rasterizer.
   ///
-  fml::WeakPtr<Rasterizer> GetRasterizer();
+  fml::WeakPtr<Rasterizer> GetRasterizer() const;
 
   //------------------------------------------------------------------------------
   /// @brief      Engines may only be accessed on the UI thread. This method is

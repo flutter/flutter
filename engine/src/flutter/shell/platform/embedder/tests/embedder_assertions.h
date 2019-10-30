@@ -9,6 +9,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/testing/assertions.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkPoint.h"
@@ -259,6 +260,10 @@ inline FlutterTransformation FlutterTransformationMake(const SkMatrix& matrix) {
   transformation.pers1 = matrix[SkMatrix::kMPersp1];
   transformation.pers2 = matrix[SkMatrix::kMPersp2];
   return transformation;
+}
+
+inline flutter::EmbedderEngine* ToEmbedderEngine(const FlutterEngine& engine) {
+  return reinterpret_cast<flutter::EmbedderEngine*>(engine);
 }
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_ASSERTIONS_H_
