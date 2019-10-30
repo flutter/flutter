@@ -16,9 +16,7 @@ class GestureTransformable extends StatelessWidget {
     @required this.child,
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    this.boundaryRect = const Rect.fromLTRB(
-      -double.infinity, -double.infinity, double.infinity, double.infinity,
-    ),
+    this.boundaryRect,
     this.initialTranslation,
     this.initialScale,
     this.initialRotation,
@@ -70,8 +68,11 @@ class GestureTransformable extends StatelessWidget {
   /// Panning beyond boundaryRect will be stopped. boundaryRect does not rotate
   /// with the rest of the scene, so it is always aligned with the viewport.
   ///
-  /// Defaults to an infinite plane, which results in no limit to the distance
-  /// that the viewport can be transformed.
+  /// To produce no bounds at all, pass a Rect that's an infinite plane:
+  /// `Rect.fromLTRB(-double.infinity, -double.infinity, double.infinity, double.infinity);`.
+  ///
+  /// Defaults to null, which results in boundaries that are the exact size of
+  /// the [child].
   final Rect boundaryRect;
 
   /// The child to perform the transformations on.
@@ -403,6 +404,20 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
     return math.log(effectivelyMotionless / velocity) / math.log(drag / 100);
   }
 
+  // Decide which type of gesture this is by comparing the amount of scale
+  // and rotation in the gesture, if any. Scale starts at 1 and rotation
+  // starts at 0. Translate will have 0 scale and 0 rotation because it uses
+  // only one finger.
+  static _GestureType _getGestureType(double scale, double rotation) {
+    if ((scale - 1).abs() > rotation.abs()) {
+      return _GestureType.scale;
+    } else if (rotation != 0) {
+      return _GestureType.rotate;
+    } else {
+      return _GestureType.translate;
+    }
+  }
+
   // The transformation matrix that gives the initial home position.
   Matrix4 get _initialTransform {
     Matrix4 matrix = Matrix4.identity();
@@ -436,6 +451,12 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
   static Offset getOffset(BuildContext context) {
     final RenderBox renderObject = context.findRenderObject();
     return renderObject.localToGlobal(Offset.zero);
+  }
+
+  Rect get _boundaryRect {
+    assert(widget.size != null);
+    // Defaults to a Rect that matches the child perfectly.
+    return widget.boundaryRect ?? Offset.zero & widget.size;
   }
 
   @override
@@ -558,14 +579,14 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       return matrix;
     }
 
-    // Clamp translation so the viewport remains inside boundaryRect.
+    // Clamp translation so the viewport remains inside _boundaryRect.
     final double scale = _transform.getMaxScaleOnAxis();
     final Size scaledSize = widget.size / scale;
     final Rect viewportBoundaries = Rect.fromLTRB(
-      widget.boundaryRect.left,
-      widget.boundaryRect.top,
-      widget.boundaryRect.right - scaledSize.width,
-      widget.boundaryRect.bottom - scaledSize.height,
+      _boundaryRect.left,
+      _boundaryRect.top,
+      _boundaryRect.right - scaledSize.width,
+      _boundaryRect.bottom - scaledSize.height,
     );
     // Translation is reversed (a positive translation moves the scene to the
     // right, viewport to the left).
@@ -604,7 +625,10 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
     }
     assert(scale != 0);
 
-    // Don't allow a scale that moves the viewport outside of boundaryRect.
+    // Don't allow a scale that moves the viewport outside of _boundaryRect.
+    // Inflate it by 1 pixel because Rect.contains excludes its bottom and right
+    // edges.
+    final boundaryRect = _boundaryRect.inflate(1.0);
     final Offset tl = fromViewport(const Offset(0, 0), _transform);
     final Offset tr = fromViewport(Offset(widget.size.width, 0), _transform);
     final Offset bl = fromViewport(Offset(0, widget.size.height), _transform);
@@ -612,10 +636,10 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       Offset(widget.size.width, widget.size.height),
       _transform,
     );
-    if (!widget.boundaryRect.contains(tl)
-      || !widget.boundaryRect.contains(tr)
-      || !widget.boundaryRect.contains(bl)
-      || !widget.boundaryRect.contains(br)) {
+    if (!boundaryRect.contains(tl)
+      || !boundaryRect.contains(tr)
+      || !boundaryRect.contains(bl)
+      || !boundaryRect.contains(br)) {
       return matrix;
     }
 
@@ -633,7 +657,7 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
 
   // Return a new matrix representing the given matrix after applying the given
   // rotation transform.
-  // Rotating the scene cannot cause the viewport to view beyond boundaryRect.
+  // Rotating the scene cannot cause the viewport to view beyond _boundaryRect.
   Matrix4 matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
     if (widget.disableRotation || rotation == 0) {
       return matrix;
@@ -684,17 +708,10 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       _transform,
     );
     if (gestureType == null) {
-      // Decide which type of gesture this is by comparing the amount of scale
-      // and rotation in the gesture, if any. Scale starts at 1 and rotation
-      // starts at 0. Translate will have 0 scale and 0 rotation because it uses
-      // only one finger.
-      if ((details.scale - 1).abs() > details.rotation.abs()) {
-        gestureType = _GestureType.scale;
-      } else if (details.rotation != 0) {
-        gestureType = _GestureType.rotate;
-      } else {
-        gestureType = _GestureType.translate;
-      }
+      gestureType = _getGestureType(
+        widget.disableScale ? 1.0 : details.scale,
+        widget.disableRotation ? 0.0 : details.rotation,
+      );
     }
     setState(() {
       if (gestureType == _GestureType.scale && _scaleStart != null) {
