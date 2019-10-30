@@ -337,3 +337,52 @@ class AotElfRelease extends AotElfBase {
     KernelSnapshot(),
   ];
 }
+
+/// Copies the prebuilt flutter aot bundle.
+// This is a one-off rule for implementing build aot in terms of assemble.
+abstract class CopyFlutterAotBundle extends Target {
+  const CopyFlutterAotBundle();
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.so'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/app.so'),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final File outputFile = environment.outputDir.childFile('app.so');
+    if (!outputFile.parent.existsSync()) {
+      outputFile.parent.createSync(recursive: true);
+    }
+    environment.buildDir.childFile('app.so').copySync(outputFile.path);
+  }
+}
+
+class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
+  const ProfileCopyFlutterAotBundle();
+
+  @override
+  String get name => 'profile_copy_aot_flutter_bundle';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfProfile(),
+  ];
+}
+
+class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
+  const ReleaseCopyFlutterAotBundle();
+
+  @override
+  String get name => 'release_copy_aot_flutter_bundle';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfRelease(),
+  ];
+}
