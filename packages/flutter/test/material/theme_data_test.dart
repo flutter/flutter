@@ -473,4 +473,31 @@ void main() {
     expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
   });
 
+  testWidgets('ThemeData.mergeThemes merges correctly', (WidgetTester tester) async {
+
+    final cardTheme = CardTheme(elevation: 24);
+    final dialogTheme = DialogTheme(elevation: 24);
+    final buttonTheme = ButtonThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
+
+    const ColorScheme lightColors = ColorScheme.light();
+    final ThemeData coloredTheme = ThemeData.from(colorScheme: lightColors);
+    final ThemeData baseTheme = ThemeData.light().copyWith(
+      cardTheme: cardTheme,
+      dialogTheme: dialogTheme,
+      buttonTheme: buttonTheme,
+    );
+    final ThemeData theme = ThemeData.mergeThemes(baseTheme: baseTheme, coloredTheme: coloredTheme);
+
+    expect(theme.brightness, equals(Brightness.light));
+    expect(theme.primaryColor, equals(lightColors.primary));
+    expect(theme.accentColor, equals(lightColors.secondary));
+    expect(theme.cardColor, equals(lightColors.surface));
+    expect(theme.cardTheme, equals(cardTheme));
+    expect(theme.buttonTheme, equals(buttonTheme));
+    expect(theme.dialogTheme, equals(dialogTheme));
+  });
 }

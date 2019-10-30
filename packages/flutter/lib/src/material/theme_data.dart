@@ -630,6 +630,48 @@ class ThemeData extends Diagnosticable {
     );
   }
 
+  /// Merge a [ThemeData] with colors with another [ThemeData] with styles.
+  ///
+  /// [ThemeData.from] does not retain the base theme information, it only sets up
+  /// the colors. With [ThemeData.mergeThemes], you can merge the colors generated
+  /// from [ThemeData.from] with an existing theme.
+  factory ThemeData.mergeThemes({
+    @required ThemeData coloredTheme,
+    @required ThemeData baseTheme,
+  }) {
+    assert(coloredTheme != null);
+    assert(baseTheme != null);
+
+    return coloredTheme.copyWith(
+      buttonTheme: baseTheme.buttonTheme,
+      textTheme: baseTheme.textTheme,
+      cardTheme: baseTheme.cardTheme,
+      iconTheme: baseTheme.iconTheme,
+      accentIconTheme: baseTheme.accentIconTheme,
+      accentTextTheme: baseTheme.accentTextTheme,
+      appBarTheme: baseTheme.appBarTheme,
+      tabBarTheme: baseTheme.tabBarTheme,
+      toggleButtonsTheme: baseTheme.toggleButtonsTheme,
+      bannerTheme: baseTheme.bannerTheme,
+      tooltipTheme: baseTheme.tooltipTheme,
+      bottomAppBarTheme: baseTheme.bottomAppBarTheme,
+      bottomSheetTheme: baseTheme.bottomSheetTheme,
+      buttonBarTheme: baseTheme.buttonBarTheme,
+      chipTheme: baseTheme.chipTheme,
+      cupertinoOverrideTheme: baseTheme.cupertinoOverrideTheme,
+      dialogTheme: baseTheme.dialogTheme,
+      dividerTheme: baseTheme.dividerTheme,
+      floatingActionButtonTheme: baseTheme.floatingActionButtonTheme,
+      inputDecorationTheme: baseTheme.inputDecorationTheme,
+      pageTransitionsTheme: baseTheme.pageTransitionsTheme,
+      popupMenuTheme: baseTheme.popupMenuTheme,
+      primaryIconTheme: baseTheme.primaryIconTheme,
+      primaryTextTheme: baseTheme.primaryTextTheme,
+      sliderTheme: baseTheme.sliderTheme,
+      snackBarTheme: baseTheme.snackBarTheme,
+    );
+  }
+
   /// A default light blue theme.
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
