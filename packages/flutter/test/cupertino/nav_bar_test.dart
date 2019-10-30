@@ -188,19 +188,18 @@ void main() {
 
   testWidgets('Nav bar respects themes', (WidgetTester tester) async {
     count = 0x000000;
-    const CupertinoDynamicColor orange = CupertinoColors.activeOrange;
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },
-            child: _ExpectStyles(color: orange.darkColor, index: 0x000001),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.darkColor, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.white, index: 0x000100),
           trailing: CupertinoButton(
             onPressed: () { },
-            child: _ExpectStyles(color: orange.darkColor, index: 0x010000),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.darkColor, index: 0x010000),
           ),
         ),
       ),
@@ -820,10 +819,7 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile(
-          'nav_bar_test.standard_title.png',
-          version: 2,
-        ),
+        matchesGoldenFile('nav_bar_test.standard_title.png'),
       );
     },
   );
@@ -854,10 +850,7 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile(
-          'nav_bar_test.large_title.png',
-          version: 2,
-        ),
+        matchesGoldenFile('nav_bar_test.large_title.png'),
       );
     },
   );
@@ -1135,7 +1128,7 @@ class _ExpectStyles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle style = DefaultTextStyle.of(context).style;
-    expect(style.color.value, color.value);
+    expect(style.color, isSameColorAs(color));
     expect(style.fontFamily, '.SF Pro Text');
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, -0.41);

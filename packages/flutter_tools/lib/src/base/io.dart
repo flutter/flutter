@@ -52,6 +52,7 @@ export 'dart:io'
         HttpException,
         HttpHeaders,
         HttpRequest,
+        HttpResponse,
         HttpServer,
         HttpStatus,
         InternetAddress,

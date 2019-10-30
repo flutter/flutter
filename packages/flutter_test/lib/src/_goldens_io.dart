@@ -15,8 +15,8 @@ import 'goldens.dart';
 
 /// The default [GoldenFileComparator] implementation for `flutter test`.
 ///
-/// The term __golden file__ refers to a master image that is considered the true
-/// rendering of a given widget, state, application, or other visual
+/// The term __golden file__ refers to a master image that is considered the
+/// true rendering of a given widget, state, application, or other visual
 /// representation you have chosen to capture. This comparator loads golden
 /// files from the local file system, treating the golden key as a relative
 /// path from the test file's directory.
@@ -53,7 +53,7 @@ import 'goldens.dart';
 ///   implements.
 ///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
 ///    comparator.
-class LocalFileComparator extends GoldenFileComparator {
+class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutput {
   /// Creates a new [LocalFileComparator] for the specified [testFile].
   ///
   /// Golden file keys will be interpreted as file paths relative to the
@@ -90,24 +90,18 @@ class LocalFileComparator extends GoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     final File goldenFile = _getGoldenFile(golden);
     if (!goldenFile.existsSync()) {
-      throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
+      throw test_package.TestFailure(
+        'Could not be compared against non-existent file: "$golden"'
+      );
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    final ComparisonResult result = GoldenFileComparator.compareLists(imageBytes, goldenBytes);
+    final ComparisonResult result = GoldenFileComparator.compareLists(
+      imageBytes,
+      goldenBytes,
+    );
 
     if (!result.passed) {
-      String additionalFeedback = '';
-      if (result.diffs != null) {
-        additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
-        final Map<String, Object> diffs = result.diffs;
-        diffs.forEach((String name, Object untypedImage) {
-          final Image image = untypedImage;
-          final File output = _getFailureFile(name, golden);
-          output.parent.createSync(recursive: true);
-          output.writeAsBytesSync(encodePng(image));
-        });
-      }
-      throw test_package.TestFailure('Golden "$golden": ${result.error}$additionalFeedback');
+      generateFailureOutput(result, golden, basedir);
     }
     return result.passed;
   }
@@ -122,16 +116,50 @@ class LocalFileComparator extends GoldenFileComparator {
   File _getGoldenFile(Uri golden) {
     return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
   }
+}
 
-  File _getFailureFile(String failure, Uri golden) {
+/// A class for use in golden file comparators that run locally and provide
+/// output.
+class LocalComparisonOutput {
+  /// Writes out diffs from the [ComparisonResult] of a golden file test.
+  ///
+  /// Will throw an error if a null result is provided.
+  void generateFailureOutput(
+    ComparisonResult result,
+    Uri golden,
+    Uri basedir, {
+    String key = '',
+  }) {
+    String additionalFeedback = '';
+    if (result.diffs != null) {
+      additionalFeedback = '\nFailure feedback can be found at '
+        '${path.join(basedir.path, 'failures')}';
+      final Map<String, Image> diffs = result.diffs;
+      diffs.forEach((String name, Image image) {
+        final File output = getFailureFile(
+          key.isEmpty ? name : name + '_' + key,
+          golden,
+          basedir,
+        );
+        output.parent.createSync(recursive: true);
+        output.writeAsBytesSync(encodePng(image));
+      });
+    }
+    throw test_package.TestFailure(
+      'Golden "$golden": ${result.error}$additionalFeedback'
+    );
+  }
+
+  /// Returns the appropriate file for a given diff from a [ComparisonResult].
+  File getFailureFile(String failure, Uri golden, Uri basedir) {
     final String fileName = golden.pathSegments[0];
     final String testName = fileName.split(path.extension(fileName))[0]
       + '_'
       + failure
       + '.png';
-    return File(_path.join(
-      _path.fromUri(basedir),
-      _path.fromUri(Uri.parse('failures/$testName')),
+    return File(path.join(
+      path.fromUri(basedir),
+      path.fromUri(Uri.parse('failures/$testName')),
     ));
   }
 }
@@ -203,7 +231,9 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
   if (pixelDiffCount > 0) {
     return ComparisonResult(
       passed: false,
-      error: 'Pixel test failed, ${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% diff detected.',
+      error: 'Pixel test failed, '
+        '${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% '
+        'diff detected.',
       diffs: diffs,
     );
   }

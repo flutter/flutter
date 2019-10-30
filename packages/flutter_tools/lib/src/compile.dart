@@ -324,6 +324,8 @@ class KernelCompiler {
       if (aot) ...<String>[
         '--aot',
         '--tfa',
+        // TODO(jonahwilliams): remove when https://github.com/flutter/flutter/issues/43751 is resolved.
+        '--no-gen-bytecode',
       ],
       if (packagesPath != null) ...<String>[
         '--packages',
@@ -514,7 +516,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String sdkRoot, {
     @required this.buildMode,
     this.causalAsyncStacks = true,
-    this.trackWidgetCreation = false,
+    this.trackWidgetCreation = true,
     this.packagesPath,
     this.fileSystemRoots,
     this.fileSystemScheme,

@@ -190,7 +190,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// change the controller's [value].
   set selection(TextSelection newSelection) {
     if (newSelection.start > text.length || newSelection.end > text.length)
-      throw FlutterError('invalid text selection: $newSelection');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('invalid text selection: $newSelection')]);
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
@@ -342,9 +342,9 @@ class EditableText extends StatefulWidget {
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
-  /// [paintCursorAboveText], [textAlign], [dragStartBehavior], [scrollPadding],
-  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer], and
-  /// [readOnly] arguments must not be null.
+  /// [enableSuggestions], [paintCursorAboveText], [textAlign], [dragStartBehavior],
+  /// [scrollPadding], [dragStartBehavior], [toolbarOptions],
+  /// [rendererIgnoresPointer], and [readOnly] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -352,6 +352,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
+    this.enableSuggestions = true,
     @required this.style,
     StrutStyle strutStyle,
     @required this.cursorColor,
@@ -401,6 +402,7 @@ class EditableText extends StatefulWidget {
        assert(focusNode != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSuggestions != null),
        assert(showSelectionHandles != null),
        assert(enableInteractiveSelection != null),
        assert(readOnly != null),
@@ -422,6 +424,7 @@ class EditableText extends StatefulWidget {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
@@ -513,6 +516,9 @@ class EditableText extends StatefulWidget {
   /// Defaults to true. Cannot be null.
   /// {@endtemplate}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.enableSuggestions}
+  final bool enableSuggestions;
 
   /// The text style to use for the editable text.
   final TextStyle style;
@@ -1036,6 +1042,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     style?.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
@@ -1393,6 +1400,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               inputType: widget.keyboardType,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
+              enableSuggestions: widget.enableSuggestions,
               inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
                   : TextInputAction.done
@@ -1841,6 +1849,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textWidthBasis: widget.textWidthBasis,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
+              enableSuggestions: widget.enableSuggestions,
               offset: offset,
               onSelectionChanged: _handleSelectionChanged,
               onCaretChanged: _handleCaretChanged,
@@ -1906,6 +1915,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.locale,
     this.obscureText,
     this.autocorrect,
+    this.enableSuggestions,
     this.offset,
     this.onSelectionChanged,
     this.onCaretChanged,
@@ -1943,6 +1953,7 @@ class _Editable extends LeafRenderObjectWidget {
   final bool obscureText;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
+  final bool enableSuggestions;
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
   final CaretChangedHandler onCaretChanged;

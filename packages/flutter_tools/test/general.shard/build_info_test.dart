@@ -53,5 +53,29 @@ void main() {
       buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-');
       expect(buildName, 'abc+-');
     });
+
+    test('build mode configuration is correct', () {
+      expect(BuildMode.debug.isRelease, false);
+      expect(BuildMode.debug.isPrecompiled, false);
+      expect(BuildMode.debug.isJit, true);
+
+      expect(BuildMode.profile.isRelease, false);
+      expect(BuildMode.profile.isPrecompiled, true);
+      expect(BuildMode.profile.isJit, false);
+
+      expect(BuildMode.release.isRelease, true);
+      expect(BuildMode.release.isPrecompiled, true);
+      expect(BuildMode.release.isJit, false);
+
+      expect(BuildMode.jitRelease.isRelease, true);
+      expect(BuildMode.jitRelease.isPrecompiled, false);
+      expect(BuildMode.jitRelease.isJit, true);
+
+      expect(BuildMode.fromName('debug'), BuildMode.debug);
+      expect(BuildMode.fromName('profile'), BuildMode.profile);
+      expect(BuildMode.fromName('jit_release'), BuildMode.jitRelease);
+      expect(BuildMode.fromName('release'), BuildMode.release);
+      expect(() => BuildMode.fromName('foo'), throwsA(isInstanceOf<ArgumentError>()));
+    });
   });
 }
