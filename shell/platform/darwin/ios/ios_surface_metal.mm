@@ -38,7 +38,7 @@ std::unique_ptr<Surface> IOSSurfaceMetal::CreateGPUSurface(GrContext* gr_context
 }
 
 // |ExternalViewEmbedder|
-sk_sp<SkSurface> IOSSurfaceMetal::GetRootSurface() {
+SkCanvas* IOSSurfaceMetal::GetRootCanvas() {
   // On iOS, the root surface is created from the on-screen render target. Only the surfaces for the
   // various overlays are controlled by this class.
   return nullptr;

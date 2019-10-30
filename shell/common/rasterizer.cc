@@ -226,24 +226,22 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
 
   auto* external_view_embedder = surface_->GetExternalViewEmbedder();
 
-  sk_sp<SkSurface> embedder_root_surface;
-
+  SkCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder != nullptr) {
     external_view_embedder->BeginFrame(layer_tree.frame_size(),
                                        surface_->GetContext(),
                                        layer_tree.device_pixel_ratio());
-    embedder_root_surface = external_view_embedder->GetRootSurface();
+    embedder_root_canvas = external_view_embedder->GetRootCanvas();
   }
 
   // If the external view embedder has specified an optional root surface, the
   // root surface transformation is set by the embedder instead of
   // having to apply it here.
   SkMatrix root_surface_transformation =
-      embedder_root_surface ? SkMatrix{} : surface_->GetRootTransformation();
+      embedder_root_canvas ? SkMatrix{} : surface_->GetRootTransformation();
 
-  auto root_surface_canvas = embedder_root_surface
-                                 ? embedder_root_surface->getCanvas()
-                                 : frame->SkiaCanvas();
+  auto root_surface_canvas =
+      embedder_root_canvas ? embedder_root_canvas : frame->SkiaCanvas();
 
   auto compositor_frame = compositor_context_->AcquireFrame(
       surface_->GetContext(),       // skia GrContext
