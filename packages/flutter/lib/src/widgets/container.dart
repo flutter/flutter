@@ -386,7 +386,11 @@ class Container extends StatelessWidget {
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
-  /// clipBehaviour for [BoxDecoration.borderRadius]
+
+  /// The clip behaviour when [BoxDecoration.borderRadius] is available.
+  /// 
+  /// By default [Container] doesn't clip the child when it is outside the
+  /// border.
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehaviour;
@@ -458,6 +462,7 @@ class Container extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehaviour', clipBehaviour, defaultValue: null));
     properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
