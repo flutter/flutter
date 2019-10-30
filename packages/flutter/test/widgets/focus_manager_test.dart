@@ -585,7 +585,6 @@ void main() {
         callCount++;
       }
 
-      final FocusManager focusManager = WidgetsBinding.instance.focusManager;
       focusManager.addHighlightModeListener(handleModeChange);
       addTearDown(() => focusManager.removeHighlightModeListener(handleModeChange));
       expect(callCount, equals(0));

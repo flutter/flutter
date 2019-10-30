@@ -153,7 +153,7 @@ class ActionDispatcher extends Diagnosticable {
   bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
     assert(action != null);
     assert(intent != null);
-    focusNode ??= WidgetsBinding.instance.focusManager.primaryFocus;
+    focusNode ??= primaryFocus;
     if (action != null && intent.isEnabled(focusNode.context)) {
       action.invoke(focusNode, intent);
       return true;

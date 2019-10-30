@@ -209,7 +209,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
       matchedIntent = _shortcuts[LogicalKeySet.fromSet(pseudoKeys)];
     }
     if (matchedIntent != null) {
-      final BuildContext primaryContext = WidgetsBinding.instance.focusManager.primaryFocus?.context;
+      final BuildContext primaryContext = primaryFocus?.context;
       if (primaryContext == null) {
         return false;
       }
