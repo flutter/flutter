@@ -797,10 +797,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   String _mapFilename(String filename, PackageUriMapper packageUriMapper) {
-    // TODO(jonahwilliams): remove once package uri fix rolls thorugh.
-    if (targetModel == TargetModel.dartdevc) {
-      return filename;
-    }
     return _doMapFilename(filename, packageUriMapper) ?? filename;
   }
 

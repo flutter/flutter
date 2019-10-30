@@ -55,7 +55,10 @@ class WebAssetServer {
   }
 
   final HttpServer _httpServer;
+  // If holding these in memory is too much overhead, this can be switched to a
+  // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
+  final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   Future<void> _handleRequest(HttpRequest request) async {
@@ -77,8 +80,7 @@ class WebAssetServer {
     }
 
     // If this is a JavaScript file, it must be in the in-memory cache.
-    // Attempt to look up the file by URI, returning a 404 if it is not
-    // found.
+    // Attempt to look up the file by URI.
     if (_files.containsKey(request.uri.path)) {
       final List<int> bytes = _files[request.uri.path];
       response.headers
@@ -88,6 +90,19 @@ class WebAssetServer {
       await response.close();
       return;
     }
+    // If this is a sourcemap file, then it might be in the in-memory cache.
+    // Attempt to lookup the file by URI.
+    if (_files.containsKey(request.uri.path)) {
+      final List<int> bytes = _sourcemaps[request.uri.path];
+      print(json.decode(utf8.decode(bytes)));
+      response.headers
+        ..add('Content-Length', bytes.length)
+        ..add('Content-Type', 'application/json');
+      response.add(bytes);
+      await response.close();
+      return;
+    }
+
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. Attempt to look in the
     // local filesystem for it, and return a 404 if it is not found. The tool
@@ -137,28 +152,50 @@ class WebAssetServer {
   /// Update the in-memory asset server with the provided source and manifest files.
   ///
   /// Returns a list of updated modules.
-  List<String> write(File sourceFile, File manifestFile) {
+  List<String> write(File codeFile, File manifestFile, File sourcemapFile) {
     final List<String> modules = <String>[];
-    final Uint8List bytes = sourceFile.readAsBytesSync();
+    final Uint8List codeBytes = codeFile.readAsBytesSync();
+    final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
     final Map<String, Object> manifest = json.decode(manifestFile.readAsStringSync());
     for (String filePath in manifest.keys) {
       if (filePath == null) {
         printTrace('Invalid manfiest file: $filePath');
         continue;
       }
-      final List<Object> offsets = manifest[filePath];
-      if (offsets.length != 2) {
+      final Map<String, Object> offsets = manifest[filePath];
+      final List<Object> codeOffsets = offsets['code'];
+      final List<Object> sourcemapOffsets = offsets['sourcemap'];
+      if (codeOffsets.length != 2 || sourcemapOffsets.length != 2) {
         printTrace('Invalid manifest byte offsets: $offsets');
         continue;
       }
-      final int start = offsets[0];
-      final int end = offsets[1];
-      if (start < 0 || end > bytes.lengthInBytes) {
-        printTrace('Invalid byte index: [$start, $end]');
+
+      final int codeStart = codeOffsets[0];
+      final int codeEnd = codeOffsets[1];
+      if (codeStart < 0 || codeEnd > codeBytes.lengthInBytes) {
+        printTrace('Invalid byte index: [$codeStart, $codeEnd]');
         continue;
       }
-      final Uint8List byteView = Uint8List.view(bytes.buffer, start, end - start);
+      final Uint8List byteView = Uint8List.view(
+        codeBytes.buffer,
+        codeStart,
+        codeEnd - codeStart,
+      );
       _files[filePath] = byteView;
+
+      final int sourcemapStart = codeOffsets[0];
+      final int sourcemapEnd = codeOffsets[1];
+      if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
+        printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
+        continue;
+      }
+      final Uint8List sourcemapView = Uint8List.view(
+        sourcemapBytes.buffer,
+        sourcemapStart,
+        sourcemapEnd - sourcemapStart,
+      );
+      _sourcemaps['$filePath.js.map'] = sourcemapView;
+
       modules.add(filePath);
     }
     return modules;
@@ -243,10 +280,10 @@ class WebDevFS implements DevFS {
       _webAssetServer.writeFile('/main.dart.js', generateBootstrapScript(
         requireUrl: requireJS.path,
         mapperUrl: null,
-        entrypoint: mainPath,
+        entrypoint: '$mainPath.js',
       ));
       _webAssetServer.writeFile('/main_module.js', generateMainModule(
-        entrypoint: mainPath,
+        entrypoint: '$mainPath.js',
       ));
       _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
     }
@@ -267,17 +304,19 @@ class WebDevFS implements DevFS {
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
-    File sourceFile;
+    File codeFile;
     File manifestFile;
+    File sourcemapFile;
     List<String> modules;
     try {
-      sourceFile = fs.file('${compilerOutput.outputFilename}.sources');
+      codeFile = fs.file('${compilerOutput.outputFilename}.sources');
       manifestFile = fs.file('${compilerOutput.outputFilename}.json');
-      modules = _webAssetServer.write(sourceFile, manifestFile);
+      sourcemapFile = fs.file('${compilerOutput.outputFilename}.map');
+      modules = _webAssetServer.write(codeFile, manifestFile, sourcemapFile);
     } on FileSystemException {
       throwToolExit('Incremental compiler did not produce expected output.');
     }
-    return UpdateFSReport(success: true, syncedBytes: sourceFile.lengthSync(),
+    return UpdateFSReport(success: true, syncedBytes: codeFile.lengthSync(),
       invalidatedSourcesCount: invalidatedFiles.length)
         ..invalidatedModules = modules;
   }
