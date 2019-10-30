@@ -240,7 +240,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     with TickerProviderStateMixin<CupertinoSlidingSegmentedControl<T>> {
 
   final Map<T, AnimationController> _highlightControllers = <T, AnimationController>{};
-  final Tween<FontWeight> _highlightTween = _FontWeightTween(begin: FontWeight.normal, end: FontWeight.w600);
+  final Tween<FontWeight> _highlightTween = _FontWeightTween(begin: FontWeight.normal, end: FontWeight.w500);
 
   final Map<T, AnimationController> _pressControllers = <T, AnimationController>{};
   final Tween<double> _pressTween = Tween<double>(begin: 1, end: 0.2);

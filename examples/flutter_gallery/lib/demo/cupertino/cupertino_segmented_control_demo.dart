@@ -66,7 +66,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
         trailing: CupertinoDemoDocumentationButton(CupertinoSegmentedControlDemo.routeName),
       ),
       child: DefaultTextStyle(
-        style: CupertinoTheme.of(context).textTheme.textStyle,
+        style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 13),
         child: SafeArea(
           child: Column(
             children: <Widget>[
