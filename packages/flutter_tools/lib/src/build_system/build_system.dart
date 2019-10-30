@@ -575,6 +575,9 @@ class ExceptionMeasurement {
   final String target;
   final dynamic exception;
   final StackTrace stackTrace;
+
+  @override
+  String toString() => 'target: $target\nexception:$exception\n$stackTrace';
 }
 
 /// Helper class to collect measurement data.

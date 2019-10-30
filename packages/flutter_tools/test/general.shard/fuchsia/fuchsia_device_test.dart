@@ -126,76 +126,6 @@ void main() {
     });
   });
 
-  group('Fuchsia device artifact overrides', () {
-    MemoryFileSystem memoryFileSystem;
-    File devFinder;
-    File sshConfig;
-    File platformDill;
-    File patchedSdk;
-    MockArtifacts mockArtifacts;
-
-    setUp(() {
-      memoryFileSystem = MemoryFileSystem();
-      devFinder = memoryFileSystem.file('dev_finder');
-      sshConfig = memoryFileSystem.file('ssh_config');
-      platformDill = memoryFileSystem.file('platform_strong.dill');
-      patchedSdk = memoryFileSystem.file('flutter_runner_patched_sdk');
-
-      mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(
-        Artifact.fuchsiaPlatformDill,
-        platform: anyNamed('platform'),
-        mode: anyNamed('mode'),
-      )).thenReturn(platformDill.path);
-      when(mockArtifacts.getArtifactPath(
-        Artifact.fuchsiaPatchedSdk,
-        platform: anyNamed('platform'),
-        mode: anyNamed('mode'),
-      )).thenReturn(patchedSdk.path);
-    });
-
-    testUsingContext('exist', () async {
-      final FuchsiaDevice device = FuchsiaDevice('fuchsia-device');
-      expect(device.artifactOverrides, isNotNull);
-      expect(device.artifactOverrides.platformKernelDill.path, equals(platformDill.path));
-      expect(device.artifactOverrides.flutterPatchedSdk.path, equals(patchedSdk.path));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
-      FileSystem: () => memoryFileSystem,
-      FuchsiaArtifacts: () => FuchsiaArtifacts(
-            sshConfig: sshConfig,
-            devFinder: devFinder,
-          ),
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('are used', () async {
-      final FuchsiaDevice device = FuchsiaDevice('fuchsia-device');
-      expect(device.artifactOverrides, isNotNull);
-      expect(device.artifactOverrides.platformKernelDill.path, equals(platformDill.path));
-      expect(device.artifactOverrides.flutterPatchedSdk.path, equals(patchedSdk.path));
-      await context.run<void>(
-        body: () {
-          expect(Artifacts.instance.getArtifactPath(Artifact.platformKernelDill),
-                 equals(platformDill.path));
-          expect(Artifacts.instance.getArtifactPath(Artifact.flutterPatchedSdkPath),
-                 equals(patchedSdk.path));
-        },
-        overrides: <Type, Generator>{
-          Artifacts: () => device.artifactOverrides,
-        },
-      );
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
-      FileSystem: () => memoryFileSystem,
-      FuchsiaArtifacts: () => FuchsiaArtifacts(
-            sshConfig: sshConfig,
-            devFinder: devFinder,
-          ),
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-  });
-
   group('displays friendly error when', () {
     MockProcessManager mockProcessManager;
     MockProcessResult mockProcessResult;
@@ -480,12 +410,12 @@ void main() {
         mode: anyNamed('mode'),
       )).thenReturn(compilerSnapshot.path);
       when(mockArtifacts.getArtifactPath(
-        Artifact.fuchsiaPlatformDill,
+        Artifact.platformKernelDill,
         platform: anyNamed('platform'),
         mode: anyNamed('mode'),
       )).thenReturn(platformDill.path);
       when(mockArtifacts.getArtifactPath(
-        Artifact.fuchsiaPatchedSdk,
+        Artifact.flutterPatchedSdkPath,
         platform: anyNamed('platform'),
         mode: anyNamed('mode'),
       )).thenReturn(patchedSdk.path);
