@@ -230,7 +230,7 @@ class KernelSnapshot extends Target {
         platform: targetPlatform,
         mode: buildMode,
       ),
-      aot: buildMode != BuildMode.debug,
+      aot: buildMode.isPrecompiled,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
       targetModel: targetModel,
