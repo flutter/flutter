@@ -92,9 +92,8 @@ class WebAssetServer {
     }
     // If this is a sourcemap file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
-    if (_files.containsKey(request.uri.path)) {
+    if (_sourcemaps.containsKey(request.uri.path)) {
       final List<int> bytes = _sourcemaps[request.uri.path];
-      print(json.decode(utf8.decode(bytes)));
       response.headers
         ..add('Content-Length', bytes.length)
         ..add('Content-Type', 'application/json');
@@ -183,8 +182,8 @@ class WebAssetServer {
       );
       _files[filePath] = byteView;
 
-      final int sourcemapStart = codeOffsets[0];
-      final int sourcemapEnd = codeOffsets[1];
+      final int sourcemapStart = sourcemapOffsets[0];
+      final int sourcemapEnd = sourcemapOffsets[1];
       if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
         printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
         continue;
@@ -192,9 +191,9 @@ class WebAssetServer {
       final Uint8List sourcemapView = Uint8List.view(
         sourcemapBytes.buffer,
         sourcemapStart,
-        sourcemapEnd - sourcemapStart,
+        sourcemapEnd - sourcemapStart ,
       );
-      _sourcemaps['$filePath.js.map'] = sourcemapView;
+      _sourcemaps['$filePath.map'] = sourcemapView;
 
       modules.add(filePath);
     }
