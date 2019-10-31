@@ -14,11 +14,14 @@ import platform
 import shutil
 import subprocess
 import sys
-import tempfile
 
 
 def IsLinux():
   return platform.system() == 'Linux'
+
+
+def GetPackagingDir(out_dir):
+  return os.path.abspath(os.path.join(out_dir, os.pardir))
 
 
 def CreateCIPDDefinition(target_arch, out_dir):
@@ -32,16 +35,18 @@ data:
 """ % (target_arch, target_arch, dir_name)
 
 
+# CIPD CLI needs the definition and data directory to be relative to each other.
 def WriteCIPDDefinition(target_arch, out_dir):
-  _, temp_file = tempfile.mkstemp(suffix='.yaml')
-  with open(temp_file, 'w') as f:
+  _packaging_dir = GetPackagingDir(out_dir)
+  yaml_file = os.path.join(_packaging_dir, 'debug_symbols.cipd.yaml')
+  with open(yaml_file, 'w') as f:
     cipd_def = CreateCIPDDefinition(target_arch, out_dir)
     f.write(cipd_def)
-  return temp_file
+  return yaml_file
 
 
 def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
-  _packaging_dir = os.path.abspath(os.path.join(out_dir, os.pardir))
+  _packaging_dir = GetPackagingDir(out_dir)
   if upload and IsLinux():
     command = [
         'cipd', 'create', '-pkg-def', cipd_yaml, '-ref', 'latest', '-tag',
