@@ -22,6 +22,24 @@
 
 @end
 
+@interface MultiplePlatformViewsTest : GoldenPlatformViewTests
+
+@end
+
+@implementation MultiplePlatformViewsTest
+
+- (instancetype)initWithInvocation:(NSInvocation*)invocation {
+  PlatformViewGoldenTestManager* manager =
+      [[PlatformViewGoldenTestManager alloc] initWithLaunchArg:@"--platform-view-multiple"];
+  return [super initWithManager:manager invocation:invocation];
+}
+
+- (void)testPlatformView {
+  [self checkGolden];
+}
+
+@end
+
 // Clip Rect Tests
 @interface PlatformViewMutationClipRectTests : GoldenPlatformViewTests
 

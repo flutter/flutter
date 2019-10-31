@@ -34,7 +34,7 @@ class PlatformViewScenario extends Scenario with _BasePlatformViewScenarioMixin 
   PlatformViewScenario(Window window, String text, {int id = 0})
       : assert(window != null),
         super(window) {
-    constructScenario(window, text, id);
+    createPlatformView(window, text, id);
   }
 
   @override
@@ -47,13 +47,45 @@ class PlatformViewScenario extends Scenario with _BasePlatformViewScenarioMixin 
   }
 }
 
+/// Builds a scene with 2 platform views.
+class MultiPlatformViewScenario extends Scenario with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformView scenario.
+  ///
+  /// The [window] parameter must not be null.
+  MultiPlatformViewScenario(Window window, {this.firstId, this.secondId})
+      : assert(window != null),
+        super(window) {
+    createPlatformView(window, 'platform view 1', firstId);
+    createPlatformView(window, 'platform view 2', secondId);
+  }
+
+  /// The platform view identifier to use for the first platform view.
+  final int firstId;
+
+  /// The platform view identifier to use for the second platform view.
+  final int secondId;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+
+    builder.pushOffset(0, 0);
+
+    builder.pushOffset(0, 600);
+    _addPlatformViewtoScene(builder, firstId, 500, 500);
+    builder.pop();
+
+    finishBuilderByAddingPlatformViewAndPicture(builder, secondId);
+  }
+}
+
 /// Platform view with clip rect.
 class PlatformViewClipRectScenario extends Scenario with _BasePlatformViewScenarioMixin {
   /// Constructs a platform view with clip rect scenario.
   PlatformViewClipRectScenario(Window window, String text, {int id = 0})
       : assert(window != null),
         super(window) {
-    constructScenario(window, text, id);
+    createPlatformView(window, text, id);
   }
 
   @override
@@ -165,7 +197,7 @@ mixin _BasePlatformViewScenarioMixin on Scenario {
   /// It prepare a TextPlatformView so it can be added to the SceneBuilder in `onBeginFrame`.
   /// Call this method in the constructor of the platform view related scenarios
   /// to perform necessary set up.
-  void constructScenario(Window window, String text, int id) {
+  void createPlatformView(Window window, String text, int id) {
     const int _valueInt32 = 3;
     const int _valueFloat64 = 6;
     const int _valueString = 7;
@@ -227,15 +259,19 @@ mixin _BasePlatformViewScenarioMixin on Scenario {
     );
   }
 
-  // Add a platform view and a picture to the scene, then finish the `sceneBuilder`.
-  void finishBuilderByAddingPlatformViewAndPicture(SceneBuilder sceneBuilder, int viewId) {
+  void _addPlatformViewtoScene(SceneBuilder sceneBuilder, int viewId, double width, double height) {
     if (Platform.isIOS) {
-      sceneBuilder.addPlatformView(viewId, width: 500, height: 500);
+      sceneBuilder.addPlatformView(viewId, width: width, height: height);
     } else if (Platform.isAndroid && _textureId != null) {
-      sceneBuilder.addTexture(_textureId, offset: const Offset(150, 300), width: 500, height: 500);
+      sceneBuilder.addTexture(_textureId, offset: const Offset(150, 300), width: width, height: height);
     } else {
       throw UnsupportedError('Platform ${Platform.operatingSystem} is not supported');
     }
+  }
+
+  // Add a platform view and a picture to the scene, then finish the `sceneBuilder`.
+  void finishBuilderByAddingPlatformViewAndPicture(SceneBuilder sceneBuilder, int viewId) {
+    _addPlatformViewtoScene(sceneBuilder, viewId, 500, 500);
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     canvas.drawCircle(
