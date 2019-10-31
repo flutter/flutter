@@ -102,7 +102,7 @@ void main() {
       .handle(Request('GET', Uri.parse('http://localhost:8080/assets/foo.js')));
 
     expect(response.headers, <String, String>{
-      'Content-Type': 'text/javascript',
+      'Content-Type': 'application/javascript',
       'content-length': '18',
     });
   }));
@@ -117,7 +117,7 @@ void main() {
 
     expect(response.headers, <String, String>{
       'Content-Type': 'text/html',
-      'content-length': '29',
+      'content-length': '28',
     });
   }));
 }
