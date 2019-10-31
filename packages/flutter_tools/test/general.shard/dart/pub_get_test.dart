@@ -341,7 +341,7 @@ void main() {
       expect(testLogger.errorText, startsWith(
         'Warning: File "/pubspec.yaml" was created in the future. Optimizations that rely on '
         'comparing time stamps will be unreliable. Check your system clock for accuracy.\n'
-        'The timestamp was: 2000-01-01 00:00:00.000\n'
+        'The timestamp was:'
       ));
       testLogger.clear();
     }, overrides: <Type, Generator>{
