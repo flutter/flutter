@@ -778,9 +778,6 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--target", targetPath
                 args "--output-dir", "${intermediateDir}"
                 args "--target-platform", "${targetPlatform}"
-                if (trackWidgetCreation) {
-                    args "--track-widget-creation"
-                }
                 if (extraFrontEndOptions != null) {
                     args "--extra-front-end-options", "${extraFrontEndOptions}"
                 }

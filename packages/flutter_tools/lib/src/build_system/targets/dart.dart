@@ -207,19 +207,33 @@ class KernelSnapshot extends Target {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'kernel_snapshot');
     }
+    if (environment.defines[kTargetPlatform] == null) {
+      throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
+    }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
     final String targetFileAbsolute = fs.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
+    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+
+    TargetModel targetModel = TargetModel.flutter;
+    if (targetPlatform == TargetPlatform.fuchsia_x64 ||
+        targetPlatform == TargetPlatform.fuchsia_arm64) {
+      targetModel = TargetModel.flutterRunner;
+    }
 
     final CompilerOutput output = await compiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+      sdkRoot: artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: targetPlatform,
+        mode: buildMode,
+      ),
       aot: buildMode != BuildMode.debug,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
-      targetModel: TargetModel.flutter,
+      targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
@@ -321,5 +335,54 @@ class AotElfRelease extends AotElfBase {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+  ];
+}
+
+/// Copies the prebuilt flutter aot bundle.
+// This is a one-off rule for implementing build aot in terms of assemble.
+abstract class CopyFlutterAotBundle extends Target {
+  const CopyFlutterAotBundle();
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.so'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/app.so'),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final File outputFile = environment.outputDir.childFile('app.so');
+    if (!outputFile.parent.existsSync()) {
+      outputFile.parent.createSync(recursive: true);
+    }
+    environment.buildDir.childFile('app.so').copySync(outputFile.path);
+  }
+}
+
+class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
+  const ProfileCopyFlutterAotBundle();
+
+  @override
+  String get name => 'profile_copy_aot_flutter_bundle';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfProfile(),
+  ];
+}
+
+class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
+  const ReleaseCopyFlutterAotBundle();
+
+  @override
+  String get name => 'release_copy_aot_flutter_bundle';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfRelease(),
   ];
 }

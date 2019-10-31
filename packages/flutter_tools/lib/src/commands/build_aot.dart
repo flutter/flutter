@@ -14,10 +14,13 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/targets/dart.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -74,12 +77,22 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
   Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
+    final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
+    final BuildMode buildMode = getBuildMode();
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
     }
+    if (_canUseAssemble(platform)) {
+      await _buildWithAssemble(
+        targetFile: findMainDartFile(targetFile),
+        outputDir: outputPath,
+        targetPlatform: platform,
+        buildMode: buildMode,
+      );
+      return null;
+    }
 
     final bool bitcode = argResults['bitcode'];
-    final BuildMode buildMode = getBuildMode();
 
     if (bitcode) {
       if (platform != TargetPlatform.ios) {
@@ -96,7 +109,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         timeout: timeoutConfiguration.slowOperation,
       );
     }
-    final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
     final bool reportTimings = argResults['report-timings'];
     try {
       String mainPath = findMainDartFile(targetFile);
@@ -199,6 +211,78 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       printStatus(builtMessage);
     }
     return null;
+  }
+
+  bool _canUseAssemble(TargetPlatform targetPlatform) {
+    if (argResults.wasParsed(FlutterOptions.kExtraFrontEndOptions) ||
+        argResults.wasParsed(FlutterOptions.kExtraGenSnapshotOptions)) {
+      return false;
+    }
+    switch (targetPlatform) {
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.darwin_x64:
+        return true;
+      case TargetPlatform.android_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      default:
+        return false;
+    }
+  }
+
+  Future<void> _buildWithAssemble({
+    TargetPlatform targetPlatform,
+    BuildMode buildMode,
+    String targetFile,
+    String outputDir,
+  }) async {
+    Status status;
+    if (!argResults['quiet']) {
+      final String typeName = artifacts.getEngineType(targetPlatform, buildMode);
+      status = logger.startProgress(
+        'Building AOT snapshot in ${getFriendlyModeName(getBuildMode())} mode ($typeName)...',
+        timeout: timeoutConfiguration.slowOperation,
+      );
+    }
+    final FlutterProject flutterProject = FlutterProject.current();
+    // Currently this only supports android, per the check above.
+    final Target target = buildMode == BuildMode.profile
+      ? const ProfileCopyFlutterAotBundle()
+      : const ReleaseCopyFlutterAotBundle();
+
+    final BuildResult result = await buildSystem.build(target, Environment(
+      projectDir: flutterProject.directory,
+      outputDir: fs.directory(outputDir),
+      buildDir: flutterProject.directory
+        .childDirectory('.dart_tool')
+        .childDirectory('flutter_build'),
+      defines: <String, String>{
+        kBuildMode: getNameForBuildMode(buildMode),
+        kTargetPlatform: getNameForTargetPlatform(targetPlatform),
+        kTargetFile: targetFile,
+      }
+    ));
+    status?.stop();
+    if (!result.success) {
+      for (ExceptionMeasurement measurement in result.exceptions.values) {
+        printError(measurement.exception.toString());
+        printError(measurement.stackTrace.toString());
+      }
+      throwToolExit('Failed to build aot.');
+    }
+    final String builtMessage = 'Built to $outputDir${fs.path.separator}.';
+    if (argResults['quiet']) {
+      printTrace(builtMessage);
+    } else {
+      printStatus(builtMessage);
+    }
   }
 }
 
