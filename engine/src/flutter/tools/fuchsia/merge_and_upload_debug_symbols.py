@@ -97,7 +97,9 @@ def main():
   for symbol_dir in symbol_dirs:
     assert os.path.exists(symbol_dir) and os.path.isdir(symbol_dir)
 
-  out_dir = NormalizeDirPathForRsync(args.out_dir)
+  arch = args.target_arch
+  out_dir = NormalizeDirPathForRsync(
+      os.path.join(args.out_dir, 'flutter-fuchsia-debug-symbols-%s' % arch))
   if os.path.exists(out_dir):
     print 'Directory: %s is not empty, deleting it.' % out_dir
     shutil.rmtree(out_dir)
@@ -108,9 +110,8 @@ def main():
         ['rsync', '--recursive',
          NormalizeDirPathForRsync(symbol_dir), out_dir])
 
-  cipd_def = WriteCIPDDefinition(args.target_arch, out_dir)
-  ProcessCIPDPackage(args.upload, cipd_def, args.engine_version, out_dir,
-                     args.target_arch)
+  cipd_def = WriteCIPDDefinition(arch, out_dir)
+  ProcessCIPDPackage(args.upload, cipd_def, args.engine_version, out_dir, arch)
   return 0
 
 
