@@ -1137,7 +1137,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 56.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
   });
-  testWidgets("ListTile doesn't accept focus when disabled", (WidgetTester tester) async {
+  testWidgets('ListTile only accepts focus when enabled', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
     await tester.pumpWidget(

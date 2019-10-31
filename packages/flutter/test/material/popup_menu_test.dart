@@ -175,7 +175,7 @@ void main() {
     expect(onCanceledCalled, isFalse);
   });
 
-  testWidgets('disabled PopupMenuButton is not focusabled', (WidgetTester tester) async {
+  testWidgets('disabled PopupMenuButton is not focusable', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final GlobalKey childKey = GlobalKey();
     bool itemBuilderCalled = false;
@@ -214,7 +214,7 @@ void main() {
     expect(onSelectedCalled, isFalse);
   });
 
-  testWidgets('disabled PopupMenuItem is not focusabled', (WidgetTester tester) async {
+  testWidgets('PopupMenuItem is only focusable when enabled', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final GlobalKey childKey = GlobalKey();
     bool itemBuilderCalled = false;
@@ -237,21 +237,22 @@ void main() {
                   ];
                 },
               ),
-              Container(),
             ],
           ),
         ),
       ),
     );
 
-    // Open the popup.
+    // Open the popup to build and show the menu contents.
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
     final FocusNode childNode = Focus.of(childKey.currentContext, nullOk: true);
+    // Now that the contents are shown, request focus on the child text.
     childNode.requestFocus();
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isTrue);
 
+    // Make sure that the focus went where we expected it to.
     expect(childNode.hasPrimaryFocus, isTrue);
     itemBuilderCalled = false;
 
@@ -264,7 +265,6 @@ void main() {
         home: Material(
           child: Column(
             children: <Widget>[
-              Container(),
               PopupMenuButton<int>(
                 key: popupButtonKey,
                 itemBuilder: (BuildContext context) {
@@ -284,7 +284,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    // Open the popup again to rebuild the contents.
+    // Open the popup again to rebuild the contents with enabled == false.
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
 
