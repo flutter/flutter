@@ -65,7 +65,7 @@ void main() {
     OutputPreferences: () => OutputPreferences(showColor: false),
     Platform: kNoColorTerminalPlatform,
   });
-  
+
   testUsingContext('passes correct AOT config to kernel compiler in aot/profile mode', () async {
     when(mockFrontendServer.stdout)
       .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
