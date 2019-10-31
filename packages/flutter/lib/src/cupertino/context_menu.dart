@@ -222,7 +222,7 @@ class CupertinoContextMenu extends StatefulWidget {
 
 class _CupertinoContextMenuState extends State<CupertinoContextMenu> with TickerProviderStateMixin {
   final GlobalKey _childGlobalKey = GlobalKey();
-  double _childOpacity = 1.0;
+  bool _childHidden = false;
   // Animates the child while it's opening.
   AnimationController _openController;
   Rect _decoyChildEndRect;
@@ -269,7 +269,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   // Push the new route and open the CupertinoContextMenu overlay.
   void _openContextMenu() {
     setState(() {
-      _childOpacity = 0.0;
+      _childHidden = true;
     });
 
     _route = _ContextMenuRoute<void>(
@@ -297,7 +297,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       case AnimationStatus.dismissed:
         if (_route == null) {
           setState(() {
-            _childOpacity = 1.0;
+            _childHidden = false;
           });
         }
         _lastOverlayEntry?.remove();
@@ -306,7 +306,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
       case AnimationStatus.completed:
         setState(() {
-          _childOpacity = 0.0;
+          _childHidden = true;
         });
         _openContextMenu();
         // Keep the decoy on the screen for one extra frame. We have to do this
@@ -332,7 +332,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       return;
     }
     setState(() {
-      _childOpacity = 1.0;
+      _childHidden = false;
     });
     _route.animation.removeStatusListener(_routeAnimationStatusListener);
     _route = null;
@@ -358,7 +358,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   void _onTapDown(TapDownDetails details) {
     setState(() {
-      _childOpacity = 0.0;
+      _childHidden = true;
     });
 
     final Rect childRect = _getRect(_childGlobalKey);
@@ -398,10 +398,13 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTap: _onTap,
-      child: Opacity(
-        opacity: _childOpacity,
-        key: _childGlobalKey,
-        child: widget.child,
+      child: TickerMode(
+        enabled: !_childHidden,
+        child: Offstage(
+          key: _childGlobalKey,
+          offstage: _childHidden,
+          child: widget.child,
+        ),
       ),
     );
   }
