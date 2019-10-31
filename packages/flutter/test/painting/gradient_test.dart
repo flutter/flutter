@@ -806,7 +806,10 @@ void main() {
           ),
         ),
       ));
-      await expectLater(find.byKey(painterKey), matchesGoldenFile(goldenName));
+      await expectLater(
+        find.byKey(painterKey),
+        matchesGoldenFile(goldenName),
+      );
     }
 
     testWidgets('Gradients - 45 degrees', (WidgetTester tester) async {
