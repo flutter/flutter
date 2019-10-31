@@ -146,23 +146,32 @@ class VMService {
       // currently in the same way as hot reload, it leaves the tool free
       // to change to a more efficient implementation in the future.
       _peer.registerMethod('reloadMethod', (rpc.Parameters params) async {
-        final String isolateId = params['isolateId'].value;
-        final String libraryId = params['library'].value;
-        final String classId = params['class'].value;
-        final String methodId = params['method'].value;
-        final String methodBody = params['methodBody'].value;
+        final Map<dynamic, dynamic> paramMap = params.asMap;
+        final String isolateId = paramMap['isolateId'];
+        final String libraryId = paramMap['library'];
+        final String classId = paramMap['class'];
+        final String methodId = paramMap['method'];
+        final String methodBody = paramMap['methodBody'];
+        final int line = paramMap['line'];
+        final int column = paramMap['column'];
 
         if (libraryId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'libraryId\': $libraryId');
+          throw rpc.RpcException.invalidParams('Invalid \'library\': $libraryId');
         }
         if (classId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'classId\': $classId');
+          throw rpc.RpcException.invalidParams('Invalid \'class\': $classId');
         }
         if (methodId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'methodId\': $methodId');
+          throw rpc.RpcException.invalidParams('Invalid \'method\': $methodId');
         }
         if (methodBody.isEmpty) {
           throw rpc.RpcException.invalidParams('Invalid \'methodBody\': $methodBody');
+        }
+        if (line == null) {
+           throw rpc.RpcException.invalidParams('Invalid \'line\': $line');
+        }
+        if (column == null) {
+           throw rpc.RpcException.invalidParams('Invalid \'column\': $column');
         }
 
         printTrace('reloadMethod not yet supported, falling back to hot reload');
