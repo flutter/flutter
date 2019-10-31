@@ -11,7 +11,6 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 @interface GoldenPlatformViewTests ()
 
 @property(nonatomic, copy) NSString* goldenName;
-@property(nonatomic, strong) XCUIApplication* application;
 
 @property(nonatomic, strong) PlatformViewGoldenTestManager* manager;
 

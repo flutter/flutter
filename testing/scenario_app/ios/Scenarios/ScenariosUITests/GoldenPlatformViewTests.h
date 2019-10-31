@@ -17,6 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 // This base class doesn't run any test case on its own.
 @interface GoldenPlatformViewTests : XCTestCase
 
+@property(nonatomic, strong) XCUIApplication* application;
+
 // Initialize with a `PlatformViewGoldenTestManager`.
 - (instancetype)initWithManager:(PlatformViewGoldenTestManager*)manager
                      invocation:(NSInvocation*)invocation;

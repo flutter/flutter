@@ -24,6 +24,8 @@ NSDictionary* launchArgsMap;
       launchArgsMap = @{
         @"--platform-view" : @"platform_view",
         @"--platform-view-multiple" : @"platform_view_multiple",
+        @"--platform-view-multiple-background-foreground" :
+            @"platform_view_multiple_background_foreground",
         @"--platform-view-cliprect" : @"platform_view_cliprect",
         @"--platform-view-cliprrect" : @"platform_view_cliprrect",
         @"--platform-view-clippath" : @"platform_view_clippath",
