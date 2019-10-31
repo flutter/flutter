@@ -795,7 +795,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   void reset() {
     _server?.stdin?.writeln('reset');
     printTrace('<- reset');
-
   }
 
   String _mapFilename(String filename, PackageUriMapper packageUriMapper) {
