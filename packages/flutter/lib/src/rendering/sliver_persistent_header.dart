@@ -294,13 +294,15 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   /// This is used by [performLayout].
   @protected
   double updateGeometry() {
+    print(constraints.flexExtent);
     final double maxExtent = this.maxExtent;
     final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
+    final double paintExtent = math.min(childExtent, constraints.remainingPaintExtent) + constraints.flexExtent;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
-      paintExtent: math.min(childExtent, constraints.remainingPaintExtent) + constraints.flexExtent,
-      layoutExtent: layoutExtent,
+      paintExtent: paintExtent,
+      layoutExtent: math.min(layoutExtent, paintExtent),
       maxPaintExtent: maxExtent,
       maxScrollObstructionExtent: minExtent,
       cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,

@@ -547,6 +547,36 @@ class SliverGeometry extends Diagnosticable {
        cacheExtent = cacheExtent ?? layoutExtent ?? paintExtent,
        visible = visible ?? paintExtent > 0.0;
 
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  SliverGeometry copyWith({
+    double scrollExtent,
+    double paintExtent,
+    double paintOrigin,
+    double layoutExtent,
+    double maxPaintExtent,
+    double maxScrollObstructionExtent,
+    double hitTestExtent,
+    bool visible,
+    bool hasVisualOverflow,
+    double scrollOffsetCorrection,
+    double cacheExtent,
+  }) {
+    return SliverGeometry(
+      scrollExtent: scrollExtent ?? this.scrollExtent,
+      paintExtent: paintExtent ?? this.paintExtent,
+      paintOrigin: paintOrigin ?? this.paintOrigin,
+      layoutExtent: layoutExtent ?? this.layoutExtent,
+      maxPaintExtent: maxPaintExtent ?? this.maxPaintExtent,
+      maxScrollObstructionExtent: maxScrollObstructionExtent ?? this.maxScrollObstructionExtent,
+      hitTestExtent: hitTestExtent ?? this.hitTestExtent,
+      visible: visible ?? this.visible,
+      hasVisualOverflow: hasVisualOverflow ?? this.hasVisualOverflow,
+      scrollOffsetCorrection: scrollOffsetCorrection ?? this.scrollOffsetCorrection,
+      cacheExtent: cacheExtent ?? this.cacheExtent,
+    );
+  }
+
   /// A sliver that occupies no space at all.
   static const SliverGeometry zero = SliverGeometry();
 
