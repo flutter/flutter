@@ -10,9 +10,13 @@ import 'package:path/path.dart' as path;
 
 const String defaultFileTemplate = '''
 import 'dart:async';
-import 'package:intl/intl.dart';
+
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
+
 import 'messages_all.dart';
+
 /// Callers can lookup localized strings with an instance of @className returned
 /// by `@className.of(context)`.
 ///
@@ -22,11 +26,7 @@ import 'messages_all.dart';
 ///
 /// ```
 /// return MaterialApp(
-///   localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-///     @className.delegate(),
-///     GlobalMaterialLocalizations.delegate,
-///     GlobalWidgetsLocalizations.delegate,
-///   ],
+///   localizationsDelegates: @className.localizationsDelegates,
 ///   supportedLocales: const <Locale>[
 ///     Locale('en', 'US'),
 ///     Locale('es', 'ES'),
@@ -36,7 +36,9 @@ import 'messages_all.dart';
 /// ```
 class @className {
   @className(Locale locale) : _localeName = locale.toString();
+
   final String _localeName;
+
   static Future<@className> load(Locale locale) {
     return initializeMessages(locale.toString())
       .then<@className>((void _) => @className(locale));
@@ -44,15 +46,37 @@ class @className {
   static @className of(BuildContext context) {
     return Localizations.of<@className>(context, @className);
   }
+
   static const LocalizationsDelegate<@className> delegate = _@classNameDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  static const List<LocalizationsDelegate> localizationsDelegates = [
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
+
+  /// A list of this localizations delegate's supported locales.
+  @supportedLocales
+
 @classMethods
 }
+
 class _@classNameDelegate extends LocalizationsDelegate<@className> {
   const _@classNameDelegate();
+
   @override
   Future<@className> load(Locale locale) => @className.load(locale);
+
   @override
   bool isSupported(Locale locale) => [@supportedLanguageCodes].contains(locale.languageCode);
+
   @override
   bool shouldReload(_@classNameDelegate old) => false;
 }
@@ -75,7 +99,6 @@ const String pluralMethodTemplate = '''
     );
   }
 ''';
-
 
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
   final Map<String, dynamic> attributesMap = bundle['@$key'];
@@ -166,6 +189,12 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 
+String genSupportedLocaleProperty(Set<String> supportedLocales) {
+  const String prefix = 'static const List<Locale> supportedLocales = <Locale>[ \n    Locale(''';
+  const String suffix = '),\n  ];';
+  return prefix + supportedLocales.toList().join('),\n    Locale(') + suffix;
+}
+
 Future<void> main(List<String> args) async {
   final Directory l10nDirectory = Directory(path.join('lib', 'l10n'));
   final File inputArbFile = File(path.join(l10nDirectory.path, 'demo_en.arb'));
@@ -203,6 +232,7 @@ Future<void> main(List<String> args) async {
     defaultFileTemplate
       .replaceAll('@className', stringsClassName)
       .replaceAll('@classMethods', classMethods.join('\n'))
+      .replaceAll('@supportedLocales', genSupportedLocaleProperty(supportedLanguageCodes))
       .replaceAll('@supportedLanguageCodes', supportedLanguageCodes.toList().join(', '))
   );
 
