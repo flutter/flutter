@@ -15,6 +15,7 @@
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
+#include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
@@ -278,7 +279,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          Settings settings,
          std::unique_ptr<Animator> animator,
          fml::WeakPtr<IOManager> io_manager,
-         fml::RefPtr<SkiaUnrefQueue> unref_queue);
+         fml::RefPtr<SkiaUnrefQueue> unref_queue,
+         fml::WeakPtr<SnapshotDelegate> snapshot_delegate);
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the engine engine. Called by the shell on the UI task

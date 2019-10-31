@@ -34,6 +34,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     TaskRunners task_runners,
     std::unique_ptr<Window> window,
+    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
@@ -56,17 +57,18 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
   // being prepared to run.
   auto root_embedder_data = std::make_unique<std::shared_ptr<DartIsolate>>(
       std::shared_ptr<DartIsolate>(new DartIsolate(
-          settings,                     // settings
-          std::move(isolate_snapshot),  // isolate snapshot
-          task_runners,                 // task runners
-          std::move(io_manager),        // IO manager
-          std::move(unref_queue),       // Skia unref queue
-          std::move(image_decoder),     // Image Decoder
-          advisory_script_uri,          // advisory URI
-          advisory_script_entrypoint,   // advisory entrypoint
-          nullptr,                      // child isolate preparer
-          isolate_create_callback,      // isolate create callback
-          isolate_shutdown_callback     // isolate shutdown callback
+          settings,                      // settings
+          std::move(isolate_snapshot),   // isolate snapshot
+          task_runners,                  // task runners
+          std::move(snapshot_delegate),  // snapshot delegate
+          std::move(io_manager),         // IO manager
+          std::move(unref_queue),        // Skia unref queue
+          std::move(image_decoder),      // Image Decoder
+          advisory_script_uri,           // advisory URI
+          advisory_script_entrypoint,    // advisory entrypoint
+          nullptr,                       // child isolate preparer
+          isolate_create_callback,       // isolate create callback
+          isolate_shutdown_callback      // isolate shutdown callback
           )));
 
   std::tie(vm_isolate, embedder_isolate) = CreateDartVMAndEmbedderObjectPair(
@@ -103,6 +105,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
 DartIsolate::DartIsolate(const Settings& settings,
                          fml::RefPtr<const DartSnapshot> isolate_snapshot,
                          TaskRunners task_runners,
+                         fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                          fml::WeakPtr<IOManager> io_manager,
                          fml::RefPtr<SkiaUnrefQueue> unref_queue,
                          fml::WeakPtr<ImageDecoder> image_decoder,
@@ -114,6 +117,7 @@ DartIsolate::DartIsolate(const Settings& settings,
     : UIDartState(std::move(task_runners),
                   settings.task_observer_add,
                   settings.task_observer_remove,
+                  std::move(snapshot_delegate),
                   std::move(io_manager),
                   std::move(unref_queue),
                   std::move(image_decoder),
@@ -594,6 +598,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           vm_data->GetIsolateSnapshot(),  // isolate snapshot
           null_task_runners,              // task runners
           nullptr,                        // window
+          {},                             // snapshot delegate
           {},                             // IO Manager
           {},                             // Skia unref queue
           {},                             // Image Decoder
@@ -706,6 +711,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
             (*raw_embedder_isolate)->GetSettings(),         // settings
             (*raw_embedder_isolate)->GetIsolateSnapshot(),  // isolate_snapshot
             null_task_runners,                              // task_runners
+            fml::WeakPtr<SnapshotDelegate>{},               // snapshot_delegate
             fml::WeakPtr<IOManager>{},                      // io_manager
             fml::RefPtr<SkiaUnrefQueue>{},                  // unref_queue
             fml::WeakPtr<ImageDecoder>{},                   // image_decoder

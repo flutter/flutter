@@ -43,7 +43,8 @@ Engine::Engine(Delegate& delegate,
                Settings settings,
                std::unique_ptr<Animator> animator,
                fml::WeakPtr<IOManager> io_manager,
-               fml::RefPtr<SkiaUnrefQueue> unref_queue)
+               fml::RefPtr<SkiaUnrefQueue> unref_queue,
+               fml::WeakPtr<SnapshotDelegate> snapshot_delegate)
     : delegate_(delegate),
       settings_(std::move(settings)),
       animator_(std::move(animator)),
@@ -58,10 +59,11 @@ Engine::Engine(Delegate& delegate,
   // object as its delegate. The delegate may be called in the constructor and
   // we want to be fully initilazed by that point.
   runtime_controller_ = std::make_unique<RuntimeController>(
-      *this,                                 // runtime delegate
-      &vm,                                   // VM
-      std::move(isolate_snapshot),           // isolate snapshot
-      task_runners_,                         // task runners
+      *this,                        // runtime delegate
+      &vm,                          // VM
+      std::move(isolate_snapshot),  // isolate snapshot
+      task_runners_,                // task runners
+      std::move(snapshot_delegate),
       std::move(io_manager),                 // io manager
       std::move(unref_queue),                // Skia unref queue
       image_decoder_.GetWeakPtr(),           // image decoder
