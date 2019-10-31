@@ -1,13 +1,12 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_system/build_system.dart';
+import '../build_system/depfile.dart';
 import '../build_system/targets/assets.dart';
 import '../build_system/targets/dart.dart';
 import '../build_system/targets/ios.dart';
