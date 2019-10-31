@@ -78,4 +78,46 @@ void main() {
 
     expect(response.statusCode, 404);
   }));
+
+  test('release asset server serves correct mime type and content length for png', () => testbed.run(() async {
+    assetServer = ReleaseAssetServer();
+    fs.file(fs.path.join('build', 'web', 'assets', 'foo.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/assets/foo.png')));
+
+    expect(response.headers, <String, String>{
+      'Content-Type': 'image/png',
+      'content-length': '64',
+    });
+  }));
+
+  test('release asset server serves correct mime type and content length for JavaScript', () => testbed.run(() async {
+    assetServer = ReleaseAssetServer();
+    fs.file(fs.path.join('build', 'web', 'assets', 'foo.js'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('function main() {}');
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/assets/foo.js')));
+
+    expect(response.headers, <String, String>{
+      'Content-Type': 'application/javascript',
+      'content-length': '18',
+    });
+  }));
+
+  test('release asset server serves correct mime type and content length for html', () => testbed.run(() async {
+    assetServer = ReleaseAssetServer();
+    fs.file(fs.path.join('build', 'web', 'assets', 'foo.html'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('<!doctype html><html></html>');
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/assets/foo.html')));
+
+    expect(response.headers, <String, String>{
+      'Content-Type': 'text/html',
+      'content-length': '28',
+    });
+  }));
 }
