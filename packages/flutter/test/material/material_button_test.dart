@@ -133,7 +133,7 @@ void main() {
       ),
     );
 
-    focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
@@ -174,7 +174,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     // Base elevation
     Material material = tester.widget<Material>(rawButtonMaterial);

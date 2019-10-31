@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'binding.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 

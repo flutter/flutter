@@ -577,7 +577,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   bool get hasPrimaryFocus => _manager?.primaryFocus == this;
 
   /// Returns the [FocusHighlightMode] that is currently in effect for this node.
-  FocusHighlightMode get highlightMode => focusManager.highlightMode;
+  FocusHighlightMode get highlightMode => FocusManager.instance.highlightMode;
 
   /// Returns the nearest enclosing scope node above this node, including
   /// this node, if it's a scope.
@@ -1147,6 +1147,10 @@ class FocusManager with DiagnosticableTreeMixin {
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
+  /// Provides convenient access to the current [FocusManager] singleton from
+  /// the [WidgetsBinding] instance.
+  static FocusManager get instance => WidgetsBinding.instance.focusManager;
+
   bool _lastInteractionWasTouch = true;
 
   /// Sets the strategy by which [highlightMode] is determined.
@@ -1424,10 +1428,6 @@ class FocusManager with DiagnosticableTreeMixin {
   }
 }
 
-/// Provides convenient access to the current [FocusManager] from the
-/// [WidgetsBinding] instance.
-FocusManager get focusManager => WidgetsBinding.instance.focusManager;
-
 /// Provides convenient access to the current [FocusManager.primaryFocus] from the
 /// [WidgetsBinding] instance.
 FocusNode get primaryFocus => WidgetsBinding.instance.focusManager.primaryFocus;
@@ -1440,7 +1440,7 @@ String debugDescribeFocusTree() {
   assert(WidgetsBinding.instance != null);
   String result;
   assert(() {
-    result = focusManager.toStringDeep();
+    result = FocusManager.instance.toStringDeep();
     return true;
   }());
   return result ?? '';

@@ -9,7 +9,6 @@ import 'package:flutter/painting.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'binding.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
@@ -619,7 +618,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     // If we still didn't find any candidate, use the current node as a
     // fallback.
     candidate ??= currentNode;
-    candidate ??= focusManager.rootScope;
+    candidate ??= FocusManager.instance.rootScope;
     return candidate;
   }
 
