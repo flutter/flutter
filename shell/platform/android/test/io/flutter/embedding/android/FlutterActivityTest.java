@@ -139,7 +139,8 @@ public class FlutterActivityTest {
           context,
           mock(FlutterLoader.class),
           flutterJNI,
-          new String[]{}
+          new String[]{},
+          true
         );
     }
   }
