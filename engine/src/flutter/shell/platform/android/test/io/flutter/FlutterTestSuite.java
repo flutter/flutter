@@ -21,6 +21,7 @@ import io.flutter.plugin.common.StandardMessageCodecTest;
 import io.flutter.plugin.editing.TextInputPluginTest;
 import io.flutter.plugin.platform.SingleViewPresentationTest;
 import io.flutter.util.PreconditionsTest;
+import test.io.flutter.embedding.engine.FlutterEngineTest;
 import test.io.flutter.embedding.engine.dart.DartExecutorTest;
 
 @RunWith(Suite.class)
@@ -30,6 +31,7 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
     FlutterActivityTest.class,
     FlutterAndroidComponentTest.class,
     FlutterEngineCacheTest.class,
+    FlutterEngineTest.class,
     FlutterFragmentTest.class,
     FlutterJNITest.class,
     FlutterRendererTest.class,
