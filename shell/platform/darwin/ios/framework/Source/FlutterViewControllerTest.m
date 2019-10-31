@@ -45,6 +45,10 @@ typedef enum UIAccessibilityContrast : NSInteger {
 @end
 #endif
 
+@interface FlutterViewController (Tests)
+- (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
+@end
+
 @implementation FlutterViewControllerTest
 
 - (void)testBinaryMessenger {
@@ -252,6 +256,179 @@ typedef enum UIAccessibilityContrast : NSInteger {
   [mockTraitCollection stopMocking];
 }
 
+- (void)testPerformOrientationUpdateForcesOrientationChange {
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortrait
+                          currentOrientation:UIInterfaceOrientationLandscapeLeft
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationPortrait];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortrait
+                          currentOrientation:UIInterfaceOrientationLandscapeRight
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationPortrait];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortrait
+                          currentOrientation:UIInterfaceOrientationPortraitUpsideDown
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationPortrait];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortraitUpsideDown
+                          currentOrientation:UIInterfaceOrientationLandscapeLeft
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationPortraitUpsideDown];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortraitUpsideDown
+                          currentOrientation:UIInterfaceOrientationLandscapeRight
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationPortraitUpsideDown];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortraitUpsideDown
+                          currentOrientation:UIInterfaceOrientationPortrait
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationPortraitUpsideDown];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscape
+                          currentOrientation:UIInterfaceOrientationPortrait
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationLandscapeLeft];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscape
+                          currentOrientation:UIInterfaceOrientationPortraitUpsideDown
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationLandscapeLeft];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeLeft
+                          currentOrientation:UIInterfaceOrientationPortrait
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationLandscapeLeft];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeLeft
+                          currentOrientation:UIInterfaceOrientationLandscapeRight
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationLandscapeLeft];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeLeft
+                          currentOrientation:UIInterfaceOrientationPortraitUpsideDown
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationLandscapeLeft];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeRight
+                          currentOrientation:UIInterfaceOrientationPortrait
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationLandscapeRight];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeRight
+                          currentOrientation:UIInterfaceOrientationLandscapeLeft
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationLandscapeRight];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeRight
+                          currentOrientation:UIInterfaceOrientationPortraitUpsideDown
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationLandscapeRight];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAllButUpsideDown
+                          currentOrientation:UIInterfaceOrientationPortraitUpsideDown
+                        didChangeOrientation:YES
+                        resultingOrientation:UIInterfaceOrientationPortrait];
+}
+
+- (void)testPerformOrientationUpdateDoesNotForceOrientationChange {
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAll
+                          currentOrientation:UIInterfaceOrientationPortrait
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAll
+                          currentOrientation:UIInterfaceOrientationPortraitUpsideDown
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAll
+                          currentOrientation:UIInterfaceOrientationLandscapeLeft
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAll
+                          currentOrientation:UIInterfaceOrientationLandscapeRight
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAllButUpsideDown
+                          currentOrientation:UIInterfaceOrientationPortrait
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAllButUpsideDown
+                          currentOrientation:UIInterfaceOrientationLandscapeLeft
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAllButUpsideDown
+                          currentOrientation:UIInterfaceOrientationLandscapeRight
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortrait
+                          currentOrientation:UIInterfaceOrientationPortrait
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortraitUpsideDown
+                          currentOrientation:UIInterfaceOrientationPortraitUpsideDown
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscape
+                          currentOrientation:UIInterfaceOrientationLandscapeLeft
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscape
+                          currentOrientation:UIInterfaceOrientationLandscapeRight
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeLeft
+                          currentOrientation:UIInterfaceOrientationLandscapeLeft
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+
+  [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeRight
+                          currentOrientation:UIInterfaceOrientationLandscapeRight
+                        didChangeOrientation:NO
+                        resultingOrientation:0];
+}
+
+// Perform an orientation update test that fails when the expected outcome
+// for an orientation update is not met
+- (void)orientationTestWithOrientationUpdate:(UIInterfaceOrientationMask)mask
+                          currentOrientation:(UIInterfaceOrientation)currentOrientation
+                        didChangeOrientation:(BOOL)didChange
+                        resultingOrientation:(UIInterfaceOrientation)resultingOrientation {
+  id engine = OCMClassMock([FlutterEngine class]);
+
+  id deviceMock = OCMPartialMock([UIDevice currentDevice]);
+  if (!didChange) {
+    OCMReject([deviceMock setValue:[OCMArg any] forKey:@"orientation"]);
+  } else {
+    OCMExpect([deviceMock setValue:@(resultingOrientation) forKey:@"orientation"]);
+  }
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
+
+  [realVC performOrientationUpdate:mask];
+  OCMVerifyAll(deviceMock);
+  [engine stopMocking];
+  [deviceMock stopMocking];
+  [mockApplication stopMocking];
+}
+
 // Creates a mocked UITraitCollection with nil values for everything except accessibilityContrast,
 // which is set to the given "contrast".
 - (UITraitCollection*)fakeTraitCollectionWithContrast:(UIAccessibilityContrast)contrast {
@@ -264,17 +441,19 @@ typedef enum UIAccessibilityContrast : NSInteger {
   XCTestExpectation* expectation =
       [[XCTestExpectation alloc] initWithDescription:@"notification called"];
   id engine = [[MockEngine alloc] init];
-  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
-                                                                        nibName:nil
-                                                                         bundle:nil];
-  id observer =
-      [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
-                                                        object:nil
-                                                         queue:[NSOperationQueue mainQueue]
-                                                    usingBlock:^(NSNotification* _Nonnull note) {
-                                                      [expectation fulfill];
-                                                    }];
-  realVC = nil;
+  @autoreleasepool {
+    FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
+                                                                          nibName:nil
+                                                                           bundle:nil];
+    id observer =
+        [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
+                                                          object:nil
+                                                           queue:[NSOperationQueue mainQueue]
+                                                      usingBlock:^(NSNotification* _Nonnull note) {
+                                                        [expectation fulfill];
+                                                      }];
+    realVC = nil;
+  }
   [self waitForExpectations:@[ expectation ] timeout:1.0];
 }
 
