@@ -280,14 +280,14 @@ class _SlidersState extends State<_Sliders> {
                 ),
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
-//                    textScaleFactor: 3.11,
-                  textScaleFactor: 1,
+                    textScaleFactor: 3.11,
+//                  textScaleFactor: 1,
                   ),
                   child: Slider.adaptive(
                     value: _continuousValue,
                     min: 0.0,
                     max: 100.0,
-                    label: '${(_continuousValue).toStringAsFixed(4)}',
+                    label: '${(_continuousValue).toStringAsFixed(0)}',
                     onChanged: (double value) {
                       setState(() {
                         _continuousValue = value;
@@ -385,7 +385,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
+      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 120.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
@@ -399,8 +399,8 @@ class _RangeSlidersState extends State<_RangeSliders> {
                 ),
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
-                    textScaleFactor: 1,
-//                    textScaleFactor: 3.11,
+//                    textScaleFactor: 1,
+                    textScaleFactor: 3.11,
                   ),
                 child: RangeSlider(
                   values: _continuousValues,

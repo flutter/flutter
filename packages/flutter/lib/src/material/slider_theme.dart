@@ -2943,9 +2943,7 @@ class _PaddleSliderValueIndicatorPathPainter {
 
   // Radius of the top lobe of the value indicator.
   static const double _topLobeRadius = 16.0;
-  // Designed size of the label text. This is the size that the value indicator
-  // was designed to contain. We scale it from here to fit other sizes.
-  static const double _labelTextDesignSize = 12.0;
+  static const double _minLabelWidth = 16.0;
   // Radius of the bottom lobe of the value indicator.
   static const double _bottomLobeRadius = 10.0;
   static const double _labelPadding = 8.0;
@@ -2983,7 +2981,8 @@ class _PaddleSliderValueIndicatorPathPainter {
     assert(labelPainter != null);
     assert(mediaQueryData != null);
     final double textScaleFactor = mediaQueryData.textScaleFactor;
-    return Size(labelPainter.width + 2 * _labelPadding * textScaleFactor, _preferredHeight * textScaleFactor);
+    final double width = math.max(_minLabelWidth * textScaleFactor, labelPainter.width) + _labelPadding * 2 * textScaleFactor;
+    return Size(width, _preferredHeight * textScaleFactor);
   }
 
   // Adds an arc to the path that has the attributes passed in. This is
