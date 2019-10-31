@@ -79,6 +79,98 @@ class MultiPlatformViewScenario extends Scenario with _BasePlatformViewScenarioM
   }
 }
 
+/// Scenario for verifying platform views after background and foregrounding the app.
+///
+/// Renders a frame with 2 platform views covered by a flutter drawn rectangle,
+/// when the app goes to the background and comes back to the foreground renders a new frame
+/// with the 2 platform views but without the flutter drawn rectangle.
+class MultiPlatformViewBackgroundForegroundScenario extends Scenario with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformView scenario.
+  ///
+  /// The [window] parameter must not be null.
+  MultiPlatformViewBackgroundForegroundScenario(Window window, {this.firstId, this.secondId})
+      : assert(window != null),
+        super(window) {
+    createPlatformView(window, 'platform view 1', firstId);
+    createPlatformView(window, 'platform view 2', secondId);
+    _nextFrame = _firstFrame;
+  }
+
+  /// The platform view identifier to use for the first platform view.
+  final int firstId;
+
+  /// The platform view identifier to use for the second platform view.
+  final int secondId;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    _nextFrame();
+  }
+
+  VoidCallback _nextFrame;
+
+  void _firstFrame() {
+    final SceneBuilder builder = SceneBuilder();
+
+    builder.pushOffset(0, 0);
+
+    builder.pushOffset(0, 600);
+    _addPlatformViewtoScene(builder, firstId, 500, 500);
+    builder.pop();
+
+    _addPlatformViewtoScene(builder, secondId, 500, 500);
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTRB(0, 0, 500, 1000),
+      Paint()..color = const Color(0xFFFF0000),
+    );
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(const Offset(0, 0), picture);
+
+    builder.pop();
+    final Scene scene = builder.build();
+    window.render(scene);
+    scene.dispose();
+  }
+
+  void _secondFrame() {
+    final SceneBuilder builder = SceneBuilder();
+
+    builder.pushOffset(0, 0);
+
+    builder.pushOffset(0, 600);
+    _addPlatformViewtoScene(builder, firstId, 500, 500);
+    builder.pop();
+
+    _addPlatformViewtoScene(builder, secondId, 500, 500);
+    final Scene scene = builder.build();
+    window.render(scene);
+    scene.dispose();
+  }
+
+  String _lastLifecycleState = '';
+
+  @override
+  void onPlatformMessage(
+      String name,
+      ByteData data,
+      PlatformMessageResponseCallback callback,
+      ) {
+    if (name != 'flutter/lifecycle') {
+      return;
+    }
+    final String message = utf8.decode(data.buffer.asUint8List());
+    if (_lastLifecycleState == 'AppLifecycleState.inactive' && message == 'AppLifecycleState.resumed') {
+      _nextFrame = _secondFrame;
+      window.scheduleFrame();
+    }
+
+    _lastLifecycleState = message;
+  }
+}
+
 /// Platform view with clip rect.
 class PlatformViewClipRectScenario extends Scenario with _BasePlatformViewScenarioMixin {
   /// Constructs a platform view with clip rect scenario.

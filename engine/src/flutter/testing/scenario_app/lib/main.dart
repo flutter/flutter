@@ -23,6 +23,7 @@ Map<String, Scenario> _scenarios = <String, Scenario>{
   'platform_view_transform': PlatformViewTransformScenario(window, 'PlatformViewTransform', id: 4),
   'platform_view_opacity': PlatformViewOpacityScenario(window, 'PlatformViewOpacity', id: 5),
   'platform_view_multiple': MultiPlatformViewScenario(window, firstId: 6, secondId: 7),
+  'platform_view_multiple_background_foreground': MultiPlatformViewBackgroundForegroundScenario(window, firstId: 8, secondId: 9),
   'poppable_screen': PoppableScreenScenario(window),
 };
 

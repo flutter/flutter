@@ -31,6 +31,7 @@
 		24D47D1D230CA2700069DD5E /* golden_platform_view_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 24D47D1C230CA2700069DD5E /* golden_platform_view_iPhone SE_simulator.png */; };
 		24F1FB89230B4579005ACE7C /* TextPlatformView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24F1FB87230B4579005ACE7C /* TextPlatformView.m */; };
 		59A97FD8236A49D300B4C066 /* golden_platform_view_multiple_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 59A97FD7236A49D300B4C066 /* golden_platform_view_multiple_iPhone SE_simulator.png */; };
+		59A97FDA236B984300B4C066 /* golden_platform_view_multiple_background_foreground_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 59A97FD9236B984300B4C066 /* golden_platform_view_multiple_background_foreground_iPhone SE_simulator.png */; };
 		6816DB9E231750ED00A51400 /* GoldenPlatformViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6816DB9D231750ED00A51400 /* GoldenPlatformViewTests.m */; };
 		6816DBA12317573300A51400 /* GoldenImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 6816DBA02317573300A51400 /* GoldenImage.m */; };
 		6816DBA42318358200A51400 /* PlatformViewGoldenTestManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6816DBA32318358200A51400 /* PlatformViewGoldenTestManager.m */; };
@@ -123,6 +124,7 @@
 		24F1FB87230B4579005ACE7C /* TextPlatformView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextPlatformView.m; sourceTree = "<group>"; };
 		24F1FB88230B4579005ACE7C /* TextPlatformView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextPlatformView.h; sourceTree = "<group>"; };
 		59A97FD7236A49D300B4C066 /* golden_platform_view_multiple_iPhone SE_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_multiple_iPhone SE_simulator.png"; sourceTree = "<group>"; };
+		59A97FD9236B984300B4C066 /* golden_platform_view_multiple_background_foreground_iPhone SE_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_multiple_background_foreground_iPhone SE_simulator.png"; sourceTree = "<group>"; };
 		6816DB9C231750ED00A51400 /* GoldenPlatformViewTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GoldenPlatformViewTests.h; sourceTree = "<group>"; };
 		6816DB9D231750ED00A51400 /* GoldenPlatformViewTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GoldenPlatformViewTests.m; sourceTree = "<group>"; };
 		6816DB9F2317573300A51400 /* GoldenImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GoldenImage.h; sourceTree = "<group>"; };
@@ -218,6 +220,7 @@
 		248D76ED22E388380012F0C1 /* ScenariosUITests */ = {
 			isa = PBXGroup;
 			children = (
+				59A97FD9236B984300B4C066 /* golden_platform_view_multiple_background_foreground_iPhone SE_simulator.png */,
 				59A97FD7236A49D300B4C066 /* golden_platform_view_multiple_iPhone SE_simulator.png */,
 				244EA6CF230DBE8900B2D26E /* golden_platform_view_D21AP.png */,
 				24D47D1C230CA2700069DD5E /* golden_platform_view_iPhone SE_simulator.png */,
@@ -375,6 +378,7 @@
 			files = (
 				6816DBAE2318696600A51400 /* golden_platform_view_cliprrect_iPhone SE_simulator.png in Resources */,
 				6816DBAB2318696600A51400 /* golden_platform_view_transform_iPhone SE_simulator.png in Resources */,
+				59A97FDA236B984300B4C066 /* golden_platform_view_multiple_background_foreground_iPhone SE_simulator.png in Resources */,
 				6816DBAA2318696600A51400 /* golden_platform_view_clippath_iPhone SE_simulator.png in Resources */,
 				6816DBAD2318696600A51400 /* golden_platform_view_cliprect_iPhone SE_simulator.png in Resources */,
 				24D47D1B230C79840069DD5E /* golden_platform_view_D211AP.png in Resources */,

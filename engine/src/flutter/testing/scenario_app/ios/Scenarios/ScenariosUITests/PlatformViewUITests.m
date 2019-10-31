@@ -35,6 +35,29 @@
 }
 
 - (void)testPlatformView {
+  //[self checkGolden];
+  [[XCUIDevice sharedDevice] pressButton:XCUIDeviceButtonHome];
+  [self.application activate];
+  [self checkGolden];
+}
+
+@end
+
+@interface MultiplePlatformViewsBackgroundForegroundTest : GoldenPlatformViewTests
+
+@end
+
+@implementation MultiplePlatformViewsBackgroundForegroundTest
+
+- (instancetype)initWithInvocation:(NSInvocation*)invocation {
+  PlatformViewGoldenTestManager* manager = [[PlatformViewGoldenTestManager alloc]
+      initWithLaunchArg:@"--platform-view-multiple-background-foreground"];
+  return [super initWithManager:manager invocation:invocation];
+}
+
+- (void)testPlatformView {
+  [[XCUIDevice sharedDevice] pressButton:XCUIDeviceButtonHome];
+  [self.application activate];
   [self checkGolden];
 }
 
