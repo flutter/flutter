@@ -795,15 +795,16 @@ class MediaQuery extends InheritedWidget {
       return query.data;
     if (nullOk)
       return null;
-    throw FlutterError(
-      'MediaQuery.of() called with a context that does not contain a MediaQuery.\n'
-      'No MediaQuery ancestor could be found starting from the context that was passed '
-      'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
-      'MaterialApp widget (those widgets introduce a MediaQuery), or it can happen '
-      'if the context you use comes from a widget above those widgets.\n'
-      'The context used was:\n'
-      '  $context'
-    );
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('MediaQuery.of() called with a context that does not contain a MediaQuery.'),
+      ErrorDescription(
+        'No MediaQuery ancestor could be found starting from the context that was passed '
+        'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
+        'MaterialApp widget (those widgets introduce a MediaQuery), or it can happen '
+        'if the context you use comes from a widget above those widgets.'
+      ),
+      context.describeElement('The context used was')
+    ]);
   }
 
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or 1.0, if

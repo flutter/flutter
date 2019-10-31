@@ -69,12 +69,12 @@ class FileHash {
 /// operation, and persisted to cache in the root build directory.
 ///
 /// The format of the file store is subject to change and not part of its API.
-///
-// TODO(jonahwilliams): find a better way to clear out old entries, perhaps
-// track the last access or modification date?
 class FileHashStore {
-  FileHashStore(this.environment);
+  FileHashStore(this.environment, this.fileSystem) :
+    _cachePath = environment.buildDir.childFile(_kFileCache).path;
 
+  final FileSystem fileSystem;
+  final String _cachePath;
   final Environment environment;
   final HashMap<String, String> previousHashes = HashMap<String, String>();
   final HashMap<String, String> currentHashes = HashMap<String, String>();
@@ -88,20 +88,33 @@ class FileHashStore {
   /// Read file hashes from disk.
   void initialize() {
     printTrace('Initializing file store');
-    if (!_cacheFile.existsSync()) {
+    final File cacheFile = fileSystem.file(_cachePath);
+    if (!cacheFile.existsSync()) {
       return;
     }
-    final List<int> data = _cacheFile.readAsBytesSync();
+    List<int> data;
+    try {
+      data = cacheFile.readAsBytesSync();
+    } on FileSystemException catch (err) {
+      printError(
+        'Failed to read file store at ${cacheFile.path} due to $err.\n'
+        'Build artifacts will not be cached. Try clearing the cache directories '
+        'with "flutter clean"',
+      );
+      return;
+    }
+
     FileStorage fileStorage;
     try {
       fileStorage = FileStorage.fromBuffer(data);
     } catch (err) {
       printTrace('Filestorage format changed');
-      _cacheFile.deleteSync();
+      cacheFile.deleteSync();
       return;
     }
     if (fileStorage.version != _kVersion) {
-      _cacheFile.deleteSync();
+      printTrace('file cache format updating, clearing old hashes.');
+      cacheFile.deleteSync();
       return;
     }
     for (FileHash fileHash in fileStorage.files) {
@@ -113,15 +126,12 @@ class FileHashStore {
   /// Persist file hashes to disk.
   void persist() {
     printTrace('Persisting file store');
-    final File file = _cacheFile;
-    if (!file.existsSync()) {
-      file.createSync(recursive: true);
+    final File cacheFile = fileSystem.file(_cachePath);
+    if (!cacheFile.existsSync()) {
+      cacheFile.createSync(recursive: true);
     }
     final List<FileHash> fileHashes = <FileHash>[];
     for (MapEntry<String, String> entry in currentHashes.entries) {
-      previousHashes[entry.key] = entry.value;
-    }
-    for (MapEntry<String, String> entry in previousHashes.entries) {
       fileHashes.add(FileHash(entry.key, entry.value));
     }
     final FileStorage fileStorage = FileStorage(
@@ -129,7 +139,15 @@ class FileHashStore {
       fileHashes,
     );
     final Uint8List buffer = fileStorage.toBuffer();
-    file.writeAsBytesSync(buffer);
+    try {
+      cacheFile.writeAsBytesSync(buffer);
+    } on FileSystemException catch (err) {
+      printError(
+        'Failed to persist file store at ${cacheFile.path} due to $err.\n'
+        'Build artifacts will not be cached. Try clearing the cache directories '
+        'with "flutter clean"',
+      );
+    }
     printTrace('Done persisting file store');
   }
 
@@ -166,6 +184,4 @@ class FileHashStore {
       resource.release();
     }
   }
-
-  File get _cacheFile => environment.buildDir.childFile(_kFileCache);
 }

@@ -1039,6 +1039,7 @@ class _ActionButtonParentData extends MultiChildLayoutParentData {
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
+    Key key,
     this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
@@ -1046,7 +1047,8 @@ class CupertinoDialogAction extends StatelessWidget {
     @required this.child,
   }) : assert(child != null),
        assert(isDefaultAction != null),
-       assert(isDestructiveAction != null);
+       assert(isDestructiveAction != null),
+       super(key: key);
 
   /// The callback that is called when the button is tapped or otherwise
   /// activated.

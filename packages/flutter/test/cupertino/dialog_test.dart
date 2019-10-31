@@ -1023,6 +1023,36 @@ void main() {
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
     expect(transition.opacity.value, closeTo(0.0, 0.001));
   });
+
+  testWidgets('Actions are accessible by key', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return const CupertinoAlertDialog(
+            title: Text('The Title'),
+            content: Text('The message'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                key: Key('option_1'),
+                child: Text('Option 1'),
+              ),
+              CupertinoDialogAction(
+                key: Key('option_2'),
+                child: Text('Option 2'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(find.byKey(const Key('option_1')), findsOneWidget);
+    expect(find.byKey(const Key('option_2')), findsOneWidget);
+    expect(find.byKey(const Key('option_3')), findsNothing);
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
