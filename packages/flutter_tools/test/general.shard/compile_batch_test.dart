@@ -76,7 +76,7 @@ void main() {
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
     await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
-      buildMode: BuildMode.release,
+      buildMode: BuildMode.profile,
       trackWidgetCreation: false,
       aot: true,
     );
