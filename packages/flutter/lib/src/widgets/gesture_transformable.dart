@@ -645,24 +645,6 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
     }
     assert(scale != 0);
 
-    // Don't allow a scale that moves the viewport outside of _boundaryRect.
-    // Inflate it by 1 pixel because Rect.contains excludes its bottom and right
-    // edges.
-    final Rect boundaryRect = _boundaryRect.inflate(1.0);
-    final Offset tl = fromViewport(const Offset(0, 0), _transform);
-    final Offset tr = fromViewport(Offset(widget.size.width, 0), _transform);
-    final Offset bl = fromViewport(Offset(0, widget.size.height), _transform);
-    final Offset br = fromViewport(
-      Offset(widget.size.width, widget.size.height),
-      _transform,
-    );
-    if (!boundaryRect.contains(tl)
-      || !boundaryRect.contains(tr)
-      || !boundaryRect.contains(bl)
-      || !boundaryRect.contains(br)) {
-      return matrix;
-    }
-
     // Don't allow a scale that results in an overall scale beyond min/max
     // scale.
     final double currentScale = _transform.getMaxScaleOnAxis();
@@ -672,7 +654,31 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       widget.maxScale,
     );
     final double clampedScale = clampedTotalScale / currentScale;
-    return matrix..scale(clampedScale);
+    final Matrix4 nextMatrix = matrix.clone()..scale(clampedScale);
+
+    // Don't allow a scale that moves the viewport outside of _boundaryRect.
+    // Add 1 pixel because Rect.contains excludes its bottom and right edges.
+    final Rect boundaryRect = Rect.fromLTRB(
+      _boundaryRect.left,
+      _boundaryRect.top,
+      _boundaryRect.right + 1.0,
+      _boundaryRect.bottom + 1.0,
+    );
+    final Offset tl = fromViewport(const Offset(0, 0), nextMatrix);
+    final Offset tr = fromViewport(Offset(widget.size.width, 0), nextMatrix);
+    final Offset bl = fromViewport(Offset(0, widget.size.height), nextMatrix);
+    final Offset br = fromViewport(
+      Offset(widget.size.width, widget.size.height),
+      nextMatrix,
+    );
+    if (!boundaryRect.contains(tl)
+      || !boundaryRect.contains(tr)
+      || !boundaryRect.contains(bl)
+      || !boundaryRect.contains(br)) {
+      return matrix;
+    }
+
+    return nextMatrix;
   }
 
   // Return a new matrix representing the given matrix after applying the given
