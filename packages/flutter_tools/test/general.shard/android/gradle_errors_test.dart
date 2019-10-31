@@ -279,7 +279,7 @@ Command: /home/android/gradlew assembleRelease
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'gradle--android-x-failure',
+        label: 'gradle-android-x-failure',
         parameters: <String, String>{
           'cd43': 'app-not-using-plugins',
         },
@@ -312,7 +312,7 @@ Command: /home/android/gradlew assembleRelease
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'gradle--android-x-failure',
+        label: 'gradle-android-x-failure',
         parameters: <String, String>{
           'cd43': 'app-not-using-androidx',
         },
@@ -338,7 +338,7 @@ Command: /home/android/gradlew assembleRelease
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'gradle--android-x-failure',
+        label: 'gradle-android-x-failure',
         parameters: <String, String>{
           'cd43': 'using-jetifier',
         },
@@ -371,7 +371,7 @@ Command: /home/android/gradlew assembleRelease
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'gradle--android-x-failure',
+        label: 'gradle-android-x-failure',
         parameters: <String, String>{
           'cd43': 'not-using-jetifier',
         },
