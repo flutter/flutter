@@ -27,6 +27,10 @@ void UniqueFDTraits::Free(int fd) {
   close(fd);
 }
 
+void UniqueDirTraits::Free(DIR* dir) {
+  closedir(dir);
+}
+
 }  // namespace os_unix
 
 #endif  // OS_WIN
