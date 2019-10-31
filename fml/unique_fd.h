@@ -14,6 +14,7 @@
 
 #else  // OS_WIN
 
+#include <dirent.h>
 #include <unistd.h>
 
 #endif  // OS_WIN
@@ -43,6 +44,12 @@ struct UniqueFDTraits {
   static void Free(int fd);
 };
 
+struct UniqueDirTraits {
+  static DIR* InvalidValue() { return nullptr; }
+  static bool IsValid(DIR* value) { return value != nullptr; }
+  static void Free(DIR* dir);
+};
+
 }  // namespace os_unix
 
 #endif  // OS_WIN
@@ -56,6 +63,7 @@ using UniqueFD = UniqueObject<HANDLE, internal::os_win::UniqueFDTraits>;
 #else  // OS_WIN
 
 using UniqueFD = UniqueObject<int, internal::os_unix::UniqueFDTraits>;
+using UniqueDir = UniqueObject<DIR*, internal::os_unix::UniqueDirTraits>;
 
 #endif  // OS_WIN
 
