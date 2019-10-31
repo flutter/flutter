@@ -4,6 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 
+// A single user event can only represent one of these gestures. The user can't
+// do multiple at the same time, which results in more precise transformations.
+enum _GestureType {
+  translate,
+  scale,
+  rotate,
+}
+
 /// This widget allows 2D transform interactions on its child in relation to its
 /// parent. The user can transform the child by dragging to pan or pinching to
 /// zoom and rotate. All event callbacks for GestureDetector are supported, and
@@ -11,6 +19,9 @@ import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 /// original position of the child.
 @immutable
 class GestureTransformable extends StatelessWidget {
+  /// Create a GestureTransformable.
+  ///
+  /// The [child] parameter must not be null.
   const GestureTransformable({
     Key key,
     @required this.child,
@@ -370,14 +381,6 @@ class _GestureTransformableSized extends StatefulWidget {
   @override _GestureTransformableState createState() => _GestureTransformableState();
 }
 
-// A single user event can only represent one of these gestures. The user can't
-// do multiple at the same time, which results in more precise transformations.
-enum _GestureType {
-  translate,
-  scale,
-  rotate,
-}
-
 // This is public only for access from a unit test.
 class _GestureTransformableState extends State<_GestureTransformableSized> with TickerProviderStateMixin {
   Animation<Offset> _animation;
@@ -608,7 +611,7 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       translation.dx,
       translation.dy,
     );
-    if (boundaries.contains(_getMatrixTranslation(nextMatrixXY))) {
+    if (translationBoundaries.contains(_getMatrixTranslation(nextMatrixXY))) {
       return nextMatrixXY;
     }
 
@@ -617,7 +620,7 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       translation.dx,
       0.0,
     );
-    if (boundaries.contains(_getMatrixTranslation(nextMatrixX))) {
+    if (translationBoundaries.contains(_getMatrixTranslation(nextMatrixX))) {
       return nextMatrixX;
     }
 
@@ -626,7 +629,7 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       0.0,
       translation.dy,
     );
-    if (boundaries.contains(_getMatrixTranslation(nextMatrixY))) {
+    if (translationBoundaries.contains(_getMatrixTranslation(nextMatrixY))) {
       return nextMatrixY;
     }
 
@@ -645,7 +648,7 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
     // Don't allow a scale that moves the viewport outside of _boundaryRect.
     // Inflate it by 1 pixel because Rect.contains excludes its bottom and right
     // edges.
-    final boundaryRect = _boundaryRect.inflate(1.0);
+    final Rect boundaryRect = _boundaryRect.inflate(1.0);
     final Offset tl = fromViewport(const Offset(0, 0), _transform);
     final Offset tr = fromViewport(Offset(widget.size.width, 0), _transform);
     final Offset bl = fromViewport(Offset(0, widget.size.height), _transform);
@@ -724,12 +727,10 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
       details.focalPoint,
       _transform,
     );
-    if (gestureType == null) {
-      gestureType = _getGestureType(
-        widget.disableScale ? 1.0 : details.scale,
-        widget.disableRotation ? 0.0 : details.rotation,
-      );
-    }
+    gestureType ??= _getGestureType(
+      widget.disableScale ? 1.0 : details.scale,
+      widget.disableRotation ? 0.0 : details.rotation,
+    );
     setState(() {
       if (gestureType == _GestureType.scale && _scaleStart != null) {
         // details.scale gives us the amount to change the scale as of the
