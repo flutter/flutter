@@ -22,6 +22,7 @@ Map<String, Scenario> _scenarios = <String, Scenario>{
   'platform_view_clippath': PlatformViewClipPathScenario(window, 'PlatformViewClipPath', id: 3),
   'platform_view_transform': PlatformViewTransformScenario(window, 'PlatformViewTransform', id: 4),
   'platform_view_opacity': PlatformViewOpacityScenario(window, 'PlatformViewOpacity', id: 5),
+  'platform_view_multiple': MultiPlatformViewScenario(window, firstId: 6, secondId: 7),
   'poppable_screen': PoppableScreenScenario(window),
 };
 
