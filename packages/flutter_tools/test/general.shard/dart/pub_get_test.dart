@@ -243,7 +243,7 @@ void main() {
     Pub: () => const Pub(),
   });
 
-  test('Pub error handling', () {
+  test('Pub error handling', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -279,7 +279,7 @@ void main() {
         }
       ),
     ]);
-    Testbed().run(() async {
+    await Testbed().run(() async {
       // the good scenario: .packages is old, pub updates the file.
       fs.file('.packages')
         ..createSync()
