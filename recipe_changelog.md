@@ -1,5 +1,10 @@
 # Recipe Changelog
 
+## 31 Oct 2019
+
+* Recipe Link: https://chromium-review.googlesource.com/c/chromium/tools/build/+/1894232
+* Reason: Upload `sky_engine` to CIPD.
+
 ## 30 Oct 2019
 
 * Recipe Link: https://chromium-review.googlesource.com/c/chromium/tools/build/+/1891522
