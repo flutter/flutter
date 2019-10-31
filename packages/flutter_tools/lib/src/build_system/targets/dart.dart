@@ -236,7 +236,7 @@ class KernelSnapshot extends Target {
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
-      linkPlatformKernelIn: buildMode == BuildMode.release,
+      linkPlatformKernelIn: buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
     );
