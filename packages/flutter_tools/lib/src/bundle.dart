@@ -50,7 +50,7 @@ class BundleBuilder {
   /// The default `mainPath` is `lib/main.dart`.
   /// The default  `manifestPath` is `pubspec.yaml`
   Future<void> build({
-    TargetPlatform platform,
+    @required TargetPlatform platform,
     BuildMode buildMode,
     String mainPath,
     String manifestPath = defaultManifestPath,
