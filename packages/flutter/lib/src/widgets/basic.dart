@@ -14,7 +14,7 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'widget_span.dart';
 
-export 'gesture_transformable.dart';
+export 'interactive_viewer.dart';
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
   ChangeNotifier,

@@ -32,7 +32,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     );
 
     // The scene is drawn by a CustomPaint, but user interaction is handled by
-    // the GestureTransformable parent widget.
+    // the InteractiveViewer parent widget.
     return Scaffold(
       appBar: AppBar(
         title: const Text('2D Tranformations'),
@@ -55,7 +55,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
           // translate beyond that to a visibleSize that's a bit bigger.
           final Size size = Size(constraints.maxWidth, constraints.maxHeight);
           final Size visibleSize = Size(size.width * 3, size.height * 2);
-          return GestureTransformable(
+          return InteractiveViewer(
             reset: _reset,
             onResetEnd: () {
               setState(() {
@@ -73,7 +73,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
             ),
             // Center the board in the middle of the screen. It's drawn centered
             // at the origin, which is the top left corner of the
-            // GestureTransformable.
+            // InteractiveViewer.
             initialTranslation: Offset(size.width / 2, size.height / 2),
             onTapUp: _onTapUp,
           );

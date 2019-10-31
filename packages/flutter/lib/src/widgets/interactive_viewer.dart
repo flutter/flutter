@@ -18,18 +18,18 @@ enum _GestureType {
 /// the coordinates that are given are untransformed and in relation to the
 /// original position of the child.
 @immutable
-class GestureTransformable extends StatelessWidget {
-  /// Create a GestureTransformable.
+class InteractiveViewer extends StatelessWidget {
+  /// Create an InteractiveViewer.
   ///
   /// The [child] parameter must not be null.
-  const GestureTransformable({
+  const InteractiveViewer({
     Key key,
     @required this.child,
     this.maxScale = 2.5,
     this.minScale = 0.8,
     // TODO(justinmc): Google Photos and Apple Photos both have some effects
     // when transforming beyond the boundaries that aren't currently possible
-    // with GestureTransformable. There is either a rubber band effect when
+    // with InteractiveViewer. There is either a rubber band effect when
     // exceeding the boundaries, or a strong enough gesture causes a navigation
     // change.
     this.boundaryRect,
@@ -246,7 +246,7 @@ class GestureTransformable extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        return _GestureTransformableSized(
+        return _InteractiveViewerSized(
           child: child,
           maxScale: maxScale,
           minScale: minScale,
@@ -292,8 +292,8 @@ class GestureTransformable extends StatelessWidget {
 }
 
 @immutable
-class _GestureTransformableSized extends StatefulWidget {
-  const _GestureTransformableSized({
+class _InteractiveViewerSized extends StatefulWidget {
+  const _InteractiveViewerSized({
     @required this.child,
     @required this.size,
     this.maxScale,
@@ -383,11 +383,11 @@ class _GestureTransformableSized extends StatefulWidget {
   final double initialScale;
   final double initialRotation;
 
-  @override _GestureTransformableState createState() => _GestureTransformableState();
+  @override _InteractiveViewerState createState() => _InteractiveViewerState();
 }
 
 // This is public only for access from a unit test.
-class _GestureTransformableState extends State<_GestureTransformableSized> with TickerProviderStateMixin {
+class _InteractiveViewerState extends State<_InteractiveViewerSized> with TickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
   Animation<Matrix4> _animationReset;
@@ -489,7 +489,7 @@ class _GestureTransformableState extends State<_GestureTransformableSized> with 
   }
 
   @override
-  void didUpdateWidget(_GestureTransformableSized oldWidget) {
+  void didUpdateWidget(_InteractiveViewerSized oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.reset && !oldWidget.reset && _animationReset == null) {
       _animateResetInitialize();

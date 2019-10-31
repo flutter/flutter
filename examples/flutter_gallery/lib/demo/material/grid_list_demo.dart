@@ -175,8 +175,9 @@ class GridDemoPhotoItem extends StatelessWidget {
           body: SizedBox.expand(
             child: Hero(
               tag: photo.tag,
+              // TODO(justinmc): Remove this and its code.
               //child: GridPhotoViewer(photo: photo),
-              child: GestureTransformable(
+              child: InteractiveViewer(
                 disableRotation: true,
                 child: Image.asset(
                   photo.assetName,
