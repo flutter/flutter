@@ -278,6 +278,14 @@ void main() {
             ..setLastModifiedSync(DateTime(2002));
         }
       ),
+      const FakeCommand(
+        command: <String>[
+          '/bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+      ),
     ]);
     await Testbed().run(() async {
       // the good scenario: .packages is old, pub updates the file.
