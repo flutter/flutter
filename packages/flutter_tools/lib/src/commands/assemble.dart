@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -33,6 +34,10 @@ const List<Target> _kDefaultTargets = <Target>[
   ReleaseMacOSBundleFlutterAssets(),
   DebugBundleLinuxAssets(),
   WebReleaseBundle(),
+  // TODO(jonahwilliams): stabilize the naming scheme.
+  ReleaseCopyFlutterAotBundle(),
+  ProfileCopyFlutterAotBundle(),
+  CopyFlutterBundle(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -43,6 +48,9 @@ class AssembleCommand extends FlutterCommand {
       'define',
       abbr: 'd',
       help: 'Allows passing configuration to a target with --define=target=key=value.',
+    );
+    argParser.addOption('depfile', help: 'A file path where a depfile will be written. '
+      'This contains all build inputs and outputs in a make style syntax'
     );
     argParser.addOption('build-inputs', help: 'A file path where a newline '
         'separated file containing all inputs used will be written after a build.'
@@ -125,8 +133,7 @@ class AssembleCommand extends FlutterCommand {
     ));
     if (!result.success) {
       for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
-        printError('Target ${data.key} failed: ${data.value.exception}');
-        printError('${data.value.exception}');
+        printError('Target ${data.key} failed: ${data.value.exception}', stackTrace: data.value.stackTrace);
       }
       throwToolExit('build failed.');
     }
@@ -136,6 +143,11 @@ class AssembleCommand extends FlutterCommand {
     }
     if (argResults.wasParsed('build-outputs')) {
       writeListIfChanged(result.outputFiles, argResults['build-outputs']);
+    }
+    if (argResults.wasParsed('depfile')) {
+      final File depfileFile = fs.file(argResults['depfile']);
+      final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+      depfile.writeToFile(fs.file(depfileFile));
     }
     return null;
   }

@@ -34,6 +34,27 @@ const String kBitcodeFlag = 'EnableBitcode';
 /// Whether to enable or disable track widget creation.
 const String kTrackWidgetCreation = 'TrackWidgetCreation';
 
+/// Additional configuration passed to the dart front end.
+///
+/// This is expected to be a comma separated list of strings.
+const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
+
+/// Additional configuration passed to gen_snapshot.
+///
+/// This is expected to be a comma separated list of strings.
+const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
+
+/// Alternative scheme for file URIs.
+///
+/// May be used along with [kFileSystemRoots] to support a multiroot
+/// filesystem.
+const String kFileSystemScheme = 'FileSystemScheme';
+
+/// Additional filesystem roots.
+///
+/// If provided, must be used along with [kFileSystemScheme].
+const String kFileSystemRoots = 'FileSystemRoots';
+
 /// The define to control what iOS architectures are built for.
 ///
 /// This is expected to be a comma-separated list of architectures. If not
@@ -218,6 +239,13 @@ class KernelSnapshot extends Target {
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
+    // This configuration is all optional.
+    final List<String> extraFrontEndOptions = <String>[
+      ...?environment.defines[kExtraFrontEndOptions]?.split(',')
+    ];
+    final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
+    final String fileSystemScheme = environment.defines[kFileSystemScheme];
+
     TargetModel targetModel = TargetModel.flutter;
     if (targetPlatform == TargetPlatform.fuchsia_x64 ||
         targetPlatform == TargetPlatform.fuchsia_arm64) {
@@ -239,6 +267,9 @@ class KernelSnapshot extends Target {
       linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
+      extraFrontEndOptions: extraFrontEndOptions,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
