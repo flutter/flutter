@@ -101,7 +101,7 @@ void main() {
           onValueChanged: null,
         ),
       );
-      fail('Should not be possible to create segmented control without a onValueChanged');
+      fail('Should not be possible to create segmented control without an onValueChanged');
     } on AssertionError catch (e) {
       expect(e.toString(), contains('onValueChanged'));
     }
