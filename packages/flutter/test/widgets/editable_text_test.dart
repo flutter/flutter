@@ -3421,7 +3421,7 @@ void main() {
     });
     const String testText = 'flutter is the best!';
     final TextEditingController controller = TextEditingController(text: testText);
-    EditableText et = EditableText(
+    final EditableText et = EditableText(
       showSelectionHandles: true,
       maxLines: 2,
       controller: controller,
@@ -3445,7 +3445,7 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     expect(log.length, 7);
     // TextInput.show should be before TextInput.setEditingState
-    List<String> logOrder = ['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
+    final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
     int index = 0;
     for (MethodCall m in log) {
       expect(m.method, logOrder[index]);
