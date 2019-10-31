@@ -5,38 +5,38 @@
 import("$flutter_root/tools/fuchsia/clang.gni")
 
 fuchsia_sdk_base = "//fuchsia/sdk/$host_os/arch/$target_cpu"
-fuchsia_sdk_lib = "$fuchsia_sdk_base/lib"
+fuchsia_sdk_dist = "$fuchsia_sdk_base/dist"
 sysroot_lib = "$fuchsia_sdk_base/sysroot/lib"
 sysroot_dist_lib = "$fuchsia_sdk_base/sysroot/dist/lib"
 
 common_libs = [
   {
     name = "libasync-default.so"
-    path = rebase_path("$fuchsia_sdk_lib")
+    path = rebase_path("$fuchsia_sdk_dist")
   },
   {
     name = "libtrace-engine.so"
-    path = rebase_path("$fuchsia_sdk_lib")
+    path = rebase_path("$fuchsia_sdk_dist")
   },
   {
     name = "libfdio.so"
-    path = rebase_path("$fuchsia_sdk_lib")
+    path = rebase_path("$fuchsia_sdk_dist")
   },
   {
     name = "libmemfs.so"
-    path = rebase_path("$fuchsia_sdk_lib")
+    path = rebase_path("$fuchsia_sdk_dist")
   },
   {
     name = "libsyslog.so"
-    path = rebase_path("$fuchsia_sdk_lib")
+    path = rebase_path("$fuchsia_sdk_dist")
   },
   {
     name = "libvulkan.so"
-    path = rebase_path("$fuchsia_sdk_lib")
+    path = rebase_path("$fuchsia_sdk_dist")
   },
   {
     name = "libtrace-provider-so.so"
-    path = rebase_path("$fuchsia_sdk_lib")
+    path = rebase_path("$fuchsia_sdk_dist")
   },
   {
     name = "libzircon.so"
