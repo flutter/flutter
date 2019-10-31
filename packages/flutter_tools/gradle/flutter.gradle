@@ -755,10 +755,10 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "-dExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
             if (buildMode == "profile") {
-                args "profile_copy_aot_flutter_bundle"
+                args "profile_android_flutter_bundle"
             }
             if (buildMode == "release") {
-                args "release_copy_aot_flutter_bundle"
+                args "release_android_flutter_bundle"
             }
             if (buildMode == "debug") {
                 args "copy_flutter_bundle"

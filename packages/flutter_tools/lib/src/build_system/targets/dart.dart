@@ -398,11 +398,12 @@ class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
   const ProfileCopyFlutterAotBundle();
 
   @override
-  String get name => 'profile_copy_aot_flutter_bundle';
+  String get name => 'profile_android_flutter_bundle';
 
   @override
   List<Target> get dependencies => const <Target>[
     AotElfProfile(),
+    CopyFlutterBundle(),
   ];
 }
 
@@ -410,10 +411,11 @@ class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
   const ReleaseCopyFlutterAotBundle();
 
   @override
-  String get name => 'release_copy_aot_flutter_bundle';
+  String get name => 'release_android_flutter_bundle';
 
   @override
   List<Target> get dependencies => const <Target>[
     AotElfRelease(),
+    CopyFlutterBundle(),
   ];
 }
