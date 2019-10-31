@@ -647,13 +647,13 @@ void main() {
   });
 
   testWidgets('showDialog uses root navigator by default', (WidgetTester tester) async {
-    final TestNavigatorObserver rootNavigatorObserver = TestNavigatorObserver();
-    final TestNavigatorObserver nestedNavigatorObserver = TestNavigatorObserver();
+    final DialogObserver rootObserver = DialogObserver();
+    final DialogObserver nestedObserver = DialogObserver();
 
     await tester.pumpWidget(MaterialApp(
-      navigatorObservers: <NavigatorObserver>[rootNavigatorObserver],
+      navigatorObservers: <NavigatorObserver>[rootObserver],
       home: Navigator(
-        observers: <NavigatorObserver>[nestedNavigatorObserver],
+        observers: <NavigatorObserver>[nestedObserver],
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
@@ -675,22 +675,20 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.pumpAndSettle();
     await tester.tap(find.byType(RaisedButton));
-    await tester.pumpAndSettle();
 
-    expect(rootNavigatorObserver.dialogPushCount, 1);
-    expect(nestedNavigatorObserver.dialogPushCount, 0);
+    expect(rootObserver.dialogCount, 1);
+    expect(nestedObserver.dialogCount, 0);
   });
 
   testWidgets('showDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
-    final TestNavigatorObserver rootNavigatorObserver = TestNavigatorObserver();
-    final TestNavigatorObserver nestedNavigatorObserver = TestNavigatorObserver();
+    final DialogObserver rootObserver = DialogObserver();
+    final DialogObserver nestedObserver = DialogObserver();
 
     await tester.pumpWidget(MaterialApp(
-      navigatorObservers: <NavigatorObserver>[rootNavigatorObserver],
+      navigatorObservers: <NavigatorObserver>[rootObserver],
       home: Navigator(
-        observers: <NavigatorObserver>[nestedNavigatorObserver],
+        observers: <NavigatorObserver>[nestedObserver],
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
@@ -713,12 +711,10 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.pumpAndSettle();
     await tester.tap(find.byType(RaisedButton));
-    await tester.pumpAndSettle();
 
-    expect(rootNavigatorObserver.dialogPushCount, 0);
-    expect(nestedNavigatorObserver.dialogPushCount, 1);
+    expect(rootObserver.dialogCount, 0);
+    expect(nestedObserver.dialogCount, 1);
   });
 
   group('Scrollable title and content', () {
@@ -799,13 +795,13 @@ void main() {
   });
 }
 
-class TestNavigatorObserver extends NavigatorObserver {
-  int dialogPushCount = 0;
+class DialogObserver extends NavigatorObserver {
+  int dialogCount = 0;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (route is! MaterialPageRoute<dynamic>) {
-      dialogPushCount++;
+    if (route.toString().contains('_DialogRoute')) {
+      dialogCount++;
     }
     super.didPush(route, previousRoute);
   }

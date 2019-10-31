@@ -1138,6 +1138,7 @@ Future<DateTime> showDatePicker({
   assert(initialDate != null);
   assert(firstDate != null);
   assert(lastDate != null);
+  assert(useRootNavigator != null);
   assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
   assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
   assert(!firstDate.isAfter(lastDate), 'lastDate must be on or after firstDate');

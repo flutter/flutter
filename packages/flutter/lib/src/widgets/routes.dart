@@ -1557,6 +1557,12 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// dialog to the [Navigator] furthest from or nearest to the given `context`.
+/// By default, `useRootNavigator` is `true` and the dialog route created by
+/// this method is pushed to the root navigator.
+///
+/// If the application has multiple [Navigator] objects, it may be necessary to
+/// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
+/// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// The `barrierDismissible` argument is used to determine whether this route
 /// can be dismissed by tapping the modal barrier. This argument defaults
@@ -1580,11 +1586,6 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
-/// By default, the dialog route created by this method is pushed to the root
-/// navigator. If the application has multiple [Navigator] objects, it may be
-/// necessary to call `Navigator.of(context, rootNavigator: true).pop(result)`
-/// to close the dialog rather than just `Navigator.pop(context, result)`.
-///
 /// See also:
 ///
 ///  * [showDialog], which displays a Material-style dialog.
@@ -1600,6 +1601,7 @@ Future<T> showGeneralDialog<T>({
   bool useRootNavigator = true,
 }) {
   assert(pageBuilder != null);
+  assert(useRootNavigator != null);
   assert(!barrierDismissible || barrierLabel != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(_DialogRoute<T>(
     pageBuilder: pageBuilder,

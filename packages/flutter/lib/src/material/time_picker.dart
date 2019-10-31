@@ -1784,6 +1784,7 @@ Future<TimeOfDay> showTimePicker({
 }) async {
   assert(context != null);
   assert(initialTime != null);
+  assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final Widget dialog = _TimePickerDialog(initialTime: initialTime);

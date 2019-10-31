@@ -865,7 +865,8 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// safely removed from the tree before the popup is closed.
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
-/// popup to the [Navigator] furthest from or nearest to the given `context`.
+/// popup to the [Navigator] furthest from or nearest to the given `context`. It
+/// is `false` by default.
 ///
 /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
 /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
@@ -887,6 +888,7 @@ Future<T> showCupertinoModalPopup<T>({
   @required WidgetBuilder builder,
   bool useRootNavigator = true,
 }) {
+  assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
     _CupertinoModalPopupRoute<T>(
       builder: builder,
@@ -939,14 +941,15 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// dialog to the [Navigator] furthest from or nearest to the given `context`.
+/// By default, `useRootNavigator` is `true` and the dialog route created by
+/// this method is pushed to the root navigator.
+///
+/// If the application has multiple [Navigator] objects, it may be necessary to
+/// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
+/// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
-///
-/// By default, the dialog route created by this method is pushed to the root
-/// navigator. If the application has multiple [Navigator] objects, it may be
-/// necessary to call `Navigator.of(context, rootNavigator: true).pop(result)`
-/// to close the dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
 ///
@@ -961,6 +964,7 @@ Future<T> showCupertinoDialog<T>({
   bool useRootNavigator = true,
 }) {
   assert(builder != null);
+  assert(useRootNavigator != null);
   return showGeneralDialog(
     context: context,
     barrierDismissible: false,

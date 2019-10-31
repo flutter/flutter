@@ -232,9 +232,10 @@ void showAboutDialog({
   Widget applicationIcon,
   String applicationLegalese,
   List<Widget> children,
-  bool useRootNavigator,
+  bool useRootNavigator = true,
 }) {
   assert(context != null);
+  assert(useRootNavigator != null);
   showDialog<void>(
     context: context,
     useRootNavigator: useRootNavigator,
@@ -258,7 +259,8 @@ void showAboutDialog({
 /// The `context` argument is used to look up the [Navigator] for the page.
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
-/// page to the [Navigator] furthest from or nearest to the given `context`.
+/// page to the [Navigator] furthest from or nearest to the given `context`. It
+/// is `false` by default.
 ///
 /// If the application has a [Drawer], consider using [AboutListTile] instead
 /// of calling this directly.
@@ -277,6 +279,7 @@ void showLicensePage({
   bool useRootNavigator = false,
 }) {
   assert(context != null);
+  assert(useRootNavigator != null);
   Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,

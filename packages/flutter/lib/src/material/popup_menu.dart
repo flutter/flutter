@@ -790,7 +790,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// widget can be safely removed from the tree before the popup menu is closed.
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
-/// menu to the [Navigator] furthest from or nearest to the given `context`.
+/// menu to the [Navigator] furthest from or nearest to the given `context`. It
+/// is `false` by default.
 ///
 /// The `semanticLabel` argument is used by accessibility frameworks to
 /// announce screen transitions when the menu is opened and closed. If this
@@ -820,6 +821,7 @@ Future<T> showMenu<T>({
 }) {
   assert(context != null);
   assert(position != null);
+  assert(useRootNavigator != null);
   assert(items != null && items.isNotEmpty);
   assert(captureInheritedThemes != null);
   assert(debugCheckHasMaterialLocalizations(context));
