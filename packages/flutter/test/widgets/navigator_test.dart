@@ -994,15 +994,15 @@ void main() {
     );
 
     // The initial route /A/B/C should've been pushed successfully.
-    expect(find.byKey(keyRoot), findsOneWidget);
-    expect(find.byKey(keyA), findsOneWidget);
+    expect(find.byKey(keyRoot, skipOffstage: false), findsOneWidget);
+    expect(find.byKey(keyA, skipOffstage: false), findsOneWidget);
     expect(find.byKey(keyABC), findsOneWidget);
 
     keyNav.currentState.pop();
     await tester.pumpAndSettle();
-    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyRoot, skipOffstage: false), findsOneWidget);
     expect(find.byKey(keyA), findsOneWidget);
-    expect(find.byKey(keyABC), findsNothing);
+    expect(find.byKey(keyABC, skipOffstage: false), findsNothing);
   });
 
   testWidgets('The full initial route has to be matched', (WidgetTester tester) async {
@@ -1089,4 +1089,111 @@ void main() {
     });
   });
 
+  testWidgets('OverlayEntry of topmost initial route is marked as opaque', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/38038.
+
+    final Key root = UniqueKey();
+    final Key intermediate = UniqueKey();
+    final GlobalKey topmost = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/A/B',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(key: root),
+          '/A': (BuildContext context) => Container(key: intermediate),
+          '/A/B': (BuildContext context) => Container(key: topmost),
+        },
+      ),
+    );
+
+    expect(ModalRoute.of(topmost.currentContext).overlayEntries.first.opaque, isTrue);
+
+    expect(find.byKey(root), findsNothing);  // hidden by opaque Route
+    expect(find.byKey(intermediate), findsNothing);  // hidden by opaque Route
+    expect(find.byKey(topmost), findsOneWidget);
+  });
+
+  testWidgets('OverlayEntry of topmost route is set to opaque after Push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/38038.
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          return NoAnimationPageRoute(
+            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
+          );
+        },
+      ),
+    );
+    expect(find.byKey(const ValueKey<String>('/')), findsOneWidget);
+
+    navigator.currentState.pushNamed('/A');
+    await tester.pump();
+
+    final BuildContext topMostContext = tester.element(find.byKey(const ValueKey<String>('/A')));
+    expect(ModalRoute.of(topMostContext).overlayEntries.first.opaque, isTrue);
+
+    expect(find.byKey(const ValueKey<String>('/')), findsNothing);  // hidden by /A
+    expect(find.byKey(const ValueKey<String>('/A')), findsOneWidget);
+  });
+
+  testWidgets('OverlayEntry of topmost route is set to opaque after Replace', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/38038.
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        initialRoute: '/A/B',
+        onGenerateRoute: (RouteSettings settings) {
+          return NoAnimationPageRoute(
+            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
+          );
+        },
+      ),
+    );
+    expect(find.byKey(const ValueKey<String>('/')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('/A')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('/A/B')), findsOneWidget);
+
+    final Route<dynamic> oldRoute = ModalRoute.of(
+      tester.element(find.byKey(const ValueKey<String>('/A'), skipOffstage: false)),
+    );
+    final Route<void> newRoute = NoAnimationPageRoute(
+      pageBuilder: (_) => Container(key: const ValueKey<String>('/C')),
+    );
+
+    navigator.currentState.replace<void>(oldRoute: oldRoute, newRoute: newRoute);
+    await tester.pump();
+
+    expect(newRoute.overlayEntries.first.opaque, isTrue);
+
+    expect(find.byKey(const ValueKey<String>('/')), findsNothing);  // hidden by /A/B
+    expect(find.byKey(const ValueKey<String>('/A')), findsNothing);  // replaced
+    expect(find.byKey(const ValueKey<String>('/C')), findsNothing);  // hidden by /A/B
+    expect(find.byKey(const ValueKey<String>('/A/B')), findsOneWidget);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('/')), findsNothing);  // hidden by /C
+    expect(find.byKey(const ValueKey<String>('/A')), findsNothing);  // replaced
+    expect(find.byKey(const ValueKey<String>('/A/B')), findsNothing); // popped
+    expect(find.byKey(const ValueKey<String>('/C')), findsOneWidget);
+  });
+}
+
+class NoAnimationPageRoute extends PageRouteBuilder<void> {
+  NoAnimationPageRoute({WidgetBuilder pageBuilder})
+      : super(pageBuilder: (BuildContext context, __, ___) {
+          return pageBuilder(context);
+        });
+
+  @override
+  AnimationController createAnimationController() {
+    return super.createAnimationController()..value = 1.0;
+  }
 }
