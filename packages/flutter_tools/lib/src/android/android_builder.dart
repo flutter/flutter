@@ -6,19 +6,23 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../base/common.dart';
+import '../android/gradle_errors.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../project.dart';
-
 import 'android_sdk.dart';
 import 'gradle.dart';
 
 /// The builder in the current context.
-AndroidBuilder get androidBuilder => context.get<AndroidBuilder>() ?? _AndroidBuilderImpl();
+AndroidBuilder get androidBuilder {
+  return context.get<AndroidBuilder>() ?? const _AndroidBuilderImpl();
+}
 
 /// Provides the methods to build Android artifacts.
+// TODO(egarciad): https://github.com/flutter/flutter/issues/43863
 abstract class AndroidBuilder {
+  const AndroidBuilder();
   /// Builds an AAR artifact.
   Future<void> buildAar({
     @required FlutterProject project,
@@ -44,7 +48,7 @@ abstract class AndroidBuilder {
 
 /// Default implementation of [AarBuilder].
 class _AndroidBuilderImpl extends AndroidBuilder {
-  _AndroidBuilderImpl();
+  const _AndroidBuilderImpl();
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -54,27 +58,18 @@ class _AndroidBuilderImpl extends AndroidBuilder {
     @required String target,
     @required String outputDir,
   }) async {
-    if (!project.android.isUsingGradle) {
-      throwToolExit(
-          'The build process for Android has changed, and the current project configuration '
-          'is no longer valid. Please consult\n\n'
-          '  https://github.com/flutter/flutter/wiki/Upgrading-Flutter-projects-to-build-with-gradle\n\n'
-          'for details on how to upgrade the project.'
-      );
-    }
-    if (!project.manifest.isModule && !project.manifest.isPlugin) {
-      throwToolExit('AARs can only be built for plugin or module projects.');
-    }
-    // Validate that we can find an Android SDK.
-    if (androidSdk == null) {
-      throwToolExit('No Android SDK found. Try setting the `ANDROID_SDK_ROOT` environment variable.');
-    }
     try {
+      Directory outputDirectory =
+        fs.directory(outputDir ?? project.android.buildDirectory);
+      if (project.isModule) {
+        // Module projects artifacts are located in `build/host`.
+        outputDirectory = outputDirectory.childDirectory('host');
+      }
       await buildGradleAar(
         project: project,
         androidBuildInfo: androidBuildInfo,
         target: target,
-        outputDir: outputDir,
+        outputDir: outputDirectory,
       );
     } finally {
       androidSdk.reinitialize();
@@ -88,24 +83,13 @@ class _AndroidBuilderImpl extends AndroidBuilder {
     @required AndroidBuildInfo androidBuildInfo,
     @required String target,
   }) async {
-    if (!project.android.isUsingGradle) {
-      throwToolExit(
-          'The build process for Android has changed, and the current project configuration '
-          'is no longer valid. Please consult\n\n'
-          '  https://github.com/flutter/flutter/wiki/Upgrading-Flutter-projects-to-build-with-gradle\n\n'
-          'for details on how to upgrade the project.'
-      );
-    }
-    // Validate that we can find an android sdk.
-    if (androidSdk == null) {
-      throwToolExit('No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.');
-    }
     try {
-      await buildGradleProject(
+      await buildGradleApp(
         project: project,
         androidBuildInfo: androidBuildInfo,
         target: target,
         isBuildingBundle: false,
+        localGradleErrors: gradleErrors,
       );
     } finally {
       androidSdk.reinitialize();
@@ -119,54 +103,16 @@ class _AndroidBuilderImpl extends AndroidBuilder {
     @required AndroidBuildInfo androidBuildInfo,
     @required String target,
   }) async {
-    if (!project.android.isUsingGradle) {
-      throwToolExit(
-          'The build process for Android has changed, and the current project configuration '
-          'is no longer valid. Please consult\n\n'
-          'https://github.com/flutter/flutter/wiki/Upgrading-Flutter-projects-to-build-with-gradle\n\n'
-          'for details on how to upgrade the project.'
-      );
-    }
-    // Validate that we can find an android sdk.
-    if (androidSdk == null) {
-      throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
-    }
-
     try {
-      await buildGradleProject(
+      await buildGradleApp(
         project: project,
         androidBuildInfo: androidBuildInfo,
         target: target,
         isBuildingBundle: true,
+        localGradleErrors: gradleErrors,
       );
     } finally {
       androidSdk.reinitialize();
     }
   }
-}
-
-/// A fake implementation of [AndroidBuilder].
-@visibleForTesting
-class FakeAndroidBuilder implements AndroidBuilder {
-  @override
-  Future<void> buildAar({
-    @required FlutterProject project,
-    @required AndroidBuildInfo androidBuildInfo,
-    @required String target,
-    @required String outputDir,
-  }) async {}
-
-  @override
-  Future<void> buildApk({
-    @required FlutterProject project,
-    @required AndroidBuildInfo androidBuildInfo,
-    @required String target,
-  }) async {}
-
-  @override
-  Future<void> buildAab({
-    @required FlutterProject project,
-    @required AndroidBuildInfo androidBuildInfo,
-    @required String target,
-  }) async {}
 }
