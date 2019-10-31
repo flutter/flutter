@@ -324,8 +324,6 @@ class KernelCompiler {
       if (aot) ...<String>[
         '--aot',
         '--tfa',
-        // TODO(jonahwilliams): remove when https://github.com/flutter/flutter/issues/43751 is resolved.
-        '--no-gen-bytecode',
       ],
       if (packagesPath != null) ...<String>[
         '--packages',
@@ -797,6 +795,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   void reset() {
     _server?.stdin?.writeln('reset');
     printTrace('<- reset');
+
   }
 
   String _mapFilename(String filename, PackageUriMapper packageUriMapper) {
