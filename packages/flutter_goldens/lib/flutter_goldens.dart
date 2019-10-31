@@ -415,7 +415,7 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
 /// The [FlutterLocalFileComparator] is intended to run on local machines and
 /// serve as a smoke test during development. As such, it will not be able to
 /// detect unintended changes on environments other than the currently executing
-/// machine, until it they are tested using the [FlutterPreSubmitFileComparator].
+/// machine, until they are tested using the [FlutterPreSubmitFileComparator].
 ///
 /// See also:
 ///
