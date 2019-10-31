@@ -143,10 +143,10 @@ class IOSDevice extends Device {
 
   final String _sdkVersion;
 
-  /// May be null if version cannot be parsed.
+  /// May be 0 if version cannot be parsed.
   int get majorSdkVersion {
     final String majorVersionString = _sdkVersion?.split('.')?.first?.trim();
-    return majorVersionString != null ? int.tryParse(majorVersionString) : null;
+    return majorVersionString != null ? int.tryParse(majorVersionString) ?? 0 : 0;
   }
 
   @override
@@ -537,7 +537,7 @@ String decodeSyslog(String line) {
 class IOSDeviceLogReader extends DeviceLogReader {
   IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
-      onListen: _start,
+      onListen: _listenToSysLog,
       onCancel: dispose,
     );
 
@@ -576,22 +576,20 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   @override
   set connectedVMServices(List<VMService> connectedVMServices) {
-    _listenToLoggingEvents(connectedVMServices);
+    _listenToUnifiedLoggingEvents(connectedVMServices);
     _connectedVMServices = connectedVMServices;
   }
 
   static const int _minimumUniversalLoggingSdkVersion = 13;
 
-  Future<void> _listenToLoggingEvents(List<VMService> vmServices) async {
+  Future<void> _listenToUnifiedLoggingEvents(List<VMService> vmServices) async {
     if (device.majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
       return;
     }
     for (VMService vmService in vmServices) {
       // The VM service will not publish logging events unless the debug stream is being listened to.
-      // onDebugEvent listens to this stream as a side-effect.
-      if (_linesController.hasListener) {
-        unawaited(vmService.onDebugEvent);
-      }
+      // onDebugEvent listens to this stream as a side effect.
+      unawaited(vmService.onDebugEvent);
       _loggingSubscriptions.add((await vmService.onStdoutEvent).listen((ServiceEvent event) {
         final String logMessage = event.message;
         if (logMessage.isNotEmpty) {
@@ -599,9 +597,14 @@ class IOSDeviceLogReader extends DeviceLogReader {
         }
       }));
     }
+    _connectedVMServices = connectedVMServices;
   }
 
-  Future<void> _start () async {
+  Future<void> _listenToSysLog () async {
+    // syslog is not written on iOS 13+.
+    if (device.majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
+      return;
+    }
     unawaited(iMobileDevice.startLogger(device.id).then<void>((Process process) {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
@@ -613,16 +616,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
       assert(_idevicesyslogProcess == null);
       _idevicesyslogProcess = process;
     }));
-
-    if (connectedVMServices == null || device.majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
-      return;
-    }
-
-    for (VMService vmService in connectedVMServices) {
-      // The VM service will not publish logging events unless the debug stream is being listened to.
-      // onDebugEvent listens to this stream as a side-effect.
-      await vmService.onDebugEvent;
-    }
   }
 
   @visibleForTesting

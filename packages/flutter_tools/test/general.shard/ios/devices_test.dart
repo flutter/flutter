@@ -73,7 +73,7 @@ void main() {
       expect(IOSDevice('device-123', sdkVersion: '13.1.1').majorSdkVersion, 13);
       expect(IOSDevice('device-123', sdkVersion: '10').majorSdkVersion, 10);
       expect(IOSDevice('device-123', sdkVersion: '0').majorSdkVersion, 0);
-      expect(IOSDevice('device-123', sdkVersion: 'bogus').majorSdkVersion, null);
+      expect(IOSDevice('device-123', sdkVersion: 'bogus').majorSdkVersion, 0);
     }, overrides: <Type, Generator>{
       Platform: () => macPlatform,
     });
