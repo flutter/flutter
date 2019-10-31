@@ -78,4 +78,18 @@ void main() {
 
     expect(response.statusCode, 404);
   }));
+
+  test('release asset server serves correct mime type and content length', () => testbed.run(() async {
+    assetServer = ReleaseAssetServer();
+    fs.file(fs.path.join('build', 'web', 'assets', 'foo.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/assets/foo.png')));
+
+    expect(response.headers, <String, String>{
+      'Content-Type': 'image/png',
+      'content-length': '64',
+    });
+  }));
 }
