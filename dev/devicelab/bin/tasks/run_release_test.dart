@@ -73,7 +73,7 @@ void main() {
         throw 'flutter run --release had unexpected second line: ${stdout.first}';
       }
       stdout.removeAt(0);
-      if (!(stdout.first.startsWith('Built build/app/outputs/apk/release/app-release.apk (') && stdout.first.endsWith('MB).'))) {
+      if (!(stdout.first.contains('Built build/app/outputs/apk/release/app-release.apk (') && stdout.first.contains('MB).'))) {
         throw 'flutter run --release had unexpected third line: ${stdout.first}';
       }
       stdout.removeAt(0);
