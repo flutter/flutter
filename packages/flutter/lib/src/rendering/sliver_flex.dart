@@ -25,7 +25,7 @@ class RenderSliverFlex extends RenderSliver with ContainerRenderObjectMixin<Rend
   /// Temp - used for debugging
   final Key key;
 
-  /// Whether or not pinned [SliverPersistentHeaders] should be pushed off
+  /// Whether or not pinned [SliverPersistentHeader]s should be pushed off
   /// screen.
   bool get pushPinnedHeaders => _pushPinnedHeaders;
   bool _pushPinnedHeaders;

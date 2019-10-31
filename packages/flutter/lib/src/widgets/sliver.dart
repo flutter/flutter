@@ -7,7 +7,7 @@ import 'dart:math' as math show max;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/rendering/sliver_group.dart';
+import 'package:flutter/src/rendering/sliver_flex.dart';
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
