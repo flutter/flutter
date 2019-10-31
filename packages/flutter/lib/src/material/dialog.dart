@@ -657,8 +657,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// The `child` argument is deprecated, and should be replaced with `builder`.
 ///
-/// The `context` argument is used to look up the root [Navigator] and [Theme]
-/// for the dialog. It is only used when the method is called. Its corresponding
+/// The `context` argument is used to look up the [Navigator] and [Theme] for
+/// the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
