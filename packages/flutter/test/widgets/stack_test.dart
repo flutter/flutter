@@ -589,7 +589,7 @@ void main() {
             ),
           ],
         ),
-      )
+      ),
     );
 
     expect(tester.getTopLeft(find.byKey(key)), const Offset(675.0, 0.0));
@@ -605,7 +605,7 @@ void main() {
             ),
           ],
         ),
-      )
+      ),
     );
 
     expect(tester.getTopLeft(find.byKey(key)), const Offset(50.0, 0.0));

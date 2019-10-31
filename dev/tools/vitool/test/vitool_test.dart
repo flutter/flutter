@@ -22,19 +22,19 @@ void main() {
 
   test('parsePoints', () {
     expect(parsePoints('1.0, 2.0'),
-        const <Point<double>>[Point<double>(1.0, 2.0)]
+        const <Point<double>>[Point<double>(1.0, 2.0)],
     );
     expect(parsePoints('12.0, 34.0 5.0, 6.6'),
         const <Point<double>>[
           Point<double>(12.0, 34.0),
           Point<double>(5.0, 6.6),
-        ]
+        ],
     );
     expect(parsePoints('12.0 34.0 5.0 6.6'),
         const <Point<double>>[
           Point<double>(12.0, 34.0),
           Point<double>(5.0, 6.6),
-        ]
+        ],
     );
   });
 
@@ -47,19 +47,19 @@ void main() {
     test('illegal SVGs', () {
       expect(
         () { interpretSvg(testAsset('illegal_svg_multiple_roots.svg')); },
-        throwsA(anything)
+        throwsA(anything),
       );
     });
 
     test('SVG size', () {
       expect(
           interpretSvg(testAsset('empty_svg_1_48x48.svg')).size,
-          const Point<double>(48.0, 48.0)
+          const Point<double>(48.0, 48.0),
       );
 
       expect(
           interpretSvg(testAsset('empty_svg_2_100x50.svg')).size,
-          const Point<double>(100.0, 50.0)
+          const Point<double>(100.0, 50.0),
       );
     });
 
@@ -83,7 +83,7 @@ void main() {
     test('SVG illegal path', () {
       expect(
         () { interpretSvg(testAsset('illegal_path.svg')); },
-        throwsA(anything)
+        throwsA(anything),
       );
     });
 
@@ -148,14 +148,14 @@ void main() {
               SvgPathCommand('Z', <Point<double>>[]),
             ]),
             margin: precisionErrorTolerance,
-        )
+        ),
       ]);
     });
 
     test('SVG illegal transform', () {
       expect(
         () { interpretSvg(testAsset('illegal_transform.svg')); },
-        throwsA(anything)
+        throwsA(anything),
       );
     });
 
@@ -235,8 +235,8 @@ void main() {
                   <Point<double>>[Point<double>(10.0, 10.0)],
                 ]),
               ],
-              opacities: <double>[1.0]
-          ))
+              opacities: <double>[1.0],
+          )),
       );
     });
 
@@ -265,10 +265,10 @@ void main() {
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
                   <Point<double>>[Point<double>(0.0, 0.0)],
-                ])
+                ]),
               ],
-              opacities: <double>[1.0]
-          ))
+              opacities: <double>[1.0],
+          )),
       );
 
       expect(PathAnimation.fromFrameData(frameData, 1),
@@ -278,8 +278,8 @@ void main() {
                   <Point<double>>[Point<double>(5.0, 6.0)],
                 ])
               ],
-              opacities: <double>[1.0]
-          ))
+              opacities: <double>[1.0],
+          )),
       );
     });
 
@@ -291,7 +291,7 @@ void main() {
             SvgPath(
               'path_1',
               <SvgPathCommand>[
-                SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)])
+                SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)]),
               ],
               opacity: 0.5,
             ),
@@ -303,7 +303,7 @@ void main() {
             SvgPath(
               'path_1',
               <SvgPathCommand>[
-                SvgPathCommand('M', <Point<double>>[Point<double>(10.0, 10.0)])
+                SvgPathCommand('M', <Point<double>>[Point<double>(10.0, 10.0)]),
               ],
             ),
           ],
@@ -319,8 +319,8 @@ void main() {
                   ],
                 ]),
               ],
-              opacities: <double>[0.5, 1.0]
-          ))
+              opacities: <double>[0.5, 1.0],
+          )),
       );
     });
   });
@@ -352,10 +352,10 @@ void main() {
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
                   <Point<double>>[Point<double>(0.0, 0.0)],
-                ])
+                ]),
               ],
-              opacities: <double>[1.0]
-          ))
+              opacities: <double>[1.0],
+          )),
       );
 
       expect(animation.paths[1],
@@ -363,10 +363,10 @@ void main() {
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
                   <Point<double>>[Point<double>(5.0, 6.0)],
-                ])
+                ]),
               ],
-              opacities: <double>[1.0]
-          ))
+              opacities: <double>[1.0],
+          )),
       );
 
       expect(animation.size, const Point<double>(10.0, 10.0));
@@ -391,7 +391,7 @@ void main() {
           '            const Offset(1.0, 2.0),\n'
           '            const Offset(3.0, 4.0),\n'
           '          ],\n'
-          '        ),\n'
+          '        ),\n',
 
       );
     });
@@ -413,7 +413,7 @@ void main() {
           '            const Offset(1.0, 2.0),\n'
           '            const Offset(3.0, 4.0),\n'
           '          ],\n'
-          '        ),\n'
+          '        ),\n',
 
       );
     });
@@ -451,7 +451,7 @@ void main() {
           '            const Offset(40.0, 40.0),\n'
           '            const Offset(40.0, 40.0),\n'
           '          ],\n'
-          '        ),\n'
+          '        ),\n',
 
       );
     });
@@ -464,7 +464,7 @@ void main() {
 
       expect(command.toDart(),
           '        const _PathClose(\n'
-          '        ),\n'
+          '        ),\n',
 
       );
     });
@@ -477,7 +477,7 @@ void main() {
 
       expect(
         () { command.toDart(); },
-        throwsA(anything)
+        throwsA(anything),
       );
     });
 
@@ -497,7 +497,7 @@ void main() {
               ],
             ]),
           ],
-          opacities: <double>[0.5, 1.0]
+          opacities: <double>[0.5, 1.0],
       );
 
       expect(pathAnimation.toDart(),
@@ -520,7 +520,7 @@ void main() {
           '          ],\n'
           '        ),\n'
           '      ],\n'
-          '    ),\n'
+          '    ),\n',
       );
     });
 
@@ -543,7 +543,7 @@ void main() {
                     ],
                   ]),
                 ],
-                opacities: <double>[0.5, 1.0]
+                opacities: <double>[0.5, 1.0],
             ),
 
             PathAnimation(
@@ -555,7 +555,7 @@ void main() {
                     ],
                   ]),
                 ],
-                opacities: <double>[0.5, 1.0]
+                opacities: <double>[0.5, 1.0],
             ),
           ]);
 
@@ -598,7 +598,7 @@ void main() {
           '      ],\n'
           '    ),\n'
           '  ],\n'
-          ');'
+          ');',
       );
     });
   });

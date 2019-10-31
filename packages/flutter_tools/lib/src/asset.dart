@@ -81,20 +81,27 @@ class _ManifestAssetBundle implements AssetBundle {
 
   @override
   bool needsBuild({ String manifestPath = defaultManifestPath }) {
-    if (_lastBuildTimestamp == null)
+    if (_lastBuildTimestamp == null) {
       return true;
+    }
 
     final FileStat stat = fs.file(manifestPath).statSync();
-    if (stat.type == FileSystemEntityType.notFound)
+    if (stat.type == FileSystemEntityType.notFound) {
       return true;
+    }
 
     for (Directory directory in _wildcardDirectories.values) {
-      final DateTime dateTime = directory.statSync().modified;
-      if (dateTime == null) {
-        continue;
+      if (!directory.existsSync()) {
+        return true; // directory was deleted.
       }
-      if (dateTime.isAfter(_lastBuildTimestamp)) {
-        return true;
+      for (File file in directory.listSync().whereType<File>()) {
+        final DateTime dateTime = file.statSync().modified;
+        if (dateTime == null) {
+          continue;
+        }
+        if (dateTime.isAfter(_lastBuildTimestamp)) {
+          return true;
+        }
       }
     }
 
@@ -119,8 +126,9 @@ class _ManifestAssetBundle implements AssetBundle {
       printError('$e');
       return 1;
     }
-    if (flutterManifest == null)
+    if (flutterManifest == null) {
       return 1;
+    }
 
     // If the last build time isn't set before this early return, empty pubspecs will
     // hang on hot reload, as the incremental dill files will never be copied to the
@@ -164,11 +172,13 @@ class _ManifestAssetBundle implements AssetBundle {
       if (package != null && package.scheme == 'file') {
         final String packageManifestPath = fs.path.fromUri(package.resolve('../pubspec.yaml'));
         final FlutterManifest packageFlutterManifest = FlutterManifest.createFromPath(packageManifestPath);
-        if (packageFlutterManifest == null)
+        if (packageFlutterManifest == null) {
           continue;
+        }
         // Skip the app itself
-        if (packageFlutterManifest.appName == flutterManifest.appName)
+        if (packageFlutterManifest.appName == flutterManifest.appName) {
           continue;
+        }
         final String packageBasePath = fs.path.dirname(packageManifestPath);
 
         final Map<_Asset, List<_Asset>> packageAssets = _parseAssets(
@@ -179,8 +189,9 @@ class _ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
         );
 
-        if (packageAssets == null)
+        if (packageAssets == null) {
           return 1;
+        }
         assetVariants.addAll(packageAssets);
 
         fonts.addAll(_parseFonts(
@@ -235,7 +246,7 @@ class _ManifestAssetBundle implements AssetBundle {
     entries[_fontManifestJson] = DevFSStringContent(json.encode(fonts));
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
-    entries[_license] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
+    entries[_license] = _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
 
     return 0;
   }
@@ -262,8 +273,9 @@ class _Asset {
   /// The delta between what the entryUri is and the relativeUri (e.g.,
   /// packages/flutter_gallery).
   Uri get symbolicPrefixUri {
-    if (entryUri == relativeUri)
+    if (entryUri == relativeUri) {
       return null;
+    }
     final int index = entryUri.path.indexOf(relativeUri.path);
     return index == -1 ? null : Uri(path: entryUri.path.substring(0, index));
   }
@@ -273,10 +285,12 @@ class _Asset {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(other, this))
+    if (identical(other, this)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     final _Asset otherAsset = other;
     return otherAsset.baseDir == baseDir
         && otherAsset.relativeUri == relativeUri
@@ -325,11 +339,11 @@ List<_Asset> _getMaterialAssets(String fontSet) {
 final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
 
 /// Returns a DevFSContent representing the license file.
-Future<DevFSContent> _obtainLicenses(
+DevFSContent _obtainLicenses(
   PackageMap packageMap,
   String assetBase, {
   bool reportPackages,
-}) async {
+}) {
   // Read the LICENSE file from each package in the .packages file, splitting
   // each one into each component license (so that we can de-dupe if possible).
   //
@@ -347,30 +361,32 @@ Future<DevFSContent> _obtainLicenses(
   final Set<String> allPackages = <String>{};
   for (String packageName in packageMap.map.keys) {
     final Uri package = packageMap.map[packageName];
-    if (package != null && package.scheme == 'file') {
-      final File file = fs.file(package.resolve('../LICENSE'));
-      if (file.existsSync()) {
-        final List<String> rawLicenses =
-            (await file.readAsString()).split(_licenseSeparator);
-        for (String rawLicense in rawLicenses) {
-          List<String> packageNames;
-          String licenseText;
-          if (rawLicenses.length > 1) {
-            final int split = rawLicense.indexOf('\n\n');
-            if (split >= 0) {
-              packageNames = rawLicense.substring(0, split).split('\n');
-              licenseText = rawLicense.substring(split + 2);
-            }
-          }
-          if (licenseText == null) {
-            packageNames = <String>[packageName];
-            licenseText = rawLicense;
-          }
-          packageLicenses.putIfAbsent(licenseText, () => <String>{})
-            ..addAll(packageNames);
-          allPackages.addAll(packageNames);
+    if (package == null || package.scheme != 'file') {
+      continue;
+    }
+    final File file = fs.file(package.resolve('../LICENSE'));
+    if (!file.existsSync()) {
+      continue;
+    }
+    final List<String> rawLicenses =
+        file.readAsStringSync().split(_licenseSeparator);
+    for (String rawLicense in rawLicenses) {
+      List<String> packageNames;
+      String licenseText;
+      if (rawLicenses.length > 1) {
+        final int split = rawLicense.indexOf('\n\n');
+        if (split >= 0) {
+          packageNames = rawLicense.substring(0, split).split('\n');
+          licenseText = rawLicense.substring(split + 2);
         }
       }
+      if (licenseText == null) {
+        packageNames = <String>[packageName];
+        licenseText = rawLicense;
+      }
+      packageLicenses.putIfAbsent(licenseText, () => <String>{})
+        ..addAll(packageNames);
+      allPackages.addAll(packageNames);
     }
   }
 
@@ -407,10 +423,10 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
     ..sort(_byBasename);
 
   for (_Asset main in sortedKeys) {
-    final List<String> variants = <String>[];
-    for (_Asset variant in assetVariants[main])
-      variants.add(variant.entryUri.path);
-    jsonObject[main.entryUri.path] = variants;
+    jsonObject[main.entryUri.path] = <String>[
+      for (_Asset variant in assetVariants[main])
+        variant.entryUri.path,
+    ];
   }
   return DevFSStringContent(json.encode(jsonObject));
 }
@@ -492,22 +508,25 @@ class _AssetDirectoryCache {
     final String assetName = fs.path.basename(assetPath);
     final String directory = fs.path.dirname(assetPath);
 
-    if (!fs.directory(directory).existsSync())
+    if (!fs.directory(directory).existsSync()) {
       return const <String>[];
+    }
 
     if (_cache[directory] == null) {
       final List<String> paths = <String>[];
       for (FileSystemEntity entity in fs.directory(directory).listSync(recursive: true)) {
         final String path = entity.path;
-        if (fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude)))
+        if (fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude))) {
           paths.add(path);
+        }
       }
 
       final Map<String, List<String>> variants = <String, List<String>>{};
       for (String path in paths) {
         final String variantName = fs.path.basename(path);
-        if (directory == fs.path.dirname(path))
+        if (directory == fs.path.dirname(path)) {
           continue;
+        }
         variants[variantName] ??= <String>[];
         variants[variantName].add(path);
       }
@@ -649,7 +668,7 @@ void _parseAssetFromFile(
         baseDir: asset.baseDir,
         entryUri: entryUri,
         relativeUri: relativeUri,
-        )
+      ),
     );
   }
 
@@ -667,8 +686,9 @@ _Asset _resolveAsset(
     // The asset is referenced in the pubspec.yaml as
     // 'packages/PACKAGE_NAME/PATH/TO/ASSET .
     final _Asset packageAsset = _resolvePackageAsset(assetUri, packageMap);
-    if (packageAsset != null)
+    if (packageAsset != null) {
       return packageAsset;
+    }
   }
 
   return _Asset(

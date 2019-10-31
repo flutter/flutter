@@ -39,14 +39,11 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile(
-        'backdrop_filter_test.cull_rect.png',
-        version: 1,
-      ),
+      matchesGoldenFile('backdrop_filter_test.cull_rect.png'),
     );
   }, skip: isBrowser);
 }

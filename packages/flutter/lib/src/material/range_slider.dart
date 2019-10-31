@@ -126,7 +126,7 @@ class RangeSlider extends StatefulWidget {
     this.labels,
     this.activeColor,
     this.inactiveColor,
-    this.semanticFormatterCallback
+    this.semanticFormatterCallback,
   }) : assert(values != null),
        assert(min != null),
        assert(max != null),
@@ -333,10 +333,28 @@ class RangeSlider extends StatefulWidget {
   final RangeSemanticFormatterCallback semanticFormatterCallback;
 
   // Touch width for the tap boundary of the slider thumbs.
-  static const double _minTouchTargetWidth = 48;
+  static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
   @override
   _RangeSliderState createState() => _RangeSliderState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('valueStart', values.start));
+    properties.add(DoubleProperty('valueEnd', values.end));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('onChangeStart', onChangeStart));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('onChangeEnd', onChangeEnd));
+    properties.add(DoubleProperty('min', min));
+    properties.add(DoubleProperty('max', max));
+    properties.add(IntProperty('divisions', divisions));
+    properties.add(StringProperty('labelStart', labels?.start));
+    properties.add(StringProperty('labelEnd', labels?.end));
+    properties.add(ColorProperty('activeColor', activeColor));
+    properties.add(ColorProperty('inactiveColor', inactiveColor));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
+  }
 }
 
 class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin {
@@ -373,17 +391,17 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController = AnimationController(
       duration: enableAnimationDuration,
       vsync: this,
-      value: widget.onChanged != null ? 1.0 : 0.0
+      value: widget.onChanged != null ? 1.0 : 0.0,
     );
     startPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.start)
+      value: _unlerp(widget.values.start),
     );
     endPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.end)
+      value: _unlerp(widget.values.end),
     );
   }
 
@@ -458,13 +476,13 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   // non-zero displacement is negative, then the left thumb is selected, and if its
   // positive, then the right thumb is selected.
   static final RangeThumbSelector _defaultRangeThumbSelector = (
-      TextDirection textDirection,
-      RangeValues values,
-      double tapValue,
-      Size thumbSize,
-      Size trackSize,
-      double dx, // The horizontal delta or displacement of the drag update.
-    ) {
+    TextDirection textDirection,
+    RangeValues values,
+    double tapValue,
+    Size thumbSize,
+    Size trackSize,
+    double dx, // The horizontal delta or displacement of the drag update.
+  ) {
     final double touchRadius = math.max(thumbSize.width, RangeSlider._minTouchTargetWidth) / 2;
     final bool inStartTouchTarget = (tapValue - values.start).abs() * trackSize.width < touchRadius;
     final bool inEndTouchTarget = (tapValue - values.end).abs() * trackSize.width < touchRadius;
@@ -630,7 +648,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class _RenderRangeSlider extends RenderBox {
+class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderRangeSlider({
     @required RangeValues values,
     int divisions,
@@ -931,6 +949,14 @@ class _RenderRangeSlider extends RenderBox {
   }
 
   @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    _startLabelPainter.markNeedsLayout();
+    _endLabelPainter.markNeedsLayout();
+    _updateLabelPainters();
+  }
+
+  @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _overlayAnimation.addListener(markNeedsPaint);
@@ -1151,7 +1177,7 @@ class _RenderRangeSlider extends RenderBox {
         parentBox: this,
         offset: offset,
         sliderTheme: _sliderTheme,
-        isDiscrete: isDiscrete
+        isDiscrete: isDiscrete,
     );
     final Offset startThumbCenter = Offset(trackRect.left + startVisualPosition * trackRect.width, trackRect.center.dy);
     final Offset endThumbCenter = Offset(trackRect.left + endVisualPosition * trackRect.width, trackRect.center.dy);
@@ -1166,7 +1192,7 @@ class _RenderRangeSlider extends RenderBox {
         startThumbCenter: startThumbCenter,
         endThumbCenter: endThumbCenter,
         isDiscrete: isDiscrete,
-        isEnabled: isEnabled
+        isEnabled: isEnabled,
     );
 
     if (!_overlayAnimation.isDismissed) {

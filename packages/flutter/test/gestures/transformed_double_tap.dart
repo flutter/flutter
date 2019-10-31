@@ -25,10 +25,10 @@ void main() {
                   width: 100,
                   height: 150,
                   color: Colors.red,
-                )
+                ),
             ),
           ),
-        )
+        ),
     );
 
     // Move just below kTouchSlop should recognize tap.
@@ -69,10 +69,10 @@ void main() {
                   width: 500,
                   height: 500,
                   color: Colors.red,
-                )
+                ),
             ),
           ),
-        )
+        ),
     );
 
     // Move just below kTouchSlop should recognize tap.

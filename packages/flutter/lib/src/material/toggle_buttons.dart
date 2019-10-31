@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -25,6 +26,8 @@ import 'toggle_buttons_theme.dart';
 /// ## Customizing toggle buttons
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
 /// can update the [isSelected] list however it wants to.
+///
+/// {@animation 700 150 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_simple.mp4}
 ///
 /// Here is an implementation that allows for multiple buttons to be
 /// simultaneously selected, while requiring none of the buttons to be
@@ -44,6 +47,8 @@ import 'toggle_buttons_theme.dart';
 ///   isSelected: isSelected,
 /// ),
 /// ```
+///
+/// {@animation 700 150 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_required_mutually_exclusive.mp4}
 ///
 /// Here is an implementation that requires mutually exclusive selection
 /// while requiring at least one selection. Note that this assumes that
@@ -70,6 +75,8 @@ import 'toggle_buttons_theme.dart';
 /// ),
 /// ```
 ///
+/// {@animation 700 150 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_mutually_exclusive.mp4}
+///
 /// Here is an implementation that requires mutually exclusive selection,
 /// but allows for none of the buttons to be selected.
 /// ```dart
@@ -93,6 +100,8 @@ import 'toggle_buttons_theme.dart';
 ///   isSelected: isSelected,
 /// ),
 /// ```
+///
+/// {@animation 700 150 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_required.mp4}
 ///
 /// Here is an implementation that allows for multiple buttons to be
 /// simultaneously selected, while requiring at least one selection. Note
@@ -157,6 +166,8 @@ class ToggleButtons extends StatelessWidget {
     @required this.children,
     @required this.isSelected,
     this.onPressed,
+    this.textStyle,
+    this.constraints,
     this.color,
     this.selectedColor,
     this.disabledColor,
@@ -206,6 +217,21 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// When the callback is null, all toggle buttons will be disabled.
   final void Function(int index) onPressed;
+
+  /// The [TextStyle] to apply to any text in these toggle buttons.
+  ///
+  /// [TextStyle.color] will be ignored and substituted by [color],
+  /// [selectedColor] or [disabledColor] depending on whether the buttons
+  /// are active, selected, or disabled.
+  final TextStyle textStyle;
+
+  /// Defines the button's size.
+  ///
+  /// Typically used to constrain the button's minimum size.
+  ///
+  /// If this property is null, then
+  /// BoxConstraints(minWidth: 48.0, minHeight: 48.0) is be used.
+  final BoxConstraints constraints;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
   /// enabled and not selected.
@@ -561,6 +587,8 @@ class ToggleButtons extends StatelessWidget {
 
           return _ToggleButton(
             selected: isSelected[index],
+            textStyle: textStyle,
+            constraints: constraints,
             color: color,
             selectedColor: selectedColor,
             disabledColor: disabledColor,
@@ -595,6 +623,7 @@ class ToggleButtons extends StatelessWidget {
       ifTrue: 'Buttons are disabled',
       ifFalse: 'Buttons are enabled',
     ));
+    textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
@@ -626,6 +655,8 @@ class _ToggleButton extends StatelessWidget {
   const _ToggleButton({
     Key key,
     this.selected = false,
+    this.textStyle,
+    this.constraints,
     this.color,
     this.selectedColor,
     this.disabledColor,
@@ -648,6 +679,14 @@ class _ToggleButton extends StatelessWidget {
 
   /// Determines if the button is displayed as active/selected or enabled.
   final bool selected;
+
+  /// The [TextStyle] to apply to any text that appears in this button.
+  final TextStyle textStyle;
+
+  /// Defines the button's size.
+  ///
+  /// Typically used to constrain the button's minimum size.
+  final BoxConstraints constraints;
 
   /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
@@ -679,13 +718,7 @@ class _ToggleButton extends StatelessWidget {
   /// The splash color for the button's [InkWell].
   final Color splashColor;
 
-  /// A leaf node in the focus tree for this button.
-  ///
-  /// Focus is used to determine which widget should be affected by keyboard
-  /// events. The focus tree keeps track of which widget is currently focused
-  /// on by the user.
-  ///
-  /// See [FocusNode] for more information about how focus nodes are used.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
   /// Called when the button is tapped or otherwise activated.
@@ -767,12 +800,16 @@ class _ToggleButton extends StatelessWidget {
       currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
+    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.body1;
+    final BoxConstraints currentConstraints = constraints ?? toggleButtonsTheme.constraints ?? const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension);
+
     final Widget result = ClipRRect(
       borderRadius: clipRadius,
       child: RawMaterialButton(
-        textStyle: TextStyle(
+        textStyle: currentTextStyle.copyWith(
           color: currentColor,
         ),
+        constraints: currentConstraints,
         elevation: 0.0,
         highlightElevation: 0.0,
         fillColor: currentFillColor,
@@ -876,9 +913,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     this._borderRadius,
     this._isFirstButton,
     this._isLastButton,
-    this._textDirection,
-    [RenderBox child]
-  ) : super(child);
+    this._textDirection, [
+    RenderBox child,
+  ]) : super(child);
 
   // The width and color of the button's leading side border.
   BorderSide get leadingBorderSide => _leadingBorderSide;

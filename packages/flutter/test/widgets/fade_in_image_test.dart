@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../painting/image_data.dart';
 import '../painting/image_test_utils.dart';
 
 const Duration animationDuration = Duration(milliseconds: 50);
@@ -49,6 +52,26 @@ class FadeInImageElements {
   RawImage get rawImage => rawImageElement.widget;
   FadeTransition get fadeTransition => fadeTransitionElement?.widget;
   double get opacity => fadeTransition == null ? 1 : fadeTransition.opacity.value;
+}
+
+class LoadTestImageProvider extends ImageProvider<dynamic> {
+  LoadTestImageProvider(this.provider);
+
+  final ImageProvider provider;
+
+  ImageStreamCompleter testLoad(dynamic key, DecoderCallback decode) {
+    return provider.load(key, decode);
+  }
+
+  @override
+  Future<dynamic> obtainKey(ImageConfiguration configuration) {
+    return null;
+  }
+
+  @override
+  ImageStreamCompleter load(dynamic key, DecoderCallback decode) {
+    return null;
+  }
 }
 
 FadeInImageParts findFadeInImage(WidgetTester tester) {
@@ -260,6 +283,58 @@ Future<void> main() async {
       await tester.pump(animationDuration);
       expect(findFadeInImage(tester).placeholder.opacity, moreOrLessEquals(0));
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
+    });
+
+    group(ImageProvider, () {
+
+      testWidgets('memory placeholder cacheWidth and cacheHeight is passed through', (WidgetTester tester) async {
+        final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
+        final FadeInImage image = FadeInImage.memoryNetwork(
+          placeholder: testBytes,
+          image: 'test.com',
+          placeholderCacheWidth: 20,
+          placeholderCacheHeight: 30,
+          imageCacheWidth: 40,
+          imageCacheHeight: 50,
+        );
+
+        bool called = false;
+        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+          expect(cacheWidth, 20);
+          expect(cacheHeight, 30);
+          called = true;
+          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+        };
+        final ImageProvider resizeImage = image.placeholder;
+        expect(image.placeholder, isA<ResizeImage>());
+        expect(called, false);
+        final LoadTestImageProvider testProvider = LoadTestImageProvider(image.placeholder);
+        testProvider.testLoad(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+        expect(called, true);
+      });
+
+      testWidgets('do not resize when null cache dimensions', (WidgetTester tester) async {
+        final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
+        final FadeInImage image = FadeInImage.memoryNetwork(
+          placeholder: testBytes,
+          image: 'test.com',
+        );
+
+        bool called = false;
+        final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+          expect(cacheWidth, null);
+          expect(cacheHeight, null);
+          called = true;
+          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+        };
+        // image.placeholder should be an instance of MemoryImage instead of ResizeImage
+        final ImageProvider memoryImage = image.placeholder;
+        expect(image.placeholder, isA<MemoryImage>());
+        expect(called, false);
+        final LoadTestImageProvider testProvider = LoadTestImageProvider(image.placeholder);
+        testProvider.testLoad(await memoryImage.obtainKey(ImageConfiguration.empty), decode);
+        expect(called, true);
+      });
     });
 
     group('semantics', () {

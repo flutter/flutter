@@ -7,12 +7,13 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
-import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
-import 'compile.dart';
+import 'build_system/build_system.dart';
+import 'build_system/depfile.dart';
+import 'build_system/targets/dart.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart';
@@ -42,10 +43,6 @@ String getKernelPathForTransformerOptions(
 
 const String defaultPrivateKeyPath = 'privatekey.der';
 
-const String _kKernelKey = 'kernel_blob.bin';
-const String _kVMSnapshotData = 'vm_snapshot_data';
-const String _kIsolateSnapshotData = 'isolate_snapshot_data';
-
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
   /// Builds the bundle for the given target platform.
@@ -53,7 +50,7 @@ class BundleBuilder {
   /// The default `mainPath` is `lib/main.dart`.
   /// The default  `manifestPath` is `pubspec.yaml`
   Future<void> build({
-    TargetPlatform platform,
+    @required TargetPlatform platform,
     BuildMode buildMode,
     String mainPath,
     String manifestPath = defaultManifestPath,
@@ -74,51 +71,73 @@ class BundleBuilder {
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
-    applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
     final FlutterProject flutterProject = FlutterProject.current();
-
-    DevFSContent kernelContent;
-    if (!precompiledSnapshot) {
-      if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
-        printTrace('Extra front-end options: $extraFrontEndOptions');
-      ensureDirectoryExists(applicationKernelFilePath);
-      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
-      final CompilerOutput compilerOutput = await kernelCompiler.compile(
-        sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
-        mainPath: fs.file(mainPath).absolute.path,
-        outputFilePath: applicationKernelFilePath,
-        depFilePath: depfilePath,
-        trackWidgetCreation: trackWidgetCreation,
-        extraFrontEndOptions: extraFrontEndOptions,
-        fileSystemRoots: fileSystemRoots,
-        fileSystemScheme: fileSystemScheme,
-        packagesPath: packagesPath,
-      );
-      if (compilerOutput?.outputFilename == null) {
-        throwToolExit('Compiler failed on $mainPath');
+    await buildWithAssemble(
+      buildMode: buildMode ?? BuildMode.debug,
+      targetPlatform: platform,
+      mainPath: mainPath,
+      flutterProject: flutterProject,
+      outputDir: assetDirPath,
+      depfilePath: depfilePath,
+      precompiled: precompiledSnapshot,
+      trackWidgetCreation: trackWidgetCreation,
+    );
+    // Work around for flutter_tester placing kernel artifacts in odd places.
+    if (applicationKernelFilePath != null) {
+      final File outputDill = fs.directory(assetDirPath).childFile('kernel_blob.bin');
+      if (outputDill.existsSync()) {
+        outputDill.copySync(applicationKernelFilePath);
       }
-      kernelContent = DevFSFileContent(fs.file(compilerOutput.outputFilename));
-
-      await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
-          .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
     }
+    return;
+  }
+}
 
-    final AssetBundle assets = await buildAssets(
-      manifestPath: manifestPath,
-      assetDirPath: assetDirPath,
-      packagesPath: packagesPath,
-      reportLicensedPackages: reportLicensedPackages,
-    );
-    if (assets == null)
-      throwToolExit('Error building assets', exitCode: 1);
+/// Build an application bundle using flutter assemble.
+///
+/// This is a temporary shim to migrate the build implementations.
+Future<void> buildWithAssemble({
+  @required FlutterProject flutterProject,
+  @required BuildMode buildMode,
+  @required TargetPlatform targetPlatform,
+  @required String mainPath,
+  @required String outputDir,
+  @required String depfilePath,
+  @required bool precompiled,
+  bool trackWidgetCreation,
+}) async {
+  // If the precompiled flag was not passed, force us into debug mode.
+  buildMode = precompiled ? buildMode : BuildMode.debug;
+  final Environment environment = Environment(
+    projectDir: flutterProject.directory,
+    outputDir: fs.directory(outputDir),
+    buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
+    defines: <String, String>{
+      kTargetFile: mainPath,
+      kBuildMode: getNameForBuildMode(buildMode),
+      kTargetPlatform: getNameForTargetPlatform(targetPlatform),
+      kTrackWidgetCreation: trackWidgetCreation?.toString(),
+    },
+  );
+  final Target target = buildMode == BuildMode.debug
+    ? const CopyFlutterBundle()
+    : const ReleaseCopyFlutterBundle();
+  final BuildResult result = await buildSystem.build(target, environment);
 
-    await assemble(
-      buildMode: buildMode,
-      assetBundle: assets,
-      kernelContent: kernelContent,
-      privateKeyPath: privateKeyPath,
-      assetDirPath: assetDirPath,
-    );
+  if (!result.success) {
+    for (ExceptionMeasurement measurement in result.exceptions.values) {
+      printError(measurement.exception.toString());
+      printError(measurement.stackTrace.toString());
+    }
+    throwToolExit('Failed to build bundle.');
+  }
+  if (depfilePath != null) {
+    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+    final File outputDepfile = fs.file(depfilePath);
+    if (!outputDepfile.parent.existsSync()) {
+      outputDepfile.parent.createSync(recursive: true);
+    }
+    depfile.writeToFile(outputDepfile);
   }
 }
 
@@ -141,44 +160,20 @@ Future<AssetBundle> buildAssets({
     includeDefaultFonts: includeDefaultFonts,
     reportLicensedPackages: reportLicensedPackages,
   );
-  if (result != 0)
+  if (result != 0) {
     return null;
-
-  return assetBundle;
-}
-
-Future<void> assemble({
-  BuildMode buildMode,
-  AssetBundle assetBundle,
-  DevFSContent kernelContent,
-  String privateKeyPath = defaultPrivateKeyPath,
-  String assetDirPath,
-}) async {
-  assetDirPath ??= getAssetBuildDirectory();
-  printTrace('Building bundle');
-
-  final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assetBundle.entries);
-  if (kernelContent != null) {
-    final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
-    final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
-    assetEntries[_kKernelKey] = kernelContent;
-    assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
-    assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
   }
 
-  printTrace('Writing asset files to $assetDirPath');
-  ensureDirectoryExists(assetDirPath);
-
-  await writeBundle(fs.directory(assetDirPath), assetEntries);
-  printTrace('Wrote $assetDirPath');
+  return assetBundle;
 }
 
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
 ) async {
-  if (bundleDir.existsSync())
+  if (bundleDir.existsSync()) {
     bundleDir.deleteSync(recursive: true);
+  }
   bundleDir.createSync(recursive: true);
 
   // Limit number of open files to avoid running out of file descriptors.

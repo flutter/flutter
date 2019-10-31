@@ -20,12 +20,18 @@ void main() {
     testUsingContext('recursively creates a directory if it does not exist', () async {
       ensureDirectoryExists('foo/bar/baz.flx');
       expect(fs.isDirectorySync('foo/bar'), true);
-    }, overrides: <Type, Generator>{FileSystem: () => fs});
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
 
     testUsingContext('throws tool exit on failure to create', () async {
       fs.file('foo').createSync();
       expect(() => ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
-    }, overrides: <Type, Generator>{FileSystem: () => fs});
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 
   group('copyDirectorySync', () {
@@ -57,6 +63,30 @@ void main() {
       expect(sourceMemoryFs.file('some_file.txt').lastModifiedSync(), writeTime);
       // There's still 3 things in the original directory as there were initially.
       expect(sourceMemoryFs.directory(sourcePath).listSync().length, 3);
+    });
+
+    testUsingContext('Skip files if shouldCopyFile returns false', () {
+      final Directory origin = fs.directory('/origin');
+      origin.createSync();
+      fs.file(fs.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
+      fs.directory('/origin/nested').createSync();
+      fs.file(fs.path.join('origin', 'nested', 'a.txt')).writeAsStringSync('irrelevant');
+      fs.file(fs.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
+
+      final Directory destination = fs.directory('/destination');
+      copyDirectorySync(origin, destination, shouldCopyFile: (File origin, File dest) {
+        return origin.basename == 'b.txt';
+      });
+
+      expect(destination.existsSync(), isTrue);
+      expect(destination.childDirectory('nested').existsSync(), isTrue);
+      expect(destination.childDirectory('nested').childFile('b.txt').existsSync(), isTrue);
+
+      expect(destination.childFile('a.txt').existsSync(), isFalse);
+      expect(destination.childDirectory('nested').childFile('a.txt').existsSync(), isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 

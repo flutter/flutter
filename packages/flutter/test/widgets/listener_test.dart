@@ -34,7 +34,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('X'));
@@ -58,7 +58,7 @@ void main() {
               events.add(event);
             },
             onPointerUp: (PointerUpEvent event) {
-            events.add(event);
+              events.add(event);
             },
             onPointerMove: (PointerMoveEvent event) {
               events.add(event);
@@ -155,6 +155,7 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset center = tester.getCenter(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -193,8 +194,6 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
-
-      await gesture.removePointer();
     });
 
     testWidgets('scaled and offset for touch/signal', (WidgetTester tester) async {
@@ -234,6 +233,7 @@ void main() {
       final Offset center = tester.getCenter(find.byKey(key));
       final Offset topLeft = tester.getTopLeft(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -273,8 +273,6 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
-
-      await gesture.removePointer();
     });
 
     testWidgets('rotated for touch/signal', (WidgetTester tester) async {
@@ -312,6 +310,7 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset downPosition = tester.getCenter(find.byKey(key)) + const Offset(10, 5);
       final TestGesture gesture = await tester.startGesture(downPosition);
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -352,9 +351,51 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
-
-      await gesture.removePointer();
     });
+  });
+
+  testWidgets('RenderPointerListener\'s debugFillProperties when default', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    RenderPointerListener().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'parentData: MISSING',
+      'constraints: MISSING',
+      'size: MISSING',
+      'behavior: deferToChild',
+      'listeners: <none>',
+    ]);
+  });
+
+  testWidgets('RenderPointerListener\'s debugFillProperties when full', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    RenderPointerListener(
+      onPointerDown: (PointerDownEvent event) {},
+      onPointerUp: (PointerUpEvent event) {},
+      onPointerMove: (PointerMoveEvent event) {},
+      onPointerCancel: (PointerCancelEvent event) {},
+      onPointerSignal: (PointerSignalEvent event) {},
+      behavior: HitTestBehavior.opaque,
+      child: RenderErrorBox(),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'parentData: MISSING',
+      'constraints: MISSING',
+      'size: MISSING',
+      'behavior: opaque',
+      'listeners: down, move, up, cancel, signal',
+    ]);
   });
 }
 

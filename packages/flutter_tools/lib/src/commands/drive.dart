@@ -94,15 +94,18 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String testFile = _getTestFile();
-    if (testFile == null)
+    if (testFile == null) {
       throwToolExit(null);
+    }
 
     _device = await findTargetDevice();
-    if (device == null)
+    if (device == null) {
       throwToolExit(null);
+    }
 
-    if (await fs.type(testFile) != FileSystemEntityType.file)
+    if (await fs.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
+    }
 
     String observatoryUri;
     if (argResults['use-existing-app'] == null) {
@@ -119,8 +122,9 @@ class DriveCommand extends RunCommandBase {
       }
 
       final LaunchResult result = await appStarter(this);
-      if (result == null)
+      if (result == null) {
         throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
+      }
       observatoryUri = result.observatoryUri.toString();
     } else {
       printStatus('Will connect to already running application instance.');
@@ -132,8 +136,9 @@ class DriveCommand extends RunCommandBase {
     try {
       await testRunner(<String>[testFile], observatoryUri);
     } catch (error, stackTrace) {
-      if (error is ToolExit)
+      if (error is ToolExit) {
         rethrow;
+      }
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
       if (argResults['keep-app-running'] ?? (argResults['use-existing-app'] != null)) {
@@ -148,8 +153,9 @@ class DriveCommand extends RunCommandBase {
   }
 
   String _getTestFile() {
-    if (argResults['driver'] != null)
+    if (argResults['driver'] != null) {
       return argResults['driver'];
+    }
 
     // If the --driver argument wasn't provided, then derive the value from
     // the target file.
@@ -211,7 +217,7 @@ Future<Device> findTargetDevice() async {
     return null;
   } else if (devices.length > 1) {
     printStatus('Found multiple connected devices:');
-    printStatus(devices.map<String>((Device d) => '  - ${d.name}\n').join(''));
+    await Device.printDevices(devices);
   }
   printStatus('Using device ${devices.first.name}.');
   return devices.first;
@@ -240,14 +246,16 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 
   if (command.shouldBuild) {
     printTrace('Installing application package.');
-    if (await command.device.isAppInstalled(package))
+    if (await command.device.isAppInstalled(package)) {
       await command.device.uninstallApp(package);
+    }
     await command.device.installApp(package);
   }
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
-  if (command.traceStartup)
+  if (command.traceStartup) {
     platformArgs['trace-startup'] = command.traceStartup;
+  }
 
   printTrace('Starting application.');
 
@@ -266,11 +274,12 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       command.getBuildInfo(),
       startPaused: true,
       observatoryPort: command.observatoryPort,
-      verboseSystemLogs: command.verboseSystemLogs
+      verboseSystemLogs: command.verboseSystemLogs,
+      cacheSkSL: command.cacheSkSL,
+      dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
-    usesTerminalUi: false,
   );
 
   if (!result.started) {
@@ -293,7 +302,7 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
-  final int result = await runCommandAndStreamOutput(
+  final int result = await processUtils.stream(
     <String>[
       dartVmPath,
       ...dartVmFlags,
@@ -303,8 +312,9 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
     ],
     environment: <String, String>{'VM_SERVICE_URL': observatoryUri},
   );
-  if (result != 0)
+  if (result != 0) {
     throwToolExit('Driver tests failed: $result', exitCode: result);
+  }
 }
 
 

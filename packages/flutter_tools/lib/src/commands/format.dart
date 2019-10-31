@@ -76,9 +76,10 @@ class FormatCommand extends FlutterCommand {
       ...argResults.rest,
     ];
 
-    final int result = await runCommandAndStreamOutput(command);
-    if (result != 0)
+    final int result = await processUtils.stream(command);
+    if (result != 0) {
       throwToolExit('Formatting failed: $result', exitCode: result);
+    }
 
     return null;
   }

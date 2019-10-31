@@ -89,7 +89,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows an [AppBar] with two simple actions. The first action
 /// opens a [SnackBar], while the second action navigates to a new page.
@@ -384,11 +384,11 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   @override
   final Size preferredSize;
 
-  bool _getEffectiveCenterTitle(ThemeData themeData) {
+  bool _getEffectiveCenterTitle(ThemeData theme) {
     if (centerTitle != null)
       return centerTitle;
-    assert(themeData.platform != null);
-    switch (themeData.platform) {
+    assert(theme.platform != null);
+    switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return false;
@@ -417,7 +417,7 @@ class _AppBarState extends State<AppBar> {
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final ThemeData themeData = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
@@ -429,16 +429,16 @@ class _AppBarState extends State<AppBar> {
 
     IconThemeData overallIconTheme = widget.iconTheme
       ?? appBarTheme.iconTheme
-      ?? themeData.primaryIconTheme;
+      ?? theme.primaryIconTheme;
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
     TextStyle centerStyle = widget.textTheme?.title
       ?? appBarTheme.textTheme?.title
-      ?? themeData.primaryTextTheme.title;
+      ?? theme.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1
       ?? appBarTheme.textTheme?.body1
-      ?? themeData.primaryTextTheme.body1;
+      ?? theme.primaryTextTheme.body1;
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -477,11 +477,11 @@ class _AppBarState extends State<AppBar> {
     Widget title = widget.title;
     if (title != null) {
       bool namesRoute;
-      switch (defaultTargetPlatform) {
+      switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-           namesRoute = true;
-           break;
+          namesRoute = true;
+          break;
         case TargetPlatform.iOS:
           break;
       }
@@ -491,7 +491,7 @@ class _AppBarState extends State<AppBar> {
         overflow: TextOverflow.ellipsis,
         child: Semantics(
           namesRoute: namesRoute,
-          child: title,
+          child: _AppBarTitleBox(child: title),
           header: true,
         ),
       );
@@ -524,7 +524,7 @@ class _AppBarState extends State<AppBar> {
       leading: leading,
       middle: title,
       trailing: actions,
-      centerMiddle: widget._getEffectiveCenterTitle(themeData),
+      centerMiddle: widget._getEffectiveCenterTitle(theme),
       middleSpacing: widget.titleSpacing,
     );
 
@@ -552,10 +552,13 @@ class _AppBarState extends State<AppBar> {
               child: appBar,
             ),
           ),
-          widget.bottomOpacity == 1.0 ? widget.bottom : Opacity(
-            opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
-            child: widget.bottom,
-          ),
+          if (widget.bottomOpacity == 1.0)
+            widget.bottom
+          else
+            Opacity(
+              opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
+              child: widget.bottom,
+            ),
         ],
       );
     }
@@ -584,7 +587,7 @@ class _AppBarState extends State<AppBar> {
     }
     final Brightness brightness = widget.brightness
       ?? appBarTheme.brightness
-      ?? themeData.primaryColorBrightness;
+      ?? theme.primaryColorBrightness;
     final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
       ? SystemUiOverlayStyle.light
       : SystemUiOverlayStyle.dark;
@@ -596,7 +599,7 @@ class _AppBarState extends State<AppBar> {
         child: Material(
           color: widget.backgroundColor
             ?? appBarTheme.color
-            ?? themeData.primaryColor,
+            ?? theme.primaryColor,
           elevation: widget.elevation
             ?? appBarTheme.elevation
             ?? _defaultElevation,
@@ -1236,5 +1239,39 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         ),
       ),
     );
+  }
+}
+
+// Layout the AppBar's title with unconstrained height, vertically
+// center it within its (NavigationToolbar) parent, and allow the
+// parent to constrain the title's actual height.
+class _AppBarTitleBox extends SingleChildRenderObjectWidget {
+  const _AppBarTitleBox({ Key key, @required Widget child }) : assert(child != null), super(key: key, child: child);
+
+  @override
+  _RenderAppBarTitleBox createRenderObject(BuildContext context) {
+    return _RenderAppBarTitleBox(
+      textDirection: Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderAppBarTitleBox renderObject) {
+    renderObject.textDirection = Directionality.of(context);
+  }
+}
+
+class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
+  _RenderAppBarTitleBox({
+    RenderBox child,
+    TextDirection textDirection,
+  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
+
+  @override
+  void performLayout() {
+    final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
+    child.layout(innerConstraints, parentUsesSize: true);
+    size = constraints.constrain(child.size);
+    alignChild();
   }
 }

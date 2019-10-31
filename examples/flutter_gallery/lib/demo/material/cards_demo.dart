@@ -262,70 +262,68 @@ class TravelDestinationContent extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subhead;
 
-    final List<Widget> children = <Widget>[
-      // Photo and title.
-      SizedBox(
-        height: 184.0,
-        child: Stack(
-          children: <Widget>[
-            Positioned.fill(
-              // In order to have the ink splash appear above the image, you
-              // must use Ink.image. This allows the image to be painted as part
-              // of the Material and display ink effects above it. Using a
-              // standard Image will obscure the ink splash.
-              child: Ink.image(
-                image: AssetImage(destination.assetName, package: destination.assetPackage),
-                fit: BoxFit.cover,
-                child: Container(),
-              ),
-            ),
-            Positioned(
-              bottom: 16.0,
-              left: 16.0,
-              right: 16.0,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  destination.title,
-                  style: titleStyle,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      // Description and share/explore buttons.
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
-        child: DefaultTextStyle(
-          softWrap: false,
-          overflow: TextOverflow.ellipsis,
-          style: descriptionStyle,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        // Photo and title.
+        SizedBox(
+          height: 184.0,
+          child: Stack(
             children: <Widget>[
-              // three line description
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(
-                  destination.description,
-                  style: descriptionStyle.copyWith(color: Colors.black54),
+              Positioned.fill(
+                // In order to have the ink splash appear above the image, you
+                // must use Ink.image. This allows the image to be painted as part
+                // of the Material and display ink effects above it. Using a
+                // standard Image will obscure the ink splash.
+                child: Ink.image(
+                  image: AssetImage(destination.assetName, package: destination.assetPackage),
+                  fit: BoxFit.cover,
+                  child: Container(),
                 ),
               ),
-              Text(destination.city),
-              Text(destination.location),
+              Positioned(
+                bottom: 16.0,
+                left: 16.0,
+                right: 16.0,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    destination.title,
+                    style: titleStyle,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-      ),
-    ];
-
-    if (destination.type == CardDemoType.standard) {
-      children.add(
-        // share, explore buttons
-        ButtonTheme.bar(
-          child: ButtonBar(
+        // Description and share/explore buttons.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+          child: DefaultTextStyle(
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: descriptionStyle,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // three line description
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    destination.description,
+                    style: descriptionStyle.copyWith(color: Colors.black54),
+                  ),
+                ),
+                Text(destination.city),
+                Text(destination.location),
+              ],
+            ),
+          ),
+        ),
+        if (destination.type == CardDemoType.standard)
+          // share, explore buttons
+          ButtonBar(
             alignment: MainAxisAlignment.start,
             children: <Widget>[
               FlatButton(
@@ -340,13 +338,7 @@ class TravelDestinationContent extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
+      ],
     );
   }
 }

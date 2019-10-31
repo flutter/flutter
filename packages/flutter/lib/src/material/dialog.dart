@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog_theme.dart';
@@ -75,7 +74,7 @@ class Dialog extends StatelessWidget {
   /// The curve to use for the animation shown when the system keyboard intrudes
   /// into the space that the dialog is placed in.
   ///
-  /// Defaults to [Curves.fastOutSlowIn].
+  /// Defaults to [Curves.decelerate].
   final Curve insetAnimationCurve;
 
   /// {@template flutter.material.dialog.shape}
@@ -134,15 +133,6 @@ class Dialog extends StatelessWidget {
 /// of actions. The title is displayed above the content and the actions are
 /// displayed below the content.
 ///
-/// If the content is too large to fit on the screen vertically, the dialog will
-/// display the title and the actions and let the content overflow, which is
-/// rarely desired. Consider using a scrolling widget for [content], such as
-/// [SingleChildScrollView], to avoid overflow. (However, be aware that since
-/// [AlertDialog] tries to size itself using the intrinsic dimensions of its
-/// children, widgets such as [ListView], [GridView], and [CustomScrollView],
-/// which use lazy viewports, will not work. If this is a problem, consider
-/// using [Dialog] directly.)
-///
 /// For dialogs that offer the user a choice between several options, consider
 /// using a [SimpleDialog].
 ///
@@ -162,13 +152,11 @@ class Dialog extends StatelessWidget {
 ///     builder: (BuildContext context) {
 ///       return AlertDialog(
 ///         title: Text('Rewind and remember'),
-///         content: SingleChildScrollView(
-///           child: ListBody(
-///             children: <Widget>[
-///               Text('You will never be satisfied.'),
-///               Text('You\’re like me. I’m never satisfied.'),
-///             ],
-///           ),
+///         content: Column(
+///           children: <Widget>[
+///             Text('You will never be satisfied.'),
+///             Text('You\’re like me. I’m never satisfied.'),
+///           ],
 ///         ),
 ///         actions: <Widget>[
 ///           FlatButton(
@@ -304,23 +292,10 @@ class AlertDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final List<Widget> children = <Widget>[];
-    String label = semanticLabel;
 
-    if (title != null) {
-      children.add(Padding(
-        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
-        child: DefaultTextStyle(
-          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
-          child: Semantics(
-            child: title,
-            namesRoute: true,
-            container: true,
-          ),
-        ),
-      ));
-    } else {
-      switch (defaultTargetPlatform) {
+    String label = semanticLabel;
+    if (title == null) {
+      switch (theme.platform) {
         case TargetPlatform.iOS:
           label = semanticLabel;
           break;
@@ -330,31 +305,47 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
-    if (content != null) {
-      children.add(Flexible(
-        child: Padding(
-          padding: contentPadding,
-          child: DefaultTextStyle(
-            style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
-            child: content,
-          ),
-        ),
-      ));
-    }
-
-    if (actions != null) {
-      children.add(ButtonTheme.bar(
-        child: ButtonBar(
-          children: actions,
-        ),
-      ));
-    }
-
     Widget dialogChild = IntrinsicWidth(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
+        children: <Widget>[
+          if (title != null || content != null)
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    if (title != null)
+                      Padding(
+                        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+                        child: DefaultTextStyle(
+                          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
+                          child: Semantics(
+                            child: title,
+                            namesRoute: true,
+                            container: true,
+                          ),
+                        ),
+                      ),
+                    if (content != null)
+                      Padding(
+                        padding: contentPadding,
+                        child: DefaultTextStyle(
+                          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+                          child: content,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          if (actions != null)
+            ButtonBar(
+              children: actions,
+            ),
+        ],
       ),
     );
 
@@ -587,19 +578,11 @@ class SimpleDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final List<Widget> body = <Widget>[];
-    String label = semanticLabel;
+    final ThemeData theme = Theme.of(context);
 
-    if (title != null) {
-      body.add(Padding(
-        padding: titlePadding,
-        child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.title,
-          child: Semantics(namesRoute: true, child: title),
-        ),
-      ));
-    } else {
-      switch (defaultTargetPlatform) {
+    String label = semanticLabel;
+    if (title == null) {
+      switch (theme.platform) {
         case TargetPlatform.iOS:
           label = semanticLabel;
           break;
@@ -609,15 +592,6 @@ class SimpleDialog extends StatelessWidget {
       }
     }
 
-    if (children != null) {
-      body.add(Flexible(
-        child: SingleChildScrollView(
-          padding: contentPadding,
-          child: ListBody(children: children),
-        ),
-      ));
-    }
-
     Widget dialogChild = IntrinsicWidth(
       stepWidth: 56.0,
       child: ConstrainedBox(
@@ -625,7 +599,23 @@ class SimpleDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: body,
+          children: <Widget>[
+            if (title != null)
+              Padding(
+                padding: titlePadding,
+                child: DefaultTextStyle(
+                  style: theme.textTheme.title,
+                  child: Semantics(namesRoute: true, child: title),
+                ),
+              ),
+            if (children != null)
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: contentPadding,
+                  child: ListBody(children: children),
+                ),
+              ),
+          ],
         ),
       ),
     );

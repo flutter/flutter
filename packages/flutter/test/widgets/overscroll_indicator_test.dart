@@ -72,7 +72,7 @@ void main() {
                 width: 600.0,
                 child: const CustomScrollView(
                   slivers: <Widget>[
-                      SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+                    SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
                   ],
                 ),
               ),

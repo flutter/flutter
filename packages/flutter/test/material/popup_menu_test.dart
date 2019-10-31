@@ -520,26 +520,28 @@ void main() {
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: PopupMenuButton<int>(
-          itemBuilder: (BuildContext context) {
-            return <PopupMenuItem<int>>[
-              const PopupMenuItem<int>(value: 1, child: Text('1')),
-              const PopupMenuItem<int>(value: 2, child: Text('2')),
-              const PopupMenuItem<int>(value: 3, child: Text('3')),
-              const PopupMenuItem<int>(value: 4, child: Text('4')),
-              const PopupMenuItem<int>(value: 5, child: Text('5')),
-            ];
-          },
-          child: const SizedBox(
-            height: 100.0,
-            width: 100.0,
-            child: Text('XXX'),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(value: 1, child: Text('1')),
+                const PopupMenuItem<int>(value: 2, child: Text('2')),
+                const PopupMenuItem<int>(value: 3, child: Text('3')),
+                const PopupMenuItem<int>(value: 4, child: Text('4')),
+                const PopupMenuItem<int>(value: 5, child: Text('5')),
+              ];
+            },
+            child: const SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: Text('XXX'),
+            ),
           ),
         ),
       ),
-    ));
+    );
     await tester.tap(find.text('XXX'));
     await tester.pumpAndSettle();
 
@@ -563,26 +565,31 @@ void main() {
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '1',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '2',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '3',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '4',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '5',
                         textDirection: TextDirection.ltr,
@@ -672,7 +679,7 @@ void main() {
                         context: context,
                         items: <PopupMenuItem<int>>[
                           const PopupMenuItem<int>(
-                              value: 1, child: Text('1')
+                              value: 1, child: Text('1'),
                           ),
                         ],
                       );
@@ -684,12 +691,312 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('Menu Button'));
   });
 
+  testWidgets('PopupMenuItem child height is a minimum, child is vertically centered', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                  // This menu item's height will be 48 because the default minimum height
+                  // is 48 and the height of the text is less than 48.
+                  const PopupMenuItem<String>(
+                    value: '0',
+                    child: Text('Item 0'),
+                  ),
+                  // This menu item's height parameter specifies its minium height. The
+                  // overall height of the menu item will be 50 because the child's
+                  // height 40, is less than 50.
+                  const PopupMenuItem<String>(
+                    height: 50,
+                    value: '1',
+                    child: SizedBox(
+                      height: 40,
+                      child: Text('Item 1'),
+                    ),
+                  ),
+                  // This menu item's height parameter specifies its minium height, so the
+                  // overall height of the menu item will be 75.
+                  const PopupMenuItem<String>(
+                    height: 75,
+                    value: '2',
+                    child: SizedBox(
+                      child: Text('Item 2'),
+                    ),
+                  ),
+                  // This menu item's height will be 100.
+                  const PopupMenuItem<String>(
+                    value: '3',
+                    child: SizedBox(
+                      height: 100,
+                      child: Text('Item 3'),
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    // The menu items and their InkWells should have the expected vertical size
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 1')).height, 50);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 2')).height, 75);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 3')).height, 100);
+    expect(tester.getSize(find.widgetWithText(InkWell, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(InkWell, 'Item 1')).height, 50);
+    expect(tester.getSize(find.widgetWithText(InkWell, 'Item 2')).height, 75);
+    expect(tester.getSize(find.widgetWithText(InkWell, 'Item 3')).height, 100);
+
+    // Menu item children which whose height is less than the PopupMenuItem
+    // are vertically centered.
+    expect(
+      tester.getRect(find.widgetWithText(menuItemType, 'Item 0')).center.dy,
+      tester.getRect(find.text('Item 0')).center.dy,
+    );
+    expect(
+      tester.getRect(find.widgetWithText(menuItemType, 'Item 2')).center.dy,
+      tester.getRect(find.text('Item 2')).center.dy,
+    );
+  });
+
+  testWidgets('Update PopupMenuItem layout while the menu is visible', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
+
+    Widget buildFrame({
+      TextDirection textDirection = TextDirection.ltr,
+      double fontSize = 24,
+    }) {
+      return MaterialApp(
+        builder: (BuildContext context, Widget child) {
+          return Directionality(
+            textDirection: textDirection,
+            child: PopupMenuTheme(
+              data: PopupMenuTheme.of(context).copyWith(
+                textStyle: Theme.of(context).textTheme.subhead.copyWith(fontSize: fontSize),
+              ),
+              child: child,
+            ),
+          );
+        },
+        home: Scaffold(
+          body: PopupMenuButton<String>(
+            key: popupMenuButtonKey,
+            child: const Text('button'),
+            onSelected: (String result) { },
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: '0',
+                  child: Text('Item 0'),
+                ),
+                const PopupMenuItem<String>(
+                  value: '1',
+                  child: Text('Item 1'),
+                ),
+              ];
+            },
+          ),
+        ),
+      );
+    }
+
+    // Show the menu
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    // The menu items should have their default heights and horizontal alignment.
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 1')).height, 48);
+    expect(tester.getTopLeft(find.text('Item 0')).dx, 24);
+    expect(tester.getTopLeft(find.text('Item 1')).dx, 24);
+
+    // While the menu is up, change its font size to 64 (default is 16).
+    await tester.pumpWidget(buildFrame(fontSize: 64));
+    await tester.pumpAndSettle(); // Theme changes are animated.
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 128);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 1')).height, 128);
+    expect(tester.getSize(find.text('Item 0')).height, 128);
+    expect(tester.getSize(find.text('Item 1')).height, 128);
+    expect(tester.getTopLeft(find.text('Item 0')).dx, 24);
+    expect(tester.getTopLeft(find.text('Item 1')).dx, 24);
+
+    // While the menu is up, change the textDirection to rtl. Now menu items
+    // will be aligned right.
+    await tester.pumpWidget(buildFrame(textDirection: TextDirection.rtl));
+    await tester.pumpAndSettle(); // Theme changes are animated.
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 1')).height, 48);
+    expect(tester.getTopLeft(find.text('Item 0')).dx, 72);
+    expect(tester.getTopLeft(find.text('Item 1')).dx, 72);
+  });
+
+  test("PopupMenuButton's child and icon properties cannot be simultaneously defined", () {
+    expect(() {
+      PopupMenuButton<int>(
+        itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
+        child: Container(),
+        icon: const Icon(Icons.error),
+      );
+    }, throwsAssertionError);
+  });
+
+  testWidgets('PopupMenuButton default tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              // Default Tooltip should be present when [PopupMenuButton.icon]
+              // and [PopupMenuButton.child] are undefined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+              // Default Tooltip should be present when
+              // [PopupMenuButton.child] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                child: const Text('Test text'),
+              ),
+              // Default Tooltip should be present when
+              // [PopupMenuButton.icon] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                icon: const Icon(Icons.check),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // The default tooltip is defined as [MaterialLocalizations.showMenuTooltip]
+    // and it is used when no tooltip is provided.
+    expect(find.byType(Tooltip), findsNWidgets(3));
+    expect(find.byTooltip(const DefaultMaterialLocalizations().showMenuTooltip), findsNWidgets(3));
+  });
+
+  testWidgets('PopupMenuButton custom tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              // Tooltip should work when [PopupMenuButton.icon]
+              // and [PopupMenuButton.child] are undefined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                tooltip: 'Test tooltip',
+              ),
+              // Tooltip should work when
+              // [PopupMenuButton.child] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                tooltip: 'Test tooltip',
+                child: const Text('Test text'),
+              ),
+              // Tooltip should work when
+              // [PopupMenuButton.icon] is defined.
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                tooltip: 'Test tooltip',
+                icon: const Icon(Icons.check),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNWidgets(3));
+    expect(find.byTooltip('Test tooltip',), findsNWidgets(3));
+  });
+
+  testWidgets('Allow Widget for PopupMenuButton.icon', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<int>>[
+                const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('Tap me please!'),
+                ),
+              ];
+            },
+            tooltip: 'Test tooltip',
+            icon: const Text('PopupMenuButton icon'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('PopupMenuButton icon'), findsOneWidget);
+  });
 }
 
 class TestApp extends StatefulWidget {

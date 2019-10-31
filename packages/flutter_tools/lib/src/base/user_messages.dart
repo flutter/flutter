@@ -49,6 +49,7 @@ class UserMessages {
   String androidCantRunJavaBinary(String javaBinary) => 'Cannot execute $javaBinary to determine the version';
   String get androidUnknownJavaVersion => 'Could not determine java version';
   String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
+  String androidJavaMinimumVersion(String javaVersion) => 'Java version $javaVersion is older than the minimum recommended version of 1.8';
   String androidSdkLicenseOnly(String envKey) =>
       'Android SDK contains licenses only.\n'
       'Your first build of an Android application will take longer than usual, '
@@ -167,11 +168,16 @@ class UserMessages {
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
-  String cocoaPodsOutdated(String recVersion, String consequence, String upgradeInstructions) =>
-      'CocoaPods out of date ($recVersion is recommended).\n'
+  String cocoaPodsOutdated(String currentVersion, String recVersion, String consequence, String upgradeInstructions) =>
+      'CocoaPods $currentVersion out of date ($recVersion is recommended).\n'
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
+  String cocoaPodsBrokenInstall(String consequence, String reinstallInstructions) =>
+      'CocoaPods installed but not working.\n'
+      '$consequence\n'
+      'To re-install CocoaPods, run:\n'
+      '$reinstallInstructions';
 
   // Messages used in VsCodeValidator
   String vsCodeVersion(String version) => 'version $version';
@@ -185,9 +191,16 @@ class UserMessages {
       'Visual Studio is missing necessary components. Please re-run the '
       'Visual Studio installer for the "$workload" workload, and include these components:\n'
       '  ${components.join('\n  ')}';
-  String get visualStudioMissing =>
+  String visualStudioMissing(String workload, List<String> components) =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
-      'Download at https://visualstudio.microsoft.com/downloads/.';
+      'Download at https://visualstudio.microsoft.com/downloads/.\n'
+      'Please install the "$workload" workload, including following components:\n  ${components.join('\n  ')}';
+  String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
+      'supported by Flutter yet.';
+  String get visualStudioNotLaunchable =>
+      'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.';
+  String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete. Please reinstall Visual Studio.';
+  String get visualStudioRebootRequired => 'Visual Studio requires a reboot of your system to complete installation.';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';

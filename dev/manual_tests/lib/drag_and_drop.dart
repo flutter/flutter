@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ExampleDragTarget extends StatefulWidget {
@@ -295,6 +297,12 @@ class DragAndDropAppState extends State<DragAndDropApp> {
 }
 
 void main() {
+  if (Platform.isMacOS) {
+    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
+    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+
   runApp(MaterialApp(
     title: 'Drag and Drop Flutter Demo',
     home: DragAndDropApp(),

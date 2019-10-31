@@ -20,13 +20,11 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-          'lib/arm64-v8a/libflutter.so',
+          ...flutterAssets,
+          ...debugAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
+          'lib/arm64-v8a/libflutter.so',
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
@@ -47,19 +45,15 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
+          'lib/arm64-v8a/libflutter.so',
+          'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
+        checkItDoesNotContain<String>(debugAssets, apkFiles);
       });
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
@@ -70,19 +64,15 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
+        checkItDoesNotContain<String>(debugAssets, apkFiles);
       });
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
@@ -94,32 +84,24 @@ Future<void> main() async {
         final Iterable<String> armApkFiles = await getFilesInApk(pluginProject.releaseArmApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
         ], armApkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], armApkFiles);
+        checkItDoesNotContain<String>(debugAssets, armApkFiles);
 
         final Iterable<String> arm64ApkFiles = await getFilesInApk(pluginProject.releaseArm64ApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], arm64ApkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], arm64ApkFiles);
+        checkItDoesNotContain<String>(debugAssets, arm64ApkFiles);
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -130,17 +112,18 @@ Future<void> main() async {
         // for arm and arm64.
         final List<String> targetPlatforms = <String>[
           'android-arm',
-          'android-arm64'
+          'android-arm64',
         ];
         for (final String targetPlatform in targetPlatforms) {
           final String androidArmSnapshotPath = path.join(
-              project.rootPath,
-              'build',
-              'app',
-              'intermediates',
-              'flutter',
-              'release',
-              targetPlatform);
+            project.rootPath,
+            'build',
+            'app',
+            'intermediates',
+            'flutter',
+            'release',
+            targetPlatform,
+          );
 
           final String sharedLibrary = path.join(androidArmSnapshotPath, 'app.so');
           if (!File(sharedLibrary).existsSync()) {

@@ -21,7 +21,7 @@
    [viewController viewWillAppear:NO];
    [viewController viewDidDisappear:NO];
  }
- XCTAssertNil(weakEngine);
+ XCTAssertNil(weakEngine, @"Engine failed to release.");
 }
 
 @end

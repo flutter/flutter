@@ -4,6 +4,7 @@
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
+import '../../build_info.dart';
 import '../../globals.dart';
 import '../build_system.dart';
 
@@ -17,7 +18,7 @@ class UnpackWindows extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/windows.dart'),
-    Source.artifact(Artifact.windowsDesktopPath),
+    Source.artifact(Artifact.windowsDesktopPath, mode: BuildMode.debug),
   ];
 
   @override
@@ -29,22 +30,20 @@ class UnpackWindows extends Target {
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_export.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_messenger.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_plugin_registrar.h'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_glfw.h'),
+    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/icudtl.dat'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/cpp_client_wrapper/*'),
   ];
 
   @override
   List<Target> get dependencies => const <Target>[];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     // This path needs to match the prefix in the rule below.
     final String basePath = artifacts.getArtifactPath(Artifact.windowsDesktopPath);
-    for (File input in inputFiles) {
-      if (fs.path.basename(input.path) == 'windows.dart') {
-        continue;
-      }
+    for (File input in fs.directory(basePath)
+        .listSync(recursive: true)
+        .whereType<File>()) {
       final String outputPath = fs.path.join(
         environment.projectDir.path,
         'windows',

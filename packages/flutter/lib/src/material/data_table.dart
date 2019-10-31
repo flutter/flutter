@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
 import 'dropdown.dart';
@@ -262,7 +263,7 @@ class DataTable extends StatelessWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
-    this.dataRowHeight = 48.0,
+    this.dataRowHeight = kMinInteractiveDimension,
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
@@ -321,7 +322,8 @@ class DataTable extends StatelessWidget {
 
   /// The height of each row (excluding the row that contains column headings).
   ///
-  /// This value defaults to 48.0 to adhere to the Material Design specifications.
+  /// This value defaults to kMinInteractiveDimension to adhere to the Material
+  /// Design specifications.
   final double dataRowHeight;
 
   /// The height of the heading row.

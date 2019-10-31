@@ -64,6 +64,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -73,7 +74,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-    await gesture.removePointer();
   },
     semanticsEnabled: true,
     skip: isBrowser,
@@ -129,6 +129,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -138,7 +139,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-    await gesture.removePointer();
   },
     semanticsEnabled: true,
     skip: isBrowser,
@@ -198,6 +198,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(textColor(), hoverColor);
@@ -207,7 +208,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(textColor(), pressedColor);
-    await gesture.removePointer();
   });
 
   testWidgets('FlatButton uses stateful color for icon color in different states', (WidgetTester tester) async {
@@ -264,6 +264,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(iconColor(), hoverColor);
@@ -273,7 +274,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(iconColor(), pressedColor);
-    await gesture.removePointer();
   });
 
   testWidgets('FlatButton ignores disabled text color if text color is stateful', (WidgetTester tester) async {
@@ -332,6 +332,81 @@ void main() {
         tester.renderObject(find.byType(FlatButton)),
         paintsExactlyCountTimes(#clipPath, 0),
     );
+  });
+
+  testWidgets('FlatButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+
+    bool wasPressed;
+    Finder flatButton;
+
+    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(
+          child: const Text('button'),
+          onPressed: onPressed,
+          onLongPress: onLongPress,
+        ),
+      );
+    }
+
+    // onPressed not null, onLongPress null.
+    wasPressed = false;
+    await tester.pumpWidget(
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+    );
+    flatButton = find.byType(FlatButton);
+    expect(tester.widget<FlatButton>(flatButton).enabled, true);
+    await tester.tap(flatButton);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress not null.
+    wasPressed = false;
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+    );
+    flatButton = find.byType(FlatButton);
+    expect(tester.widget<FlatButton>(flatButton).enabled, true);
+    await tester.longPress(flatButton);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress null.
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: null),
+    );
+    flatButton = find.byType(FlatButton);
+    expect(tester.widget<FlatButton>(flatButton).enabled, false);
+  });
+
+  testWidgets('FlatButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+    bool didPressButton = false;
+    bool didLongPressButton = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(
+          onPressed: () {
+            didPressButton = true;
+          },
+          onLongPress: () {
+            didLongPressButton = true;
+          },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final Finder flatButton = find.byType(FlatButton);
+    expect(tester.widget<FlatButton>(flatButton).enabled, true);
+
+    expect(didPressButton, isFalse);
+    await tester.tap(flatButton);
+    expect(didPressButton, isTrue);
+
+    expect(didLongPressButton, isFalse);
+    await tester.longPress(flatButton);
+    expect(didLongPressButton, isTrue);
   });
 }
 

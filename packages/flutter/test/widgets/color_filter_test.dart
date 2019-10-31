@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 void main() {
   testWidgets('Color filter - red', (WidgetTester tester) async {
@@ -17,16 +18,12 @@ void main() {
     );
     await expectLater(
       find.byType(ColorFiltered),
-      matchesGoldenFile(
-        'color_filter_red.png',
-        version: 1,
-      ),
+      matchesGoldenFile('color_filter_red.png'),
     );
   });
 
   testWidgets('Color filter - sepia', (WidgetTester tester) async {
-    // TODO(dnfield): This should be const. https://github.com/dart-lang/sdk/issues/37503
-    final ColorFilter sepia = ColorFilter.matrix(<double>[
+    const ColorFilter sepia = ColorFilter.matrix(<double>[
       0.39,  0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
       0.272, 0.534, 0.131, 0, 0, //
@@ -54,14 +51,33 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     await expectLater(
       find.byType(ColorFiltered),
-      matchesGoldenFile(
-        'color_filter_sepia.png',
-        version: 1,
-      ),
+      matchesGoldenFile('color_filter_sepia.png'),
     );
+  });
+
+  testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
+    Future<void> pumpWithColor(Color color) async {
+      await tester.pumpWidget(
+        RepaintBoundary(
+          child: ColorFiltered(
+            colorFilter: ColorFilter.mode(color, BlendMode.color),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+    }
+
+    await pumpWithColor(Colors.red);
+    final RenderObject renderObject = tester.firstRenderObject(find.byType(ColorFiltered));
+    final ColorFilterLayer originalLayer = renderObject.debugLayer;
+    expect(originalLayer, isNotNull);
+
+    // Change color to force a repaint.
+    await pumpWithColor(Colors.green);
+    expect(renderObject.debugLayer, same(originalLayer));
   });
 }

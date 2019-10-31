@@ -4,6 +4,7 @@
 @TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -15,7 +16,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../services/fake_platform_views.dart';
 
 void main() {
-
   group('AndroidView', () {
     testWidgets('Create Android view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -623,8 +623,7 @@ void main() {
       );
     });
 
-    testWidgets(
-        'Android view can claim gesture after all pointers are up', (WidgetTester tester) async {
+    testWidgets('Android view can claim gesture after all pointers are up', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -838,7 +837,15 @@ void main() {
         ),
       );
 
-      final SemanticsNode semantics =  tester.getSemantics(find.byType(AndroidView));
+      // Find the first _AndroidPlatformView widget inside of the AndroidView so
+      // that it finds the right RenderObject when looking for semantics.
+      final Finder semanticsFinder = find.byWidgetPredicate(
+            (Widget widget) {
+          return widget.runtimeType.toString() == '_AndroidPlatformView';
+        },
+        description: '_AndroidPlatformView widget inside AndroidView',
+      );
+      final SemanticsNode semantics = tester.getSemantics(semanticsFinder.first);
 
       // Platform view has not been created yet, no platformViewId.
       expect(semantics.platformViewId, null);
@@ -889,8 +896,8 @@ void main() {
       tester.widget(
           find.descendant(
               of: find.byType(AndroidView),
-              matching: find.byType(Focus)
-          )
+              matching: find.byType(Focus),
+          ),
       );
       final Element containerElement = tester.element(find.byKey(containerKey));
       final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode;
@@ -1581,7 +1588,7 @@ void main() {
               height: 100,
             ),
           ],
-        )
+        ),
       );
 
       // First frame is before the platform view was created so the render object
@@ -1763,8 +1770,7 @@ void main() {
 
     });
 
-    testWidgets(
-        'PlatformViewSurface can claim gesture after all pointers are up', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface can claim gesture after all pointers are up', (WidgetTester tester) async {
       bool verticalDragAcceptedByParent = false;
       // The long press recognizer rejects the gesture after the PlatformViewSurface gets the pointer up event.
       // This test makes sure that the PlatformViewSurface can win the gesture after it got the pointer up event.
@@ -1917,7 +1923,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
 
       await tester.pumpWidget(
@@ -1928,9 +1935,277 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
       expect(factoryInvocationCount, 1);
+    });
+
+    testWidgets('PlatformViewLink Widget init, should create a SizedBox widget before onPlatformViewCreated and a PlatformViewSurface after', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      int createdPlatformViewId;
+
+      PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
+
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params){
+          onPlatformViewCreatedCallBack = params.onPlatformViewCreated;
+          createdPlatformViewId = params.id;
+          return FakePlatformViewController(params.id);
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+              controller: controller,
+              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+      });
+
+      await tester.pumpWidget(platformViewLink);
+      final SizedBox sizedBox = tester.allWidgets.firstWhere((Widget widget) => widget is SizedBox);
+      expect(sizedBox, isNotNull);
+
+      onPlatformViewCreatedCallBack(createdPlatformViewId);
+
+      await tester.pump();
+
+      final PlatformViewSurface surface = tester.allWidgets.firstWhere((Widget widget) => widget is PlatformViewSurface);
+      expect(surface, isNotNull);
+
+      expect(createdPlatformViewId, currentViewId+1);
+    });
+
+    testWidgets('PlatformViewLink Widget dispose', (WidgetTester tester) async {
+      FakePlatformViewController disposedController;
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params){
+          disposedController = FakePlatformViewController(params.id);
+          params.onPlatformViewCreated(params.id);
+          return disposedController;
+        },
+        surfaceFactory: (BuildContext context,PlatformViewController controller) {
+          return PlatformViewSurface(
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+              controller: controller,
+              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+      });
+
+      await tester.pumpWidget(platformViewLink);
+
+      await tester.pumpWidget(Container());
+
+      expect(disposedController.disposed, true);
+    });
+
+    testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final List<int> ids = <int>[];
+
+      FakePlatformViewController controller;
+
+      PlatformViewLink createPlatformViewLink() {
+        return PlatformViewLink(
+          key: key,
+          viewType: 'webview',
+          onCreatePlatformView: (PlatformViewCreationParams params){
+            ids.add(params.id);
+            controller = FakePlatformViewController(params.id);
+            params.onPlatformViewCreated(params.id);
+            return controller;
+          },
+          surfaceFactory: (BuildContext context, PlatformViewController controller) {
+            return PlatformViewSurface(
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+              controller: controller,
+              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            );
+          },
+        );
+      }
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: createPlatformViewLink(),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        Center(
+          child: Container(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: createPlatformViewLink(),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        ids,
+        unorderedEquals(<int>[
+          currentViewId+1,
+        ]),
+      );
+    });
+
+    testWidgets('PlatformViewLink re-initializes when view type changes', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final List<int> ids = <int>[];
+      final List<int> surfaceViewIds = <int>[];
+      final List<String> viewTypes = <String>[];
+
+      PlatformViewLink createPlatformViewLink(String viewType) {
+        return PlatformViewLink(
+          viewType: viewType,
+          onCreatePlatformView: (PlatformViewCreationParams params){
+            ids.add(params.id);
+            viewTypes.add(params.viewType);
+            controller = FakePlatformViewController(params.id);
+            params.onPlatformViewCreated(params.id);
+            return controller;
+          },
+          surfaceFactory: (BuildContext context, PlatformViewController controller) {
+            surfaceViewIds.add(controller.viewId);
+            return PlatformViewSurface(
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+              controller: controller,
+              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            );
+          },
+        );
+      }
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: createPlatformViewLink('webview'),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: createPlatformViewLink('maps'),
+          ),
+        ),
+      );
+
+      expect(
+        ids,
+        unorderedEquals(<int>[
+          currentViewId+1, currentViewId+2,
+        ]),
+      );
+
+      expect(
+        surfaceViewIds,
+        unorderedEquals(<int>[
+          currentViewId+1, currentViewId+2,
+        ]),
+      );
+
+      expect(
+        viewTypes,
+        unorderedEquals(<String>[
+          'webview', 'maps',
+        ]),
+      );
+    });
+
+    testWidgets('PlatformViewLink can take any widget to return in the SurfaceFactory', (WidgetTester tester) async {
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params){
+          params.onPlatformViewCreated(params.id);
+          return FakePlatformViewController(params.id);
+        },
+        surfaceFactory: (BuildContext context,PlatformViewController controller) {
+          return Container();
+        });
+
+      await tester.pumpWidget(platformViewLink);
+
+      final Container container = tester.allWidgets.firstWhere((Widget widget){
+        return widget is Container;
+      });
+      expect(container, isNotNull);
+    });
+
+    testWidgets('PlatformViewLink manages the focus properly', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      FakePlatformViewController controller;
+      ValueChanged<bool> focusChanged;
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params){
+          params.onPlatformViewCreated(params.id);
+          focusChanged = params.onFocusChanged;
+          controller = FakePlatformViewController(params.id);
+          return controller;
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        );
+      });
+      await tester.pumpWidget(
+        Center(
+          child: Column(
+            children: <Widget>[
+              SizedBox(child: platformViewLink, width: 300, height: 300,),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
+            ],
+          ),
+        ),
+      );
+      final Focus platformViewFocusWidget =
+      tester.widget(
+          find.descendant(
+              of: find.byType(PlatformViewLink),
+              matching: find.byType(Focus),
+          ),
+      );
+      final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode;
+      final Element containerElement = tester.element(find.byKey(containerKey));
+      final FocusNode containerFocusNode = Focus.of(containerElement);
+
+      containerFocusNode.requestFocus();
+      await tester.pump();
+
+      expect(containerFocusNode.hasFocus, true);
+      expect(platformViewFocusNode.hasFocus, false);
+
+      // ask the platform view to gain focus
+      focusChanged(true);
+      await tester.pump();
+
+      expect(containerFocusNode.hasFocus, false);
+      expect(platformViewFocusNode.hasFocus, true);
+      expect(controller.focusCleared, false);
+      // ask the container to gain focus, and the platform view should clear focus.
+      containerFocusNode.requestFocus();
+      await tester.pump();
+
+      expect(containerFocusNode.hasFocus, true);
+      expect(platformViewFocusNode.hasFocus, false);
+      expect(controller.focusCleared, true);
     });
   });
 }

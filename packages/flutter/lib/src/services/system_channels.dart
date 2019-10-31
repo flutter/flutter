@@ -27,6 +27,24 @@ class SystemChannels {
   ///  * [WidgetsBindingObserver.didPopRoute] and
   ///    [WidgetsBindingObserver.didPushRoute], which expose this channel's
   ///    methods.
+  ///
+  /// The following methods are used for the opposite direction data flow. The
+  /// framework notifies the engine about the route changes.
+  ///
+  ///  * `routePushed`, which is called when a route is pushed. (e.g. A modal
+  ///  replaces the entire screen.)
+  ///
+  ///  * `routePopped`, which is called when a route is popped. (e.g. A dialog,
+  ///  such as time picker is closed.)
+  ///
+  ///  * `routeReplaced`, which is called when a route is replaced.
+  ///
+  /// See also:
+  ///
+  ///  * [Navigator] which manages transitions from one page to another.
+  ///    [Navigator.push], [Navigator.pushReplacement], [Navigator.pop] and
+  ///    [Navigator.replace], utilize this channel's methods to send route
+  ///    change information from framework to engine.
   static const MethodChannel navigation = MethodChannel(
       'flutter/navigation',
       JSONMethodCodec(),

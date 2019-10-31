@@ -5,6 +5,8 @@ import 'package:{{projectName}}/{{projectName}}.dart';
 void main() {
   const MethodChannel channel = MethodChannel('{{projectName}}');
 
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       return '42';

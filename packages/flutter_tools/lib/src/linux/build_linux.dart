@@ -5,23 +5,19 @@
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
-  final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 export FLUTTER_ROOT=${Cache.flutterRoot}
-export BUILD=$buildFlag
 export TRACK_WIDGET_CREATION=${buildInfo?.trackWidgetCreation == true}
 export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
@@ -34,32 +30,36 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   }
 
   /// Cache flutter configuration files in the linux directory.
-  linuxProject.cacheDirectory.childFile('generated_config')
+  linuxProject.generatedMakeConfigFile
     ..createSync(recursive: true)
     ..writeAsStringSync(buffer.toString());
 
+  if (!buildInfo.isDebug) {
+    const String warning = '🚧 ';
+    printStatus(warning * 20);
+    printStatus('Warning: Only debug is currently implemented for Linux. This is effectively a debug build.');
+    printStatus('See https://github.com/flutter/flutter/issues/38478 for details and updates.');
+    printStatus(warning * 20);
+    printStatus('');
+  }
+
   // Invoke make.
+  final String buildFlag = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Stopwatch sw = Stopwatch()..start();
-  final Process process = await processManager.start(<String>[
-    'make',
-    '-C',
-    linuxProject.editableHostAppDirectory.path,
-  ], runInShell: true);
   final Status status = logger.startProgress(
     'Building Linux application...',
     timeout: null,
   );
   int result;
   try {
-    process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printError);
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printTrace);
-    result = await process.exitCode;
+    result = await processUtils.stream(<String>[
+      'make',
+      '-C',
+      linuxProject.makeFile.parent.path,
+      'BUILD=$buildFlag',
+    ], trace: true);
+  } on ArgumentError {
+    throwToolExit('make not found. Run \'flutter doctor\' for more information.');
   } finally {
     status.cancel();
   }

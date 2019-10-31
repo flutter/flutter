@@ -8,11 +8,13 @@ import 'dart:io' show ProcessResult, Process;
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -30,7 +32,7 @@ class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
 class MockSimControl extends Mock implements SimControl {}
-class MockIOSWorkflow extends Mock implements IOSWorkflow {}
+class MockPlistUtils extends Mock implements PlistParser {}
 
 void main() {
   FakePlatform osx;
@@ -183,6 +185,25 @@ void main() {
     });
   });
 
+  testUsingContext('builds with targetPlatform', () async {
+    final IOSSimulator simulator = IOSSimulator('x', name: 'iPhone X');
+    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
+    });
+    await simulator.sideloadUpdatedAssetsForInstalledApplicationBundle(BuildInfo.debug, 'lib/main.dart');
+
+    final VerificationResult result = verify(buildSystem.build(any, captureAny));
+    final Environment environment = result.captured.single;
+    expect(environment.defines, <String, String>{
+      kTargetFile: 'lib/main.dart',
+      kTargetPlatform: 'ios',
+      kBuildMode: 'debug',
+      kTrackWidgetCreation: 'false',
+    });
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => MockBuildSystem(),
+  });
+
   group('Simulator screenshot', () {
     MockXcode mockXcode;
     MockProcessManager mockProcessManager;
@@ -222,12 +243,12 @@ void main() {
         await deviceUnderTest.takeScreenshot(mockFile);
         verify(mockProcessManager.run(
           <String>[
-              '/usr/bin/xcrun',
-              'simctl',
-              'io',
-              'x',
-              'screenshot',
-              fs.path.join('some', 'path', 'to', 'screenshot.png'),
+            '/usr/bin/xcrun',
+            'simctl',
+            'io',
+            'x',
+            'screenshot',
+            fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],
           environment: null,
           workingDirectory: null,
@@ -338,7 +359,7 @@ void main() {
 
       final IOSSimulator device = IOSSimulator('123456', simulatorCategory: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(
-        app: BuildableIOSApp(mockIosProject),
+        app: await BuildableIOSApp.fromProject(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();
@@ -390,14 +411,15 @@ void main() {
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      when(mockProcessManager.runSync(any))
-          .thenReturn(ProcessResult(mockPid, 0, validSimControlOutput, ''));
+      when(mockProcessManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(mockPid, 0, validSimControlOutput, '');
+      });
 
       simControl = SimControl();
     });
 
-    testUsingContext('getDevices succeeds', () {
-      final List<SimDevice> devices = simControl.getDevices();
+    testUsingContext('getDevices succeeds', () async {
+      final List<SimDevice> devices = await simControl.getDevices();
 
       final SimDevice watch = devices[0];
       expect(watch.category, 'watchOS 4.3');
@@ -426,6 +448,23 @@ void main() {
       ProcessManager: () => mockProcessManager,
       SimControl: () => simControl,
     });
+
+    testUsingContext('getDevices handles bad simctl output', () async {
+      when(mockProcessManager.run(any))
+          .thenAnswer((Invocation _) async => ProcessResult(mockPid, 0, 'Install Started', ''));
+      final List<SimDevice> devices = await simControl.getDevices();
+
+      expect(devices, isEmpty);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      SimControl: () => simControl,
+    });
+
+    testUsingContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
+      final IOSSimulator iosSimulatorA = IOSSimulator('x', name: 'Testo', simulatorCategory: 'NaN');
+
+      expect(await iosSimulatorA.sdkMajorVersion, 11);
+    });
   });
 
   group('startApp', () {
@@ -436,23 +475,21 @@ void main() {
     });
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
-        final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
-        when(iosWorkflow.getPlistValueFromFile(any, any)).thenReturn('correct');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
+      when(PlistParser.instance.getValueFromFile(any, any)).thenReturn('correct');
 
-        final Directory mockDir = fs.currentDirectory;
-        final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+      final Directory mockDir = fs.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
-        const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
-        final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
-        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
+      final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
-        verify(simControl.launch(any, 'correct', any));
-      },
-      overrides: <Type, Generator>{
-        SimControl: () => simControl,
-        IOSWorkflow: () => MockIOSWorkflow()
-      },
-    );
+      verify(simControl.launch(any, 'correct', any));
+    }, overrides: <Type, Generator>{
+      SimControl: () => simControl,
+      PlistParser: () => MockPlistUtils(),
+    });
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
@@ -470,6 +507,7 @@ flutter:
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
@@ -481,6 +519,7 @@ flutter:
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
@@ -491,5 +530,8 @@ flutter:
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
+
+class MockBuildSystem extends Mock implements BuildSystem {}

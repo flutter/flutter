@@ -46,7 +46,11 @@ void main() {
     expect(baseSize.height, equals(14.0));
 
     await tester.pumpWidget(const Center(
-      child: Text('Hello', textScaleFactor: 1.5, textDirection: TextDirection.ltr),
+      child: Text(
+        'Hello',
+        textScaleFactor: 1.5,
+        textDirection: TextDirection.ltr,
+      ),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -102,8 +106,14 @@ void main() {
           TextSpan(
             text: 'Hello',
             children: <TextSpan>[
-              TextSpan(text: ' beautiful ', style: TextStyle(fontStyle: FontStyle.italic)),
-              TextSpan(text: 'world', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: ' beautiful ',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+              TextSpan(
+                text: 'world',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           textDirection: TextDirection.ltr,
@@ -116,10 +126,47 @@ void main() {
     expect(text.text.style.fontSize, 20.0);
   });
 
+  testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/35869
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <InlineSpan>[
+            const TextSpan(
+              text: 'a very very very very very very very very very very long line',
+            ),
+            WidgetSpan(
+              child: SizedBox(
+                width: 20,
+                height: 40,
+                child: Card(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      const Text('\$\$', semanticsLabel: 'Double dollars', textDirection: TextDirection.ltr)
+      const Text(
+        '\$\$',
+        semanticsLabel: 'Double dollars',
+        textDirection: TextDirection.ltr,
+      )
     );
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -129,7 +176,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
 
     await tester.pumpWidget(
       const Directionality(
@@ -137,7 +192,15 @@ void main() {
         child: Text('\$\$', semanticsLabel: 'Double dollars')),
     );
 
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -169,13 +232,22 @@ void main() {
             TestSemantics(
               label: 'Clickable',
               actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
               textDirection: TextDirection.ltr,
             ),
           ],
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -187,7 +259,10 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'world',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: ' this is a '),
             const TextSpan(text: 'cat-astrophe'),
           ],
@@ -207,9 +282,8 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               label: ' this is a cat-astrophe',
@@ -219,7 +293,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -233,7 +315,10 @@ void main() {
           TextSpan(
             children: <TextSpan>[
               const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
-              TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+              TextSpan(
+                text: 'world',
+                recognizer: TapGestureRecognizer()..onTap = () { },
+              ),
             ],
             style: textStyle,
           ),
@@ -252,13 +337,22 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap]
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
           ],
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -270,9 +364,15 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'world',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: ' this is a '),
-            const TextSpan(text: 'cat-astrophe', semanticsLabel: 'regrettable event'),
+            const TextSpan(
+              text: 'cat-astrophe',
+              semanticsLabel: 'regrettable event',
+            ),
           ],
           style: textStyle,
         ),
@@ -290,9 +390,8 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               label: ' this is a regrettable event',
@@ -302,7 +401,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   }, skip: isBrowser);
 
@@ -316,14 +423,20 @@ void main() {
           style: textStyle,
           children: <TextSpan>[
             const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
-            TextSpan(text: 'BOY', recognizer: LongPressGestureRecognizer()..onLongPress = () { }),
+            TextSpan(
+              text: 'BOY',
+              recognizer: LongPressGestureRecognizer()..onLongPress = () { },
+            ),
             const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
-            TextSpan(text: 'SIR', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'SIR',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
           ],
         ),
         textDirection: TextDirection.ltr,
-      )
+      ),
     );
     // The expected visual order of the text is:
     //   hello world RIS OD you OD WOH YOB good bye
@@ -341,9 +454,8 @@ void main() {
               rect: const Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
               label: 'RIS',
               textDirection: TextDirection.rtl,  // in the last string we switched to RTL using RLE.
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               rect: const Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
@@ -367,9 +479,56 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+      ),
+    );
     semantics.dispose();
   }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
+
+  testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <TextSpan>[
+            TextSpan(
+              text: 'click me',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'click me',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink]
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(
+      expectedSemantics,
+      ignoreTransform: true,
+      ignoreId: true,
+      ignoreRect: true,
+    ));
+    semantics.dispose();
+  });
 
   testWidgets('inline widgets generate semantic nodes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -379,7 +538,10 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(text: 'a '),
-            TextSpan(text: 'pebble', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'pebble',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: ' in the '),
             WidgetSpan(
               child: SizedBox(
@@ -411,9 +573,8 @@ void main() {
             TestSemantics(
               label: 'pebble',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               label: ' in the ',
@@ -431,7 +592,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   }, skip: isBrowser);
 
@@ -443,7 +612,10 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(text: 'a '),
-            TextSpan(text: 'pebble', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'pebble',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: ' in the '),
             WidgetSpan(
               child: SizedBox(
@@ -478,9 +650,8 @@ void main() {
             TestSemantics(
               label: 'pebble',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
               rect: const Rect.fromLTRB(52.0, 48.0, 228.0, 84.0),
             ),
             TestSemantics(
@@ -502,7 +673,14 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true,));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+      ),
+    );
     semantics.dispose();
   }, skip: isBrowser);
 
@@ -523,7 +701,10 @@ void main() {
       text: 'a long long long long text, should be clip',
     );
 
-    expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
+    expect(
+      find.byType(Text),
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)),
+    );
   }, skip: isBrowser);
 
   testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
@@ -543,7 +724,10 @@ void main() {
       text: 'a long long long long text, should be clip',
     );
 
-    expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
+    expect(
+      find.byType(Text),
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)),
+    );
   });
 
   testWidgets('Overflow is clipping correctly - short text with overflow: fade', (WidgetTester tester) async {
@@ -585,7 +769,9 @@ void main() {
               child: Container(
                 // Each word takes up more than a half of a line. Together they
                 // wrap onto two lines, but leave a lot of extra space.
-                child: Text('twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+                child: Text(
+                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywr'
+                    'apwithlotsofextraspace',
                   textDirection: TextDirection.ltr,
                   textWidthBasis: textWidthBasis,
                 ),

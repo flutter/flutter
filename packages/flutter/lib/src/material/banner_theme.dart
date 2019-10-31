@@ -116,7 +116,7 @@ class MaterialBannerThemeData extends Diagnosticable {
 ///
 /// Values specified here are used for [MaterialBanner] properties that are not
 /// given an explicit non-null value.
-class MaterialBannerTheme extends InheritedWidget {
+class MaterialBannerTheme extends InheritedTheme {
   /// Creates a banner theme that controls the configurations for
   /// [MaterialBanner]s in its widget subtree.
   const MaterialBannerTheme({
@@ -140,8 +140,14 @@ class MaterialBannerTheme extends InheritedWidget {
   /// MaterialBannerThemeData theme = MaterialBannerTheme.of(context);
   /// ```
   static MaterialBannerThemeData of(BuildContext context) {
-    final MaterialBannerTheme popupMenuTheme = context.inheritFromWidgetOfExactType(MaterialBannerTheme);
-    return popupMenuTheme?.data ?? Theme.of(context).bannerTheme;
+    final MaterialBannerTheme bannerTheme = context.inheritFromWidgetOfExactType(MaterialBannerTheme);
+    return bannerTheme?.data ?? Theme.of(context).bannerTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final MaterialBannerTheme ancestorTheme = context.ancestorWidgetOfExactType(MaterialBannerTheme);
+    return identical(this, ancestorTheme) ? child : MaterialBannerTheme(data: data, child: child);
   }
 
   @override

@@ -20,6 +20,7 @@ import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
@@ -34,7 +35,7 @@ IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 /// Specialized exception for expected situations where the ideviceinfo
 /// tool responds with exit code 255 / 'No device found' message
 class IOSDeviceNotFoundError implements Exception {
-  IOSDeviceNotFoundError(this.message);
+  const IOSDeviceNotFoundError(this.message);
 
   final String message;
 
@@ -42,19 +43,64 @@ class IOSDeviceNotFoundError implements Exception {
   String toString() => message;
 }
 
+/// Exception representing an attempt to find information on an iOS device
+/// that failed because the user had not paired the device with the host yet.
+class IOSDeviceNotTrustedError implements Exception {
+  const IOSDeviceNotTrustedError(this.message, this.lockdownCode);
+
+  /// The error message to show to the user.
+  final String message;
+
+  /// The associated `lockdownd` error code.
+  final LockdownReturnCode lockdownCode;
+
+  @override
+  String toString() => '$message (lockdownd error code ${lockdownCode.code})';
+}
+
+/// Class specifying possible return codes from `lockdownd`.
+///
+/// This contains only a subset of the return codes that `lockdownd` can return,
+/// as we only care about a limited subset. These values should be kept in sync with
+/// https://github.com/libimobiledevice/libimobiledevice/blob/26373b3/include/libimobiledevice/lockdown.h#L37
+class LockdownReturnCode {
+  const LockdownReturnCode._(this.code);
+
+  /// Creates a new [LockdownReturnCode] from the specified OS exit code.
+  ///
+  /// If the [code] maps to one of the known codes, a `const` instance will be
+  /// returned.
+  factory LockdownReturnCode.fromCode(int code) {
+    final Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
+      pairingDialogResponsePending.code: pairingDialogResponsePending,
+      invalidHostId.code: invalidHostId,
+    };
+
+    return knownCodes.containsKey(code) ? knownCodes[code] : LockdownReturnCode._(code);
+  }
+
+  /// The OS exit code.
+  final int code;
+
+  /// Error code indicating that the pairing dialog has been shown to the user,
+  /// and the user has not yet responded as to whether to trust the host.
+  static const LockdownReturnCode pairingDialogResponsePending = LockdownReturnCode._(19);
+
+  /// Error code indicating that the host is not trusted.
+  ///
+  /// This can happen if the user explicitly says "do not trust this  computer"
+  /// or if they revoke all trusted computers in the device settings.
+  static const LockdownReturnCode invalidHostId = LockdownReturnCode._(21);
+}
+
 class IMobileDevice {
   IMobileDevice()
-      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios)
-          ?? 'idevice_id', // TODO(fujino): remove fallback once g3 updated
-        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios)
-          ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
-        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios)
-          ?? 'idevicename', // TODO(fujino): remove fallback once g3 updated
-        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios)
-          ?? 'idevicesyslog', // TODO(fujino): remove fallback once g3 updated
-        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios)
-          ?? 'idevicescreenshot' { // TODO(fujino): remove fallback once g3 updated
-        }
+      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
+        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
+        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
+        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+
   final String _ideviceIdPath;
   final String _ideviceinfoPath;
   final String _idevicenamePath;
@@ -62,10 +108,10 @@ class IMobileDevice {
   final String _idevicescreenshotPath;
 
   bool get isInstalled {
-    _isInstalled ??= exitsHappy(
+    _isInstalled ??= processUtils.exitsHappySync(
       <String>[
         _ideviceIdPath,
-        '-h'
+        '-h',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[cache.dyLdLibEntry]
@@ -91,11 +137,11 @@ class IMobileDevice {
     final Map<String, String> executionEnv = Map<String, String>.fromEntries(
       <MapEntry<String, String>>[cache.dyLdLibEntry]
     );
-    final ProcessResult ideviceResult = (await runAsync(
+    final ProcessResult ideviceResult = (await processUtils.run(
       <String>[
         _ideviceinfoPath,
         '-u',
-        fakeIphoneId
+        fakeIphoneId,
       ],
       environment: executionEnv,
     )).processResult;
@@ -105,7 +151,7 @@ class IMobileDevice {
     }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
-    final ProcessResult result = (await runAsync(
+    final ProcessResult result = (await processUtils.run(
       <String>[
         _ideviceIdPath,
         '-l',
@@ -116,7 +162,7 @@ class IMobileDevice {
       _isWorking = true;
     } else {
       // Check that we can look up the names of any attached devices.
-      _isWorking = await exitsHappyAsync(
+      _isWorking = await processUtils.exitsHappy(
         <String>[_idevicenamePath],
         environment: executionEnv,
       );
@@ -130,14 +176,15 @@ class IMobileDevice {
       final ProcessResult result = await processManager.run(
         <String>[
           _ideviceIdPath,
-          '-l'
+          '-l',
         ],
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry]
         ),
       );
-      if (result.exitCode != 0)
+      if (result.exitCode != 0) {
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
+      }
       return result.stdout;
     } on ProcessException {
       throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
@@ -152,16 +199,32 @@ class IMobileDevice {
           '-u',
           deviceID,
           '-k',
-          key
+          key,
         ],
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry]
         ),
       );
-      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
-        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
-      if (result.exitCode != 0)
+      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found')) {
+        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}. Try unlocking attached devices.');
+      }
+      if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
+        if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
+          throw const IOSDeviceNotTrustedError(
+            'Device info unavailable. Is the device asking to "Trust This Computer?"',
+            LockdownReturnCode.pairingDialogResponsePending,
+          );
+        }
+        if (result.stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
+          throw const IOSDeviceNotTrustedError(
+            'Device info unavailable. Device pairing "trust" may have been revoked.',
+            LockdownReturnCode.invalidHostId,
+          );
+        }
+      }
+      if (result.exitCode != 0) {
         throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
+      }
       return result.stdout.trim();
     } on ProcessException {
       throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
@@ -170,7 +233,7 @@ class IMobileDevice {
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
-    return runCommand(
+    return processUtils.start(
       <String>[
         _idevicesyslogPath,
         '-u',
@@ -184,11 +247,12 @@ class IMobileDevice {
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
-    return runCheckedAsync(
+    return processUtils.run(
       <String>[
         _idevicescreenshotPath,
-        outputFile.path
+        outputFile.path,
       ],
+      throwOnError: true,
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[cache.dyLdLibEntry]
       ),
@@ -201,15 +265,17 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildInfo buildInfo,
   String targetOverride,
   bool buildForDevice,
-  IOSArch activeArch,
+  DarwinArch activeArch,
   bool codesign = true,
-  bool usesTerminalUi = true,
-}) async {
-  if (!await upgradePbxProjWithFlutterAssets(app.project))
-    return XcodeBuildResult(success: false);
 
-  if (!_checkXcodeVersion())
+}) async {
+  if (!upgradePbxProjWithFlutterAssets(app.project)) {
     return XcodeBuildResult(success: false);
+  }
+
+  if (!_checkXcodeVersion()) {
+    return XcodeBuildResult(success: false);
+  }
 
 
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
@@ -258,9 +324,29 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
+  final FlutterManifest manifest = app.project.parent.manifest;
+  final String buildName = parsedBuildName(manifest: manifest, buildInfo: buildInfo);
+  final bool buildNameIsMissing = buildName == null || buildName.isEmpty;
+
+  if (buildNameIsMissing) {
+    printStatus('Warning: Missing build name (CFBundleShortVersionString).');
+  }
+
+  final String buildNumber = parsedBuildNumber(manifest: manifest, buildInfo: buildInfo);
+  final bool buildNumberIsMissing = buildNumber == null || buildNumber.isEmpty;
+
+  if (buildNumberIsMissing) {
+    printStatus('Warning: Missing build number (CFBundleVersion).');
+  }
+  if (buildNameIsMissing || buildNumberIsMissing) {
+    printError('Action Required: You must set a build name and number in the pubspec.yaml '
+      'file version field before submitting to the App Store.');
+  }
+
   Map<String, String> autoSigningConfigs;
-  if (codesign && buildForDevice)
-    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
+  if (codesign && buildForDevice) {
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+  }
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -317,7 +403,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (activeArch != null) {
-    final String activeArchName = getNameForIOSArch(activeArch);
+    final String activeArchName = getNameForDarwinArch(activeArch);
     if (activeArchName != null) {
       buildCommands.add('ONLY_ACTIVE_ARCH=YES');
       buildCommands.add('ARCHS=$activeArchName');
@@ -330,7 +416,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         'CODE_SIGNING_ALLOWED=NO',
         'CODE_SIGNING_REQUIRED=NO',
         'CODE_SIGNING_IDENTITY=""',
-      ]
+      ],
     );
   }
 
@@ -377,10 +463,12 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Don't log analytics for downstream Flutter commands.
   // e.g. `flutter build bundle`.
   buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
+  buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
+  buildCommands.addAll(environmentVariablesAsXcodeBuildSettings());
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
-  final RunResult buildResult = await runAsync(
+  final RunResult buildResult = await processUtils.run(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,
     allowReentrantFlutter: true,
@@ -397,22 +485,42 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
   flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
-  // Run -showBuildSettings again but with the exact same parameters as the build.
-  final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
-    (List<String>
-        .from(buildCommands)
-        ..add('-showBuildSettings'))
-        // Undocumented behavior: xcodebuild craps out if -showBuildSettings
-        // is used together with -allowProvisioningUpdates or
-        // -allowProvisioningDeviceRegistration and freezes forever.
-        .where((String buildCommand) {
-          return !const <String>[
-            '-allowProvisioningUpdates',
-            '-allowProvisioningDeviceRegistration',
-          ].contains(buildCommand);
-        }).toList(),
-    workingDirectory: app.project.hostAppRoot.path,
-  ));
+  // Run -showBuildSettings again but with the exact same parameters as the
+  // build. showBuildSettings is reported to ocassionally timeout. Here, we give
+  // it a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+  // When there is a timeout, we retry once. See issue #35988.
+  final List<String> showBuildSettingsCommand = (List<String>
+      .from(buildCommands)
+      ..add('-showBuildSettings'))
+      // Undocumented behavior: xcodebuild craps out if -showBuildSettings
+      // is used together with -allowProvisioningUpdates or
+      // -allowProvisioningDeviceRegistration and freezes forever.
+      .where((String buildCommand) {
+        return !const <String>[
+          '-allowProvisioningUpdates',
+          '-allowProvisioningDeviceRegistration',
+        ].contains(buildCommand);
+      }).toList();
+  const Duration showBuildSettingsTimeout = Duration(minutes: 1);
+  Map<String, String> buildSettings;
+  try {
+    final RunResult showBuildSettingsResult = await processUtils.run(
+      showBuildSettingsCommand,
+      throwOnError: true,
+      workingDirectory: app.project.hostAppRoot.path,
+      timeout: showBuildSettingsTimeout,
+      timeoutRetries: 1,
+    );
+    final String showBuildSettings = showBuildSettingsResult.stdout.trim();
+    buildSettings = parseXcodeBuildSettings(showBuildSettings);
+  } on ProcessException catch (e) {
+    if (e.toString().contains('timed out')) {
+      BuildEvent('xcode-show-build-settings-timeout',
+        command: showBuildSettingsCommand.join(' '),
+      ).send();
+    }
+    rethrow;
+  }
 
   if (buildResult.exitCode != 0) {
     printStatus('Failed to build iOS app');
@@ -455,7 +563,16 @@ Future<XcodeBuildResult> buildXcodeProject({
     } else {
       printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
     }
-    return XcodeBuildResult(success: true, output: outputDir);
+    return XcodeBuildResult(
+        success: true,
+        output: outputDir,
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: app.project.hostAppRoot.path,
+          buildForPhysicalDevice: buildForDevice,
+          buildSettings: buildSettings,
+      ),
+    );
   }
 }
 
@@ -463,8 +580,9 @@ String readGeneratedXcconfig(String appPath) {
   final String generatedXcconfigPath =
       fs.path.join(fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
   final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
-  if (!generatedXcconfigFile.existsSync())
+  if (!generatedXcconfigFile.existsSync()) {
     return null;
+  }
   return generatedXcconfigFile.readAsStringSync();
 }
 
@@ -554,8 +672,9 @@ class XcodeBuildExecution {
 const String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
-  if (!platform.isMacOS)
+  if (!platform.isMacOS) {
     return false;
+  }
   if (!xcodeProjectInterpreter.isInstalled) {
     printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
@@ -598,7 +717,10 @@ Future<void> _copyServiceFrameworks(List<Map<String, String>> services, Director
       continue;
     }
     // Shell out so permissions on the dylib are preserved.
-    await runCheckedAsync(<String>['/bin/cp', dylib.path, frameworksDirectory.path]);
+    await processUtils.run(
+      <String>['/bin/cp', dylib.path, frameworksDirectory.path],
+      throwOnError: true,
+    );
   }
 }
 
@@ -614,10 +736,10 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
-Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
+bool upgradePbxProjWithFlutterAssets(IosProject project) {
   final File xcodeProjectFile = project.xcodeProjectInfoFile;
-  assert(await xcodeProjectFile.exists());
-  final List<String> lines = await xcodeProjectFile.readAsLines();
+  assert(xcodeProjectFile.existsSync());
+  final List<String> lines = xcodeProjectFile.readAsLinesSync();
 
   final RegExp oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
   final StringBuffer buffer = StringBuffer();
@@ -626,12 +748,13 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
   for (final String line in lines) {
     final Match match = oldAssets.firstMatch(line);
     if (match != null) {
-      if (printedStatuses.add(match.group(1)))
+      if (printedStatuses.add(match.group(1))) {
         printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
+      }
     } else {
       buffer.writeln(line);
     }
   }
-  await xcodeProjectFile.writeAsString(buffer.toString());
+  xcodeProjectFile.writeAsStringSync(buffer.toString());
   return true;
 }

@@ -122,6 +122,9 @@ To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -a
 ```
 
+This defaults to only running tests supported by your host device's platform
+(`--match-host-platform`) and exiting after the first failure (`--exit`).
+
 ## Running specific tests
 
 To run a test, use option `-t` (`--task`):
@@ -180,7 +183,7 @@ the `run.dart` command. For example:
 
 # Writing tests
 
-A test is a simple Dart program that lives under `bin/tests` and uses
+A test is a simple Dart program that lives under `bin/tasks` and uses
 `package:flutter_devicelab/framework/framework.dart` to define and run a _task_.
 
 Example:
@@ -229,7 +232,7 @@ your test edit `manifest.yaml` and add the following in the "tasks" dictionary:
 Where:
 
  - `{NAME_OF_TEST}` is the name of your test that also matches the name of the
- file in `bin/tests` without the `.dart` extension.
+ file in `bin/tasks` without the `.dart` extension.
  - `{DESCRIPTION}` is the plain English description of your test that helps
  others understand what this test is testing.
  - `{STAGE}` is `devicelab` if you want to run on Android, or `devicelab_ios` if

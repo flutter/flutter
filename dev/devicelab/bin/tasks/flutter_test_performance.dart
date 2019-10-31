@@ -38,13 +38,10 @@ enum TestStep {
 
 Future<int> runTest({bool coverage = false}) async {
   final Stopwatch clock = Stopwatch()..start();
-  final List<String> arguments = <String>[
-    'test',
-  ];
-  if (coverage) {
-    arguments.add('--coverage');
-  }
-  arguments.add(path.join('flutter_test', 'trivial_widget_test.dart'));
+  final List<String> arguments = flutterCommandArgs('test', <String>[
+    if (coverage) '--coverage',
+    path.join('flutter_test', 'trivial_widget_test.dart'),
+  ]);
   final Process analysis = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     arguments,

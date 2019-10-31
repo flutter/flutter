@@ -144,13 +144,9 @@ class AndroidSemanticsNode  {
   }
 
   /// Gets a list of [AndroidSemanticsActions] which are defined for the node.
-  List<AndroidSemanticsAction> getActions() {
-    final List<AndroidSemanticsAction> result = <AndroidSemanticsAction>[];
-    for (int id in _values['actions']) {
-      result.add(AndroidSemanticsAction.deserialize(id));
-    }
-    return result;
-  }
+  List<AndroidSemanticsAction> getActions() => <AndroidSemanticsAction>[
+    for (int id in _values['actions']) AndroidSemanticsAction.deserialize(id),
+  ];
 
   @override
   String toString() {

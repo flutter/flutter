@@ -48,6 +48,8 @@ class TypographyDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Widget> styleItems = <Widget>[
+      if (MediaQuery.of(context).size.width > 500.0)
+        TextStyleItem(name: 'Display 4', style: textTheme.display4, text: 'Light 112sp'),
       TextStyleItem(name: 'Display 3', style: textTheme.display3, text: 'Regular 56sp'),
       TextStyleItem(name: 'Display 2', style: textTheme.display2, text: 'Regular 45sp'),
       TextStyleItem(name: 'Display 1', style: textTheme.display1, text: 'Regular 34sp'),
@@ -59,14 +61,6 @@ class TypographyDemo extends StatelessWidget {
       TextStyleItem(name: 'Caption', style: textTheme.caption, text: 'Regular 12sp'),
       TextStyleItem(name: 'Button', style: textTheme.button, text: 'MEDIUM (ALL CAPS) 14sp'),
     ];
-
-    if (MediaQuery.of(context).size.width > 500.0) {
-      styleItems.insert(0, TextStyleItem(
-        name: 'Display 4',
-        style: textTheme.display4,
-        text: 'Light 112sp',
-      ));
-    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Typography')),

@@ -60,7 +60,7 @@ IF NOT EXIST "%cache_dir%" (
 
 
 REM To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
-REM SET FLUTTER_TOOL_ARGS="--checked %FLUTTER_TOOL_ARGS%"
+REM SET FLUTTER_TOOL_ARGS="--enable-asserts %FLUTTER_TOOL_ARGS%"
 REM SET FLUTTER_TOOL_ARGS="%FLUTTER_TOOL_ARGS% --observe=65432"
 
 :acquire_lock
@@ -136,7 +136,7 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade...
-        CALL "%pub%" upgrade "%VERBOSITY%"
+        CALL "%pub%" upgrade "%VERBOSITY%" --no-precompile
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
         ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
         timeout /t 5 /nobreak 2>NUL

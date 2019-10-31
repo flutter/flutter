@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, Window;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show MouseTrackerAnnotation;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -73,7 +74,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The configuration is initially set by the `configuration` argument
   /// passed to the constructor.
   ///
-  /// Always call [scheduleInitialFrame] before changing the configuration.
+  /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     assert(value != null);
     if (configuration == value)
@@ -109,16 +110,28 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// Bootstrap the rendering pipeline by scheduling the first frame.
   ///
+  /// Deprecated. Call [prepareInitialFrame] followed by a call to
+  /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
+  @Deprecated('Call prepareInitialFrame followed by owner.requestVisualUpdate() instead.')
+  void scheduleInitialFrame() {
+    prepareInitialFrame();
+    owner.requestVisualUpdate();
+  }
+
+  /// Bootstrap the rendering pipeline by preparing the first frame.
+  ///
   /// This should only be called once, and must be called before changing
   /// [configuration]. It is typically called immediately after calling the
   /// constructor.
-  void scheduleInitialFrame() {
+  ///
+  /// This does not actually schedule the first frame. Call
+  /// [PipelineOwner.requestVisualUpdate] on [owner] to do that.
+  void prepareInitialFrame() {
     assert(owner != null);
     assert(_rootTransform == null);
     scheduleInitialLayout();
     scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
     assert(_rootTransform != null);
-    owner.requestVisualUpdate();
   }
 
   Matrix4 _rootTransform;
@@ -171,6 +184,21 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       child.hitTest(BoxHitTestResult.wrap(result), position: position);
     result.add(HitTestEntry(this));
     return true;
+  }
+
+  /// Determines the set of mouse tracker annotations at the given position.
+  ///
+  /// See also:
+  ///
+  /// * [Layer.findAllAnnotations], which is used by this method to find all
+  ///   [AnnotatedRegionLayer]s annotated for mouse tracking.
+  Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
+    // Layer hit testing is done using device pixels, so we have to convert
+    // the logical coordinates of the event location back to device pixels
+    // here.
+    return layer.findAllAnnotations<MouseTrackerAnnotation>(
+      position * configuration.devicePixelRatio
+    ).annotations;
   }
 
   @override

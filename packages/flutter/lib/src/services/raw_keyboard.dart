@@ -11,6 +11,7 @@ import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
 import 'raw_keyboard_linux.dart';
 import 'raw_keyboard_macos.dart';
+import 'raw_keyboard_web.dart';
 import 'system_channels.dart';
 
 /// An enum describing the side of the keyboard that a key is on, to allow
@@ -259,6 +260,8 @@ abstract class RawKeyEvent extends Diagnosticable {
           eventSource: message['source'] ?? 0,
           vendorId: message['vendorId'] ?? 0,
           productId: message['productId'] ?? 0,
+          deviceId: message['deviceId'] ?? 0,
+          repeatCount: message['repeatCount'] ?? 0,
         );
         break;
       case 'fuchsia':
@@ -279,10 +282,17 @@ abstract class RawKeyEvent extends Diagnosticable {
       case 'linux':
         data = RawKeyEventDataLinux(
             keyHelper: KeyHelper(message['toolkit'] ?? ''),
-            codePoint: message['codePoint'] ?? 0,
+            unicodeScalarValues: message['unicodeScalarValues'] ?? 0,
             keyCode: message['keyCode'] ?? 0,
             scanCode: message['scanCode'] ?? 0,
             modifiers: message['modifiers'] ?? 0);
+        break;
+      case 'web':
+        data = RawKeyEventDataWeb(
+          code: message['code'],
+          key: message['key'],
+          metaState: message['metaState'],
+        );
         break;
       default:
         // We don't yet implement raw key events on iOS or other platforms, but
@@ -511,5 +521,13 @@ class RawKeyboard {
   /// Returns the set of keys currently pressed.
   Set<LogicalKeyboardKey> get keysPressed {
     return _keysPressed.toSet();
+  }
+
+  /// Clears the list of keys returned from [keysPressed].
+  ///
+  /// This is used by the testing framework to make sure tests are hermetic.
+  @visibleForTesting
+  void clearKeysPressed() {
+    _keysPressed.clear();
   }
 }

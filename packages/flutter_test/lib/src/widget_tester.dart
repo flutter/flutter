@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:test_api/test_api.dart' as test_package;
@@ -16,6 +17,7 @@ import 'package:test_api/test_api.dart' as test_package;
 import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
+import 'event_simulation.dart';
 import 'finders.dart';
 import 'matchers.dart';
 import 'test_async_utils.dart';
@@ -634,13 +636,16 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (_tickers != null) {
       for (Ticker ticker in _tickers) {
         if (ticker.isActive) {
-          throw FlutterError(
-            'A Ticker was active $when.\n'
-            'All Tickers must be disposed. Tickers used by AnimationControllers '
-            'should be disposed by calling dispose() on the AnimationController itself. '
-            'Otherwise, the ticker will leak.\n'
-            'The offending ticker was: ${ticker.toString(debugIncludeStack: true)}'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('A Ticker was active $when.'),
+            ErrorDescription('All Tickers must be disposed.'),
+            ErrorHint(
+              'Tickers used by AnimationControllers '
+              'should be disposed by calling dispose() on the AnimationController itself. '
+              'Otherwise, the ticker will leak.'
+            ),
+            ticker.describeForError('The offending ticker was')
+          ]);
         }
       }
     }
@@ -654,13 +659,20 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
     if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles) {
-      throw FlutterError(
-        'A SemanticsHandle was active at the end of the test.\n'
-        'All SemanticsHandle instances must be disposed by calling dispose() on '
-        'the SemanticsHandle. If your test uses SemanticsTester, it is '
-        'sufficient to call dispose() on SemanticsTester. Otherwise, the '
-        'existing handle will leak into another test and alter its behavior.'
-      );
+      // TODO(jacobr): The hint for this one causes a change in line breaks but
+      // I think it is for the best.
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('A SemanticsHandle was active at the end of the test.'),
+        ErrorDescription(
+          'All SemanticsHandle instances must be disposed by calling dispose() on '
+          'the SemanticsHandle.'
+        ),
+        ErrorHint(
+          'If your test uses SemanticsTester, it is '
+          'sufficient to call dispose() on SemanticsTester. Otherwise, the '
+          'existing handle will leak into another test and alter its behavior.'
+        )
+      ]);
     }
     _lastRecordedSemanticsHandles = null;
   }
@@ -717,6 +729,74 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       testTextInput.enterText(text);
       await idle();
     });
+  }
+
+  /// Simulates sending physical key down and up events through the system channel.
+  ///
+  /// This only simulates key events coming from a physical keyboard, not from a
+  /// soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
+  /// Windows, iOS) are not yet supported.
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// This method sends both the key down and the key up events, to simulate a
+  /// key press. To simulate individual down and/or up events, see
+  /// [sendKeyDownEvent] and [sendKeyUpEvent].
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] to simulate only a key down event.
+  ///  - [sendKeyUpEvent] to simulate only a key up event.
+  Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    await simulateKeyDownEvent(key, platform: platform);
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key down event through the system channel.
+  ///
+  /// This only simulates key down events coming from a physical keyboard, not
+  /// from a soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
+  /// Windows, iOS) are not yet supported.
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    return simulateKeyDownEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key up event through the system channel.
+  ///
+  /// This only simulates key up events coming from a physical keyboard,
+  /// not from a soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". May not be null.
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
   }
 
   /// Makes an effort to dismiss the current page with a Material [Scaffold] or

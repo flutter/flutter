@@ -30,6 +30,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// override. The style is mixed with the ambient [DefaultTextStyle] by the
 /// [Text] widget.
 ///
+/// ![Applying the style in this way creates bold text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_bold.png)
+///
 /// ```dart
 /// Text(
 ///   'No, we need bold strokes. We need this plan.',
@@ -43,6 +45,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// {@tool sample}
 /// As in the previous example, the [Text] widget is given a specific style
 /// override which is implicitly mixed with the ambient [DefaultTextStyle].
+///
+/// ![This results in italicized text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_italics.png)
 ///
 /// ```dart
 /// Text(
@@ -67,6 +71,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// If [backgroundColor] is specified, [background] must be null and vice versa.
 /// The [backgroundColor] is treated as a shorthand for
 /// `background: Paint()..color = backgroundColor`.
+///
+/// ![This results in three lines of text that go from lighter to darker in color.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_opacity_and_color.png)
 ///
 /// ```dart
 /// RichText(
@@ -96,6 +102,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// In this example, the ambient [DefaultTextStyle] is explicitly manipulated to
 /// obtain a [TextStyle] that doubles the default font size.
 ///
+/// ![This results in text that is twice as large as normal.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_size.png)
+///
 /// ```dart
 /// Text(
 ///   'These are wise words, enterprising men quote \'em.',
@@ -124,8 +132,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ```dart
 /// Text(
-///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
-///   style: TextStyle(fontSize: 10, height: 5.0),
+///   'Ladies and gentlemen, you coulda been anywhere in the world tonight, but you’re here with us in New York City.',
+///   style: TextStyle(height: 5, fontSize: 10),
 /// )
 /// ```
 /// {@end-tool}
@@ -139,11 +147,13 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ### Wavy red underline with black text
 ///
 /// {@tool sample}
-/// Styles can be combined. In this example, the misspelt word is drawn in black
-/// text and underlined with a wavy red line to indicate a spelling error. (The
-/// remainder is styled according to the Flutter default text styles, not the
-/// ambient [DefaultTextStyle], since no explicit style is given and [RichText]
-/// does not automatically use the ambient [DefaultTextStyle].)
+/// Styles can be combined. In this example, the misspelled word is drawn in
+/// black text and underlined with a wavy red line to indicate a spelling error.
+/// (The remainder is styled according to the Flutter default text styles, not
+/// the ambient [DefaultTextStyle], since no explicit style is given and
+/// [RichText] does not automatically use the ambient [DefaultTextStyle].)
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_wavy_red_underline.png)
 ///
 /// ```dart
 /// RichText(
@@ -266,6 +276,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// argument as shown in the example below:
 ///
 /// {@tool sample}
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_custom_fonts.png)
+///
 /// ```dart
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
@@ -328,6 +340,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 ///  * [fontFamily]
 ///  * [fontFamilyFallback] in order of first to last.
+///  * System fallback fonts which will vary depending on platform.
 ///
 /// The glyph used will always be the first matching version in fallback order.
 ///
@@ -1190,12 +1203,13 @@ class TextStyle extends Diagnosticable {
     super.debugFillProperties(properties);
     if (debugLabel != null)
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
-    final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
-    styles.add(ColorProperty('${prefix}color', color, defaultValue: null));
-    styles.add(ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null));
-    styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
-    styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
-    styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
+    final List<DiagnosticsNode> styles = <DiagnosticsNode>[
+      ColorProperty('${prefix}color', color, defaultValue: null),
+      ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null),
+      StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
+      IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null),
+      DoubleProperty('${prefix}size', fontSize, defaultValue: null),
+    ];
     String weightDescription;
     if (fontWeight != null) {
       weightDescription = '${fontWeight.index + 1}00';

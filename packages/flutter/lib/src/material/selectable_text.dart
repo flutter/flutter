@@ -46,7 +46,7 @@ class _TextSpanEditingController extends TextEditingController {
 
 class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _SelectableTextSelectionGestureDetectorBuilder({
-    @required _SelectableTextState state
+    @required _SelectableTextState state,
   }) : _state = state,
       super(delegate: state);
 
@@ -184,7 +184,10 @@ class SelectableText extends StatefulWidget {
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
   ///
-  /// The [data] parameter must not be null.
+
+  /// The [showCursor], [autofocus], [dragStartBehavior], and [data] parameters
+  /// must not be null. If specified, the [maxLines] argument must be greater
+  /// than zero.
   const SelectableText(
     this.data, {
     Key key,
@@ -225,6 +228,8 @@ class SelectableText extends StatefulWidget {
   ///
   /// The [textSpan] parameter must not be null and only contain [TextSpan] in
   /// [textSpan.children]. Other type of [InlineSpan] is not allowed.
+  ///
+  /// The [autofocus] and [dragStartBehavior] arguments must not be null.
   const SelectableText.rich(
     this.textSpan, {
     Key key,
@@ -369,7 +374,7 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.edtiableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   @override
@@ -435,7 +440,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       );
     }
     if (_effectiveFocusNode.hasFocus && _controller.selection.isCollapsed) {
-        _showSelectionHandles = false;
+      _showSelectionHandles = false;
     }
   }
 

@@ -89,7 +89,7 @@ void main() {
       'decoration: BoxDecoration(color: Color(0xffffffff))',
       'textStyle: TextStyle(inherit: true, decoration: TextDecoration.underline)',
       'wait duration: 0:00:00.100000',
-      'show duration: 0:00:00.200000'
+      'show duration: 0:00:00.200000',
     ]);
   });
 
@@ -588,7 +588,7 @@ void main() {
         tooltipTheme: const TooltipThemeData(
           textStyle: TextStyle(
             color: Colors.orange,
-            decoration: TextDecoration.underline
+            decoration: TextDecoration.underline,
           ),
         ),
       ),
@@ -619,7 +619,7 @@ void main() {
         child: Tooltip(
           textStyle: const TextStyle(
             color: Colors.orange,
-            decoration: TextDecoration.underline
+            decoration: TextDecoration.underline,
           ),
           key: key,
           message: tooltipText,
@@ -824,6 +824,7 @@ void main() {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
@@ -846,7 +847,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);
@@ -865,13 +866,13 @@ void main() {
     // Wait for it to disappear.
     await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
     expect(find.text(tooltipText), findsNothing);
-    await gesture.removePointer();
   });
 
   testWidgets('Tooltip waitDuration - TooltipTheme', (WidgetTester tester) async {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
@@ -890,7 +891,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);
@@ -909,7 +910,6 @@ void main() {
     // Wait for it to disappear.
     await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
     expect(find.text(tooltipText), findsNothing);
-    await gesture.removePointer();
   });
 
   testWidgets('Tooltip showDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
@@ -932,7 +932,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);
@@ -965,7 +965,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);

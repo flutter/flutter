@@ -31,13 +31,14 @@ class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
   /// The [shape], [elevation], [focusElevation], [hoverElevation],
-  /// [highlightElevation], [disabledElevation], [padding], [constraints], and
-  /// [clipBehavior] arguments must not be null. Additionally, [elevation],
-  /// [focusElevation], [hoverElevation], [highlightElevation], and
+  /// [highlightElevation], [disabledElevation], [padding], [constraints],
+  /// [autofocus], and [clipBehavior] arguments must not be null. Additionally,
+  /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], and
   /// [disabledElevation] must be non-negative.
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
+    this.onLongPress,
     this.onHighlightChanged,
     this.textStyle,
     this.fillColor,
@@ -56,6 +57,7 @@ class RawMaterialButton extends StatefulWidget {
     this.animationDuration = kThemeChangeDuration,
     this.clipBehavior = Clip.none,
     this.focusNode,
+    this.autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
@@ -69,12 +71,26 @@ class RawMaterialButton extends StatefulWidget {
        assert(constraints != null),
        assert(animationDuration != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
   ///
-  /// If this is set to null, the button will be disabled, see [enabled].
+  /// If this callback and [onLongPress] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
   final VoidCallback onPressed;
+
+  /// Called when the button is long-pressed.
+  ///
+  /// If this callback and [onPressed] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
+  final VoidCallback onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -220,8 +236,8 @@ class RawMaterialButton extends StatefulWidget {
   /// Whether the button is enabled or disabled.
   ///
   /// Buttons are disabled by default. To enable a button, set its [onPressed]
-  /// property to a non-null value.
-  bool get enabled => onPressed != null;
+  /// or [onLongPress] properties to a non-null value.
+  bool get enabled => onPressed != null || onLongPress != null;
 
   /// Configures the minimum size of the tap target.
   ///
@@ -232,15 +248,15 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
-  /// An optional focus node to use for requesting focus when pressed.
-  ///
-  /// If not supplied, the button will create and host its own [FocusNode].
-  ///
-  /// If supplied, the given focusNode will be _hosted_ by this widget. See
-  /// [FocusNode] for more information on what that implies.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   @override
@@ -328,37 +344,38 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
     final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
 
-    final Widget result = Focus(
-      focusNode: widget.focusNode,
-      onFocusChange: _handleFocusedChanged,
-      child: ConstrainedBox(
-        constraints: widget.constraints,
-        child: Material(
-          elevation: _effectiveElevation,
-          textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
-          shape: effectiveShape,
-          color: widget.fillColor,
-          type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
-          animationDuration: widget.animationDuration,
-          clipBehavior: widget.clipBehavior,
-          child: InkWell(
-            onHighlightChanged: _handleHighlightChanged,
-            splashColor: widget.splashColor,
-            highlightColor: widget.highlightColor,
-            focusColor: widget.focusColor,
-            hoverColor: widget.hoverColor,
-            onHover: _handleHoveredChanged,
-            onTap: widget.onPressed,
-            customBorder: effectiveShape,
-            child: IconTheme.merge(
-              data: IconThemeData(color: effectiveTextColor),
-              child: Container(
-                padding: widget.padding,
-                child: Center(
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: widget.child,
-                ),
+    final Widget result = ConstrainedBox(
+      constraints: widget.constraints,
+      child: Material(
+        elevation: _effectiveElevation,
+        textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
+        shape: effectiveShape,
+        color: widget.fillColor,
+        type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
+        animationDuration: widget.animationDuration,
+        clipBehavior: widget.clipBehavior,
+        child: InkWell(
+          focusNode: widget.focusNode,
+          canRequestFocus: widget.enabled,
+          onFocusChange: _handleFocusedChanged,
+          autofocus: widget.autofocus,
+          onHighlightChanged: _handleHighlightChanged,
+          splashColor: widget.splashColor,
+          highlightColor: widget.highlightColor,
+          focusColor: widget.focusColor,
+          hoverColor: widget.hoverColor,
+          onHover: _handleHoveredChanged,
+          onTap: widget.onPressed,
+          onLongPress: widget.onLongPress,
+          customBorder: effectiveShape,
+          child: IconTheme.merge(
+            data: IconThemeData(color: effectiveTextColor),
+            child: Container(
+              padding: widget.padding,
+              child: Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: widget.child,
               ),
             ),
           ),

@@ -124,6 +124,11 @@ void recursiveCopy(Directory source, Directory target) {
     else if (entity is File) {
       final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
+      // Preserve executable bit
+      final String modes = entity.statSync().modeString();
+      if (modes != null && modes.contains('x')) {
+        makeExecutable(dest);
+      }
     }
   }
 }
@@ -132,6 +137,27 @@ FileSystemEntity move(FileSystemEntity whatToMove,
     {Directory to, String name}) {
   return whatToMove
       .renameSync(path.join(to.path, name ?? path.basename(whatToMove.path)));
+}
+
+/// Equivalent of `chmod a+x file`
+void makeExecutable(File file) {
+  // Windows files do not have an executable bit
+  if (Platform.isWindows) {
+    return;
+  }
+  final ProcessResult result = _processManager.runSync(<String>[
+    'chmod',
+    'a+x',
+    file.path,
+  ]);
+
+  if (result.exitCode != 0) {
+    throw FileSystemException(
+      'Error making ${file.path} executable.\n'
+      '${result.stderr}',
+      file.path,
+    );
+  }
 }
 
 /// Equivalent of `mkdir directory`.
@@ -229,13 +255,14 @@ Future<Process> startProcess(
 }) async {
   assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
-  print('\nExecuting: $command');
+  final String finalWorkingDirectory = workingDirectory ?? cwd;
+  print('\nExecuting: $command in $finalWorkingDirectory');
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
     environment: environment,
-    workingDirectory: workingDirectory ?? cwd,
+    workingDirectory: finalWorkingDirectory,
   );
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
@@ -421,7 +448,7 @@ void cd(dynamic directory) {
     throw 'Cannot cd into directory that does not exist: $directory';
 }
 
-Directory get flutterDirectory => dir('../..').absolute;
+Directory get flutterDirectory => Directory.current.parent.parent;
 
 String requireEnvVar(String name) {
   final String value = Platform.environment[name];
@@ -595,4 +622,47 @@ void checkFileExists(String file) {
   if (!exists(File(file))) {
     throw FileSystemException('Expected file to exit.', file);
   }
+}
+
+void _checkExitCode(int code) {
+  if (code != 0) {
+    throw Exception(
+      'Unexpected exit code = $code!',
+    );
+  }
+}
+
+Future<void> _execAndCheck(String executable, List<String> args) async {
+  _checkExitCode(await exec(executable, args));
+}
+
+// Measure the CPU/GPU percentage for [duration] while a Flutter app is running
+// on an iOS device (e.g., right after a Flutter driver test has finished, which
+// doesn't close the Flutter app, and the Flutter app has an indefinite
+// animation). The return should have a format like the following json
+// ```
+// {"gpu_percentage":12.6,"cpu_percentage":18.15}
+// ```
+Future<Map<String, dynamic>> measureIosCpuGpu({
+    Duration duration = const Duration(seconds: 10),
+    String deviceId,
+}) async {
+  await _execAndCheck('pub', <String>[
+    'global',
+    'activate',
+    'gauge',
+    '0.1.4',
+  ]);
+
+  await _execAndCheck('pub', <String>[
+    'global',
+    'run',
+    'gauge',
+    'ioscpugpu',
+    'new',
+    if (deviceId != null) ...<String>['-w', deviceId],
+    '-l',
+    '${duration.inMilliseconds}',
+  ]);
+  return json.decode(file('$cwd/result.json').readAsStringSync());
 }

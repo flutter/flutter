@@ -15,7 +15,7 @@ void main() {
           floating: false,
           bottom: false,
           controller: controller,
-        )
+        ),
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
@@ -34,7 +34,7 @@ void main() {
           floating: false,
           bottom: true,
           controller: controller,
-        )
+        ),
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
@@ -53,7 +53,7 @@ void main() {
           floating: true,
           bottom: false,
           controller: controller,
-        )
+        ),
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
@@ -72,7 +72,7 @@ void main() {
           floating: true,
           bottom: true,
           controller: controller,
-        )
+        ),
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
@@ -91,7 +91,7 @@ void main() {
           floating: false,
           bottom: false,
           controller: controller,
-        )
+        ),
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
@@ -110,7 +110,7 @@ void main() {
           floating: false,
           bottom: true,
           controller: controller,
-        )
+        ),
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
@@ -131,7 +131,7 @@ void main() {
           floating: true,
           bottom: false,
           controller: controller,
-        )
+        ),
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
@@ -152,7 +152,7 @@ void main() {
         floating: true,
         bottom: true,
         controller: controller,
-      )
+      ),
     );
 
     final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));

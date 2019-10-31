@@ -8,6 +8,7 @@ import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
+import 'build_info.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
@@ -84,8 +85,6 @@ abstract class CodegenDaemon {
 /// Only a subset of the arguments provided to the [KernelCompiler] are
 /// supported here. Using the build pipeline implies a fixed multiroot
 /// filesystem and requires a pubspec.
-///
-/// This is only safe to use if [experimentalBuildEnabled] is true.
 class CodeGeneratingKernelCompiler implements KernelCompiler {
   const CodeGeneratingKernelCompiler();
 
@@ -97,9 +96,10 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     String outputFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
+    @required BuildMode buildMode,
+    bool causalAsyncStacks = true,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    bool targetProductVm = false,
     // These arguments are currently unused.
     String sdkRoot,
     String packagesPath,
@@ -133,9 +133,10 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       outputFilePath: outputFilePath,
       linkPlatformKernelIn: linkPlatformKernelIn,
       aot: aot,
+      buildMode: buildMode,
+      causalAsyncStacks: causalAsyncStacks,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
-      targetProductVm: targetProductVm,
       sdkRoot: sdkRoot,
       packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[
@@ -163,16 +164,23 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   /// codegen mode.
   static Future<ResidentCompiler> create({
     @required FlutterProject flutterProject,
+    @required BuildMode buildMode,
     bool trackWidgetCreation = false,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     bool unsafePackageSerialization = false,
     String outputPath,
     String initializeFromDill,
     bool runCold = false,
+    TargetPlatform targetPlatform,
   }) async {
     codeGenerator.updatePackages(flutterProject);
     final ResidentCompiler residentCompiler = ResidentCompiler(
-      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: targetPlatform,
+        mode: buildMode,
+      ),
+      buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
       packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[

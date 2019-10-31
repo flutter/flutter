@@ -27,6 +27,7 @@ import 'sliver_multi_box_adaptor.dart';
 ///  * [RenderSliverFixedExtentList], which has a configurable [itemExtent].
 ///  * [RenderSliverList], which does not require its children to have the same
 ///    extent in the main axis.
+@Deprecated('Use SliverLayoutBuilder instead.')
 class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that each fill the
   /// viewport.
@@ -105,8 +106,6 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
 ///
 /// See also:
 ///
-///  * [RenderSliverFillViewport], which sizes its children based on the
-///    size of the viewport, regardless of what else is in the scroll view.
 ///  * [RenderSliverList], which shows a list of variable-sized children in a
 ///    viewport.
 class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {

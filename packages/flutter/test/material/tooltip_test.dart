@@ -557,7 +557,7 @@ void main() {
         key: key,
         textStyle: const TextStyle(
           color: Colors.orange,
-          decoration: TextDecoration.underline
+          decoration: TextDecoration.underline,
         ),
         message: tooltipText,
         child: Container(
@@ -574,6 +574,72 @@ void main() {
     expect(textStyle.color, Colors.orange);
     expect(textStyle.fontFamily, null);
     expect(textStyle.decoration, TextDecoration.underline);
+  });
+
+  testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/40702.
+    Widget buildApp(String text, TextDirection textDirection) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: Center(
+            child: Tooltip(
+              message: text,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: Colors.green[500],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(tooltipText, TextDirection.rtl));
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsOneWidget);
+    RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(tooltipRenderParagraph.textDirection, TextDirection.rtl);
+
+    await tester.pumpWidget(buildApp(tooltipText, TextDirection.ltr));
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsOneWidget);
+    tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(tooltipRenderParagraph.textDirection, TextDirection.ltr);
+  });
+
+  testWidgets('Tooltip overlay wrapped with a non-fallback DefaultTextStyle widget', (WidgetTester tester) async {
+    // A Material widget is needed as an ancestor of the Text widget.
+    // It is invalid to have text in a Material application that
+    // does not have a Material ancestor.
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Tooltip(
+        key: key,
+        message: tooltipText,
+        child: Container(
+          width: 100.0,
+          height: 100.0,
+          color: Colors.green[500],
+        ),
+      ),
+    ));
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final TextStyle textStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(
+        of: find.text(tooltipText),
+        matching: find.byType(DefaultTextStyle),
+      ).first,
+    ).style;
+
+    // The default fallback text style results in a text with a
+    // double underline of Color(0xffffff00).
+    expect(textStyle.decoration, isNot(TextDecoration.underline));
+    expect(textStyle.decorationColor, isNot(const Color(0xffffff00)));
+    expect(textStyle.decorationStyle, isNot(TextDecorationStyle.double));
   });
 
   testWidgets('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
@@ -667,7 +733,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);
@@ -703,7 +769,11 @@ void main() {
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration(milliseconds: 0);
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      if (gesture != null)
+        return gesture.removePointer();
+    });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
@@ -721,7 +791,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);
@@ -745,6 +815,7 @@ void main() {
     // Wait for it to disappear.
     await tester.pumpAndSettle();
     await gesture.removePointer();
+    gesture = null;
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -786,7 +857,7 @@ void main() {
           label: 'TIP',
           textDirection: TextDirection.ltr,
         ),
-      ]
+      ],
     );
 
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));

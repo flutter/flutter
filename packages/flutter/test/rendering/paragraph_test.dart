@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show TextBox;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
@@ -338,10 +339,11 @@ void main() {
     );
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
-    final List<RenderBox> renderBoxes = <RenderBox>[];
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+    ];
 
     final RenderParagraph paragraph = RenderParagraph(
       text,
@@ -380,14 +382,15 @@ void main() {
     );
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
-    final List<RenderBox> renderBoxes = <RenderBox>[];
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+    ];
 
     final RenderParagraph paragraph = RenderParagraph(
       text,

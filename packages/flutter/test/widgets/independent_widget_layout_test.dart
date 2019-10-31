@@ -23,7 +23,8 @@ class OffscreenRenderView extends RenderView {
 class OffscreenWidgetTree {
   OffscreenWidgetTree() {
     renderView.attach(pipelineOwner);
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
+    pipelineOwner.requestVisualUpdate();
   }
 
   final RenderView renderView = OffscreenRenderView();

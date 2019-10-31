@@ -44,12 +44,11 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
 
   @override
   String toString() {
-    final List<String> values = <String>[];
-    if (offset != null)
-      values.add('offset=$offset');
-    if (scale != null)
-      values.add('scale=$scale');
-    values.add(super.toString());
+    final List<String> values = <String>[
+      if (offset != null) 'offset=$offset',
+      if (scale != null) 'scale=$scale',
+      super.toString(),
+    ];
     return values.join('; ');
   }
 }
@@ -57,7 +56,8 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
 /// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
-             RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
+             RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
+                  RelayoutWhenSystemFontsChangeMixin {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -110,7 +110,7 @@ class RenderParagraph extends RenderBox
 
   final TextPainter _textPainter;
 
-  /// The text to display
+  /// The text to display.
   InlineSpan get text => _textPainter.text;
   set text(InlineSpan value) {
     assert(value != null);
@@ -220,11 +220,12 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  /// An optional maximum number of lines for the text to span, wrapping if necessary.
-  /// If the text exceeds the given number of lines, it will be truncated according
-  /// to [overflow] and [softWrap].
+  /// An optional maximum number of lines for the text to span, wrapping if
+  /// necessary. If the text exceeds the given number of lines, it will be
+  /// truncated according to [overflow] and [softWrap].
   int get maxLines => _textPainter.maxLines;
-  /// The value may be null. If it is not null, then it must be greater than zero.
+  /// The value may be null. If it is not null, then it must be greater than
+  /// zero.
   set maxLines(int value) {
     assert(value == null || value > 0);
     if (_textPainter.maxLines == value)
@@ -234,10 +235,11 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  /// Used by this paragraph's internal [TextPainter] to select a locale-specific
-  /// font.
+  /// Used by this paragraph's internal [TextPainter] to select a
+  /// locale-specific font.
   ///
-  /// In some cases the same Unicode character may be rendered differently depending
+  /// In some cases the same Unicode character may be rendered differently
+  /// depending
   /// on the locale. For example the '骨' character is rendered differently in
   /// the Chinese and Japanese locales. In these cases the [locale] may be used
   /// to select a locale-specific font.
@@ -318,11 +320,12 @@ class RenderParagraph extends RenderBox
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
-    // TODO(garyq): Since our metric for ideographic baseline is currently inacurrate
-    // and the non-alphabetic baselines are based off of the alphabetic baseline, we
-    // use the alphabetic for now to produce correct layouts. We should eventually change
-    // this back to pass the `baseline` property when the ideographic baseline is properly
-    // implemented (https://github.com/flutter/flutter/issues/22625).
+    // TODO(garyq): Since our metric for ideographic baseline is currently
+    // inaccurate and the non-alphabetic baselines are based off of the
+    // alphabetic baseline, we use the alphabetic for now to produce correct
+    // layouts. We should eventually change this back to pass the `baseline`
+    // property when the ideographic baseline is properly implemented
+    // (https://github.com/flutter/flutter/issues/22625).
     return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
@@ -412,8 +415,15 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       final TextParentData textParentData = child.parentData;
-      final Matrix4 transform = Matrix4.translationValues(textParentData.offset.dx, textParentData.offset.dy, 0.0)
-        ..scale(textParentData.scale, textParentData.scale, textParentData.scale);
+      final Matrix4 transform = Matrix4.translationValues(
+        textParentData.offset.dx,
+        textParentData.offset.dy,
+        0.0,
+      )..scale(
+        textParentData.scale,
+        textParentData.scale,
+        textParentData.scale,
+      );
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: position,
@@ -442,8 +452,14 @@ class RenderParagraph extends RenderBox
     _layoutTextWithConstraints(constraints);
     final Offset offset = entry.localPosition;
     final TextPosition position = _textPainter.getPositionForOffset(offset);
-    final TextSpan span = _textPainter.text.getSpanForPosition(position);
-    span?.recognizer?.addPointer(event);
+    final InlineSpan span = _textPainter.text.getSpanForPosition(position);
+    if (span == null) {
+      return;
+    }
+    if (span is TextSpan) {
+      final TextSpan textSpan = span;
+      textSpan.recognizer?.addPointer(event);
+    }
   }
 
   bool _needsClipping = false;
@@ -458,10 +474,29 @@ class RenderParagraph extends RenderBox
 
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
-    _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
+    _textPainter.layout(
+      minWidth: minWidth,
+      maxWidth: widthMatters ?
+        maxWidth :
+        double.infinity,
+    );
   }
 
+  @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    _textPainter.markNeedsLayout();
+  }
+
+  // Placeholder dimensions representing the sizes of child inline widgets.
+  //
+  // These need to be cached because the text painter's placeholder dimensions
+  // will be overwritten during intrinsic width/height calculations and must be
+  // restored to the original values before final layout and painting.
+  List<PlaceholderDimensions> _placeholderDimensions;
+
   void _layoutTextWithConstraints(BoxConstraints constraints) {
+    _textPainter.setPlaceholderDimensions(_placeholderDimensions);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 
@@ -474,7 +509,7 @@ class RenderParagraph extends RenderBox
       return;
     }
     RenderBox child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
+    _placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
       // Only constrain the width to the maximum width of the paragraph.
@@ -483,12 +518,14 @@ class RenderParagraph extends RenderBox
         BoxConstraints(
           maxWidth: constraints.maxWidth,
         ),
-        parentUsesSize: true
+        parentUsesSize: true,
       );
       double baselineOffset;
       switch (_placeholderSpans[childIndex].alignment) {
         case ui.PlaceholderAlignment.baseline: {
-          baselineOffset = child.getDistanceToBaseline(_placeholderSpans[childIndex].baseline);
+          baselineOffset = child.getDistanceToBaseline(
+            _placeholderSpans[childIndex].baseline
+          );
           break;
         }
         default: {
@@ -496,7 +533,7 @@ class RenderParagraph extends RenderBox
           break;
         }
       }
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
+      _placeholderDimensions[childIndex] = PlaceholderDimensions(
         size: child.size,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
@@ -505,7 +542,6 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   // Iterate through the laid-out children and set the parentData offsets based
@@ -513,11 +549,11 @@ class RenderParagraph extends RenderBox
   void _setParentData() {
     RenderBox child = firstChild;
     int childIndex = 0;
-    while (child != null) {
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
       final TextParentData textParentData = child.parentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
-        _textPainter.inlinePlaceholderBoxes[childIndex].top
+        _textPainter.inlinePlaceholderBoxes[childIndex].top,
       );
       textParentData.scale = _textPainter.inlinePlaceholderScales[childIndex];
       child = childAfter(child);
@@ -606,11 +642,11 @@ class RenderParagraph extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     // Ideally we could compute the min/max intrinsic width/height with a
     // non-destructive operation. However, currently, computing these values
-    // will destroy state inside the painter. If that happens, we need to
-    // get back the correct state by calling _layout again.
+    // will destroy state inside the painter. If that happens, we need to get
+    // back the correct state by calling _layout again.
     //
-    // TODO(abarth): Make computing the min/max intrinsic width/height
-    // a non-destructive operation.
+    // TODO(abarth): Make computing the min/max intrinsic width/height a
+    //  non-destructive operation.
     //
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
@@ -628,8 +664,8 @@ class RenderParagraph extends RenderBox
     if (_needsClipping) {
       final Rect bounds = offset & size;
       if (_overflowShader != null) {
-        // This layer limits what the shader below blends with to be just the text
-        // (as opposed to the text and its background).
+        // This layer limits what the shader below blends with to be just the
+        // text (as opposed to the text and its background).
         context.canvas.saveLayer(bounds, Paint());
       } else {
         context.canvas.save();
@@ -640,8 +676,11 @@ class RenderParagraph extends RenderBox
 
     RenderBox child = firstChild;
     int childIndex = 0;
-    while (child != null) {
-      assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
+    // childIndex might be out of index of placeholder boxes. This can happen
+    // if engine truncates children due to ellipsis. Sadly, we would not know
+    // it until we finish layout, and RenderObject is in immutable state at
+    // this point.
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
       final TextParentData textParentData = child.parentData;
 
       final double scale = textParentData.scale;
@@ -804,7 +843,10 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     for (InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
       final TextDirection initialDirection = currentDirection;
-      final TextSelection selection = TextSelection(baseOffset: start, extentOffset: start + info.text.length);
+      final TextSelection selection = TextSelection(
+        baseOffset: start,
+        extentOffset: start + info.text.length,
+      );
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
       if (rects.isEmpty) {
         continue;
@@ -852,6 +894,7 @@ class RenderParagraph extends RenderBox
           if (info.recognizer is TapGestureRecognizer) {
             final TapGestureRecognizer recognizer = info.recognizer;
             configuration.onTap = recognizer.onTap;
+            configuration.isLink = true;
           } else if (info.recognizer is LongPressGestureRecognizer) {
             final LongPressGestureRecognizer recognizer = info.recognizer;
             configuration.onLongPress = recognizer.onLongPress;
@@ -872,7 +915,12 @@ class RenderParagraph extends RenderBox
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[text.toDiagnosticsNode(name: 'text', style: DiagnosticsTreeStyle.transition)];
+    return <DiagnosticsNode>[
+      text.toDiagnosticsNode(
+        name: 'text',
+        style: DiagnosticsTreeStyle.transition,
+      )
+    ];
   }
 
   @override
@@ -880,10 +928,30 @@ class RenderParagraph extends RenderBox
     super.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
-    properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(
+      FlagProperty(
+        'softWrap',
+        value: softWrap,
+        ifTrue: 'wrapping at box width',
+        ifFalse: 'no wrapping except at line break characters',
+        showName: true,
+      )
+    );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
-    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(
+      DoubleProperty(
+        'textScaleFactor',
+        textScaleFactor,
+        defaultValue: 1.0,
+      )
+    );
+    properties.add(
+      DiagnosticsProperty<Locale>(
+        'locale',
+        locale,
+        defaultValue: null,
+      )
+    );
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }

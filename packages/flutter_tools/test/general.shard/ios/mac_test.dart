@@ -56,7 +56,7 @@ void main() {
 
     testUsingContext('isWorking returns false if libimobiledevice is not installed', () async {
       when(mockProcessManager.runSync(
-        <String>[ideviceIdPath, '-h'], environment: anyNamed('environment')
+        <String>[ideviceIdPath, '-h'], environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(123, 1, '', ''));
       expect(await iMobileDevice.isWorking, false);
     }, overrides: <Type, Generator>{
@@ -107,6 +107,69 @@ void main() {
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
       )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
       expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotFoundError>()));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
+    });
+
+    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when user has not yet trusted the host', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) {
+        final ProcessResult result = ProcessResult(
+          1,
+          255,
+          '',
+          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.pairingDialogResponsePending.code}',
+        );
+        return Future<ProcessResult>.value(result);
+      });
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
+    });
+
+    testUsingContext('getInfoForDevice throws ToolExit lockdownd fails for unknown reason', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) {
+        final ProcessResult result = ProcessResult(
+          1,
+          255,
+          '',
+          'ERROR: Could not connect to lockdownd, error code -12345',
+        );
+        return Future<ProcessResult>.value(result);
+      });
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
+    });
+
+    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when host trust is revoked', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) {
+        final ProcessResult result = ProcessResult(
+          1,
+          255,
+          '',
+          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.invalidHostId.code}',
+        );
+        return Future<ProcessResult>.value(result);
+      });
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -183,7 +246,9 @@ void main() {
       );
 
       await diagnoseXcodeBuildFailure(buildResult);
-      verify(mockUsage.sendEvent('build', 'xcode-bitcode-failure',
+      verify(mockUsage.sendEvent('build',
+        any,
+        label: 'xcode-bitcode-failure',
         parameters: <String, String>{
           cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
           cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),
@@ -371,12 +436,12 @@ Could not build the precompiled application for the device.''',
 
       when(project.xcodeProjectInfoFile).thenReturn(pbxprojFile);
       when(project.hostAppBundleName).thenReturn('UnitTestRunner.app');
-      when(pbxprojFile.readAsLines())
-          .thenAnswer((_) => Future<List<String>>.value(flutterAssetPbxProjLines));
-      when(pbxprojFile.exists())
-          .thenAnswer((_) => Future<bool>.value(true));
+      when(pbxprojFile.readAsLinesSync())
+          .thenAnswer((_) => flutterAssetPbxProjLines);
+      when(pbxprojFile.existsSync())
+          .thenAnswer((_) => true);
 
-      bool result = await upgradePbxProjWithFlutterAssets(project);
+      bool result = upgradePbxProjWithFlutterAssets(project);
       expect(result, true);
       expect(
         testLogger.statusText,
@@ -384,9 +449,9 @@ Could not build the precompiled application for the device.''',
       );
       testLogger.clear();
 
-      when(pbxprojFile.readAsLines())
-          .thenAnswer((_) => Future<List<String>>.value(appFlxPbxProjLines));
-      result = await upgradePbxProjWithFlutterAssets(project);
+      when(pbxprojFile.readAsLinesSync())
+          .thenAnswer((_) => appFlxPbxProjLines);
+      result = upgradePbxProjWithFlutterAssets(project);
       expect(result, true);
       expect(
         testLogger.statusText,
@@ -394,9 +459,9 @@ Could not build the precompiled application for the device.''',
       );
       testLogger.clear();
 
-      when(pbxprojFile.readAsLines())
-          .thenAnswer((_) => Future<List<String>>.value(cleanPbxProjLines));
-      result = await upgradePbxProjWithFlutterAssets(project);
+      when(pbxprojFile.readAsLinesSync())
+          .thenAnswer((_) => cleanPbxProjLines);
+      result = upgradePbxProjWithFlutterAssets(project);
       expect(result, true);
       expect(
         testLogger.statusText,

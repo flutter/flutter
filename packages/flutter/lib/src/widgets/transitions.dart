@@ -194,6 +194,51 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
 ///
+/// {@tool snippet --template=stateful_widget_scaffold_center_freeform_state}
+/// The following code implements the [SlideTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
+///   AnimationController _controller;
+///   Animation<Offset> _offsetAnimation;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _controller = AnimationController(
+///       duration: const Duration(seconds: 2),
+///       vsync: this,
+///     )..repeat(reverse: true);
+///     _offsetAnimation = Tween<Offset>(
+///       begin: Offset.zero,
+///       end: const Offset(1.5, 0.0),
+///     ).animate(CurvedAnimation(
+///       parent: _controller,
+///       curve: Curves.elasticIn,
+///     ));
+///   }
+///
+///   @override
+///   void dispose() {
+///     super.dispose();
+///     _controller.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return SlideTransition(
+///       position: _offsetAnimation,
+///       child: const Padding(
+///         padding: EdgeInsets.all(8.0),
+///         child: FlutterLogo(size: 150.0),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AlignTransition], an animated version of an [Align] that animates its
@@ -875,7 +920,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedBuilder] and makes use of the
-/// [child] feature to avoid having to rebuild the [Container] each time.
+/// [child] feature to avoid having to rebuild the [Container] each time. The
+/// resulting animation is shown below the code.
 ///
 /// ```dart
 /// class Spinner extends StatefulWidget {
@@ -905,7 +951,14 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///   Widget build(BuildContext context) {
 ///     return AnimatedBuilder(
 ///       animation: _controller,
-///       child: Container(width: 200.0, height: 200.0, color: Colors.green),
+///       child: Container(
+///         width: 200.0,
+///         height: 200.0,
+///         color: Colors.green,
+///         child: const Center(
+///           child: Text('Wee'),
+///         ),
+///       ),
 ///       builder: (BuildContext context, Widget child) {
 ///         return Transform.rotate(
 ///           angle: _controller.value * 2.0 * math.pi,
@@ -917,6 +970,13 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// }
 /// ```
 /// {@end-tool}
+///
+/// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_builder.mp4}
+///
+/// See also:
+///
+///  * [TweenAnimationBuilder], which animates a property to a target value
+///    without requiring manual management of an [AnimationController].
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///

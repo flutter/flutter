@@ -25,18 +25,18 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// interactive display of errors.
   _ErrorDiagnostic(
     String message, {
-      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
-      DiagnosticLevel level = DiagnosticLevel.info,
-    }) : assert(message != null),
-         super(
-           null,
-           <Object>[message],
-           showName: false,
-           showSeparator: false,
-           defaultValue: null,
-           style: style,
-           level: level,
-         );
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
+    DiagnosticLevel level = DiagnosticLevel.info,
+  }) : assert(message != null),
+       super(
+         null,
+         <Object>[message],
+         showName: false,
+         showSeparator: false,
+         defaultValue: null,
+         style: style,
+         level: level,
+       );
 
   /// In debug builds, a kernel transformer rewrites calls to the default
   /// constructors for [ErrorSummary], [ErrorDetails], and [ErrorHint] to use
@@ -547,9 +547,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
             '(one line) summary description of the problem that was '
             'detected.'
           ),
+          DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace),
+          ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'),
         ];
-        message.add(DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace));
-        message.add(ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'));
         int i = 1;
         for (DiagnosticsNode summary in summaries) {
           message.add(DiagnosticsProperty<DiagnosticsNode>('Summary $i', summary, expandableValue : true));
@@ -644,7 +644,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           wrapWidth: wrapWidth,
           wrapWidthProperties: wrapWidth,
           maxDescendentsTruncatableNode: 5,
-        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight()
+        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
       );
     } else {
       debugPrint('Another exception was thrown: ${details.summary}');
@@ -737,24 +737,30 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   }
 }
 
-/// Dump the current stack to the console using [debugPrint] and
+/// Dump the stack to the console using [debugPrint] and
 /// [FlutterError.defaultStackFilter].
 ///
-/// The current stack is obtained using [StackTrace.current].
+/// If the `stackTrace` parameter is null, the [StackTrace.current] is used to
+/// obtain the stack.
 ///
 /// The `maxFrames` argument can be given to limit the stack to the given number
-/// of lines. By default, all non-filtered stack lines are shown.
+/// of lines before filtering is applied. By default, all stack lines are
+/// included.
 ///
 /// The `label` argument, if present, will be printed before the stack.
-void debugPrintStack({ String label, int maxFrames }) {
+void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
   if (label != null)
     debugPrint(label);
-  Iterable<String> lines = StackTrace.current.toString().trimRight().split('\n');
-  if (kIsWeb) {
+  stackTrace ??= StackTrace.current;
+  Iterable<String> lines = stackTrace.toString().trimRight().split('\n');
+  if (kIsWeb && lines.isNotEmpty) {
     // Remove extra call to StackTrace.current for web platform.
     // TODO(ferhat): remove when https://github.com/flutter/flutter/issues/37635
     // is addressed.
-    lines = lines.skip(1);
+    lines = lines.skipWhile((String line) {
+      return line.contains('StackTrace.current') ||
+             line.contains('dart:sdk_internal');
+    });
   }
   if (maxFrames != null)
     lines = lines.take(maxFrames);

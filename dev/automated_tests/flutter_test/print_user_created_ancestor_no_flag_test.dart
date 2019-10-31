@@ -12,7 +12,7 @@ void main() {
       CustomScrollView(
         slivers: <Widget>[
           SliverToBoxAdapter(child: Container()),
-        ]
+        ],
       )
     );
   });

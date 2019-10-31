@@ -189,7 +189,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
         informationCollector: () sync* {
           yield StringProperty('Handler', name);
           yield DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty);
-        }
+        },
       ));
     }
     return result;
@@ -253,6 +253,18 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     _entries.clear();
     for (GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);
+  }
+
+  /// Resolves this recognizer's participation in the given gesture arena with
+  /// the given disposition.
+  @protected
+  @mustCallSuper
+  void resolvePointer(int pointer, GestureDisposition disposition) {
+    final GestureArenaEntry entry = _entries[pointer];
+    if (entry != null) {
+      entry.resolve(disposition);
+      _entries.remove(pointer);
+    }
   }
 
   @override

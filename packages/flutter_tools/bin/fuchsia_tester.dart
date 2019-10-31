@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
@@ -146,6 +147,7 @@ Future<void> run(List<String> args) async {
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,
+      buildMode: BuildMode.debug,
       precompiledDillFiles: tests,
       concurrency: math.max(1, platform.numberOfProcessors - 2),
       icudtlPath: fs.path.absolute(argResults[_kOptionIcudtl]),
@@ -161,8 +163,9 @@ Future<void> run(List<String> args) async {
       } else {
         fs.currentDirectory = testDirectory;
       }
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory))
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory)) {
         throwToolExit('Failed to collect coverage data');
+      }
     }
   } finally {
     tempDir.deleteSync(recursive: true);

@@ -1,15 +1,11 @@
-# Using a CDN with CocoaPods 1.7.2 or later can save a lot of time on pod installation, but it's experimental rather than the default.
-# source 'https://cdn.cocoapods.org/'
-
-platform :osx, '10.13'
+platform :osx, '10.11'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
   'Debug' => :debug,
-  # TODO: Add Profile support to projects.
-  #'Profile' => :release,
+  'Profile' => :release,
   'Release' => :release,
 }
 
@@ -41,15 +37,14 @@ def pubspec_supports_macos(file)
     return false;
   end
   File.foreach(file_abs_path) { |line|
-    # TODO(stuartmorgan): Use formal platform declaration once it exists,
-    # see https://github.com/flutter/flutter/issues/33597.
-    return true if line =~ /^\s*macosPrefix:/
+    return true if line =~ /^\s*macos:/
   }
   return false
 end
 
 target 'Runner' do
   use_frameworks!
+  use_modular_headers!
 
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
   # referring to absolute paths on developers' machines.

@@ -54,7 +54,7 @@ class InlineSpanSemanticsInformation {
     this.text, {
     this.isPlaceholder = false,
     this.semanticsLabel,
-    this.recognizer
+    this.recognizer,
   }) : assert(text != null),
        assert(isPlaceholder != null),
        assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),

@@ -237,6 +237,33 @@ void main() {
     );
   });
 
+  test('isSameColorAs', () {
+    expect(
+      const Color(0x87654321),
+      isSameColorAs(_CustomColor(0x87654321)),
+    );
+
+    expect(
+      _CustomColor(0x87654321),
+      isSameColorAs(const Color(0x87654321)),
+    );
+
+    expect(
+      const Color(0x12345678),
+      isNot(isSameColorAs(_CustomColor(0x87654321))),
+    );
+
+    expect(
+      _CustomColor(0x87654321),
+      isNot(isSameColorAs(const Color(0x12345678))),
+    );
+
+    expect(
+      _CustomColor(0xFF123456),
+      isSameColorAs(_CustomColor(0xFF123456)..isEqual = false),
+    );
+  });
+
   group('coversSameAreaAs', () {
     test('empty Paths', () {
       expect(
@@ -412,6 +439,7 @@ void main() {
         namesRoute: true,
         header: true,
         button: true,
+        link: true,
         onTap: () { },
         onLongPress: () { },
         label: 'foo',
@@ -439,6 +467,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scan',
@@ -460,6 +489,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scan',
@@ -481,6 +511,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scans',
@@ -525,6 +556,8 @@ void main() {
         scrollExtentMin: null,
         platformViewId: 105,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        currentValueLength: 10,
+        maxValueLength: 15,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode();
       node.data = data;
@@ -535,15 +568,19 @@ void main() {
          elevation: 3.0,
          thickness: 4.0,
          platformViewId: 105,
+         currentValueLength: 10,
+         maxValueLength: 15,
          /* Flags */
          hasCheckedState: true,
          isChecked: true,
          isSelected: true,
          isButton: true,
+         isLink: true,
          isTextField: true,
          isReadOnly: true,
          hasEnabledState: true,
          isFocused: true,
+         isFocusable: true,
          isEnabled: true,
          isInMutuallyExclusiveGroup: true,
          isHeader: true,
@@ -665,4 +702,15 @@ class _FakeSemanticsNode extends SemanticsNode {
   SemanticsData data;
   @override
   SemanticsData getSemanticsData() => data;
+}
+
+class _CustomColor extends Color {
+  _CustomColor(int value) : super(value);
+  bool isEqual;
+
+  @override
+  bool operator ==(dynamic other) => isEqual ?? super == other;
+
+  @override
+  int get hashCode => hashValues(super.hashCode, isEqual);
 }

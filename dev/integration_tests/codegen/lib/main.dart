@@ -34,7 +34,7 @@ class _ExampleWidgetState extends State<ExampleWidget> {
                 });
               },
             ),
-            _pressed ? GeneratedWidget() : const SizedBox(),
+            if (_pressed) GeneratedWidget() else const SizedBox(),
           ],
         ),
       ),

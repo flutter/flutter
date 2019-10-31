@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'actions.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
@@ -245,7 +249,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         }
       }
     });
-    return sorted.first;
+
+    if (sorted.isNotEmpty)
+      return sorted.first;
+
+    return null;
   }
 
   // Sorts nodes from left to right horizontally, and removes nodes that are
@@ -657,10 +665,9 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       return topmost;
     }
 
-    final List<_SortData> data = <_SortData>[];
-    for (FocusNode node in nodes) {
-      data.add(_SortData(node));
-    }
+    final List<_SortData> data = <_SortData>[
+      for (FocusNode node in nodes) _SortData(node),
+    ];
 
     // Pick the initial widget as the one that is leftmost in the band of the
     // topmost, or the topmost, if there are no others in its band.
@@ -790,4 +797,148 @@ class DefaultFocusTraversal extends InheritedWidget {
 
   @override
   bool updateShouldNotify(DefaultFocusTraversal oldWidget) => policy != oldWidget.policy;
+}
+
+// A base class for all of the default actions that request focus for a node.
+class _RequestFocusActionBase extends Action {
+  _RequestFocusActionBase(LocalKey name) : super(name);
+
+  FocusNode _previousFocus;
+
+  @override
+  void invoke(FocusNode node, Intent intent) {
+    _previousFocus = WidgetsBinding.instance.focusManager.primaryFocus;
+    node.requestFocus();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<FocusNode>('previous', _previousFocus));
+  }
+}
+
+/// An [Action] that requests the focus on the node it is invoked on.
+///
+/// This action can be used to request focus for a particular node, by calling
+/// [Action.invoke] like so:
+///
+/// ```dart
+/// Actions.invoke(context, const Intent(RequestFocusAction.key), focusNode: _focusNode);
+/// ```
+///
+/// Where the `_focusNode` is the node for which the focus will be requested.
+///
+/// The difference between requesting focus in this way versus calling
+/// [_focusNode.requestFocus] directly is that it will use the [Action]
+/// registered in the nearest [Actions] widget associated with [key] to make the
+/// request, rather than just requesting focus directly. This allows the action
+/// to have additional side effects, like logging, or undo and redo
+/// functionality.
+///
+/// However, this [RequestFocusAction] is the default action associated with the
+/// [key] in the [WidgetsApp], and it simply requests focus and has no side
+/// effects.
+class RequestFocusAction extends _RequestFocusActionBase {
+  /// Creates a [RequestFocusAction] with a fixed [key].
+  RequestFocusAction() : super(key);
+
+  /// The [LocalKey] that uniquely identifies this action to an [Intent].
+  static const LocalKey key = ValueKey<Type>(RequestFocusAction);
+
+  @override
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
+    node.requestFocus();
+  }
+}
+
+/// An [Action] that moves the focus to the next focusable node in the focus
+/// order.
+///
+/// This action is the default action registered for the [key], and by default
+/// is bound to the [LogicalKeyboardKey.tab] key in the [WidgetsApp].
+class NextFocusAction extends _RequestFocusActionBase {
+  /// Creates a [NextFocusAction] with a fixed [key];
+  NextFocusAction() : super(key);
+
+  /// The [LocalKey] that uniquely identifies this action to an [Intent].
+  static const LocalKey key = ValueKey<Type>(NextFocusAction);
+
+  @override
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
+    node.nextFocus();
+  }
+}
+
+/// An [Action] that moves the focus to the previous focusable node in the focus
+/// order.
+///
+/// This action is the default action registered for the [key], and by default
+/// is bound to a combination of the [LogicalKeyboardKey.tab] key and the
+/// [LogicalKeyboardKey.shift] key in the [WidgetsApp].
+class PreviousFocusAction extends _RequestFocusActionBase {
+  /// Creates a [PreviousFocusAction] with a fixed [key];
+  PreviousFocusAction() : super(key);
+
+  /// The [LocalKey] that uniquely identifies this action to an [Intent].
+  static const LocalKey key = ValueKey<Type>(PreviousFocusAction);
+
+  @override
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
+    node.previousFocus();
+  }
+}
+
+/// An [Intent] that represents moving to the next focusable node in the given
+/// [direction].
+///
+/// This is the [Intent] bound by default to the [LogicalKeyboardKey.arrowUp],
+/// [LogicalKeyboardKey.arrowDown], [LogicalKeyboardKey.arrowLeft], and
+/// [LogicalKeyboardKey.arrowRight] keys in the [WidgetsApp], with the
+/// appropriate associated directions.
+class DirectionalFocusIntent extends Intent {
+  /// Creates a [DirectionalFocusIntent] with a fixed [key], and the given
+  /// [direction].
+  const DirectionalFocusIntent(this.direction, {this.ignoreTextFields = true})
+      : assert(ignoreTextFields != null), super(DirectionalFocusAction.key);
+
+  /// The direction in which to look for the next focusable node when the
+  /// associated [DirectionalFocusAction] is invoked.
+  final TraversalDirection direction;
+
+  /// If true, then directional focus actions that occur within a text field
+  /// will not happen when the focus node which received the key is a text
+  /// field.
+  ///
+  /// Defaults to true.
+  final bool ignoreTextFields;
+}
+
+/// An [Action] that moves the focus to the focusable node in the given
+/// [direction] configured by the associated [DirectionalFocusIntent].
+///
+/// This is the [Action] associated with the [key] and bound by default to the
+/// [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
+/// [LogicalKeyboardKey.arrowLeft], and [LogicalKeyboardKey.arrowRight] keys in
+/// the [WidgetsApp], with the appropriate associated directions.
+class DirectionalFocusAction extends _RequestFocusActionBase {
+  /// Creates a [DirectionalFocusAction] with a fixed [key];
+  DirectionalFocusAction() : super(key);
+
+  /// The [LocalKey] that uniquely identifies this action to [DirectionalFocusIntent].
+  static const LocalKey key = ValueKey<Type>(DirectionalFocusAction);
+
+  /// The direction in which to look for the next focusable node when invoked.
+  TraversalDirection direction;
+
+  @override
+  void invoke(FocusNode node, DirectionalFocusIntent intent) {
+    super.invoke(node, intent);
+    if (!intent.ignoreTextFields || node.context.widget is! EditableText) {
+      node.focusInDirection(intent.direction);
+    }
+  }
 }

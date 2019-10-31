@@ -17,8 +17,9 @@ const String _kFlutterServicesManifestPath = 'flutter_services.yaml';
 
 dynamic _loadYamlFile(String path) {
   printTrace("Looking for YAML at '$path'");
-  if (!fs.isFileSync(path))
+  if (!fs.isFileSync(path)) {
     return null;
+  }
   final String manifestString = fs.file(path).readAsStringSync();
   return loadYaml(manifestString);
 }
@@ -69,8 +70,9 @@ Future<void> parseServiceConfigs(
     }
 
     if (jars != null && serviceConfig['jars'] is Iterable) {
-      for (String jar in serviceConfig['jars'])
+      for (String jar in serviceConfig['jars']) {
         jars.add(fs.file(await getServiceFromUrl(jar, serviceRoot, service)));
+      }
     }
   }
 }

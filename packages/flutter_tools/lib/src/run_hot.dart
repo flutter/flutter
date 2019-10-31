@@ -7,7 +7,9 @@ import 'dart:async';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 
+import 'base/async_guard.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -28,6 +30,10 @@ import 'vmservice.dart';
 class HotRunnerConfig {
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
   bool stableDartDependencies = false;
+
+  /// Whether the hot runner should scan for modified files asynchronously.
+  bool asyncScanning = false;
+
   /// A hook for implementations to perform any necessary initialization prior
   /// to a hot restart. Should return true if the hot restart should continue.
   Future<bool> setupHotRestart() async {
@@ -57,7 +63,6 @@ class HotRunner extends ResidentRunner {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUi = true,
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
@@ -69,7 +74,6 @@ class HotRunner extends ResidentRunner {
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
-             usesTerminalUi: usesTerminalUi,
              projectRootPath: projectRootPath,
              packagesFilePath: packagesFilePath,
              stayResident: stayResident,
@@ -165,8 +169,9 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-    for (FlutterDevice device in flutterDevices)
+    for (FlutterDevice device in flutterDevices) {
       device.initLogReader();
+    }
     try {
       final List<Uri> baseUris = await _initDevFS();
       if (connectionInfoCompleter != null) {
@@ -176,7 +181,7 @@ class HotRunner extends ResidentRunner {
             httpUri: flutterDevices.first.observatoryUris.first,
             wsUri: flutterDevices.first.vmServices.first.wsAddress,
             baseUri: baseUris.first.toString(),
-          )
+          ),
         );
       }
     } catch (error) {
@@ -189,17 +194,20 @@ class HotRunner extends ResidentRunner {
       'hotReloadInitialDevFSSyncMilliseconds',
       initialUpdateDevFSsTimer.elapsed.inMilliseconds,
     );
-    if (!devfsResult.success)
+    if (!devfsResult.success) {
       return 3;
+    }
 
     await refreshViews();
     for (FlutterDevice device in flutterDevices) {
       // VM must have accepted the kernel binary, there will be no reload
       // report, so we let incremental compiler know that source code was accepted.
-      if (device.generator != null)
+      if (device.generator != null) {
         device.generator.accept();
-      for (FlutterView view in device.views)
+      }
+      for (FlutterView view in device.views) {
         printTrace('Connected to $view.');
+      }
     }
 
     appStartedCompleter?.complete();
@@ -225,10 +233,12 @@ class HotRunner extends ResidentRunner {
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
       return 0;
     }
+    writeVmserviceFile();
 
     int result = 0;
-    if (stayResident)
+    if (stayResident) {
       result = await waitForAppToFinish();
+    }
     await cleanupAtFinish();
     return result;
   }
@@ -238,12 +248,12 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true,
   }) async {
     if (!fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
-      if (target == null)
+      if (target == null) {
         message += '\nConsider using the -t option to specify the Dart file to start.';
+      }
       printError(message);
       return 1;
     }
@@ -254,7 +264,6 @@ class HotRunner extends ResidentRunner {
       final int result = await device.runHot(
         hotRunner: this,
         route: route,
-        shouldBuild: shouldBuild,
       );
       if (result != 0) {
         return result;
@@ -269,34 +278,34 @@ class HotRunner extends ResidentRunner {
 
   Future<List<Uri>> _initDevFS() async {
     final String fsName = fs.path.basename(projectRootPath);
-    final List<Uri> devFSUris = <Uri>[];
-    for (FlutterDevice device in flutterDevices) {
-      final Uri uri = await device.setupDevFS(
-        fsName,
-        fs.directory(projectRootPath),
-        packagesFilePath: packagesFilePath,
-      );
-      devFSUris.add(uri);
-    }
-    return devFSUris;
+    return <Uri>[
+      for (FlutterDevice device in flutterDevices)
+        await device.setupDevFS(
+          fsName,
+          fs.directory(projectRootPath),
+          packagesFilePath: packagesFilePath,
+        ),
+    ];
   }
 
   Future<UpdateFSReport> _updateDevFS({ bool fullRestart = false }) async {
-    final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
+    final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');
       final int result = await assetBundle.build();
-      if (result != 0)
+      if (result != 0) {
         return UpdateFSReport(success: false);
+      }
     }
 
     // Picking up first device's compiler as a source of truth - compilers
     // for all devices should be in sync.
-    final List<Uri> invalidatedFiles = ProjectFileInvalidator.findInvalidated(
+    final List<Uri> invalidatedFiles = await ProjectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevices[0].devFS.lastCompiled,
       urisToMonitor: flutterDevices[0].devFS.sources,
       packagesPath: packagesFilePath,
+      asyncScanning: hotRunnerConfig.asyncScanning,
     );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
@@ -306,7 +315,7 @@ class HotRunner extends ResidentRunner {
         bundle: assetBundle,
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: isFirstUpload,
-        bundleDirty: isFirstUpload == false && rebuildBundle,
+        bundleDirty: !isFirstUpload && rebuildBundle,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart),
@@ -318,8 +327,9 @@ class HotRunner extends ResidentRunner {
   }
 
   void _resetDirtyAssets() {
-    for (FlutterDevice device in flutterDevices)
+    for (FlutterDevice device in flutterDevices) {
       device.devFS.assetPathsToEvict.clear();
+    }
   }
 
   Future<void> _cleanupDevFS() async {
@@ -345,9 +355,9 @@ class HotRunner extends ResidentRunner {
     Uri packagesUri,
     Uri assetsDirectoryUri,
   ) {
-    final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterView view in device.views)
-      futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
+    final List<Future<void>> futures = <Future<void>>[
+      for (FlutterView view in device.views) view.runFromSource(entryUri, packagesUri, assetsDirectoryUri),
+    ];
     final Completer<void> completer = Completer<void>();
     Future.wait(futures).whenComplete(() { completer.complete(null); });
     return completer.future;
@@ -370,16 +380,18 @@ class HotRunner extends ResidentRunner {
     await Future.wait(futures);
     if (benchmarkMode) {
       futures.clear();
-      for (FlutterDevice device in flutterDevices)
-        for (FlutterView view in device.views)
+      for (FlutterDevice device in flutterDevices) {
+        for (FlutterView view in device.views) {
           futures.add(view.flushUIThreadTasks());
+        }
+      }
       await Future.wait(futures);
     }
   }
 
   Future<OperationResult> _restartFromSources({
     String reason,
-    bool benchmarkMode = false
+    bool benchmarkMode = false,
   }) async {
     if (!_isPaused()) {
       printTrace('Refreshing active FlutterViews before restarting.');
@@ -472,8 +484,9 @@ class HotRunner extends ResidentRunner {
     bool printErrors = true,
   }) {
     if (reloadReport == null) {
-      if (printErrors)
+      if (printErrors) {
         printError('Hot reload did not receive reload report.');
+      }
       return false;
     }
     if (!(reloadReport['type'] == 'ReloadReport' &&
@@ -489,15 +502,17 @@ class HotRunner extends ResidentRunner {
            )
           )
          )) {
-      if (printErrors)
+      if (printErrors) {
         printError('Hot reload received invalid response: $reloadReport');
+      }
       return false;
     }
     if (!reloadReport['success']) {
       if (printErrors) {
         printError('Hot reload was rejected:');
-        for (Map<String, dynamic> notice in reloadReport['details']['notices'])
+        for (Map<String, dynamic> notice in reloadReport['details']['notices']) {
           printError('${notice['message']}');
+        }
       }
       return false;
     }
@@ -512,7 +527,7 @@ class HotRunner extends ResidentRunner {
     bool fullRestart = false,
     bool pauseAfterRestart = false,
     String reason,
-    bool benchmarkMode = false
+    bool benchmarkMode = false,
   }) async {
     String targetPlatform;
     String sdkName;
@@ -578,10 +593,14 @@ class HotRunner extends ResidentRunner {
       if (!(await hotRunnerConfig.setupHotRestart())) {
         return OperationResult(1, 'setupHotRestart failed');
       }
-      result = await _restartFromSources(
+      // The current implementation of the vmservice and JSON rpc may throw
+      // unhandled exceptions into the zone that cannot be caught with a regular
+      // try catch. The usage is [asyncGuard] is required to normalize the error
+      // handling, at least until we can refactor the underlying code.
+      result = await asyncGuard(() => _restartFromSources(
         reason: reason,
         benchmarkMode: benchmarkMode,
-      );
+      ));
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       }
@@ -651,12 +670,12 @@ class HotRunner extends ResidentRunner {
     bool emulator,
     bool pause = false,
     String reason,
-    void Function(String message) onSlow
+    void Function(String message) onSlow,
   }) async {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null) {
-          throw 'Application isolate not found';
+          return OperationResult(2, 'Application isolate not found', fatal: true);
         }
       }
     }
@@ -764,7 +783,6 @@ class HotRunner extends ResidentRunner {
     }
     // Record time it took for the VM to reload the sources.
     _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
-
     final Stopwatch reassembleTimer = Stopwatch()..start();
     // Reload the isolate.
     final List<Future<void>> allDevices = <Future<void>>[];
@@ -806,8 +824,9 @@ class HotRunner extends ResidentRunner {
       }
     }
     if (pausedIsolatesFound > 0) {
-      if (onSlow != null)
+      if (onSlow != null) {
         onSlow('${_describePausedIsolates(pausedIsolatesFound, serviceEventKind)}; interface might not update.');
+      }
       if (reassembleViews.isEmpty) {
         printTrace('Skipping reassemble because all isolates are paused.');
         return OperationResult(OperationResult.ok.code, reloadMessage);
@@ -818,18 +837,18 @@ class HotRunner extends ResidentRunner {
     assert(reassembleViews.isNotEmpty);
     printTrace('Reassembling application');
     bool failedReassemble = false;
-    final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterView view in reassembleViews) {
-      futures.add(() async {
-        try {
-          await view.uiIsolate.flutterReassemble();
-        } catch (error) {
-          failedReassemble = true;
-          printError('Reassembling ${view.uiIsolate.name} failed: $error');
-          return;
-        }
-      }());
-    }
+    final List<Future<void>> futures = <Future<void>>[
+      for (FlutterView view in reassembleViews)
+        () async {
+          try {
+            await view.uiIsolate.flutterReassemble();
+          } catch (error) {
+            failedReassemble = true;
+            printError('Reassembling ${view.uiIsolate.name} failed: $error');
+            return;
+          }
+        }(),
+    ];
     final Future<void> reassembleFuture = Future.wait<void>(futures).then<void>((List<void> values) { });
     await reassembleFuture.timeout(
       const Duration(seconds: 2),
@@ -860,8 +879,9 @@ class HotRunner extends ResidentRunner {
           return;
         }
         shouldReportReloadTime = false;
-        if (onSlow != null)
+        if (onSlow != null) {
           onSlow('${_describePausedIsolates(postReloadPausedIsolatesFound, serviceEventKind)}.');
+        }
       },
     );
     // Record time it took for Flutter to reassemble the application.
@@ -898,8 +918,9 @@ class HotRunner extends ResidentRunner {
       _addBenchmarkData('hotReloadMillisecondsToFrame', reloadInMs);
     }
     // Only report timings if we reloaded a single view without any errors.
-    if ((reassembleViews.length == 1) && !failedReassemble && shouldReportReloadTime)
+    if ((reassembleViews.length == 1) && !failedReassemble && shouldReportReloadTime) {
       flutterUsage.sendTiming('hot', 'reload', reloadDuration);
+    }
     return OperationResult(
       failedReassemble ? 1 : OperationResult.ok.code,
       reloadMessage,
@@ -964,8 +985,9 @@ class HotRunner extends ResidentRunner {
     printStatus(message);
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
-      for (Uri uri in device.observatoryUris)
+      for (Uri uri in device.observatoryUris) {
         printStatus('An Observatory debugger and profiler on $dname is available at: $uri');
+      }
     }
     final String quitMessage = _didAttach
         ? 'To detach, press "d"; to quit, press "q".'
@@ -981,8 +1003,9 @@ class HotRunner extends ResidentRunner {
   Future<void> _evictDirtyAssets() {
     final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];
     for (FlutterDevice device in flutterDevices) {
-      if (device.devFS.assetPathsToEvict.isEmpty)
+      if (device.devFS.assetPathsToEvict.isEmpty) {
         continue;
+      }
       if (device.views.first.uiIsolate == null) {
         printError('Application isolate not found for $device');
         continue;
@@ -1010,10 +1033,14 @@ class HotRunner extends ResidentRunner {
   Future<void> preExit() async {
     await _cleanupDevFS();
     await hotRunnerConfig.runPreShutdownOperations();
+    await super.preExit();
   }
 
   @override
   Future<void> cleanupAtFinish() async {
+    for (FlutterDevice flutterDevice in flutterDevices) {
+      flutterDevice.device.dispose();
+    }
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
   }
@@ -1023,38 +1050,75 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  static List<Uri> findInvalidated({
+  // As of writing, Dart supports up to 32 asynchronous I/O threads per
+  // isolate.  We also want to avoid hitting platform limits on open file
+  // handles/descriptors.
+  //
+  // This value was chosen based on empirical tests scanning a set of
+  // ~2000 files.
+  static const int _kMaxPendingStats = 8;
+
+  static Future<List<Uri>> findInvalidated({
     @required DateTime lastCompiled,
     @required List<Uri> urisToMonitor,
     @required String packagesPath,
-  }) {
-    final List<Uri> invalidatedFiles = <Uri>[];
-    int scanned = 0;
+    bool asyncScanning = false,
+  }) async {
+    assert(urisToMonitor != null);
+    assert(packagesPath != null);
+
+    if (lastCompiled == null) {
+      // Initial load.
+      assert(urisToMonitor.isEmpty);
+      return <Uri>[];
+    }
+
     final Stopwatch stopwatch = Stopwatch()..start();
-    for (Uri uri in urisToMonitor) {
-      if ((platform.isWindows && uri.path.contains(_pubCachePathWindows))
-          || uri.path.contains(_pubCachePathLinuxAndMac)) {
-        // Don't watch pub cache directories to speed things up a little.
-        continue;
+
+    final List<Uri> urisToScan = <Uri>[
+      // Don't watch pub cache directories to speed things up a little.
+      ...urisToMonitor.where(_isNotInPubCache),
+
+      // We need to check the .packages file too since it is not used in compilation.
+      fs.file(packagesPath).uri,
+    ];
+    final List<Uri> invalidatedFiles = <Uri>[];
+
+    if (asyncScanning) {
+      final Pool pool = Pool(_kMaxPendingStats);
+      final List<Future<void>> waitList = <Future<void>>[];
+      for (final Uri uri in urisToScan) {
+        waitList.add(pool.withResource<void>(
+          () => fs
+            .stat(uri.toFilePath(windows: platform.isWindows))
+            .then((FileStat stat) {
+              final DateTime updatedAt = stat.modified;
+              if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+                invalidatedFiles.add(uri);
+              }
+            })
+        ));
       }
-      final DateTime updatedAt = fs.statSync(
-          uri.toFilePath(windows: platform.isWindows)).modified;
-      scanned++;
-      if (updatedAt == null) {
-        continue;
-      }
-      if (updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
-        invalidatedFiles.add(uri);
+      await Future.wait<void>(waitList);
+    } else {
+      for (final Uri uri in urisToScan) {
+        final DateTime updatedAt = fs.statSync(
+            uri.toFilePath(windows: platform.isWindows)).modified;
+        if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+          invalidatedFiles.add(uri);
+        }
       }
     }
-    // we need to check the .packages file too since it is not used in compilation.
-    final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
-    if (lastCompiled != null && packagesUpdatedAt != null
-        && packagesUpdatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
-      invalidatedFiles.add(fs.file(packagesPath).uri);
-      scanned++;
-    }
-    printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
+    printTrace(
+      'Scanned through ${urisToScan.length} files in '
+      '${stopwatch.elapsedMilliseconds}ms'
+      '${asyncScanning ? " (async)" : ""}',
+    );
     return invalidatedFiles;
+  }
+
+  static bool _isNotInPubCache(Uri uri) {
+    return !(platform.isWindows && uri.path.contains(_pubCachePathWindows))
+        && !uri.path.contains(_pubCachePathLinuxAndMac);
   }
 }

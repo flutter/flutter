@@ -72,7 +72,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
     expect(selectedResults, <void>[null]);
@@ -558,9 +558,10 @@ void main() {
                       TestSemantics(
                         id: 10,
                         flags: <SemanticsFlag>[
-                          SemanticsFlag.isButton,
                           SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isButton,
                           SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: 'Back',
@@ -588,9 +589,10 @@ void main() {
                   TestSemantics(
                     id: 8,
                     flags: <SemanticsFlag>[
-                      SemanticsFlag.isButton,
                       SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isButton,
                       SemanticsFlag.isEnabled,
+                      SemanticsFlag.isFocusable,
                     ],
                     actions: <SemanticsAction>[SemanticsAction.tap],
                     label: 'Suggestions',
