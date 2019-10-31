@@ -1,5 +1,10 @@
 # Recipe Changelog
 
+## 30 Oct 2019
+
+* Recipe Link: https://chromium-review.googlesource.com/c/chromium/tools/build/+/1891522
+* Reason: Pass the `out-dir` arg in the recipe.
+
 ## 29 Oct 2019
 
 * Recipe Link: https://chromium-review.googlesource.com/c/chromium/tools/build/+/1887742
