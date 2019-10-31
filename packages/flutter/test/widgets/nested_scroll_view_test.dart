@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -703,6 +705,60 @@ void main() {
     expect(globalKey.currentState.innerController, isNotNull);
     expect(globalKey.currentState.outerController, isNotNull);
   });
+
+  // One scrollExtent should be smaller than the height of the toolbar
+  // to ensure that the inner scroll controller is not scrolled in that case.
+  for (final double scrollExtent in const <double>[
+    kToolbarHeight - 9,
+    4.2e2,
+    3e3,
+    1e4
+  ]) {
+    testWidgets(
+        'NestedScrollView exposed scroll controllers work properly with a scroll extent of $scrollExtent',
+            (WidgetTester tester) async {
+          final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+          final ScrollController scrollController = ScrollController();
+
+          await tester.pumpWidget(Directionality(
+            textDirection: TextDirection.ltr,
+            child: Localizations(
+              locale: const Locale('en', 'US'),
+              delegates: const <LocalizationsDelegate<dynamic>>[
+                DefaultMaterialLocalizations.delegate,
+                DefaultWidgetsLocalizations.delegate,
+              ],
+              child: MediaQuery(
+                data: const MediaQueryData(),
+                child: NestedScrollView(
+                  controller: scrollController,
+                  key: globalKey,
+                  body: ListView.builder(
+                    itemBuilder: (BuildContext context, int index) =>
+                        Text('$index'),
+                  ),
+                  headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
+                ),
+              ),
+            ),
+          ));
+
+          const double scrollExtent = 4.2e2;
+
+          expect(
+              globalKey.currentState.innerController.position.pixels +
+                  globalKey.currentState.outerController.position.pixels,
+              scrollExtent);
+
+          // The outer scroll view cannot scroll past its height, which should be kToolbarHeight as a SliverAppBar represents the outer body.
+          expect(globalKey.currentState.outerController.position.pixels,
+              min(kToolbarHeight, scrollExtent));
+
+          // The inner controller should only start scrolling once the outer controller has been scrolled to its full extent.
+          expect(globalKey.currentState.innerController.position.pixels,
+              max(0, scrollExtent - kToolbarHeight));
+        });
+  }
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {
