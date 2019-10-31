@@ -1,4 +1,4 @@
-Signature: 5e96c8b6acdd7d5e0df9bb0153aa12a1
+Signature: 3206d0cf85b6b3692f0c2e5171b048b9
 
 UNUSED LICENSES:
 
@@ -1222,6 +1222,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/composition_deleg
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/composition_delegate/composition_delegate.dart
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/_layout_logic.dart
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/_layout_strategy.dart
+FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/archetype_strategy/archetype_strategy.dart
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/copresent_strategy/copresent_strategy.dart
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/split_evenly_strategy/split_evenly_strategy.dart
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/stack_strategy/stack_strategy.dart
