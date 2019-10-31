@@ -27,6 +27,11 @@ class GestureTransformable extends StatelessWidget {
     @required this.child,
     this.maxScale = 2.5,
     this.minScale = 0.8,
+    // TODO(justinmc): Google Photos and Apple Photos both have some effects
+    // when transforming beyond the boundaries that aren't currently possible
+    // with GestureTransformable. There is either a rubber band effect when
+    // exceeding the boundaries, or a strong enough gesture causes a navigation
+    // change.
     this.boundaryRect,
     this.initialTranslation,
     this.initialScale,
