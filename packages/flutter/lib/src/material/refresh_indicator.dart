@@ -267,8 +267,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   bool _handleGlowNotification(OverscrollIndicatorNotification notification) {
-    if (notification.depth != 0) return false;
-    if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
+    if (notification.depth != 0 || !notification.leading)
+      return false;
+    if (_mode == _RefreshIndicatorMode.drag) {
       notification.disallowGlow();
       return true;
     }
