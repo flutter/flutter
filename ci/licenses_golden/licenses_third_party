@@ -1,4 +1,4 @@
-Signature: 11e32382c56527efdcebb8a776a011be
+Signature: 10793d772d6c660b5fab347dc5ac6cf2
 
 UNUSED LICENSES:
 
@@ -7490,6 +7490,7 @@ FILE: ../../../third_party/dart/sdk/lib/vmservice_libraries.json
 FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/conversions_dart2js.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/html_common.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/libraries.json
+FILE: ../../../third_party/dart/sdk_nnbd/lib/libraries_nnbd_mix_hack.json
 FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice_libraries.json
 FILE: ../../../third_party/dart/third_party/7zip.tar.gz.sha1
 FILE: ../../../third_party/dart/third_party/clang.tar.gz.sha1
