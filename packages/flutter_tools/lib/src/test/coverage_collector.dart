@@ -11,21 +11,19 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../project.dart';
 import '../vmservice.dart';
 
 import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.flutterProject, this.coverageDirectory});
+  CoverageCollector({this.libraryPredicate});
 
   Map<String, dynamic> _globalHitmap;
-  final Directory coverageDirectory;
-  final FlutterProject flutterProject;
+  bool Function(String) libraryPredicate;
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
@@ -50,13 +48,7 @@ class CoverageCollector extends TestWatcher {
   Future<void> collectCoverageIsolate(Uri observatoryUri) async {
     assert(observatoryUri != null);
     print('collecting coverage data from $observatoryUri...');
-    final Map<String, dynamic> data = await collect(observatoryUri, (String libraryName) {
-      // If we have a specified coverage directory or could not find the package name, then
-      // accept all libraries.
-      return (coverageDirectory != null)
-          || (flutterProject == null)
-          || libraryName.contains(flutterProject.manifest.appName);
-    });
+    final Map<String, dynamic> data = await collect(observatoryUri, libraryPredicate);
     if (data == null) {
       throw Exception('Failed to collect coverage.');
     }
@@ -84,20 +76,11 @@ class CoverageCollector extends TestWatcher {
       .then<void>((int code) {
         throw Exception('Failed to collect coverage, process terminated prematurely with exit code $code.');
       });
-    final Future<void> collectionComplete = collect(observatoryUri, (String libraryName) {
-      // If we have a specified coverage directory or could not find the package name, then
-      // accept all libraries.
-      if (coverageDirectory != null) {
-        return true;
-      }
-      if (flutterProject == null) {
-        return true;
-      }
-      return libraryName.contains(flutterProject.manifest.appName);
-    })
+    final Future<void> collectionComplete = collect(observatoryUri, libraryPredicate)
       .then<void>((Map<String, dynamic> result) {
-        if (result == null)
+        if (result == null) {
           throw Exception('Failed to collect coverage.');
+        }
         data = result;
       });
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
@@ -140,8 +123,9 @@ class CoverageCollector extends TestWatcher {
     );
     status.stop();
     printTrace('coverage information collection complete');
-    if (coverageData == null)
+    if (coverageData == null) {
       return false;
+    }
 
     final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
@@ -157,10 +141,11 @@ class CoverageCollector extends TestWatcher {
 
       if (os.which('lcov') == null) {
         String installMessage = 'Please install lcov.';
-        if (platform.isLinux)
+        if (platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
-        else if (platform.isMacOS)
+        } else if (platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
+        }
         printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
         return false;
       }
@@ -168,14 +153,15 @@ class CoverageCollector extends TestWatcher {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
         final File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
-        final ProcessResult result = processManager.runSync(<String>[
+        final RunResult result = processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
           '--output-file', coverageFile.path,
         ]);
-        if (result.exitCode != 0)
+        if (result.exitCode != 0) {
           return false;
+        }
       } finally {
         tempDir.deleteSync(recursive: true);
       }

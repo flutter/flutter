@@ -27,22 +27,44 @@ class LoggingThumbShape extends SliderComponentShape {
 
   @override
   void paint(
-      PaintingContext context,
-      Offset thumbCenter, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isEnabled,
-      bool isDiscrete,
-      bool onActiveTrack,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-    }) {
+    PaintingContext context,
+    Offset thumbCenter, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isEnabled,
+    bool isDiscrete,
+    bool onActiveTrack,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
     context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
+  }
+}
+
+class TallSliderTickMarkShape extends SliderTickMarkShape {
+  @override
+  Size getPreferredSize({SliderThemeData sliderTheme, bool isEnabled}) {
+    return const Size(10.0, 200.0);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    Offset thumbCenter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    bool isEnabled,
+    TextDirection textDirection,
+  }) {
+    final Paint paint = Paint()..color = Colors.red;
+    context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, 10.0, 20.0), paint);
   }
 }
 
@@ -560,7 +582,7 @@ void main() {
         overlayColor: Color(0xff000010),
         thumbColor: Color(0xff000011),
         valueIndicatorColor: Color(0xff000012),
-      )
+      ),
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
     double value = 0.45;
@@ -1484,5 +1506,78 @@ void main() {
     // Drag to the right end of the track.
     await gesture.moveBy(const Offset(600.0, 0.0));
     expect(value, 1.0);
+  });
+
+  testWidgets('Slider respects height from theme', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(tickMarkShape: TallSliderTickMarkShape());
+            return MediaQuery(
+              data: MediaQueryData.fromWindow(window),
+              child: Material(
+                child: Center(
+                  child: IntrinsicHeight(
+                    child: SliderTheme(
+                      data: sliderTheme,
+                      child: Slider(
+                        key: sliderKey,
+                        value: value,
+                        divisions: 4,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final RenderBox renderObject = tester.renderObject<RenderBox>(find.byType(Slider));
+    expect(renderObject.size.height, 200);
+  });
+
+  testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const Slider(
+      activeColor: Colors.blue,
+      divisions: 10,
+      inactiveColor: Colors.grey,
+      label: 'Set a value',
+      max: 100.0,
+      min: 0.0,
+      onChanged: null,
+      onChangeEnd: null,
+      onChangeStart: null,
+      semanticFormatterCallback: null,
+      value: 50.0,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      'value: 50.0',
+      'disabled',
+      'min: 0.0',
+      'max: 100.0',
+      'divisions: 10',
+      'label: "Set a value"',
+      'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
+      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
+    ]);
   });
 }

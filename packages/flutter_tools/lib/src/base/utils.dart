@@ -8,7 +8,6 @@ import 'dart:math' show Random, max;
 import 'package:intl/intl.dart';
 
 import '../convert.dart';
-import '../globals.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart' as io;
@@ -27,14 +26,13 @@ class BotDetector {
 
         // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
         || platform.environment.containsKey('FLUTTER_HOST')
+        // When set, GA logs to a local file (normally for tests) so we don't need to filter.
+        || platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
     ) {
       return false;
     }
 
     return platform.environment['BOT'] == 'true'
-
-        // Non-interactive terminals are assumed to be bots.
-        || !io.stdout.hasTerminal
 
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         || platform.environment['TRAVIS'] == 'true'
@@ -48,7 +46,8 @@ class BotDetector {
         || platform.environment.containsKey('CIRRUS_CI')
 
         // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-        || (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR'))
+        || (platform.environment.containsKey('AWS_REGION') &&
+            platform.environment.containsKey('CODEBUILD_INITIATOR'))
 
         // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
         || platform.environment.containsKey('JENKINS_URL')
@@ -86,8 +85,9 @@ String snakeCase(String str, [ String sep = '_' ]) {
 }
 
 String toTitleCase(String str) {
-  if (str.isEmpty)
+  if (str.isEmpty) {
     return str;
+  }
   return str.substring(0, 1).toUpperCase() + str.substring(1);
 }
 
@@ -108,8 +108,9 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
   while (true) {
     final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
     final File file = fs.file(fs.path.join(dir.path, name));
-    if (!file.existsSync())
+    if (!file.existsSync()) {
       return file;
+    }
     i++;
   }
 }
@@ -189,11 +190,13 @@ class SettingsFile {
   SettingsFile.parse(String contents) {
     for (String line in contents.split('\n')) {
       line = line.trim();
-      if (line.startsWith('#') || line.isEmpty)
+      if (line.startsWith('#') || line.isEmpty) {
         continue;
+      }
       final int index = line.indexOf('=');
-      if (index != -1)
+      if (index != -1) {
         values[line.substring(0, index)] = line.substring(index + 1);
+      }
     }
   }
 
@@ -254,43 +257,6 @@ Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
 
 typedef AsyncCallback = Future<void> Function();
 
-/// A [Timer] inspired class that:
-///   - has a different initial value for the first callback delay
-///   - waits for a callback to be complete before it starts the next timer
-class Poller {
-  Poller(this.callback, this.pollingInterval, { this.initialDelay = Duration.zero }) {
-    Future<void>.delayed(initialDelay, _handleCallback);
-  }
-
-  final AsyncCallback callback;
-  final Duration initialDelay;
-  final Duration pollingInterval;
-
-  bool _canceled = false;
-  Timer _timer;
-
-  Future<void> _handleCallback() async {
-    if (_canceled)
-      return;
-
-    try {
-      await callback();
-    } catch (error) {
-      printTrace('Error from poller: $error');
-    }
-
-    if (!_canceled)
-      _timer = Timer(pollingInterval, _handleCallback);
-  }
-
-  /// Cancels the poller.
-  void cancel() {
-    _canceled = true;
-    _timer?.cancel();
-    _timer = null;
-  }
-}
-
 /// Returns a [Future] that completes when all given [Future]s complete.
 ///
 /// Uses [Future.wait] but removes null elements from the provided
@@ -301,9 +267,6 @@ class Poller {
 Future<List<T>> waitGroup<T>(Iterable<Future<T>> futures) {
   return Future.wait<T>(futures.where((Future<T> future) => future != null));
 }
-/// The terminal width used by the [wrapText] function if there is no terminal
-/// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
-const int kDefaultTerminalColumns = 100;
 
 /// Smallest column that will be used for text wrapping. If the requested column
 /// width is smaller than this, then this is what will be used.

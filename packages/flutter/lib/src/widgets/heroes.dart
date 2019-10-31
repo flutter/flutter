@@ -250,52 +250,58 @@ class Hero extends StatefulWidget {
   // should be considered for animation when `navigator` transitions from one
   // PageRoute to another.
   static Map<Object, _HeroState> _allHeroesFor(
-      BuildContext context,
-      bool isUserGestureTransition,
-      NavigatorState navigator,
+    BuildContext context,
+    bool isUserGestureTransition,
+    NavigatorState navigator,
   ) {
     assert(context != null);
     assert(isUserGestureTransition != null);
     assert(navigator != null);
     final Map<Object, _HeroState> result = <Object, _HeroState>{};
 
-    void addHero(StatefulElement hero, Object tag) {
+    void inviteHero(StatefulElement hero, Object tag) {
       assert(() {
         if (result.containsKey(tag)) {
-          throw FlutterError(
-            'There are multiple heroes that share the same tag within a subtree.\n'
-            'Within each subtree for which heroes are to be animated (i.e. a PageRoute subtree), '
-            'each Hero must have a unique non-null tag.\n'
-            'In this case, multiple heroes had the following tag: $tag\n'
-            'Here is the subtree for one of the offending heroes:\n'
-            '${hero.toStringDeep(prefixLineOne: "# ")}'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('There are multiple heroes that share the same tag within a subtree.'),
+            ErrorDescription(
+              'Within each subtree for which heroes are to be animated (i.e. a PageRoute subtree), '
+              'each Hero must have a unique non-null tag.\n'
+              'In this case, multiple heroes had the following tag: $tag\n'
+            ),
+            DiagnosticsProperty<StatefulElement>('Here is the subtree for one of the offending heroes', hero, linePrefix: '# ', style: DiagnosticsTreeStyle.dense),
+          ]);
         }
         return true;
       }());
+      final Hero heroWidget = hero.widget;
       final _HeroState heroState = hero.state;
-      result[tag] = heroState;
+      if (!isUserGestureTransition || heroWidget.transitionOnUserGestures) {
+        result[tag] = heroState;
+      } else {
+        // If transition is not allowed, we need to make sure hero is not hidden.
+        // A hero can be hidden previously due to hero transition.
+        heroState.ensurePlaceholderIsHidden();
+      }
     }
 
     void visitor(Element element) {
       if (element.widget is Hero) {
         final StatefulElement hero = element;
         final Hero heroWidget = element.widget;
-        if (!isUserGestureTransition || heroWidget.transitionOnUserGestures) {
-          final Object tag = heroWidget.tag;
-          assert(tag != null);
-          if (Navigator.of(hero) == navigator) {
-            addHero(hero, tag);
-          } else {
-            // The nearest navigator to the Hero is not the Navigator that is
-            // currently transitioning from one route to another. This means
-            // the Hero is inside a nested Navigator and should only be
-            // considered for animation if it is part of the top-most route in
-            // that nested Navigator and if that route is also a PageRoute.
-            final ModalRoute<dynamic> heroRoute = ModalRoute.of(hero);
-            if (heroRoute != null && heroRoute is PageRoute && heroRoute.isCurrent) {
-              addHero(hero, tag);
-            }
+        final Object tag = heroWidget.tag;
+        assert(tag != null);
+        if (Navigator.of(hero) == navigator) {
+          inviteHero(hero, tag);
+        } else {
+          // The nearest navigator to the Hero is not the Navigator that is
+          // currently transitioning from one route to another. This means
+          // the Hero is inside a nested Navigator and should only be
+          // considered for animation if it is part of the top-most route in
+          // that nested Navigator and if that route is also a PageRoute.
+          final ModalRoute<dynamic> heroRoute = ModalRoute.of(hero);
+          if (heroRoute != null && heroRoute is PageRoute && heroRoute.isCurrent) {
+            inviteHero(hero, tag);
           }
         }
       }
@@ -345,11 +351,20 @@ class _HeroState extends State<Hero> {
     });
   }
 
-  void endFlight() {
+  void ensurePlaceholderIsHidden() {
     if (mounted) {
       setState(() {
         _placeholderSize = null;
       });
+    }
+  }
+
+  // When `keepPlaceholder` is true, the placeholder will continue to be shown
+  // after the flight ends. Otherwise the child of the Hero will become visible
+  // and its TickerMode will be re-enabled.
+  void endFlight({ bool keepPlaceholder = false }) {
+    if (!keepPlaceholder) {
+      ensurePlaceholderIsHidden();
     }
   }
 
@@ -360,13 +375,13 @@ class _HeroState extends State<Hero> {
       'A Hero widget cannot be the descendant of another Hero widget.'
     );
 
-    final bool isHeroInFlight = _placeholderSize != null;
+    final bool showPlaceholder = _placeholderSize != null;
 
-    if (isHeroInFlight && widget.placeholderBuilder != null) {
+    if (showPlaceholder && widget.placeholderBuilder != null) {
       return widget.placeholderBuilder(context, _placeholderSize, widget.child);
     }
 
-    if (isHeroInFlight && !_shouldIncludeChild) {
+    if (showPlaceholder && !_shouldIncludeChild) {
       return SizedBox(
         width: _placeholderSize.width,
         height: _placeholderSize.height,
@@ -377,11 +392,11 @@ class _HeroState extends State<Hero> {
       width: _placeholderSize?.width,
       height: _placeholderSize?.height,
       child: Offstage(
-        offstage: isHeroInFlight,
+        offstage: showPlaceholder,
         child: TickerMode(
-          enabled: !isHeroInFlight,
+          enabled: !showPlaceholder,
           child: KeyedSubtree(key: _key, child: widget.child),
-        )
+        ),
       ),
     );
   }
@@ -400,6 +415,7 @@ class _HeroFlightManifest {
     @required this.createRectTween,
     @required this.shuttleBuilder,
     @required this.isUserGestureTransition,
+    @required this.isDiverted,
   }) : assert(fromHero.widget.tag == toHero.widget.tag);
 
   final HeroFlightDirection type;
@@ -412,6 +428,7 @@ class _HeroFlightManifest {
   final CreateRectTween createRectTween;
   final HeroFlightShuttleBuilder shuttleBuilder;
   final bool isUserGestureTransition;
+  final bool isDiverted;
 
   Object get tag => fromHero.widget.tag;
 
@@ -419,6 +436,7 @@ class _HeroFlightManifest {
     return CurvedAnimation(
       parent: (type == HeroFlightDirection.push) ? toRoute.animation : fromRoute.animation,
       curve: Curves.fastOutSlowIn,
+      reverseCurve: isDiverted ? null : Curves.fastOutSlowIn.flipped,
     );
   }
 
@@ -520,9 +538,13 @@ class _HeroFlight {
       assert(overlayEntry != null);
       overlayEntry.remove();
       overlayEntry = null;
-
-      manifest.fromHero.endFlight();
-      manifest.toHero.endFlight();
+      // We want to keep the hero underneath the current page hidden. If
+      // [AnimationStatus.completed], toHero will be the one on top and we keep
+      // fromHero hidden. If [AnimationStatus.dismissed], the animation is
+      // triggered but canceled before it finishes. In this case, we keep toHero
+      // hidden instead.
+      manifest.fromHero.endFlight(keepPlaceholder: status == AnimationStatus.completed);
+      manifest.toHero.endFlight(keepPlaceholder: status == AnimationStatus.dismissed);
       onFlightEnded(this);
     }
   }
@@ -572,7 +594,6 @@ class _HeroFlight {
   // routes with the same hero. Redirect the in-flight hero to the new toRoute.
   void divert(_HeroFlightManifest newManifest) {
     assert(manifest.tag == newManifest.tag);
-
     if (manifest.type == HeroFlightDirection.push && newManifest.type == HeroFlightDirection.pop) {
       // A push flight was interrupted by a pop.
       assert(newManifest.animation.status == AnimationStatus.reverse);
@@ -600,9 +621,8 @@ class _HeroFlight {
           end: 1.0,
         ),
       );
-
       if (manifest.fromHero != newManifest.toHero) {
-        manifest.fromHero.endFlight();
+        manifest.fromHero.endFlight(keepPlaceholder: true);
         newManifest.toHero.startFlight();
         heroRectTween = _doCreateRectTween(
             heroRectTween.end,
@@ -630,8 +650,8 @@ class _HeroFlight {
       else
         _proxyAnimation.parent = newManifest.animation;
 
-      manifest.fromHero.endFlight();
-      manifest.toHero.endFlight();
+      manifest.fromHero.endFlight(keepPlaceholder: true);
+      manifest.toHero.endFlight(keepPlaceholder: true);
 
       // Let the heroes in each of the routes rebuild with their placeholders.
       newManifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: newManifest.type == HeroFlightDirection.push);
@@ -712,6 +732,33 @@ class HeroController extends NavigatorObserver {
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, true);
   }
 
+  @override
+  void didStopUserGesture() {
+    if (navigator.userGestureInProgress)
+      return;
+
+    // If the user horizontal drag gesture initiated the flight (i.e. the back swipe)
+    // didn't move towards the pop direction at all, the animation will not play
+    // and thus the status update callback _handleAnimationUpdate will never be
+    // called when the gesture finishes. In this case the initiated flight needs
+    // to be manually invalidated.
+    bool isInvalidFlight(_HeroFlight flight) {
+      return flight.manifest.isUserGestureTransition
+          && flight.manifest.type == HeroFlightDirection.pop
+          && flight._proxyAnimation.isDismissed;
+    }
+
+    final List<_HeroFlight> invalidFlights = _flights.values
+      .where(isInvalidFlight)
+      .toList(growable: false);
+
+    // Treat these invalidated flights as dismissed. Calling _handleAnimationUpdate
+    // will also remove the flight from _flights.
+    for (_HeroFlight flight in invalidFlights) {
+      flight._handleAnimationUpdate(AnimationStatus.dismissed);
+    }
+  }
+
   // If we're transitioning between different page routes, start a hero transition
   // after the toRoute has been laid out with its animation's value at 1.0.
   void _maybeStartHeroTransition(
@@ -790,6 +837,7 @@ class HeroController extends NavigatorObserver {
       if (toHeroes[tag] != null) {
         final HeroFlightShuttleBuilder fromShuttleBuilder = fromHeroes[tag].widget.flightShuttleBuilder;
         final HeroFlightShuttleBuilder toShuttleBuilder = toHeroes[tag].widget.flightShuttleBuilder;
+        final bool isDiverted = _flights[tag] != null;
 
         final _HeroFlightManifest manifest = _HeroFlightManifest(
           type: flightType,
@@ -803,15 +851,23 @@ class HeroController extends NavigatorObserver {
           shuttleBuilder:
               toShuttleBuilder ?? fromShuttleBuilder ?? _defaultHeroFlightShuttleBuilder,
           isUserGestureTransition: isUserGestureTransition,
+          isDiverted: isDiverted,
         );
 
-        if (_flights[tag] != null)
+        if (isDiverted)
           _flights[tag].divert(manifest);
         else
           _flights[tag] = _HeroFlight(_handleFlightEnded)..start(manifest);
       } else if (_flights[tag] != null) {
         _flights[tag].abort();
       }
+    }
+
+    // If the from hero is gone, the flight won't start and the to hero needs to
+    // be put on stage again.
+    for (Object tag in toHeroes.keys) {
+      if (fromHeroes[tag] == null)
+        toHeroes[tag].ensurePlaceholderIsHidden();
     }
   }
 

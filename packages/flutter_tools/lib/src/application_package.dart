@@ -13,14 +13,14 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'fuchsia/application_package.dart';
 import 'globals.dart';
-import 'ios/ios_workflow.dart';
-import 'ios/plist_utils.dart' as plist;
+import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
@@ -69,7 +69,8 @@ class ApplicationPackageFactory {
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
         return applicationBinary == null
             ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
             : FuchsiaApp.fromPrebuiltApp(applicationBinary);
@@ -114,16 +115,24 @@ class AndroidApk extends ApplicationPackage {
       return null;
     }
 
-    final List<String> aaptArgs = <String>[
-       aaptPath,
-      'dump',
-      'xmltree',
-      apk.path,
-      'AndroidManifest.xml',
-    ];
+    String apptStdout;
+    try {
+      apptStdout = processUtils.runSync(
+        <String>[
+          aaptPath,
+          'dump',
+          'xmltree',
+          apk.path,
+          'AndroidManifest.xml',
+        ],
+        throwOnError: true,
+      ).stdout.trim();
+    } on ProcessException catch (error) {
+      printError('Failed to extract manifest from APK: $error.');
+      return null;
+    }
 
-    final ApkManifestData data = ApkManifestData
-        .parseFromXmlDump(runCheckedSync(aaptArgs));
+    final ApkManifestData data = ApkManifestData.parseFromXmlDump(apptStdout);
 
     if (data == null) {
       printError('Unable to read manifest info from ${apk.path}.');
@@ -304,9 +313,9 @@ abstract class IOSApp extends ApplicationPackage {
       printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
-    final String id = iosWorkflow.getPlistValueFromFile(
+    final String id = PlistParser.instance.getValueFromFile(
       plistPath,
-      plist.kCFBundleIdentifierKey,
+      PlistParser.kCFBundleIdentifierKey,
     );
     if (id == null) {
       printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
@@ -320,7 +329,7 @@ abstract class IOSApp extends ApplicationPackage {
     );
   }
 
-  factory IOSApp.fromIosProject(IosProject project) {
+  static Future<IOSApp> fromIosProject(IosProject project) {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
     }
@@ -337,7 +346,7 @@ abstract class IOSApp extends ApplicationPackage {
       printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
-    return BuildableIOSApp(project);
+    return BuildableIOSApp.fromProject(project);
   }
 
   @override
@@ -349,7 +358,13 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project) : super(projectBundleId: project.productBundleIdentifier);
+  BuildableIOSApp(this.project, String projectBundleId)
+    : super(projectBundleId: projectBundleId);
+
+  static Future<BuildableIOSApp> fromProject(IosProject project) async {
+    final String projectBundleId = await project.productBundleIdentifier;
+    return BuildableIOSApp(project, projectBundleId);
+  }
 
   final IosProject project;
 
@@ -408,9 +423,10 @@ class ApplicationPackageStore {
         android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
         return android;
       case TargetPlatform.ios:
-        iOS ??= IOSApp.fromIosProject(FlutterProject.current().ios);
+        iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
         fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
         return fuchsia;
       case TargetPlatform.darwin_x64:
@@ -492,9 +508,26 @@ class _Attribute extends _Entry {
 class ApkManifestData {
   ApkManifestData._(this._data);
 
+  static bool isAttributeWithValuePresent(_Element baseElement,
+      String childElement, String attributeName, String attributeValue) {
+    final Iterable<_Element> allElements = baseElement.allElements(
+        childElement).cast<_Element>();
+    for (_Element oneElement in allElements) {
+      final String elementAttributeValue = oneElement
+          ?.firstAttribute(attributeName)
+          ?.value;
+      if (elementAttributeValue != null &&
+          elementAttributeValue.startsWith(attributeValue)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static ApkManifestData parseFromXmlDump(String data) {
-    if (data == null || data.trim().isEmpty)
+    if (data == null || data.trim().isEmpty) {
       return null;
+    }
 
     final List<String> lines = data.split('\n');
     assert(lines.length > 3);
@@ -544,21 +577,19 @@ class ApkManifestData {
       }
 
       for (_Element element in intentFilters) {
-        final _Element action = element.firstElement('action');
-        final _Element category = element.firstElement('category');
-        final String actionAttributeValue = action
-            ?.firstAttribute('android:name')
-            ?.value;
-        final String categoryAttributeValue =
-            category?.firstAttribute('android:name')?.value;
-        final bool isMainAction = actionAttributeValue != null &&
-            actionAttributeValue.startsWith('"android.intent.action.MAIN"');
-        final bool isLauncherCategory = categoryAttributeValue != null &&
-            categoryAttributeValue.startsWith('"android.intent.category.LAUNCHER"');
-        if (isMainAction && isLauncherCategory) {
-          launchActivity = activity;
-          break;
+        final bool isMainAction = isAttributeWithValuePresent(
+            element, 'action', 'android:name', '"android.intent.action.MAIN"');
+        if (!isMainAction) {
+          continue;
         }
+        final bool isLauncherCategory = isAttributeWithValuePresent(
+            element, 'category', 'android:name',
+            '"android.intent.category.LAUNCHER"');
+        if (!isLauncherCategory) {
+          continue;
+        }
+        launchActivity = activity;
+        break;
       }
       if (launchActivity != null) {
         break;

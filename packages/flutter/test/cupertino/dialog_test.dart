@@ -60,7 +60,39 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
+    expect(widget.style.color.withAlpha(255).value, CupertinoColors.destructiveRed.value);
+  });
+
+  testWidgets('Dialog dark theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('Content'),
+            actions: <Widget>[
+              CupertinoDialogAction(child: const Text('Cancel'), isDefaultAction: true, onPressed: () {}),
+              const CupertinoDialogAction(child: Text('OK')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RichText cancelText =  tester.widget<RichText>(
+      find.descendant(of: find.text('Cancel'), matching: find.byType(RichText)),
+    );
+
+    expect(
+      cancelText.text.style.color.value,
+      0xFF0A84FF, // dark elevated color of systemBlue.
+    );
+
+    expect(
+      find.byType(CupertinoAlertDialog),
+      paints..rect(color: const Color(0xBF1E1E1E)),
+    );
   });
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
@@ -151,7 +183,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
+    expect(widget.style.color.withAlpha(255).value, CupertinoColors.destructiveRed.value);
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
@@ -739,8 +771,8 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    const Color normalButtonBackgroundColor = Color(0xc0ffffff);
-    const Color pressedButtonBackgroundColor = Color(0x90ffffff);
+    const Color normalButtonBackgroundColor = Color(0xCCF2F2F2);
+    const Color pressedButtonBackgroundColor = Color(0xFFE1E1E1);
     final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
     final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
@@ -990,6 +1022,36 @@ void main() {
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
     expect(transition.opacity.value, closeTo(0.0, 0.001));
+  });
+
+  testWidgets('Actions are accessible by key', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return const CupertinoAlertDialog(
+            title: Text('The Title'),
+            content: Text('The message'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                key: Key('option_1'),
+                child: Text('Option 1'),
+              ),
+              CupertinoDialogAction(
+                key: Key('option_2'),
+                child: Text('Option 2'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(find.byKey(const Key('option_1')), findsOneWidget);
+    expect(find.byKey(const Key('option_2')), findsOneWidget);
+    expect(find.byKey(const Key('option_3')), findsNothing);
   });
 }
 

@@ -23,9 +23,8 @@ TaskFunction createHotModeTest() {
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident',
+      '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident', '--output-dill', path.join('build', 'app.dill')
     ];
-    setLocalEngineOptionIfNecessary(options);
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;
     Map<String, dynamic> freshRestartReloadsData;
@@ -39,7 +38,7 @@ TaskFunction createHotModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run', ...options],
+              flutterCommandArgs('run', options),
               environment: null,
           );
 
@@ -93,7 +92,7 @@ TaskFunction createHotModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run', ...options],
+              flutterCommandArgs('run', options),
               environment: null,
           );
           final Completer<void> stdoutDone = Completer<void>();

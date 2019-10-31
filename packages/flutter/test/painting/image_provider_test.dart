@@ -11,12 +11,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:test_api/test_api.dart' show TypeMatcher;
 
 import '../rendering/rendering_tester.dart';
 import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
+
+  final DecoderCallback basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+  };
+
   group(ImageProvider, () {
     setUpAll(() {
       TestRenderingFlutterBinding(); // initializes the imageCache
@@ -44,11 +50,19 @@ void main() {
         final ImageCache otherCache = ImageCache();
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         final MemoryImage imageProvider = MemoryImage(bytes);
-        otherCache.putIfAbsent(imageProvider, () => imageProvider.load(imageProvider));
+        final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
+          imageProvider, () => imageProvider.load(imageProvider, basicDecoder),
+        );
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> completer = Completer<void>();
-        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
-        await completer.future;
+        final Completer<void> cacheCompleter = Completer<void>();
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+          completer.complete();
+        }));
+        cacheStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+          cacheCompleter.complete();
+        }));
+        await Future.wait(<Future<void>>[completer.future, cacheCompleter.future]);
 
         expect(otherCache.currentSize, 1);
         expect(imageCache.currentSize, 1);
@@ -146,6 +160,34 @@ void main() {
         debugNetworkImageHttpClientProvider = null;
       });
 
+      test('Expect thrown exception with statusCode', () async {
+        final int errorStatusCode = HttpStatus.notFound;
+        const String requestUrl = 'foo-url';
+
+        final MockHttpClientRequest request = MockHttpClientRequest();
+        final MockHttpClientResponse response = MockHttpClientResponse();
+        when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+        when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+        when(response.statusCode).thenReturn(errorStatusCode);
+
+        final Completer<dynamic> caughtError = Completer<dynamic>();
+
+        final ImageProvider imageProvider = NetworkImage(nonconst(requestUrl));
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+        }, onError: (dynamic error, StackTrace stackTrace) {
+          caughtError.complete(error);
+        }));
+
+        final dynamic err = await caughtError.future;
+        expect(
+          err,
+          const TypeMatcher<NetworkImageLoadException>()
+            .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
+            .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
+        );
+      }, skip: isBrowser);  // Browser implementation does not use HTTP client but a <img> tag.
+
       test('Disallows null urls', () {
         expect(() {
           NetworkImage(nonconst(null));
@@ -158,7 +200,7 @@ void main() {
 
         Future<void> loadNetworkImage() async {
           final NetworkImage networkImage = NetworkImage(nonconst('foo'));
-          final ImageStreamCompleter completer = networkImage.load(networkImage);
+          final ImageStreamCompleter completer = networkImage.load(networkImage, basicDecoder);
           completer.addListener(ImageStreamListener(
             (ImageInfo image, bool synchronousCall) { },
             onError: (dynamic error, StackTrace stackTrace) {
@@ -202,11 +244,11 @@ void main() {
       });
 
       test('Notifies listeners of chunk events', () async {
-        final List<Uint8List> chunks = <Uint8List>[];
         const int chunkSize = 8;
-        for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize) {
-          chunks.add(Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()));
-        }
+        final List<Uint8List> chunks = <Uint8List>[
+          for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize)
+            Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()),
+        ];
         final Completer<void> imageAvailable = Completer<void>();
         final MockHttpClientRequest request = MockHttpClientRequest();
         final MockHttpClientResponse response = MockHttpClientResponse();
@@ -256,6 +298,83 @@ void main() {
       }, skip: isBrowser);
     });
   });
+
+  test('ResizeImage resizes to the correct dimensions', () async {
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage imageProvider = MemoryImage(bytes);
+    final Size rawImageSize = await _resolveAndGetSize(imageProvider);
+    expect(rawImageSize, const Size(1, 1));
+
+    const Size resizeDims = Size(14, 7);
+    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round());
+    const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
+    final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
+    expect(resizedImageSize, resizeDims);
+  }, skip: isBrowser);
+
+  test('ResizeImage does not resize when no size is passed', () async {
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage imageProvider = MemoryImage(bytes);
+    final Size rawImageSize = await _resolveAndGetSize(imageProvider);
+    expect(rawImageSize, const Size(1, 1));
+
+    // Cannot pass in two null arguments for cache dimensions, so will use the regular
+    // MemoryImage
+    final MemoryImage resizedImage = MemoryImage(bytes);
+    final Size resizedImageSize = await _resolveAndGetSize(resizedImage);
+    expect(resizedImageSize, const Size(1, 1));
+  }, skip: isBrowser);
+
+  test('ResizeImage stores values', () async {
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage memoryImage = MemoryImage(bytes);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 10, height: 20);
+    expect(resizeImage.width, 10);
+    expect(resizeImage.height, 20);
+    expect(resizeImage.imageProvider, memoryImage);
+
+    expect(memoryImage.resolve(ImageConfiguration.empty) != resizeImage.resolve(ImageConfiguration.empty), true);
+  });
+
+  test('ResizeImage takes one dim', () async {
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage memoryImage = MemoryImage(bytes);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 10, height: null);
+    expect(resizeImage.width, 10);
+    expect(resizeImage.height, null);
+    expect(resizeImage.imageProvider, memoryImage);
+
+    expect(memoryImage.resolve(ImageConfiguration.empty) != resizeImage.resolve(ImageConfiguration.empty), true);
+  });
+
+  test('ResizeImage forms closure', () async {
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage memoryImage = MemoryImage(bytes);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
+
+    final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+      expect(cacheWidth, 123);
+      expect(cacheHeight, 321);
+      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+    };
+
+    resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+  });
+}
+
+Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
+    {ImageConfiguration configuration = ImageConfiguration.empty}) async {
+  final ImageStream stream = imageProvider.resolve(configuration);
+  final Completer<Size> completer = Completer<Size>();
+  final ImageStreamListener listener =
+    ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      final int height = image.image.height;
+      final int width = image.image.width;
+      completer.complete(Size(width.toDouble(), height.toDouble()));
+    }
+  );
+  stream.addListener(listener);
+  return await completer.future;
 }
 
 class MockHttpClient extends Mock implements HttpClient {}

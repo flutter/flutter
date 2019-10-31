@@ -362,4 +362,144 @@ void main() {
     expect(valueTop, isFalse);
     expect(valueTop, isFalse);
   });
+
+  testWidgets('SemanticsDebugger checkbox message', (WidgetTester tester) async {
+    final Key checkbox = UniqueKey();
+    final Key checkboxUnchecked = UniqueKey();
+    final Key checkboxDisabled = UniqueKey();
+    final Key checkboxDisabledUnchecked = UniqueKey();
+    final Key debugger = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          key: debugger,
+          child: Material(
+            child: ListView(
+              children: <Widget>[
+                Semantics(
+                  container: true,
+                  key: checkbox,
+                  child: Checkbox(
+                    value: true,
+                    onChanged: (bool _) { },
+                  ),
+                ),
+                Semantics(
+                  container: true,
+                  key: checkboxUnchecked,
+                  child: Checkbox(
+                    value: false,
+                    onChanged: (bool _) { },
+                  ),
+                ),
+                Semantics(
+                  container: true,
+                  key: checkboxDisabled,
+                  child: const Checkbox(
+                    value: true,
+                    onChanged: null,
+                  ),
+                ),
+                Semantics(
+                  container: true,
+                  key: checkboxDisabledUnchecked,
+                  child: const Checkbox(
+                    value: false,
+                    onChanged: null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      _getMessageShownInSemanticsDebugger(widgetKey: checkbox, debuggerKey: debugger, tester: tester),
+      'checked',
+    );
+    expect(
+      _getMessageShownInSemanticsDebugger(widgetKey: checkboxUnchecked, debuggerKey: debugger, tester: tester),
+      'unchecked',
+    );
+    expect(
+      _getMessageShownInSemanticsDebugger(widgetKey: checkboxDisabled, debuggerKey: debugger, tester: tester),
+      'checked; disabled',
+    );
+    expect(
+      _getMessageShownInSemanticsDebugger(widgetKey: checkboxDisabledUnchecked, debuggerKey: debugger, tester: tester),
+      'unchecked; disabled',
+    );
+  });
+
+  testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
+    final UniqueKey textField = UniqueKey();
+    final UniqueKey debugger = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SemanticsDebugger(
+          key: debugger,
+          child: Material(
+            child: TextField(
+              key: textField,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester);
+    final RenderObject renderTextfield = tester.renderObject(find.descendant(of: find.byKey(textField), matching: find.byType(Semantics)).first);
+
+    expect(
+      semanticsDebuggerPainter.getMessage(renderTextfield.debugSemantics),
+      'textfield',
+    );
+  });
+
+  testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
+    final UniqueKey debugger = UniqueKey();
+    const TextStyle labelStyle = TextStyle(color: Colors.amber);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          key: debugger,
+          labelStyle: labelStyle,
+          child: Semantics(
+            label: 'label',
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
+  });
+}
+
+String _getMessageShownInSemanticsDebugger({
+  @required Key widgetKey,
+  @required Key debuggerKey,
+  @required WidgetTester tester,
+}) {
+  final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
+  return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics);
+}
+
+dynamic _getSemanticsDebuggerPainter({
+  @required Key debuggerKey,
+  @required WidgetTester tester,
+}) {
+  final CustomPaint customPaint = tester.widgetList(find.descendant(
+    of: find.byKey(debuggerKey),
+    matching: find.byType(CustomPaint),
+  )).first;
+  final dynamic semanticsDebuggerPainter = customPaint.foregroundPainter;
+  expect(semanticsDebuggerPainter.runtimeType.toString(), '_SemanticsDebuggerPainter');
+  return semanticsDebuggerPainter;
 }

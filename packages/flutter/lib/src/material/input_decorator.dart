@@ -283,6 +283,7 @@ class _HelperError extends StatefulWidget {
     this.textAlign,
     this.helperText,
     this.helperStyle,
+    this.helperMaxLines,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -291,6 +292,7 @@ class _HelperError extends StatefulWidget {
   final TextAlign textAlign;
   final String helperText;
   final TextStyle helperStyle;
+  final int helperMaxLines;
   final String errorText;
   final TextStyle errorStyle;
   final int errorMaxLines;
@@ -372,6 +374,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
           style: widget.helperStyle,
           textAlign: widget.textAlign,
           overflow: TextOverflow.ellipsis,
+          maxLines: widget.helperMaxLines,
         ),
       ),
     );
@@ -827,14 +830,18 @@ class _RenderDecoration extends RenderBox {
       visitor(prefix);
     if (prefixIcon != null)
       visitor(prefixIcon);
-    if (isFocused && hint != null) {
-      // Bypass opacity to always read hint when focused. This prevents the
-      // label from changing when text is entered.
-      final RenderProxyBox typedHint = hint;
-      visitor(typedHint.child);
-    } else if (!isFocused && label != null) {
+
+    if (label != null) {
       visitor(label);
     }
+    if (hint != null) {
+      if (isFocused) {
+        visitor(hint);
+      } else if (label == null) {
+        visitor(hint);
+      }
+    }
+
     if (input != null)
       visitor(input);
     if (suffixIcon != null)
@@ -2060,6 +2067,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
+      alwaysIncludeSemantics: true,
       child: Text(
         decoration.hintText,
         style: hintStyle,
@@ -2179,6 +2187,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       textAlign: textAlign,
       helperText: decoration.helperText,
       helperStyle: _getHelperStyle(themeData),
+      helperMaxLines: decoration.helperMaxLines,
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData),
       errorMaxLines: decoration.errorMaxLines,
@@ -2299,6 +2308,7 @@ class InputDecoration {
     this.labelStyle,
     this.helperText,
     this.helperStyle,
+    this.helperMaxLines,
     this.hintText,
     this.hintStyle,
     this.hintMaxLines,
@@ -2358,6 +2368,7 @@ class InputDecoration {
        labelStyle = null,
        helperText = null,
        helperStyle = null,
+       helperMaxLines = null,
        hintMaxLines = null,
        errorText = null,
        errorStyle = null,
@@ -2431,6 +2442,19 @@ class InputDecoration {
   /// The style to use for the [helperText].
   final TextStyle helperStyle;
 
+  /// The maximum number of lines the [helperText] can occupy.
+  ///
+  /// Defaults to null, which means that the [helperText] will be limited
+  /// to a single line with [TextOverflow.ellipsis].
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the helper.
+  ///
+  /// See also:
+  ///
+  ///  * [errorMaxLines], the equivalent but for the [errorText].
+  final int helperMaxLines;
+
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the input [child] (i.e., at the same location on the
@@ -2480,6 +2504,10 @@ class InputDecoration {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
+  ///
+  /// See also:
+  ///
+  ///  * [helperMaxLines], the equivalent but for the [helperText].
   final int errorMaxLines;
 
   /// Whether the label floats on focus.
@@ -2934,6 +2962,7 @@ class InputDecoration {
     TextStyle labelStyle,
     String helperText,
     TextStyle helperStyle,
+    int helperMaxLines,
     String hintText,
     TextStyle hintStyle,
     int hintMaxLines,
@@ -2974,6 +3003,7 @@ class InputDecoration {
       labelStyle: labelStyle ?? this.labelStyle,
       helperText: helperText ?? this.helperText,
       helperStyle: helperStyle ?? this.helperStyle,
+      helperMaxLines : helperMaxLines ?? this.helperMaxLines,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
@@ -3019,6 +3049,7 @@ class InputDecoration {
     return copyWith(
       labelStyle: labelStyle ?? theme.labelStyle,
       helperStyle: helperStyle ?? theme.helperStyle,
+      helperMaxLines : helperMaxLines ?? theme.helperMaxLines,
       hintStyle: hintStyle ?? theme.hintStyle,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
@@ -3054,6 +3085,7 @@ class InputDecoration {
         && typedOther.labelStyle == labelStyle
         && typedOther.helperText == helperText
         && typedOther.helperStyle == helperStyle
+        && typedOther.helperMaxLines == helperMaxLines
         && typedOther.hintText == hintText
         && typedOther.hintStyle == hintStyle
         && typedOther.hintMaxLines == hintMaxLines
@@ -3098,6 +3130,7 @@ class InputDecoration {
       labelStyle,
       helperText,
       helperStyle,
+      helperMaxLines,
       hintText,
       hintStyle,
       hintMaxLines,
@@ -3140,79 +3173,45 @@ class InputDecoration {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
-    if (icon != null)
-      description.add('icon: $icon');
-    if (labelText != null)
-      description.add('labelText: "$labelText"');
-    if (helperText != null)
-      description.add('helperText: "$helperText"');
-    if (hintText != null)
-      description.add('hintText: "$hintText"');
-    if (hintMaxLines != null)
-      description.add('hintMaxLines: "$hintMaxLines"');
-    if (errorText != null)
-      description.add('errorText: "$errorText"');
-    if (errorStyle != null)
-      description.add('errorStyle: "$errorStyle"');
-    if (errorMaxLines != null)
-      description.add('errorMaxLines: "$errorMaxLines"');
-    if (hasFloatingPlaceholder == false)
-      description.add('hasFloatingPlaceholder: false');
-    if (isDense ?? false)
-      description.add('isDense: $isDense');
-    if (contentPadding != null)
-      description.add('contentPadding: $contentPadding');
-    if (isCollapsed)
-      description.add('isCollapsed: $isCollapsed');
-    if (prefixIcon != null)
-      description.add('prefixIcon: $prefixIcon');
-    if (prefix != null)
-      description.add('prefix: $prefix');
-    if (prefixText != null)
-      description.add('prefixText: $prefixText');
-    if (prefixStyle != null)
-      description.add('prefixStyle: $prefixStyle');
-    if (suffixIcon != null)
-      description.add('suffixIcon: $suffixIcon');
-    if (suffix != null)
-      description.add('suffix: $suffix');
-    if (suffixText != null)
-      description.add('suffixText: $suffixText');
-    if (suffixStyle != null)
-      description.add('suffixStyle: $suffixStyle');
-    if (counter != null)
-      description.add('counter: $counter');
-    if (counterText != null)
-      description.add('counterText: $counterText');
-    if (counterStyle != null)
-      description.add('counterStyle: $counterStyle');
-    if (filled == true) // filled == null same as filled == false
-      description.add('filled: true');
-    if (fillColor != null)
-      description.add('fillColor: $fillColor');
-    if (focusColor != null)
-      description.add('focusColor: $focusColor');
-    if (hoverColor != null)
-      description.add('hoverColor: $hoverColor');
-    if (errorBorder != null)
-      description.add('errorBorder: $errorBorder');
-    if (focusedBorder != null)
-      description.add('focusedBorder: $focusedBorder');
-    if (focusedErrorBorder != null)
-      description.add('focusedErrorBorder: $focusedErrorBorder');
-    if (disabledBorder != null)
-      description.add('disabledBorder: $disabledBorder');
-    if (enabledBorder != null)
-      description.add('enabledBorder: $enabledBorder');
-    if (border != null)
-      description.add('border: $border');
-    if (!enabled)
-      description.add('enabled: false');
-    if (semanticCounterText != null)
-      description.add('semanticCounterText: $semanticCounterText');
-    if (alignLabelWithHint != null)
-      description.add('alignLabelWithHint: $alignLabelWithHint');
+    final List<String> description = <String>[
+      if (icon != null) 'icon: $icon',
+      if (labelText != null) 'labelText: "$labelText"',
+      if (helperText != null) 'helperText: "$helperText"',
+      if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
+      if (hintText != null) 'hintText: "$hintText"',
+      if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
+      if (errorText != null) 'errorText: "$errorText"',
+      if (errorStyle != null) 'errorStyle: "$errorStyle"',
+      if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
+      if (hasFloatingPlaceholder == false) 'hasFloatingPlaceholder: false',
+      if (isDense ?? false) 'isDense: $isDense',
+      if (contentPadding != null) 'contentPadding: $contentPadding',
+      if (isCollapsed) 'isCollapsed: $isCollapsed',
+      if (prefixIcon != null) 'prefixIcon: $prefixIcon',
+      if (prefix != null) 'prefix: $prefix',
+      if (prefixText != null) 'prefixText: $prefixText',
+      if (prefixStyle != null) 'prefixStyle: $prefixStyle',
+      if (suffixIcon != null) 'suffixIcon: $suffixIcon',
+      if (suffix != null) 'suffix: $suffix',
+      if (suffixText != null) 'suffixText: $suffixText',
+      if (suffixStyle != null) 'suffixStyle: $suffixStyle',
+      if (counter != null) 'counter: $counter',
+      if (counterText != null) 'counterText: $counterText',
+      if (counterStyle != null) 'counterStyle: $counterStyle',
+      if (filled == true) 'filled: true', // filled == null same as filled == false
+      if (fillColor != null) 'fillColor: $fillColor',
+      if (focusColor != null) 'focusColor: $focusColor',
+      if (hoverColor != null) 'hoverColor: $hoverColor',
+      if (errorBorder != null) 'errorBorder: $errorBorder',
+      if (focusedBorder != null) 'focusedBorder: $focusedBorder',
+      if (focusedErrorBorder != null) 'focusedErrorBorder: $focusedErrorBorder',
+      if (disabledBorder != null) 'disabledBorder: $disabledBorder',
+      if (enabledBorder != null) 'enabledBorder: $enabledBorder',
+      if (border != null) 'border: $border',
+      if (!enabled) 'enabled: false',
+      if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
+      if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
+    ];
     return 'InputDecoration(${description.join(', ')})';
   }
 }
@@ -3236,6 +3235,7 @@ class InputDecorationTheme extends Diagnosticable {
   const InputDecorationTheme({
     this.labelStyle,
     this.helperStyle,
+    this.helperMaxLines,
     this.hintStyle,
     this.errorStyle,
     this.errorMaxLines,
@@ -3275,6 +3275,19 @@ class InputDecorationTheme extends Diagnosticable {
   /// The style to use for [InputDecoration.helperText].
   final TextStyle helperStyle;
 
+  /// The maximum number of lines the [helperText] can occupy.
+  ///
+  /// Defaults to null, which means that the [helperText] will be limited
+  /// to a single line with [TextOverflow.ellipsis].
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the helper.
+  ///
+  /// See also:
+  ///
+  ///  * [errorMaxLines], the equivalent but for the [errorText].
+  final int helperMaxLines;
+
   /// The style to use for the [InputDecoration.hintText].
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
@@ -3298,6 +3311,10 @@ class InputDecorationTheme extends Diagnosticable {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
+  ///
+  /// See also:
+  ///
+  ///  * [helperMaxLines], the equivalent but for the [helperText].
   final int errorMaxLines;
 
   /// Whether the placeholder text floats to become a label on focus.
@@ -3547,15 +3564,135 @@ class InputDecorationTheme extends Diagnosticable {
   /// behavior of aligning the label with the center of the [TextField].
   final bool alignLabelWithHint;
 
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  InputDecorationTheme copyWith({
+    TextStyle labelStyle,
+    TextStyle helperStyle,
+    int helperMaxLines,
+    TextStyle hintStyle,
+    TextStyle errorStyle,
+    int errorMaxLines,
+    bool hasFloatingPlaceholder,
+    bool isDense,
+    EdgeInsetsGeometry contentPadding,
+    bool isCollapsed,
+    TextStyle prefixStyle,
+    TextStyle suffixStyle,
+    TextStyle counterStyle,
+    bool filled,
+    Color fillColor,
+    Color focusColor,
+    Color hoverColor,
+    InputBorder errorBorder,
+    InputBorder focusedBorder,
+    InputBorder focusedErrorBorder,
+    InputBorder disabledBorder,
+    InputBorder enabledBorder,
+    InputBorder border,
+    bool alignLabelWithHint,
+  }) {
+    return InputDecorationTheme(
+      labelStyle: labelStyle ?? this.labelStyle,
+      helperStyle: helperStyle ?? this.helperStyle,
+      helperMaxLines: helperMaxLines ?? this.helperMaxLines,
+      hintStyle: hintStyle ?? this.hintStyle,
+      errorStyle: errorStyle ?? this.errorStyle,
+      errorMaxLines: errorMaxLines ?? this.errorMaxLines,
+      hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
+      isDense: isDense ?? this.isDense,
+      contentPadding: contentPadding ?? this.contentPadding,
+      isCollapsed: isCollapsed ?? this.isCollapsed,
+      prefixStyle: prefixStyle ?? this.prefixStyle,
+      suffixStyle: suffixStyle ?? this.suffixStyle,
+      counterStyle: counterStyle ?? this.counterStyle,
+      filled: filled ?? this.filled,
+      fillColor: fillColor ?? this.fillColor,
+      focusColor: focusColor ?? this.focusColor,
+      hoverColor: hoverColor ?? this.hoverColor,
+      errorBorder: errorBorder ?? this.errorBorder,
+      focusedBorder: focusedBorder ?? this.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? this.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? this.disabledBorder,
+      enabledBorder: enabledBorder ?? this.enabledBorder,
+      border: border ?? this.border,
+      alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
+    );
+  }
+
+  @override
+  int get hashCode {
+    return hashList(<dynamic>[
+      labelStyle,
+      helperStyle,
+      helperMaxLines,
+      hintStyle,
+      errorStyle,
+      errorMaxLines,
+      hasFloatingPlaceholder,
+      isDense,
+      contentPadding,
+      isCollapsed,
+      prefixStyle,
+      suffixStyle,
+      counterStyle,
+      filled,
+      fillColor,
+      focusColor,
+      hoverColor,
+      errorBorder,
+      focusedBorder,
+      focusedErrorBorder,
+      disabledBorder,
+      enabledBorder,
+      border,
+      alignLabelWithHint,
+    ]);
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final InputDecorationTheme typedOther = other;
+    return typedOther.labelStyle == labelStyle
+        && typedOther.helperStyle == helperStyle
+        && typedOther.helperMaxLines == helperMaxLines
+        && typedOther.hintStyle == hintStyle
+        && typedOther.errorStyle == errorStyle
+        && typedOther.errorMaxLines == errorMaxLines
+        && typedOther.isDense == isDense
+        && typedOther.contentPadding == contentPadding
+        && typedOther.isCollapsed == isCollapsed
+        && typedOther.prefixStyle == prefixStyle
+        && typedOther.suffixStyle == suffixStyle
+        && typedOther.counterStyle == counterStyle
+        && typedOther.filled == filled
+        && typedOther.fillColor == fillColor
+        && typedOther.focusColor == focusColor
+        && typedOther.hoverColor == hoverColor
+        && typedOther.errorBorder == errorBorder
+        && typedOther.focusedBorder == focusedBorder
+        && typedOther.focusedErrorBorder == focusedErrorBorder
+        && typedOther.disabledBorder == disabledBorder
+        && typedOther.enabledBorder == enabledBorder
+        && typedOther.border == border
+        && typedOther.alignLabelWithHint == alignLabelWithHint
+        && typedOther.disabledBorder == disabledBorder;
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const InputDecorationTheme defaultTheme = InputDecorationTheme();
     properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultTheme.labelStyle));
     properties.add(DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
+    properties.add(IntProperty('helperMaxLines', helperMaxLines, defaultValue: defaultTheme.helperMaxLines));
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
-    properties.add(DiagnosticsProperty<int>('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
+    properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(DiagnosticsProperty<bool>('hasFloatingPlaceholder', hasFloatingPlaceholder, defaultValue: defaultTheme.hasFloatingPlaceholder));
     properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));

@@ -184,26 +184,6 @@ class _DemoItem extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
-
-    final List<Widget> titleChildren = <Widget>[
-      Text(
-        demo.title,
-        style: theme.textTheme.subhead.copyWith(
-          color: isDark ? Colors.white : const Color(0xFF202124),
-        ),
-      ),
-    ];
-    if (demo.subtitle != null) {
-      titleChildren.add(
-        Text(
-          demo.subtitle,
-          style: theme.textTheme.body1.copyWith(
-            color: isDark ? Colors.white : const Color(0xFF60646B)
-          ),
-        ),
-      );
-    }
-
     return RawMaterialButton(
       padding: EdgeInsets.zero,
       splashColor: theme.primaryColor.withOpacity(0.12),
@@ -229,7 +209,21 @@ class _DemoItem extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: titleChildren,
+                children: <Widget>[
+                  Text(
+                    demo.title,
+                    style: theme.textTheme.subhead.copyWith(
+                      color: isDark ? Colors.white : const Color(0xFF202124),
+                    ),
+                  ),
+                  if (demo.subtitle != null)
+                    Text(
+                      demo.subtitle,
+                      style: theme.textTheme.body1.copyWith(
+                        color: isDark ? Colors.white : const Color(0xFF60646B)
+                      ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(width: 44.0),
@@ -294,11 +288,11 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   GalleryDemoCategory _category;
 
   static Widget _topHomeLayout(Widget currentChild, List<Widget> previousChildren) {
-    List<Widget> children = previousChildren;
-    if (currentChild != null)
-      children = children.toList()..add(currentChild);
     return Stack(
-      children: children,
+      children: <Widget>[
+        ...previousChildren,
+        if (currentChild != null) currentChild,
+      ],
       alignment: Alignment.topCenter,
     );
   }

@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
@@ -296,6 +297,87 @@ void main() {
     expect(tapCount, equals(1));
   });
 
+  testWidgets('Light theme SnackBar has dark background', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.light();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightTheme,
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'ACTION',
+                          onPressed: () { },
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderPhysicalModel renderModel = tester.renderObject(
+        find.widgetWithText(Material, 'I am a snack bar.').first
+    );
+    // There is a somewhat complicated background color calculation based
+    // off of the surface color. For the default light theme it
+    // should be this value.
+    expect(renderModel.color, equals(const Color(0xFF333333)));
+  });
+
+  testWidgets('Dark theme SnackBar has light background', (WidgetTester tester) async {
+    final ThemeData darkTheme = ThemeData.dark();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: darkTheme,
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () { },
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderPhysicalModel renderModel = tester.renderObject(
+      find.widgetWithText(Material, 'I am a snack bar.').first
+    );
+    expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
+  });
+
   testWidgets('Snackbar labels can be colored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -455,7 +537,7 @@ void main() {
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.send),
-            onPressed: () {}
+            onPressed: () {},
           ),
           body: Builder(
             builder: (BuildContext context) {
@@ -611,7 +693,7 @@ void main() {
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
               child: const Icon(Icons.send),
-              onPressed: () {}
+              onPressed: () {},
           ),
           body: Builder(
             builder: (BuildContext context) {
@@ -649,7 +731,7 @@ void main() {
       resizeToAvoidBottomInset: false,
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.send),
-        onPressed: () {}
+        onPressed: () {},
       ),
       body: Builder(
         builder: (BuildContext context) {
@@ -660,7 +742,7 @@ void main() {
                   content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                )
+                ),
               );
             },
             child: const Text('X'),
@@ -674,8 +756,8 @@ void main() {
         data: const MediaQueryData(
           padding: EdgeInsets.only(bottom: 20.0),
         ),
-        child: child
-      )
+        child: child,
+      ),
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(); // Show snackbar
@@ -982,5 +1064,86 @@ void main() {
 
     await tester.tap(find.byKey(tapTarget));
     expect(tester.takeException(), isNotNull);
+  });
+
+  testWidgets('Snackbar calls onVisible once', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    int called = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: const Text('hello'),
+                  duration: const Duration(seconds: 1),
+                  onVisible: () {
+                    called += 1;
+                  },
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pump(); // start animation
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsOneWidget);
+    expect(called, 1);
+  });
+
+  testWidgets('Snackbar does not call onVisible when it is queued', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    int called = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: const Text('hello'),
+                  duration: const Duration(seconds: 1),
+                  onVisible: () {
+                    called += 1;
+                  },
+                ));
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: const Text('hello 2'),
+                  duration: const Duration(seconds: 1),
+                  onVisible: () {
+                    called += 1;
+                  },
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pump(); // start animation
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsOneWidget);
+    expect(called, 1);
   });
 }

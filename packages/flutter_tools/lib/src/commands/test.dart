@@ -9,6 +9,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../codegen.dart';
@@ -50,7 +51,7 @@ class TestCommand extends FastFlutterCommand {
         defaultsTo: false,
         negatable: false,
         help: 'No longer require an authentication code to connect to the VM '
-              'service (not recommended).'
+              'service (not recommended).',
       )
       ..addFlag('coverage',
         defaultsTo: false,
@@ -78,12 +79,6 @@ class TestCommand extends FastFlutterCommand {
         help: 'Handle machine structured JSON command input\n'
               'and provide output and progress in machine friendly format.',
       )
-      ..addFlag('track-widget-creation',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'Track widget creation locations.\n'
-              'This enables testing of features such as the widget inspector.',
-      )
       ..addFlag('update-goldens',
         negatable: false,
         help: 'Whether matchesGoldenFile() calls within your test methods should '
@@ -93,7 +88,7 @@ class TestCommand extends FastFlutterCommand {
         abbr: 'j',
         defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
         help: 'The number of concurrent test processes to run.',
-        valueHelp: 'jobs'
+        valueHelp: 'jobs',
       )
       ..addFlag('test-assets',
         defaultsTo: true,
@@ -104,8 +99,9 @@ class TestCommand extends FastFlutterCommand {
       ..addOption('platform',
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
-        help: 'The platform to run the unit tests on. Defaults to "tester".'
+        help: 'The platform to run the unit tests on. Defaults to "tester".',
       );
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
   @override
@@ -136,7 +132,7 @@ class TestCommand extends FastFlutterCommand {
         'directory (or one of its subdirectories).');
     }
     if (shouldRunPub) {
-      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+      await pub.get(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
     final bool buildTestAssets = argResults['test-assets'];
     final List<String> names = argResults['name'];
@@ -169,8 +165,9 @@ class TestCommand extends FastFlutterCommand {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like like "hit_test.dart" don't get run.
       workDir = fs.directory('test');
-      if (!workDir.existsSync())
+      if (!workDir.existsSync()) {
         throwToolExit('Test directory "${workDir.path}" not found.');
+      }
       files = _findTests(workDir).toList();
       if (files.isEmpty) {
         throwToolExit(
@@ -180,18 +177,19 @@ class TestCommand extends FastFlutterCommand {
       }
     } else {
       files = <String>[
-        for (String file in files)
-          if (file.endsWith(platform.pathSeparator))
-            ..._findTests(fs.directory(file))
+        for (String path in files)
+          if (fs.isDirectorySync(path))
+            ..._findTests(fs.directory(path))
           else
-            file
+            path,
       ];
     }
 
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
+      final String projectName = FlutterProject.current().manifest.appName;
       collector = CoverageCollector(
-        flutterProject: FlutterProject.current(),
+        libraryPredicate: (String libraryName) => libraryName.contains(projectName),
       );
     }
 
@@ -237,6 +235,7 @@ class TestCommand extends FastFlutterCommand {
       disableServiceAuthCodes: disableServiceAuthCodes,
       ipv6: argResults['ipv6'],
       machine: machine,
+      buildMode: BuildMode.debug,
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
@@ -246,13 +245,18 @@ class TestCommand extends FastFlutterCommand {
     );
 
     if (collector != null) {
-      if (!await collector.collectCoverageData(
-          argResults['coverage-path'], mergeCoverageData: argResults['merge-coverage']))
+      final bool collectionResult = await collector.collectCoverageData(
+        argResults['coverage-path'],
+        mergeCoverageData: argResults['merge-coverage'],
+      );
+      if (!collectionResult) {
         throwToolExit(null);
+      }
     }
 
-    if (result != 0)
+    if (result != 0) {
       throwToolExit(null);
+    }
     return const FlutterCommandResult(ExitStatus.success);
   }
 
@@ -267,6 +271,7 @@ class TestCommand extends FastFlutterCommand {
           assetBundle.entries);
     }
   }
+
   bool _needRebuild(Map<String, DevFSContent> entries) {
     final File manifest = fs.file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
     if (!manifest.existsSync()) {

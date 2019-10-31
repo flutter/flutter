@@ -322,7 +322,7 @@ class AndroidDevice implements Device {
         process.exitCode.then<void>((int exitCode) {
           print('adb logcat process terminated with exit code $exitCode');
           if (!aborted) {
-            stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.'));
+            stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.\n'));
             processDone.complete();
           }
         });
@@ -392,9 +392,35 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
   }
 
+  // Returns the path to cached binaries relative to devicelab directory
+  String get _artifactDirPath {
+    return path.normalize(
+      path.join(
+        path.current,
+        '../../bin/cache/artifacts',
+      )
+    );
+  }
+
+  // Returns a colon-separated environment variable that contains the paths
+  // of linked libraries for idevice_id
+  Map<String, String> get _ideviceIdEnvironment {
+    final String libPath = const <String>[
+      'libimobiledevice',
+      'usbmuxd',
+      'libplist',
+      'openssl',
+      'ideviceinstaller',
+      'ios-deploy',
+      'libzip',
+    ].map((String packageName) => path.join(_artifactDirPath, packageName)).join(':');
+    return <String, String>{'DYLD_LIBRARY_PATH': libPath};
+  }
+
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> iosDeviceIDs = LineSplitter.split(await eval('idevice_id', <String>['-l']))
+    final String ideviceIdPath = path.join(_artifactDirPath, 'libimobiledevice', 'idevice_id');
+    final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: _ideviceIdEnvironment))
       .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty)
       .toList();

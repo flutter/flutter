@@ -150,6 +150,18 @@ void main() {
     expect(event['raster'], 4000);
   });
 
+  test('TimingsCallback exceptions are caught', () {
+    FlutterErrorDetails errorCaught;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorCaught = details;
+    };
+    SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+      throw Exception('Test');
+    });
+    window.onReportTimings(<FrameTiming>[]);
+    expect(errorCaught.exceptionAsString(), equals('Exception: Test'));
+  });
+
   test('currentSystemFrameTimeStamp is the raw timestamp', () {
     Duration lastTimeStamp;
     Duration lastSystemTimeStamp;

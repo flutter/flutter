@@ -182,7 +182,7 @@ void main() {
         child: Center(
           child: CircularProgressIndicator(value: 0.0),
         ),
-      )
+      ),
     );
 
     expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
@@ -197,7 +197,7 @@ void main() {
     await tester.pumpWidget(
       const Center(
         child: CircularProgressIndicator(value: null),
-      )
+      ),
     );
 
     expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
@@ -288,7 +288,7 @@ void main() {
             }
           ),
         ),
-      )
+      ),
     );
     expect(tester.hasRunningAnimations, isTrue);
 

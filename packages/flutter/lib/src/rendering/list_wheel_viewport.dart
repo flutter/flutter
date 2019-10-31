@@ -1002,7 +1002,7 @@ class RenderListWheelViewport
     final ListWheelParentData parentData = child.parentData;
     final double targetOffset = parentData.offset.dy; // the so-called "centerPosition"
 
-    final Matrix4 transform = target.getTransformTo(this);
+    final Matrix4 transform = target.getTransformTo(child);
     final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Rect targetRect = bounds.translate(0.0, (size.height - itemExtent) / 2);
 

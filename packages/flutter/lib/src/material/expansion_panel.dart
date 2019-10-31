@@ -5,13 +5,14 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'expand_icon.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'mergeable_material.dart';
 import 'theme.dart';
 
-const double _kPanelHeaderCollapsedHeight = 48.0;
+const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const double _kPanelHeaderExpandedHeight = 64.0;
 
 class _SaltedKey<S, V> extends LocalKey {
@@ -463,7 +464,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         expandIconContainer = Semantics(
           label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
           container: true,
-          child: expandIconContainer
+          child: expandIconContainer,
         );
       }
       Widget header = Row(
@@ -487,7 +488,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           child: InkWell(
             onTap: () => _handlePressed(_isChildExpanded(index), index),
             child: header,
-          )
+          ),
         );
       }
       items.add(

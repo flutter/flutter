@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/common/diagnostics_tree.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_driver/src/common/find.dart';
 import 'package:flutter_driver/src/common/geometry.dart';
 import 'package:flutter_driver/src/common/request_data.dart';
 import 'package:flutter_driver/src/common/text.dart';
+import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -28,18 +30,18 @@ void main() {
     });
 
     testWidgets('returns immediately when transient callback queue is empty', (WidgetTester tester) async {
-      extension.call(const WaitUntilNoTransientCallbacks().serialize())
-        .then<void>(expectAsync1((Map<String, dynamic> r) {
-          result = r;
-        }));
+      extension.call(const WaitUntilNoTransientCallbacks().serialize()) // ignore: deprecated_member_use_from_same_package
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
 
       await tester.idle();
       expect(
-          result,
-          <String, dynamic>{
-            'isError': false,
-            'response': null,
-          },
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
       );
     });
 
@@ -48,10 +50,10 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      extension.call(const WaitUntilNoTransientCallbacks().serialize())
-        .then<void>(expectAsync1((Map<String, dynamic> r) {
-          result = r;
-        }));
+      extension.call(const WaitUntilNoTransientCallbacks().serialize()) // ignore: deprecated_member_use_from_same_package
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
 
       // Nothing should happen until the next frame.
       await tester.idle();
@@ -60,11 +62,11 @@ void main() {
       // NOW we should receive the result.
       await tester.pump();
       expect(
-          result,
-          <String, dynamic>{
-            'isError': false,
-            'response': null,
-          },
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
       );
     });
 
@@ -73,6 +75,377 @@ void main() {
       final dynamic result = RequestDataResult.fromJson((await extension.call(const RequestData('hello').serialize()))['response']);
       expect(log, <String>['hello']);
       expect(result.message, '1');
+    });
+  });
+
+  group('waitForCondition', () {
+    FlutterDriverExtension extension;
+    Map<String, dynamic> result;
+    int messageId = 0;
+    final List<String> log = <String>[];
+
+    setUp(() {
+      result = null;
+      extension = FlutterDriverExtension((String message) async { log.add(message); return (messageId += 1).toString(); }, false);
+    });
+
+    testWidgets('waiting for NoTransientCallbacks returns immediately when transient callback queue is empty', (WidgetTester tester) async {
+      extension.call(const WaitForCondition(NoTransientCallbacks()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      await tester.idle();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets('waiting for NoTransientCallbacks returns until no transient callbacks', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
+        // Intentionally blank. We only care about existence of a callback.
+      });
+
+      extension.call(const WaitForCondition(NoTransientCallbacks()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets('waiting for NoPendingFrame returns immediately when frame is synced', (
+        WidgetTester tester) async {
+      extension.call(const WaitForCondition(NoPendingFrame()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      await tester.idle();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets('waiting for NoPendingFrame returns until no pending scheduled frame', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrame();
+
+      extension.call(const WaitForCondition(NoPendingFrame()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for combined conditions returns immediately', (WidgetTester tester) async {
+      const SerializableWaitCondition combinedCondition =
+          CombinedCondition(<SerializableWaitCondition>[NoTransientCallbacks(), NoPendingFrame()]);
+      extension.call(const WaitForCondition(combinedCondition).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      await tester.idle();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for combined conditions returns until no transient callbacks', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
+        // Intentionally blank. We only care about existence of a callback.
+      });
+
+      const SerializableWaitCondition combinedCondition =
+          CombinedCondition(<SerializableWaitCondition>[NoTransientCallbacks(), NoPendingFrame()]);
+      extension.call(const WaitForCondition(combinedCondition).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for combined conditions returns until no pending scheduled frame', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
+        // Intentionally blank. We only care about existence of a callback.
+      });
+
+      const SerializableWaitCondition combinedCondition =
+          CombinedCondition(<SerializableWaitCondition>[NoPendingFrame(), NoTransientCallbacks()]);
+      extension.call(const WaitForCondition(combinedCondition).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns immediately when there\'re no platform messages', (WidgetTester tester) async {
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      await tester.idle();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns until a single method channel call returns', (WidgetTester tester) async {
+      const MethodChannel channel = MethodChannel('helloChannel', JSONMethodCodec());
+      const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 10),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+      channel.invokeMethod<String>('sayHello', 'hello');
+
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // The channel message are delayed for 10 milliseconds, so nothing happens yet.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(result, isNull);
+
+      // Now we receive the result.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns until both method channel calls return', (WidgetTester tester) async {
+      const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+      // Configures channel 1
+      const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel1', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 10),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      // Configures channel 2
+      const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel2', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 20),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      channel1.invokeMethod<String>('sayHello', 'hello');
+      channel2.invokeMethod<String>('sayHello', 'hello');
+
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Neither of the channel responses is received, so nothing happens yet.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(result, isNull);
+
+      // Result of channel 1 is received, but channel 2 is still pending, so still waiting.
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(result, isNull);
+
+      // Both of the results are received. Now we receive the result.
+      await tester.pump(const Duration(milliseconds: 30));
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns until new method channel call returns', (WidgetTester tester) async {
+      const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+      // Configures channel 1
+      const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel1', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 10),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      // Configures channel 2
+      const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel2', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 20),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      channel1.invokeMethod<String>('sayHello', 'hello');
+
+      // Calls the waiting API before the second channel message is sent.
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // The first channel message is not received, so nothing happens yet.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(result, isNull);
+
+      channel2.invokeMethod<String>('sayHello', 'hello');
+
+      // Result of channel 1 is received, but channel 2 is still pending, so still waiting.
+      await tester.pump(const Duration(milliseconds: 15));
+      expect(result, isNull);
+
+      // Both of the results are received. Now we receive the result.
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns until both old and new method channel calls return', (WidgetTester tester) async {
+      const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+      // Configures channel 1
+      const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel1', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 20),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      // Configures channel 2
+      const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel2', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 10),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      channel1.invokeMethod<String>('sayHello', 'hello');
+
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // The first channel message is not received, so nothing happens yet.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(result, isNull);
+
+      channel2.invokeMethod<String>('sayHello', 'hello');
+
+      // Result of channel 2 is received, but channel 1 is still pending, so still waiting.
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(result, isNull);
+
+      // Now we receive the result.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
     });
   });
 
@@ -121,7 +494,7 @@ void main() {
       final Map<String, Object> response = await extension.call(arguments);
 
       expect(response['isError'], true);
-      expect(response['response'], contains('Bad state: Too many elements'));
+      expect(response['response'], contains('Bad state: Found more than one element with the same ID'));
       semantics.dispose();
     });
   });
@@ -200,6 +573,39 @@ void main() {
     expect(await result, null);
   });
 
+  testWidgets('descendant finder firstMatchOnly', (WidgetTester tester) async {
+    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<String> getDescendantText() async {
+      final Map<String, Object> arguments = GetText(Descendant(
+        of: ByValueKey('column'),
+        matching: const ByType('Text'),
+        firstMatchOnly: true,
+      ), timeout: const Duration(seconds: 1)).serialize();
+      final Map<String, dynamic> result = await extension.call(arguments);
+      if (result['isError']) {
+        return null;
+      }
+      return GetTextResult.fromJson(result['response']).text;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          key: const ValueKey<String>('column'),
+          children: const <Widget>[
+            Text('Hello1', key: ValueKey<String>('text1')),
+            Text('Hello2', key: ValueKey<String>('text2')),
+            Text('Hello3', key: ValueKey<String>('text3')),
+          ],
+        ),
+      ),
+    );
+
+    expect(await getDescendantText(), 'Hello1');
+  });
+
   testWidgets('ancestor finder', (WidgetTester tester) async {
     flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
     final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
@@ -269,6 +675,54 @@ void main() {
     expect(await result, null);
   });
 
+  testWidgets('ancestor finder firstMatchOnly', (WidgetTester tester) async {
+    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<Offset> getAncestorTopLeft() async {
+      final Map<String, Object> arguments = GetOffset(Ancestor(
+        of: ByValueKey('leaf'),
+        matching: const ByType('Container'),
+        firstMatchOnly: true,
+      ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      if (response['isError']) {
+        return null;
+      }
+      final GetOffsetResult result = GetOffsetResult.fromJson(response['response']);
+      return Offset(result.dx, result.dy);
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            height: 200,
+            width: 200,
+            child: Center(
+              child: Container(
+                height: 100,
+                width: 100,
+                child: Center(
+                  child: Container(
+                    key: const ValueKey<String>('leaf'),
+                    height: 50,
+                    width: 50,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      await getAncestorTopLeft(),
+      const Offset((800 - 100) / 2, (600 - 100) / 2),
+    );
+  });
+
   testWidgets('GetDiagnosticsTree', (WidgetTester tester) async {
     final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
@@ -279,10 +733,10 @@ void main() {
     }
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-            child: const Text('Hello World', key: ValueKey<String>('Text'))
+            child: Text('Hello World', key: ValueKey<String>('Text'))
         ),
       ),
     );
@@ -332,5 +786,82 @@ void main() {
     result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 100);
     children = result['children'];
     expect(children.single['children'], isEmpty);
+  });
+
+  group('waitUntilFrameSync', () {
+    FlutterDriverExtension extension;
+    Map<String, dynamic> result;
+
+    setUp(() {
+      extension = FlutterDriverExtension((String arg) async => '', true);
+      result = null;
+    });
+
+    testWidgets('returns immediately when frame is synced', (
+        WidgetTester tester) async {
+      extension.call(const WaitUntilNoPendingFrame().serialize()) // ignore: deprecated_member_use_from_same_package
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      await tester.idle();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waits until no transient callbacks', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
+        // Intentionally blank. We only care about existence of a callback.
+      });
+
+      extension.call(const WaitUntilNoPendingFrame().serialize()) // ignore: deprecated_member_use_from_same_package
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waits until no pending scheduled frame', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrame();
+
+      extension.call(const WaitUntilNoPendingFrame().serialize()) // ignore: deprecated_member_use_from_same_package
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
   });
 }

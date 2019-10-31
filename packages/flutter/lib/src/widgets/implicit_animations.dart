@@ -221,9 +221,53 @@ class TextStyleTween extends Tween<TextStyle> {
 /// respond to those _changes_ by animating the changes over a specified
 /// [duration].
 ///
-/// Which properties are animated is left up to the subclass. Subclasses' States
+/// Which properties are animated is left up to the subclass. Subclasses' [State]s
 /// must extend [ImplicitlyAnimatedWidgetState] and provide a way to visit the
 /// relevant fields to animate.
+///
+/// ## Relationship to [AnimatedWidget]s
+///
+/// [ImplicitlyAnimatedWidget]s (and their subclasses) automatically animate
+/// changes in their properties whenever they change. For this,
+/// they create and manage their own internal [AnimationController]s to power
+/// the animation. While these widgets are simple to use and don't require you
+/// to manually manage the lifecycle of an [AnimationController], they
+/// are also somewhat limited: Besides the target value for the animated
+/// property, developers can only chose a [duration] and [curve] for the
+/// animation. If you require more control over the animation (e.g. you want
+/// to stop it somewhere in the middle), consider using a
+/// [AnimatedWidget] or one of its subclasses. These widget take an [Animation]
+/// as an argument to power the animation. This gives the developer full control
+/// over the animation at the cost of requiring you to manually manage the
+/// underlying [AnimationController].
+///
+/// ## Common implicitly animated widgets
+///
+/// A number of implicitly animated widgets ship with the framework. They are
+/// usually named `AnimatedFoo`, where `Foo` is the name of the non-animated
+/// version of that widget. Commonly used implicitly animated widgets include:
+///
+///  * [TweenAnimationBuilder], which animates any property expressed by
+///    a [Tween] to a specified target value.
+///  * [AnimatedAlign], which is an implicitly animated version of [Align].
+///  * [AnimatedContainer], which is an implicitly animated version of
+///    [Container].
+///  * [AnimatedDefaultTextStyle], which is an implicitly animated version of
+///    [DefaultTextStyle].
+///  * [AnimatedOpacity], which is an implicitly animated version of [Opacity].
+///  * [AnimatedPadding], which is an implicitly animated version of [Padding].
+///  * [AnimatedPhysicalModel], which is an implicitly animated version of
+///    [PhysicalModel].
+///  * [AnimatedPositioned], which is an implicitly animated version of
+///    [Positioned].
+///  * [AnimatedPositionedDirectional], which is an implicitly animated version
+///    of [PositionedDirectional].
+///  * [AnimatedTheme], which is an implicitly animated version of [Theme].
+///  * [AnimatedCrossFade], which cross-fades between two given children and
+///    animates itself between their sizes.
+///  * [AnimatedSize], which automatically transitions its size over a given
+///    duration.
+///  * [AnimatedSwitcher], which fades from one widget to another.
 abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// Initializes fields for subclasses.
   ///
@@ -232,7 +276,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
     Key key,
     this.curve = Curves.linear,
     @required this.duration,
-    this.reverseDuration,
+    this.onEnd,
   }) : assert(curve != null),
        assert(duration != null),
        super(key: key);
@@ -243,11 +287,11 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// The duration over which to animate the parameters of this container.
   final Duration duration;
 
-  /// The duration over which to animate the parameters of this container when
-  /// the animation is going in the reverse direction.
+  /// Called every time an animation completes.
   ///
-  /// Defaults to [duration] if not specified.
-  final Duration reverseDuration;
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation.
+  final VoidCallback onEnd;
 
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
@@ -256,7 +300,6 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
-    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
   }
 }
 
@@ -317,10 +360,20 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     super.initState();
     _controller = AnimationController(
       duration: widget.duration,
-      reverseDuration: widget.reverseDuration,
       debugLabel: kDebugMode ? '${widget.toStringShort()}' : null,
       vsync: this,
     );
+    _controller.addStatusListener((AnimationStatus status) {
+      switch (status) {
+        case AnimationStatus.completed:
+          if (widget.onEnd != null)
+            widget.onEnd();
+          break;
+        case AnimationStatus.dismissed:
+        case AnimationStatus.forward:
+        case AnimationStatus.reverse:
+      }
+    });
     _updateCurve();
     _constructTweens();
     didUpdateTweens();
@@ -332,7 +385,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     if (widget.curve != oldWidget.curve)
       _updateCurve();
     _controller.duration = widget.duration;
-    _controller.reverseDuration = widget.reverseDuration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic> tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
@@ -507,7 +559,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   }
 }
 
-/// A container that gradually changes its values over a period of time.
+/// Animated version of [Container] that gradually changes its values over a period of time.
 ///
 /// The [AnimatedContainer] will automatically animate between the old and
 /// new values of properties when they change using the provided curve and
@@ -590,7 +642,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve = Curves.linear,
     @required Duration duration,
-    Duration reverseDuration,
+    VoidCallback onEnd,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
@@ -605,7 +657,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
           ? constraints?.tighten(width: width, height: height)
             ?? BoxConstraints.tightFor(width: width, height: height)
           : constraints,
-       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The [child] contained by the container.
   ///
@@ -747,10 +799,10 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve = Curves.linear,
     @required Duration duration,
-    Duration reverseDuration,
+    VoidCallback onEnd,
   }) : assert(padding != null),
        assert(padding.isNonNegative),
-       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
@@ -800,6 +852,14 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_align.mp4}
 ///
+/// For the animation, you can chose a [curve] as well as a [duration] and the
+/// widget will automatically animate to the new target [alignment]. If you require
+/// more control over the animation (e.g. if you want to stop it mid-animation),
+/// consider using an [AlignTransition] instead, which takes a provided
+/// [Animation] as argument. While that allows you to fine-tune the animation,
+/// it also requires more development overhead as you have to manually manage
+/// the lifecycle of the underlying [AnimationController].
+///
 /// See also:
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
@@ -819,9 +879,9 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve = Curves.linear,
     @required Duration duration,
-    Duration reverseDuration,
+    VoidCallback onEnd,
   }) : assert(alignment != null),
-       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// How to align the child.
   ///
@@ -895,6 +955,14 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_positioned.mp4}
 ///
+/// For the animation, you can chose a [curve] as well as a [duration] and the
+/// widget will automatically animate to the new target position. If you require
+/// more control over the animation (e.g. if you want to stop it mid-animation),
+/// consider using an [PositionedTransition] instead, which takes a provided
+/// [Animation] as argument. While that allows you to fine-tune the animation,
+/// it also requires more development overhead as you have to manually manage
+/// the lifecycle of the underlying [AnimationController].
+///
 /// See also:
 ///
 ///  * [AnimatedPositionedDirectional], which adapts to the ambient
@@ -920,10 +988,10 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.height,
     Curve curve = Curves.linear,
     @required Duration duration,
-    Duration reverseDuration,
+    VoidCallback onEnd,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -934,14 +1002,14 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     Rect rect,
     Curve curve = Curves.linear,
     @required Duration duration,
-    Duration reverseDuration,
+    VoidCallback onEnd,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
        height = rect.height,
        right = null,
        bottom = null,
-       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1073,10 +1141,10 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     this.height,
     Curve curve = Curves.linear,
     @required Duration duration,
-    Duration reverseDuration,
+    VoidCallback onEnd,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1215,6 +1283,8 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///
 /// See also:
 ///
+///  * [AnimatedCrossFade], for fading between two children.
+///  * [AnimatedSwitcher], for fading between many children in sequence.
 ///  * [FadeTransition], an explicitly animated version of this widget, where
 ///    an [Animation] is provided by the caller instead of being built in.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
@@ -1228,9 +1298,10 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     @required this.opacity,
     Curve curve = Curves.linear,
     @required Duration duration,
-    Duration reverseDuration,
+    VoidCallback onEnd,
+    this.alwaysIncludeSemantics = false,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1244,6 +1315,16 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   ///
   /// The opacity must not be null.
   final double opacity;
+
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
 
   @override
   _AnimatedOpacityState createState() => _AnimatedOpacityState();
@@ -1274,6 +1355,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
     return FadeTransition(
       opacity: _opacityAnimation,
       child: widget.child,
+      alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
     );
   }
 }
@@ -1289,6 +1371,14 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.elasticInOut].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_default_text_style.mp4}
+///
+/// For the animation, you can chose a [curve] as well as a [duration] and the
+/// widget will automatically animate to the new default text style. If you require
+/// more control over the animation (e.g. if you want to stop it mid-animation),
+/// consider using an [DefaultTextStyleTransition] instead, which takes a provided
+/// [Animation] as argument. While that allows you to fine-tune the animation,
+/// it also requires more development overhead as you have to manually manage
+/// the lifecycle of the underlying [AnimationController].
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///
@@ -1304,13 +1394,13 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     this.maxLines,
     Curve curve = Curves.linear,
     @required Duration duration,
-    Duration reverseDuration,
+    VoidCallback onEnd,
   }) : assert(style != null),
        assert(child != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
-       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1400,9 +1490,9 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///
-  /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor], [curve], and
-  /// [duration] arguments must not be null. Additionally, [elevation] must be
-  /// non-negative.
+  /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor],
+  /// [curve], [clipBehavior], and [duration] arguments must not be null.
+  /// Additionally, [elevation] must be non-negative.
   ///
   /// Animating [color] is optional and is controlled by the [animateColor] flag.
   ///
@@ -1420,7 +1510,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     this.animateShadowColor = true,
     Curve curve = Curves.linear,
     @required Duration duration,
-    Duration reverseDuration,
+    VoidCallback onEnd,
   }) : assert(child != null),
        assert(shape != null),
        assert(clipBehavior != null),
@@ -1430,7 +1520,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(shadowColor != null),
        assert(animateColor != null),
        assert(animateShadowColor != null),
-       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1443,6 +1533,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   final BoxShape shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// The target border radius of the rounded corners for a rectangle shape.

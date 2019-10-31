@@ -39,7 +39,7 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
     await saveCatalogScreenshots(
       directory: dir('${flutterDirectory.path}/examples/catalog/.generated'),
       commit: commit,
-      token: authorizationToken,
+      token: authorizationToken, // TODO(fujino): workaround auth token for local runs
       prefix: isIosDevice ? 'ios_' : '',
     );
   });

@@ -8,37 +8,24 @@ import '../base/common.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../macos/build_macos.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
-/// A command to build a macos desktop target through a build shell script.
+/// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand() {
+  BuildMacosCommand({bool verboseHelp}) {
     usesTargetOption();
-    argParser.addFlag('debug',
-      negatable: false,
-      help: 'Build a debug version of your app.',
-    );
-    argParser.addFlag('profile',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.'
-    );
-    argParser.addFlag('release',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.',
-    );
+    addBuildModeFlags(verboseHelp: verboseHelp);
   }
 
   @override
   final String name = 'macos';
 
   @override
-  bool isExperimental = true;
-
-  @override
-  bool hidden = true;
+  bool get hidden => !featureFlags.isMacOSEnabled || !platform.isMacOS;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -47,13 +34,16 @@ class BuildMacosCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the macOS desktop target (Experimental).';
+  String get description => 'build the macOS desktop target.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
+    if (!featureFlags.isMacOSEnabled) {
+      throwToolExit('"build macos" is not currently supported.');
+    }
     if (!platform.isMacOS) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }

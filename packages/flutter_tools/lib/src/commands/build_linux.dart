@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../linux/build_linux.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -23,7 +24,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     );
     argParser.addFlag('profile',
       negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.'
+      help: 'Build a version of your app specialized for performance profiling.',
     );
     argParser.addFlag('release',
       negatable: false,
@@ -35,10 +36,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   final String name = 'linux';
 
   @override
-  bool isExperimental = true;
-
-  @override
-  bool hidden = true;
+  bool get hidden => !featureFlags.isLinuxEnabled || !platform.isLinux;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -47,13 +45,16 @@ class BuildLinuxCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the Linux desktop target (Experimental).';
+  String get description => 'build the Linux desktop target.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
+    if (!featureFlags.isLinuxEnabled) {
+      throwToolExit('"build linux" is not currently supported.');
+    }
     if (!platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }

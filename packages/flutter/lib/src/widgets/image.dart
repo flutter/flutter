@@ -207,6 +207,42 @@ typedef ImageLoadingBuilder = Widget Function(
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
+/// {@tool sample}
+/// The default constructor can be used with any [ImageProvider], such as a
+/// [NetworkImage], to display an image from the internet.
+///
+/// ![An image of an owl displayed by the image widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg)
+///
+/// ```dart
+/// const Image(
+///   image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// The [Image] Widget also provides several constructors to display different
+/// types of images for convenience. In this example, use the [Image.network]
+/// constructor to display an image from the internet.
+///
+/// ![An image of an owl displayed by the image widget using the shortcut constructor](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg)
+///
+/// ```dart
+/// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
+/// ```
+/// {@end-tool}
+///
+/// The [Image.asset], [Image.network], [Image.file], and [Image.memory]
+/// constructors allow a custom decode size to be specified through
+/// [cacheWidth] and [cacheHeight] parameters. The engine will decode the
+/// image to the specified size, which is primarily intended to reduce the
+/// memory usage of [ImageCache].
+///
+/// In the case where a network image is used on the Web platform, the
+/// [cacheWidth] and [cacheHeight] parameters are ignored as the Web engine
+/// delegates image decoding of network images to the Web, which does not support
+/// custom decode sizes.
+///
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.
@@ -280,6 +316,19 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image should be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
+  ///
+  /// In the case where the network image is on the Web platform, the [cacheWidth]
+  /// and [cacheHeight] parameters are ignored as the web engine delegates
+  /// image decoding to the web which does not support custom decode sizes.
+  //
+  // TODO(garyq): We should eventually support custom decoding of network images
+  // on Web as well, see https://github.com/flutter/flutter/issues/42789.
   Image.network(
     String src, {
     Key key,
@@ -300,10 +349,14 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-  }) : image = NetworkImage(src, scale: scale, headers: headers),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
@@ -324,6 +377,12 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   Image.file(
     File file, {
     Key key,
@@ -342,12 +401,16 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = FileImage(file, scale: scale),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
 
@@ -378,6 +441,12 @@ class Image extends StatefulWidget {
   /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   ///
   /// The [name] and [repeat] arguments must not be null.
   ///
@@ -495,18 +564,27 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     String package,
     this.filterQuality = FilterQuality.low,
-  }) : image = scale != null
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, scale != null
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package),
+         : AssetImage(name, bundle: bundle, package: package)
+       ),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
   /// The [bytes], [scale], and [repeat] arguments must not be null.
+  ///
+  /// This only accepts compressed image formats (e.g. PNG). Uncompressed
+  /// formats like rawRgba (the default format of [ui.Image.toByteData]) will
+  /// lead to exceptions.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -519,6 +597,12 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   Image.memory(
     Uint8List bytes, {
     Key key,
@@ -537,11 +621,15 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = MemoryImage(bytes, scale: scale),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// The image to display.

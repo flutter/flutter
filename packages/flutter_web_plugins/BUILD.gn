@@ -1,0 +1,18 @@
+# Copyright 2019 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/dart/dart_library.gni")
+
+dart_library("flutter_web_plugins") {
+  package_name = "flutter_web_plugins"
+
+  # Can be left empty as analysis is disabled.
+  sources = []
+
+  disable_analysis = true
+
+  deps = [
+    "../flutter",
+  ]
+}

@@ -132,11 +132,11 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     assert(() {
       if (minExtent <= maxExtent)
         return true;
-      throw FlutterError(
-        'The maxExtent for this $runtimeType is less than its minExtent.\n'
-        'The specified maxExtent was: ${maxExtent.toStringAsFixed(1)}\n'
-        'The specified minExtent was: ${minExtent.toStringAsFixed(1)}\n'
-      );
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('The maxExtent for this $runtimeType is less than its minExtent.'),
+        DoubleProperty('The specified maxExtent was', maxExtent),
+        DoubleProperty('The specified minExtent was', minExtent),
+      ]);
     }());
     child?.layout(
       constraints.asBoxConstraints(maxExtent: math.max(minExtent, maxExtent - shrinkOffset)),
@@ -415,7 +415,6 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
-      maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return math.min(0.0, paintExtent - childExtent);
@@ -476,8 +475,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     } else {
       _effectiveScrollOffset = constraints.scrollOffset;
     }
-    final bool overlapsContent = _effectiveScrollOffset <= constraints.scrollOffset;
-    excludeFromSemanticsScrolling = overlapsContent;
+    excludeFromSemanticsScrolling = _effectiveScrollOffset <= constraints.scrollOffset;
+    final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset;
     layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: overlapsContent);
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;

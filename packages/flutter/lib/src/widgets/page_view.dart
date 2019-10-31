@@ -368,8 +368,16 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       forcePixels(getPixelsFromPage(oldPage));
   }
 
+  // The amount of offset that will be added to [minScrollExtent] and subtracted
+  // from [maxScrollExtent], such that every page will properly snap to the center
+  // of the viewport when viewportFraction is greater than 1.
+  //
+  // The value is 0 if viewportFraction is less than or equal to 1, larger than 0
+  // otherwise.
+  double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);
+
   double getPageFromPixels(double pixels, double viewportDimension) {
-    final double actual = math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double actual = math.max(0, pixels - _initialPageOffset) / math.max(1.0, viewportDimension * viewportFraction);
     final double round = actual.roundToDouble();
     if ((actual - round).abs() < precisionErrorTolerance) {
       return round;
@@ -378,7 +386,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   double getPixelsFromPage(double page) {
-    return page * viewportDimension * viewportFraction;
+    return page * viewportDimension * viewportFraction + _initialPageOffset;
   }
 
   @override
@@ -418,6 +426,15 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       return false;
     }
     return result;
+  }
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    final double newMinScrollExtent = minScrollExtent + _initialPageOffset;
+    return super.applyContentDimensions(
+      newMinScrollExtent,
+      math.max(newMinScrollExtent, maxScrollExtent - _initialPageOffset),
+    );
   }
 
   @override
@@ -562,6 +579,10 @@ class PageView extends StatefulWidget {
   ///
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
+  ///
+  /// [PageView.builder] by default does not support child reordering. If
+  /// you are planning to change child order at a later time, consider using
+  /// [PageView] or [PageView.custom].
   PageView.builder({
     Key key,
     this.scrollDirection = Axis.horizontal,
@@ -579,6 +600,84 @@ class PageView extends StatefulWidget {
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
+  ///
+  /// {@tool sample}
+  ///
+  /// This [PageView] uses a custom [SliverChildBuilderDelegate] to support child
+  /// reordering.
+  ///
+  /// ```dart
+  /// class MyPageView extends StatefulWidget {
+  ///   @override
+  ///   _MyPageViewState createState() => _MyPageViewState();
+  /// }
+  ///
+  /// class _MyPageViewState extends State<MyPageView> {
+  ///   List<String> items = <String>['1', '2', '3', '4', '5'];
+  ///
+  ///   void _reverse() {
+  ///     setState(() {
+  ///       items = items.reversed.toList();
+  ///     });
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Scaffold(
+  ///       body: SafeArea(
+  ///         child: PageView.custom(
+  ///           childrenDelegate: SliverChildBuilderDelegate(
+  ///             (BuildContext context, int index) {
+  ///               return KeepAlive(
+  ///                 data: items[index],
+  ///                 key: ValueKey<String>(items[index]),
+  ///               );
+  ///             },
+  ///             childCount: items.length,
+  ///             findChildIndexCallback: (Key key) {
+  ///               final ValueKey valueKey = key;
+  ///               final String data = valueKey.value;
+  ///               return items.indexOf(data);
+  ///             }
+  ///           ),
+  ///         ),
+  ///       ),
+  ///       bottomNavigationBar: BottomAppBar(
+  ///         child: Row(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             FlatButton(
+  ///               onPressed: () => _reverse(),
+  ///               child: Text('Reverse items'),
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// class KeepAlive extends StatefulWidget {
+  ///   const KeepAlive({Key key, this.data}) : super(key: key);
+  ///
+  ///   final String data;
+  ///
+  ///   @override
+  ///   _KeepAliveState createState() => _KeepAliveState();
+  /// }
+  ///
+  /// class _KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin{
+  ///   @override
+  ///   bool get wantKeepAlive => true;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     super.build(context);
+  ///     return Text(widget.data);
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   PageView.custom({
     Key key,
     this.scrollDirection = Axis.horizontal,

@@ -105,19 +105,19 @@ void main() {
   });
 
   List<double> estimateBounds(Curve curve) {
-    final List<double> values = <double>[];
-
-    values.add(curve.transform(0.0));
-    values.add(curve.transform(0.1));
-    values.add(curve.transform(0.2));
-    values.add(curve.transform(0.3));
-    values.add(curve.transform(0.4));
-    values.add(curve.transform(0.5));
-    values.add(curve.transform(0.6));
-    values.add(curve.transform(0.7));
-    values.add(curve.transform(0.8));
-    values.add(curve.transform(0.9));
-    values.add(curve.transform(1.0));
+    final List<double> values = <double>[
+      curve.transform(0.0),
+      curve.transform(0.1),
+      curve.transform(0.2),
+      curve.transform(0.3),
+      curve.transform(0.4),
+      curve.transform(0.5),
+      curve.transform(0.6),
+      curve.transform(0.7),
+      curve.transform(0.8),
+      curve.transform(0.9),
+      curve.transform(1.0),
+    ];
 
     return <double>[
       values.reduce(math.min),

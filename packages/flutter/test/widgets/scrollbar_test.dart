@@ -51,7 +51,7 @@ void main() {
     maxScrollExtent: 0,
     pixels: 0,
     viewportDimension: 100,
-    axisDirection: AxisDirection.down
+    axisDirection: AxisDirection.down,
   );
 
   test(
@@ -91,7 +91,7 @@ void main() {
       expect(rect1.left, size.width - _kThickness);
       expect(rect1.width, _kThickness);
       expect(rect1.height >= minLen, true);
-    }
+    },
   );
 
   test(
@@ -138,7 +138,7 @@ void main() {
         expect(nearEqual(rect.height, viewportDimension * viewportDimension / (viewportDimension + maxExtent), 0.001), true);
         expect(nearEqual(lastCoefficient, newCoefficient, 0.001), true);
       }
-    }
+    },
   );
 
   test(
@@ -179,7 +179,7 @@ void main() {
         painter.paint(testCanvas, size);
         expect(size.height - captureRect().bottom, margin);
       }
-    }
+    },
   );
 
   test(
@@ -217,7 +217,7 @@ void main() {
                 margin,
                 textDirection == TextDirection.ltr
                   ? size.width - rect.right
-                  : rect.left
+                  : rect.left,
               );
               break;
             case AxisDirection.left:
@@ -227,7 +227,7 @@ void main() {
           }
         }
       }
-    }
+    },
   );
 
   group('Padding works for all scroll directions', () {
@@ -371,6 +371,77 @@ void main() {
     });
   });
 
+  testWidgets('thumb resizes gradually on overscroll', (WidgetTester tester) async {
+    const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
+    const Size size = Size(60, 300);
+    final double scrollExtent = size.height * 10;
+    final ScrollMetrics metrics = defaultMetrics.copyWith(
+      minScrollExtent: 0,
+      maxScrollExtent: scrollExtent,
+      axisDirection: AxisDirection.down,
+      viewportDimension: size.height,
+    );
+
+    const double minOverscrollLength = 8.0;
+    final ScrollbarPainter p = _buildPainter(
+      padding: padding,
+      scrollMetrics: metrics,
+      minLength: 36.0,
+      minOverscrollLength: 8.0,
+    );
+
+    // No overscroll gives a full sized thumb.
+    p.update(
+      metrics.copyWith(
+        pixels: 0.0,
+      ),
+      AxisDirection.down,
+    );
+    p.paint(testCanvas, size);
+    final double fullThumbExtent = captureRect().height;
+    expect(fullThumbExtent, greaterThan(_kMinThumbExtent));
+
+    // Scrolling to the middle also gives a full sized thumb.
+    p.update(
+      metrics.copyWith(
+        pixels: scrollExtent / 2,
+      ),
+      AxisDirection.down,
+    );
+    p.paint(testCanvas, size);
+    expect(captureRect().height, closeTo(fullThumbExtent, .000001));
+
+    // Scrolling just to the very end also gives a full sized thumb.
+    p.update(
+      metrics.copyWith(
+        pixels: scrollExtent,
+      ),
+      AxisDirection.down,
+    );
+    p.paint(testCanvas, size);
+    expect(captureRect().height, closeTo(fullThumbExtent, .000001));
+
+    // Scrolling just past the end shrinks the thumb slightly.
+    p.update(
+      metrics.copyWith(
+        pixels: scrollExtent * 1.001,
+      ),
+      AxisDirection.down,
+    );
+    p.paint(testCanvas, size);
+    expect(captureRect().height, closeTo(fullThumbExtent, 2.0));
+
+    // Scrolling way past the end shrinks the thumb to minimum.
+    p.update(
+      metrics.copyWith(
+        pixels: double.infinity,
+      ),
+      AxisDirection.down,
+    );
+    p.paint(testCanvas, size);
+    expect(captureRect().height, minOverscrollLength);
+  });
+
   test('should scroll towards the right direction',
     () {
       const Size size = Size(60, 80);
@@ -394,7 +465,7 @@ void main() {
 
         final Iterable<ScrollMetrics> metricsList = Iterable<ScrollMetrics>.generate(
           9999,
-          (int index) => startingMetrics.copyWith(pixels: minScrollExtent + index * size.height / 3)
+          (int index) => startingMetrics.copyWith(pixels: minScrollExtent + index * size.height / 3),
         )
         .takeWhile((ScrollMetrics metrics) => !metrics.outOfRange);
 
@@ -420,6 +491,6 @@ void main() {
           previousRect = rect;
         }
       }
-    }
+    },
   );
 }

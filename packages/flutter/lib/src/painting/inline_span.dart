@@ -35,6 +35,68 @@ class Accumulator {
 /// [InlineSpan]s.
 typedef InlineSpanVisitor = bool Function(InlineSpan span);
 
+/// The textual and semantic label information for an [InlineSpan].
+///
+/// For [PlaceholderSpan]s, [InlineSpanSemanticsInformation.placeholder] is used by default.
+///
+/// See also:
+///   * [InlineSpan.getSemanticsInformation]
+@immutable
+class InlineSpanSemanticsInformation {
+  /// Constructs an object that holds the text and sematnics label values of an
+  /// [InlineSpan].
+  ///
+  /// The text parameter must not be null.
+  ///
+  /// Use [InlineSpanSemanticsInformation.placeholder] instead of directly setting
+  /// [isPlaceholder].
+  const InlineSpanSemanticsInformation(
+    this.text, {
+    this.isPlaceholder = false,
+    this.semanticsLabel,
+    this.recognizer,
+  }) : assert(text != null),
+       assert(isPlaceholder != null),
+       assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
+       requiresOwnNode = isPlaceholder || recognizer != null;
+
+  /// The text info for a [PlaceholderSpan].
+  static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation('\uFFFC', isPlaceholder: true);
+
+  /// The text value, if any.  For [PlaceholderSpan]s, this will be the unicode
+  /// placeholder value.
+  final String text;
+
+  /// The semanticsLabel, if any.
+  final String semanticsLabel;
+
+  /// The gesture recognizer, if any, for this span.
+  final GestureRecognizer recognizer;
+
+  /// Whether this is for a placeholder span.
+  final bool isPlaceholder;
+
+  /// True if this configuration should get its own semantics node.
+  ///
+  /// This will be the case of the [recognizer] is not null, of if
+  /// [isPlaceholder] is true.
+  final bool requiresOwnNode;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! InlineSpanSemanticsInformation) {
+      return false;
+    }
+    return other.text == text && other.semanticsLabel == semanticsLabel && other.recognizer == recognizer && other.isPlaceholder == isPlaceholder;
+  }
+
+  @override
+  int get hashCode => hashValues(text, semanticsLabel, recognizer, isPlaceholder);
+
+  @override
+  String toString() => '$runtimeType{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
+}
+
 /// An immutable span of inline content which forms part of a paragraph.
 ///
 ///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
@@ -175,6 +237,28 @@ abstract class InlineSpan extends DiagnosticableTree {
     return buffer.toString();
   }
 
+  /// Flattens the [InlineSpan] tree to a list of
+  /// [InlineSpanSemanticsInformation] objects.
+  ///
+  /// [PlaceholderSpan]s in the tree will be represented with a
+  /// [InlineSpanSemanticsInformation.placeholder] value.
+  List<InlineSpanSemanticsInformation> getSemanticsInformation() {
+    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
+    computeSemanticsInformation(collector);
+    return collector;
+  }
+
+  /// Walks the [InlineSpan] tree and accumulates a list of
+  /// [InlineSpanSemanticsInformation] objects.
+  ///
+  /// This method should not be directly called.  Use
+  /// [getSemanticsInformation] instead.
+  ///
+  /// [PlaceholderSpan]s in the tree will be represented with a
+  /// [InlineSpanSemanticsInformation.placeholder] value.
+  @protected
+  void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector);
+
   /// Walks the [InlineSpan] tree and writes the plain text representation to `buffer`.
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
@@ -229,6 +313,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
   /// `semanticsElements` for [PlaceholderSpan]s.
+  @Deprecated('Implement computeSemanticsInformation instead.')
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements);
 
   /// In checked mode, throws an exception if the object is not in a

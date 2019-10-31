@@ -56,7 +56,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   /// Creates a route that delegates to builder callbacks.
   ///
   /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
-  /// and [maintainState] arguments must not be null.
+  /// [maintainState], and [fullscreenDialog] arguments must not be null.
   PageRouteBuilder({
     RouteSettings settings,
     @required this.pageBuilder,
@@ -67,12 +67,14 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.barrierColor,
     this.barrierLabel,
     this.maintainState = true,
+    bool fullscreenDialog = false,
   }) : assert(pageBuilder != null),
        assert(transitionsBuilder != null),
+       assert(opaque != null),
        assert(barrierDismissible != null),
        assert(maintainState != null),
-       assert(opaque != null),
-       super(settings: settings);
+       assert(fullscreenDialog != null),
+       super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   /// Used build the route's primary contents.
   ///

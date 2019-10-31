@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -94,15 +94,19 @@ class _FrameCallbackEntry {
       if (rescheduling) {
         assert(() {
           if (debugCurrentCallbackStack == null) {
-            throw FlutterError(
-              'scheduleFrameCallback called with rescheduling true, but no callback is in scope.\n'
-              'The "rescheduling" argument should only be set to true if the '
-              'callback is being reregistered from within the callback itself, '
-              'and only then if the callback itself is entirely synchronous. '
-              'If this is the initial registration of the callback, or if the '
-              'callback is asynchronous, then do not use the "rescheduling" '
-              'argument.'
-            );
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('scheduleFrameCallback called with rescheduling true, but no callback is in scope.'),
+              ErrorDescription(
+                'The "rescheduling" argument should only be set to true if the '
+                'callback is being reregistered from within the callback itself, '
+                'and only then if the callback itself is entirely synchronous.'
+              ),
+              ErrorHint(
+                'If this is the initial registration of the callback, or if the '
+                'callback is asynchronous, then do not use the "rescheduling" '
+                'argument.'
+              )
+            ]);
           }
           return true;
         }());
@@ -150,7 +154,7 @@ enum SchedulerPhase {
   /// Microtasks scheduled during the processing of transient callbacks are
   /// current executing.
   ///
-  /// This may include, for instance, callbacks from futures resulted during the
+  /// This may include, for instance, callbacks from futures resolved during the
   /// [transientCallbacks] phase.
   midFrameMicrotasks,
 
@@ -194,20 +198,74 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    window.onBeginFrame = _handleBeginFrame;
-    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     readInitialLifecycleStateFromNativeWindow();
 
     if (!kReleaseMode) {
       int frameNumber = 0;
-
-      window.onReportTimings = (List<FrameTiming> timings) {
+      addTimingsCallback((List<FrameTiming> timings) {
         for (FrameTiming frameTiming in timings) {
           frameNumber += 1;
           _profileFramePostEvent(frameNumber, frameTiming);
         }
-      };
+      });
+    }
+  }
+
+  final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
+
+  /// Add a [TimingsCallback] that receives [FrameTiming] sent from the engine.
+  ///
+  /// This can be used, for example, to monitor the performance in release mode,
+  /// or to get a signal when the first frame is rasterized.
+  ///
+  /// This is preferred over using [Window.onReportTimings] directly because
+  /// [addTimingsCallback] allows multiple callbacks.
+  ///
+  /// If the same callback is added twice, it will be executed twice.
+  void addTimingsCallback(TimingsCallback callback) {
+    // TODO(liyuqian): once this is merged, modify the doc of
+    //  [Window.onReportTimings] inside the engine repo to recommend using this
+    // API instead of using [Window.onReportTimings] directly.
+    _timingsCallbacks.add(callback);
+    if (_timingsCallbacks.length == 1) {
+      assert(window.onReportTimings == null);
+      window.onReportTimings = _executeTimingsCallbacks;
+    }
+    assert(window.onReportTimings == _executeTimingsCallbacks);
+  }
+
+  /// Removes a callback that was earlier added by [addTimingsCallback].
+  void removeTimingsCallback(TimingsCallback callback) {
+    assert(_timingsCallbacks.contains(callback));
+    _timingsCallbacks.remove(callback);
+    if (_timingsCallbacks.isEmpty) {
+      window.onReportTimings = null;
+    }
+  }
+
+  void _executeTimingsCallbacks(List<FrameTiming> timings) {
+    final List<TimingsCallback> clonedCallbacks =
+        List<TimingsCallback>.from(_timingsCallbacks);
+    for (TimingsCallback callback in clonedCallbacks) {
+      try {
+        if (_timingsCallbacks.contains(callback)) {
+          callback(timings);
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          context: ErrorDescription('while executing callbacks for FrameTiming'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<TimingsCallback>(
+              'The TimingsCallback that gets executed was',
+              callback,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
+        ));
+      }
     }
   }
 
@@ -504,7 +562,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         FlutterError.reportError(FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
-            informationCollector: () sync* {
+          informationCollector: () sync* {
             if (count == 1) {
               // TODO(jacobr): I have added an extra line break in this case.
               yield ErrorDescription(
@@ -654,6 +712,12 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       scheduleFrame();
   }
 
+  @protected
+  void ensureFrameCallbacksRegistered() {
+    window.onBeginFrame ??= _handleBeginFrame;
+    window.onDrawFrame ??= _handleDrawFrame;
+  }
+
   /// Schedules a new frame using [scheduleFrame] if this object is not
   /// currently producing a frame.
   ///
@@ -715,6 +779,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
+    ensureFrameCallbacksRegistered();
     window.scheduleFrame();
     _hasScheduledFrame = true;
   }
@@ -1028,7 +1093,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace callbackStack ]) {
     assert(callback != null);
     assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack; return true; }());
+    assert(() {
+      _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack;
+      return true;
+    }());
     try {
       callback(timeStamp);
     } catch (exception, exceptionStack) {
@@ -1047,7 +1115,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         },
       ));
     }
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; }());
+    assert(() {
+      _FrameCallbackEntry.debugCurrentCallbackStack = null;
+      return true;
+    }());
   }
 }
 

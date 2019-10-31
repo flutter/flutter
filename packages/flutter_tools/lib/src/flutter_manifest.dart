@@ -11,6 +11,7 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'globals.dart';
+import 'plugins.dart';
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -26,8 +27,9 @@ class FlutterManifest {
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static FlutterManifest createFromPath(String path) {
-    if (path == null || !fs.isFileSync(path))
+    if (path == null || !fs.isFileSync(path)) {
       return _createFromYaml(null);
+    }
     final String manifest = fs.file(path).readAsStringSync();
     return createFromString(manifest);
   }
@@ -40,8 +42,9 @@ class FlutterManifest {
 
   static FlutterManifest _createFromYaml(dynamic yamlDocument) {
     final FlutterManifest pubspec = FlutterManifest._();
-    if (yamlDocument != null && !_validate(yamlDocument))
+    if (yamlDocument != null && !_validate(yamlDocument)) {
       return null;
+    }
 
     final Map<dynamic, dynamic> yamlMap = yamlDocument;
     if (yamlMap != null) {
@@ -98,10 +101,10 @@ class FlutterManifest {
   /// The build version name from the `pubspec.yaml` file.
   /// Can be null if version isn't set or has a wrong format.
   String get buildName {
-    if (appVersion != null && appVersion.contains('+'))
+    if (appVersion != null && appVersion.contains('+')) {
       return appVersion.split('+')?.elementAt(0);
-    else
-      return appVersion;
+    }
+    return appVersion;
   }
 
   /// The build version number from the `pubspec.yaml` file.
@@ -149,18 +152,26 @@ class FlutterManifest {
   /// module or plugin descriptor. Returns null, if there is no
   /// such declaration.
   String get androidPackage {
-    if (isModule)
+    if (isModule) {
       return _flutterDescriptor['module']['androidPackage'];
-    if (isPlugin)
-      return _flutterDescriptor['plugin']['androidPackage'];
+    }
+    if (isPlugin) {
+      final YamlMap plugin = _flutterDescriptor['plugin'];
+      if (plugin.containsKey('platforms')) {
+        return plugin['platforms']['android']['package'];
+      } else {
+        return plugin['androidPackage'];
+      }
+    }
     return null;
   }
 
   /// Returns the iOS bundle identifier declared by this manifest in its
   /// module descriptor. Returns null if there is no such declaration.
   String get iosBundleIdentifier {
-    if (isModule)
+    if (isModule) {
       return _flutterDescriptor['module']['iosBundleIdentifier'];
+    }
     return null;
   }
 
@@ -175,16 +186,27 @@ class FlutterManifest {
         : fontList.map<Map<String, dynamic>>(castStringKeyedMap).toList();
   }
 
-  List<Uri> get assets {
+  List<Uri> get assets => _assets ??= _computeAssets();
+  List<Uri> _assets;
+  List<Uri> _computeAssets() {
     final List<dynamic> assets = _flutterDescriptor['assets'];
     if (assets == null) {
       return const <Uri>[];
     }
-    return assets
-        .cast<String>()
-        .map<String>(Uri.encodeFull)
-        ?.map<Uri>(Uri.parse)
-        ?.toList();
+    final List<Uri> results = <Uri>[];
+    for (Object asset in assets) {
+      if (asset is! String || asset == null || asset == '') {
+        printError('Asset manifest contains a null or empty uri.');
+        continue;
+      }
+      final String stringAsset = asset;
+      try {
+        results.add(Uri.parse(Uri.encodeFull(stringAsset)));
+      } on FormatException {
+        printError('Asset manifest contains invalid uri: $asset.');
+      }
+    }
+    return results;
   }
 
   List<Font> _fonts;
@@ -195,8 +217,9 @@ class FlutterManifest {
   }
 
   List<Font> _extractFonts() {
-    if (!_flutterDescriptor.containsKey('fonts'))
+    if (!_flutterDescriptor.containsKey('fonts')) {
       return <Font>[];
+    }
 
     final List<Font> fonts = <Font>[];
     for (Map<String, dynamic> fontFamily in _rawFontsDescriptor) {
@@ -225,8 +248,9 @@ class FlutterManifest {
           style: fontFile['style'],
         ));
       }
-      if (fontAssets.isNotEmpty)
+      if (fontAssets.isNotEmpty) {
         fonts.add(Font(fontFamily['family'], fontAssets));
+      }
     }
     return fonts;
   }
@@ -262,11 +286,13 @@ class FontAsset {
 
   Map<String, dynamic> get descriptor {
     final Map<String, dynamic> descriptor = <String, dynamic>{};
-    if (weight != null)
+    if (weight != null) {
       descriptor['weight'] = weight;
+    }
 
-    if (style != null)
+    if (style != null) {
       descriptor['style'] = style;
+    }
 
     descriptor['asset'] = assetUri.path;
     return descriptor;
@@ -355,8 +381,9 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
       case 'fonts':
         if (kvp.value is! YamlList || kvp.value[0] is! YamlMap) {
           errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
+        } else {
+          _validateFonts(kvp.value, errors);
         }
-        _validateFonts(kvp.value, errors);
         break;
       case 'module':
         if (kvp.value is! YamlMap) {
@@ -374,21 +401,12 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         break;
       case 'plugin':
-        if (kvp.value is! YamlMap) {
+        if (kvp.value is! YamlMap || kvp.value == null) {
           errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
+          break;
         }
-        if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
-          errors.add('The "androidPackage" must either be null or a string.');
-        }
-        if (kvp.value['iosPrefix'] != null && kvp.value['iosPrefix'] is! String) {
-          errors.add('The "iosPrefix" must either be null or a string.');
-        }
-        if (kvp.value['macosPrefix'] != null && kvp.value['macosPrefix'] is! String) {
-          errors.add('The "macosPrefix" must either be null or a string.');
-        }
-        if (kvp.value['pluginClass'] != null && kvp.value['pluginClass'] is! String) {
-          errors.add('The "pluginClass" must either be null or a string..');
-        }
+        final List<String> pluginErrors = Plugin.validatePluginYaml(kvp.value);
+        errors.addAll(pluginErrors);
         break;
       default:
         errors.add('Unexpected child "${kvp.key}" found under "flutter".');
@@ -404,7 +422,12 @@ void _validateFonts(YamlList fonts, List<String> errors) {
   const Set<int> fontWeights = <int>{
     100, 200, 300, 400, 500, 600, 700, 800, 900,
   };
-  for (final YamlMap fontMap in fonts) {
+  for (final dynamic fontListEntry in fonts) {
+    if (fontListEntry is! YamlMap) {
+      errors.add('Unexpected child "$fontListEntry" found under "fonts". Expected a map.');
+      continue;
+    }
+    final YamlMap fontMap = fontListEntry;
     for (dynamic key in fontMap.keys.where((dynamic key) => key != 'family' && key != 'fonts')) {
       errors.add('Unexpected child "$key" found under "fonts".');
     }
@@ -417,8 +440,13 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       errors.add('Expected "fonts" to either be null or a list.');
       continue;
     }
-    for (final YamlMap fontListItem in fontMap['fonts']) {
-      for (final MapEntry<dynamic, dynamic> kvp in fontListItem.entries) {
+    for (final dynamic fontListItem in fontMap['fonts']) {
+      if (fontListItem is! YamlMap) {
+        errors.add('Expected "fonts" to be a list of maps.');
+        continue;
+      }
+      final YamlMap fontMapList = fontListItem;
+      for (final MapEntry<dynamic, dynamic> kvp in fontMapList.entries) {
         if (kvp.key is! String) {
           errors.add('Expected "${kvp.key}" under "fonts" to be a string.');
         }

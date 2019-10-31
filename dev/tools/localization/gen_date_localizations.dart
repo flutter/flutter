@@ -36,6 +36,12 @@ import 'localizations_utils.dart';
 
 const String _kCommandName = 'gen_date_localizations.dart';
 
+// Used to let _jsonToMap know what locale it's date symbols converting for.
+// Date symbols for the Kannada locale ('kn') are handled specially because
+// some of the strings contain characters that can crash Emacs on Linux.
+// See packages/flutter_localizations/lib/src/l10n/README for more information.
+String currentLocale;
+
 Future<void> main(List<String> rawArgs) async {
   checkCwdIsRepoRoot(_kCommandName);
 
@@ -87,9 +93,11 @@ Future<void> main(List<String> rawArgs) async {
 /// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, dynamic> dateSymbols = <String, dynamic> {');
   symbolFiles.forEach((String locale, File data) {
+    currentLocale = locale;
     if (_supportedLocales().contains(locale))
       buffer.writeln(_jsonToMapEntry(locale, json.decode(data.readAsStringSync())));
   });
+  currentLocale = null;
   buffer.writeln('};');
 
   // Code that uses datePatterns expects it to contain values of type
@@ -132,7 +140,9 @@ String _jsonToMap(dynamic json) {
     return '$json';
 
   if (json is String) {
-    if (json.contains("'"))
+    if (currentLocale == 'kn')
+      return generateEncodedString(json);
+    else if (json.contains("'"))
       return 'r"""$json"""';
     else
       return "r'''$json'''";

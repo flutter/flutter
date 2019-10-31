@@ -11,12 +11,13 @@ import 'package:flutter/rendering.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'localizations.dart';
+import 'theme.dart';
 
 // Read off from the output on iOS 12. This color does not vary with the
 // application's theme color.
-const Color _kHandlesColor = Color(0xFF136FE0);
 const double _kSelectionHandleOverlap = 1.5;
-const double _kSelectionHandleRadius = 5.5;
+// Extracted from https://developer.apple.com/design/resources/.
+const double _kSelectionHandleRadius = 6;
 
 // Minimal padding from all edges of the selection toolbar to all edges of the
 // screen.
@@ -31,13 +32,16 @@ const double _kToolbarContentDistance = 8.0;
 // Values derived from https://developer.apple.com/design/resources/.
 // 92% Opacity ~= 0xEB
 
+// Values extracted from https://developer.apple.com/design/resources/.
 // The height of the toolbar, including the arrow.
 const double _kToolbarHeight = 43.0;
+const Size _kToolbarArrowSize = Size(14.0, 7.0);
+const Radius _kToolbarBorderRadius = Radius.circular(8);
+// Colors extracted from https://developer.apple.com/design/resources/.
+// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
 const Color _kToolbarBackgroundColor = Color(0xEB202020);
 const Color _kToolbarDividerColor = Color(0xFF808080);
-const Size _kToolbarArrowSize = Size(14.0, 7.0);
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
-const Radius _kToolbarBorderRadius = Radius.circular(8);
+
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
@@ -46,6 +50,9 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   fontWeight: FontWeight.w400,
   color: CupertinoColors.white,
 );
+
+// Eyeballed value.
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
 
 /// An iOS-style toolbar that appears in response to text selection.
 ///
@@ -164,15 +171,13 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     child.layout(heightConstraint.enforce(enforcedConstraint), parentUsesSize: true,);
     final _ToolbarParentData childParentData = child.parentData;
 
-    final Offset localTopCenter = globalToLocal(Offset(_arrowTipX, _barTopY));
-
     // The local x-coordinate of the center of the toolbar.
     final double lowerBound = child.size.width/2 + _kToolbarScreenPadding;
     final double upperBound = size.width - child.size.width/2 - _kToolbarScreenPadding;
-    final double adjustedCenterX = localTopCenter.dx.clamp(lowerBound, upperBound);
+    final double adjustedCenterX = _arrowTipX.clamp(lowerBound, upperBound);
 
-    childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, localTopCenter.dy);
-    childParentData.arrowXOffsetFromCenter = localTopCenter.dx - adjustedCenterX;
+    childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, _barTopY);
+    childParentData.arrowXOffsetFromCenter = _arrowTipX - adjustedCenterX;
   }
 
   // The path is described in the toolbar's coordinate system.
@@ -225,9 +230,9 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
-        if (child == null) {
-          return true;
-        }
+      if (child == null) {
+        return true;
+      }
 
       _debugPaint ??= Paint()
       ..shader = ui.Gradient.linear(
@@ -249,12 +254,14 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
 /// Draws a single text selection handle with a bar and a ball.
 class _TextSelectionHandlePainter extends CustomPainter {
-  const _TextSelectionHandlePainter();
+  const _TextSelectionHandlePainter(this.color);
+
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-        ..color = _kHandlesColor
+        ..color = color
         ..strokeWidth = 2.0;
     canvas.drawCircle(
       const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
@@ -276,7 +283,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => false;
+  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
 }
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
@@ -305,11 +312,12 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough space
     // at the bottom in this case.
-    final bool isArrowPointingDown =
-      mediaQuery.padding.top
+    final double toolbarHeightNeeded = mediaQuery.padding.top
       + _kToolbarScreenPadding
       + _kToolbarHeight
-      + _kToolbarContentDistance <= globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
+      + _kToolbarContentDistance;
+    final double availableHeight = globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
+    final bool isArrowPointingDown = toolbarHeightNeeded <= availableHeight;
 
     final double arrowTipX = (position.dx + globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
@@ -334,7 +342,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     void addToolbarButtonIfNeeded(
       String text,
       bool Function(TextSelectionDelegate) predicate,
-      void Function(TextSelectionDelegate) onPressed
+      void Function(TextSelectionDelegate) onPressed,
     ) {
       if (!predicate(delegate)) {
         return;
@@ -380,8 +388,8 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
     final Widget handle = SizedBox.fromSize(
       size: desiredSize,
-      child: const CustomPaint(
-        painter: _TextSelectionHandlePainter(),
+      child: CustomPaint(
+        painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
       ),
     );
 
@@ -402,7 +410,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
         );
       // iOS doesn't draw anything for collapsed selections.
       case TextSelectionHandleType.collapsed:
-        return Container();
+        return const SizedBox();
     }
     assert(type != null);
     return null;

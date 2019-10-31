@@ -46,12 +46,13 @@ void main() {
     WidgetsBinding.instance.addObserver(observer);
     final ByteData message = const JSONMessageCodec().encodeMessage(
       <String, dynamic>{'type': 'memoryPressure'});
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
     expect(observer.sawMemoryPressure, true);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('handleLifecycleStateChanged callback', (WidgetTester tester) async {
+    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     final AppLifecycleStateObserver observer = AppLifecycleStateObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -79,13 +80,14 @@ void main() {
     const String testRouteName = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRoute', testRouteName));
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, testRouteName);
 
     WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
+    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     ByteData message;
     expect(tester.binding.hasScheduledFrame, isFalse);
 
@@ -135,5 +137,37 @@ void main() {
     tester.binding.scheduleWarmUpFrame(); // this actually tests flutter_test's implementation
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(frameCount, 1);
+  });
+
+  testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
+    FlutterError error;
+    try {
+      tester.binding.scheduleFrameCallback(null, rescheduling: true);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.diagnostics.length, 3);
+    expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics.last.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'If this is the initial registration of the callback, or if the\n'
+        'callback is asynchronous, then do not use the "rescheduling"\n'
+        'argument.\n'
+      ),
+    );
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   scheduleFrameCallback called with rescheduling true, but no\n'
+      '   callback is in scope.\n'
+      '   The "rescheduling" argument should only be set to true if the\n'
+      '   callback is being reregistered from within the callback itself,\n'
+      '   and only then if the callback itself is entirely synchronous.\n'
+      '   If this is the initial registration of the callback, or if the\n'
+      '   callback is asynchronous, then do not use the "rescheduling"\n'
+      '   argument.\n'
+    );
   });
 }

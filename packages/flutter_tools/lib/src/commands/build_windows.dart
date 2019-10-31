@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import '../windows/build_windows.dart';
@@ -23,7 +24,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     );
     argParser.addFlag('profile',
       negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.'
+      help: 'Build a version of your app specialized for performance profiling.',
     );
     argParser.addFlag('release',
       negatable: false,
@@ -35,10 +36,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   final String name = 'windows';
 
   @override
-  bool isExperimental = true;
-
-  @override
-  bool hidden = true;
+  bool get hidden => !featureFlags.isWindowsEnabled || !platform.isWindows;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -47,13 +45,16 @@ class BuildWindowsCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the desktop Windows target (Experimental).';
+  String get description => 'build the desktop Windows target.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final FlutterProject flutterProject = FlutterProject.current();
     final BuildInfo buildInfo = getBuildInfo();
+    if (!featureFlags.isWindowsEnabled) {
+      throwToolExit('"build windows" is not currently supported.');
+    }
     if (!platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }

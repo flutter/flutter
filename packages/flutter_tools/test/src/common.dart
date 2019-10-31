@@ -5,11 +5,6 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/desktop.dart';
-import 'package:flutter_tools/src/web/workflow.dart';
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
-
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -17,21 +12,10 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
-
-/// Disable both web and desktop to make testing easier. For example, prevent
-/// them from showing up in the devices list if the host happens to be setup
-/// properly.
-set debugDisableWebAndDesktop(bool value) {
-  if (value) {
-    debugDisableDesktop = true;
-    debugDisableWeb = true;
-  } else {
-    debugDisableDesktop = false;
-    debugDisableWeb = false;
-  }
-}
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
@@ -54,10 +38,11 @@ void tryToDelete(Directory directory) {
 /// environment variable is set, it will be returned. Otherwise, this will
 /// deduce the path from `platform.script`.
 String getFlutterRoot() {
-  if (platform.environment.containsKey('FLUTTER_ROOT'))
+  if (platform.environment.containsKey('FLUTTER_ROOT')) {
     return platform.environment['FLUTTER_ROOT'];
+  }
 
-  Error invalidScript() => StateError('Invalid script: ${platform.script}');
+  Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
   switch (platform.script.scheme) {
@@ -67,8 +52,9 @@ String getFlutterRoot() {
     case 'data':
       final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
       final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
-      if (match == null)
+      if (match == null) {
         throw invalidScript();
+      }
       scriptUri = Uri.parse(match.group(1));
       break;
     default:
@@ -77,16 +63,18 @@ String getFlutterRoot() {
 
   final List<String> parts = fs.path.split(fs.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
-  if (toolsIndex == -1)
+  if (toolsIndex == -1) {
     throw invalidScript();
+  }
   final String toolsPath = fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
   return fs.path.normalize(fs.path.join(toolsPath, '..', '..'));
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
   final FlutterCommandRunner runner = FlutterCommandRunner();
-  if (command != null)
+  if (command != null) {
     runner.addCommand(command);
+  }
   return runner;
 }
 
@@ -103,10 +91,12 @@ void updateFileModificationTime(
 /// Matcher for functions that throw [ToolExit].
 Matcher throwsToolExit({ int exitCode, Pattern message }) {
   Matcher matcher = isToolExit;
-  if (exitCode != null)
+  if (exitCode != null) {
     matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
-  if (message != null)
+  }
+  if (message != null) {
     matcher = allOf(matcher, (ToolExit e) => e.message.contains(message));
+  }
   return throwsA(matcher);
 }
 
@@ -132,12 +122,18 @@ Future<String> createProject(Directory temp, { List<String> arguments }) async {
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
+  // Created `.packages` since it's not created when the flag `--no-pub` is passed.
+  fs.file(fs.path.join(projectPath, '.packages')).createSync();
   return projectPath;
 }
 
-/// Test case timeout for tests involving remote calls to `pub get` or similar.
-const Timeout allowForRemotePubInvocation = Timeout.factor(10.0);
-
-/// Test case timeout for tests involving creating a Flutter project with
-/// `--no-pub`. Use [allowForRemotePubInvocation] when creation involves `pub`.
-const Timeout allowForCreateFlutterProject = Timeout.factor(3.0);
+Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+  try {
+    await future;
+    fail('ToolExit expected, but nothing thrown');
+  } on ToolExit catch(e) {
+    expect(e.message, messageMatcher);
+  } catch(e, trace) {
+    fail('ToolExit expected, got $e\n$trace');
+  }
+}

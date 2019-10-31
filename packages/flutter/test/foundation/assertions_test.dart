@@ -56,7 +56,7 @@ void main() {
         'MESSAGE\n'
         '\n'
         'INFO\n'
-        '═════════════════════════════════════════════════════════════════\n'
+        '═════════════════════════════════════════════════════════════════\n',
 
     );
     expect(
@@ -87,7 +87,7 @@ void main() {
         'MESSAGE\n'
         '\n'
         'INFO\n'
-        '═════════════════════════════════════════════════════════════════\n'
+        '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       FlutterErrorDetails(
@@ -111,14 +111,28 @@ void main() {
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
       'The following message was thrown:\n'
       'MESSAGE\n'
-      '═════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       const FlutterErrorDetails().toString(),
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
       'The following Null object was thrown:\n'
       '  null\n'
-      '═════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
+    );
+  });
+
+  test('FlutterErrorDetails.toStringShort', () {
+    expect(
+        FlutterErrorDetails(
+          exception: 'MESSAGE',
+          library: 'library',
+          context: ErrorDescription('CONTEXTING'),
+          informationCollector: () sync* {
+            yield ErrorDescription('INFO');
+          },
+        ).toStringShort(),
+        'Exception caught by library',
     );
   });
 
@@ -140,7 +154,7 @@ void main() {
       'FlutterError\n'
       '   My Error Summary.\n'
       '   My first description.\n'
-      '   My second description.\n'
+      '   My second description.\n',
     );
 
     error = FlutterError(
@@ -166,7 +180,7 @@ void main() {
       '   My first description.\n'
       '   My second description.\n'
       '\n'
-      '\n'
+      '\n',
     );
 
     error = FlutterError(
@@ -191,7 +205,7 @@ void main() {
       '   My Error Summary.\n'
       '   My first description.\n'
       '\n'
-      '   My second description.\n'
+      '   My second description.\n',
     );
     error = FlutterError('My Error Summary.');
     expect(error.diagnostics.length, 1);
@@ -201,7 +215,7 @@ void main() {
     expect(
       error.toStringDeep(),
       'FlutterError\n'
-      '   My Error Summary.\n'
+      '   My Error Summary.\n',
     );
   });
 
@@ -312,6 +326,30 @@ void main() {
         '  https://github.com/flutter/flutter/issues/new?template=BUG.md\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
+    }
+  });
+
+  test('User-thrown exceptions have ErrorSummary properties', () {
+    {
+      DiagnosticsNode node;
+      try {
+        throw 'User thrown string';
+      } catch (e) {
+        node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
+      }
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
+      expect(summary.value, equals(<String>['User thrown string']));
+    }
+
+    {
+      DiagnosticsNode node;
+      try {
+        throw ArgumentError.notNull('myArgument');
+      } catch (e) {
+        node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
+      }
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
+      expect(summary.value, equals(<String>['Invalid argument(s) (myArgument): Must not be null']));
     }
   });
 }

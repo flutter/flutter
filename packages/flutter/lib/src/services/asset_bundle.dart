@@ -116,10 +116,10 @@ class NetworkAssetBundle extends AssetBundle {
     final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
-      throw FlutterError(
-        'Unable to load asset: $key\n'
-        'HTTP status code: ${response.statusCode}'
-      );
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Unable to load asset: $key'),
+        IntProperty('HTTP status code', response.statusCode),
+      ]);
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
     return bytes.buffer.asByteData();
   }
@@ -216,7 +216,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData asset =
-        await defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
+        await defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData()); // ignore: deprecated_member_use_from_same_package
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;

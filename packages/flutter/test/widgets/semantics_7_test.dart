@@ -67,7 +67,7 @@ void main() {
           ),
           // IDs 5 and 6 are used up by the nodes that get merged in
         ],
-      )
+      ),
     ));
 
     label = '2';
@@ -123,7 +123,7 @@ void main() {
           ),
           // IDs 5 and 6 are used up by the nodes that get merged in
         ],
-      )
+      ),
     ));
 
     semantics.dispose();

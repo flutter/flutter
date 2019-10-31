@@ -105,7 +105,6 @@ class FlutterTesterDevice extends Device {
     @required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
@@ -116,8 +115,9 @@ class FlutterTesterDevice extends Device {
     }
 
     final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-    if (!fs.isFileSync(shellPath))
+    if (!fs.isFileSync(shellPath)) {
       throwToolExit('Cannot find Flutter shell at $shellPath');
+    }
 
     final List<String> command = <String>[
       shellPath,
@@ -127,12 +127,15 @@ class FlutterTesterDevice extends Device {
       '--packages=${PackageMap.globalPackagesPath}',
     ];
     if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.startPaused)
+      if (debuggingOptions.startPaused) {
         command.add('--start-paused');
-      if (debuggingOptions.disableServiceAuthCodes)
+      }
+      if (debuggingOptions.disableServiceAuthCodes) {
         command.add('--disable-service-auth-codes');
-      if (debuggingOptions.hasObservatoryPort)
+      }
+      if (debuggingOptions.hasObservatoryPort) {
         command.add('--observatory-port=${debuggingOptions.observatoryPort}');
+      }
     }
 
     // Build assets and perform initial compilation.
@@ -142,11 +145,13 @@ class FlutterTesterDevice extends Device {
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
     await BundleBuilder().build(
+      buildMode: buildInfo.mode,
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
+      platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
     );
     command.add('--flutter-assets-dir=$assetDirPath');
 
@@ -176,8 +181,9 @@ class FlutterTesterDevice extends Device {
           _logReader.addLine(line);
         });
 
-      if (!debuggingOptions.debuggingEnabled)
+      if (!debuggingOptions.debuggingEnabled) {
         return LaunchResult.succeeded();
+      }
 
       final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(),
@@ -249,8 +255,9 @@ class _FlutterTesterDeviceLogReader extends DeviceLogReader {
 class _NoopPortForwarder extends DevicePortForwarder {
   @override
   Future<int> forward(int devicePort, { int hostPort }) {
-    if (hostPort != null && hostPort != devicePort)
+    if (hostPort != null && hostPort != devicePort) {
       throw 'Forwarding to a different port is not supported by flutter tester';
+    }
     return Future<int>.value(devicePort);
   }
 

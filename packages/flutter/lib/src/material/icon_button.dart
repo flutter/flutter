@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -15,8 +16,8 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
-// See: <https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size>
-const double _kMinButtonSize = 48.0;
+// See: <https://material.io/design/usability/accessibility.html#layout-typography>.
+const double _kMinButtonSize = kMinInteractiveDimension;
 
 /// A material design icon button.
 ///
@@ -31,16 +32,18 @@ const double _kMinButtonSize = 48.0;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// The hit region of an icon button will, if possible, be at least 48.0 pixels
-/// in size, regardless of the actual [iconSize], to satisfy the [touch target
-/// size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
+/// The hit region of an icon button will, if possible, be at least
+/// kMinInteractiveDimension pixels in size, regardless of the actual
+/// [iconSize], to satisfy the [touch target size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button.png)
 ///
 /// ```dart preamble
 /// double _volume = 0.0;
@@ -48,24 +51,20 @@ const double _kMinButtonSize = 48.0;
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: Column(
-///         mainAxisSize: MainAxisSize.min,
-///         children: <Widget>[
-///           IconButton(
-///             icon: Icon(Icons.volume_up),
-///             tooltip: 'Increase volume by 10',
-///             onPressed: () {
-///               setState(() {
-///                 _volume += 10;
-///               });
-///             },
-///           ),
-///           Text('Volume : $_volume')
-///         ],
+///   return Column(
+///     mainAxisSize: MainAxisSize.min,
+///     children: <Widget>[
+///       IconButton(
+///         icon: Icon(Icons.volume_up),
+///         tooltip: 'Increase volume by 10',
+///         onPressed: () {
+///           setState(() {
+///             _volume += 10;
+///           });
+///         },
 ///       ),
-///     ),
+///       Text('Volume : $_volume')
+///     ],
 ///   );
 /// }
 /// ```
@@ -90,21 +89,22 @@ const double _kMinButtonSize = 48.0;
 /// is a light shade of blue, it's a filled circle, and it's as big as the
 /// button is.
 ///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button_background.png)
+///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: Container(
+///   return Material(
+///     color: Colors.white,
+///     child: Center(
 ///       child: Ink(
-///         decoration: ShapeDecoration(
+///         decoration: const ShapeDecoration(
 ///           color: Colors.lightBlue,
 ///           shape: CircleBorder(),
 ///         ),
 ///         child: IconButton(
 ///           icon: Icon(Icons.android),
 ///           color: Colors.white,
-///           onPressed: () {
-///             print("filled background");
-///           },
+///           onPressed: () {},
 ///         ),
 ///       ),
 ///     ),
@@ -130,8 +130,8 @@ class IconButton extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   ///
-  /// The [iconSize], [padding], and [alignment] arguments must not be null (though
-  /// they each have default values).
+  /// The [iconSize], [padding], [autofocus], and [alignment] arguments must not
+  /// be null (though they each have default values).
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
@@ -149,10 +149,12 @@ class IconButton extends StatelessWidget {
     this.disabledColor,
     @required this.onPressed,
     this.focusNode,
+    this.autofocus = false,
     this.tooltip,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
+       assert(autofocus != null),
        assert(icon != null),
        super(key: key);
 
@@ -255,13 +257,11 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// An optional focus node to use for requesting focus when pressed.
-  ///
-  /// If not supplied, the button will create and host its own [FocusNode].
-  ///
-  /// If supplied, the given focusNode will be _hosted_ by this widget. See
-  /// [FocusNode] for more information on what that implies.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// Text that describes the action that will occur when the button is pressed.
   ///
@@ -309,20 +309,20 @@ class IconButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: onPressed != null,
-      child: Focus(
+      child: InkResponse(
         focusNode: focusNode,
-        child: InkResponse(
-          onTap: onPressed,
-          child: result,
-          focusColor: focusColor ?? Theme.of(context).focusColor,
-          hoverColor: hoverColor ?? Theme.of(context).hoverColor,
-          highlightColor: highlightColor ?? Theme.of(context).highlightColor,
-          splashColor: splashColor ?? Theme.of(context).splashColor,
-          radius: math.max(
-            Material.defaultSplashRadius,
-            (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
-            // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
-          ),
+        autofocus: autofocus,
+        canRequestFocus: onPressed != null,
+        onTap: onPressed,
+        child: result,
+        focusColor: focusColor ?? Theme.of(context).focusColor,
+        hoverColor: hoverColor ?? Theme.of(context).hoverColor,
+        highlightColor: highlightColor ?? Theme.of(context).highlightColor,
+        splashColor: splashColor ?? Theme.of(context).splashColor,
+        radius: math.max(
+          Material.defaultSplashRadius,
+          (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+          // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
       ),
     );

@@ -6,11 +6,10 @@ import 'package:flutter/material.dart';
 
 import 'about.dart';
 import 'scales.dart';
-import 'themes.dart';
 
 class GalleryOptions {
   GalleryOptions({
-    this.theme,
+    this.themeMode,
     this.textScaleFactor,
     this.textDirection = TextDirection.ltr,
     this.timeDilation = 1.0,
@@ -20,7 +19,7 @@ class GalleryOptions {
     this.showPerformanceOverlay = false,
   });
 
-  final GalleryTheme theme;
+  final ThemeMode themeMode;
   final GalleryTextScaleValue textScaleFactor;
   final TextDirection textDirection;
   final double timeDilation;
@@ -30,7 +29,7 @@ class GalleryOptions {
   final bool showOffscreenLayersCheckerboard;
 
   GalleryOptions copyWith({
-    GalleryTheme theme,
+    ThemeMode themeMode,
     GalleryTextScaleValue textScaleFactor,
     TextDirection textDirection,
     double timeDilation,
@@ -40,7 +39,7 @@ class GalleryOptions {
     bool showOffscreenLayersCheckerboard,
   }) {
     return GalleryOptions(
-      theme: theme ?? this.theme,
+      themeMode: themeMode ?? this.themeMode,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       textDirection: textDirection ?? this.textDirection,
       timeDilation: timeDilation ?? this.timeDilation,
@@ -56,7 +55,7 @@ class GalleryOptions {
     if (runtimeType != other.runtimeType)
       return false;
     final GalleryOptions typedOther = other;
-    return theme == typedOther.theme
+    return themeMode == typedOther.themeMode
         && textScaleFactor == typedOther.textScaleFactor
         && textDirection == typedOther.textDirection
         && platform == typedOther.platform
@@ -67,7 +66,7 @@ class GalleryOptions {
 
   @override
   int get hashCode => hashValues(
-    theme,
+    themeMode,
     textScaleFactor,
     textDirection,
     timeDilation,
@@ -79,7 +78,7 @@ class GalleryOptions {
 
   @override
   String toString() {
-    return '$runtimeType($theme)';
+    return '$runtimeType($themeMode)';
   }
 }
 
@@ -202,25 +201,55 @@ class _Heading extends StatelessWidget {
   }
 }
 
-class _ThemeItem extends StatelessWidget {
-  const _ThemeItem(this.options, this.onOptionsChanged);
+class _ThemeModeItem extends StatelessWidget {
+  const _ThemeModeItem(this.options, this.onOptionsChanged);
 
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
+  static final Map<ThemeMode, String> modeLabels = <ThemeMode, String>{
+    ThemeMode.system: 'System Default',
+    ThemeMode.light: 'Light',
+    ThemeMode.dark: 'Dark',
+  };
+
   @override
   Widget build(BuildContext context) {
-    return _BooleanItem(
-      'Dark Theme',
-      options.theme == kDarkGalleryTheme,
-      (bool value) {
-        onOptionsChanged(
-          options.copyWith(
-            theme: value ? kDarkGalleryTheme : kLightGalleryTheme,
+    return _OptionsItem(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text('Theme'),
+                Text(
+                  '${modeLabels[options.themeMode]}',
+                  style: Theme.of(context).primaryTextTheme.body1,
+                ),
+              ],
+            ),
           ),
-        );
-      },
-      switchKey: const Key('dark_theme'),
+          PopupMenuButton<ThemeMode>(
+            padding: const EdgeInsetsDirectional.only(end: 16.0),
+            icon: const Icon(Icons.arrow_drop_down),
+            initialValue: options.themeMode,
+            itemBuilder: (BuildContext context) {
+              return ThemeMode.values.map<PopupMenuItem<ThemeMode>>((ThemeMode mode) {
+                return PopupMenuItem<ThemeMode>(
+                  value: mode,
+                  child: Text(modeLabels[mode]),
+                );
+              }).toList();
+            },
+            onSelected: (ThemeMode mode) {
+              onOptionsChanged(
+                options.copyWith(themeMode: mode),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -396,13 +425,10 @@ class GalleryOptionsPage extends StatelessWidget {
         options.showPerformanceOverlay == null)
       return const <Widget>[];
 
-    final List<Widget> items = <Widget>[
+    return <Widget>[
       const Divider(),
       const _Heading('Diagnostics'),
-    ];
-
-    if (options.showOffscreenLayersCheckerboard != null) {
-      items.add(
+      if (options.showOffscreenLayersCheckerboard != null)
         _BooleanItem(
           'Highlight offscreen layers',
           options.showOffscreenLayersCheckerboard,
@@ -410,10 +436,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showOffscreenLayersCheckerboard: value));
           },
         ),
-      );
-    }
-    if (options.showRasterCacheImagesCheckerboard != null) {
-      items.add(
+      if (options.showRasterCacheImagesCheckerboard != null)
         _BooleanItem(
           'Highlight raster cache images',
           options.showRasterCacheImagesCheckerboard,
@@ -421,10 +444,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showRasterCacheImagesCheckerboard: value));
           },
         ),
-      );
-    }
-    if (options.showPerformanceOverlay != null) {
-      items.add(
+      if (options.showPerformanceOverlay != null)
         _BooleanItem(
           'Show performance overlay',
           options.showPerformanceOverlay,
@@ -432,10 +452,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showPerformanceOverlay: value));
           },
         ),
-      );
-    }
-
-    return items;
+    ];
   }
 
   @override
@@ -448,7 +465,7 @@ class GalleryOptionsPage extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 124.0),
         children: <Widget>[
           const _Heading('Display'),
-          _ThemeItem(options, onOptionsChanged),
+          _ThemeModeItem(options, onOptionsChanged),
           _TextScaleFactorItem(options, onOptionsChanged),
           _TextDirectionItem(options, onOptionsChanged),
           _TimeDilationItem(options, onOptionsChanged),

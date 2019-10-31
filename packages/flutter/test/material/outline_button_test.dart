@@ -67,6 +67,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -76,7 +77,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-    await gesture.removePointer();
   },
     semanticsEnabled: true,
     skip: isBrowser,
@@ -132,6 +132,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -141,7 +142,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-    await gesture.removePointer();
   },
     skip: isBrowser,
     semanticsEnabled: true,
@@ -201,6 +201,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(textColor(), hoverColor);
@@ -210,7 +211,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(textColor(), pressedColor);
-    await gesture.removePointer();
   });
 
   testWidgets('OutlineButton uses stateful color for icon color in different states', (WidgetTester tester) async {
@@ -267,6 +267,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(iconColor(), hoverColor);
@@ -276,7 +277,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(iconColor(), pressedColor);
-    await gesture.removePointer();
   });
 
   testWidgets('OutlineButton ignores disabled text color if text color is stateful', (WidgetTester tester) async {
@@ -370,6 +370,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(outlineButton, paints..path(color: hoverColor));
@@ -378,7 +379,6 @@ void main() {
     await gesture.down(center);
     await tester.pumpAndSettle();
     expect(outlineButton, paints..path(color: pressedColor));
-    await gesture.removePointer();
   });
 
   testWidgets('OutlineButton ignores highlightBorderColor if border color is stateful', (WidgetTester tester) async {
@@ -450,37 +450,48 @@ void main() {
     expect(find.byType(OutlineButton), paints..path(color: disabledColor));
   });
 
-  testWidgets('Outline button responds to tap when enabled', (WidgetTester tester) async {
-    int pressedCount = 0;
+  testWidgets('OutlineButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
 
-    Widget buildFrame(VoidCallback onPressed) {
+    bool wasPressed;
+    Finder outlineButton;
+
+    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: Theme(
-          data: ThemeData(),
-          child: Center(
-            child: OutlineButton(onPressed: onPressed),
-          ),
+        child: OutlineButton(
+          child: const Text('button'),
+          onPressed: onPressed,
+          onLongPress: onLongPress,
         ),
       );
     }
 
+    // onPressed not null, onLongPress null.
+    wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(() { pressedCount += 1; }),
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
     );
-    expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, true);
-    await tester.tap(find.byType(OutlineButton));
-    await tester.pumpAndSettle();
-    expect(pressedCount, 1);
-
-    await tester.pumpWidget(
-      buildFrame(null),
-    );
-    final Finder outlineButton = find.byType(OutlineButton);
-    expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
+    outlineButton = find.byType(OutlineButton);
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
     await tester.tap(outlineButton);
-    await tester.pumpAndSettle();
-    expect(pressedCount, 1);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress not null.
+    wasPressed = false;
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+    );
+    outlineButton = find.byType(OutlineButton);
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
+    await tester.longPress(outlineButton);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress null.
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: null),
+    );
+    outlineButton = find.byType(OutlineButton);
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
   });
 
   testWidgets('Outline button doesn\'t crash if disabled during a gesture', (WidgetTester tester) async {
@@ -666,9 +677,10 @@ void main() {
             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
-              SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
               SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocusable,
             ],
           ),
         ],
@@ -812,6 +824,37 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     _checkPhysicalLayer(buttonElement, fillColor.withAlpha(0x00));
+  });
+
+  testWidgets('OutlineButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+    bool didPressButton = false;
+    bool didLongPressButton = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          onPressed: () {
+            didPressButton = true;
+          },
+          onLongPress: () {
+            didLongPressButton = true;
+          },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final Finder outlineButton = find.byType(OutlineButton);
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
+
+    expect(didPressButton, isFalse);
+    await tester.tap(outlineButton);
+    expect(didPressButton, isTrue);
+
+    expect(didLongPressButton, isFalse);
+    await tester.longPress(outlineButton);
+    expect(didLongPressButton, isTrue);
   });
 }
 

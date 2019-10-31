@@ -15,6 +15,11 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.title = @"Dual Flutter Views";
+  self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
+                                              initWithTitle:@"Back"
+                                                      style:UIBarButtonItemStylePlain
+                                                     target:nil
+                                                     action:nil];
 
   UIStackView* stackView = [[UIStackView alloc] initWithFrame:self.view.frame];
   stackView.axis = UILayoutConstraintAxisVertical;

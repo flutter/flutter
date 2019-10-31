@@ -7,11 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
-const Color _kScrollbarColor = Color(0x99777777);
+const Color _kScrollbarColor = Color(0x59000000);
 
 // The `y` offset has to be larger than `ScrollDragController._bigThresholdBreakDistance`
 // to prevent [motionStartDistanceThreshold] from affecting the actual drag distance.
 const Offset _kGestureOffset = Offset(0, -25);
+const Radius _kScrollbarRadius = Radius.circular(1.5);
 
 void main() {
   testWidgets('Paints iOS spec', (WidgetTester tester) async {
@@ -41,13 +42,13 @@ void main() {
       color: _kScrollbarColor,
       rrect: RRect.fromRectAndRadius(
         const Rect.fromLTWH(
-          800.0 - 3 - 2.5, // Screen width - margin - thickness.
+          800.0 - 3 - 3, // Screen width - margin - thickness.
           3.0, // Initial position is the top margin.
-          2.5, // Thickness.
+          3, // Thickness.
           // Fraction in viewport * scrollbar height - top, bottom margin.
           600.0 / 4000.0 * (600.0 - 2 * 3),
         ),
-        const Radius.circular(1.25),
+        _kScrollbarRadius,
       ),
     ));
   });
@@ -85,14 +86,14 @@ void main() {
       color: _kScrollbarColor,
       rrect: RRect.fromRectAndRadius(
         const Rect.fromLTWH(
-          800.0 - 3 - 2.5, // Screen width - margin - thickness.
+          800.0 - 3 - 3, // Screen width - margin - thickness.
           44 + 20 + 3.0, // nav bar height + top margin
-          2.5, // Thickness.
+          3, // Thickness.
           // Fraction visible * (viewport size - padding - margin)
           // where Fraction visible = (viewport size - padding) / content size
           (600.0 - 34 - 44 - 20) / 4000.0 * (600.0 - 2 * 3 - 34 - 44 - 20),
         ),
-        const Radius.circular(1.25),
+        _kScrollbarRadius,
       ),
     ));
   });

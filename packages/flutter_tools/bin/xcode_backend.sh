@@ -132,16 +132,24 @@ BuildApp() {
     flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
   fi
 
+  local bitcode_flag=""
+  if [[ $ENABLE_BITCODE == "YES" ]]; then
+    bitcode_flag="--bitcode"
+  fi
+
   if [[ -e "${project_path}/.ios" ]]; then
     RunCommand rm -rf -- "${derived_dir}/engine"
     mkdir "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
-    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
+    # Make headers, plists, and modulemap files read-only to discourage editing.
+    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f \( -name '*.h' -o -name '*.modulemap' -o -name '*.plist' \) -exec chmod a-w "{}" \;
   else
     RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    RunCommand cp -- "${flutter_podspec}" "${derived_dir}"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
-    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+    # Make headers, plists, and modulemap files read-only to discourage editing.
+    RunCommand find "${derived_dir}/Flutter.framework" -type f \( -name '*.h' -o -name '*.modulemap' -o -name '*.plist' \) -exec chmod a-w "{}" \;
   fi
 
   RunCommand pushd "${project_path}" > /dev/null
@@ -174,6 +182,7 @@ BuildApp() {
       EchoError "========================================================================"
       exit -1
     fi
+
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
       build aot                                                             \
@@ -183,7 +192,8 @@ BuildApp() {
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
       ${flutter_engine_flag}                                                \
-      ${local_engine_flag}
+      ${local_engine_flag}                                                  \
+      ${bitcode_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
@@ -195,27 +205,29 @@ BuildApp() {
 
     RunCommand cp -r -- "${app_framework}" "${derived_dir}"
 
-    StreamOutput " ├─Generating dSYM file..."
-    # Xcode calls `symbols` during app store upload, which uses Spotlight to
-    # find dSYM files for embedded frameworks. When it finds the dSYM file for
-    # `App.framework` it throws an error, which aborts the app store upload.
-    # To avoid this, we place the dSYM files in a folder ending with ".noindex",
-    # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
-    RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
-    RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
-      exit -1
-    fi
-    StreamOutput "done"
+    if [[ "${build_mode}" == "release" ]]; then
+      StreamOutput " ├─Generating dSYM file..."
+      # Xcode calls `symbols` during app store upload, which uses Spotlight to
+      # find dSYM files for embedded frameworks. When it finds the dSYM file for
+      # `App.framework` it throws an error, which aborts the app store upload.
+      # To avoid this, we place the dSYM files in a folder ending with ".noindex",
+      # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
+      RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
+      RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
+      if [[ $? -ne 0 ]]; then
+        EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
+        exit -1
+      fi
+      StreamOutput "done"
 
-    StreamOutput " ├─Stripping debug symbols..."
-    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to strip ${derived_dir}/App.framework/App."
-      exit -1
+      StreamOutput " ├─Stripping debug symbols..."
+      RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
+      if [[ $? -ne 0 ]]; then
+        EchoError "Failed to strip ${derived_dir}/App.framework/App."
+        exit -1
+      fi
+      StreamOutput "done"
     fi
-    StreamOutput "done"
 
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
@@ -229,6 +241,7 @@ BuildApp() {
 
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
         ${arch_flags} \
+        -fembed-bitcode-marker \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
@@ -249,7 +262,7 @@ BuildApp() {
   fi
 
   StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                  \
+  RunCommand "${FLUTTER_ROOT}/bin/flutter"     \
     ${verbose_flag}                                                         \
     build bundle                                                            \
     --target-platform=ios                                                   \

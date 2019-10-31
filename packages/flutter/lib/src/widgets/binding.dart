@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -124,9 +124,12 @@ abstract class WidgetsBindingObserver {
   /// }
   ///
   /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
+  ///   Size _lastSize;
+  ///
   ///   @override
   ///   void initState() {
   ///     super.initState();
+  ///     _lastSize = WidgetsBinding.instance.window.physicalSize;
   ///     WidgetsBinding.instance.addObserver(this);
   ///   }
   ///
@@ -135,8 +138,6 @@ abstract class WidgetsBindingObserver {
   ///     WidgetsBinding.instance.removeObserver(this);
   ///     super.dispose();
   ///   }
-  ///
-  ///   Size _lastSize;
   ///
   ///   @override
   ///   void didChangeMetrics() {
@@ -246,16 +247,19 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
+mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
+    // Initialization of [_buildOwner] has to be done after
+    // [super.initInstances] is called, as it requires [ServicesBinding] to
+    // properly setup the [defaultBinaryMessenger] instance.
+    _buildOwner = BuildOwner();
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
-    SystemChannels.system.setMessageHandler(_handleSystemMessage);
     FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
 
@@ -280,17 +284,19 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         },
       );
 
-      registerBoolServiceExtension(
-        name: 'showPerformanceOverlay',
-        getter: () =>
-        Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
-        setter: (bool value) {
-          if (WidgetsApp.showPerformanceOverlayOverride == value)
-            return Future<void>.value();
-          WidgetsApp.showPerformanceOverlayOverride = value;
-          return _forceRebuild();
-        },
-      );
+      if (!kIsWeb) {
+        registerBoolServiceExtension(
+          name: 'showPerformanceOverlay',
+          getter: () =>
+          Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
+          setter: (bool value) {
+            if (WidgetsApp.showPerformanceOverlayOverride == value)
+              return Future<void>.value();
+            WidgetsApp.showPerformanceOverlayOverride = value;
+            return _forceRebuild();
+          },
+        );
+      }
 
       registerServiceExtension(
         name: 'didSendFirstFrameEvent',
@@ -300,6 +306,20 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
             // Devtools, the Intellij plugin, and the flutter tool all depend
             // on it returning a string and not a boolean.
             'enabled': _needToReportFirstFrame ? 'false' : 'true',
+          };
+        },
+      );
+
+      // This returns 'true' when the first frame is rasterized, and the trace
+      // event 'Rasterized first useful frame' is sent out.
+      registerServiceExtension(
+        name: 'didSendFirstFrameRasterizedEvent',
+        callback: (_) async {
+          return <String, dynamic>{
+            // This is defined to return a STRING, not a boolean.
+            // Devtools, the Intellij plugin, and the flutter tool all depend
+            // on it returning a string and not a boolean.
+            'enabled': firstFrameRasterized ? 'true' : 'false',
           };
         },
       );
@@ -357,7 +377,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// The [BuildOwner] in charge of executing the build pipeline for the
   /// widget tree rooted at this binding.
   BuildOwner get buildOwner => _buildOwner;
-  final BuildOwner _buildOwner = BuildOwner();
+  // Initialization of [_buildOwner] has to be done within the [initInstances]
+  // method, as it requires [ServicesBinding] to properly setup the
+  // [defaultBinaryMessenger] instance.
+  BuildOwner _buildOwner;
 
   /// The object in charge of the focus tree.
   ///
@@ -535,7 +558,9 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       observer.didHaveMemoryPressure();
   }
 
-  Future<void> _handleSystemMessage(Object systemMessage) async {
+  @override
+  Future<void> handleSystemMessage(Object systemMessage) async {
+    await super.handleSystemMessage(systemMessage);
     final Map<String, dynamic> message = systemMessage;
     final String type = message['type'];
     switch (type) {
@@ -550,7 +575,30 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   int _deferFirstFrameReportCount = 0;
   bool get _reportFirstFrame => _deferFirstFrameReportCount == 0;
 
-  /// Whether the first frame has finished rendering.
+
+  final Completer<void> _firstFrameCompleter = Completer<void>();
+
+  /// Whether the Flutter engine has rasterized the first frame.
+  ///
+  /// {@macro flutter.frame_rasterized_vs_presented}
+  ///
+  /// See also:
+  ///
+  ///  * [waitUntilFirstFrameRasterized], the future when [firstFrameRasterized]
+  ///    becomes true.
+  bool get firstFrameRasterized => _firstFrameCompleter.isCompleted;
+
+  /// A future that completes when the Flutter engine has rasterized the first
+  /// frame.
+  ///
+  /// {@macro flutter.frame_rasterize_vs_presented}
+  ///
+  /// See also:
+  ///
+  ///  * [firstFrameRasterized], whether this future has completed or not.
+  Future<void> get waitUntilFirstFrameRasterized => _firstFrameCompleter.future;
+
+  /// Whether the first frame has finished building.
   ///
   /// Only useful in profile and debug builds; in release builds, this always
   /// return false. This can be deferred using [deferFirstFrameReport] and
@@ -559,6 +607,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   ///
   /// This value can also be obtained over the VM service protocol as
   /// `ext.flutter.didSendFirstFrameEvent`.
+  ///
+  /// See also:
+  ///
+  ///  * [firstFrameRasterized], whether the first frame has finished rendering.
   bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
 
   /// Tell the framework not to report the frame it is building as a "useful"
@@ -593,23 +645,27 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     // should not trigger a new frame.
     assert(() {
       if (debugBuildingDirtyElements) {
-        throw FlutterError(
-          'Build scheduled during frame.\n'
-          'While the widget tree was being built, laid out, and painted, '
-          'a new frame was scheduled to rebuild the widget tree. '
-          'This might be because setState() was called from a layout or '
-          'paint callback. '
-          'If a change is needed to the widget tree, it should be applied '
-          'as the tree is being built. Scheduling a change for the subsequent '
-          'frame instead results in an interface that lags behind by one frame. '
-          'If this was done to make your build dependent on a size measured at '
-          'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
-          'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
-          'is the desired effect, for example because this is an '
-          'animation, consider scheduling the frame in a post-frame callback '
-          'using SchedulerBinding.addPostFrameCallback or '
-          'using an AnimationController to trigger the animation.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Build scheduled during frame.'),
+          ErrorDescription(
+            'While the widget tree was being built, laid out, and painted, '
+            'a new frame was scheduled to rebuild the widget tree.'
+          ),
+          ErrorHint(
+            'This might be because setState() was called from a layout or '
+            'paint callback. '
+            'If a change is needed to the widget tree, it should be applied '
+            'as the tree is being built. Scheduling a change for the subsequent '
+            'frame instead results in an interface that lags behind by one frame. '
+            'If this was done to make your build dependent on a size measured at '
+            'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
+            'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
+            'is the desired effect, for example because this is an '
+            'animation, consider scheduling the frame in a post-frame callback '
+            'using SchedulerBinding.addPostFrameCallback or '
+            'using an AnimationController to trigger the animation.',
+          )
+        ]);
       }
       return true;
     }());
@@ -672,7 +728,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// sent to the GPU.
   ///
   /// 8. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.semanticsAnnotator]). This
+  /// their semantics updated (see [RenderObject.assembleSemanticsNode]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
@@ -696,6 +752,22 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       debugBuildingDirtyElements = true;
       return true;
     }());
+
+    if (_needToReportFirstFrame && _reportFirstFrame) {
+      assert(!_firstFrameCompleter.isCompleted);
+
+      TimingsCallback firstFrameCallback;
+      firstFrameCallback = (List<FrameTiming> timings) {
+        if (!kReleaseMode) {
+          developer.Timeline.instantSync('Rasterized first useful frame');
+          developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
+        }
+        SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
+        _firstFrameCompleter.complete();
+      };
+      SchedulerBinding.instance.addTimingsCallback(firstFrameCallback);
+    }
+
     try {
       if (renderViewElement != null)
         buildOwner.buildScope(renderViewElement);
@@ -709,11 +781,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     }
     if (!kReleaseMode) {
       if (_needToReportFirstFrame && _reportFirstFrame) {
-        developer.Timeline.instantSync('Widgets completed first useful frame');
-        developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
-        _needToReportFirstFrame = false;
+        developer.Timeline.instantSync('Widgets built first useful frame');
       }
     }
+    _needToReportFirstFrame = false;
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
@@ -722,6 +793,17 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// This is initialized the first time [runApp] is called.
   Element get renderViewElement => _renderViewElement;
   Element _renderViewElement;
+
+  /// Schedules a [Timer] for attaching the root widget.
+  ///
+  /// This is called by [runApp] to configure the widget tree. Consider using
+  /// [attachRootWidget] if you want to build the widget tree synchronously.
+  @protected
+  void scheduleAttachRootWidget(Widget rootWidget) {
+    Timer.run(() {
+      attachRootWidget(rootWidget);
+    });
+  }
 
   /// Takes a widget and attaches it to the [renderViewElement], creating it if
   /// necessary.
@@ -784,7 +866,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 ///    ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
   WidgetsFlutterBinding.ensureInitialized()
-    ..attachRootWidget(app)
+    ..scheduleAttachRootWidget(app)
     ..scheduleWarmUpFrame();
 }
 
@@ -792,7 +874,10 @@ void runApp(Widget app) {
 void debugDumpApp() {
   assert(WidgetsBinding.instance != null);
   String mode = 'RELEASE MODE';
-  assert(() { mode = 'CHECKED MODE'; return true; }());
+  assert(() {
+    mode = 'CHECKED MODE';
+    return true;
+  }());
   debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.renderViewElement != null) {
     debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());
@@ -856,6 +941,9 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
       owner.buildScope(element, () {
         element.mount(null, null);
       });
+      // This is most likely the first time the framework is ready to produce
+      // a frame. Ensure that we are asked for one.
+      SchedulerBinding.instance.ensureVisualUpdate();
     } else {
       element._newWidget = this;
       element.markNeedsBuild();

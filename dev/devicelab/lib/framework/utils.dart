@@ -13,8 +13,6 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'adb.dart';
-
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
@@ -126,6 +124,11 @@ void recursiveCopy(Directory source, Directory target) {
     else if (entity is File) {
       final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
+      // Preserve executable bit
+      final String modes = entity.statSync().modeString();
+      if (modes != null && modes.contains('x')) {
+        makeExecutable(dest);
+      }
     }
   }
 }
@@ -134,6 +137,27 @@ FileSystemEntity move(FileSystemEntity whatToMove,
     {Directory to, String name}) {
   return whatToMove
       .renameSync(path.join(to.path, name ?? path.basename(whatToMove.path)));
+}
+
+/// Equivalent of `chmod a+x file`
+void makeExecutable(File file) {
+  // Windows files do not have an executable bit
+  if (Platform.isWindows) {
+    return;
+  }
+  final ProcessResult result = _processManager.runSync(<String>[
+    'chmod',
+    'a+x',
+    file.path,
+  ]);
+
+  if (result.exitCode != 0) {
+    throw FileSystemException(
+      'Error making ${file.path} executable.\n'
+      '${result.stderr}',
+      file.path,
+    );
+  }
 }
 
 /// Equivalent of `mkdir directory`.
@@ -231,13 +255,14 @@ Future<Process> startProcess(
 }) async {
   assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
-  print('\nExecuting: $command');
+  final String finalWorkingDirectory = workingDirectory ?? cwd;
+  print('\nExecuting: $command in $finalWorkingDirectory');
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
     environment: environment,
-    workingDirectory: workingDirectory ?? cwd,
+    workingDirectory: finalWorkingDirectory,
   );
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
@@ -303,7 +328,7 @@ Future<int> exec(
 
 /// Executes a command and returns its standard output as a String.
 ///
-/// For logging purposes, the command's output is also printed out.
+/// For logging purposes, the command's output is also printed out by default.
 Future<String> eval(
   String executable,
   List<String> arguments, {
@@ -311,6 +336,8 @@ Future<String> eval(
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String workingDirectory,
   StringBuffer stderr, // if not null, the stderr will be written here
+  bool printStdout = true,
+  bool printStderr = true,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
@@ -321,14 +348,18 @@ Future<String> eval(
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stdout: $line');
+        if (printStdout) {
+          print('stdout: $line');
+        }
         output.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stderr: $line');
+        if (printStderr) {
+          print('stderr: $line');
+        }
         stderr?.writeln(line);
       }, onDone: () { stderrDone.complete(); });
 
@@ -341,17 +372,21 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-Future<int> flutter(String command, {
-  List<String> options = const <String>[],
-  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  Map<String, String> environment,
-}) {
-  final List<String> args = <String>[
+List<String> flutterCommandArgs(String command, List<String> options) {
+  return <String>[
     command,
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     ...options,
   ];
+}
+
+Future<int> flutter(String command, {
+  List<String> options = const <String>[],
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  Map<String, String> environment,
+}) {
+  final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment);
 }
@@ -363,12 +398,7 @@ Future<String> evalFlutter(String command, {
   Map<String, String> environment,
   StringBuffer stderr, // if not null, the stderr will be written here.
 }) {
-  final List<String> args = <String>[
-    command,
-    if (localEngine != null) ...<String>['--local-engine', localEngine],
-    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
-    ...options,
-  ];
+  final List<String> args = flutterCommandArgs(command, options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment, stderr: stderr);
 }
@@ -418,7 +448,7 @@ void cd(dynamic directory) {
     throw 'Cannot cd into directory that does not exist: $directory';
 }
 
-Directory get flutterDirectory => dir('../..').absolute;
+Directory get flutterDirectory => Directory.current.parent.parent;
 
 String requireEnvVar(String name) {
   final String value = Platform.environment[name];
@@ -587,35 +617,52 @@ Uri parseServiceUri(String line, {
   return matches.isEmpty ? null : Uri.parse(matches[0].group(0));
 }
 
-/// If FLUTTER_ENGINE environment variable is set then we need to pass
-/// correct --local-engine setting too.
-void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
-  if (Platform.environment['FLUTTER_ENGINE'] != null) {
-    if (flavor == null) {
-      // If engine flavor was not specified explicitly then scan options looking
-      // for flags that specify the engine flavor (--release, --profile or
-      // --debug). Default flavor to debug if no flags were found.
-      const Map<String, String> optionToFlavor = <String, String>{
-        '--release': 'release',
-        '--debug': 'debug',
-        '--profile': 'profile',
-      };
-
-      for (String option in options) {
-        flavor = optionToFlavor[option];
-        if (flavor != null) {
-          break;
-        }
-      }
-
-      flavor ??= 'debug';
-    }
-
-    const Map<DeviceOperatingSystem, String> osNames = <DeviceOperatingSystem, String>{
-      DeviceOperatingSystem.ios: 'ios',
-      DeviceOperatingSystem.android: 'android',
-    };
-
-    options.add('--local-engine=${osNames[deviceOperatingSystem]}_$flavor');
+/// Checks that the file exists, otherwise throws a [FileSystemException].
+void checkFileExists(String file) {
+  if (!exists(File(file))) {
+    throw FileSystemException('Expected file to exit.', file);
   }
+}
+
+void _checkExitCode(int code) {
+  if (code != 0) {
+    throw Exception(
+      'Unexpected exit code = $code!',
+    );
+  }
+}
+
+Future<void> _execAndCheck(String executable, List<String> args) async {
+  _checkExitCode(await exec(executable, args));
+}
+
+// Measure the CPU/GPU percentage for [duration] while a Flutter app is running
+// on an iOS device (e.g., right after a Flutter driver test has finished, which
+// doesn't close the Flutter app, and the Flutter app has an indefinite
+// animation). The return should have a format like the following json
+// ```
+// {"gpu_percentage":12.6,"cpu_percentage":18.15}
+// ```
+Future<Map<String, dynamic>> measureIosCpuGpu({
+    Duration duration = const Duration(seconds: 10),
+    String deviceId,
+}) async {
+  await _execAndCheck('pub', <String>[
+    'global',
+    'activate',
+    'gauge',
+    '0.1.4',
+  ]);
+
+  await _execAndCheck('pub', <String>[
+    'global',
+    'run',
+    'gauge',
+    'ioscpugpu',
+    'new',
+    if (deviceId != null) ...<String>['-w', deviceId],
+    '-l',
+    '${duration.inMilliseconds}',
+  ]);
+  return json.decode(file('$cwd/result.json').readAsStringSync());
 }

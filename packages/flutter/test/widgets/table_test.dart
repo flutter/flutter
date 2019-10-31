@@ -19,6 +19,24 @@ class TestStatefulWidgetState extends State<TestStatefulWidget> {
   Widget build(BuildContext context) => Container();
 }
 
+class TestChildWidget extends StatefulWidget {
+  const TestChildWidget({ Key key }) : super(key: key);
+
+  @override
+  TestChildState createState() => TestChildState();
+}
+
+class TestChildState extends State<TestChildWidget> {
+  bool toggle = true;
+
+  void toggleMe() {
+    setState(() { toggle = !toggle; });
+  }
+
+  @override
+  Widget build(BuildContext context) => toggle ? const SizedBox() : const Text('CRASHHH');
+}
+
 void main() {
   testWidgets('Table widget - empty', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -356,6 +374,36 @@ void main() {
       ),
     );
     // If the above bug is present this test will never terminate.
+  });
+
+  testWidgets('Calculating flex columns with small width deficit', (WidgetTester tester) async {
+    const SizedBox cell = SizedBox(width: 1, height: 1);
+    // If the error is present, pumpWidget() will fail due to an unsatisfied
+    // assertion during the layout phase.
+    await tester.pumpWidget(
+      ConstrainedBox(
+        constraints: BoxConstraints.tight(const Size(600, 800)),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            columnWidths: const <int, TableColumnWidth>{
+              0: FlexColumnWidth(1.0),
+              1: FlexColumnWidth(0.123),
+              2: FlexColumnWidth(0.123),
+              3: FlexColumnWidth(0.123),
+              4: FlexColumnWidth(0.123),
+              5: FlexColumnWidth(0.123),
+              6: FlexColumnWidth(0.123),
+            },
+            children: <TableRow>[
+              TableRow(children: List<Widget>.filled(7, cell)),
+              TableRow(children: List<Widget>.filled(7, cell)),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), null);
   });
 
   testWidgets('Table widget - repump test', (WidgetTester tester) async {
@@ -854,6 +902,33 @@ void main() {
       ),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/31473.
+  testWidgets(
+    'Does not crash if a child RenderObject is replaced by another RenderObject of a different type',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
+        ),
+      );
+      expect(find.text('CRASHHH'), findsNothing);
+
+      final TestChildState state = tester.state(find.byType(TestChildWidget));
+      state.toggleMe();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
+        ),
+      );
+
+      // Should not crash.
+      expect(find.text('CRASHHH'), findsOneWidget);
+    },
+  );
 
   // TODO(ianh): Test handling of TableCell object
 }

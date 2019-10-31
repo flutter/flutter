@@ -6,9 +6,10 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
-import '../ios/plist_utils.dart' as plist;
+import '../ios/plist_parser.dart';
 import '../project.dart';
 
 /// Tests whether a [FileSystemEntity] is an macOS bundle directory
@@ -65,8 +66,9 @@ abstract class MacOSApp extends ApplicationPackage {
       printError('Invalid prebuilt macOS app. Does not contain Info.plist.');
       return null;
     }
-    final String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
-    final String executableName = plist.getValueFromFile(plistPath, plist.kCFBundleExecutable);
+    final Map<String, dynamic> propertyValues = PlistParser.instance.parseFile(plistPath);
+    final String id = propertyValues[PlistParser.kCFBundleIdentifierKey];
+    final String executableName = propertyValues[PlistParser.kCFBundleExecutable];
     if (id == null) {
       printError('Invalid prebuilt macOS app. Info.plist does not contain bundle identifier');
       return null;
@@ -130,7 +132,7 @@ class BuildableMacOSApp extends MacOSApp {
         getMacOSBuildDirectory(),
         'Build',
         'Products',
-        buildMode == BuildMode.debug ? 'Debug' : 'Release',
+        toTitleCase(getNameForBuildMode(buildMode)),
         appBundleNameFile.readAsStringSync().trim());
   }
 
@@ -141,7 +143,7 @@ class BuildableMacOSApp extends MacOSApp {
       return null;
     }
     final _ExecutableAndId executableAndId = MacOSApp._executableFromBundle(fs.directory(directory));
-    return executableAndId.executable;
+    return executableAndId?.executable;
   }
 }
 

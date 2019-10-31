@@ -63,7 +63,7 @@ enum ButtonBarLayoutBehavior {
 ///    based on the ambient button theme.
 ///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
-class ButtonTheme extends InheritedWidget {
+class ButtonTheme extends InheritedTheme {
   /// Creates a button theme.
   ///
   /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
@@ -120,20 +120,51 @@ class ButtonTheme extends InheritedWidget {
   }) : assert(data != null),
        super(key: key, child: child);
 
+  // TODO(darrenaustin): remove after this deprecation warning has been on
+  // stable for a couple of releases.
+  // See https://github.com/flutter/flutter/issues/37333
+  //
   /// Creates a button theme that is appropriate for button bars, as used in
   /// dialog footers and in the headers of data tables.
   ///
-  /// This theme is denser, with a smaller [minWidth] and [padding], than the
-  /// default theme. Also, this theme uses [ButtonTextTheme.accent] rather than
-  /// [ButtonTextTheme.normal].
+  /// Deprecated. Please use [ButtonBarTheme] instead which offers more
+  /// flexibility to configure [ButtonBar] widgets.
   ///
-  /// For best effect, the label of the button at the edge of the container
-  /// should have text that ends up wider than 64.0 pixels. This ensures that
-  /// the alignment of the text matches the alignment of the edge of the
-  /// container.
+  /// To migrate instances of code that were just wrapping a [ButtonBar]:
   ///
-  /// For example, buttons at the bottom of [Dialog] or [Card] widgets use this
-  /// button theme.
+  /// ```dart
+  /// ButtonTheme.bar(
+  ///   child: ButtonBar(...)
+  /// );
+  /// ```
+  ///
+  /// you can just remove the `ButtonTheme.bar` as the defaults are now handled
+  /// by [ButtonBar] directly.
+  ///
+  /// If you have more complicated usages of `ButtonTheme.bar` like:
+  ///
+  /// ```dart
+  /// ButtonTheme.bar(
+  ///   padding: EdgeInsets.symmetric(horizontal: 10.0),
+  ///   textTheme: ButtonTextTheme.accent,
+  ///   child: ButtonBar(...),
+  /// );
+  /// ```
+  ///
+  /// you can remove the `ButtonTheme.bar` and move the parameters to the
+  /// [ButtonBar] instance directly:
+  ///
+  /// ```dart
+  /// ButtonBar(
+  ///   padding: EdgeInsets.symmetric(horizontal: 10.0),
+  ///   textTheme: ButtonTextTheme.accent,
+  ///   ...
+  /// );
+  /// ```
+  ///
+  /// You can also replace the defaults for all [ButtonBar] widgets by updating
+  /// [ThemeData.buttonBarTheme] for your app.
+  @Deprecated('use ButtonBarTheme instead')
   ButtonTheme.bar({
     Key key,
     ButtonTextTheme textTheme = ButtonTextTheme.accent,
@@ -197,6 +228,12 @@ class ButtonTheme extends InheritedWidget {
       }
     }
     return buttonTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final ButtonTheme ancestorTheme = context.ancestorWidgetOfExactType(ButtonTheme);
+    return identical(this, ancestorTheme) ? child : ButtonTheme.fromButtonThemeData(data: data, child: child);
   }
 
   @override
@@ -468,18 +505,12 @@ class ButtonThemeData extends Diagnosticable {
     return button.textTheme ?? textTheme;
   }
 
-  Color _getDisabledColor(MaterialButton button) {
-    return getBrightness(button) == Brightness.dark
-      ? colorScheme.onSurface.withOpacity(0.30)  // default == Colors.white30
-      : colorScheme.onSurface.withOpacity(0.38); // default == Colors.black38;
-  }
-
   /// The foreground color of the [button]'s text and icon when
   /// [MaterialButton.onPressed] is null (when MaterialButton.enabled is false).
   ///
   /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
-  /// with its opacity set to 0.30 if [getBrightness] is dark, 0.38 otherwise.
+  /// with its opacity set to 0.38.
   ///
   /// If [MaterialButton.textColor] is a [MaterialStateProperty<Color>], it will be
   /// used as the `disabledTextColor`. It will be resolved in the [MaterialState.disabled] state.
@@ -488,7 +519,7 @@ class ButtonThemeData extends Diagnosticable {
       return button.textColor;
     if (button.disabledTextColor != null)
       return button.disabledTextColor;
-    return _getDisabledColor(button);
+    return colorScheme.onSurface.withOpacity(0.38);
   }
 
   /// The [button]'s background color when [MaterialButton.onPressed] is null
@@ -500,13 +531,13 @@ class ButtonThemeData extends Diagnosticable {
   /// is returned, if it is non-null.
   ///
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
-  /// with its opacity set to 0.3 if [getBrightness] is dark, 0.38 otherwise.
+  /// with its opacity set to 0.38.
   Color getDisabledFillColor(MaterialButton button) {
     if (button.disabledColor != null)
       return button.disabledColor;
     if (_disabledColor != null)
       return _disabledColor;
-    return _getDisabledColor(button);
+    return colorScheme.onSurface.withOpacity(0.38);
   }
 
   /// The button's background fill color or null for buttons that don't have
@@ -568,10 +599,11 @@ class ButtonThemeData extends Diagnosticable {
   /// Otherwise the text color depends on the value of [getTextTheme]
   /// and [getBrightness].
   ///
-  ///  * [ButtonTextTheme.normal], [Colors.white] if [getBrightness] is dark,
-  ///    otherwise [Colors.black87].
-  ///  * ButtonTextTheme.accent], [colorScheme.secondary].
-  ///  * [ButtonTextTheme.primary], if [getFillColor] is dark then [Colors.white],
+  ///  * [ButtonTextTheme.normal]: [Colors.white] is used if [getBrightness]
+  ///    resolves to [Brightness.dark]. [Colors.black87] is used if
+  ///    [getBrightness] resolves to [Brightness.light].
+  ///  * [ButtonTextTheme.accent]: [colorScheme.secondary].
+  ///  * [ButtonTextTheme.primary]: If [getFillColor] is dark then [Colors.white],
   ///    otherwise if [button] is a [FlatButton] or an [OutlineButton] then
   ///    [colorScheme.primary], otherwise [Colors.black].
   Color getTextColor(MaterialButton button) {
@@ -588,7 +620,7 @@ class ButtonThemeData extends Diagnosticable {
       case ButtonTextTheme.accent:
         return colorScheme.secondary;
 
-      case ButtonTextTheme.primary: {
+      case ButtonTextTheme.primary:
         final Color fillColor = getFillColor(button);
         final bool fillIsDark = fillColor != null
           ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
@@ -598,7 +630,6 @@ class ButtonThemeData extends Diagnosticable {
         if (button is FlatButton || button is OutlineButton)
           return colorScheme.primary;
         return Colors.black;
-      }
     }
 
     assert(false);

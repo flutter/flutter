@@ -41,7 +41,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// their scroll positions being intrinsically linked.
 ///
 /// The most common use case for this widget is a scrollable view with a
-/// flexible [SliverAppBar] containing a [TabBar] in the header (build by
+/// flexible [SliverAppBar] containing a [TabBar] in the header (built by
 /// [headerSliverBuilder], and with a [TabBarView] in the [body], such that the
 /// scrollable view's contents vary based on which tab is visible.
 ///
@@ -498,8 +498,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   bool get hasScrolledBody {
     for (_NestedScrollPosition position in _innerPositions) {
-      if (position.pixels > position.minScrollExtent)
+      assert(position.minScrollExtent != null && position.pixels != null);
+      if (position.pixels > position.minScrollExtent) {
         return true;
+      }
     }
     return false;
   }

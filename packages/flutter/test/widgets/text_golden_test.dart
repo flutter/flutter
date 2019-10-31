@@ -30,10 +30,7 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Centered.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Centered.png'),
     );
 
     await tester.pumpWidget(
@@ -57,12 +54,9 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Centered.wrap.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Centered.wrap.png'),
     );
-  }, skip: !isLinux);
+  });
 
 
   testWidgets('Text Foreground', (WidgetTester tester) async {
@@ -91,10 +85,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'text_golden.Foreground.gradient.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Foreground.gradient.png'),
     );
 
     await tester.pumpWidget(
@@ -116,10 +107,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'text_golden.Foreground.stroke.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Foreground.stroke.png'),
     );
 
     await tester.pumpWidget(
@@ -142,12 +130,9 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'text_golden.Foreground.stroke_and_gradient.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
     );
-  }, skip: !isLinux);
+  });
 
   // TODO(garyq): This test requires an update when the background
   // drawing from the beginning of the line bug is fixed. The current
@@ -195,12 +180,9 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'text_golden.Background.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Background.png'),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -229,17 +211,14 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
     );
 
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile(
-        'text_golden.Fade.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Fade.png'),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -262,13 +241,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.StrutDefault.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.StrutDefault.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text 1', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -293,13 +268,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Strut.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Strut.1.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text 2', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -325,13 +296,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Strut.2.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Strut.2.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text rich', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -380,13 +347,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Strut.3.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Strut.3.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text font fallback', (WidgetTester tester) async {
     // Font Fallback
@@ -419,13 +382,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Strut.4.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Strut.4.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -474,13 +433,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.StrutForce.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.StrutForce.1.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -488,7 +443,7 @@ void main() {
         TextDecoration.underline,
         TextDecoration.overline,
         TextDecoration.lineThrough,
-      ]
+      ],
     );
 
     await tester.pumpWidget(
@@ -516,12 +471,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Decoration.1.png',
-        version: 0,
-      ),
+      matchesGoldenFile('text_golden.Decoration.1.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -529,7 +481,7 @@ void main() {
         TextDecoration.underline,
         TextDecoration.overline,
         TextDecoration.lineThrough,
-      ]
+      ],
     );
 
     await tester.pumpWidget(
@@ -558,12 +510,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.DecorationThickness.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.DecorationThickness.1.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   testWidgets('Text Inline widget', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -610,10 +559,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -625,19 +574,19 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           child: Checkbox(value: false, onChanged: null),
                           alignment: PlaceholderAlignment.baseline,
-                          baseline: TextBaseline.alphabetic
+                          baseline: TextBaseline.alphabetic,
                         ),
                         WidgetSpan(
                           child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           child: Text('embedded'),
@@ -655,12 +604,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidget.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidget.1.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   testWidgets('Text Inline widget textfield', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -703,12 +649,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidget.2.png',
-        version: 2,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidget.2.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   // This tests if multiple Text.rich widgets are able to inline nest within each other.
   testWidgets('Text Inline widget nesting', (WidgetTester tester) async {
@@ -760,10 +703,10 @@ void main() {
                                                     decoration: BoxDecoration(
                                                       color: Color(0xff5f00f0),
                                                     ),
-                                                  )
+                                                  ),
                                                 ),
                                               ),
-                                            )
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -786,10 +729,10 @@ void main() {
                                             decoration: BoxDecoration(
                                               color: Color(0xff5f0000),
                                             ),
-                                          )
+                                          ),
                                         ),
                                       ),
-                                    )
+                                    ),
                                   ),
                                 ),
                               ],
@@ -816,10 +759,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xff0000ff),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                       ],
@@ -835,12 +778,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetNest.1.png',
-        version: 2,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetNest.1.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   testWidgets('Text Inline widget baseline', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -891,10 +831,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -910,7 +850,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
@@ -924,7 +864,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
@@ -945,12 +885,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetBaseline.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetBaseline.1.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   testWidgets('Text Inline widget aboveBaseline', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1001,10 +938,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -1020,7 +957,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
@@ -1034,7 +971,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
@@ -1055,12 +992,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetAboveBaseline.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetAboveBaseline.1.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   testWidgets('Text Inline widget belowBaseline', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1111,10 +1045,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -1130,7 +1064,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
@@ -1144,7 +1078,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
@@ -1165,12 +1099,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetBelowBaseline.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetBelowBaseline.1.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   testWidgets('Text Inline widget top', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1221,10 +1152,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -1240,7 +1171,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
@@ -1254,7 +1185,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
@@ -1275,12 +1206,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetTop.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetTop.1.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   testWidgets('Text Inline widget middle', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1331,10 +1259,10 @@ void main() {
                                     decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
-                                  )
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ),
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
@@ -1350,7 +1278,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
@@ -1364,7 +1292,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
@@ -1385,10 +1313,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetMiddle.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetMiddle.1.png'),
     );
-  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
+  });
 }

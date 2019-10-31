@@ -4,10 +4,24 @@
 
 import 'dart:collection';
 
-/// A list optimized for containment queries.
+/// A list optimized for the observer pattern when there are small numbers of
+/// observers.
 ///
 /// Consider using an [ObserverList] instead of a [List] when the number of
 /// [contains] calls dominates the number of [add] and [remove] calls.
+///
+/// This class will include in the [iterator] each added item in the order it
+/// was added, as many times as it was added.
+///
+/// If there will be a large number of observers, consider using
+/// [HashedObserverList] instead. It has slightly different iteration semantics,
+/// but serves a similar purpose, while being more efficient for large numbers
+/// of observers.
+///
+/// See also:
+///
+///  * [HashedObserverList] for a list that is optimized for larger numbers of
+///    observers.
 // TODO(ianh): Use DelegatingIterable, possibly moving it from the collection
 // package to foundation, or to dart:collection.
 class ObserverList<T> extends Iterable<T> {
@@ -16,6 +30,8 @@ class ObserverList<T> extends Iterable<T> {
   HashSet<T> _set;
 
   /// Adds an item to the end of this list.
+  ///
+  /// This operation has constant time complexity.
   void add(T item) {
     _isDirty = true;
     _list.add(item);
@@ -28,6 +44,7 @@ class ObserverList<T> extends Iterable<T> {
   /// Returns whether the item was present in the list.
   bool remove(T item) {
     _isDirty = true;
+    _set?.clear(); // Clear the set so that we don't leak items.
     return _list.remove(item);
   }
 
@@ -40,7 +57,6 @@ class ObserverList<T> extends Iterable<T> {
       if (_set == null) {
         _set = HashSet<T>.from(_list);
       } else {
-        _set.clear();
         _set.addAll(_list);
       }
       _isDirty = false;
@@ -57,4 +73,59 @@ class ObserverList<T> extends Iterable<T> {
 
   @override
   bool get isNotEmpty => _list.isNotEmpty;
+}
+
+/// A list optimized for the observer pattern, but for larger numbers of observers.
+///
+/// For small numbers of observers (e.g. less than 10), use [ObserverList] instead.
+///
+/// The iteration semantics of the this class are slightly different from
+/// [ObserverList]. This class will only return an item once in the [iterator],
+/// no matter how many times it was added, although it does require that an item
+/// be removed as many times as it was added for it to stop appearing in the
+/// [iterator]. It will return them in the order the first instance of an item
+/// was originally added.
+///
+/// See also:
+///
+///  * [ObserverList] for a list that is fast for small numbers of observers.
+class HashedObserverList<T> extends Iterable<T> {
+  final LinkedHashMap<T, int> _map = LinkedHashMap<T, int>();
+
+  /// Adds an item to the end of this list.
+  ///
+  /// This has constant time complexity.
+  void add(T item) {
+    _map[item] = (_map[item] ?? 0) + 1;
+  }
+
+  /// Removes an item from the list.
+  ///
+  /// This operation has constant time complexity.
+  ///
+  /// Returns whether the item was present in the list.
+  bool remove(T item) {
+    final int value = _map[item];
+    if (value == null) {
+      return false;
+    }
+    if (value == 1) {
+      _map.remove(item);
+    } else {
+      _map[item] = value - 1;
+    }
+    return true;
+  }
+
+  @override
+  bool contains(Object element) => _map.containsKey(element);
+
+  @override
+  Iterator<T> get iterator => _map.keys.iterator;
+
+  @override
+  bool get isEmpty => _map.isEmpty;
+
+  @override
+  bool get isNotEmpty => _map.isNotEmpty;
 }

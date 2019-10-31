@@ -28,6 +28,7 @@ import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
+import '../common/wait.dart';
 import 'common.dart';
 import 'timeline.dart';
 
@@ -268,6 +269,8 @@ class FlutterDriver {
       logCommunicationToFile: logCommunicationToFile,
     );
 
+    driver._dartVmReconnectUrl = dartVmServiceUrl;
+
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
     // such as a debugger, any of which could have resumed the isolate.
@@ -392,7 +395,27 @@ class FlutterDriver {
   final VMServiceClient serviceClient;
 
   /// JSON-RPC client useful for sending raw JSON requests.
-  final rpc.Peer _peer;
+  rpc.Peer _peer;
+
+  String _dartVmReconnectUrl;
+
+  Future<void> _restorePeerConnectionIfNeeded() async {
+    if (!_peer.isClosed || _dartVmReconnectUrl == null) {
+      return;
+    }
+
+    _log.warning(
+        'Peer connection is closed! Trying to restore the connection...'
+    );
+
+    final String webSocketUrl = _getWebSocketUrl(_dartVmReconnectUrl);
+    final WebSocket ws = await WebSocket.connect(webSocketUrl);
+    ws.done.whenComplete(() => _checkCloseCode(ws));
+    _peer = rpc.Peer(
+        IOWebSocketChannel(ws).cast(),
+        onUnhandledError: _unhandledJsonRpcError,
+    )..listen();
+  }
 
   /// The main isolate hosting the Flutter application.
   ///
@@ -469,12 +492,25 @@ class FlutterDriver {
     await _sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
+  /// Waits until the given [waitCondition] is satisfied.
+  Future<void> waitForCondition(SerializableWaitCondition waitCondition, {Duration timeout}) async {
+    await _sendCommand(WaitForCondition(waitCondition, timeout: timeout));
+  }
+
   /// Waits until there are no more transient callbacks in the queue.
   ///
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
   Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
-    await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
+    await _sendCommand(WaitForCondition(const NoTransientCallbacks(), timeout: timeout));
+  }
+
+  /// Waits until the next [Window.onReportTimings] is called.
+  ///
+  /// Use this method to wait for the first frame to be rasterized during the
+  /// app launch.
+  Future<void> waitUntilFirstFrameRasterized() async {
+    await _sendCommand(const WaitForCondition(FirstFrameRasterized()));
   }
 
   Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
@@ -840,6 +876,7 @@ class FlutterDriver {
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   Future<List<Map<String, dynamic>>> getVmFlags() async {
+    await _restorePeerConnectionIfNeeded();
     final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
     return result != null
         ? result['flags'].cast<Map<String,dynamic>>()
@@ -1084,28 +1121,45 @@ void _unhandledJsonRpcError(dynamic error, dynamic stack) {
   // assert(false);
 }
 
+String _getWebSocketUrl(String url) {
+  Uri uri = Uri.parse(url);
+  final List<String> pathSegments = <String>[
+    // If there's an authentication code (default), we need to add it to our path.
+    if (uri.pathSegments.isNotEmpty) uri.pathSegments.first,
+    'ws',
+  ];
+  if (uri.scheme == 'http')
+    uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
+  return uri.toString();
+}
+
+void _checkCloseCode(WebSocket ws) {
+  if (ws.closeCode != 1000 && ws.closeCode != null) {
+    _log.warning('$ws is closed with an unexpected code ${ws.closeCode}');
+  }
+}
+
 /// Waits for a real Dart VM service to become available, then connects using
 /// the [VMServiceClient].
 Future<VMServiceClientConnection> _waitAndConnect(String url) async {
-  Uri uri = Uri.parse(url);
-  final List<String> pathSegments = <String>[];
-  // If there's an authentication code (default), we need to add it to our path.
-  if (uri.pathSegments.isNotEmpty) {
-    pathSegments.add(uri.pathSegments.first);
-  }
-  pathSegments.add('ws');
-  if (uri.scheme == 'http')
-    uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
+  final String webSocketUrl = _getWebSocketUrl(url);
   int attempts = 0;
   while (true) {
     WebSocket ws1;
     WebSocket ws2;
     try {
-      ws1 = await WebSocket.connect(uri.toString());
-      ws2 = await WebSocket.connect(uri.toString());
+      ws1 = await WebSocket.connect(webSocketUrl);
+      ws2 = await WebSocket.connect(webSocketUrl);
+
+      ws1.done.whenComplete(() => _checkCloseCode(ws1));
+      ws2.done.whenComplete(() => _checkCloseCode(ws2));
+
       return VMServiceClientConnection(
         VMServiceClient(IOWebSocketChannel(ws1).cast()),
-        rpc.Peer(IOWebSocketChannel(ws2).cast(), onUnhandledError: _unhandledJsonRpcError)..listen(),
+        rpc.Peer(
+            IOWebSocketChannel(ws2).cast(),
+            onUnhandledError: _unhandledJsonRpcError,
+        )..listen(),
       );
     } catch (e) {
       await ws1?.close();
@@ -1145,22 +1199,30 @@ class CommonFinders {
   ///
   /// If the `matchRoot` argument is true then the widget specified by `of` will
   /// be considered for a match. The argument defaults to false.
+  ///
+  /// If `firstMatchOnly` is true then only the first ancestor matching
+  /// `matching` will be returned. Defaults to false.
   SerializableFinder ancestor({
     @required SerializableFinder of,
     @required SerializableFinder matching,
     bool matchRoot = false,
-  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot);
+    bool firstMatchOnly = false,
+  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot, firstMatchOnly: firstMatchOnly);
 
   /// Finds the widget that is an descendant of the `of` parameter and that
   /// matches the `matching` parameter.
   ///
   /// If the `matchRoot` argument is true then the widget specified by `of` will
   /// be considered for a match. The argument defaults to false.
+  ///
+  /// If `firstMatchOnly` is true then only the first descendant matching
+  /// `matching` will be returned. Defaults to false.
   SerializableFinder descendant({
     @required SerializableFinder of,
     @required SerializableFinder matching,
     bool matchRoot = false,
-  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot);
+    bool firstMatchOnly = false,
+  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot, firstMatchOnly: firstMatchOnly);
 }
 
 /// An immutable 2D floating-point offset used by Flutter Driver.

@@ -7,13 +7,21 @@ import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'inherited_theme.dart';
 import 'media_query.dart';
 
 // Examples can assume:
 // String _name;
 
 /// The text style to apply to descendant [Text] widgets without explicit style.
-class DefaultTextStyle extends InheritedWidget {
+///
+/// See also:
+///
+///  * [AnimatedDefaultTextStyle], which animates changes in the text style
+///    smoothly over a given duration.
+///  * [DefaultTextStyleTransition], which takes a provided [Animation] to
+///    animate changes in text style smoothly over time.
+class DefaultTextStyle extends InheritedTheme {
   /// Creates a default text style for the given subtree.
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
@@ -127,6 +135,7 @@ class DefaultTextStyle extends InheritedWidget {
   final int maxLines;
 
   /// The strategy to use when calculating the width of the Text.
+  ///
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
@@ -152,6 +161,20 @@ class DefaultTextStyle extends InheritedWidget {
         overflow != oldWidget.overflow ||
         maxLines != oldWidget.maxLines ||
         textWidthBasis != oldWidget.textWidthBasis;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final DefaultTextStyle defaultTextStyle = context.ancestorWidgetOfExactType(DefaultTextStyle);
+    return identical(this, defaultTextStyle) ? child : DefaultTextStyle(
+      style: style,
+      textAlign: textAlign,
+      softWrap: softWrap,
+      overflow: overflow,
+      maxLines: maxLines,
+      textWidthBasis: textWidthBasis,
+      child: child,
+    );
   }
 
   @override
@@ -181,6 +204,13 @@ class DefaultTextStyle extends InheritedWidget {
 ///
 /// {@tool sample}
 ///
+/// This example shows how to display text using the [Text] widget with the
+/// [overflow] set to [TextOverflow.ellipsis].
+///
+/// ![If the text is shorter than the available space, it is displayed in full without an ellipsis.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text.png)
+///
+/// ![If the text overflows, the Text widget displays an ellipsis to trim the overflowing text](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_ellipsis.png)
+///
 /// ```dart
 /// Text(
 ///   'Hello, $_name! How are you?',
@@ -197,6 +227,8 @@ class DefaultTextStyle extends InheritedWidget {
 /// for each word.
 ///
 /// {@tool sample}
+///
+/// ![The word "Hello" is shown with the default text styles. The word "beautiful" is italicized. The word "world" is bold.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_rich.png)
 ///
 /// ```dart
 /// const Text.rich(
@@ -379,7 +411,7 @@ class Text extends StatelessWidget {
   /// ```
   final String semanticsLabel;
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   @override

@@ -116,7 +116,8 @@ const int kTouchContact = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
 ///
-/// The `number` argument can be at most 62.
+/// The `number` argument can be at most 62 in Flutter for mobile and desktop,
+/// and at most 32 on Flutter for web.
 ///
 /// See [kPrimaryMouseButton], [kSecondaryMouseButton], [kMiddleMouseButton],
 /// [kBackMouseButton], and [kForwardMouseButton] for semantic names for some
@@ -125,7 +126,8 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth stylus button.
 ///
-/// The `number` argument can be at most 62.
+/// The `number` argument can be at most 62 in Flutter for mobile and desktop,
+/// and at most 32 on Flutter for web.
 ///
 /// See [kPrimaryStylusButton] and [kSecondaryStylusButton] for semantic names
 /// for some stylus buttons.
@@ -802,8 +804,8 @@ class PointerHoverEvent extends PointerEvent {
   }
 }
 
-/// The pointer has moved with respect to the device while the pointer is not
-/// in contact with the device, and it has entered a target object.
+/// The pointer has moved with respect to the device while the pointer is or is
+/// not in contact with the device, and it has entered a target object.
 ///
 /// See also:
 ///
@@ -837,6 +839,7 @@ class PointerEnterEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
+    bool down = false,
     bool synthesized = false,
     Matrix4 transform,
     PointerEnterEvent original,
@@ -849,7 +852,7 @@ class PointerEnterEvent extends PointerEvent {
          delta: delta,
          localDelta: localDelta,
          buttons: buttons,
-         down: false,
+         down: down,
          obscured: obscured,
          pressure: 0.0,
          pressureMin: pressureMin,
@@ -898,6 +901,7 @@ class PointerEnterEvent extends PointerEvent {
     radiusMax: event?.radiusMax,
     orientation: event?.orientation,
     tilt: event?.tilt,
+    down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
     original: event?.original,
@@ -935,6 +939,7 @@ class PointerEnterEvent extends PointerEvent {
       radiusMax: radiusMax,
       orientation: orientation,
       tilt: tilt,
+      down: down,
       synthesized: synthesized,
       transform: transform,
       original: original ?? this,
@@ -942,8 +947,8 @@ class PointerEnterEvent extends PointerEvent {
   }
 }
 
-/// The pointer has moved with respect to the device while the pointer is not
-/// in contact with the device, and entered a target object.
+/// The pointer has moved with respect to the device while the pointer is or is
+/// not in contact with the device, and entered a target object.
 ///
 /// See also:
 ///
@@ -977,6 +982,7 @@ class PointerExitEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
+    bool down = false,
     bool synthesized = false,
     Matrix4 transform,
     PointerExitEvent original,
@@ -989,7 +995,7 @@ class PointerExitEvent extends PointerEvent {
          delta: delta,
          localDelta: localDelta,
          buttons: buttons,
-         down: false,
+         down: down,
          obscured: obscured,
          pressure: 0.0,
          pressureMin: pressureMin,
@@ -1038,6 +1044,7 @@ class PointerExitEvent extends PointerEvent {
     radiusMax: event?.radiusMax,
     orientation: event?.orientation,
     tilt: event?.tilt,
+    down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
     original: event?.original,
@@ -1075,6 +1082,7 @@ class PointerExitEvent extends PointerEvent {
       radiusMax: radiusMax,
       orientation: orientation,
       tilt: tilt,
+      down: down,
       synthesized: synthesized,
       transform: transform,
       original: original ?? this,

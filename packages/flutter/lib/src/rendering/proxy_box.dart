@@ -456,13 +456,15 @@ class RenderAspectRatio extends RenderProxyBox {
     assert(constraints.debugAssertIsValid());
     assert(() {
       if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
-        throw FlutterError(
-          '$runtimeType has unbounded constraints.\n'
-          'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
-          'both unbounded width and unbounded height constraints. Because both '
-          'constraints were unbounded, this render object doesn\'t know how much '
-          'size to consume.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType has unbounded constraints.'),
+          ErrorDescription(
+            'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
+            'both unbounded width and unbounded height constraints. Because both '
+            'constraints were unbounded, this render object doesn\'t know how much '
+            'size to consume.'
+          )
+        ]);
       }
       return true;
     }());
@@ -789,14 +791,18 @@ class RenderOpacity extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       if (_alpha == 0) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         return;
       }
       if (_alpha == 255) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         context.paintChild(child, offset);
         return;
       }
       assert(needsCompositing);
-      context.pushOpacity(offset, _alpha, super.paint);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
     }
   }
 
@@ -904,14 +910,19 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      if (_alpha == 0)
+      if (_alpha == 0) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         return;
+      }
       if (_alpha == 255) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         context.paintChild(child, offset);
         return;
       }
       assert(needsCompositing);
-      context.pushOpacity(offset, _alpha, super.paint);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
     }
   }
 
@@ -952,6 +963,9 @@ class RenderShaderMask extends RenderProxyBox {
        _blendMode = blendMode,
        super(child);
 
+  @override
+  ShaderMaskLayer get layer => super.layer;
+
   /// Called to creates the [Shader] that generates the mask.
   ///
   /// The shader callback is called with the current size of the child so that
@@ -989,15 +1003,14 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushLayer(
-        ShaderMaskLayer(
-          shader: _shaderCallback(offset & size),
-          maskRect: offset & size,
-          blendMode: _blendMode,
-        ),
-        super.paint,
-        offset,
-      );
+      layer ??= ShaderMaskLayer();
+      layer
+        ..shader = _shaderCallback(offset & size)
+        ..maskRect = offset & size
+        ..blendMode = _blendMode;
+      context.pushLayer(layer, super.paint, offset);
+    } else {
+      layer = null;
     }
   }
 }
@@ -1014,6 +1027,9 @@ class RenderBackdropFilter extends RenderProxyBox {
     : assert(filter != null),
       _filter = filter,
       super(child);
+
+  @override
+  BackdropFilterLayer get layer => super.layer;
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1037,7 +1053,11 @@ class RenderBackdropFilter extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushLayer(BackdropFilterLayer(filter: _filter), super.paint, offset);
+      layer ??= BackdropFilterLayer();
+      layer.filter = _filter;
+      context.pushLayer(layer, super.paint, offset);
+    } else {
+      layer = null;
     }
   }
 }
@@ -1267,12 +1287,14 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] must not be null or [Clip.none].
   RenderClipRect({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
+       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1292,7 +1314,9 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1322,13 +1346,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipRRect({
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
@@ -1368,7 +1393,9 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1396,12 +1423,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipOval({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
@@ -1436,7 +1464,9 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1472,12 +1502,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipPath({
     RenderBox child,
     CustomClipper<Path> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
@@ -1498,7 +1529,9 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1606,8 +1639,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   ///
   /// The [color] is required.
   ///
-  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [shape], [elevation], [color], [clipBehavior], and [shadowColor]
+  /// arguments must not be null. Additionally, the [elevation] must be
+  /// non-negative.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
@@ -1628,8 +1662,11 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
          child: child,
          elevation: elevation,
          color: color,
-         shadowColor: shadowColor
+         shadowColor: shadowColor,
        );
+
+  @override
+  PhysicalModelLayer get layer => super.layer;
 
   /// The shape of the layer.
   ///
@@ -1710,18 +1747,20 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         }
         return true;
       }());
-      final PhysicalModelLayer physicalModel = PhysicalModelLayer(
-        clipPath: offsetRRectAsPath,
-        clipBehavior: clipBehavior,
-        elevation: paintShadows ? elevation : 0.0,
-        color: color,
-        shadowColor: shadowColor,
-      );
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetRRectAsPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
       assert(() {
-        physicalModel.debugCreator = debugCreator;
+        layer.debugCreator = debugCreator;
         return true;
       }());
-      context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
+    } else {
+      layer = null;
     }
   }
 
@@ -1765,8 +1804,11 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
          color: color,
          shadowColor: shadowColor,
          clipper: clipper,
-         clipBehavior: clipBehavior
+         clipBehavior: clipBehavior,
        );
+
+  @override
+  PhysicalModelLayer get layer => super.layer;
 
   @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
@@ -1804,18 +1846,20 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         }
         return true;
       }());
-      final PhysicalModelLayer physicalModel = PhysicalModelLayer(
-        clipPath: offsetPath,
-        clipBehavior: clipBehavior,
-        elevation: paintShadows ? elevation : 0.0,
-        color: color,
-        shadowColor: shadowColor,
-      );
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
       assert(() {
-        physicalModel.debugCreator = debugCreator;
+        layer.debugCreator = debugCreator;
         return true;
       }());
-      context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
+    } else {
+      layer = null;
     }
   }
 
@@ -1934,16 +1978,16 @@ class RenderDecoratedBox extends RenderProxyBox {
       _painter.paint(context.canvas, offset, filledConfiguration);
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
-          throw FlutterError(
-            '${_decoration.runtimeType} painter had mismatching save and restore calls.\n'
-            'Before painting the decoration, the canvas save count was $debugSaveCount. '
-            'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-            'Every call to save() or saveLayer() must be matched by a call to restore().\n'
-            'The decoration was:\n'
-            '  $decoration\n'
-            'The painter was:\n'
-            '  $_painter'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('${_decoration.runtimeType} painter had mismatching save and restore calls.'),
+            ErrorDescription(
+              'Before painting the decoration, the canvas save count was $debugSaveCount. '
+              'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
+              'Every call to save() or saveLayer() must be matched by a call to restore().'
+            ),
+            DiagnosticsProperty<Decoration>('The decoration was', decoration, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
+          ]);
         }
         return true;
       }());
@@ -2145,10 +2189,12 @@ class RenderTransform extends RenderProxyBox {
     if (child != null) {
       final Matrix4 transform = _effectiveTransform;
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
-      if (childOffset == null)
-        context.pushTransform(needsCompositing, offset, transform, super.paint);
-      else
+      if (childOffset == null) {
+        layer = context.pushTransform(needsCompositing, offset, transform, super.paint, oldLayer: layer);
+      } else {
         super.paint(context, offset + childOffset);
+        layer = null;
+      }
     }
   }
 
@@ -2288,12 +2334,14 @@ class RenderFittedBox extends RenderProxyBox {
     }
   }
 
-  void _paintChildWithTransform(PaintingContext context, Offset offset) {
+  TransformLayer _paintChildWithTransform(PaintingContext context, Offset offset) {
     final Offset childOffset = MatrixUtils.getAsTranslation(_transform);
     if (childOffset == null)
-      context.pushTransform(needsCompositing, offset, _transform, super.paint);
+      return context.pushTransform(needsCompositing, offset, _transform, super.paint,
+          oldLayer: layer is TransformLayer ? layer : null);
     else
       super.paint(context, offset + childOffset);
+    return null;
   }
 
   @override
@@ -2303,9 +2351,10 @@ class RenderFittedBox extends RenderProxyBox {
     _updatePaintData();
     if (child != null) {
       if (_hasVisualOverflow)
-        context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform);
+        layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
+            oldLayer: layer is ClipRectLayer ? layer : null);
       else
-        _paintChildWithTransform(context, offset);
+        layer = _paintChildWithTransform(context, offset);
     }
   }
 
@@ -2460,15 +2509,18 @@ typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
 
-/// Calls callbacks in response to pointer events.
+/// Calls callbacks in response to common pointer events.
+///
+/// It responds to events that can construct gestures, such as when the
+/// pointer is pressed, moved, then released or canceled.
+///
+/// It does not respond to events that are exclusive to mouse, such as when the
+/// mouse enters, exits or hovers a region without pressing any buttons. For
+/// these events, use [RenderMouseRegion].
 ///
 /// If it has a child, defers to the child for sizing behavior.
 ///
 /// If it does not have a child, grows to fit the parent-provided constraints.
-///
-/// The [onPointerEnter], [onPointerHover], and [onPointerExit] events are only
-/// relevant to and fired by pointers that can hover (e.g. mouse pointers, but
-/// not most touch pointers).
 class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
@@ -2476,27 +2528,12 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   RenderPointerListener({
     this.onPointerDown,
     this.onPointerMove,
-    PointerEnterEventListener onPointerEnter,
-    PointerHoverEventListener onPointerHover,
-    PointerExitEventListener onPointerExit,
     this.onPointerUp,
     this.onPointerCancel,
     this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox child,
-  }) : _onPointerEnter = onPointerEnter,
-       _onPointerHover = onPointerHover,
-       _onPointerExit = onPointerExit,
-       super(behavior: behavior, child: child) {
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
-      );
-    }
-    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
-  }
+  }) : super(behavior: behavior, child: child);
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -2505,45 +2542,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   PointerMoveEventListener onPointerMove;
-
-  /// Called when a hovering pointer enters the region for this widget.
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer enters
-  /// the region defined by this widget.
-  PointerEnterEventListener get onPointerEnter => _onPointerEnter;
-  set onPointerEnter(PointerEnterEventListener value) {
-    if (_onPointerEnter != value) {
-      _onPointerEnter = value;
-      _updateAnnotations();
-    }
-  }
-  PointerEnterEventListener _onPointerEnter;
-
-  /// Called when a pointer that has not triggered an [onPointerDown] changes
-  /// position.
-  ///
-  /// Typically only triggered for mouse pointers.
-  PointerHoverEventListener get onPointerHover => _onPointerHover;
-  set onPointerHover(PointerHoverEventListener value) {
-    if (_onPointerHover != value) {
-      _onPointerHover = value;
-      _updateAnnotations();
-    }
-  }
-  PointerHoverEventListener _onPointerHover;
-
-  /// Called when a hovering pointer leaves the region for this widget.
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
-  /// the region defined by this widget.
-  PointerExitEventListener get onPointerExit => _onPointerExit;
-  set onPointerExit(PointerExitEventListener value) {
-    if (_onPointerExit != value) {
-      _onPointerExit = value;
-      _updateAnnotations();
-    }
-  }
-  PointerExitEventListener _onPointerExit;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
   /// contact with the screen.
@@ -2556,119 +2554,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener onPointerSignal;
 
-  // Object used for annotation of the layer used for hover hit detection.
-  MouseTrackerAnnotation _hoverAnnotation;
-
-  /// Object used for annotation of the layer used for hover hit detection.
-  ///
-  /// This is only public to allow for testing of Listener widgets. Do not call
-  /// in other contexts.
-  @visibleForTesting
-  MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
-
-  void _updateAnnotations() {
-    assert(_hoverAnnotation == null || _onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
-      "Shouldn't call _updateAnnotations if nothing has changed.");
-    bool changed = false;
-    final bool hadHoverAnnotation = _hoverAnnotation != null;
-    if (_hoverAnnotation != null && attached) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-      changed = true;
-    }
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
-      );
-      if (attached) {
-        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-        changed = true;
-      }
-    } else {
-      _hoverAnnotation = null;
-    }
-    if (changed) {
-      markNeedsPaint();
-    }
-    final bool hasHoverAnnotation = _hoverAnnotation != null;
-    if (hadHoverAnnotation != hasHoverAnnotation) {
-      markNeedsCompositingBitsUpdate();
-    }
-  }
-
-  bool _mouseIsConnected;
-  void _handleMouseTrackerChanged() {
-    final bool newState = RendererBinding.instance.mouseTracker.mouseIsConnected;
-    if (newState != _mouseIsConnected) {
-      _mouseIsConnected = newState;
-      if (_hoverAnnotation != null) {
-        markNeedsCompositingBitsUpdate();
-        markNeedsPaint();
-      }
-    }
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    // Add a listener to listen for changes in mouseIsConnected.
-    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChanged);
-    postActivate();
-  }
-
-  /// Attaches the annotation for this render object, if any.
-  ///
-  /// This is called by [attach] to attach any new annotations.
-  ///
-  /// This is also called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
-  /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
-  /// the widget that provided the callback, and [State.setState] can safely be
-  /// called within that callback.
-  void postActivate() {
-    if (_hoverAnnotation != null) {
-      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-    }
-  }
-
-  /// Detaches the annotation for this render object, if any.
-  ///
-  /// This is called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
-  /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
-  /// widget that provided the callback, and [State.setState] can safely be
-  /// called within that callback.
-  void preDeactivate() {
-    if (_hoverAnnotation != null) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-    }
-  }
-
-  @override
-  void detach() {
-    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChanged);
-    super.detach();
-  }
-
-  bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
-
-  @override
-  bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_hasActiveAnnotation) {
-      final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
-        _hoverAnnotation,
-        size: size,
-        offset: offset,
-      );
-      context.pushLayer(layer, super.paint, offset);
-    }
-    super.paint(context, offset);
-  }
-
   @override
   void performResize() {
     size = constraints.biggest;
@@ -2677,8 +2562,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    // The onPointerEnter, onPointerHover, and onPointerExit events are are
-    // triggered from within the MouseTracker, not here.
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
     if (onPointerMove != null && event is PointerMoveEvent)
@@ -2694,27 +2577,228 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[];
-    if (onPointerDown != null)
-      listeners.add('down');
-    if (onPointerMove != null)
-      listeners.add('move');
-    if (onPointerEnter != null)
-      listeners.add('enter');
-    if (onPointerHover != null)
-      listeners.add('hover');
-    if (onPointerExit != null)
-      listeners.add('exit');
-    if (onPointerUp != null)
-      listeners.add('up');
-    if (onPointerCancel != null)
-      listeners.add('cancel');
-    if (onPointerSignal != null)
-      listeners.add('signal');
-    if (listeners.isEmpty)
-      listeners.add('<none>');
-    properties.add(IterableProperty<String>('listeners', listeners));
-    // TODO(jacobr): add raw listeners to the diagnostics data.
+    properties.add(FlagsSummary<Function>(
+      'listeners',
+      <String, Function>{
+        'down': onPointerDown,
+        'move': onPointerMove,
+        'up': onPointerUp,
+        'cancel': onPointerCancel,
+        'signal': onPointerSignal,
+      },
+      ifEmpty: '<none>',
+    ));
+  }
+}
+
+/// Calls callbacks in response to pointer events that are exclusive to mice.
+///
+/// It responds to events that are related to hovering, i.e. when the mouse
+/// enters, exits (with or without pressing buttons), or moves over a region
+/// without pressing buttons.
+///
+/// It does not respond to common events that construct gestures, such as when
+/// the pointer is pressed, moved, then released or canceled. For these events,
+/// use [RenderPointerListener].
+///
+/// If it has a child, it defers to the child for sizing behavior.
+///
+/// If it does not have a child, it grows to fit the parent-provided constraints.
+///
+/// See also:
+///
+///  * [MouseRegion], a widget that listens to hover events using
+///    [RenderMouseRegion].
+class RenderMouseRegion extends RenderProxyBox {
+  /// Creates a render object that forwards pointer events to callbacks.
+  RenderMouseRegion({
+    PointerEnterEventListener onEnter,
+    PointerHoverEventListener onHover,
+    PointerExitEventListener onExit,
+    this.opaque = true,
+    RenderBox child,
+  }) : assert(opaque != null),
+       _onEnter = onEnter,
+       _onHover = onHover,
+       _onExit = onExit,
+       _annotationIsActive = false,
+       super(child) {
+    _hoverAnnotation = MouseTrackerAnnotation(
+      onEnter: _handleEnter,
+      onHover: _handleHover,
+      onExit: _handleExit,
+    );
+  }
+
+  /// Whether this object should prevent [RenderMouseRegion]s visually behind it
+  /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
+  /// and [onExit] behave.
+  ///
+  /// If [opaque] is true, this object will absorb the mouse pointer and
+  /// prevent this object's siblings (or any other objects that are not
+  /// ancestors or descendants of this object) from detecting the mouse
+  /// pointer even when the pointer is within their areas.
+  ///
+  /// If [opaque] is false, this object will not affect how [RenderMouseRegion]s
+  /// behind it behave, which will detect the mouse pointer as long as the
+  /// pointer is within their areas.
+  ///
+  /// This defaults to true.
+  bool opaque;
+
+  /// Called when a mouse pointer enters the region (with or without buttons
+  /// pressed).
+  PointerEnterEventListener get onEnter => _onEnter;
+  set onEnter(PointerEnterEventListener value) {
+    if (_onEnter != value) {
+      _onEnter = value;
+      _updateAnnotations();
+    }
+  }
+  PointerEnterEventListener _onEnter;
+  void _handleEnter(PointerEnterEvent event) {
+    if (_onEnter != null)
+      _onEnter(event);
+  }
+
+  /// Called when a pointer changes position without buttons pressed and the end
+  /// position is within the region.
+  PointerHoverEventListener get onHover => _onHover;
+  set onHover(PointerHoverEventListener value) {
+    if (_onHover != value) {
+      _onHover = value;
+      _updateAnnotations();
+    }
+  }
+  PointerHoverEventListener _onHover;
+  void _handleHover(PointerHoverEvent event) {
+    if (_onHover != null)
+      _onHover(event);
+  }
+
+  /// Called when a pointer leaves the region (with or without buttons pressed).
+  PointerExitEventListener get onExit => _onExit;
+  set onExit(PointerExitEventListener value) {
+    if (_onExit != value) {
+      _onExit = value;
+      _updateAnnotations();
+    }
+  }
+  PointerExitEventListener _onExit;
+  void _handleExit(PointerExitEvent event) {
+    if (_onExit != null)
+      _onExit(event);
+  }
+
+  // Object used for annotation of the layer used for hover hit detection.
+  MouseTrackerAnnotation _hoverAnnotation;
+
+  /// Object used for annotation of the layer used for hover hit detection.
+  ///
+  /// This is only public to allow for testing of Listener widgets. Do not call
+  /// in other contexts.
+  @visibleForTesting
+  MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
+
+  void _updateAnnotations() {
+    final bool annotationWasActive = _annotationIsActive;
+    final bool annotationWillBeActive = (
+        _onEnter != null ||
+        _onHover != null ||
+        _onExit != null
+      ) &&
+      RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (annotationWasActive != annotationWillBeActive) {
+      markNeedsPaint();
+      markNeedsCompositingBitsUpdate();
+      if (annotationWillBeActive) {
+        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+      } else {
+        RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+      }
+      _annotationIsActive = annotationWillBeActive;
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    // Add a listener to listen for changes in mouseIsConnected.
+    RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
+    _updateAnnotations();
+  }
+
+  /// Attaches the annotation for this render object, if any.
+  ///
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it has transitioned from "inactive"
+  /// state to "active". We call it here so that
+  /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
+  /// the widget that provided the callback, and [State.setState] can safely be
+  /// called within that callback.
+  void postActivate() {
+    if (_annotationIsActive)
+      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+  }
+
+  /// Detaches the annotation for this render object, if any.
+  ///
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it will shortly be transitioned from "active"
+  /// state to "inactive". We call it here so that
+  /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
+  /// widget that provided the callback, and [State.setState] can safely be
+  /// called within that callback.
+  void preDeactivate() {
+    if (_annotationIsActive)
+      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+  }
+
+  @override
+  void detach() {
+    RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
+    super.detach();
+  }
+
+  bool _annotationIsActive;
+
+  @override
+  bool get needsCompositing => super.needsCompositing || _annotationIsActive;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_annotationIsActive) {
+      // Annotated region layers are not retained because they do not create engine layers.
+      final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
+        _hoverAnnotation,
+        size: size,
+        offset: offset,
+        opaque: opaque,
+      );
+      context.pushLayer(layer, super.paint, offset);
+    } else {
+      super.paint(context, offset);
+    }
+  }
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagsSummary<Function>(
+      'listeners',
+      <String, Function>{
+        'enter': onEnter,
+        'hover': onHover,
+        'exit': onExit,
+      },
+      ifEmpty: '<none>',
+    ));
+    properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }
 
@@ -2811,7 +2895,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
-    return layer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
+    final OffsetLayer offsetLayer = layer;
+    return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
 
@@ -2990,7 +3075,7 @@ class RenderIgnorePointer extends RenderProxyBox {
         'ignoringSemantics',
         _effectiveIgnoringSemantics,
         description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null,
-      )
+      ),
     );
   }
 }
@@ -3392,15 +3477,12 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> gestures = <String>[];
-    if (onTap != null)
-      gestures.add('tap');
-    if (onLongPress != null)
-      gestures.add('long press');
-    if (onHorizontalDragUpdate != null)
-      gestures.add('horizontal scroll');
-    if (onVerticalDragUpdate != null)
-      gestures.add('vertical scroll');
+    final List<String> gestures = <String>[
+      if (onTap != null) 'tap',
+      if (onLongPress != null) 'long press',
+      if (onHorizontalDragUpdate != null) 'horizontal scroll',
+      if (onVerticalDragUpdate != null) 'vertical scroll',
+    ];
     if (gestures.isEmpty)
       gestures.add('<none>');
     properties.add(IterableProperty<String>('gestures', gestures));
@@ -3424,17 +3506,22 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool toggled,
     bool selected,
     bool button,
+    bool link,
     bool header,
     bool textField,
     bool readOnly,
+    bool focusable,
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool multiline,
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
     bool image,
     bool liveRegion,
+    int maxValueLength,
+    int currentValueLength,
     String label,
     String value,
     String increasedValue,
@@ -3472,15 +3559,20 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _toggled = toggled,
        _selected = selected,
        _button = button,
+       _link = link,
        _header = header,
        _textField = textField,
        _readOnly = readOnly,
+       _focusable = focusable,
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
+       _multiline = multiline,
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
        _liveRegion = liveRegion,
+       _maxValueLength = maxValueLength,
+       _currentValueLength = currentValueLength,
        _hidden = hidden,
        _image = image,
        _onDismiss = onDismiss,
@@ -3611,6 +3703,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the [SemanticsNode.isLink] semantic to the given value.
+  bool get link => _link;
+  bool _link;
+  set link(bool value) {
+    if (link == value)
+      return;
+    _link = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.isHeader] semantic to the given value.
   bool get header => _header;
   bool _header;
@@ -3638,6 +3740,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (readOnly == value)
       return;
     _readOnly = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isFocusable] semantic to the given value.
+  bool get focusable => _focusable;
+  bool _focusable;
+  set focusable(bool value) {
+    if (focusable == value)
+      return;
+    _focusable = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3670,6 +3782,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (obscured == value)
       return;
     _obscured = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isMultiline] semantic to the given
+  /// value.
+  bool get multiline => _multiline;
+  bool _multiline;
+  set multiline(bool value) {
+    if (multiline == value)
+      return;
+    _multiline = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3722,6 +3845,28 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_liveRegion == value)
       return;
     _liveRegion = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.maxValueLength] semantic to the given
+  /// value.
+  int get maxValueLength => _maxValueLength;
+  int _maxValueLength;
+  set maxValueLength(int value) {
+    if (_maxValueLength == value)
+      return;
+    _maxValueLength = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.currentValueLength] semantic to the
+  /// given value.
+  int get currentValueLength => _currentValueLength;
+  int _currentValueLength;
+  set currentValueLength(int value) {
+    if (_currentValueLength == value)
+      return;
+    _currentValueLength = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4260,18 +4405,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isSelected = selected;
     if (button != null)
       config.isButton = button;
+    if (link != null)
+      config.isLink = link;
     if (header != null)
       config.isHeader = header;
     if (textField != null)
       config.isTextField = textField;
     if (readOnly != null)
       config.isReadOnly = readOnly;
+    if (focusable != null)
+      config.isFocusable = focusable;
     if (focused != null)
       config.isFocused = focused;
     if (inMutuallyExclusiveGroup != null)
       config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (obscured != null)
       config.isObscured = obscured;
+    if (multiline != null)
+      config.isMultiline = multiline;
     if (hidden != null)
       config.isHidden = hidden;
     if (image != null)
@@ -4294,6 +4445,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.namesRoute = namesRoute;
     if (liveRegion != null)
       config.liveRegion = liveRegion;
+    if (maxValueLength != null) {
+      config.maxValueLength = maxValueLength;
+    }
+    if (currentValueLength != null) {
+      config.currentValueLength = currentValueLength;
+    }
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)
@@ -4621,7 +4778,16 @@ class RenderLeaderLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushLayer(LeaderLayer(link: link, offset: offset), super.paint, Offset.zero);
+    if (layer == null) {
+      layer = LeaderLayer(link: link, offset: offset);
+    } else {
+      final LeaderLayer leaderLayer = layer;
+      leaderLayer
+        ..link = link
+        ..offset = offset;
+    }
+    context.pushLayer(layer, super.paint, Offset.zero);
+    assert(layer != null);
   }
 
   @override
@@ -4707,7 +4873,7 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   void detach() {
-    _layer = null;
+    layer = null;
     super.detach();
   }
 
@@ -4715,7 +4881,8 @@ class RenderFollowerLayer extends RenderProxyBox {
   bool get alwaysNeedsCompositing => true;
 
   /// The layer we created when we were last painted.
-  FollowerLayer _layer;
+  @override
+  FollowerLayer get layer => super.layer;
 
   /// Return the transform that was used in the last composition phase, if any.
   ///
@@ -4724,7 +4891,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// [FollowerLayer.getLastTransform]), this returns the identity matrix (see
   /// [new Matrix4.identity].
   Matrix4 getCurrentTransform() {
-    return _layer?.getLastTransform() ?? Matrix4.identity();
+    return layer?.getLastTransform() ?? Matrix4.identity();
   }
 
   @override
@@ -4750,14 +4917,22 @@ class RenderFollowerLayer extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(showWhenUnlinked != null);
-    _layer = FollowerLayer(
-      link: link,
-      showWhenUnlinked: showWhenUnlinked,
-      linkedOffset: this.offset,
-      unlinkedOffset: offset,
-    );
+    if (layer == null) {
+      layer = FollowerLayer(
+        link: link,
+        showWhenUnlinked: showWhenUnlinked,
+        linkedOffset: this.offset,
+        unlinkedOffset: offset,
+      );
+    } else {
+      layer
+        ..link = link
+        ..showWhenUnlinked = showWhenUnlinked
+        ..linkedOffset = this.offset
+        ..unlinkedOffset = offset;
+    }
     context.pushLayer(
-      _layer,
+      layer,
       super.paint,
       Offset.zero,
       childPaintBounds: const Rect.fromLTRB(
@@ -4835,6 +5010,7 @@ class RenderAnnotatedRegion<T> extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // Annotated region layers are not retained because they do not create engine layers.
     final AnnotatedRegionLayer<T> layer = AnnotatedRegionLayer<T>(
       value,
       size: sized ? size : null,

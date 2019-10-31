@@ -5,12 +5,15 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+
+final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
@@ -42,7 +45,7 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  battery:\n  package_info:\n',
+        '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -142,7 +145,14 @@ Future<void> main() async {
       final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);
       recursiveCopy(
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_host_app')),
+        Directory(
+          path.join(
+            flutterDirectory.path,
+            'dev',
+            'integration_tests',
+            useAndroidEmbeddingV2 ? 'android_host_app_v2_embedding' : 'android_host_app',
+          ),
+        ),
         hostApp,
       );
       copy(
@@ -154,17 +164,26 @@ Future<void> main() async {
         Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
+      final File analyticsOutputFile = File(path.join(tempDir.path, 'analytics.log'));
+
+      section('Build debug host APK');
+
       await inDirectory(hostApp, () async {
         if (!Platform.isWindows) {
           await exec('chmod', <String>['+x', 'gradlew']);
         }
         await exec(gradlewExecutable,
           <String>['app:assembleDebug'],
-          environment: <String, String>{ 'JAVA_HOME': javaHome },
+          environment: <String, String>{
+            'JAVA_HOME': javaHome,
+            'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
+          },
         );
       });
 
-      final bool existingAppBuilt = exists(File(path.join(
+      section('Check debug APK exists');
+
+      final String debugHostApk = path.join(
         hostApp.path,
         'app',
         'build',
@@ -172,12 +191,90 @@ Future<void> main() async {
         'apk',
         'debug',
         'app-debug.apk',
-      )));
+      );
+      if (!exists(File(debugHostApk))) {
+        return TaskResult.failure('Failed to build debug host APK');
+      }
 
-      if (!existingAppBuilt) {
-        return TaskResult.failure('Failed to build existing app .apk');
+      section('Check files in debug APK');
+
+      checkItContains<String>(<String>[
+        ...flutterAssets,
+        ...debugAssets,
+        ...baseApkFiles,
+      ], await getFilesInApk(debugHostApk));
+
+      section('Check debug AndroidManifest.xml');
+
+      final String androidManifestDebug = await getAndroidManifest(debugHostApk);
+      if (!androidManifestDebug.contains('''
+        <meta-data
+            android:name="flutterProjectType"
+            android:value="module" />''')
+      ) {
+        return TaskResult.failure('Debug host APK doesn\'t contain metadata: flutterProjectType = module ');
+      }
+
+      final String analyticsOutput = analyticsOutputFile.readAsStringSync();
+      if (!analyticsOutput.contains('cd24: android-arm64')
+          || !analyticsOutput.contains('cd25: true')
+          || !analyticsOutput.contains('viewName: build/bundle')) {
+        return TaskResult.failure(
+          'Building outer app produced the following analytics: "$analyticsOutput"'
+          'but not the expected strings: "cd24: android-arm64", "cd25: true" and '
+          '"viewName: build/bundle"'
+        );
+      }
+
+      section('Build release host APK');
+
+      await inDirectory(hostApp, () async {
+        await exec(gradlewExecutable,
+          <String>['app:assembleRelease'],
+          environment: <String, String>{
+            'JAVA_HOME': javaHome,
+            'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
+          },
+        );
+      });
+
+      final String releaseHostApk = path.join(
+        hostApp.path,
+        'app',
+        'build',
+        'outputs',
+        'apk',
+        'release',
+        'app-release-unsigned.apk',
+      );
+      if (!exists(File(releaseHostApk))) {
+        return TaskResult.failure('Failed to build release host APK');
+      }
+
+      section('Check files in release APK');
+
+      checkItContains<String>(<String>[
+        ...flutterAssets,
+        ...baseApkFiles,
+        'lib/arm64-v8a/libapp.so',
+        'lib/arm64-v8a/libflutter.so',
+        'lib/armeabi-v7a/libapp.so',
+        'lib/armeabi-v7a/libflutter.so',
+      ], await getFilesInApk(releaseHostApk));
+
+      section('Check release AndroidManifest.xml');
+
+      final String androidManifestRelease = await getAndroidManifest(debugHostApk);
+      if (!androidManifestRelease.contains('''
+        <meta-data
+            android:name="flutterProjectType"
+            android:value="module" />''')
+      ) {
+        return TaskResult.failure('Release host APK doesn\'t contain metadata: flutterProjectType = module ');
       }
       return TaskResult.success(null);
+    } on TaskResult catch (taskResult) {
+      return taskResult;
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {

@@ -52,7 +52,7 @@ void main() {
             );
           },
         ),
-      )
+      ),
     ));
 
     await tester.pumpAndSettle();
@@ -103,8 +103,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>(
@@ -258,7 +258,7 @@ void main() {
           onPressed: null,
           child: Text('fab'),
         ),
-      )
+      ),
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>(
@@ -431,6 +431,7 @@ void main() {
     const Color color = Colors.pink;
     const double elevation = 9.0;
     final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
+    const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -449,7 +450,7 @@ void main() {
           Container(height: 100.0, child: const Text('Three')),
         ],
       );
-    }, backgroundColor: color, elevation: elevation, shape: shape);
+    }, backgroundColor: color, elevation: elevation, shape: shape, clipBehavior: clipBehavior);
 
     await tester.pumpAndSettle();
 
@@ -457,6 +458,7 @@ void main() {
     expect(bottomSheet.backgroundColor, color);
     expect(bottomSheet.elevation, elevation);
     expect(bottomSheet.shape, shape);
+    expect(bottomSheet.clipBehavior, clipBehavior);
   });
 
   testWidgets('PersistentBottomSheetController.close dismisses the bottom sheet', (WidgetTester tester) async {
@@ -464,8 +466,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
     final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {

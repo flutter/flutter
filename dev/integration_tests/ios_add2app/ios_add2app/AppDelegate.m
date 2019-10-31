@@ -41,7 +41,7 @@ static NSString *_kReloadChannelName = @"reload";
 
   _reloadMessageChannel = [[FlutterBasicMessageChannel alloc]
          initWithName:_kReloadChannelName
-      binaryMessenger:_engine
+      binaryMessenger:_engine.binaryMessenger
                 codec:[FlutterStringCodec sharedInstance]];
 
   self.window.rootViewController = _navigationController;

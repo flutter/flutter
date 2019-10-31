@@ -202,27 +202,29 @@ void main() {
     final PageController pageController = PageController(initialPage: 1);
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: PageView(
-              controller: pageController,
-              children: <Widget>[
-                Container(
-                  color: Colors.red,
-                ),
-                Container(
-                  child: TextField(
-                    controller: textController,
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: PageView(
+                controller: pageController,
+                children: <Widget>[
+                  Container(
+                    color: Colors.red,
                   ),
-                  color: Colors.green,
-                ),
-                Container(
-                  color: Colors.red,
-                ),
-              ],
+                  Container(
+                    child: TextField(
+                      controller: textController,
+                    ),
+                    color: Colors.green,
+                  ),
+                  Container(
+                    color: Colors.red,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

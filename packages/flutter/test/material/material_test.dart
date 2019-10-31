@@ -21,12 +21,14 @@ class NotifyMaterial extends StatelessWidget {
 Widget buildMaterial({
   double elevation = 0.0,
   Color shadowColor = const Color(0xFF00FF00),
+  Color color = const Color(0xFF0000FF),
 }) {
   return Center(
     child: SizedBox(
       height: 100.0,
       width: 100.0,
       child: Material(
+        color: color,
         shadowColor: shadowColor,
         elevation: elevation,
         shape: const CircleBorder(),
@@ -35,7 +37,7 @@ Widget buildMaterial({
   );
 }
 
-RenderPhysicalShape getShadow(WidgetTester tester) {
+RenderPhysicalShape getModel(WidgetTester tester) {
   return tester.renderObject(find.byType(PhysicalShape));
 }
 
@@ -53,6 +55,12 @@ class PaintRecorder extends CustomPainter {
 
   @override
   bool shouldRepaint(PaintRecorder oldDelegate) => false;
+}
+
+class ElevationColor {
+  const ElevationColor(this.elevation, this.color);
+  final double elevation;
+  final Color color;
 }
 
 void main() {
@@ -163,23 +171,23 @@ void main() {
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(elevation: 0.0));
-    final RenderPhysicalShape modelA = getShadow(tester);
+    final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.elevation, equals(0.0));
 
     await tester.pumpWidget(buildMaterial(elevation: 9.0));
-    final RenderPhysicalShape modelB = getShadow(tester);
+    final RenderPhysicalShape modelB = getModel(tester);
     expect(modelB.elevation, equals(0.0));
 
     await tester.pump(const Duration(milliseconds: 1));
-    final RenderPhysicalShape modelC = getShadow(tester);
+    final RenderPhysicalShape modelC = getModel(tester);
     expect(modelC.elevation, closeTo(0.0, 0.001));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
-    final RenderPhysicalShape modelD = getShadow(tester);
+    final RenderPhysicalShape modelD = getModel(tester);
     expect(modelD.elevation, isNot(closeTo(0.0, 0.001)));
 
     await tester.pump(kThemeChangeDuration);
-    final RenderPhysicalShape modelE = getShadow(tester);
+    final RenderPhysicalShape modelE = getModel(tester);
     expect(modelE.elevation, equals(9.0));
   });
 
@@ -188,24 +196,99 @@ void main() {
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFF00FF00)));
-    final RenderPhysicalShape modelA = getShadow(tester);
+    final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.shadowColor, equals(const Color(0xFF00FF00)));
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFFFF0000)));
-    final RenderPhysicalShape modelB = getShadow(tester);
+    final RenderPhysicalShape modelB = getModel(tester);
     expect(modelB.shadowColor, equals(const Color(0xFF00FF00)));
 
     await tester.pump(const Duration(milliseconds: 1));
-    final RenderPhysicalShape modelC = getShadow(tester);
+    final RenderPhysicalShape modelC = getModel(tester);
     expect(modelC.shadowColor, within<Color>(distance: 1, from: const Color(0xFF00FF00)));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
-    final RenderPhysicalShape modelD = getShadow(tester);
+    final RenderPhysicalShape modelD = getModel(tester);
     expect(modelD.shadowColor, isNot(within<Color>(distance: 1, from: const Color(0xFF00FF00))));
 
     await tester.pump(kThemeChangeDuration);
-    final RenderPhysicalShape modelE = getShadow(tester);
+    final RenderPhysicalShape modelE = getModel(tester);
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
+  });
+
+  group('Elevation Overlay', () {
+
+    testWidgets('applyElevationOverlayColor set to false does not change surface color', (WidgetTester tester) async {
+      const Color surfaceColor = Color(0xFF121212);
+      await tester.pumpWidget(Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: false,
+            colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
+          ),
+          child: buildMaterial(color: surfaceColor, elevation: 8.0),
+      ));
+      final RenderPhysicalShape model = getModel(tester);
+      expect(model.color, equals(surfaceColor));
+    });
+
+    testWidgets('applyElevationOverlayColor set to true applies a semi-transparent onSurface color to the surface color', (WidgetTester tester) async {
+      const Color surfaceColor = Color(0xFF121212);
+      const Color onSurfaceColor = Colors.greenAccent;
+
+      // The colors we should get with a base surface color of 0xFF121212 for
+      // and a given elevation
+      const List<ElevationColor> elevationColors = <ElevationColor>[
+        ElevationColor(0.0, Color(0xFF121212)),
+        ElevationColor(1.0, Color(0xFF161D19)),
+        ElevationColor(2.0, Color(0xFF18211D)),
+        ElevationColor(3.0, Color(0xFF19241E)),
+        ElevationColor(4.0, Color(0xFF1A2620)),
+        ElevationColor(6.0, Color(0xFF1B2922)),
+        ElevationColor(8.0, Color(0xFF1C2C24)),
+        ElevationColor(12.0, Color(0xFF1D3027)),
+        ElevationColor(16.0, Color(0xFF1E3329)),
+        ElevationColor(24.0, Color(0xFF20362B)),
+      ];
+
+      for (ElevationColor test in elevationColors) {
+        await tester.pumpWidget(
+            Theme(
+              data: ThemeData(
+                applyElevationOverlayColor: true,
+                colorScheme: const ColorScheme.dark().copyWith(
+                  surface: surfaceColor,
+                  onSurface: onSurfaceColor,
+                ),
+              ),
+              child: buildMaterial(
+                color: surfaceColor,
+                elevation: test.elevation,
+              ),
+            ),
+        );
+        await tester.pumpAndSettle(); // wait for the elevation animation to finish
+        final RenderPhysicalShape model = getModel(tester);
+        expect(model.color, equals(test.color));
+      }
+    });
+
+    testWidgets('overlay will only apply to materials using colorScheme.surface', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          Theme(
+            data: ThemeData(
+              applyElevationOverlayColor: true,
+              colorScheme: const ColorScheme.dark().copyWith(surface: const Color(0xFF121212)),
+            ),
+            child: buildMaterial(
+                color: Colors.cyan,
+                elevation: 8.0,
+            ),
+          ),
+      );
+      final RenderPhysicalShape model = getModel(tester);
+      expect(model.color, equals(Colors.cyan));
+    });
+
   });
 
   group('Transparency clipping', () {
@@ -216,10 +299,26 @@ void main() {
             key: materialKey,
             type: MaterialType.transparency,
             child: const SizedBox(width: 100.0, height: 100.0),
-          )
+          ),
       );
 
       expect(find.byKey(materialKey), hasNoImmediateClip);
+    });
+
+    testWidgets('Null clipBehavior asserts', (WidgetTester tester) async {
+      final GlobalKey materialKey = GlobalKey();
+      Future<void> doPump() async {
+        await tester.pumpWidget(
+            Material(
+              key: materialKey,
+              type: MaterialType.transparency,
+              child: const SizedBox(width: 100.0, height: 100.0),
+              clipBehavior: null,
+            ),
+        );
+      }
+
+      expect(() async => doPump(), throwsAssertionError);
     });
 
     testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {
@@ -230,7 +329,7 @@ void main() {
           type: MaterialType.transparency,
           child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), clipsWithBoundingRect);
@@ -245,7 +344,7 @@ void main() {
           borderRadius: const BorderRadius.all(Radius.circular(10.0)),
           child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
-        )
+        ),
       );
 
       expect(
@@ -265,7 +364,7 @@ void main() {
           shape: const StadiumBorder(),
           child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
-        )
+        ),
       );
 
       expect(
@@ -348,7 +447,7 @@ void main() {
           key: materialKey,
           type: MaterialType.canvas,
           child: const SizedBox(width: 100.0, height: 100.0),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -367,7 +466,7 @@ void main() {
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -386,7 +485,7 @@ void main() {
           shape: const StadiumBorder(),
           child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
@@ -402,7 +501,7 @@ void main() {
           key: materialKey,
           type: MaterialType.card,
           child: const SizedBox(width: 100.0, height: 100.0),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -421,7 +520,7 @@ void main() {
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           elevation: 5.0,
           child: const SizedBox(width: 100.0, height: 100.0),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -440,7 +539,7 @@ void main() {
           shape: const StadiumBorder(),
           elevation: 5.0,
           child: const SizedBox(width: 100.0, height: 100.0),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
@@ -457,7 +556,7 @@ void main() {
           type: MaterialType.circle,
           child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -474,7 +573,7 @@ void main() {
           type: MaterialType.button,
           child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -494,7 +593,7 @@ void main() {
           color: const Color(0xFF0000FF),
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           elevation: 4.0,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -514,7 +613,7 @@ void main() {
           color: const Color(0xFF0000FF),
           shape: const StadiumBorder(),
           elevation: 4.0,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
@@ -539,7 +638,7 @@ void main() {
               color: Color(0xFF0000FF),
             ),
           ),
-        )
+        ),
       );
 
       final RenderBox box = tester.renderObject(find.byKey(materialKey));
@@ -559,7 +658,7 @@ void main() {
               color: Color(0xFF0000FF),
             ),
           ),
-        )
+        ),
       );
 
       final RenderBox box = tester.renderObject(find.byKey(materialKey));
@@ -574,7 +673,7 @@ void main() {
           type: MaterialType.transparency,
           child: const SizedBox(width: 100.0, height: 100.0),
           shape: const CircleBorder(),
-        )
+        ),
       );
 
       final RenderBox box = tester.renderObject(find.byKey(materialKey));
@@ -616,11 +715,7 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile(
-          'material.border_paint_above.png',
-          version: null,
-        ),
-        skip: !isLinux,
+        matchesGoldenFile('material.border_paint_above.png'),
       );
     }, skip: isBrowser);
 
@@ -660,11 +755,7 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile(
-          'material.border_paint_below.png',
-          version: null,
-        ),
-        skip: !isLinux,
+        matchesGoldenFile('material.border_paint_below.png'),
       );
     }, skip: isBrowser);
   });

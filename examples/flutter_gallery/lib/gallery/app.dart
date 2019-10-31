@@ -62,7 +62,7 @@ class _GalleryAppState extends State<GalleryApp> {
   void initState() {
     super.initState();
     _options = GalleryOptions(
-      theme: kLightGalleryTheme,
+      themeMode: ThemeMode.system,
       textScaleFactor: kAllGalleryTextScaleValues[0],
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
@@ -134,7 +134,9 @@ class _GalleryAppState extends State<GalleryApp> {
     return ScopedModel<AppStateModel>(
       model: model,
       child: MaterialApp(
-        theme: _options.theme.data.copyWith(platform: _options.platform),
+        theme: kLightGalleryTheme.copyWith(platform: _options.platform),
+        darkTheme: kDarkGalleryTheme.copyWith(platform: _options.platform),
+        themeMode: _options.themeMode,
         title: 'Flutter Gallery',
         color: Colors.grey,
         showPerformanceOverlay: _options.showPerformanceOverlay,
@@ -148,12 +150,14 @@ class _GalleryAppState extends State<GalleryApp> {
               // Specifically use a blank Cupertino theme here and do not transfer
               // over the Material primary color etc except the brightness to
               // showcase standard iOS looks.
-              CupertinoTheme(
-                data: CupertinoThemeData(
-                  brightness: _options.theme.data.brightness,
-                ),
-                child: child,
-              ),
+              Builder(builder: (BuildContext context) {
+                return CupertinoTheme(
+                  data: CupertinoThemeData(
+                    brightness: Theme.of(context).brightness,
+                  ),
+                  child: child,
+                );
+              }),
             ),
           );
         },

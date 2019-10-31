@@ -59,8 +59,9 @@ class AndroidConsole {
     while (true) {
       final String text = await _queue.next;
       final String trimmedText = text.trim();
-      if (trimmedText == 'OK')
+      if (trimmedText == 'OK') {
         break;
+      }
       if (trimmedText.endsWith('\nOK')) {
         output.write(trimmedText.substring(0, trimmedText.length - 3));
         break;

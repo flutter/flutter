@@ -322,8 +322,8 @@ class BottomNavigationBar extends StatefulWidget {
   // [BottomNavigationBarType.fixed] is used for 3 or fewer items, and
   // [BottomNavigationBarType.shifting] is used for 4+ items.
   static BottomNavigationBarType _type(
-      BottomNavigationBarType type,
-      List<BottomNavigationBarItem> items,
+    BottomNavigationBarType type,
+    List<BottomNavigationBarItem> items,
   ) {
     if (type != null) {
       return type;
@@ -473,47 +473,44 @@ class _BottomNavigationTile extends StatelessWidget {
       flex: size,
       child: Semantics(
         container: true,
-        header: true,
         selected: selected,
-        child: Focus(
-          child: Stack(
-            children: <Widget>[
-              InkResponse(
-                onTap: onTap,
-                child: Padding(
-                  padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      _TileIcon(
-                        colorTween: colorTween,
-                        animation: animation,
-                        iconSize: iconSize,
-                        selected: selected,
-                        item: item,
-                        selectedIconTheme: selectedIconTheme,
-                        unselectedIconTheme: unselectedIconTheme,
-                      ),
-                      _Label(
-                        colorTween: colorTween,
-                        animation: animation,
-                        item: item,
-                        selectedLabelStyle: selectedLabelStyle,
-                        unselectedLabelStyle: unselectedLabelStyle,
-                        showSelectedLabels: showSelectedLabels,
-                        showUnselectedLabels: showUnselectedLabels,
-                      ),
-                    ],
-                  ),
+        child: Stack(
+          children: <Widget>[
+            InkResponse(
+              onTap: onTap,
+              child: Padding(
+                padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    _TileIcon(
+                      colorTween: colorTween,
+                      animation: animation,
+                      iconSize: iconSize,
+                      selected: selected,
+                      item: item,
+                      selectedIconTheme: selectedIconTheme,
+                      unselectedIconTheme: unselectedIconTheme,
+                    ),
+                    _Label(
+                      colorTween: colorTween,
+                      animation: animation,
+                      item: item,
+                      selectedLabelStyle: selectedLabelStyle,
+                      unselectedLabelStyle: unselectedLabelStyle,
+                      showSelectedLabels: showSelectedLabels,
+                      showUnselectedLabels: showUnselectedLabels,
+                    ),
+                  ],
                 ),
               ),
-              Semantics(
-                label: indexLabel,
-              ),
-            ],
-          ),
+            ),
+            Semantics(
+              label: indexLabel,
+            ),
+          ],
         ),
       ),
     );

@@ -10,13 +10,19 @@ import 'colors.dart';
 
 const double _kDefaultIndicatorRadius = 10.0;
 
-/// An iOS-style activity indicator.
+// Extracted from iOS 13.2 Beta.
+const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFF3C3C44),
+  darkColor: Color(0xFFEBEBF5),
+);
+
+/// An iOS-style activity indicator that spins clockwise.
 ///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/progress-indicators/#activity-indicators>
 class CupertinoActivityIndicator extends StatefulWidget {
-  /// Creates an iOS-style activity indicator.
+  /// Creates an iOS-style activity indicator that spins clockwise.
   const CupertinoActivityIndicator({
     Key key,
     this.animating = true,
@@ -81,6 +87,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       child: CustomPaint(
         painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
+          activeColor: CupertinoDynamicColor.resolve(_kActiveTickColor, context),
           radius: widget.radius,
         ),
       ),
@@ -90,26 +97,29 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
 
 const double _kTwoPI = math.pi * 2.0;
 const int _kTickCount = 12;
-const int _kHalfTickCount = _kTickCount ~/ 2;
-const Color _kTickColor = CupertinoColors.lightBackgroundGray;
-const Color _kActiveTickColor = Color(0xFF9D9D9D);
+
+// Alpha values extracted from the native component (for both dark and light mode).
+// The list has a length of 12.
+const List<int> _alphaValues = <int>[147, 131, 114, 97, 81, 64, 47, 47, 47, 47, 47, 47];
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
-    this.position,
+    @required this.position,
+    @required this.activeColor,
     double radius,
   }) : tickFundamentalRRect = RRect.fromLTRBXY(
-           -radius,
-           1.0 * radius / _kDefaultIndicatorRadius,
-           -radius / 2.0,
-           -1.0 * radius / _kDefaultIndicatorRadius,
-           1.0,
-           1.0,
+         -radius,
+         radius / _kDefaultIndicatorRadius,
+         -radius / 2.0,
+         -radius / _kDefaultIndicatorRadius,
+         radius / _kDefaultIndicatorRadius,
+         radius / _kDefaultIndicatorRadius,
        ),
        super(repaint: position);
 
   final Animation<double> position;
   final RRect tickFundamentalRRect;
+  final Color activeColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -121,8 +131,8 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     final int activeTick = (_kTickCount * position.value).floor();
 
     for (int i = 0; i < _kTickCount; ++ i) {
-      final double t = (((i + activeTick) % _kTickCount) / _kHalfTickCount).clamp(0.0, 1.0);
-      paint.color = Color.lerp(_kActiveTickColor, _kTickColor, t);
+      final int t = (i + activeTick) % _kTickCount;
+      paint.color = activeColor.withAlpha(_alphaValues[t]);
       canvas.drawRRect(tickFundamentalRRect, paint);
       canvas.rotate(-_kTwoPI / _kTickCount);
     }
@@ -132,6 +142,6 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CupertinoActivityIndicatorPainter oldPainter) {
-    return oldPainter.position != position;
+    return oldPainter.position != position || oldPainter.activeColor != activeColor;
   }
 }

@@ -29,6 +29,8 @@ import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
+import '../common/wait.dart';
+import 'wait_conditions.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
@@ -53,6 +55,11 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
       name: _extensionMethodName,
       callback: extension.call,
     );
+  }
+
+  @override
+  BinaryMessenger createBinaryMessenger() {
+    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 }
 
@@ -112,7 +119,10 @@ class FlutterDriverExtension {
       'tap': _tap,
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
-      'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
+      'waitForCondition': _waitForCondition,
+      'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks, // ignore: deprecated_member_use_from_same_package
+      'waitUntilNoPendingFrame': _waitUntilNoPendingFrame, // ignore: deprecated_member_use_from_same_package
+      'waitUntilFirstFrameRasterized': _waitUntilFirstFrameRasterized, // ignore: deprecated_member_use_from_same_package
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
       'get_diagnostics_tree': _getDiagnosticsTree,
@@ -132,7 +142,10 @@ class FlutterDriverExtension {
       'tap': (Map<String, String> params) => Tap.deserialize(params),
       'waitFor': (Map<String, String> params) => WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
-      'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
+      'waitForCondition': (Map<String, String> params) => WaitForCondition.deserialize(params),
+      'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params), // ignore: deprecated_member_use_from_same_package
+      'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params), // ignore: deprecated_member_use_from_same_package
+      'waitUntilFirstFrameRasterized': (Map<String, String> params) => WaitUntilFirstFrameRasterized.deserialize(params), // ignore: deprecated_member_use_from_same_package
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
       'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),
@@ -218,6 +231,13 @@ class FlutterDriverExtension {
     return RenderTree(RendererBinding.instance?.renderView?.toStringDeep());
   }
 
+  // This can be used to wait for the first frame being rasterized during app launch.
+  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
+  Future<Result> _waitUntilFirstFrameRasterized(Command command) async {
+    await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
+    return null;
+  }
+
   // Waits until at the end of a frame the provided [condition] is [true].
   Future<void> _waitUntilFrame(bool condition(), [ Completer<void> completer ]) {
     completer ??= Completer<void>();
@@ -233,9 +253,6 @@ class FlutterDriverExtension {
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
   Future<Finder> _waitForElement(Finder finder) async {
-    // TODO(mravn): This method depends on async execution. A refactoring
-    // for sync-async semantics is tracked in https://github.com/flutter/flutter/issues/16801.
-    await Future<void>.value(null);
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
 
@@ -318,19 +335,21 @@ class FlutterDriverExtension {
   }
 
   Finder _createAncestorFinder(Ancestor arguments) {
-    return find.ancestor(
+    final Finder finder = find.ancestor(
       of: _createFinder(arguments.of),
       matching: _createFinder(arguments.matching),
       matchRoot: arguments.matchRoot,
     );
+    return arguments.firstMatchOnly ? finder.first : finder;
   }
 
   Finder _createDescendantFinder(Descendant arguments) {
-    return find.descendant(
+    final Finder finder = find.descendant(
       of: _createFinder(arguments.of),
       matching: _createFinder(arguments.matching),
       matchRoot: arguments.matchRoot,
     );
+    return arguments.firstMatchOnly ? finder.first : finder;
   }
 
   Finder _createFinder(SerializableFinder finder) {
@@ -363,16 +382,57 @@ class FlutterDriverExtension {
     return const WaitForAbsentResult();
   }
 
+  Future<Result> _waitForCondition(Command command) async {
+    assert(command != null);
+    final WaitForCondition waitForConditionCommand = command;
+    final WaitCondition condition = deserializeCondition(waitForConditionCommand.condition);
+    await condition.wait();
+    return null;
+  }
+
+  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
     return null;
   }
 
+  /// Returns a future that waits until no pending frame is scheduled (frame is synced).
+  ///
+  /// Specifically, it checks:
+  /// * Whether the count of transient callbacks is zero.
+  /// * Whether there's no pending request for scheduling a new frame.
+  ///
+  /// We consider the frame is synced when both conditions are met.
+  ///
+  /// This method relies on a Flutter Driver mechanism called "frame sync",
+  /// which waits for transient animations to finish. Persistent animations will
+  /// cause this to wait forever.
+  ///
+  /// If a test needs to interact with the app while animations are running, it
+  /// should avoid this method and instead disable the frame sync using
+  /// `set_frame_sync` method. See [FlutterDriver.runUnsynchronized] for more
+  /// details on how to do this. Note, disabling frame sync will require the
+  /// test author to use some other method to avoid flakiness.
+  ///
+  /// This method has been deprecated in favor of [_waitForCondition].
+  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
+  Future<Result> _waitUntilNoPendingFrame(Command command) async {
+    await _waitUntilFrame(() {
+      return SchedulerBinding.instance.transientCallbackCount == 0
+          && !SchedulerBinding.instance.hasScheduledFrame;
+    });
+    return null;
+  }
+
   Future<GetSemanticsIdResult> _getSemanticsId(Command command) async {
     final GetSemanticsId semanticsCommand = command;
     final Finder target = await _waitForElement(_createFinder(semanticsCommand.finder));
-    final Element element = target.evaluate().single;
+    final Iterable<Element> elements = target.evaluate();
+    if (elements.length > 1) {
+      throw StateError('Found more than one element with the same ID: $elements');
+    }
+    final Element element = elements.single;
     RenderObject renderObject = element.renderObject;
     SemanticsNode node;
     while (renderObject != null && node == null) {

@@ -10,23 +10,23 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { Theme
   return MaterialApp(
     theme: theme,
     home: Material(
-        child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                  child: RaisedButton(
-                      child: const Text('X'),
-                      onPressed: () {
-                        showDialog<void>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return RepaintBoundary(key: _painterKey, child: dialog);
-                          },
-                        );
-                      },
-                  ),
-              );
-            }
-        ),
+      child: Builder(
+        builder: (BuildContext context) {
+          return Center(
+            child: RaisedButton(
+              child: const Text('X'),
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return RepaintBoundary(key: _painterKey, child: dialog);
+                  },
+                );
+              },
+            ),
+          );
+        },
+      ),
     ),
   );
 }
@@ -130,11 +130,7 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile(
-        'dialog_theme.dialog_with_custom_border.png',
-        version: null,
-      ),
-      skip: !isLinux,
+      matchesGoldenFile('dialog_theme.dialog_with_custom_border.png'),
     );
   }, skip: isBrowser);
 

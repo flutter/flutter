@@ -237,6 +237,33 @@ void main() {
     );
   });
 
+  test('isSameColorAs', () {
+    expect(
+      const Color(0x87654321),
+      isSameColorAs(_CustomColor(0x87654321)),
+    );
+
+    expect(
+      _CustomColor(0x87654321),
+      isSameColorAs(const Color(0x87654321)),
+    );
+
+    expect(
+      const Color(0x12345678),
+      isNot(isSameColorAs(_CustomColor(0x87654321))),
+    );
+
+    expect(
+      _CustomColor(0x87654321),
+      isNot(isSameColorAs(const Color(0x12345678))),
+    );
+
+    expect(
+      _CustomColor(0xFF123456),
+      isSameColorAs(_CustomColor(0xFF123456)..isEqual = false),
+    );
+  });
+
   group('coversSameAreaAs', () {
     test('empty Paths', () {
       expect(
@@ -335,30 +362,6 @@ void main() {
         expect(comparator.imageBytes, hasLength(greaterThan(0)));
         expect(comparator.golden, Uri.parse('foo.png'));
       });
-
-      testWidgets('Comparator succeeds incorporating version number', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(const Text('hello')));
-        final Finder finder = find.byType(Text);
-        await expectLater(finder, matchesGoldenFile(
-          'foo.png',
-          version: 1,
-        ));
-        expect(comparator.invocation, _ComparatorInvocation.compare);
-        expect(comparator.imageBytes, hasLength(greaterThan(0)));
-        expect(comparator.golden, Uri.parse('foo.1.png'));
-      });
-
-      testWidgets('Comparator succeeds with null version number', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(const Text('hello')));
-        final Finder finder = find.byType(Text);
-        await expectLater(finder, matchesGoldenFile(
-          'foo.png',
-          version: null,
-        ));
-        expect(comparator.invocation, _ComparatorInvocation.compare);
-        expect(comparator.imageBytes, hasLength(greaterThan(0)));
-        expect(comparator.golden, Uri.parse('foo.png'));
-      });
     });
 
     group('does not match', () {
@@ -413,40 +416,6 @@ void main() {
           expect(error.message, contains('too many widgets'));
         }
       });
-
-      testWidgets('Comparator failure incorporates version number', (WidgetTester tester) async {
-        comparator.behavior = _ComparatorBehavior.returnFalse;
-        await tester.pumpWidget(boilerplate(const Text('hello')));
-        final Finder finder = find.byType(Text);
-        try {
-          await expectLater(finder, matchesGoldenFile(
-            'foo.png',
-            version: 1,
-          ));
-          fail('TestFailure expected but not thrown');
-        } on TestFailure catch (error) {
-          expect(comparator.invocation, _ComparatorInvocation.compare);
-          expect(error.message, contains('does not match'));
-          expect(error.message, contains('foo.1.png'));
-        }
-      });
-
-      testWidgets('Comparator failure with null version number', (WidgetTester tester) async {
-        comparator.behavior = _ComparatorBehavior.returnFalse;
-        await tester.pumpWidget(boilerplate(const Text('hello')));
-        final Finder finder = find.byType(Text);
-        try {
-          await expectLater(finder, matchesGoldenFile(
-            'foo.png',
-            version: null,
-          ));
-          fail('TestFailure expected but not thrown');
-        } on TestFailure catch (error) {
-          expect(comparator.invocation, _ComparatorInvocation.compare);
-          expect(error.message, contains('does not match'));
-          expect(error.message, contains('foo.png'));
-        }
-      });
     });
 
     testWidgets('calls update on comparator if autoUpdateGoldenFiles is true', (WidgetTester tester) async {
@@ -470,6 +439,7 @@ void main() {
         namesRoute: true,
         header: true,
         button: true,
+        link: true,
         onTap: () { },
         onLongPress: () { },
         label: 'foo',
@@ -497,6 +467,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scan',
@@ -518,6 +489,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scan',
@@ -539,6 +511,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scans',
@@ -560,7 +533,9 @@ void main() {
       for (int index in SemanticsAction.values.keys)
         actions |= index;
       for (int index in SemanticsFlag.values.keys)
-        flags |= index;
+        // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
+        if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline)
+          flags |= index;
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
@@ -581,6 +556,8 @@ void main() {
         scrollExtentMin: null,
         platformViewId: 105,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        currentValueLength: 10,
+        maxValueLength: 15,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode();
       node.data = data;
@@ -591,19 +568,25 @@ void main() {
          elevation: 3.0,
          thickness: 4.0,
          platformViewId: 105,
+         currentValueLength: 10,
+         maxValueLength: 15,
          /* Flags */
          hasCheckedState: true,
          isChecked: true,
          isSelected: true,
          isButton: true,
+         isLink: true,
          isTextField: true,
          isReadOnly: true,
          hasEnabledState: true,
          isFocused: true,
+         isFocusable: true,
          isEnabled: true,
          isInMutuallyExclusiveGroup: true,
          isHeader: true,
          isObscured: true,
+         // TODO(mdebbar): Uncomment after https://github.com/flutter/engine/pull/9894
+         //isMultiline: true,
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,
@@ -708,10 +691,26 @@ class _FakeComparator implements GoldenFileComparator {
     this.imageBytes = imageBytes;
     return Future<void>.value();
   }
+
+  @override
+  Uri getTestUri(Uri key, int version) {
+    return key;
+  }
 }
 
 class _FakeSemanticsNode extends SemanticsNode {
   SemanticsData data;
   @override
   SemanticsData getSemanticsData() => data;
+}
+
+class _CustomColor extends Color {
+  _CustomColor(int value) : super(value);
+  bool isEqual;
+
+  @override
+  bool operator ==(dynamic other) => isEqual ?? super == other;
+
+  @override
+  int get hashCode => hashValues(super.hashCode, isEqual);
 }

@@ -15,6 +15,34 @@ void main() {
     navigatorObserver = MockNavigatorObserver();
   });
 
+  testWidgets(
+    'Throws FlutterError with correct message when route builder returns null',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Placeholder(),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+          CupertinoPageRoute<void>(
+            title: 'Route 1',
+            builder: (_) => null,
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final dynamic error = tester.takeException();
+    expect(error, isFlutterError);
+    expect(error.toStringDeep(), equalsIgnoringHashCodes(
+      'FlutterError\n'
+      '   The builder for route "null" returned null.\n'
+      '   Route builders must never return null.\n'
+    ));
+  });
+
   testWidgets('Middle auto-populates with title', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -31,7 +59,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -64,7 +92,7 @@ void main() {
             ),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -95,8 +123,8 @@ void main() {
     });
 
     expect(opacities, <double> [
-        0.0, // Initially the smaller font title is invisible.
-        1.0, // The larger font title is visible.
+      0.0, // Initially the smaller font title is invisible.
+      1.0, // The larger font title is visible.
     ]);
 
     // Check that the large font title is at the right spot.
@@ -126,7 +154,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -141,7 +169,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -172,7 +200,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -187,7 +215,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     // Trigger the route push
@@ -347,7 +375,18 @@ void main() {
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))).dx,
       moreOrLessEquals(798, epsilon: 1),
     );
-    await tester.tap(find.text('push'));
+
+    // Use the navigator to push a route instead of tapping the 'push' button.
+    // The topmost route (the one that's animating away), ignores input while
+    // the pop is underway because route.navigator.userGestureInProgress.
+    Navigator.push<void>(scaffoldKey.currentContext, CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Center(child: Text('route')),
+        );
+      },
+    ));
+
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
@@ -742,6 +781,142 @@ void main() {
       tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
       false,
     );
+  });
+
+  testWidgets('ModalPopup overlay dark mode', (WidgetTester tester) async {
+    StateSetter stateSetter;
+    Brightness brightness = Brightness.light;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          stateSetter = setter;
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: CupertinoPageScaffold(
+              child: Builder(builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () async {
+                    await showCupertinoModalPopup<void>(
+                      context: context,
+                      builder: (BuildContext context) => const SizedBox(),
+                    );
+                  },
+                  child: const Text('tap'),
+                );
+              }),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color.value,
+      0x33000000,
+    );
+
+    stateSetter(() { brightness = Brightness.dark; });
+    await tester.pump();
+
+    // TODO(LongCatIsLooong): The background overlay SHOULD switch to dark color.
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color.value,
+      0x33000000,
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoPageScaffold(
+          child: Builder(builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () async {
+                await showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) => const SizedBox(),
+                );
+              },
+              child: const Text('tap'),
+            );
+          }),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color.value,
+      0x7A000000,
+    );
+  });
+
+  testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/39989
+
+    final GlobalKey homeScaffoldKey = GlobalKey();
+    final GlobalKey pageScaffoldKey = GlobalKey();
+    int homeTapCount = 0;
+    int pageTapCount = 0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: homeScaffoldKey,
+          child: GestureDetector(
+            onTap: () {
+              homeTapCount += 1;
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(homeScaffoldKey));
+    expect(homeTapCount, 1);
+    expect(pageTapCount, 0);
+
+    Navigator.push<void>(homeScaffoldKey.currentContext, CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return CupertinoPageScaffold(
+          key: pageScaffoldKey,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: GestureDetector(
+              onTap: () {
+                pageTapCount += 1;
+              }
+            ),
+          ),
+        );
+      },
+    ));
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(pageScaffoldKey));
+    expect(homeTapCount, 1);
+    expect(pageTapCount, 1);
+
+    // Start the basic iOS back-swipe dismiss transition. Drag the pushed
+    // "page" route halfway across the screen. The underlying "home" will
+    // start sliding in from the left.
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5, 300));
+    await gesture.moveBy(const Offset(400, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
+    expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
+
+    // Tapping on the "page" route doesn't trigger the GestureDetector because
+    // it's being dragged.
+    await tester.tap(find.byKey(pageScaffoldKey));
+    expect(homeTapCount, 1);
+    expect(pageTapCount, 1);
   });
 }
 

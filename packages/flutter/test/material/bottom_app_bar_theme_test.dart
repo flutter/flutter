@@ -80,11 +80,7 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile(
-        'bottom_app_bar_theme.custom_shape.png',
-        version: null,
-      ),
-      skip: !isLinux,
+      matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
     );
   }, skip: isBrowser);
 

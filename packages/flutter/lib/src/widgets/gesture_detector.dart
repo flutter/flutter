@@ -126,19 +126,41 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
 ///
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/gesture_detector.mp4}
+///
 /// {@tool sample}
 ///
-/// This example makes a rectangle react to being tapped by setting the
-/// `_lights` field:
+/// This example turns the light bulb yellow when the "turn lights on" button is
+/// tapped by setting the `_lights` field:
 ///
 /// ```dart
-/// GestureDetector(
-///   onTap: () {
-///     setState(() { _lights = true; });
-///   },
-///   child: Container(
-///     color: Colors.yellow,
-///     child: Text('TURN LIGHTS ON'),
+/// Container(
+///   alignment: FractionalOffset.center,
+///   color: Colors.white,
+///   child: Column(
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: <Widget>[
+///       Padding(
+///         padding: const EdgeInsets.all(8.0),
+///         child: Icon(
+///           Icons.lightbulb_outline,
+///           color: _lights ? Colors.yellow.shade600 : Colors.black,
+///           size: 60,
+///         ),
+///       ),
+///       GestureDetector(
+///         onTap: () {
+///           setState(() {
+///             _lights = true;
+///           });
+///         },
+///         child: Container(
+///           color: Colors.yellow.shade600,
+///           padding: const EdgeInsets.all(8),
+///           child: const Text('TURN LIGHTS ON'),
+///         ),
+///       ),
+///     ],
 ///   ),
 /// )
 /// ```
@@ -210,18 +232,23 @@ class GestureDetector extends StatelessWidget {
          final bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
          if (havePan || haveScale) {
            if (havePan && haveScale) {
-             throw FlutterError(
-               'Incorrect GestureDetector arguments.\n'
-               'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan. Just use the scale gesture recognizer.'
-             );
+             throw FlutterError.fromParts(<DiagnosticsNode>[
+               ErrorSummary('Incorrect GestureDetector arguments.'),
+               ErrorDescription(
+                 'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan.'
+               ),
+               ErrorHint('Just use the scale gesture recognizer.')
+             ]);
            }
            final String recognizer = havePan ? 'pan' : 'scale';
            if (haveVerticalDrag && haveHorizontalDrag) {
-             throw FlutterError(
-               'Incorrect GestureDetector arguments.\n'
-               'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
-               'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
-             );
+             throw FlutterError.fromParts(<DiagnosticsNode>[
+               ErrorSummary('Incorrect GestureDetector arguments.'),
+               ErrorDescription(
+                 'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
+                 'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
+               )
+             ]);
            }
          }
          return true;
@@ -913,13 +940,15 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   void replaceGestureRecognizers(Map<Type, GestureRecognizerFactory> gestures) {
     assert(() {
       if (!context.findRenderObject().owner.debugDoingLayout) {
-        throw FlutterError(
-          'Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.\n'
-          'The replaceGestureRecognizers() method can only be called during the layout phase. '
-          'To set the gesture recognizers at other times, trigger a new build using setState() '
-          'and provide the new gesture recognizers as constructor arguments to the corresponding '
-          'RawGestureDetector or GestureDetector object.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.'),
+          ErrorDescription('The replaceGestureRecognizers() method can only be called during the layout phase.'),
+          ErrorHint(
+            'To set the gesture recognizers at other times, trigger a new build using setState() '
+            'and provide the new gesture recognizers as constructor arguments to the corresponding '
+            'RawGestureDetector or GestureDetector object.'
+          )
+        ]);
       }
       return true;
     }());
@@ -930,8 +959,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
-  /// This method can be called outside of the build phase to filter the list of
-  /// available semantic actions.
+  /// This method can be called to filter the list of available semantic actions,
+  /// after the render object was created.
   ///
   /// The actual filtering is happening in the next frame and a frame will be
   /// scheduled if non is pending.
@@ -942,20 +971,21 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// If this is never called, then the actions are not filtered. If the list of
   /// actions to filter changes, it must be called again.
   void replaceSemanticsActions(Set<SemanticsAction> actions) {
+    if (widget.excludeFromSemantics)
+      return;
+
+    final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
     assert(() {
-      final Element element = context;
-      if (element.owner.debugBuilding) {
+      if (semanticsGestureHandler == null) {
         throw FlutterError(
           'Unexpected call to replaceSemanticsActions() method of RawGestureDetectorState.\n'
-          'The replaceSemanticsActions() method can only be called outside of the build phase.'
+          'The replaceSemanticsActions() method can only be called after the RenderSemanticsGestureHandler has been created.'
         );
       }
       return true;
     }());
-    if (!widget.excludeFromSemantics) {
-      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      semanticsGestureHandler.validActions = actions; // will call _markNeedsSemanticsUpdate(), if required.
-    }
+
+    semanticsGestureHandler.validActions = actions; // will call _markNeedsSemanticsUpdate(), if required.
   }
 
   @override

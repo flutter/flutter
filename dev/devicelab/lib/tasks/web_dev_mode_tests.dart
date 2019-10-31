@@ -14,13 +14,19 @@ import '../framework/utils.dart';
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
 final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
 
+const String kInitialStartupTime = 'InitialStartupTime';
+const String kFirstRestartTime = 'FistRestartTime';
+const String kFirstRecompileTime  = 'FirstRecompileTime';
+const String kSecondStartupTime = 'SecondStartupTime';
+const String kSecondRestartTime = 'SecondRestartTime';
+
 TaskFunction createWebDevModeTest() {
   return () async {
     final List<String> options = <String>[
-      '--hot', '-d', 'chrome', '--verbose', '--resident', '--target=lib/main.dart',
+      '--hot', '-d', 'web-server', '--verbose', '--resident', '--target=lib/main.dart',
     ];
-    setLocalEngineOptionIfNecessary(options);
     int hotRestartCount = 0;
+    final Map<String, int> measurements = <String, int>{};
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
@@ -37,7 +43,7 @@ TaskFunction createWebDevModeTest() {
           await packagesGet.exitCode;
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run', ...options],
+              flutterCommandArgs('run', options),
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
               },
@@ -45,15 +51,23 @@ TaskFunction createWebDevModeTest() {
 
           final Completer<void> stdoutDone = Completer<void>();
           final Completer<void> stderrDone = Completer<void>();
+          final Stopwatch sw = Stopwatch()..start();
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
             if (line.contains('To hot restart')) {
+              // measure clean start-up time.
+              sw.stop();
+              measurements[kInitialStartupTime] = sw.elapsedMilliseconds;
+              sw
+                ..reset()
+                ..start();
               process.stdin.write('R');
             }
-            if (line.contains('Restarted')) {
+            if (line.contains('Recompile complete')) {
               if (hotRestartCount == 0) {
+                measurements[kFirstRestartTime] = sw.elapsedMilliseconds;
                 // Update the file and reload again.
                 final File appDartSource = file(path.join(
                     _editedFlutterGalleryDir.path, 'lib/gallery/app.dart',
@@ -63,9 +77,13 @@ TaskFunction createWebDevModeTest() {
                         "'Flutter Gallery'", "'Updated Flutter Gallery'",
                     )
                 );
+                sw
+                  ..reset()
+                  ..start();
                 process.stdin.writeln('R');
                 ++hotRestartCount;
               } else {
+                measurements[kFirstRecompileTime] = sw.elapsedMilliseconds;
                 // Quit after second hot restart.
                 process.stdin.writeln('q');
               }
@@ -94,9 +112,11 @@ TaskFunction createWebDevModeTest() {
         // Start `flutter run` again to make sure it loads from the previous
         // state. dev compilers loads up from previously compiled JavaScript.
         {
+
+          final Stopwatch sw = Stopwatch()..start();
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run', ...options],
+              flutterCommandArgs('run', options),
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
               },
@@ -107,10 +127,16 @@ TaskFunction createWebDevModeTest() {
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
+
             if (line.contains('To hot restart')) {
+              measurements[kSecondStartupTime] = sw.elapsedMilliseconds;
+              sw
+                ..reset()
+                ..start();
               process.stdin.write('R');
             }
-            if (line.contains('Restarted')) {
+            if (line.contains('Recompile complete')) {
+               measurements[kSecondRestartTime] = sw.elapsedMilliseconds;
               process.stdin.writeln('q');
             }
             print('stdout: $line');
@@ -137,6 +163,12 @@ TaskFunction createWebDevModeTest() {
     if (hotRestartCount != 1) {
       return TaskResult.failure(null);
     }
-    return TaskResult.success(null);
+    return TaskResult.success(measurements, benchmarkScoreKeys: <String>[
+      kInitialStartupTime,
+      kFirstRestartTime,
+      kFirstRecompileTime,
+      kSecondStartupTime,
+      kSecondRestartTime,
+    ]);
   };
 }

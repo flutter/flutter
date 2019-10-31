@@ -5,18 +5,22 @@
 import 'dart:async';
 
 import 'package:mustache/mustache.dart' as mustache;
+import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
+import 'android/gradle.dart';
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
-import 'desktop.dart';
+import 'features.dart';
 import 'globals.dart';
 import 'macos/cocoapods.dart';
+import 'platform_plugins.dart';
 import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
-     mustache.Template(template).renderString(context);
+     mustache.Template(template, htmlEscapeValues: false).renderString(context);
   final File file = fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
@@ -26,63 +30,216 @@ class Plugin {
   Plugin({
     this.name,
     this.path,
-    this.androidPackage,
-    this.iosPrefix,
-    this.macosPrefix,
-    this.pluginClass,
+    this.platforms,
   });
 
+  /// Parses [Plugin] specification from the provided pluginYaml.
+  ///
+  /// This currently supports two formats. Legacy and Multi-platform.
+  /// Example of the deprecated Legacy format.
+  /// flutter:
+  ///  plugin:
+  ///    androidPackage: io.flutter.plugins.sample
+  ///    iosPrefix: FLT
+  ///    pluginClass: SamplePlugin
+  ///
+  /// Example Multi-platform format.
+  /// flutter:
+  ///  plugin:
+  ///    platforms:
+  ///      android:
+  ///        package: io.flutter.plugins.sample
+  ///        pluginClass: SamplePlugin
+  ///      ios:
+  ///        pluginClass: SamplePlugin
+  ///      linux:
+  ///        pluginClass: SamplePlugin
+  ///      macos:
+  ///        pluginClass: SamplePlugin
+  ///      windows:
+  ///        pluginClass: SamplePlugin
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
-    String androidPackage;
-    String iosPrefix;
-    String macosPrefix;
-    String pluginClass;
-    if (pluginYaml != null) {
-      androidPackage = pluginYaml['androidPackage'];
-      iosPrefix = pluginYaml['iosPrefix'] ?? '';
-      // TODO(stuartmorgan): Add |?? ''| here as well once this isn't used as
-      // an indicator of macOS support, see https://github.com/flutter/flutter/issues/33597
-      macosPrefix = pluginYaml['macosPrefix'];
-      pluginClass = pluginYaml['pluginClass'];
+    final List<String> errors = validatePluginYaml(pluginYaml);
+    if (errors.isNotEmpty) {
+      throwToolExit('Invalid plugin specification.\n${errors.join('\n')}');
+    }
+    if (pluginYaml != null && pluginYaml['platforms'] != null) {
+      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
+    }
+    return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
+  }
+
+  factory Plugin._fromMultiPlatformYaml(String name, String path, dynamic pluginYaml) {
+    assert (pluginYaml != null && pluginYaml['platforms'] != null,
+            'Invalid multi-platform plugin specification.');
+    final dynamic platformsYaml = pluginYaml['platforms'];
+
+    assert (_validateMultiPlatformYaml(platformsYaml).isEmpty,
+            'Invalid multi-platform plugin specification.');
+
+    final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
+
+    if (platformsYaml[AndroidPlugin.kConfigKey] != null) {
+      platforms[AndroidPlugin.kConfigKey] = AndroidPlugin.fromYaml(
+        name,
+        platformsYaml[AndroidPlugin.kConfigKey],
+        path,
+      );
+    }
+
+    if (platformsYaml[IOSPlugin.kConfigKey] != null) {
+      platforms[IOSPlugin.kConfigKey] =
+          IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey]);
+    }
+
+    if (platformsYaml[LinuxPlugin.kConfigKey] != null) {
+      platforms[LinuxPlugin.kConfigKey] =
+          LinuxPlugin.fromYaml(name, platformsYaml[LinuxPlugin.kConfigKey]);
+    }
+
+    if (platformsYaml[MacOSPlugin.kConfigKey] != null) {
+      platforms[MacOSPlugin.kConfigKey] =
+          MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey]);
+    }
+
+    if (platformsYaml[WebPlugin.kConfigKey] != null) {
+      platforms[WebPlugin.kConfigKey] =
+          WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey]);
+    }
+
+    if (platformsYaml[WindowsPlugin.kConfigKey] != null) {
+      platforms[WindowsPlugin.kConfigKey] =
+          WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey]);
+    }
+
+    return Plugin(
+      name: name,
+      path: path,
+      platforms: platforms,
+    );
+  }
+
+  @deprecated
+  factory Plugin._fromLegacyYaml(String name, String path, dynamic pluginYaml) {
+    final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
+    final String pluginClass = pluginYaml['pluginClass'];
+    if (pluginYaml != null && pluginClass != null) {
+      final String androidPackage = pluginYaml['androidPackage'];
+      if (androidPackage != null) {
+        platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
+          name: name,
+          package: pluginYaml['androidPackage'],
+          pluginClass: pluginClass,
+          pluginPath: path,
+        );
+      }
+
+      final String iosPrefix = pluginYaml['iosPrefix'] ?? '';
+      platforms[IOSPlugin.kConfigKey] =
+          IOSPlugin(
+            name: name,
+            classPrefix: iosPrefix,
+            pluginClass: pluginClass,
+          );
     }
     return Plugin(
       name: name,
       path: path,
-      androidPackage: androidPackage,
-      iosPrefix: iosPrefix,
-      macosPrefix: macosPrefix,
-      pluginClass: pluginClass,
+      platforms: platforms,
     );
+  }
+
+  static List<String> validatePluginYaml(YamlMap yaml) {
+    if (yaml.containsKey('platforms')) {
+      final int numKeys = yaml.keys.toSet().length;
+      if (numKeys != 1) {
+        return <String>[
+          'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}',
+        ];
+      } else {
+        return _validateMultiPlatformYaml(yaml['platforms']);
+      }
+    } else {
+      return _validateLegacyYaml(yaml);
+    }
+  }
+
+  static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
+    final List<String> errors = <String>[];
+    if (yaml.containsKey(AndroidPlugin.kConfigKey) &&
+        !AndroidPlugin.validate(yaml[AndroidPlugin.kConfigKey])) {
+      errors.add('Invalid "android" plugin specification.');
+    }
+    if (yaml.containsKey(IOSPlugin.kConfigKey) &&
+        !IOSPlugin.validate(yaml[IOSPlugin.kConfigKey])) {
+      errors.add('Invalid "ios" plugin specification.');
+    }
+    if (yaml.containsKey(LinuxPlugin.kConfigKey) &&
+        !LinuxPlugin.validate(yaml[LinuxPlugin.kConfigKey])) {
+      errors.add('Invalid "linux" plugin specification.');
+    }
+    if (yaml.containsKey(MacOSPlugin.kConfigKey) &&
+        !MacOSPlugin.validate(yaml[MacOSPlugin.kConfigKey])) {
+      errors.add('Invalid "macos" plugin specification.');
+    }
+    if (yaml.containsKey(WindowsPlugin.kConfigKey) &&
+        !WindowsPlugin.validate(yaml[WindowsPlugin.kConfigKey])) {
+      errors.add('Invalid "windows" plugin specification.');
+    }
+    return errors;
+  }
+
+  static List<String> _validateLegacyYaml(YamlMap yaml) {
+    final List<String> errors = <String>[];
+    if (yaml['androidPackage'] != null && yaml['androidPackage'] is! String) {
+      errors.add('The "androidPackage" must either be null or a string.');
+    }
+    if (yaml['iosPrefix'] != null && yaml['iosPrefix'] is! String) {
+      errors.add('The "iosPrefix" must either be null or a string.');
+    }
+    if (yaml['pluginClass'] != null && yaml['pluginClass'] is! String) {
+      errors.add('The "pluginClass" must either be null or a string..');
+    }
+    return errors;
   }
 
   final String name;
   final String path;
-  final String androidPackage;
-  final String iosPrefix;
-  final String macosPrefix;
-  final String pluginClass;
+
+  /// This is a mapping from platform config key to the plugin platform spec.
+  final Map<String, PluginPlatform> platforms;
 }
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
-  if (!fs.isFileSync(pubspecPath))
+  if (!fs.isFileSync(pubspecPath)) {
     return null;
+  }
   final dynamic pubspec = loadYaml(fs.file(pubspecPath).readAsStringSync());
-  if (pubspec == null)
+  if (pubspec == null) {
     return null;
+  }
   final dynamic flutterConfig = pubspec['flutter'];
-  if (flutterConfig == null || !flutterConfig.containsKey('plugin'))
+  if (flutterConfig == null || !flutterConfig.containsKey('plugin')) {
     return null;
+  }
   final String packageRootPath = fs.path.fromUri(packageRoot);
   printTrace('Found plugin $name at $packageRootPath');
-  return Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
+  return Plugin.fromYaml(
+    name,
+    packageRootPath,
+    flutterConfig['plugin'],
+  );
 }
 
 List<Plugin> findPlugins(FlutterProject project) {
   final List<Plugin> plugins = <Plugin>[];
   Map<String, Uri> packages;
   try {
-    final String packagesFile = fs.path.join(project.directory.path, PackageMap.globalPackagesPath);
+    final String packagesFile = fs.path.join(
+      project.directory.path,
+      PackageMap.globalPackagesPath,
+    );
     packages = PackageMap(packagesFile).map;
   } on FormatException catch (e) {
     printTrace('Invalid .packages file: $e');
@@ -91,8 +248,9 @@ List<Plugin> findPlugins(FlutterProject project) {
   packages.forEach((String name, Uri uri) {
     final Uri packageRoot = uri.resolve('..');
     final Plugin plugin = _pluginFromPubspec(name, packageRoot);
-    if (plugin != null)
+    if (plugin != null) {
       plugins.add(plugin);
+    }
   });
   return plugins;
 }
@@ -122,7 +280,7 @@ String _readFlutterPluginsList(FlutterProject project) {
       : null;
 }
 
-const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
+const String _androidPluginRegistryTemplateOldEmbedding = '''package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
 {{#plugins}}
@@ -153,33 +311,138 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> androidPlugins = plugins
-      .where((Plugin p) => p.androidPackage != null && p.pluginClass != null)
-      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
-          'name': p.name,
-          'package': p.androidPackage,
-          'class': p.pluginClass,
-      })
-      .toList();
-  final Map<String, dynamic> context = <String, dynamic>{
-    'plugins': androidPlugins,
-  };
+const String _androidPluginRegistryTemplateNewEmbedding = '''package dev.flutter.plugins;
 
+{{#androidX}}
+import androidx.annotation.NonNull;
+{{/androidX}}
+{{^androidX}}
+import android.support.annotation.NonNull;
+{{/androidX}}
+import io.flutter.embedding.engine.FlutterEngine;
+{{#needsShim}}
+import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
+{{/needsShim}}
+
+/**
+ * Generated file. Do not edit.
+ * This file is generated by the Flutter tool based on the
+ * plugins that support the Android platform.
+ */
+public final class GeneratedPluginRegistrant {
+  public static void registerWith(@NonNull FlutterEngine flutterEngine) {
+{{#needsShim}}
+    ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
+{{/needsShim}}
+{{#plugins}}
+  {{#usesEmbedding2}}
+    flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+  {{/usesEmbedding2}}
+  {{^usesEmbedding2}}
+    {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
+  {{/usesEmbedding2}}
+{{/plugins}}
+  }
+}
+''';
+
+List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String type) {
+  final List<Map<String, dynamic>> pluginConfigs = <Map<String, dynamic>>[];
+  for (Plugin p in plugins) {
+    final PluginPlatform platformPlugin = p.platforms[type];
+    if (platformPlugin != null) {
+      pluginConfigs.add(platformPlugin.toMap());
+    }
+  }
+  return pluginConfigs;
+}
+
+/// Returns the version of the Android embedding that the current
+/// [project] is using.
+String _getAndroidEmbeddingVersion(FlutterProject project) {
+  assert(project.android != null);
+
+  final File androidManifest = project.android.appManifestFile;
+  if (androidManifest == null || !androidManifest.existsSync()) {
+    return '1';
+  }
+  xml.XmlDocument document;
+  try {
+    document = xml.parse(androidManifest.readAsStringSync());
+  } on xml.XmlParserException {
+    throwToolExit('Error parsing ${project.android.appManifestFile} '
+                  'Please ensure that the android manifest is a valid XML document and try again.');
+  } on FileSystemException {
+    throwToolExit('Error reading ${project.android.appManifestFile} even though it exists. '
+                  'Please ensure that you have read permission to this file and try again.');
+  }
+  for (xml.XmlElement metaData in document.findAllElements('meta-data')) {
+    final String name = metaData.getAttribute('android:name');
+    if (name == 'flutterEmbedding') {
+      return metaData.getAttribute('android:value');
+    }
+  }
+  return '1';
+}
+
+Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Map<String, dynamic>> androidPlugins =
+    _extractPlatformMaps(plugins, AndroidPlugin.kConfigKey);
+
+  final Map<String, dynamic> templateContext = <String, dynamic>{
+    'plugins': androidPlugins,
+    'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
+  };
   final String javaSourcePath = fs.path.join(
     project.android.pluginRegistrantHost.path,
     'src',
     'main',
     'java',
   );
-  final String registryPath = fs.path.join(
-    javaSourcePath,
-    'io',
-    'flutter',
-    'plugins',
-    'GeneratedPluginRegistrant.java',
+
+  String registryPath;
+  String templateContent;
+
+  final String appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
+  switch (appEmbeddingVersion) {
+    case '2':
+      templateContext['needsShim'] = false;
+      // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
+      // then add  shim for the old plugins.
+      for (Map<String, dynamic> plugin in androidPlugins) {
+        if (!plugin['usesEmbedding2']) {
+          templateContext['needsShim'] = true;
+          break;
+        }
+      }
+      registryPath = fs.path.join(
+        javaSourcePath,
+        'dev',
+        'flutter',
+        'plugins',
+        'GeneratedPluginRegistrant.java',
+      );
+      templateContent = _androidPluginRegistryTemplateNewEmbedding;
+    break;
+    case '1':
+      registryPath = fs.path.join(
+        javaSourcePath,
+        'io',
+        'flutter',
+        'plugins',
+        'GeneratedPluginRegistrant.java',
+      );
+      templateContent = _androidPluginRegistryTemplateOldEmbedding;
+    break;
+    default:
+      throwToolExit('Unsupported Android embedding');
+  }
+  printTrace('Generating $registryPath');
+  _renderTemplateToFile(
+    templateContent,
+    templateContext,
+    registryPath,
   );
-  _renderTemplateToFile(_androidPluginRegistryTemplate, context, registryPath);
 }
 
 const String _objcPluginRegistryHeaderTemplate = '''//
@@ -191,10 +454,13 @@ const String _objcPluginRegistryHeaderTemplate = '''//
 
 #import <{{framework}}/{{framework}}.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GeneratedPluginRegistrant : NSObject
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 @end
 
+NS_ASSUME_NONNULL_END
 #endif /* GeneratedPluginRegistrant_h */
 ''';
 
@@ -203,10 +469,15 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 //
 
 #import "GeneratedPluginRegistrant.h"
-{{#plugins}}
-#import <{{name}}/{{class}}.h>
-{{/plugins}}
 
+{{#plugins}}
+#if __has_include(<{{name}}/{{class}}.h>)
+#import <{{name}}/{{class}}.h>
+#else
+@import {{name}};
+#endif
+
+{{/plugins}}
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
@@ -221,8 +492,9 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 const String _swiftPluginRegistryTemplate = '''//
 //  Generated file. Do not edit.
 //
-import Foundation
+
 import {{framework}}
+import Foundation
 
 {{#plugins}}
 import {{name}}
@@ -254,6 +526,8 @@ Depends on all your plugins, and provides a function to register them.
   s.source_files =  "Classes", "Classes/**/*.{h,m}"
   s.source           = { :path => '.' }
   s.public_header_files = './Classes/**/*.h'
+  s.static_framework    = true
+  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.dependency '{{framework}}'
   {{#plugins}}
   s.dependency '{{name}}'
@@ -261,14 +535,60 @@ Depends on all your plugins, and provides a function to register them.
 end
 ''';
 
+const String _dartPluginRegistryTemplate = '''//
+// Generated file. Do not edit.
+//
+import 'dart:ui';
+
+{{#plugins}}
+import 'package:{{name}}/{{file}}';
+{{/plugins}}
+
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+
+void registerPlugins(PluginRegistry registry) {
+{{#plugins}}
+  {{class}}.registerWith(registry.registrarFor({{class}}));
+{{/plugins}}
+  registry.registerMessageHandler();
+}
+''';
+
+const String _cppPluginRegistryHeaderTemplate = '''//
+//  Generated file. Do not edit.
+//
+
+#ifndef GENERATED_PLUGIN_REGISTRANT_
+#define GENERATED_PLUGIN_REGISTRANT_
+
+#include <flutter/plugin_registry.h>
+
+// Registers Flutter plugins.
+void RegisterPlugins(flutter::PluginRegistry* registry);
+
+#endif  // GENERATED_PLUGIN_REGISTRANT_
+''';
+
+const String _cppPluginRegistryImplementationTemplate = '''//
+//  Generated file. Do not edit.
+//
+
+#include "generated_plugin_registrant.h"
+
+{{#plugins}}
+#include <{{filename}}.h>
+{{/plugins}}
+
+void RegisterPlugins(flutter::PluginRegistry* registry) {
+{{#plugins}}
+  {{class}}RegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("{{class}}"));
+{{/plugins}}
+}
+''';
+
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> iosPlugins = plugins
-      .where((Plugin p) => p.pluginClass != null)
-      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
-    'name': p.name,
-    'prefix': p.iosPrefix,
-    'class': p.pluginClass,
-  }).toList();
+  final List<Map<String, dynamic>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'ios',
     'deploymentTarget': '8.0',
@@ -307,15 +627,16 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   }
 }
 
+Future<void> _writeLinuxPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Map<String, dynamic>> linuxPlugins = _extractPlatformMaps(plugins, LinuxPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'plugins': linuxPlugins,
+  };
+  await _writeCppPluginRegistrant(project.linux.managedDirectory, context);
+}
+
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  // TODO(stuartmorgan): Replace macosPrefix check with formal metadata check,
-  // see https://github.com/flutter/flutter/issues/33597.
-  final List<Map<String, dynamic>> macosPlugins = plugins
-      .where((Plugin p) => p.pluginClass != null && p.macosPrefix != null)
-      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
-    'name': p.name,
-    'class': p.pluginClass,
-  }).toList();
+  final List<Map<String, dynamic>> macosPlugins = _extractPlatformMaps(plugins, MacOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'macos',
     'framework': 'FlutterMacOS',
@@ -329,6 +650,49 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
+Future<void> _writeWindowsPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(plugins, WindowsPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'plugins': windowsPlugins,
+  };
+  await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
+}
+
+Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
+  final String registryDirectory = destination.path;
+  _renderTemplateToFile(
+    _cppPluginRegistryHeaderTemplate,
+    templateContext,
+    fs.path.join(registryDirectory, 'generated_plugin_registrant.h'),
+  );
+  _renderTemplateToFile(
+    _cppPluginRegistryImplementationTemplate,
+    templateContext,
+    fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
+  );
+}
+
+Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Map<String, dynamic>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'plugins': webPlugins,
+  };
+  final String registryDirectory = project.web.libDirectory.path;
+  final String filePath = fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
+  if (webPlugins.isEmpty) {
+    final File file = fs.file(filePath);
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+  } else {
+    _renderTemplateToFile(
+      _dartPluginRegistryTemplate,
+      context,
+      filePath,
+    );
+  }
+}
+
 /// Rewrites the `.flutter-plugins` file of [project] based on the plugin
 /// dependencies declared in `pubspec.yaml`.
 ///
@@ -340,10 +704,14 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
   final bool changed = _writeFlutterPluginsList(project, plugins);
   if (changed) {
-    if (checkProjects && !project.ios.existsSync()) {
-      return;
+    if (!checkProjects || project.ios.existsSync()) {
+      cocoaPods.invalidatePodInstallOutput(project.ios);
     }
-    cocoaPods.invalidatePodInstallOutput(project.ios);
+    // TODO(stuartmorgan): Potentially add checkProjects once a decision has
+    // made about how to handle macOS in existing projects.
+    if (project.macos.existsSync()) {
+      cocoaPods.invalidatePodInstallOutput(project.macos);
+    }
   }
 }
 
@@ -361,24 +729,33 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   if ((checkProjects && project.ios.existsSync()) || !checkProjects) {
     await _writeIOSPluginRegistrant(project, plugins);
   }
-  // TODO(stuartmorgan): Revisit the condition here once the plans for handling
+  // TODO(stuartmorgan): Revisit the conditions here once the plans for handling
   // desktop in existing projects are in place. For now, ignore checkProjects
   // on desktop and always treat it as true.
-  if (flutterDesktopEnabled && project.macos.existsSync()) {
+  if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
+    await _writeLinuxPluginRegistrant(project, plugins);
+  }
+  if (featureFlags.isMacOSEnabled && project.macos.existsSync()) {
     await _writeMacOSPluginRegistrant(project, plugins);
   }
+  if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
+    await _writeWindowsPluginRegistrant(project, plugins);
+  }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
-  if (!project.isModule && (!checkProjects || subproject.existsSync())) {
-    final CocoaPods cocoaPods = CocoaPods();
-    if (plugins.isNotEmpty) {
-      cocoaPods.setupPodfile(subproject);
-    }
-    /// The user may have a custom maintained Podfile that they're running `pod install`
-    /// on themselves.
-    else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
-      cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
+    if (!project.isModule && (!checkProjects || subproject.existsSync())) {
+      final CocoaPods cocoaPods = CocoaPods();
+      if (plugins.isNotEmpty) {
+        await cocoaPods.setupPodfile(subproject);
+      }
+      /// The user may have a custom maintained Podfile that they're running `pod install`
+      /// on themselves.
+      else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
+        cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
+      }
     }
   }
+  if (featureFlags.isWebEnabled && project.web.existsSync()) {
+    await _writeWebPluginRegistrant(project, plugins);
   }
 }
 

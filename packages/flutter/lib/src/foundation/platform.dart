@@ -11,11 +11,11 @@ import '_platform_io.dart'
 /// This is the default value of [ThemeData.platform] (hence the name). Widgets
 /// from the material library should use [Theme.of] to determine the current
 /// platform for styling purposes, rather than using [defaultTargetPlatform].
-/// However, if there is widget behavior that depends on the actual underlying
-/// platform, then depending on [defaultTargetPlatform] makes sense.
-/// [dart.io.Platform.environment] should be used directly only when it's
-/// critical to actually know the current platform, without any overrides
-/// possible (for example, when a system API is about to be called).
+/// Widgets and render objects at lower layers that try to emulate the
+/// underlying platform can depend on [defaultTargetPlatform] directly. The
+/// [dart.io.Platform] object should only be used directly when it's critical to
+/// actually know the current platform, without any overrides possible (for
+/// example, when a system API is about to be called).
 ///
 /// In a test environment, the platform returned is [TargetPlatform.android]
 /// regardless of the host platform. (Android was chosen because the tests were

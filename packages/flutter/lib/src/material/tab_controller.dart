@@ -11,7 +11,7 @@ import 'constants.dart';
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].
 ///
 /// The [index] property is the index of the selected tab and the [animation]
-/// represents the current scroll positions of the tab bar and the tar bar view.
+/// represents the current scroll positions of the tab bar and the tab bar view.
 /// The selected tab's index can be changed with [animateTo].
 ///
 /// A stateful widget that builds a [TabBar] or a [TabBarView] can create
@@ -313,7 +313,7 @@ class DefaultTabController extends StatefulWidget {
     @required this.child,
   }) : assert(initialIndex != null),
        assert(length >= 0),
-       assert(initialIndex >= 0 && initialIndex < length),
+       assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
        super(key: key);
 
   /// The total number of tabs.

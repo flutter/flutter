@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 import 'thumb_painter.dart';
 
@@ -59,11 +60,13 @@ class CupertinoSlider extends StatefulWidget {
     this.max = 1.0,
     this.divisions,
     this.activeColor,
+    this.thumbColor = CupertinoColors.white,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       assert(thumbColor != null),
        super(key: key);
 
   /// The currently selected value for this slider.
@@ -192,6 +195,13 @@ class CupertinoSlider extends StatefulWidget {
   /// Defaults to the [CupertinoTheme]'s primary color if null.
   final Color activeColor;
 
+  /// The color to use for the thumb of the slider.
+  ///
+  /// Thumb color must not be null.
+  ///
+  /// Defaults to [CupertinoColors.white].
+  final Color thumbColor;
+
   @override
   _CupertinoSliderState createState() => _CupertinoSliderState();
 
@@ -228,7 +238,11 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
     return _CupertinoSliderRenderObjectWidget(
       value: (widget.value - widget.min) / (widget.max - widget.min),
       divisions: widget.divisions,
-      activeColor: widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
+      activeColor: CupertinoDynamicColor.resolve(
+        widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
+        context,
+      ),
+      thumbColor: widget.thumbColor,
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -243,6 +257,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.value,
     this.divisions,
     this.activeColor,
+    this.thumbColor,
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -252,6 +267,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final double value;
   final int divisions;
   final Color activeColor;
+  final Color thumbColor;
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
@@ -263,6 +279,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       value: value,
       divisions: divisions,
       activeColor: activeColor,
+      thumbColor: CupertinoDynamicColor.resolve(thumbColor, context),
+      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -277,6 +295,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..divisions = divisions
       ..activeColor = activeColor
+      ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)
+      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -287,7 +307,6 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kPadding = 8.0;
-const Color _kTrackColor = Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
 const Duration _kDiscreteTransitionDuration = Duration(milliseconds: 500);
@@ -299,6 +318,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     @required double value,
     int divisions,
     Color activeColor,
+    Color thumbColor,
+    Color trackColor,
     ValueChanged<double> onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -309,6 +330,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
        _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
+       _thumbColor = thumbColor,
+       _trackColor = trackColor,
        _onChanged = onChanged,
        _textDirection = textDirection,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSliderWidth, height: _kSliderHeight)) {
@@ -352,6 +375,24 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     if (value == _activeColor)
       return;
     _activeColor = value;
+    markNeedsPaint();
+  }
+
+  Color get thumbColor => _thumbColor;
+  Color _thumbColor;
+  set thumbColor(Color value) {
+    if (value == _thumbColor)
+      return;
+    _thumbColor = value;
+    markNeedsPaint();
+  }
+
+  Color get trackColor => _trackColor;
+  Color _trackColor;
+  set trackColor(Color value) {
+    if (value == _trackColor)
+      return;
+    _trackColor = value;
     markNeedsPaint();
   }
 
@@ -457,8 +498,6 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       _drag.addPointer(event);
   }
 
-  final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter();
-
   @override
   void paint(PaintingContext context, Offset offset) {
     double visualPosition;
@@ -468,11 +507,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       case TextDirection.rtl:
         visualPosition = 1.0 - _position.value;
         leftColor = _activeColor;
-        rightColor = _kTrackColor;
+        rightColor = trackColor;
         break;
       case TextDirection.ltr:
         visualPosition = _position.value;
-        leftColor = _kTrackColor;
+        leftColor = trackColor;
         rightColor = _activeColor;
         break;
     }
@@ -497,7 +536,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     }
 
     final Offset thumbCenter = Offset(trackActive, trackCenter);
-    _thumbPainter.paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
+    CupertinoThumbPainter(color: thumbColor).paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
   }
 
   @override

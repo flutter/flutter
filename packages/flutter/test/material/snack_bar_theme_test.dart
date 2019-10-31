@@ -59,7 +59,7 @@ void main() {
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff123456))',
       'elevation: 2.0',
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
-      'behavior: SnackBarBehavior.floating'
+      'behavior: SnackBarBehavior.floating',
     ]);
   });
 
@@ -92,7 +92,7 @@ void main() {
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
     expect(content.text.style, Typography().white.subhead);
-    expect(material.color, const Color(0xFF323232));
+    expect(material.color, const Color(0xFF333333));
     expect(material.elevation, 6.0);
     expect(material.shape, null);
   });

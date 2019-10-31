@@ -866,7 +866,7 @@ class _PrefixedStringBuilder {
   ///
   /// This method wraps a sequence of text where only some spans of text can be
   /// used as wrap boundaries.
-   static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) sync* {
+  static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) sync* {
     if (message.length + startOffset < width) {
       // Nothing to do. The line doesn't wrap.
       yield message;
@@ -1097,8 +1097,8 @@ class TextTreeRenderer {
   /// single line style does not provide any meaningful style for how children
   /// should be connected to their parents.
   TextTreeConfiguration _childTextConfiguration(
-      DiagnosticsNode child,
-      TextTreeConfiguration textStyle,
+    DiagnosticsNode child,
+    TextTreeConfiguration textStyle,
   ) {
     final DiagnosticsTreeStyle childStyle = child?.style;
     return (_isSingleLine(childStyle) || childStyle == DiagnosticsTreeStyle.errorProperty) ? textStyle : child.textTreeConfiguration;
@@ -1290,8 +1290,7 @@ class TextTreeRenderer {
           if (!propertyRender.endsWith('\n'))
             builder.write('\n');
         }
-      } else
-      {
+      } else {
         final String propertyRender = render(property,
           prefixLineOne: '${builder.prefixOtherLines}${propertyStyle.prefixLineOne}',
           prefixOtherLines: '${builder.prefixOtherLines}${propertyStyle.childLinkSpace}${propertyStyle.prefixOtherLines}',
@@ -1589,9 +1588,9 @@ abstract class DiagnosticsNode {
   /// The provided `nodes` may be properties or children of the `parent`
   /// [DiagnosticsNode].
   static List<Map<String, Object>> toJsonList(
-      List<DiagnosticsNode> nodes,
-      DiagnosticsNode parent,
-      DiagnosticsSerializationDelegate delegate,
+    List<DiagnosticsNode> nodes,
+    DiagnosticsNode parent,
+    DiagnosticsSerializationDelegate delegate,
   ) {
     bool truncated = false;
     if (nodes == null)
@@ -2217,20 +2216,28 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   );
 
   @override
-  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+  String valueToString({TextTreeConfiguration parentConfiguration}) {
     if (value == null)
       return value.toString();
 
     if (value.isEmpty)
       return ifEmpty ?? '[]';
 
+    final Iterable<String> formattedValues = value.map((T v) {
+      if (T == double && v is double) {
+        return debugFormatDouble(v);
+      } else {
+        return v.toString();
+      }
+    });
+
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Always display the value as a single line and enclose the iterable
       // value in brackets to avoid ambiguity.
-      return '[${value.join(', ')}]';
+      return '[${formattedValues.join(', ')}]';
     }
 
-    return value.join(_isSingleLine(style) ? ', ' : '\n');
+    return formattedValues.join(_isSingleLine(style) ? ', ' : '\n');
   }
 
   /// Priority level of the diagnostic used to control which diagnostics should
@@ -2300,13 +2307,17 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
 /// omitted, that is taken to mean that [level] should be
 /// [DiagnosticLevel.hidden] when [value] is non-null or null respectively.
 ///
-/// This kind of diagnostics property is typically used for values mostly opaque
+/// This kind of diagnostics property is typically used for opaque
 /// values, like closures, where presenting the actual object is of dubious
 /// value but where reporting the presence or absence of the value is much more
 /// useful.
 ///
 /// See also:
 ///
+///
+///  * [FlagsSummary], which provides similar functionality but accepts multiple
+///    flags under the same name, and is preferred if there are multiple such
+///    values that can fit into a same category (such as "listeners").
 ///  * [FlagProperty], which provides similar functionality describing whether
 ///    a [value] is true or false.
 class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
@@ -2404,6 +2415,106 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
     if (ifPresent != null)
       json['ifPresent'] = ifPresent;
     return json;
+  }
+}
+
+/// A summary of multiple properties, indicating whether each of them is present
+/// (non-null) or absent (null).
+///
+/// Each entry of [value] is described by its key. The eventual description will
+/// be a list of keys of non-null entries.
+///
+/// The [ifEmpty] describes the entire collection of [value] when it contains no
+/// non-null entries. If [ifEmpty] is omitted, [level] will be
+/// [DiagnosticLevel.hidden] when [value] contains no non-null entries.
+///
+/// This kind of diagnostics property is typically used for opaque
+/// values, like closures, where presenting the actual object is of dubious
+/// value but where reporting the presence or absence of the value is much more
+/// useful.
+///
+/// See also:
+///
+///  * [ObjectFlagProperty], which provides similar functionality but accepts
+///    only one flag, and is preferred if there is only one entry.
+///  * [IterableProperty], which provides similar functionality describing
+///    the values a collection of objects.
+class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
+  /// Create a summary for multiple properties, indicating whether each of them
+  /// is present (non-null) or absent (null).
+  ///
+  /// The [value], [showName], [showSeparator] and [level] arguments must not be
+  /// null.
+  FlagsSummary(
+    String name,
+    Map<String, T> value, {
+    String ifEmpty,
+    bool showName = true,
+    bool showSeparator = true,
+    DiagnosticLevel level  = DiagnosticLevel.info,
+  }) : assert(value != null),
+       assert(showName != null),
+       assert(showSeparator != null),
+       assert(level != null),
+       super(
+         name,
+         value,
+         ifEmpty: ifEmpty,
+         showName: showName,
+         showSeparator: showSeparator,
+         level: level,
+       );
+
+  @override
+  String valueToString({TextTreeConfiguration parentConfiguration}) {
+    assert(value != null);
+    if (!_hasNonNullEntry() && ifEmpty != null)
+      return ifEmpty;
+
+    final Iterable<String> formattedValues = _formattedValues();
+    if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
+      // Always display the value as a single line and enclose the iterable
+      // value in brackets to avoid ambiguity.
+      return '[${formattedValues.join(', ')}]';
+    }
+
+    return formattedValues.join(_isSingleLine(style) ? ', ' : '\n');
+  }
+
+  /// Priority level of the diagnostic used to control which diagnostics should
+  /// be shown and filtered.
+  ///
+  /// If [ifEmpty] is null and the [value] contains no non-null entries, then
+  /// level [DiagnosticLevel.hidden] is returned.
+  @override
+  DiagnosticLevel get level {
+    if (!_hasNonNullEntry() && ifEmpty == null)
+      return DiagnosticLevel.hidden;
+    return super.level;
+  }
+
+  @override
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
+    if (value.isNotEmpty)
+      json['values'] = _formattedValues().toList();
+    return json;
+  }
+
+  bool _hasNonNullEntry() => value.values.any((Object o) => o != null);
+
+  // An iterable of each entry's description in [value].
+  //
+  // For a non-null value, its description is its key.
+  //
+  // For a null value, it is omitted unless `includeEmtpy` is true and
+  // [ifEntryNull] contains a corresponding description.
+  Iterable<String> _formattedValues() sync* {
+    for (MapEntry<String, T> entry in value.entries) {
+      if (entry.value != null) {
+        yield entry.key;
+      }
+    }
   }
 }
 
@@ -2557,7 +2668,11 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     json['defaultLevel'] = describeEnum(_defaultLevel);
     if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
-    if (value is num || value is String || value is bool || value == null)
+    if (v is num)
+      // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
+      // JSON.stringify replaces infinity and NaN with null.
+      json['value'] = v.isFinite ? v :  v.toString();
+    if (value is String || value is bool || value == null)
       json['value'] = value;
     return json;
   }
