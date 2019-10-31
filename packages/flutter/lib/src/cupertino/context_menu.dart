@@ -247,7 +247,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   // child is near the center of the screen, it will also appear in the center
   // of the screen when the menu is open, and the actions will be centered below
   // it.
-  _ContextMenuLocation get _contextMenuOrientation {
+  _ContextMenuLocation get _contextMenuLocation {
     final Rect childRect = _getRect(_childGlobalKey);
     final double screenWidth = MediaQuery.of(context).size.width;
 
@@ -279,7 +279,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         sigmaX: 5.0,
         sigmaY: 5.0,
       ),
-      contextMenuOrientation: _contextMenuOrientation,
+      contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect,
       builder: (BuildContext context, Animation<double> animation) {
         if (widget.previewBuilder == null) {
@@ -540,17 +540,17 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Build a _ContextMenuRoute.
   _ContextMenuRoute({
     @required List<Widget> actions,
-    @required _ContextMenuLocation contextMenuOrientation,
+    @required _ContextMenuLocation contextMenuLocation,
     this.barrierLabel,
     _ContextMenuPreviewBuilderChildless builder,
     ui.ImageFilter filter,
     Rect previousChildRect,
     RouteSettings settings,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuOrientation != null),
+       assert(contextMenuLocation != null),
        _actions = actions,
        _builder = builder,
-       _contextMenuOrientation = contextMenuOrientation,
+       _contextMenuLocation = contextMenuLocation,
        _previousChildRect = previousChildRect,
        super(
          filter: filter,
@@ -567,7 +567,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   final List<Widget> _actions;
   final _ContextMenuPreviewBuilderChildless _builder;
   final GlobalKey _childGlobalKey = GlobalKey();
-  final _ContextMenuLocation _contextMenuOrientation;
+  final _ContextMenuLocation _contextMenuLocation;
   bool _externalOffstage = false;
   bool _internalOffstage = false;
   Orientation _lastOrientation;
@@ -636,9 +636,9 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   }
 
   // Get the alignment for the _ContextMenuSheet's Transform.scale based on the
-  // ContextMenuOrientation.
-  static AlignmentDirectional getSheetAlignment(_ContextMenuLocation contextMenuOrientation) {
-    switch (contextMenuOrientation) {
+  // contextMenuLocation.
+  static AlignmentDirectional getSheetAlignment(_ContextMenuLocation contextMenuLocation) {
+    switch (contextMenuLocation) {
       case _ContextMenuLocation.center:
         return AlignmentDirectional.topCenter;
       case _ContextMenuLocation.right:
@@ -649,8 +649,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   }
 
   // The place to start the sheetRect animation from.
-  static Rect _getSheetRectBegin(Orientation orientation, _ContextMenuLocation contextMenuOrientation, Rect childRect, Rect sheetRect) {
-    switch (contextMenuOrientation) {
+  static Rect _getSheetRectBegin(Orientation orientation, _ContextMenuLocation contextMenuLocation, Rect childRect, Rect sheetRect) {
+    switch (contextMenuLocation) {
       case _ContextMenuLocation.center:
         final Offset target = orientation == Orientation.portrait
           ? childRect.bottomCenter
@@ -701,7 +701,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     final Rect sheetRect = _getRect(_sheetGlobalKey);
     final Rect sheetRectBegin = _getSheetRectBegin(
       _lastOrientation,
-      _contextMenuOrientation,
+      _contextMenuLocation,
       childRectOriginal,
       sheetRect,
     );
@@ -794,12 +794,12 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
                 child: Opacity(
                   opacity: _sheetOpacity.value,
                   child: Transform.scale(
-                    alignment: getSheetAlignment(_contextMenuOrientation),
+                    alignment: getSheetAlignment(_contextMenuLocation),
                     scale: sheetScale,
                     child: _ContextMenuSheet(
                       key: _sheetGlobalKey,
                       actions: _actions,
-                      contextMenuOrientation: _contextMenuOrientation,
+                      contextMenuLocation: _contextMenuLocation,
                       orientation: orientation,
                     ),
                   ),
@@ -820,7 +820,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
           actions: _actions,
           child: _builder(context, animation),
           childGlobalKey: _childGlobalKey,
-          contextMenuOrientation: _contextMenuOrientation,
+          contextMenuLocation: _contextMenuLocation,
           onDismiss: _onDismiss,
           orientation: orientation,
           sheetGlobalKey: _sheetGlobalKey,
@@ -838,18 +838,18 @@ class _ContextMenuRouteStatic extends StatefulWidget {
     this.actions,
     @required this.child,
     this.childGlobalKey,
-    @required this.contextMenuOrientation,
+    @required this.contextMenuLocation,
     this.onDismiss,
     @required this.orientation,
     this.sheetGlobalKey,
-  }) : assert(contextMenuOrientation != null),
+  }) : assert(contextMenuLocation != null),
        assert(orientation != null),
        super(key: key);
 
   final List<Widget> actions;
   final Widget child;
   final GlobalKey childGlobalKey;
-  final _ContextMenuLocation contextMenuOrientation;
+  final _ContextMenuLocation contextMenuLocation;
   final _DismissCallback onDismiss;
   final Orientation orientation;
   final GlobalKey sheetGlobalKey;
@@ -961,8 +961,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     widget.onDismiss(context, _lastScale, _sheetOpacityAnimation.value);
   }
 
-  Alignment _getChildAlignment(Orientation orientation, _ContextMenuLocation contextMenuOrientation) {
-    switch (contextMenuOrientation) {
+  Alignment _getChildAlignment(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
+    switch (contextMenuLocation) {
       case _ContextMenuLocation.center:
         return orientation == Orientation.portrait
           ? Alignment.bottomCenter
@@ -1015,12 +1015,12 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   // The order and alignment of the _ContextMenuSheet and the child depend on
   // both the orientation of the screen as well as the position on the screen of
   // the original child.
-  List<Widget> _getChildren(Orientation orientation, _ContextMenuLocation contextMenuOrientation) {
+  List<Widget> _getChildren(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
     final Expanded child = Expanded(
       child: Align(
         alignment: _getChildAlignment(
           widget.orientation,
-          widget.contextMenuOrientation,
+          widget.contextMenuLocation,
         ),
         child: AnimatedBuilder(
           animation: _moveController,
@@ -1040,13 +1040,13 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         child: _ContextMenuSheet(
           key: widget.sheetGlobalKey,
           actions: widget.actions,
-          contextMenuOrientation: widget.contextMenuOrientation,
+          contextMenuLocation: widget.contextMenuLocation,
           orientation: widget.orientation,
         ),
       ),
     );
 
-    switch (contextMenuOrientation) {
+    switch (contextMenuLocation) {
       case _ContextMenuLocation.center:
         return <Widget>[child, spacer, sheet];
       case _ContextMenuLocation.right:
@@ -1061,7 +1061,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   // Build the animation for the _ContextMenuSheet.
   Widget _buildSheetAnimation(BuildContext context, Widget child) {
     return Transform.scale(
-      alignment: _ContextMenuRoute.getSheetAlignment(widget.contextMenuOrientation),
+      alignment: _ContextMenuRoute.getSheetAlignment(widget.contextMenuLocation),
       scale: _sheetScaleAnimation.value,
       child: Opacity(
         opacity: _sheetOpacityAnimation.value,
@@ -1133,7 +1133,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   Widget build(BuildContext context) {
     final List<Widget> children = _getChildren(
       widget.orientation,
-      widget.contextMenuOrientation,
+      widget.contextMenuLocation,
     );
 
     return SafeArea(
@@ -1171,21 +1171,21 @@ class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
     Key key,
     @required this.actions,
-    @required _ContextMenuLocation contextMenuOrientation,
+    @required _ContextMenuLocation contextMenuLocation,
     @required Orientation orientation,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuOrientation != null),
+       assert(contextMenuLocation != null),
        assert(orientation != null),
-       _contextMenuOrientation = contextMenuOrientation,
+       _contextMenuLocation = contextMenuLocation,
        _orientation = orientation,
        super(key: key);
 
   final List<Widget> actions;
-  final _ContextMenuLocation _contextMenuOrientation;
+  final _ContextMenuLocation _contextMenuLocation;
   final Orientation _orientation;
 
   // Get the children, whose order depends on orientation and
-  // contextMenuOrientation.
+  // contextMenuLocation.
   List<Widget> get children {
     final Flexible menu = Flexible(
       fit: FlexFit.tight,
@@ -1201,7 +1201,7 @@ class _ContextMenuSheet extends StatelessWidget {
       ),
     );
 
-    switch (_contextMenuOrientation) {
+    switch (_contextMenuLocation) {
       case _ContextMenuLocation.center:
         return _orientation == Orientation.portrait
           ? <Widget>[
