@@ -323,6 +323,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 
     return InkWell(
       onTap: widget.enabled ? handleTap : null,
+      canRequestFocus: widget.enabled,
       child: item,
     );
   }
@@ -1090,6 +1091,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
+          canRequestFocus: widget.enabled,
           child: widget.child,
         ),
       );

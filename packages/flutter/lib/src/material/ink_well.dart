@@ -773,11 +773,12 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
+    final bool canRequestFocus = enabled && widget.canRequestFocus;
     return Actions(
       actions: _actionMap,
       child: Focus(
         focusNode: widget.focusNode,
-        canRequestFocus: widget.canRequestFocus,
+        canRequestFocus: canRequestFocus,
         onFocusChange: _handleFocusUpdate,
         autofocus: widget.autofocus,
         child: MouseRegion(
