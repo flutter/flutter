@@ -92,7 +92,7 @@ void main() {
       'content-length': '64',
     });
   }));
-  
+
   test('release asset server serves correct mime type and content length for JavaScript', () => testbed.run(() async {
     assetServer = ReleaseAssetServer();
     fs.file(fs.path.join('build', 'web', 'assets', 'foo.js'))
@@ -106,7 +106,7 @@ void main() {
       'content-length': '18',
     });
   }));
-  
+
   test('release asset server serves correct mime type and content length for html', () => testbed.run(() async {
     assetServer = ReleaseAssetServer();
     fs.file(fs.path.join('build', 'web', 'assets', 'foo.html'))
