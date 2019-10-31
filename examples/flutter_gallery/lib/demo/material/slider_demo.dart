@@ -280,7 +280,8 @@ class _SlidersState extends State<_Sliders> {
                 ),
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
-                    textScaleFactor: 3.11,
+//                    textScaleFactor: 3.11,
+                  textScaleFactor: 1,
                   ),
                   child: Slider.adaptive(
                     value: _continuousValue,
@@ -398,7 +399,8 @@ class _RangeSlidersState extends State<_RangeSliders> {
                 ),
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
-                    textScaleFactor: 3.11,
+                    textScaleFactor: 1,
+//                    textScaleFactor: 3.11,
                   ),
                 child: RangeSlider(
                   values: _continuousValues,
