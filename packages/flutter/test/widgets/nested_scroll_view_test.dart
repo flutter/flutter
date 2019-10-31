@@ -711,7 +711,7 @@ void main() {
   for (final double scrollExtent in const <double>[
     kToolbarHeight - 9,
     4.2e2,
-    3e3,
+    1e3,
     1e4
   ]) {
     testWidgets(
@@ -743,7 +743,16 @@ void main() {
             ),
           ));
 
-          const double scrollExtent = 4.2e2;
+          // The scroll gesture should be taken where in the inner body, so the whole scroll view is scrolled.
+          final TestGesture gesture =
+          await tester.startGesture(const Offset(0, kToolbarHeight + 1));
+          await gesture.moveBy(Offset(0, -scrollExtent));
+
+          await tester.pump();
+
+          // The scrollController should be equal to the outerController defined in the state.
+          expect(scrollController.position,
+              globalKey.currentState.outerController.position);
 
           expect(
               globalKey.currentState.innerController.position.pixels +
