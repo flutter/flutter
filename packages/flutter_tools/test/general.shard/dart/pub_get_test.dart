@@ -337,7 +337,7 @@ void main() {
         ..setLastModifiedSync(DateTime(9999));
       assert(DateTime(9999).isAfter(DateTime.now()));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
-      expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
+      expect(testLogger.statusText, contains('Running "flutter pub get" in /...\n'));
       expect(testLogger.errorText, startsWith(
         'Warning: File "/pubspec.yaml" was created in the future. Optimizations that rely on '
         'comparing time stamps will be unreliable. Check your system clock for accuracy.\n'
