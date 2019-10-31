@@ -22,7 +22,7 @@ abstract class AotAssemblyBase extends Target {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
-    final String outputPath = environment.buildDir.path;
+    final String buildOutputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_assembly');
     }
@@ -45,7 +45,7 @@ abstract class AotAssemblyBase extends Target {
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
-        outputPath: outputPath,
+        outputPath: environment.outputDir.path,
         darwinArch: iosArchs.single,
         bitcode: bitcode,
       );
@@ -62,7 +62,7 @@ abstract class AotAssemblyBase extends Target {
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
           packagesPath: environment.projectDir.childFile('.packages').path,
-          outputPath: fs.path.join(outputPath, getNameForDarwinArch(iosArch)),
+          outputPath: fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
           darwinArch: iosArch,
           bitcode: bitcode,
         ));
@@ -74,10 +74,10 @@ abstract class AotAssemblyBase extends Target {
       final ProcessResult result = await processManager.run(<String>[
         'lipo',
         ...iosArchs.map((DarwinArch iosArch) =>
-            fs.path.join(outputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
+            fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
         '-create',
         '-output',
-        fs.path.join(outputPath, 'App.framework', 'App'),
+        fs.path.join(environment.outputDir.path, 'App.framework', 'App'),
       ]);
       if (result.exitCode != 0) {
         throw Exception('lipo exited with code ${result.exitCode}');
@@ -108,7 +108,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/App'),
   ];
 
   @override
@@ -140,7 +140,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/App'),
   ];
 
   @override
