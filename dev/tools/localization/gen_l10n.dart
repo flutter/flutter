@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart' as argslib;
 import 'package:path/path.dart' as path;
 
 const String defaultFileTemplate = '''
@@ -196,10 +197,17 @@ String genSupportedLocaleProperty(Set<String> supportedLocales) {
 }
 
 Future<void> main(List<String> args) async {
-  final Directory l10nDirectory = Directory(path.join('lib', 'l10n'));
-  final File inputArbFile = File(path.join(l10nDirectory.path, 'demo_en.arb'));
-  final File outputFile = File(path.join(l10nDirectory.path, 'demo_localizations.dart'));
-  const String stringsClassName = 'DemoLocalizations';
+  final argslib.ArgParser parser = argslib.ArgParser();
+  parser.addOption('dir-path', defaultsTo: path.join('lib', 'l10n'));
+  parser.addOption('input-arb-file', defaultsTo: 'app_en.arb');
+  parser.addOption('output-file-prefix', defaultsTo: 'app');
+  parser.addOption('output-class-prefix', defaultsTo: 'App');
+  final argslib.ArgResults results = parser.parse(args);
+
+  final Directory l10nDirectory = Directory(results['dir-path']);
+  final File inputArbFile = File(path.join(l10nDirectory.path, results['input-arb-file']));
+  final File outputFile = File(path.join(l10nDirectory.path, '${results['output-file-prefix']}_localizations.dart'));
+  final String stringsClassName = '${results['output-class-prefix']}Localizations';
 
   final RegExp arbFilenameRE = RegExp(r'\w+_(\w+)\.arb$');
   final List<String> arbFilenames = <String>[];
