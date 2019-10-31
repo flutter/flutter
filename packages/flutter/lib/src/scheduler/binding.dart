@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -203,15 +203,69 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
     if (!kReleaseMode) {
       int frameNumber = 0;
-
-      // use frameTimings. https://github.com/flutter/flutter/issues/38838
-      // ignore: deprecated_member_use
-      window.onReportTimings = (List<FrameTiming> timings) {
+      addTimingsCallback((List<FrameTiming> timings) {
         for (FrameTiming frameTiming in timings) {
           frameNumber += 1;
           _profileFramePostEvent(frameNumber, frameTiming);
         }
-      };
+      });
+    }
+  }
+
+  final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
+
+  /// Add a [TimingsCallback] that receives [FrameTiming] sent from the engine.
+  ///
+  /// This can be used, for example, to monitor the performance in release mode,
+  /// or to get a signal when the first frame is rasterized.
+  ///
+  /// This is preferred over using [Window.onReportTimings] directly because
+  /// [addTimingsCallback] allows multiple callbacks.
+  ///
+  /// If the same callback is added twice, it will be executed twice.
+  void addTimingsCallback(TimingsCallback callback) {
+    // TODO(liyuqian): once this is merged, modify the doc of
+    //  [Window.onReportTimings] inside the engine repo to recommend using this
+    // API instead of using [Window.onReportTimings] directly.
+    _timingsCallbacks.add(callback);
+    if (_timingsCallbacks.length == 1) {
+      assert(window.onReportTimings == null);
+      window.onReportTimings = _executeTimingsCallbacks;
+    }
+    assert(window.onReportTimings == _executeTimingsCallbacks);
+  }
+
+  /// Removes a callback that was earlier added by [addTimingsCallback].
+  void removeTimingsCallback(TimingsCallback callback) {
+    assert(_timingsCallbacks.contains(callback));
+    _timingsCallbacks.remove(callback);
+    if (_timingsCallbacks.isEmpty) {
+      window.onReportTimings = null;
+    }
+  }
+
+  void _executeTimingsCallbacks(List<FrameTiming> timings) {
+    final List<TimingsCallback> clonedCallbacks =
+        List<TimingsCallback>.from(_timingsCallbacks);
+    for (TimingsCallback callback in clonedCallbacks) {
+      try {
+        if (_timingsCallbacks.contains(callback)) {
+          callback(timings);
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          context: ErrorDescription('while executing callbacks for FrameTiming'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<TimingsCallback>(
+              'The TimingsCallback that gets executed was',
+              callback,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
+        ));
+      }
     }
   }
 
