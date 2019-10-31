@@ -243,7 +243,7 @@ class _SlidersState extends State<_Sliders> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
+      padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 40.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
@@ -251,28 +251,28 @@ class _SlidersState extends State<_Sliders> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Semantics(
-                label: 'Editable numerical value',
-                child: SizedBox(
-                  width: 64,
-                  height: 48,
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    onSubmitted: (String value) {
-                      final double newValue = double.tryParse(value);
-                      if (newValue != null && newValue != _continuousValue) {
-                        setState(() {
-                          _continuousValue = newValue.clamp(0, 100);
-                        });
-                      }
-                    },
-                    keyboardType: TextInputType.number,
-                    controller: TextEditingController(
-                      text: _continuousValue.toStringAsFixed(0),
-                    ),
-                  ),
-                ),
-              ),
+//              Semantics(
+//                label: 'Editable numerical value',
+//                child: SizedBox(
+//                  width: 64,
+//                  height: 48,
+//                  child: TextField(
+//                    textAlign: TextAlign.center,
+//                    onSubmitted: (String value) {
+//                      final double newValue = double.tryParse(value);
+//                      if (newValue != null && newValue != _continuousValue) {
+//                        setState(() {
+//                          _continuousValue = newValue.clamp(0, 100);
+//                        });
+//                      }
+//                    },
+//                    keyboardType: TextInputType.number,
+//                    controller: TextEditingController(
+//                      text: _continuousValue.toStringAsFixed(0),
+//                    ),
+//                  ),
+//                ),
+//              ),
               SliderTheme(
                 data: const SliderThemeData(
                   showValueIndicator: ShowValueIndicator.always,
@@ -280,14 +280,14 @@ class _SlidersState extends State<_Sliders> {
                 ),
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
-//                    textScaleFactor: 3.11,
-                    textScaleFactor: 1,
+                    textScaleFactor: 3.11,
+//                    textScaleFactor: 1,
                   ),
                   child: Slider.adaptive(
                     value: _continuousValue,
                     min: 0.0,
                     max: 100.0,
-                    label: '${(_continuousValue).toStringAsFixed(0)}',
+                    label: '${(_continuousValue).toStringAsFixed(4)}',
                     onChanged: (double value) {
                       setState(() {
                         _continuousValue = value;
