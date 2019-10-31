@@ -8,6 +8,8 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -150,31 +152,35 @@ public class FlutterEngine {
    * If the Dart VM has already started, the given arguments will have no effect.
    */
   public FlutterEngine(@NonNull Context context, @Nullable String[] dartVmArgs) {
-    this(context, FlutterLoader.getInstance(), new FlutterJNI(), dartVmArgs);
+    this(context, FlutterLoader.getInstance(), new FlutterJNI(), dartVmArgs, true);
   }
 
   /**
    * Same as {@link #FlutterEngine(Context, FlutterLoader, FlutterJNI, String[])} but with no Dart
    * VM flags.
+   * <p>
+   * {@code flutterJNI} should be a new instance that has never been attached to an engine before.
    */
   public FlutterEngine(
       @NonNull Context context,
       @NonNull FlutterLoader flutterLoader,
       @NonNull FlutterJNI flutterJNI
   ) {
-    this(context, flutterLoader, flutterJNI, null);
+    this(context, flutterLoader, flutterJNI, null, true);
   }
 
   /**
-   * Constructs a new {@code FlutterEngine}. See {@link #FlutterEngine(Context)}.
-   *
-   * {@code flutterJNI} should be a new instance that has never been attached to an engine before.
+   * Same as {@link #FlutterEngine(Context, FlutterLoader, FlutterJNI)}, plus Dart VM flags in
+   * {@code dartVmArgs}, and control over whether plugins are automatically registered with this
+   * {@code FlutterEngine} in {@code automaticallyRegisterPlugins}. If plugins are automatically
+   * registered, then they are registered during the execution of this constructor.
    */
   public FlutterEngine(
       @NonNull Context context,
       @NonNull FlutterLoader flutterLoader,
       @NonNull FlutterJNI flutterJNI,
-      @Nullable String[] dartVmArgs
+      @Nullable String[] dartVmArgs,
+      boolean automaticallyRegisterPlugins
   ) {
     this.flutterJNI = flutterJNI;
     flutterLoader.startInitialization(context);
@@ -205,6 +211,10 @@ public class FlutterEngine {
       context.getApplicationContext(),
       this
     );
+
+    if (automaticallyRegisterPlugins) {
+      registerPlugins();
+    }
   }
 
   private void attachToJni() {
@@ -220,6 +230,31 @@ public class FlutterEngine {
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean isAttachedToJni() {
     return flutterJNI.isAttached();
+  }
+
+  /**
+   * Registers all plugins that an app lists in its pubspec.yaml.
+   * <p>
+   * The Flutter tool generates a class called GeneratedPluginRegistrant, which includes the code
+   * necessary to register every plugin in the pubspec.yaml with a given {@code FlutterEngine}.
+   * The GeneratedPluginRegistrant must be generated per app, because each app uses different sets
+   * of plugins. Therefore, the Android embedding cannot place a compile-time dependency on this
+   * generated class. This method uses reflection to attempt to locate the generated file and then
+   * use it at runtime.
+   * <p>
+   * This method fizzles if the GeneratedPluginRegistrant cannot be found or invoked. This situation
+   * should never occur, but if any eventuality comes up that prevents an app from using this
+   * behavior, that app can still write code that explicitly registers plugins.
+   */
+  private void registerPlugins() {
+    try {
+      Class generatedPluginRegistrant = Class.forName("io.plugins.GeneratedPluginRegistrant");
+      Method registrationMethod = generatedPluginRegistrant.getDeclaredMethod("registerWith", FlutterEngine.class);
+      registrationMethod.invoke(null, this);
+    } catch (Exception e) {
+      Log.w(TAG, "Tried to automatically register plugins with FlutterEngine ("
+          + this + ") but could not find and invoke the GeneratedPluginRegistrant.");
+    }
   }
 
   /**
