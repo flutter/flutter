@@ -184,7 +184,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   TickerFuture didPush() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
-    _animation.addStatusListener(_handleStatusChanged);
+    _didPushOrReplace();
     super.didPush();
     return _controller.forward();
   }
@@ -195,8 +195,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     if (oldRoute is TransitionRoute)
       _controller.value = oldRoute._controller.value;
-    _animation.addStatusListener(_handleStatusChanged);
+    _didPushOrReplace();
     super.didReplace(oldRoute);
+  }
+
+  void _didPushOrReplace() {
+    _animation.addStatusListener(_handleStatusChanged);
+    // If the animation is already completed, _handleStatusChanged will not get
+    // a chance to set opaqueness of OverlayEntry.
+    if (_animation.isCompleted && overlayEntries.isNotEmpty) {
+      overlayEntries.first.opaque = opaque;
+    }
   }
 
   @override
