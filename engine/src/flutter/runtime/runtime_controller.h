@@ -33,6 +33,7 @@ class RuntimeController final : public WindowClient {
       DartVM* vm,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       TaskRunners task_runners,
+      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::WeakPtr<ImageDecoder> image_decoder,
@@ -129,6 +130,7 @@ class RuntimeController final : public WindowClient {
   DartVM* const vm_;
   fml::RefPtr<const DartSnapshot> isolate_snapshot_;
   TaskRunners task_runners_;
+  fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
   fml::WeakPtr<IOManager> io_manager_;
   fml::RefPtr<SkiaUnrefQueue> unref_queue_;
   fml::WeakPtr<ImageDecoder> image_decoder_;
@@ -147,6 +149,7 @@ class RuntimeController final : public WindowClient {
       DartVM* vm,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       TaskRunners task_runners,
+      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::WeakPtr<ImageDecoder> image_decoder,

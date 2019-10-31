@@ -317,6 +317,7 @@ FILE: ../../../flutter/lib/ui/semantics/semantics_update.cc
 FILE: ../../../flutter/lib/ui/semantics/semantics_update.h
 FILE: ../../../flutter/lib/ui/semantics/semantics_update_builder.cc
 FILE: ../../../flutter/lib/ui/semantics/semantics_update_builder.h
+FILE: ../../../flutter/lib/ui/snapshot_delegate.h
 FILE: ../../../flutter/lib/ui/text.dart
 FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc
 FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.h

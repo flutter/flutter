@@ -55,6 +55,7 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
       vm.GetIsolateSnapshot(),            // isolate_snapshot
       runners,                            // task_runners
       {},                                 // window
+      {},                                 // snapshot_delegate
       {},                                 // io_manager
       {},                                 // unref_queue
       {},                                 // image_decoder
