@@ -90,7 +90,6 @@ void main() {
       '-Ddart.vm.product=false',
       '--bytecode-options=source-positions',
     ]));
-    expect(argVerification.captured.single, isNot(contains('--no-link-platform')));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
@@ -122,7 +121,6 @@ void main() {
       '-Ddart.vm.product=true',
       '--bytecode-options=source-positions',
     ]));
-    expect(argVerification.captured.single, isNot(contains('--no-link-platform')));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
