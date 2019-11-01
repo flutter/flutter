@@ -11,47 +11,55 @@ import '../flutter_test_alternative.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('text input client handler responds to reattach with setClient', () async {
-    final FakeTextChannel fakeTextChannel = FakeTextChannel((MethodCall call) async {
-      return;
+  group('TextInput message channels', () {
+    FakeTextChannel fakeTextChannel;
+    FakeTextInputClient client;
+
+    setUp(() {
+      fakeTextChannel = FakeTextChannel((MethodCall call) async {
+        return;
+      });
+      TextInput.setChannel(fakeTextChannel);
+      client = const FakeTextInputClient();
     });
-    const FakeTextInputClient client = FakeTextInputClient();
-    TextInput.setChannel(fakeTextChannel);
-    TextInput.attach(client, client.configuration);
 
-    fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
-
-    expect(fakeTextChannel.outgoingCalls.length, 2);
-    fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
-      // From original attach
-      MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
-      // From requestExistingInputState
-      MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
-    ]);
-  });
-
-  test('text input client handler responds to reattach with setClient and text state', () async {
-    final FakeTextChannel fakeTextChannel = FakeTextChannel((MethodCall call) async {
-      return;
+    tearDown(() {
+      TextInputConnection.debugResetId();
+      TextInput.setChannel(SystemChannels.textInput);
     });
-    const FakeTextInputClient client = FakeTextInputClient();
-    TextInput.setChannel(fakeTextChannel);
-    final TextInputConnection connection = TextInput.attach(client, client.configuration);
-    const TextEditingValue editingState = TextEditingValue(text: 'foo');
-    connection.setEditingState(editingState);
 
-    fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
+    test('text input client handler responds to reattach with setClient', () async {
+      TextInput.attach(client, client.configuration);
 
-    expect(fakeTextChannel.outgoingCalls.length, 4);
-    fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
-      // attach
-      MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
-      // set editing state 1
-      MethodCall('TextInput.setEditingState', editingState.toJSON()),
-      // both from requestExistingInputState
-      MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
-      MethodCall('TextInput.setEditingState', editingState.toJSON()),
-    ]);
+      fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
+
+      expect(fakeTextChannel.outgoingCalls.length, 2);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // From original attach
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        // From requestExistingInputState
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+      ]);
+    });
+
+    test('text input client handler responds to reattach with setClient and text state', () async {
+      final TextInputConnection connection = TextInput.attach(client, client.configuration);
+      const TextEditingValue editingState = TextEditingValue(text: 'foo');
+      connection.setEditingState(editingState);
+
+      fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
+
+      expect(fakeTextChannel.outgoingCalls.length, 4);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // attach
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        // set editing state 1
+        MethodCall('TextInput.setEditingState', editingState.toJSON()),
+        // both from requestExistingInputState
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        MethodCall('TextInput.setEditingState', editingState.toJSON()),
+      ]);
+    });
   });
 
   group('TextInputConfiguration', () {

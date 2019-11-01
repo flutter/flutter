@@ -669,6 +669,19 @@ class TextInputConnection {
   static int _nextId = 1;
   final int _id;
 
+  /// Resets the internal ID counter for testing purposes.
+  ///
+  /// This call has no effect when asserts are disabled. Calling it from
+  /// application code will likely break text input for the application.
+  @visibleForTesting
+  static void debugResetId({int to = 1}) {
+    assert(to != null);
+    assert(() {
+      _nextId = to;
+      return true;
+    }());
+  }
+
   final TextInputClient _client;
 
   /// Whether this connection is currently interacting with the text input control.
