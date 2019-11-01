@@ -797,7 +797,7 @@ void main() {
         globalKey.currentState.outerController.position);
   });
 
-  testWidgets('Modifying an exposed scroll controller of NestedScrollViewState should not manipulate the other', (WidgetTester tester) async {
+  testWidgets('Manipulating NestedScrollViewState.innerController should manipulate NestedScrollViewState.outerController', (WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
 
     await tester.pumpWidget(Directionality(
@@ -828,17 +828,48 @@ void main() {
     globalKey.currentState.innerController.jumpTo(1e3);
 
     expect(globalKey.currentState.innerController.position.pixels, 1e3);
+    // The outer scroll view should be scrolled away with the inner body.
+    expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight);
+  });
+
+  testWidgets('Manipulating NestedScrollViewState.outerController should not manipulate NestedScrollViewState.innerController', (WidgetTester tester) async {
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: NestedScrollView(
+            key: globalKey,
+            body: ListView.builder(
+              itemBuilder: (BuildContext context, int index) =>
+                  Text('$index'),
+            ),
+            headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
+          ),
+        ),
+      ),
+    ));
+
     expect(globalKey.currentState.outerController.position.pixels, 0);
+    expect(globalKey.currentState.innerController.position.pixels, 0);
 
     // The outer scroll view is limited to kToolbarHeight as it is a SliverAppBar.
     globalKey.currentState.outerController.jumpTo(kToolbarHeight);
 
-    expect(globalKey.currentState.innerController.position.pixels, 1e3);
+    expect(globalKey.currentState.innerController.position.pixels, 0);
     expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight);
 
     globalKey.currentState.outerController.jumpTo(2 * kToolbarHeight);
     // The other scroll view cannot be scrolled more than all the way out.
     expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight);
+    expect(globalKey.currentState.innerController.position.pixels, 0);
   });
 }
 
