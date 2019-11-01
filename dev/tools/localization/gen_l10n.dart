@@ -285,7 +285,7 @@ Future<void> main(List<String> args) async {
       classMethods.add(genPluralMethod(bundle, key));
     else
       classMethods.add(genSimpleMethod(bundle, key));
-  };
+  }
 
   outputFile.writeAsStringSync(
     defaultFileTemplate
