@@ -482,7 +482,7 @@ class DebugAssetServer extends AssetServer {
       // See if it is a flutter sdk path.
       final String webSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
       final File candidateFile = fs.file(fs.path.join(webSdkPath,
-        basePath.split('/').join(platform.pathSeparator));
+        basePath.split('/').join(platform.pathSeparator)));
       if (candidateFile.existsSync()) {
         return Response.ok(candidateFile.readAsBytesSync());
       }
