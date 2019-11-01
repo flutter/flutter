@@ -586,16 +586,16 @@ void main() {
     expect(tester.testTextInput.editingState['text'], equals('test'));
     expect(state.wantKeepAlive, true);
 
+    tester.testTextInput.log.clear();
     tester.testTextInput.closeConnection();
     await tester.idle();
 
     // Widget does not have focus anymore.
     expect(state.wantKeepAlive, false);
-    // testTextInput.isVisible is false if the clearClient/hideClient TextInput
-    // messages are sent. For onConnectionClosed message framework does not send
-    // clearClient/hideClient since the platform already informed the framework
-    // of a closed connection.
-    expect(tester.testTextInput.isVisible, true);
+    // No method calls are sent from the framework.
+    // This makes sure hide/clearClient methods are not called after connection
+    // closed.
+    expect(tester.testTextInput.log, isEmpty);
   });
 
   testWidgets('closed connection reopened when user focused', (WidgetTester tester) async {
@@ -630,18 +630,23 @@ void main() {
     expect(tester.testTextInput.editingState['text'], equals('test3'));
     expect(state.wantKeepAlive, true);
 
+    tester.testTextInput.log.clear();
     tester.testTextInput.closeConnection();
     await tester.pumpAndSettle();
 
     // Widget does not have focus anymore.
     expect(state.wantKeepAlive, false);
+    // No method calls are sent from the framework.
+    // This makes sure hide/clearClient methods are not called after connection
+    // closed.
+    expect(tester.testTextInput.log, isEmpty);
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pump();
     controller.text = 'test2';
     expect(tester.testTextInput.editingState['text'], equals('test2'));
-    // // Widget regained the focus.
+    // Widget regained the focus.
     expect(state.wantKeepAlive, true);
   });
 
@@ -698,10 +703,15 @@ void main() {
         tester.state<EditableTextState>(find.byWidget(testNameField));
     expect(state.wantKeepAlive, true);
 
+    tester.testTextInput.log.clear();
     tester.testTextInput.closeConnection();
 
     // Widget does not have focus anymore.
     expect(state.wantKeepAlive, false);
+    // No method calls are sent from the framework.
+    // This makes sure hide/clearClient methods are not called after connection
+    // closed.
+    expect(tester.testTextInput.log, isEmpty);
 
     // For the next fields, tap, enter text.
     await tester.tap(find.byWidget(testPhoneField));

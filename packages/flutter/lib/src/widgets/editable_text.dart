@@ -1425,21 +1425,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _closeConnectionReceived() {
-    if (_hasInputConnection) {
-      _textInputConnection.connectionClosedReceived();
-      _textInputConnection = null;
-      _lastKnownRemoteTextEditingValue = null;
-      _finalizeEditing(true);
-    }
-  }
-
   void _openOrCloseInputConnectionIfNeeded() {
     if (_hasFocus && widget.focusNode.consumeKeyboardToken()) {
       _openInputConnection();
     } else if (!_hasFocus) {
       _closeInputConnectionIfNeeded();
       widget.controller.clearComposing();
+    }
+  }
+
+  @override
+  void connectionClosed() {
+    if (_hasInputConnection) {
+      _textInputConnection.connectionClosedReceived();
+      _textInputConnection = null;
+      _lastKnownRemoteTextEditingValue = null;
+      _finalizeEditing(true);
     }
   }
 
@@ -1887,11 +1888,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       style: widget.style,
       withComposing: !widget.readOnly,
     );
-  }
-
-  @override
-  void connectionClosed() {
-    _closeConnectionReceived();
   }
 }
 

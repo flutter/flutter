@@ -55,6 +55,12 @@ class TestTextInput {
     _isRegistered = false;
   }
 
+  /// Log for method calls.
+  ///
+  /// For all registered channels, handled calls are added to the list. Can
+  /// be cleaned using [clearLog].
+  final List<MethodCall> log = <MethodCall>[];
+
   /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
   ///
   /// Use [register] and [unregister] methods to control this value.
@@ -78,6 +84,7 @@ class TestTextInput {
   Map<String, dynamic> editingState;
 
   Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {
+    log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
         _client = methodCall.arguments[0];
@@ -138,7 +145,7 @@ class TestTextInput {
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
           'TextInputClient.onConnectionClosed',
-           <dynamic>[_client,],
+           <dynamic>[_client,]
         ),
       ),
       (ByteData data) { /* response from framework is discarded */ },
