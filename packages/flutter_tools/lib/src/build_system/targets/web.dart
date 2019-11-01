@@ -183,18 +183,16 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/main.dart.js'),
-    Source.behavior(AssetOutputBehavior('assets')),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.pattern('{PROJECT_DIR}/web/index.html'),
+    Source.depfile('flutter_assets.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.js'),
-    Source.pattern('{OUTPUT_DIR}/assets/AssetManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/assets/FontManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/assets/LICENSE'),
     Source.pattern('{OUTPUT_DIR}/index.html'),
-    Source.behavior(AssetOutputBehavior('assets'))
+    Source.depfile('flutter_assets.d'),
   ];
 
   @override
@@ -207,12 +205,15 @@ class WebReleaseBundle extends Target {
         environment.outputDir.childFile(fs.path.basename(outputFile.path)).path
       );
     }
+    final Directory outputDirectory = environment.outputDir.childDirectory('assets');
+    outputDirectory.createSync(recursive: true);
     environment.projectDir
       .childDirectory('web')
       .childFile('index.html')
       .copySync(fs.path.join(environment.outputDir.path, 'index.html'));
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
-    await copyAssets(assetBundle, environment, 'assets');
+    final Depfile depfile = await copyAssets(assetBundle, environment.outputDir.childDirectory('assets'));
+    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 }
