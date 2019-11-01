@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../artifacts.dart';
-import '../../asset.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
@@ -104,10 +103,7 @@ class CopyFlutterBundle extends Target {
       fs.file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
-
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    await assetBundle.build();
-    final Depfile assetDepfile = await copyAssets(assetBundle, environment.outputDir);
+    final Depfile assetDepfile = await copyAssets(environment, environment.outputDir);
     assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 

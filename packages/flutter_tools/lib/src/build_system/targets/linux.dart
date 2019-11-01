@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../artifacts.dart';
-import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../globals.dart';
@@ -144,10 +143,7 @@ class DebugBundleLinuxAssets extends Target {
       environment.buildDir.childFile('app.dill')
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    await assetBundle.build();
-    final Depfile depfile = await copyAssets(assetBundle, outputDirectory);
+    final Depfile depfile = await copyAssets(environment, outputDirectory);
     depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 }

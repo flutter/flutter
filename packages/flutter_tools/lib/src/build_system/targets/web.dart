@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../artifacts.dart';
-import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
@@ -211,9 +210,7 @@ class WebReleaseBundle extends Target {
       .childDirectory('web')
       .childFile('index.html')
       .copySync(fs.path.join(environment.outputDir.path, 'index.html'));
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    await assetBundle.build();
-    final Depfile depfile = await copyAssets(assetBundle, environment.outputDir.childDirectory('assets'));
+    final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
     depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 }

@@ -58,6 +58,9 @@ class Depfile {
   ///
   /// If either [inputs] or [outputs] is empty, does not write to the file.
   void writeToFile(File depfile) {
+    if (depfile.existsSync()) {
+      depfile.deleteSync();
+    }
     if (inputs.isEmpty || outputs.isEmpty) {
       return;
     }

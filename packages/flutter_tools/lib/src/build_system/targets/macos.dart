@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../artifacts.dart';
-import '../../asset.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
@@ -245,7 +244,6 @@ abstract class MacOSBundleFlutterAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.depfile('flutter_assets.d'),
   ];
@@ -282,15 +280,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       .childDirectory('Resources')
       .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int result = await assetBundle.build(
-      manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
-      packagesPath: environment.projectDir.childFile('.packages').path,
-    );
-    if (result != 0) {
-      throw Exception('Failed to create asset bundle: $result');
-    }
-    final Depfile depfile = await copyAssets(assetBundle, assetDirectory);
+    final Depfile depfile = await copyAssets(environment, assetDirectory);
     depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
 
     // Copy Info.plist template.

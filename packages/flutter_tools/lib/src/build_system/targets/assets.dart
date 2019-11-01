@@ -12,16 +12,26 @@ import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 
-/// A helper function to copy an [assetBundle] into an [environment]'s output
+/// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
 ///
 /// [pathSuffix] may be optionally provided to add additional paths to the
 /// output directory.
 ///
 /// Returns a [Depfile] containing all assets used in the build.
-Future<Depfile> copyAssets(AssetBundle assetBundle, Directory outputDirectory) async {
+Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) async {
+  final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
+  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+  await assetBundle.build(
+    manifestPath: pubspecFile.path,
+    packagesPath: environment.projectDir.childFile('.packages').path,
+  );
   final Pool pool = Pool(kMaxOpenFiles);
-  final List<File> inputs = <File>[];
+  final List<File> inputs = <File>[
+    // An asset manifest with no assets would have zero inputs if not
+    // for this pubspec file.
+    pubspecFile,
+  ];
   final List<File> outputs = <File>[];
   await Future.wait<void>(
     assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
@@ -57,7 +67,6 @@ class CopyAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.depfile('flutter_assets.d'),
   ];
 
@@ -72,12 +81,7 @@ class CopyAssets extends Target {
       .buildDir
       .childDirectory('flutter_assets');
     output.createSync(recursive: true);
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    await assetBundle.build(
-      manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
-      packagesPath: environment.projectDir.childFile('.packages').path,
-    );
-    final Depfile depfile = await copyAssets(assetBundle, output);
+    final Depfile depfile = await copyAssets(environment, output);
     depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 }
