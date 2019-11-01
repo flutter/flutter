@@ -70,6 +70,7 @@ void main() {
                 key: expandedKey,
                 initiallyExpanded: true,
                 title: const Text('Expanded'),
+                subtitle: const Text('Subtitle'),
                 backgroundColor: Colors.red,
                 children: <Widget>[
                   ListTile(

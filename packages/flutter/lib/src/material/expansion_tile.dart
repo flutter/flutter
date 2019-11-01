@@ -35,6 +35,7 @@ class ExpansionTile extends StatefulWidget {
     Key key,
     this.leading,
     @required this.title,
+    this.subtitle,
     this.backgroundColor,
     this.onExpansionChanged,
     this.children = const <Widget>[],
@@ -52,6 +53,11 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// Typically a [Text] widget.
   final Widget title;
+
+  /// Additional content displayed bellow the title
+  ///
+  /// Typically a [Text] widget.
+  final Widget subtitle;
 
   /// Called when the tile expands or collapses.
   ///
@@ -78,10 +84,14 @@ class ExpansionTile extends StatefulWidget {
   _ExpansionTileState createState() => _ExpansionTileState();
 }
 
-class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
-  static final Animatable<double> _easeOutTween = CurveTween(curve: Curves.easeOut);
-  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
-  static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
+class _ExpansionTileState extends State<ExpansionTile>
+    with SingleTickerProviderStateMixin {
+  static final Animatable<double> _easeOutTween =
+      CurveTween(curve: Curves.easeOut);
+  static final Animatable<double> _easeInTween =
+      CurveTween(curve: Curves.easeIn);
+  static final Animatable<double> _halfTween =
+      Tween<double>(begin: 0.0, end: 0.5);
 
   final ColorTween _borderColorTween = ColorTween();
   final ColorTween _headerColorTween = ColorTween();
@@ -107,11 +117,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _borderColor = _controller.drive(_borderColorTween.chain(_easeOutTween));
     _headerColor = _controller.drive(_headerColorTween.chain(_easeInTween));
     _iconColor = _controller.drive(_iconColorTween.chain(_easeInTween));
-    _backgroundColor = _controller.drive(_backgroundColorTween.chain(_easeOutTween));
+    _backgroundColor =
+        _controller.drive(_backgroundColorTween.chain(_easeOutTween));
 
-    _isExpanded = PageStorage.of(context)?.readState(context) ?? widget.initiallyExpanded;
-    if (_isExpanded)
-      _controller.value = 1.0;
+    _isExpanded =
+        PageStorage.of(context)?.readState(context) ?? widget.initiallyExpanded;
+    if (_isExpanded) _controller.value = 1.0;
   }
 
   @override
@@ -127,8 +138,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         _controller.forward();
       } else {
         _controller.reverse().then<void>((void value) {
-          if (!mounted)
-            return;
+          if (!mounted) return;
           setState(() {
             // Rebuild without widget.children.
           });
@@ -161,6 +171,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               onTap: _handleTap,
               leading: widget.leading,
               title: widget.title,
+              subtitle: widget.subtitle,
               trailing: widget.trailing ?? RotationTransition(
                 turns: _iconTurns,
                 child: const Icon(Icons.expand_more),
@@ -181,16 +192,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
-    _borderColorTween
-      ..end = theme.dividerColor;
+    _borderColorTween..end = theme.dividerColor;
     _headerColorTween
       ..begin = theme.textTheme.subhead.color
       ..end = theme.accentColor;
     _iconColorTween
       ..begin = theme.unselectedWidgetColor
       ..end = theme.accentColor;
-    _backgroundColorTween
-      ..end = widget.backgroundColor;
+    _backgroundColorTween..end = widget.backgroundColor;
     super.didChangeDependencies();
   }
 
@@ -202,6 +211,5 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       builder: _buildChildren,
       child: closed ? null : Column(children: widget.children),
     );
-
   }
 }
