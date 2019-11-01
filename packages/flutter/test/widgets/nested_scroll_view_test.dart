@@ -715,7 +715,7 @@ void main() {
     1e4
   ]) {
     testWidgets(
-        'NestedScrollView exposed scroll controllers work properly with a scroll extent of $scrollExtent',
+        'NestedScrollViewState exposed scroll controllers work properly with a scroll extent of $scrollExtent',
             (WidgetTester tester) async {
           final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
           final ScrollController scrollController = ScrollController();
@@ -750,10 +750,6 @@ void main() {
 
           await tester.pump();
 
-          // The scrollController should be equal to the outerController defined in the state.
-          expect(scrollController.position,
-              globalKey.currentState.outerController.position);
-
           expect(
               globalKey.currentState.innerController.position.pixels +
                   globalKey.currentState.outerController.position.pixels,
@@ -768,6 +764,82 @@ void main() {
               max(0, scrollExtent - kToolbarHeight));
         });
   }
+
+  testWidgets('NestedScrollViewState.outerController should correspond to NestedScrollView.controller', (WidgetTester tester) async {
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: NestedScrollView(
+            controller: scrollController,
+            key: globalKey,
+            body: ListView.builder(
+              itemBuilder: (BuildContext context, int index) =>
+                  Text('$index'),
+            ),
+            headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
+          ),
+        ),
+      ),
+    ));
+
+    // The scrollController should be equal to the outerController defined in the state.
+    expect(scrollController.position,
+        globalKey.currentState.outerController.position);
+  });
+
+  testWidgets('Modifying an exposed scroll controller of NestedScrollViewState should not manipulate the other', (WidgetTester tester) async {
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: NestedScrollView(
+            key: globalKey,
+            body: ListView.builder(
+              itemBuilder: (BuildContext context, int index) =>
+                  Text('$index'),
+            ),
+            headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
+          ),
+        ),
+      ),
+    ));
+
+    expect(globalKey.currentState.outerController.position.pixels, 0);
+    expect(globalKey.currentState.innerController.position.pixels, 0);
+
+    globalKey.currentState.innerController.jumpTo(1e3);
+
+    expect(globalKey.currentState.innerController.position.pixels, 1e3);
+    expect(globalKey.currentState.outerController.position.pixels, 0);
+
+    // The outer scroll view is limited to kToolbarHeight as it is a SliverAppBar.
+    globalKey.currentState.outerController.jumpTo(kToolbarHeight);
+
+    expect(globalKey.currentState.innerController.position.pixels, 1e3);
+    expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight);
+
+    globalKey.currentState.outerController.jumpTo(2 * kToolbarHeight);
+    // The other scroll view cannot be scrolled more than all the way out.
+    expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight);
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {
