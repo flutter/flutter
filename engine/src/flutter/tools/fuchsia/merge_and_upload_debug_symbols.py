@@ -14,6 +14,7 @@ import platform
 import shutil
 import subprocess
 import sys
+import tarfile
 
 
 def IsLinux():
@@ -62,9 +63,15 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
   subprocess.check_call(command, cwd=_packaging_dir)
 
 
-def NormalizeDirPathForRsync(path):
-  norm_path = os.path.normpath(path)
-  return norm_path + os.path.sep
+def CreateTarFile(folder_path, base_dir):
+  archive_name = os.path.basename(folder_path)
+  tar_file_path = os.path.join(base_dir, archive_name + '.tar.bz2')
+  with tarfile.open(tar_file_path, "w:bz2") as archive:
+    for root, dirs, _ in os.walk(folder_path):
+      for dir_name in dirs:
+        dir_path = os.path.join(root, dir_name)
+        archive.add(dir_path, arcname=dir_name)
+  return tar_file_path
 
 
 def main():
@@ -98,17 +105,16 @@ def main():
     assert os.path.exists(symbol_dir) and os.path.isdir(symbol_dir)
 
   arch = args.target_arch
-  out_dir = NormalizeDirPathForRsync(
-      os.path.join(args.out_dir, 'flutter-fuchsia-debug-symbols-%s' % arch))
+  out_dir = os.path.join(args.out_dir,
+                         'flutter-fuchsia-debug-symbols-%s' % arch)
   if os.path.exists(out_dir):
     print 'Directory: %s is not empty, deleting it.' % out_dir
     shutil.rmtree(out_dir)
   os.makedirs(out_dir)
 
   for symbol_dir in symbol_dirs:
-    subprocess.check_output(
-        ['rsync', '--recursive',
-         NormalizeDirPathForRsync(symbol_dir), out_dir])
+    archive_path = CreateTarFile(symbol_dir, out_dir)
+    print('Created archive: ' + archive_path)
 
   cipd_def = WriteCIPDDefinition(arch, out_dir)
   ProcessCIPDPackage(args.upload, cipd_def, args.engine_version, out_dir, arch)
