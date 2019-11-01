@@ -678,21 +678,18 @@ class TextInputConnection {
   final TextInputClient _client;
 
   /// Whether this connection is currently interacting with the text input control.
-  bool get attached => _clientHandler._currentConnection == this;
+  bool get attached => TextInput._instance._currentConnection == this;
 
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+    TextInput._instance._channel.invokeMethod<void>('TextInput.show');
   }
 
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
-    SystemChannels.textInput.invokeMethod<void>(
-      'TextInput.setEditingState',
-      value.toJSON(),
-    );
+    TextInput._instance._setEditingState(value);
   }
 
   /// Send the size and transform of the editable text to engine.
@@ -708,7 +705,7 @@ class TextInputConnection {
     if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
       _cachedSize = editableBoxSize;
       _cachedTransform = transform;
-      SystemChannels.textInput.invokeMethod<void>(
+      TextInput._instance._channel.invokeMethod<void>(
         'TextInput.setEditableSizeAndTransform',
         <String, dynamic>{
           'width': editableBoxSize.width,
@@ -733,7 +730,7 @@ class TextInputConnection {
   }) {
     assert(attached);
 
-    SystemChannels.textInput.invokeMethod<void>(
+    TextInput._instance._channel.invokeMethod<void>(
       'TextInput.setStyle',
       <String, dynamic>{
         'fontFamily': fontFamily,
@@ -751,10 +748,7 @@ class TextInputConnection {
   /// other client attaches to it within this animation frame.
   void close() {
     if (attached) {
-      SystemChannels.textInput.invokeMethod<void>('TextInput.clearClient');
-      _clientHandler
-        .._currentConnection = null
-        .._scheduleHide();
+      TextInput._instance._clearClient();
     }
     assert(!attached);
   }
@@ -812,80 +806,28 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
-/// A handler for the [SystemChannels.textInput] channel.
-///
-/// This class is used internally by the Flutter SDK and is only visible for
-/// testing.
-@visibleForTesting
-class TextInputClientHandler {
-  /// Creates a [TextInputClientHandler].
-  @visibleForTesting
-  TextInputClientHandler(this._channel, this._currentConnection) : assert(_channel != null) {
+/// An interface to the system's text input control.
+class TextInput {
+  TextInput._() {
+    _channel = SystemChannels.textInput;
     _channel.setMethodCallHandler(_handleTextInputInvocation);
   }
 
-  final MethodChannel _channel;
-
-  TextInputConnection _currentConnection;
-
-  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
-    if (_currentConnection == null)
-      return;
-    final String method = methodCall.method;
-
-    // Reattach request needs to be handled regardless of the client ID.
-    if (method == 'TextInputClient.reattach') {
-      assert(_currentConnection._client != null);
-      TextInput._attach(this, _currentConnection);
-      return;
-    }
-
-    final List<dynamic> args = methodCall.arguments;
-    final int client = args[0];
-    // The incoming message was for a different client.
-    if (client != _currentConnection._id)
-      return;
-    switch (method) {
-      case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
-        break;
-      case 'TextInputClient.performAction':
-        _currentConnection._client.performAction(_toTextInputAction(args[1]));
-        break;
-      case 'TextInputClient.updateFloatingCursor':
-        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
-        break;
-      default:
-        throw MissingPluginException();
-    }
+  /// Set the [MethodChannel] used to communicate with the system's text input
+  /// control.
+  ///
+  /// This is only meant for testing within the Flutter SDK. Changing this
+  /// will break the ability to input text. This has no effect if asserts are
+  /// disabled.
+  @visibleForTesting
+  static void setChannel(MethodChannel newChannel) {
+    assert(() {
+      _instance._channel = newChannel..setMethodCallHandler(_instance._handleTextInputInvocation);
+      return true;
+    }());
   }
 
-  bool _hidePending = false;
-
-  void _scheduleHide() {
-    if (_hidePending)
-      return;
-    _hidePending = true;
-
-    // Schedule a deferred task that hides the text input. If someone else
-    // shows the keyboard during this update cycle, then the task will do
-    // nothing.
-    scheduleMicrotask(() {
-      _hidePending = false;
-      if (_currentConnection == null)
-        _channel.invokeMethod<void>('TextInput.hide');
-    });
-  }
-}
-
-final TextInputClientHandler _clientHandler = TextInputClientHandler(
-  SystemChannels.textInput,
-  null,
-);
-
-/// An interface to the system's text input control.
-class TextInput {
-  TextInput._();
+  static final TextInput _instance = TextInput._();
 
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
     TextInputAction.none,
@@ -926,21 +868,24 @@ class TextInput {
   static TextInputConnection attach(TextInputClient client) {
     assert(client != null);
     final TextInputConnection connection = TextInputConnection._(client);
-    _clientHandler._currentConnection = connection;
-    _attach(_clientHandler, connection);
+    _instance._attach(connection);
     return connection;
   }
 
-  static void _attach(TextInputClientHandler handler, TextInputConnection connection) {
+  /// This method actually notifies the embedding of the client. It is utilized
+  /// by [attach] and by [_handleTextInputInvocation] for the
+  /// `TextInputClient.reattach` method.
+  void _attach(TextInputConnection connection) {
     assert(connection != null);
     assert(connection._client != null);
     final TextInputConfiguration configuration = connection._client.createConfiguration();
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    handler._channel.invokeMethod<void>(
+    _channel.invokeMethod<void>(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJson() ],
     );
+    _currentConnection = connection;
   }
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
@@ -963,5 +908,78 @@ class TextInput {
       return true;
     }());
     return true;
+  }
+
+  MethodChannel _channel;
+
+  TextInputConnection _currentConnection;
+
+  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
+    if (_currentConnection == null)
+      return;
+    final String method = methodCall.method;
+
+    // Reattach request needs to be handled regardless of the client ID.
+    if (method == 'TextInputClient.requestExistingInputState') {
+      assert(_currentConnection._client != null);
+      _attach(_currentConnection);
+      if (_lastTextEditingValue != null) {
+        _setEditingState(_lastTextEditingValue);
+      }
+      return;
+    }
+
+    final List<dynamic> args = methodCall.arguments;
+    final int client = args[0];
+    // The incoming message was for a different client.
+    if (client != _currentConnection._id)
+      return;
+    switch (method) {
+      case 'TextInputClient.updateEditingState':
+        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
+        break;
+      case 'TextInputClient.performAction':
+        _currentConnection._client.performAction(_toTextInputAction(args[1]));
+        break;
+      case 'TextInputClient.updateFloatingCursor':
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        break;
+      default:
+        throw MissingPluginException();
+    }
+  }
+
+  bool _hidePending = false;
+
+  void _scheduleHide() {
+    if (_hidePending)
+      return;
+    _hidePending = true;
+
+    // Schedule a deferred task that hides the text input. If someone else
+    // shows the keyboard during this update cycle, then the task will do
+    // nothing.
+    scheduleMicrotask(() {
+      _hidePending = false;
+      if (_currentConnection == null)
+        _channel.invokeMethod<void>('TextInput.hide');
+    });
+  }
+
+  void _clearClient() {
+    _channel.invokeMethod<void>('TextInput.clearClient');
+    _currentConnection = null;
+    _scheduleHide();
+  }
+
+  TextEditingValue _lastTextEditingValue;
+
+  void _setEditingState(TextEditingValue value) {
+    assert(value != null);
+    _lastTextEditingValue = value;
+    _channel.invokeMethod<void>(
+      'TextInput.setEditingState',
+      value.toJSON(),
+    );
   }
 }

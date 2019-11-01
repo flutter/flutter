@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show utf8;
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
 import '../flutter_test_alternative.dart';
@@ -14,18 +16,42 @@ void main() {
       return;
     });
     const FakeTextInputClient client = FakeTextInputClient();
-    TextInputClientHandler(
-      fakeTextChannel,
-      TextInput.attach(client),
-    );
+    TextInput.setChannel(fakeTextChannel);
+    TextInput.attach(client);
 
-    fakeTextChannel.incoming(const MethodCall('TextInputClient.reattach', null));
+    fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
 
-    expect(fakeTextChannel.outgoingCalls.length, 1);
-    final MethodCall onlyCall = fakeTextChannel.outgoingCalls.single;
-    expect(onlyCall.method, 'TextInput.setClient');
-    expect(onlyCall.arguments[0], 1);
-    expect(onlyCall.arguments[1], client.createConfiguration().toJson());
+    expect(fakeTextChannel.outgoingCalls.length, 2);
+    fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+      // From original attach
+      MethodCall('TextInput.setClient', <dynamic>[1, client.createConfiguration().toJson()]),
+      // From requestExistingInputState
+      MethodCall('TextInput.setClient', <dynamic>[1, client.createConfiguration().toJson()]),
+    ]);
+  });
+
+  test('text input client handler responds to reattach with setClient and text state', () async {
+    final FakeTextChannel fakeTextChannel = FakeTextChannel((MethodCall call) async {
+      return;
+    });
+    const FakeTextInputClient client = FakeTextInputClient();
+    TextInput.setChannel(fakeTextChannel);
+    final TextInputConnection connection = TextInput.attach(client);
+    const TextEditingValue editingState = TextEditingValue(text: 'foo');
+    connection.setEditingState(editingState);
+
+    fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
+
+    expect(fakeTextChannel.outgoingCalls.length, 4);
+    fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+      // attach
+      MethodCall('TextInput.setClient', <dynamic>[1, client.createConfiguration().toJson()]),
+      // set editing state 1
+      MethodCall('TextInput.setEditingState', editingState.toJSON()),
+      // both from requestExistingInputState
+      MethodCall('TextInput.setClient', <dynamic>[1, client.createConfiguration().toJson()]),
+      MethodCall('TextInput.setEditingState', editingState.toJSON()),
+    ]);
   });
 
   group('TextInputConfiguration', () {
@@ -117,13 +143,12 @@ class FakeTextInputClient implements TextInputClient {
   TextInputConfiguration createConfiguration() => const TextInputConfiguration();
 
   @override
-  void performAction(TextInputAction action) {}
+  void performAction(TextInputAction action) => throw UnimplementedError();
 
   @override
-  void updateEditingValue(TextEditingValue value) {}
-
+  void updateEditingValue(TextEditingValue value) => throw UnimplementedError();
   @override
-  void updateFloatingCursor(RawFloatingCursorPoint point) {}
+  void updateFloatingCursor(RawFloatingCursorPoint point) => throw UnimplementedError();
 }
 
 class FakeTextChannel implements MethodChannel {
@@ -138,7 +163,7 @@ class FakeTextChannel implements MethodChannel {
   BinaryMessenger get binaryMessenger => throw UnimplementedError();
 
   @override
-  MethodCodec get codec => throw UnimplementedError();
+  MethodCodec get codec => const JSONMethodCodec();
 
   @override
   Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) => throw UnimplementedError();
@@ -160,9 +185,30 @@ class FakeTextChannel implements MethodChannel {
   @override
   void setMethodCallHandler(Future<void> Function(MethodCall call) handler) {
     incoming = handler;
-    // this.handler = handler;
   }
 
   @override
   void setMockMethodCallHandler(Future<void> Function(MethodCall call) handler)  => throw UnimplementedError();
+
+  void validateOutgoingMethodCalls(List<MethodCall> calls) {
+    expect(outgoingCalls.length, calls.length);
+    bool hasError = false;
+    for (int i = 0; i < calls.length; i++) {
+      final ByteData outgoingData = codec.encodeMethodCall(outgoingCalls[i]);
+      final ByteData expectedData = codec.encodeMethodCall(calls[i]);
+      final String outgoingString = utf8.decode(outgoingData.buffer.asUint8List());
+      final String expectedString = utf8.decode(expectedData.buffer.asUint8List());
+
+      if (outgoingString != expectedString) {
+        print('''Index $i did not match:
+${outgoingCalls[i]}
+${calls[i]}
+''');
+        hasError = true;
+      }
+    }
+    if (hasError) {
+      fail('Calls did not match.');
+    }
+  }
 }
