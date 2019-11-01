@@ -90,6 +90,8 @@ public class TextInputPlugin {
             }
         });
 
+        textInputChannel.requestExistingInputState();
+
         this.platformViewsController = platformViewsController;
         this.platformViewsController.attachTextInputPlugin(this);
         restartAlwaysRequired = isRestartAlwaysRequired();
