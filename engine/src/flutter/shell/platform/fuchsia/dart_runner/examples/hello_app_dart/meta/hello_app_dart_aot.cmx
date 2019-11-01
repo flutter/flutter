@@ -5,6 +5,7 @@
   "sandbox": {
     "features": [],
     "services": [
+      "fuchsia.intl.PropertyProvider",
       "fuchsia.sys.Environment"
     ]
   }
