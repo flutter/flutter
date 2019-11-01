@@ -171,8 +171,11 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///
 /// {@tool sample}
 ///
-/// This example of a red [Container] wrapping a [GestureDetector] widget. When
-/// tapped turns the [Container] yellow by setting the `_color` field:
+/// This example of a red [Container] wrapping a [GestureDetector] widget. On
+/// this example the since the [GestureDetector] does not have a child it
+/// assumes the size of its parent, making the area of the surrounding
+/// [Container] clickable.
+/// When tapped turns the [Container] yellow by setting the `_color` field:
 ///
 /// ```dart
 /// Container(
