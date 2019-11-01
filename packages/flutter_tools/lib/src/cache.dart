@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'android/gradle.dart';
+import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -914,7 +914,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
           '--project-cache-dir', tempDir.path,
           'resolveDependencies',
         ],
-        environment: gradleEnv);
+        environment: gradleEnvironment);
       if (processResult.exitCode != 0) {
         printError('Failed to download the Android dependencies');
       }
@@ -1103,6 +1103,17 @@ class IosUsbArtifacts extends CachedArtifact {
     'libzip',
   ];
 
+  // For unknown reasons, users are getting into bad states where libimobiledevice is
+  // downloaded but some executables are missing from the zip. The names here are
+  // used for additional download checks below, so we can redownload if they are
+  // missing.
+  static const Map<String, List<String>> _kExecutables = <String, List<String>>{
+    'libimobiledevice': <String>[
+      'idevice_id',
+      'ideviceinfo',
+    ],
+  };
+
   @override
   Map<String, String> get environment {
     return <String, String>{
@@ -1111,9 +1122,26 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @override
+  bool isUpToDateInner() {
+    final List<String> executables =_kExecutables[name];
+    if (executables == null) {
+      return true;
+    }
+    for (String executable in executables) {
+      if (!location.childFile(executable).existsSync()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
   Future<void> updateInner() {
     if (!platform.isMacOS && !cache.includeAllPlatforms) {
       return Future<void>.value();
+    }
+    if (location.existsSync()) {
+      location.deleteSync(recursive: true);
     }
     return _downloadZipArchive('Downloading $name...', archiveUri, location);
   }

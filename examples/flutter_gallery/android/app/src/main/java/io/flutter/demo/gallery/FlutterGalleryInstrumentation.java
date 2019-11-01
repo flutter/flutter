@@ -5,25 +5,26 @@
 package io.flutter.demo.gallery;
 
 import android.os.ConditionVariable;
+import androidx.annotation.NonNull;
+
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.view.FlutterView;
 
 /** Instrumentation for testing using Android Espresso framework. */
 public class FlutterGalleryInstrumentation implements MethodCallHandler {
-
   private final ConditionVariable testFinished = new ConditionVariable();
   private volatile boolean testSuccessful;
 
-  FlutterGalleryInstrumentation(FlutterView view) {
-    new MethodChannel(view, "io.flutter.demo.gallery/TestLifecycleListener")
+  FlutterGalleryInstrumentation(@NonNull BinaryMessenger messenger) {
+    new MethodChannel(messenger, "io.flutter.demo.gallery/TestLifecycleListener")
         .setMethodCallHandler(this);
   }
 
   @Override
-  public void onMethodCall(MethodCall call, Result result) {
+  public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     testSuccessful = call.method.equals("success");
     testFinished.open();
     result.success(null);

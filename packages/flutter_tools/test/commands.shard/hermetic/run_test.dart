@@ -232,6 +232,9 @@ class FakeDevice extends Fake implements Device {
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
 
   @override
+  final PlatformType platformType = PlatformType.ios;
+
+  @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
     String mainPath,

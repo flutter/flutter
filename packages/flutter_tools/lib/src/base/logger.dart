@@ -359,12 +359,12 @@ class BufferLogger extends Logger {
 
 class VerboseLogger extends Logger {
   VerboseLogger(this.parent) : assert(terminal != null) {
-    stopwatch.start();
+    _stopwatch.start();
   }
 
   final Logger parent;
 
-  Stopwatch stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = context.get<Stopwatch>() ?? Stopwatch();
 
   @override
   bool get isVerbose => true;
@@ -438,8 +438,8 @@ class VerboseLogger extends Logger {
       return;
     }
 
-    final int millis = stopwatch.elapsedMilliseconds;
-    stopwatch.reset();
+    final int millis = _stopwatch.elapsedMilliseconds;
+    _stopwatch.reset();
 
     String prefix;
     const int prefixWidth = 8;
