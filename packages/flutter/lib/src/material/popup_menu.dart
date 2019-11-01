@@ -1040,7 +1040,9 @@ class PopupMenuButton<T> extends StatefulWidget {
 ///
 /// {@tool sample}
 ///
-/// You would access your [PopupMenuButtonState] using a [GlobalKey].
+/// You would access your [PopupMenuButtonState] using a [GlobalKey].  
+/// Using the following setup, you can show the menu 
+/// using `globalKey.currentState.showButtonMenu`.
 ///
 /// ```dart
 /// @override
@@ -1062,7 +1064,6 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// }
 /// ```
 ///
-/// Now, you can show the menu using `globalKey.currentState.showButtonMenu`.
 /// {@end-tool}
 ///
 /// Alternatively, you could also visit child elements of your parent widget to obtain
