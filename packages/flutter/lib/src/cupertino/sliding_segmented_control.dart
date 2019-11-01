@@ -94,56 +94,12 @@ class _FontWeightTween extends Tween<FontWeight> {
 /// argument must be an ordered [Map] such as a [LinkedHashMap], the ordering of
 /// the keys will determine the order of the widgets in the segmented control.
 ///
-/// When the state of the segmented control changes, the widget changes the
-/// [controller]'s value to the map key associated with the newly selected widget,
-/// causing all of its listeners to be notified.
-///
-/// {@tool dartpad --template=stateful_widget_material}
-///
-/// This sample shows two [CupertinoSlidingSegmentedControl]s that mirror each other.
-///
-/// ```dart
-/// final Map<int, Widget> children = const <int, Widget>{
-///   0: Text('Child 1'),
-///   1: Text('Child 2'),
-///   2: Text('Child 3'),
-/// };
-///
-/// // No segment is initially selected because the controller's value is null.
-/// final ValueNotifier<int> controller = ValueNotifier<int>(null);
-///
-/// @override
-/// void initState() {
-///   super.initState();
-///   // Prints a message whenever the currently selected widget changes.
-///   controller.addListener(() { print('selected: ${controller.value}'); });
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Center(
-///     child: Column(
-///       children: <Widget>[
-///         CupertinoSlidingSegmentedControl<int>(
-///           children: children,
-///           controller: controller,
-///         ),
-///         CupertinoSlidingSegmentedControl<int>(
-///           children: children,
-///           controller: controller,
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-///
-/// @override
-/// void dispose() {
-///   controller.dispose();
-///   super.dispose();
-/// }
-/// ```
-/// {@end-tool}
+/// When the state of the segmented control changes, the widget calls the
+/// [onValueChanged] callback. The map key associated with the newly selected
+/// widget is returned in the [onValueChanged] callback. Typically, widgets
+/// that use a segmented control will listen for the [onValueChanged] callback
+/// and rebuild the segmented control with a new [groupValue] to update which
+/// option is currently selected.
 ///
 /// The [children] will be displayed in the order of the keys in the [Map].
 /// The height of the segmented control is determined by the height of the
@@ -166,33 +122,34 @@ class _FontWeightTween extends Tween<FontWeight> {
 class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
   ///
-  /// The [children] and [controller] arguments must not be null. The [children]
-  /// argument must be an ordered [Map] such as a [LinkedHashMap]. Further, the
-  /// length of the [children] list must be greater than one.
+  /// The [children] and [onValueChanged] arguments must not be null. The
+  /// [children] argument must be an ordered [Map] such as a [LinkedHashMap].
+  /// Further, the length of the [children] list must be greater than one.
   ///
-  /// Each widget value in the map of [children] must have an associated [Map] key
-  /// of type [T] that uniquely identifies this widget. This key will become the
-  /// [controller]'s new value, when the corresponding child widget from the
-  /// [children] map is selected.
+  /// Each widget value in the map of [children] must have an associated key
+  /// that uniquely identifies this widget. This key is what will be returned
+  /// in the [onValueChanged] callback when a new value from the [children] map
+  /// is selected.
   ///
-  /// The [controller]'s [ValueNotifier.value] is the currently selected value for
-  /// the segmented control. If it is null, no widget will appear as selected. The
-  /// [controller]'s value must be either null or one of the keys in the [children]
-  /// map.
+  /// The [groupValue] is the currently selected value for the segmented control.
+  /// If no [groupValue] is provided, or the [groupValue] is null, no widget will
+  /// appear as selected. The [groupValue] must be either null or one of the keys
+  /// in the [children] map.
   CupertinoSlidingSegmentedControl({
     Key key,
     @required this.children,
-    @required this.controller,
+    @required this.onValueChanged,
+    this.groupValue,
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
   }) : assert(children != null),
        assert(children.length >= 2),
        assert(padding != null),
-       assert(controller != null),
+       assert(onValueChanged != null),
        assert(
-         controller.value == null || children.keys.any((T child) => child == controller.value),
-         "The controller's value must be either null or one of the keys in the children map.",
+         groupValue == null || children.keys.contains(groupValue),
+         'The groupValue must be either null or one of the keys in the children map.',
        ),
        super(key: key);
 
@@ -203,16 +160,58 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// This attribute must be an ordered [Map] such as a [LinkedHashMap].
   final Map<T, Widget> children;
 
-  /// A [ValueNotifier]<[T]> that controls the currently selected child.
+  /// The identifier of the widget that is currently selected.
   ///
-  /// Its value must be one of the keys in the [Map] of [children], or null, in
-  /// which case no widget will be selected.
+  /// This must be one of the keys in the [Map] of [children].
+  /// If this attribute is null, no widget will be initially selected.
+  final T groupValue;
+
+  /// The callback that is called when a new option is tapped.
   ///
-  /// The [controller]'s value changes when the user drags the thumb to a different
-  /// child widget, or taps on a different child widget. Its value can also be
-  /// changed programmatically, in which case all sliding animations will play as
-  /// if the new selected child widget was tapped on.
-  final ValueNotifier<T> controller;
+  /// This attribute must not be null.
+  ///
+  /// The segmented control passes the newly selected widget's associated key
+  /// to the callback but does not actually change state until the parent
+  /// widget rebuilds the segmented control with the new [groupValue].
+  ///
+  /// The callback provided to [onValueChanged] should update the state of
+  /// the parent [StatefulWidget] using the [State.setState] method, so that
+  /// the parent gets rebuilt; for example:
+  ///
+  /// {@tool sample}
+  ///
+  /// ```dart
+  /// class SegmentedControlExample extends StatefulWidget {
+  ///   @override
+  ///   State createState() => SegmentedControlExampleState();
+  /// }
+  ///
+  /// class SegmentedControlExampleState extends State<SegmentedControlExample> {
+  ///   final Map<int, Widget> children = const {
+  ///     0: Text('Child 1'),
+  ///     1: Text('Child 2'),
+  ///   };
+  ///
+  ///   int currentValue;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Container(
+  ///       child: CupertinoSlidingSegmentedControl<int>(
+  ///         children: children,
+  ///         onValueChanged: (int newValue) {
+  ///           setState(() {
+  ///             currentValue = newValue;
+  ///           });
+  ///         },
+  ///         groupValue: currentValue,
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  final ValueChanged<T> onValueChanged;
 
   /// The color used to paint the rounded rect behind the [children] and the separators.
   ///
@@ -240,7 +239,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     with TickerProviderStateMixin<CupertinoSlidingSegmentedControl<T>> {
 
   final Map<T, AnimationController> _highlightControllers = <T, AnimationController>{};
-  final Tween<FontWeight> _highlightTween = _FontWeightTween(begin: FontWeight.normal, end: FontWeight.w600);
+  final Tween<FontWeight> _highlightTween = _FontWeightTween(begin: FontWeight.normal, end: FontWeight.w500);
 
   final Map<T, AnimationController> _pressControllers = <T, AnimationController>{};
   final Tween<double> _pressTween = Tween<double>(begin: 1, end: 0.2);
@@ -254,8 +253,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   final TapGestureRecognizer tap = TapGestureRecognizer();
   final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
   final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
-
-  ValueNotifier<T> controller;
 
   AnimationController _createHighlightAnimationController({ bool isCompleted = false }) {
     return AnimationController(
@@ -284,9 +281,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     drag.team = team;
     team.captain = drag;
 
-    controller = widget.controller;
-    controller.addListener(_didChangeControllerValue);
-    _highlighted = controller.value;
+    _highlighted = widget.groupValue;
 
     thumbController = AnimationController(
       duration: _kSpringAnimationDuration,
@@ -308,7 +303,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 
     for (T currentKey in widget.children.keys) {
       _highlightControllers[currentKey] = _createHighlightAnimationController(
-        isCompleted: currentKey == controller.value,  // Highlight the current selection.
+        isCompleted: currentKey == widget.groupValue,  // Highlight the current selection.
       );
       _pressControllers[currentKey] = _createFadeoutAnimationController();
     }
@@ -336,15 +331,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       }
     }
 
-    if (controller != widget.controller) {
-      controller.removeListener(_didChangeControllerValue);
-      controller = widget.controller;
-      controller.addListener(_didChangeControllerValue);
-    }
-
-    if (controller.value != oldWidget.controller.value) {
-      highlighted = widget.controller.value;
-    }
+    highlighted = widget.groupValue;
   }
 
   @override
@@ -366,18 +353,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     longPress.dispose();
 
     super.dispose();
-  }
-
-  void _didChangeControllerValue() {
-    assert(
-      controller.value == null || widget.children.keys.contains(controller.value),
-      "The controller's value ${controller.value} must be either null "
-      'or one of the keys in the children map: ${widget.children.keys}',
-    );
-
-    setState(() {
-      // Mark the state as dirty.
-    });
   }
 
   // Play highlight animation for the child located at _highlightControllers[at].
@@ -413,7 +388,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 
   void didChangeSelectedViaGesture() {
-    controller.value = _highlighted;
+    widget.onValueChanged(_highlighted);
   }
 
   T indexToKey(int index) => index == null ? null : keys[index];
@@ -447,9 +422,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
             style: textStyle,
             child: Semantics(
               button: true,
-              onTap: () { controller.value = currentKey; },
+              onTap: () { widget.onValueChanged(currentKey); },
               inMutuallyExclusiveGroup: true,
-              selected: controller.value == currentKey,
+              selected: widget.groupValue == currentKey,
               child: Opacity(
                 opacity: _pressTween.evaluate(_pressControllers[currentKey]),
                 // Expand the hitTest area to be as large as the Opacity widget.
@@ -464,7 +439,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           children.add(child);
         }
 
-        final int selectedIndex = controller.value == null ? null : keys.indexOf(controller.value);
+        final int selectedIndex = widget.groupValue == null ? null : keys.indexOf(widget.groupValue);
 
         final Widget box = _SegmentedControlRenderWidget<T>(
           children: children,
