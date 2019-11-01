@@ -734,8 +734,9 @@ void main() {
                   controller: scrollController,
                   key: globalKey,
                   body: ListView.builder(
-                    itemBuilder: (BuildContext context, int index) =>
-                        Text('$index'),
+                    itemBuilder: (BuildContext context, int index) {
+                      return Text('$index');
+                    },
                   ),
                   headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
                 ),
@@ -744,24 +745,28 @@ void main() {
           ));
 
           // The scroll gesture should be taken where in the inner body, so the whole scroll view is scrolled.
-          final TestGesture gesture =
-          await tester.startGesture(const Offset(0, kToolbarHeight + 1));
+          final TestGesture gesture = await tester.startGesture(const Offset(0, kToolbarHeight + 1));
           await gesture.moveBy(Offset(0, -scrollExtent));
 
           await tester.pump();
 
           expect(
-              globalKey.currentState.innerController.position.pixels +
-                  globalKey.currentState.outerController.position.pixels,
-              scrollExtent);
+            globalKey.currentState.innerController.position.pixels +
+                globalKey.currentState.outerController.position.pixels,
+            scrollExtent,
+          );
 
           // The outer scroll view cannot scroll past its height, which should be kToolbarHeight as a SliverAppBar represents the outer body.
-          expect(globalKey.currentState.outerController.position.pixels,
-              min(kToolbarHeight, scrollExtent));
+          expect(
+            globalKey.currentState.outerController.position.pixels,
+            min(kToolbarHeight, scrollExtent),
+          );
 
           // The inner controller should only start scrolling once the outer controller has been scrolled to its full extent.
-          expect(globalKey.currentState.innerController.position.pixels,
-              max(0, scrollExtent - kToolbarHeight));
+          expect(
+            globalKey.currentState.innerController.position.pixels,
+            max(0, scrollExtent - kToolbarHeight),
+          );
         });
   }
 
@@ -783,8 +788,9 @@ void main() {
             controller: scrollController,
             key: globalKey,
             body: ListView.builder(
-              itemBuilder: (BuildContext context, int index) =>
-                  Text('$index'),
+              itemBuilder: (BuildContext context, int index) {
+                return Text('$index');
+              },
             ),
             headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
           ),
@@ -793,8 +799,10 @@ void main() {
     ));
 
     // The scrollController should be equal to the outerController defined in the state.
-    expect(scrollController.position,
-        globalKey.currentState.outerController.position);
+    expect(
+      scrollController.position,
+      globalKey.currentState.outerController.position,
+    );
   });
 
   testWidgets('Manipulating NestedScrollViewState.innerController should manipulate NestedScrollViewState.outerController', (WidgetTester tester) async {
@@ -813,8 +821,9 @@ void main() {
           child: NestedScrollView(
             key: globalKey,
             body: ListView.builder(
-              itemBuilder: (BuildContext context, int index) =>
-                  Text('$index'),
+              itemBuilder: (BuildContext context, int index) {
+                return Text('$index');
+              },
             ),
             headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
           ),
@@ -848,8 +857,9 @@ void main() {
           child: NestedScrollView(
             key: globalKey,
             body: ListView.builder(
-              itemBuilder: (BuildContext context, int index) =>
-                  Text('$index'),
+              itemBuilder: (BuildContext context, int index) {
+                return Text('$index');
+              },
             ),
             headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
           ),
