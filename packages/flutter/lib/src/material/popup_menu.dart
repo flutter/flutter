@@ -790,6 +790,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// the menu. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the popup menu is closed.
 ///
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// menu to the [Navigator] furthest from or nearest to the given `context`. It
+/// is `false` by default.
+///
 /// The `semanticLabel` argument is used by accessibility frameworks to
 /// announce screen transitions when the menu is opened and closed. If this
 /// label is not provided, it will default to
@@ -814,9 +818,11 @@ Future<T> showMenu<T>({
   ShapeBorder shape,
   Color color,
   bool captureInheritedThemes = true,
+  bool useRootNavigator = false,
 }) {
   assert(context != null);
   assert(position != null);
+  assert(useRootNavigator != null);
   assert(items != null && items.isNotEmpty);
   assert(captureInheritedThemes != null);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -831,7 +837,7 @@ Future<T> showMenu<T>({
       label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
   }
 
-  return Navigator.push(context, _PopupMenuRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(_PopupMenuRoute<T>(
     position: position,
     items: items,
     initialValue: initialValue,

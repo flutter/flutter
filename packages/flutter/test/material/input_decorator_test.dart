@@ -509,12 +509,12 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getBottomLeft(find.text('text')).dy, 28.0);
-    expect(tester.getTopLeft(find.text('hint')).dy, 12.0);
-    expect(tester.getBottomLeft(find.text('hint')).dy, 28.0);
-    expect(getBorderBottom(tester), 40.0);
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 16.0);
+    expect(tester.getBottomLeft(find.text('hint')).dy, 32.0);
+    expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
 
     expect(tester.getSize(find.text('hint')).width, tester.getSize(find.text('text')).width);
@@ -1144,14 +1144,14 @@ void main() {
     // The prefix and suffix wrap the input text and are left and right justified
     // respectively. They should have the same height as the input text (16).
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.text('p')).height, 16.0);
     expect(tester.getSize(find.text('s')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('p')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('p')).dy, 16.0);
     expect(tester.getTopLeft(find.text('p')).dx, 12.0);
-    expect(tester.getTopLeft(find.text('s')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('s')).dy, 16.0);
     expect(tester.getTopRight(find.text('s')).dx, 788.0);
 
     // layout is a row: [p text s]
@@ -1179,18 +1179,18 @@ void main() {
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.text('p')).height, 16.0);
     expect(tester.getSize(find.text('s')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('p')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('s')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('p')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('s')).dy, 16.0);
     expect(tester.getTopRight(find.text('s')).dx, 788.0);
     expect(tester.getSize(find.byType(Icon)).height, 24.0);
 
     // The 24dps high icon is centered on the 16dps high input line
-    expect(tester.getTopLeft(find.byType(Icon)).dy, 8.0);
+    expect(tester.getTopLeft(find.byType(Icon)).dy, 12.0);
 
     // layout is a row: [icon, p text s]
     expect(tester.getTopLeft(find.byType(Icon)).dx, 0.0);
@@ -1939,10 +1939,10 @@ void main() {
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 44.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 13.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 29.0);
-        expect(getBorderBottom(tester), 44.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
 
@@ -1960,10 +1960,10 @@ void main() {
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 44.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 13.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 29.0);
-        expect(getBorderBottom(tester), 44.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
 
@@ -2098,7 +2098,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled
     // (dx) - 12 = (text offset)x.
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 60.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
     final double dx = tester.getRect(find.byType(InputDecorator)).right;
     expect(tester.getRect(find.text('test')).right, dx - 12.0);
   });
@@ -2118,7 +2118,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled and top left offset is (0, 0)
     // 0 + 12 = 12.
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 60.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
     expect(tester.getRect(find.text('test')).left, 12.0);
   });
 
@@ -2236,13 +2236,13 @@ void main() {
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.text('p')).height, 16.0);
     expect(tester.getSize(find.text('s')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('p')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('s')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('p')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('s')).dy, 16.0);
 
     // layout is a row: [s text p]
     expect(tester.getTopLeft(find.text('s')).dx, 12.0);
@@ -2339,10 +2339,10 @@ void main() {
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
     expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(getBorderBottom(tester), 40.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(getBorderBottom(tester), kMinInteractiveDimension); // 40 bumped up to minimum.
     expect(getBorderWeight(tester), 1.0);
   }, skip: isBrowser);
 
@@ -2360,9 +2360,9 @@ void main() {
     // Overall height for this InputDecorator is 16dps:
     //   16 - input text (ahem font size 16dps)
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 16 bumped up to minimum.
     expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
     expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 0.0);
 
@@ -2378,11 +2378,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
     expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
     expect(tester.getSize(find.text('hint')).height, 16.0);
-    expect(tester.getTopLeft(find.text('hint')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 16.0);
     expect(getBorderWeight(tester), 0.0);
   }, skip: isBrowser);
 
@@ -2418,13 +2418,13 @@ void main() {
     //      10 - label (ahem font size 10dps)
     //   17.75 - bottom padding (empty input text still appears here)
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 45.5));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 45.5 bumped up to minimum.
     expect(tester.getSize(find.text('hint')).height, 10.0);
     expect(tester.getSize(find.text('label')).height, 10.0);
     expect(tester.getSize(find.text('text')).height, 10.0);
-    expect(tester.getTopLeft(find.text('hint')).dy, 23.5);
-    expect(tester.getTopLeft(find.text('label')).dy, 17.75);
-    expect(tester.getTopLeft(find.text('text')).dy, 23.5);
+    expect(tester.getTopLeft(find.text('hint')).dy, 24.75);
+    expect(tester.getTopLeft(find.text('label')).dy, 19.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 24.75);
   }, skip: isBrowser);
 
   testWidgets('InputDecorator with empty style overrides', (WidgetTester tester) async {

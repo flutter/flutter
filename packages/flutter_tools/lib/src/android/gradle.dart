@@ -156,6 +156,7 @@ Future<void> checkGradleDependencies() async {
 /// Tries to create `settings_aar.gradle` in an app project by removing the subprojects
 /// from the existing `settings.gradle` file. This operation will fail if the existing
 /// `settings.gradle` file has local edits.
+@visibleForTesting
 void createSettingsAarGradle(Directory androidDirectory) {
   final File newSettingsFile = androidDirectory.childFile('settings_aar.gradle');
   if (newSettingsFile.existsSync()) {
@@ -232,6 +233,7 @@ Future<void> buildGradleApp({
   if (!_isSupportedVersion(project.android)) {
     _exitWithUnsupportedProjectMessage();
   }
+  final Directory buildDirectory = project.android.buildDirectory;
 
   final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
   if (usesAndroidX) {
@@ -255,7 +257,7 @@ Future<void> buildGradleApp({
     await buildPluginsAsAar(
       project,
       androidBuildInfo,
-      buildDirectory: project.android.buildDirectory.childDirectory('app'),
+      buildDirectory: buildDirectory.childDirectory('app'),
     );
   }
 
@@ -340,7 +342,7 @@ Future<void> buildGradleApp({
           return null;
         }
         if (detectedGradleError != null) {
-          // Pipe stdout/sterr from Gradle.
+          // Pipe stdout/stderr from Gradle.
           return line;
         }
         for (final GradleHandledError gradleError in localGradleErrors) {
@@ -351,7 +353,7 @@ Future<void> buildGradleApp({
             break;
           }
         }
-        // Pipe stdout/sterr from Gradle.
+        // Pipe stdout/stderr from Gradle.
         return line;
       },
     );
@@ -363,7 +365,7 @@ Future<void> buildGradleApp({
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
-      BuildEvent('gradle--unkown-failure').send();
+      BuildEvent('gradle-unkown-failure').send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -377,7 +379,7 @@ Future<void> buildGradleApp({
       );
 
       if (retries >= 1) {
-        final String successEventLabel = 'gradle--${detectedGradleError.eventLabel}-success';
+        final String successEventLabel = 'gradle-${detectedGradleError.eventLabel}-success';
         switch (status) {
           case GradleBuildStatus.retry:
             await buildGradleApp(
@@ -407,7 +409,7 @@ Future<void> buildGradleApp({
             // noop.
         }
       }
-      BuildEvent('gradle--${detectedGradleError.eventLabel}-failure').send();
+      BuildEvent('gradle-${detectedGradleError.eventLabel}-failure').send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -417,10 +419,6 @@ Future<void> buildGradleApp({
 
   if (isBuildingBundle) {
     final File bundleFile = findBundleFile(project, buildInfo);
-    if (bundleFile == null) {
-      throwToolExit('Gradle build failed to produce an Android bundle package.');
-    }
-
     final String appSize = (buildInfo.mode == BuildMode.debug)
       ? '' // Don't display the size when building a debug variant.
       : ' (${getSizeAsMB(bundleFile.lengthSync())})';
@@ -433,10 +431,6 @@ Future<void> buildGradleApp({
   }
   // Gradle produced an APK.
   final Iterable<File> apkFiles = findApkFiles(project, androidBuildInfo);
-  if (apkFiles.isEmpty) {
-    throwToolExit('Gradle build failed to produce an Android package.');
-  }
-
   final Directory apkDirectory = getApkDirectory(project);
   // Copy the first APK to app.apk, so `flutter run` can find it.
   // TODO(egarciad): Handle multiple APKs.
@@ -640,7 +634,7 @@ Future<void> buildPluginsAsAar(
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it
       // includes the plugin name and the version.
-      BuildEvent('plugin-aar-failure', eventError: plugin).send();
+      BuildEvent('gradle-plugin-aar-failure', eventError: plugin).send();
       throwToolExit('The plugin $pluginName could not be built due to the issue above.');
     }
   }
@@ -650,14 +644,11 @@ Future<void> buildPluginsAsAar(
 @visibleForTesting
 Iterable<File> findApkFiles(
   FlutterProject project,
-  AndroidBuildInfo androidBuildInfo)
-{
+  AndroidBuildInfo androidBuildInfo,
+) {
   final Iterable<String> apkFileNames = _apkFilesFor(androidBuildInfo);
-  if (apkFileNames.isEmpty) {
-    return const <File>[];
-  }
   final Directory apkDirectory = getApkDirectory(project);
-  return apkFileNames.expand<File>((String apkFileName) {
+  final Iterable<File> apks = apkFileNames.expand<File>((String apkFileName) {
     File apkFile = apkDirectory.childFile(apkFileName);
     if (apkFile.existsSync()) {
       return <File>[apkFile];
@@ -682,6 +673,13 @@ Iterable<File> findApkFiles(
     }
     return const <File>[];
   });
+  if (apks.isEmpty) {
+    _exitWithExpectedFileNotFound(
+      project: project,
+      fileExtension: '.apk',
+    );
+  }
+  return apks;
 }
 
 @visibleForTesting
@@ -716,5 +714,31 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
       return bundleFile;
     }
   }
+  _exitWithExpectedFileNotFound(
+    project: project,
+    fileExtension: '.aab',
+  );
   return null;
+}
+
+/// Throws a [ToolExit] exception and logs the event.
+void _exitWithExpectedFileNotFound({
+  @required FlutterProject project,
+  @required String fileExtension,
+}) {
+  assert(project != null);
+  assert(fileExtension != null);
+
+  final String androidGradlePluginVersion =
+      getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot);
+  BuildEvent('gradle-expected-file-not-found',
+    settings:
+      'androidGradlePluginVersion: $androidGradlePluginVersion, '
+      'fileExtension: $fileExtension'
+    ).send();
+  throwToolExit(
+    'Gradle build failed to produce an $fileExtension file. '
+    'It\'s likely that this file was generated under ${project.android.buildDirectory.path}, '
+    'but the tool couldn\'t find it.'
+  );
 }

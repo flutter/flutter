@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -22,6 +23,7 @@ import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
+import '../vmservice.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
@@ -140,6 +142,12 @@ class IOSDevice extends Device {
   String _iproxyPath;
 
   final String _sdkVersion;
+
+  /// May be 0 if version cannot be parsed.
+  int get majorSdkVersion {
+    final String majorVersionString = _sdkVersion?.split('.')?.first?.trim();
+    return majorVersionString != null ? int.tryParse(majorVersionString) ?? 0 : 0;
+  }
 
   @override
   bool get supportsHotReload => true;
@@ -529,7 +537,7 @@ String decodeSyslog(String line) {
 class IOSDeviceLogReader extends DeviceLogReader {
   IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
-      onListen: _start,
+      onListen: _listenToSysLog,
       onCancel: dispose,
     );
 
@@ -543,6 +551,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     // and "Flutter". The regex tries to strike a balance between not producing
     // false positives and not producing false negatives.
     _anyLineRegex = RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
+    _loggingSubscriptions = <StreamSubscription<ServiceEvent>>[];
   }
 
   final IOSDevice device;
@@ -553,6 +562,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   RegExp _anyLineRegex;
 
   StreamController<String> _linesController;
+  List<StreamSubscription<ServiceEvent>> _loggingSubscriptions;
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -560,10 +570,44 @@ class IOSDeviceLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
-  void _start() {
+  @override
+  List<VMService> get connectedVMServices => _connectedVMServices;
+  List<VMService> _connectedVMServices;
+
+  @override
+  set connectedVMServices(List<VMService> connectedVMServices) {
+    _listenToUnifiedLoggingEvents(connectedVMServices);
+    _connectedVMServices = connectedVMServices;
+  }
+
+  static const int _minimumUniversalLoggingSdkVersion = 13;
+
+  Future<void> _listenToUnifiedLoggingEvents(List<VMService> vmServices) async {
+    if (device.majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
+      return;
+    }
+    for (VMService vmService in vmServices) {
+      // The VM service will not publish logging events unless the debug stream is being listened to.
+      // onDebugEvent listens to this stream as a side effect.
+      unawaited(vmService.onDebugEvent);
+      _loggingSubscriptions.add((await vmService.onStdoutEvent).listen((ServiceEvent event) {
+        final String logMessage = event.message;
+        if (logMessage.isNotEmpty) {
+          _linesController.add(logMessage);
+        }
+      }));
+    }
+    _connectedVMServices = connectedVMServices;
+  }
+
+  void _listenToSysLog () {
+    // syslog is not written on iOS 13+.
+    if (device.majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
+      return;
+    }
     iMobileDevice.startLogger(device.id).then<void>((Process process) {
-      process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
-      process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
+      process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
+      process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {
         if (_linesController.hasListener) {
           _linesController.close();
@@ -584,7 +628,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // any specific prefix. To properly capture those, we enter "printing" mode
   // after matching a log line from the runner. When in printing mode, we print
   // all lines until we find the start of another log message (from any app).
-  Function _newLineHandler() {
+  Function _newSyslogLineHandler() {
     bool printing = false;
 
     return (String line) {
@@ -611,6 +655,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   @override
   void dispose() {
+    for (StreamSubscription<ServiceEvent> loggingSubscription in _loggingSubscriptions) {
+      loggingSubscription.cancel();
+    }
     _idevicesyslogProcess?.kill();
   }
 }
