@@ -253,9 +253,10 @@ Future<GradleProject> _readGradleProject(
       environment: gradleEnv,
     );
     project = GradleProject.fromAppProperties(propertiesRunResult.stdout, tasksRunResult.stdout);
+    status.stop(); 
   } on ProcessException catch (exception) {
+    status.cancel();
     if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.managed) {
-      status.cancel();
       // Handle known exceptions.
       throwToolExitIfLicenseNotAccepted(exception);
       // Print a general Gradle error and exit.
@@ -268,8 +269,6 @@ Future<GradleProject> _readGradleProject(
       <String>[],
       fs.path.join(flutterProject.android.hostAppGradleRoot.path, 'app', 'build'),
     );
-  } finally {
-    status.stop(); 
   }
   return project;
 }
