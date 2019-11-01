@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import 'keyboard_key.dart';
 import 'raw_keyboard_android.dart';
@@ -506,6 +509,9 @@ class RawKeyboard {
     if (event is RawKeyUpEvent) {
       _keysPressed.remove(event.logicalKey);
     }
+    // Make sure that the modifiers reflect reality, in case a modifier key was
+    // pressed/released while the app didn't have focus.
+    _synchronizeModifiers(event);
     if (_listeners.isEmpty) {
       return;
     }
@@ -514,6 +520,68 @@ class RawKeyboard {
         listener(event);
       }
     }
+  }
+
+  static final Map<_ModifierSidePair, Set<LogicalKeyboardKey>> _modifierKeyMap = <_ModifierSidePair, Set<LogicalKeyboardKey>>{
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.left): <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.right): <LogicalKeyboardKey>{LogicalKeyboardKey.altRight},
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight},
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.any): <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.left): <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.right): <LogicalKeyboardKey>{LogicalKeyboardKey.shiftRight},
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight},
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.any): <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.left): <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft},
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.right): <LogicalKeyboardKey>{LogicalKeyboardKey.controlRight},
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.controlRight},
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.any): <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft},
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.left): <LogicalKeyboardKey>{LogicalKeyboardKey.metaLeft},
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.right): <LogicalKeyboardKey>{LogicalKeyboardKey.metaRight},
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaRight},
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.any): <LogicalKeyboardKey>{LogicalKeyboardKey.metaLeft},
+    const _ModifierSidePair(ModifierKey.capsLockModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.capsLock},
+    const _ModifierSidePair(ModifierKey.numLockModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.numLock},
+    const _ModifierSidePair(ModifierKey.scrollLockModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.scrollLock},
+    const _ModifierSidePair(ModifierKey.functionModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.fn},
+    // The symbolModifier doesn't have a key representation on any of the
+    // platforms, so we're not mapping it here.
+  };
+
+  // The list of all modifier keys that are represented in modifier key bit masks
+  // on all platforms, so that we can clear them out of pressedKeys when
+  // synchronizing them.
+  static final Set<LogicalKeyboardKey> _allModifiers = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.altLeft,
+    LogicalKeyboardKey.altRight,
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+    LogicalKeyboardKey.controlLeft,
+    LogicalKeyboardKey.controlRight,
+    LogicalKeyboardKey.metaLeft,
+    LogicalKeyboardKey.metaRight,
+    LogicalKeyboardKey.capsLock,
+    LogicalKeyboardKey.numLock,
+    LogicalKeyboardKey.scrollLock,
+    LogicalKeyboardKey.fn,
+  };
+
+  void _synchronizeModifiers(RawKeyEvent event) {
+    final Map<ModifierKey, KeyboardSide> modifiersPressed = event.data.modifiersPressed;
+    final Set<LogicalKeyboardKey> modifierKeys = <LogicalKeyboardKey>{};
+    for (ModifierKey key in modifiersPressed.keys) {
+      final Set<LogicalKeyboardKey> mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
+      assert(mappedKeys != null,
+        'Platform key support for ${Platform.operatingSystem} is '
+        'producing unsupported modifier combinations.');
+      modifierKeys.addAll(mappedKeys);
+    }
+    // We don't send any key events for these changes, since we *should* get
+    // separate events for each modifier key down/up that occurs while the app
+    // has focus. This is just to synchronize the modifier keys when they are
+    // pressed/released while the app doesn't have focus, because we want to
+    // make sure that _keysPressed reflects reality at all times.
+    _keysPressed.removeAll(_allModifiers);
+    _keysPressed.addAll(modifierKeys);
   }
 
   final Set<LogicalKeyboardKey> _keysPressed = <LogicalKeyboardKey>{};
@@ -530,4 +598,21 @@ class RawKeyboard {
   void clearKeysPressed() {
     _keysPressed.clear();
   }
+}
+
+class _ModifierSidePair extends Object {
+  const _ModifierSidePair(this.modifier, this.side);
+
+  final ModifierKey modifier;
+  final KeyboardSide side;
+
+  @override
+  bool operator ==(dynamic other) {
+    return runtimeType == other.runtimeType
+        && modifier == other.modifier
+        && side == other.side;
+  }
+
+  @override
+  int get hashCode => hashValues(modifier, side);
 }

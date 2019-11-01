@@ -155,12 +155,10 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case ModifierKey.capsLockModifier:
         return independentModifier & modifierCapsLock != 0;
       case ModifierKey.numLockModifier:
-        return independentModifier & modifierNumericPad != 0;
       case ModifierKey.functionModifier:
-        return independentModifier & modifierFunction != 0;
       case ModifierKey.symbolModifier:
       case ModifierKey.scrollLockModifier:
-        // These are not used in macOS keyboards.
+        // These modifier masks are not used in macOS keyboards.
         return false;
     }
     return false;
