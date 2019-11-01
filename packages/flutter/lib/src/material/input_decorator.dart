@@ -907,7 +907,12 @@ class _RenderDecoration extends RenderBox {
       return 0.0;
     }
     box.layout(constraints, parentUsesSize: true);
-    final double baseline = box.getDistanceToBaseline(textBaseline);
+    // Since internally, all layout is performed against the alphabetic baseline,
+    // (eg, ascents/descents are all relative to alphabetic, even if the font is
+    // a ideographic or hanging font), we always obtain the reference baseline from
+    // the alphabetic baseline. The ideographic baseline is for reference
+    // post-layout.
+    final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
     assert(baseline != null && baseline >= 0.0);
     return baseline;
   }
