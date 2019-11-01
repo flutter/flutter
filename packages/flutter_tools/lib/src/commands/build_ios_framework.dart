@@ -193,7 +193,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       // Create iOS framework.
       List<String> lipoCommand = <String>['xcrun', 'lipo', fatFlutterFrameworkBinary.path, '-remove', 'x86_64', '-output', armFlutterFrameworkBinary.path];
 
-      processUtils.runSync(
+      await processUtils.run(
         lipoCommand,
         workingDirectory: outputDirectory.path,
         allowReentrantFlutter: false,
@@ -206,7 +206,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
       lipoCommand = <String>['xcrun', 'lipo', fatFlutterFrameworkBinary.path, '-thin', 'x86_64', '-output', simulatorFlutterFrameworkBinary.path];
 
-      processUtils.runSync(
+      await processUtils.run(
         lipoCommand,
         workingDirectory: outputDirectory.path,
         allowReentrantFlutter: false,
@@ -224,7 +224,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
           .path
       ];
 
-      processUtils.runSync(
+      await processUtils.run(
         xcframeworkCommand,
         workingDirectory: outputDirectory.path,
         allowReentrantFlutter: false,
@@ -301,7 +301,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     ];
 
     final FlutterProject flutterProject = FlutterProject.current();
-    processUtils.runSync(
+    await processUtils.run(
       pluginsBuildCommand,
       workingDirectory: flutterProject.ios.hostAppRoot.childDirectory('Pods').path,
       allowReentrantFlutter: false,
@@ -320,7 +320,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
     ];
 
-    processUtils.runSync(
+    await processUtils.run(
       pluginsBuildCommand,
       workingDirectory: flutterProject.ios.hostAppRoot.childDirectory('Pods').path,
       allowReentrantFlutter: false,
@@ -348,7 +348,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
                 modeDirectory.childDirectory(podFrameworkName).childFile(binaryName).path
               ];
 
-              processUtils.runSync(
+              await processUtils.run(
                 lipoCommand,
                 workingDirectory: outputDirectory.path,
                 allowReentrantFlutter: false,
@@ -368,7 +368,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
                 modeDirectory.childFile('$binaryName.xcframework').path
               ];
 
-              processUtils.runSync(
+              await processUtils.run(
                 xcframeworkCommand,
                 workingDirectory: outputDirectory.path,
                 allowReentrantFlutter: false,
