@@ -17,6 +17,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'message_codec.dart';
+import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
@@ -811,10 +812,19 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
-class _TextInputClientHandler {
-  _TextInputClientHandler() {
-    SystemChannels.textInput.setMethodCallHandler(_handleTextInputInvocation);
+/// A handler for the [SystemChannels.textInput] channel.
+///
+/// This class is used internally by the Flutter SDK and is only visible for
+/// testing.
+@visibleForTesting
+class TextInputClientHandler {
+  /// Creates a [TextInputClientHandler].
+  @visibleForTesting
+  TextInputClientHandler(this._channel, this._currentConnection) : assert(_channel != null) {
+    _channel.setMethodCallHandler(_handleTextInputInvocation);
   }
+
+  final MethodChannel _channel;
 
   TextInputConnection _currentConnection;
 
@@ -826,7 +836,7 @@ class _TextInputClientHandler {
     // Reattach request needs to be handled regardless of the client ID.
     if (method == 'TextInputClient.reattach') {
       assert(_currentConnection._client != null);
-      TextInput._attach(_currentConnection);
+      TextInput._attach(this, _currentConnection);
       return;
     }
 
@@ -863,12 +873,15 @@ class _TextInputClientHandler {
     scheduleMicrotask(() {
       _hidePending = false;
       if (_currentConnection == null)
-        SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+        _channel.invokeMethod<void>('TextInput.hide');
     });
   }
 }
 
-final _TextInputClientHandler _clientHandler = _TextInputClientHandler();
+final TextInputClientHandler _clientHandler = TextInputClientHandler(
+  SystemChannels.textInput,
+  null,
+);
 
 /// An interface to the system's text input control.
 class TextInput {
@@ -914,17 +927,17 @@ class TextInput {
     assert(client != null);
     final TextInputConnection connection = TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
-    _attach(connection);
+    _attach(_clientHandler, connection);
     return connection;
   }
 
-  static void _attach(TextInputConnection connection) {
+  static void _attach(TextInputClientHandler handler, TextInputConnection connection) {
     assert(connection != null);
     assert(connection._client != null);
     final TextInputConfiguration configuration = connection._client.createConfiguration();
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    SystemChannels.textInput.invokeMethod<void>(
+    handler._channel.invokeMethod<void>(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJson() ],
     );

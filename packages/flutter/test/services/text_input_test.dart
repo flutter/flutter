@@ -9,6 +9,25 @@ import '../flutter_test_alternative.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test('text input client handler responds to reattach with setClient', () async {
+    final FakeTextChannel fakeTextChannel = FakeTextChannel((MethodCall call) async {
+      return;
+    });
+    const FakeTextInputClient client = FakeTextInputClient();
+    TextInputClientHandler(
+      fakeTextChannel,
+      TextInput.attach(client),
+    );
+
+    fakeTextChannel.incoming(const MethodCall('TextInputClient.reattach', null));
+
+    expect(fakeTextChannel.outgoingCalls.length, 1);
+    final MethodCall onlyCall = fakeTextChannel.outgoingCalls.single;
+    expect(onlyCall.method, 'TextInput.setClient');
+    expect(onlyCall.arguments[0], 1);
+    expect(onlyCall.arguments[1], client.createConfiguration().toJson());
+  });
+
   group('TextInputConfiguration', () {
     test('sets expected defaults', () {
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -89,4 +108,61 @@ void main() {
       expect(decimal.hashCode == signedDecimal.hashCode, false);
     });
   });
+}
+
+class FakeTextInputClient implements TextInputClient {
+  const FakeTextInputClient();
+
+  @override
+  TextInputConfiguration createConfiguration() => const TextInputConfiguration();
+
+  @override
+  void performAction(TextInputAction action) {}
+
+  @override
+  void updateEditingValue(TextEditingValue value) {}
+
+  @override
+  void updateFloatingCursor(RawFloatingCursorPoint point) {}
+}
+
+class FakeTextChannel implements MethodChannel {
+  FakeTextChannel(this.outgoing) : assert(outgoing != null);
+
+  Future<void> Function(MethodCall) outgoing;
+  Future<void> Function(MethodCall) incoming;
+
+  List<MethodCall> outgoingCalls = <MethodCall>[];
+
+  @override
+  BinaryMessenger get binaryMessenger => throw UnimplementedError();
+
+  @override
+  MethodCodec get codec => throw UnimplementedError();
+
+  @override
+  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) => throw UnimplementedError();
+
+  @override
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
+
+  @override
+  Future<T> invokeMethod<T>(String method, [dynamic arguments]) {
+    final MethodCall call = MethodCall(method, arguments);
+    outgoingCalls.add(call);
+    return outgoing(call);
+  }
+
+  @override
+  String get name => 'flutter/textinput';
+
+
+  @override
+  void setMethodCallHandler(Future<void> Function(MethodCall call) handler) {
+    incoming = handler;
+    // this.handler = handler;
+  }
+
+  @override
+  void setMockMethodCallHandler(Future<void> Function(MethodCall call) handler)  => throw UnimplementedError();
 }
