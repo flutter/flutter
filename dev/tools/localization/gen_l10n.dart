@@ -24,7 +24,7 @@ import 'messages_all.dart';
 /// by `@className.of(context)`.
 ///
 /// Applications need to include `@className.delegate()` in their app\'s
-/// loclalizationDelegates list, and the locales they support in the app\'s
+/// localizationDelegates list, and the locales they support in the app\'s
 /// supportedLocales list. For example:
 ///
 /// ```
