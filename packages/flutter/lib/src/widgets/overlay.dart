@@ -86,8 +86,7 @@ class OverlayEntry {
     if (_opaque == value)
       return;
     _opaque = value;
-    assert(_overlay != null);
-    _overlay._didChangeEntryOpacity();
+    _overlay?._didChangeEntryOpacity();
   }
 
   /// Whether this entry must be included in the tree even if there is a fully

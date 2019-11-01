@@ -577,7 +577,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   bool get hasPrimaryFocus => _manager?.primaryFocus == this;
 
   /// Returns the [FocusHighlightMode] that is currently in effect for this node.
-  FocusHighlightMode get highlightMode => WidgetsBinding.instance.focusManager.highlightMode;
+  FocusHighlightMode get highlightMode => FocusManager.instance.highlightMode;
 
   /// Returns the nearest enclosing scope node above this node, including
   /// this node, if it's a scope.
@@ -1111,15 +1111,18 @@ enum FocusHighlightStrategy {
 /// focus.
 ///
 /// The [FocusManager] is held by the [WidgetsBinding] as
-/// [WidgetsBinding.focusManager]. The [FocusManager] is rarely accessed
-/// directly. Instead, to find the [FocusScopeNode] for a given [BuildContext],
-/// use [FocusScope.of].
+/// [WidgetsBinding.focusManager], and can be conveniently accessed using the
+/// [focusManager] global accessor.
+///
+/// To find the [FocusScopeNode] for a given [BuildContext], use
+/// [FocusScope.of].
 ///
 /// The [FocusManager] knows nothing about [FocusNode]s other than the one that
-/// is currently focused. If a [FocusScopeNode] is removed, then the
-/// [FocusManager] will attempt to focus the next [FocusScopeNode] in the focus
-/// tree that it maintains, but if the current focus in that [FocusScopeNode] is
-/// null, it will stop there, and no [FocusNode] will have focus.
+/// is currently focused (accessible via the [primaryFocus] global accessor). If
+/// a [FocusScopeNode] is removed, then the [FocusManager] will attempt to focus
+/// the next [FocusScopeNode] in the focus tree that it maintains, but if the
+/// current focus in that [FocusScopeNode] is null, it will stop there, and no
+/// [FocusNode] will have focus.
 ///
 /// See also:
 ///
@@ -1130,16 +1133,23 @@ enum FocusHighlightStrategy {
 ///    [BuildContext].
 ///  * [FocusScope.of], which provides the nearest ancestor [FocusScopeNode] for
 ///    a given [BuildContext].
+///  * The [focusManager] and [primaryFocus] global accessors, for convenient
+///    access from anywhere to the current focus manager state.
 class FocusManager with DiagnosticableTreeMixin {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
-  /// consider using [WidgetsBinding.focusManager] instead.
+  /// consider using the [focusManager] accessor instead (which gets it from the
+  /// [WidgetsBinding] singleton).
   FocusManager() {
     rootScope._manager = this;
     RawKeyboard.instance.addListener(_handleRawKeyEvent);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
+
+  /// Provides convenient access to the current [FocusManager] singleton from
+  /// the [WidgetsBinding] instance.
+  static FocusManager get instance => WidgetsBinding.instance.focusManager;
 
   bool _lastInteractionWasTouch = true;
 
@@ -1418,6 +1428,10 @@ class FocusManager with DiagnosticableTreeMixin {
   }
 }
 
+/// Provides convenient access to the current [FocusManager.primaryFocus] from the
+/// [WidgetsBinding] instance.
+FocusNode get primaryFocus => WidgetsBinding.instance.focusManager.primaryFocus;
+
 /// Returns a text representation of the current focus tree, along with the
 /// current attributes on each node.
 ///
@@ -1426,7 +1440,7 @@ String debugDescribeFocusTree() {
   assert(WidgetsBinding.instance != null);
   String result;
   assert(() {
-    result = WidgetsBinding.instance.focusManager.toStringDeep();
+    result = FocusManager.instance.toStringDeep();
     return true;
   }());
   return result ?? '';

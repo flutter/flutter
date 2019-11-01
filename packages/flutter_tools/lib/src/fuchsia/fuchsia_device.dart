@@ -433,24 +433,6 @@ class FuchsiaDevice extends Device {
   void clearLogs() {}
 
   @override
-  OverrideArtifacts get artifactOverrides {
-    return _artifactOverrides ??= OverrideArtifacts(
-      parent: Artifacts.instance,
-      platformKernelDill: fs.file(artifacts.getArtifactPath(
-        Artifact.fuchsiaPlatformDill,
-        platform: TargetPlatform.fuchsia_x64,
-        mode: BuildMode.debug,
-      )),
-      flutterPatchedSdk: fs.file(artifacts.getArtifactPath(
-        Artifact.fuchsiaPatchedSdk,
-        platform: TargetPlatform.fuchsia_x64,
-        mode: BuildMode.debug,
-      )),
-    );
-  }
-  OverrideArtifacts _artifactOverrides;
-
-  @override
   bool get supportsScreenshot => false;
 
   bool get ipv6 {
