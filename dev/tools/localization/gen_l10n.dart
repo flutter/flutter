@@ -199,7 +199,6 @@ String genSupportedLocaleProperty(List<LocaleInfo> supportedLocales) {
   String resultingProperty = prefix;
 
   for (int index = 0; index < supportedLocales.length; index += 1) {
-    print(supportedLocales);
     final String languageCode = supportedLocales[index].languageCode;
     final String countryCode = supportedLocales[index].countryCode;
     resultingProperty += '\'$languageCode\'';
