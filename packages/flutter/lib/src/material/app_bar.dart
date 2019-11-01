@@ -380,7 +380,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// A size whose height is the sum of [kToolbarHeight] and the [bottom] widget's
   /// preferred height.
   ///
-  /// [Scaffold] uses this this size to set its app bar's height.
+  /// [Scaffold] uses this size to set its app bar's height.
   @override
   final Size preferredSize;
 
