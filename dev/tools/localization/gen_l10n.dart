@@ -227,19 +227,29 @@ Future<void> main(List<String> args) async {
   final File outputFile = File(path.join(l10nDirectory.path, '${results['output-file-prefix']}_localizations.dart'));
   final String stringsClassName = '${results['output-class-prefix']}Localizations';
 
-  final RegExp arbFilenameRE = RegExp(r'^[^_]*_(\w+)\.arb$');
+  final RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
   final List<String> arbFilenames = <String>[];
   final Set<String> supportedLanguageCodes = <String>{};
   final List<LocaleInfo> supportedLocales = <LocaleInfo>[];
 
   for (FileSystemEntity entity in l10nDirectory.listSync()) {
     final String entityPath = entity.path;
-    if (FileSystemEntity.isFileSync(entityPath) && arbFilenameRE.hasMatch(entityPath)) {
-      arbFilenames.add(entityPath);
-      final String localeString = arbFilenameRE.firstMatch(entityPath)[1];
-      final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
-      supportedLocales.add(localeInfo);
-      supportedLanguageCodes.add('\'${localeInfo.languageCode}\'');
+    if (FileSystemEntity.isFileSync(entityPath)) {
+      final RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
+      if (arbFilenameRE.hasMatch(entityPath)) {
+        final File arbFile = File(entityPath);
+        final Map<String, dynamic> arbContents = json.decode(arbFile.readAsStringSync());
+        String localeString = arbContents['@@locale'];
+        if (arbFilenameLocaleRE.hasMatch(entityPath) && localeString == null)
+          localeString = arbFilenameLocaleRE.firstMatch(entityPath)[1];
+
+        if (localeString != null) {
+          arbFilenames.add(entityPath);
+          final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
+          supportedLocales.add(localeInfo);
+          supportedLanguageCodes.add('\'${localeInfo.languageCode}\'');
+        }
+      }
     }
   }
 
