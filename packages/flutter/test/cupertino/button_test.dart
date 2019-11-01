@@ -63,6 +63,42 @@ void main() {
     );
   });
 
+  testWidgets(
+    'CupertinoButton.filled default color contrast meets guideline',
+    (WidgetTester tester) async {
+      // The native color combination systemBlue text over white background fails
+      // to pass the color contrast guideline.
+      /*
+      await tester.pumpWidget(
+        CupertinoTheme(
+          data: const CupertinoThemeData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoButton.filled(
+              child: const Text('Button'),
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      */
+
+      await tester.pumpWidget(
+        CupertinoTheme(
+          data: const CupertinoThemeData(brightness: Brightness.dark),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoButton.filled(
+              child: const Text('Button'),
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+  });
+
   testWidgets('Button with background is wider', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       child: Text('X', style: testStyle),
