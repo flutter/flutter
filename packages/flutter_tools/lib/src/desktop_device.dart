@@ -109,7 +109,11 @@ abstract class DesktopDevice extends Device {
       return LaunchResult.succeeded();
     }
     _deviceLogReader.initializeProcess(process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
+      devicePort: debuggingOptions.deviceVmservicePort,
+      hostPort: debuggingOptions.hostVmservicePort,
+      ipv6: ipv6,
+    );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       onAttached(package, buildMode, process);

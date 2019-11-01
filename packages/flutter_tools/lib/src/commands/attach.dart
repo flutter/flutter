@@ -241,6 +241,9 @@ class AttachCommand extends FlutterCommand {
           observatoryDiscovery = ProtocolDiscovery.observatory(
             device.getLogReader(),
             portForwarder: device.portForwarder,
+            ipv6: ipv6,
+            devicePort: deviceVmservicePort,
+            hostPort: hostVmservicePort,
           );
           printStatus('Waiting for a connection from Flutter on ${device.name}...');
           observatoryUri = await observatoryDiscovery.uri;
@@ -258,7 +261,7 @@ class AttachCommand extends FlutterCommand {
         device,
         debugUri?.host ?? hostname,
         devicePort ?? debugUri.port,
-        observatoryPort,
+        hostVmservicePort,
         debugUri?.path,
       );
     }

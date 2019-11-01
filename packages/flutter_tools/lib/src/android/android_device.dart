@@ -549,7 +549,8 @@ class AndroidDevice extends Device {
       observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(),
         portForwarder: portForwarder,
-        hostPort: debuggingOptions.observatoryPort,
+        hostPort: debuggingOptions.hostVmservicePort,
+        devicePort: debuggingOptions.deviceVmservicePort,
         ipv6: ipv6,
       );
     }
