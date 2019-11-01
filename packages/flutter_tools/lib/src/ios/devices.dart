@@ -600,12 +600,12 @@ class IOSDeviceLogReader extends DeviceLogReader {
     _connectedVMServices = connectedVMServices;
   }
 
-  Future<void> _listenToSysLog () async {
+  void _listenToSysLog () {
     // syslog is not written on iOS 13+.
     if (device.majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
       return;
     }
-    unawaited(iMobileDevice.startLogger(device.id).then<void>((Process process) {
+    iMobileDevice.startLogger(device.id).then<void>((Process process) {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {
@@ -615,7 +615,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       });
       assert(_idevicesyslogProcess == null);
       _idevicesyslogProcess = process;
-    }));
+    });
   }
 
   @visibleForTesting
