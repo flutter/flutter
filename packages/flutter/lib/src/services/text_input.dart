@@ -650,6 +650,12 @@ abstract class TextInputClient {
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
+
+  /// Creates a [TextInputConfiguration] for this client.
+  ///
+  /// This configuration is requested when establishing or re-establishing the
+  /// connection between the [TextInput] and the engine.
+  TextInputConfiguration createConfiguration();
 }
 
 /// An interface for interacting with a text input control.
@@ -816,6 +822,14 @@ class _TextInputClientHandler {
     if (_currentConnection == null)
       return;
     final String method = methodCall.method;
+
+    // Reattach request needs to be handled regardless of the client ID.
+    if (method == 'TextInputClient.reattach') {
+      assert(_currentConnection._client != null);
+      TextInput._attach(_currentConnection);
+      return;
+    }
+
     final List<dynamic> args = methodCall.arguments;
     final int client = args[0];
     // The incoming message was for a different client.
@@ -896,17 +910,24 @@ class TextInput {
   /// A client that no longer wishes to interact with the text input control
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
-  static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
+  static TextInputConnection attach(TextInputClient client) {
     assert(client != null);
-    assert(configuration != null);
-    assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     final TextInputConnection connection = TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
+    _attach(connection);
+    return connection;
+  }
+
+  static void _attach(TextInputConnection connection) {
+    assert(connection != null);
+    assert(connection._client != null);
+    final TextInputConfiguration configuration = connection._client.createConfiguration();
+    assert(configuration != null);
+    assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJson() ],
     );
-    return connection;
   }
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
