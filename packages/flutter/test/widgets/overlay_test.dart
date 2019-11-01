@@ -657,4 +657,45 @@ void main() {
       ),
     );
   });
+
+  testWidgets('OverlayEntry.opaque can be changed when OverlayEntry is not part of an Overlay (yet)', (WidgetTester tester) async {
+    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    final Key root = UniqueKey();
+    final Key top = UniqueKey();
+    final OverlayEntry rootEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Container(key: root);
+      },
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            rootEntry,
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byKey(root), findsOneWidget);
+
+    final OverlayEntry newEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Container(key: top);
+      },
+    );
+    expect(newEntry.opaque, isFalse);
+    newEntry.opaque = true; // Does neither trigger an assert nor throw.
+    expect(newEntry.opaque, isTrue);
+
+    // The new opaqueness is honored when inserted into an overlay.
+    overlayKey.currentState.insert(newEntry);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(root), findsNothing);
+    expect(find.byKey(top), findsOneWidget);
+  });
 }

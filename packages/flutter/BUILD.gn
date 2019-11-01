@@ -13,15 +13,15 @@ dart_library("flutter") {
   disable_analysis = true
 
   deps = [
+    "//third_party/dart/third_party/pkg/intl",
     "//third_party/dart-pkg/pub/async",
     "//third_party/dart-pkg/pub/collection",
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/typed_data",
     "//third_party/dart-pkg/pub/vector_math",
-    "//third_party/dart/third_party/pkg/intl",
   ]
 
   if (is_fuchsia) {
-    deps += [ "//topaz/runtime/sky_engine:sky_engine_dart" ]
+    deps += [ "$flutter_root/sky/packages/sky_engine:sky_engine_dart" ]
   }
 }
