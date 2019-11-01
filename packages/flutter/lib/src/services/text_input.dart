@@ -651,12 +651,6 @@ abstract class TextInputClient {
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
-
-  /// Creates a [TextInputConfiguration] for this client.
-  ///
-  /// This configuration is requested when establishing or re-establishing the
-  /// connection between the [TextInput] and the engine.
-  TextInputConfiguration createConfiguration();
 }
 
 /// An interface for interacting with a text input control.
@@ -683,7 +677,7 @@ class TextInputConnection {
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    TextInput._instance._channel.invokeMethod<void>('TextInput.show');
+    TextInput._instance._show();
   }
 
   /// Requests that the text input control change its internal state to match the given state.
@@ -705,8 +699,7 @@ class TextInputConnection {
     if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
       _cachedSize = editableBoxSize;
       _cachedTransform = transform;
-      TextInput._instance._channel.invokeMethod<void>(
-        'TextInput.setEditableSizeAndTransform',
+      TextInput._instance._setEditableSizeAndTransform(
         <String, dynamic>{
           'width': editableBoxSize.width,
           'height': editableBoxSize.height,
@@ -730,8 +723,7 @@ class TextInputConnection {
   }) {
     assert(attached);
 
-    TextInput._instance._channel.invokeMethod<void>(
-      'TextInput.setStyle',
+    TextInput._instance._setStyle(
       <String, dynamic>{
         'fontFamily': fontFamily,
         'fontSize': fontSize,
@@ -865,20 +857,20 @@ class TextInput {
   /// A client that no longer wishes to interact with the text input control
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
-  static TextInputConnection attach(TextInputClient client) {
+  static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
     assert(client != null);
+    assert(configuration != null);
     final TextInputConnection connection = TextInputConnection._(client);
-    _instance._attach(connection);
+    _instance._attach(connection, configuration);
     return connection;
   }
 
   /// This method actually notifies the embedding of the client. It is utilized
   /// by [attach] and by [_handleTextInputInvocation] for the
   /// `TextInputClient.reattach` method.
-  void _attach(TextInputConnection connection) {
+  void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(connection != null);
     assert(connection._client != null);
-    final TextInputConfiguration configuration = connection._client.createConfiguration();
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _channel.invokeMethod<void>(
@@ -886,6 +878,7 @@ class TextInput {
       <dynamic>[ connection._id, configuration.toJson() ],
     );
     _currentConnection = connection;
+    _currentConfiguration = configuration;
   }
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
@@ -913,6 +906,8 @@ class TextInput {
   MethodChannel _channel;
 
   TextInputConnection _currentConnection;
+  TextInputConfiguration _currentConfiguration;
+  TextEditingValue _currentTextEditingValue;
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     if (_currentConnection == null)
@@ -922,9 +917,10 @@ class TextInput {
     // Reattach request needs to be handled regardless of the client ID.
     if (method == 'TextInputClient.requestExistingInputState') {
       assert(_currentConnection._client != null);
-      _attach(_currentConnection);
-      if (_lastTextEditingValue != null) {
-        _setEditingState(_lastTextEditingValue);
+      _attach(_currentConnection, _currentConfiguration);
+      // This will be null if we've never had a call to [_setEditingState].
+      if (_currentTextEditingValue != null) {
+        _setEditingState(_currentTextEditingValue);
       }
       return;
     }
@@ -972,14 +968,30 @@ class TextInput {
     _scheduleHide();
   }
 
-  TextEditingValue _lastTextEditingValue;
-
   void _setEditingState(TextEditingValue value) {
     assert(value != null);
-    _lastTextEditingValue = value;
     _channel.invokeMethod<void>(
       'TextInput.setEditingState',
       value.toJSON(),
+    );
+    _currentTextEditingValue = value;
+  }
+
+  void _show() {
+    _channel.invokeMethod<void>('TextInput.show');
+  }
+
+  void _setEditableSizeAndTransform(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setEditableSizeAndTransform',
+      args,
+    );
+  }
+
+  void _setStyle(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setStyle',
+      args,
     );
   }
 }

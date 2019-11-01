@@ -162,7 +162,9 @@ class SystemChannels {
   ///  * `TextInputClient.requestExistingInputState`: The embedding may have
   ///    lost its internal state about the current editing client, if there is
   ///    one. The framework should call `TextInput.setClient` and
-  ///    `TextInput.setEditingState` again with its most recent information.
+  ///    `TextInput.setEditingState` again with its most recent information. If
+  ///    there is no existing state on the framework side, the call should
+  ///    fizzle.
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).

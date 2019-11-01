@@ -1388,22 +1388,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection.attached;
 
-  @override
-  TextInputConfiguration createConfiguration() {
-    return TextInputConfiguration(
-      inputType: widget.keyboardType,
-      obscureText: widget.obscureText,
-      autocorrect: widget.autocorrect,
-      enableSuggestions: widget.enableSuggestions,
-      inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
-          ? TextInputAction.newline
-          : TextInputAction.done
-      ),
-      textCapitalization: widget.textCapitalization,
-      keyboardAppearance: widget.keyboardAppearance,
-    );
-  }
-
   void _openInputConnection() {
     if (widget.readOnly) {
       return;
@@ -1411,7 +1395,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(this);
+      _textInputConnection = TextInput.attach(
+        this,
+        TextInputConfiguration(
+          inputType: widget.keyboardType,
+          obscureText: widget.obscureText,
+          autocorrect: widget.autocorrect,
+          enableSuggestions: widget.enableSuggestions,
+          inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
+              ? TextInputAction.newline
+              : TextInputAction.done
+          ),
+          textCapitalization: widget.textCapitalization,
+          keyboardAppearance: widget.keyboardAppearance,
+        ),
+      );
       _textInputConnection.show();
 
       _updateSizeAndTransform();

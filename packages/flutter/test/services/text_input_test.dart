@@ -17,16 +17,16 @@ void main() {
     });
     const FakeTextInputClient client = FakeTextInputClient();
     TextInput.setChannel(fakeTextChannel);
-    TextInput.attach(client);
+    TextInput.attach(client, client.configuration);
 
     fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
 
     expect(fakeTextChannel.outgoingCalls.length, 2);
     fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
       // From original attach
-      MethodCall('TextInput.setClient', <dynamic>[1, client.createConfiguration().toJson()]),
+      MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       // From requestExistingInputState
-      MethodCall('TextInput.setClient', <dynamic>[1, client.createConfiguration().toJson()]),
+      MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
     ]);
   });
 
@@ -36,7 +36,7 @@ void main() {
     });
     const FakeTextInputClient client = FakeTextInputClient();
     TextInput.setChannel(fakeTextChannel);
-    final TextInputConnection connection = TextInput.attach(client);
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
     const TextEditingValue editingState = TextEditingValue(text: 'foo');
     connection.setEditingState(editingState);
 
@@ -45,11 +45,11 @@ void main() {
     expect(fakeTextChannel.outgoingCalls.length, 4);
     fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
       // attach
-      MethodCall('TextInput.setClient', <dynamic>[1, client.createConfiguration().toJson()]),
+      MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       // set editing state 1
       MethodCall('TextInput.setEditingState', editingState.toJSON()),
       // both from requestExistingInputState
-      MethodCall('TextInput.setClient', <dynamic>[1, client.createConfiguration().toJson()]),
+      MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       MethodCall('TextInput.setEditingState', editingState.toJSON()),
     ]);
   });
@@ -139,8 +139,7 @@ void main() {
 class FakeTextInputClient implements TextInputClient {
   const FakeTextInputClient();
 
-  @override
-  TextInputConfiguration createConfiguration() => const TextInputConfiguration();
+  TextInputConfiguration get configuration => const TextInputConfiguration();
 
   @override
   void performAction(TextInputAction action) => throw UnimplementedError();
