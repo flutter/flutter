@@ -121,7 +121,7 @@ void main() {
   });
 
   testWidgets('ink response changes color on focus', (WidgetTester tester) async {
-    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(
       Material(
@@ -156,7 +156,7 @@ void main() {
   });
 
   testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
-    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(Material(
       child: Directionality(
