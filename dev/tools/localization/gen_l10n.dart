@@ -227,7 +227,6 @@ Future<void> main(List<String> args) async {
   final File outputFile = File(path.join(l10nDirectory.path, '${results['output-file-prefix']}_localizations.dart'));
   final String stringsClassName = '${results['output-class-prefix']}Localizations';
 
-  final RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
   final List<String> arbFilenames = <String>[];
   final Set<String> supportedLanguageCodes = <String>{};
   final List<LocaleInfo> supportedLocales = <LocaleInfo>[];
@@ -235,11 +234,13 @@ Future<void> main(List<String> args) async {
   for (FileSystemEntity entity in l10nDirectory.listSync()) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath)) {
-      final RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
+      final RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
       if (arbFilenameRE.hasMatch(entityPath)) {
         final File arbFile = File(entityPath);
         final Map<String, dynamic> arbContents = json.decode(arbFile.readAsStringSync());
+        final RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
         String localeString = arbContents['@@locale'];
+
         if (arbFilenameLocaleRE.hasMatch(entityPath) && localeString == null)
           localeString = arbFilenameLocaleRE.firstMatch(entityPath)[1];
 
