@@ -18,6 +18,7 @@
 
 # Visual Studio Code related
 .vscode/
+.project
 
 # Flutter repo-specific
 /bin/cache/
