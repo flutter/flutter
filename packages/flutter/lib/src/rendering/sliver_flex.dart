@@ -94,9 +94,10 @@ class RenderSliverFlex extends RenderSliver with ContainerRenderObjectMixin<Rend
 
   @override
   void performLayout() {
-    // TODO(Piinks): remaining edge cases
+    // TODO(Piinks): remaining edge cases/work
     //    - exception from paintExtent > maxPaintExtent from precision error
-    //    - exception from expanding pinned headers
+    //    - exception from collapsing pinned headers
+    //    - add in consideration of overrideGroupMaxExtent
     assert(constraints != null);
     geometry = SliverGeometry.zero;
     double groupLayoutExtent = 0;
