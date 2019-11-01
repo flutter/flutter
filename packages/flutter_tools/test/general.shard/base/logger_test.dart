@@ -224,7 +224,7 @@ void main() {
             '\b\b\b\b\b\b\b\b       $b' // second tick
             '\b\b\b\b\b\b\b\b        ' // clearing the spinner to put the time
             '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
-            '    0.0s\n', // replacing it with the time
+            '    5.0s\n', // replacing it with the time
           );
           done = true;
         });
@@ -234,6 +234,7 @@ void main() {
         OutputPreferences: () => OutputPreferences(showColor: true),
         Platform: () => FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
         Stdio: () => mockStdio,
+        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('AnsiStatus works for $testOs', () {
