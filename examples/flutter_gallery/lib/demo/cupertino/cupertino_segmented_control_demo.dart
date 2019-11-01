@@ -46,12 +46,12 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
     ),
   };
 
-  final ValueNotifier<int> controller = ValueNotifier<int>(0);
+  int currentSegment = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    controller.addListener(() { setState(() {}); });
+  void onValueChanged(int newValue) {
+    setState(() {
+      currentSegment = newValue;
+    });
   }
 
   @override
@@ -75,10 +75,8 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                 width: 500.0,
                 child: CupertinoSegmentedControl<int>(
                   children: children,
-                  onValueChanged: (int newValue) {
-                    controller.value = newValue;
-                  },
-                  groupValue: controller.value,
+                  onValueChanged: onValueChanged,
+                  groupValue: currentSegment,
                 ),
               ),
               SizedBox(
@@ -87,7 +85,8 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                   padding: const EdgeInsets.all(16.0),
                   child: CupertinoSlidingSegmentedControl<int>(
                     children: children,
-                    controller: controller,
+                    onValueChanged: onValueChanged,
+                    groupValue: currentSegment,
                   ),
                 ),
               ),
@@ -130,7 +129,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                               ),
                             ],
                           ),
-                          child: icons[controller.value],
+                          child: icons[currentSegment],
                         );
                       },
                     ),
@@ -142,11 +141,5 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 }
