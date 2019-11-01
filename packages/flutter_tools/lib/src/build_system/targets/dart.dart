@@ -8,10 +8,8 @@ import '../../artifacts.dart';
 import '../../asset.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
-import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
-import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../globals.dart';
 import '../../project.dart';
@@ -41,27 +39,6 @@ const String kTrackWidgetCreation = 'TrackWidgetCreation';
 ///
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
-
-/// Finds the locations of all dart files within the project.
-///
-/// This does not attempt to determine if a file is used or imported, so it
-/// may otherwise report more files than strictly necessary.
-List<File> listDartSources(Environment environment) {
-  final Map<String, Uri> packageMap = PackageMap(environment.projectDir.childFile('.packages').path).map;
-  final List<File> dartFiles = <File>[];
-  for (Uri uri in packageMap.values) {
-    final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
-    if (!libDirectory.existsSync()) {
-      continue;
-    }
-    for (FileSystemEntity entity in libDirectory.listSync(recursive: true)) {
-      if (entity is File && entity.path.endsWith('.dart')) {
-        dartFiles.add(entity);
-      }
-    }
-  }
-  return dartFiles;
-}
 
 /// Copies the prebuilt flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.

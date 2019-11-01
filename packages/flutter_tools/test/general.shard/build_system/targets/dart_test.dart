@@ -354,16 +354,6 @@ flutter_tools:lib/''');
     ProcessManager: () => mockProcessManager,
   }));
 
-  test('list dart sources handles packages without lib directories', () => testbed.run(() {
-    fs.file('.packages')
-      ..createSync()
-      ..writeAsStringSync('''
-# Generated
-example:fiz/lib/''');
-    fs.directory('fiz').createSync();
-    expect(listDartSources(androidEnvironment), <File>[]);
-  }));
-
   test('Profile/ReleaseCopyFlutterAotBundle copies .so to correct output directory', () => testbed.run(() async {
     androidEnvironment.buildDir.createSync(recursive: true);
     androidEnvironment.buildDir.childFile('app.so').createSync();
