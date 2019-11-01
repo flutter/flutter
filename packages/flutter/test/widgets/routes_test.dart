@@ -788,6 +788,81 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
       expect(trainHopper2.currentTrain, isNull); // Has been disposed.
     });
+
+    testWidgets('showGeneralDialog uses root navigator by default', (WidgetTester tester) async {
+      final DialogObserver rootObserver = DialogObserver();
+      final DialogObserver nestedObserver = DialogObserver();
+
+      await tester.pumpWidget(MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          observers: <NavigatorObserver>[nestedObserver],
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  onPressed: () {
+                    showGeneralDialog<void>(
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration.zero,
+                      pageBuilder: (BuildContext innerContext, _, __) {
+                        return const SizedBox();
+                      },
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                );
+              },
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(RaisedButton));
+
+      expect(rootObserver.dialogCount, 1);
+      expect(nestedObserver.dialogCount, 0);
+    });
+
+    testWidgets('showGeneralDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+      final DialogObserver rootObserver = DialogObserver();
+      final DialogObserver nestedObserver = DialogObserver();
+
+      await tester.pumpWidget(MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          observers: <NavigatorObserver>[nestedObserver],
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  onPressed: () {
+                    showGeneralDialog<void>(
+                      useRootNavigator: false,
+                      context: context,
+                      barrierDismissible: false,
+                      transitionDuration: Duration.zero,
+                      pageBuilder: (BuildContext innerContext, _, __) {
+                        return const SizedBox();
+                      },
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                );
+              },
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(RaisedButton));
+
+      expect(rootObserver.dialogCount, 0);
+      expect(nestedObserver.dialogCount, 1);
+    });
   });
 }
 
@@ -803,5 +878,17 @@ class TestPageRouteBuilder extends PageRouteBuilder<void> {
   @override
   Animation<double> createAnimation() {
     return CurvedAnimation(parent: super.createAnimation(), curve: Curves.easeOutExpo);
+  }
+}
+
+class DialogObserver extends NavigatorObserver {
+  int dialogCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      dialogCount++;
+    }
+    super.didPush(route, previousRoute);
   }
 }
