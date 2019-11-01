@@ -443,6 +443,11 @@ class DataTable extends StatelessWidget {
         textDirection: numeric ? TextDirection.rtl : null,
         children: <Widget>[ label, arrowPadding, arrow ],
       );
+    } else {
+      label = Row(
+        textDirection: numeric ? TextDirection.rtl : null,
+        children: <Widget>[ label ],
+      );
     }
     label = Container(
       padding: padding,
