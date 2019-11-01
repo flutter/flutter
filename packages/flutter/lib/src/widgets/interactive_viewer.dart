@@ -32,7 +32,7 @@ class InteractiveViewer extends StatelessWidget {
     // with InteractiveViewer. There is either a rubber band effect when
     // exceeding the boundaries, or a strong enough gesture causes a navigation
     // change.
-    this.boundaryRect,
+    this.boundaryMargin = EdgeInsets.zero,
     this.initialTranslation,
     this.initialScale,
     this.initialRotation,
@@ -79,17 +79,19 @@ class InteractiveViewer extends StatelessWidget {
        ),
        super(key: key);
 
-  /// A Rect that defines the area that can be viewed by the viewport.
+  /// A margin for the visible boundaries of the child.
   ///
-  /// Panning beyond boundaryRect will be stopped. boundaryRect does not rotate
-  /// with the rest of the scene, so it is always aligned with the viewport.
+  /// Any transformation that results in the viewport being able to view outside
+  /// of the boundaries will be stopped at the boundary. The boundaries do not
+  /// rotate with the rest of the scene, so they are always aligned with the
+  /// viewport.
   ///
-  /// To produce no bounds at all, pass a Rect that's an infinite plane:
-  /// `Rect.fromLTRB(-double.infinity, -double.infinity, double.infinity, double.infinity);`.
+  /// To produce no boundaries at all, pass infinite [EdgeInsets], such as
+  /// `EdgeInsets.all(double.infinity)`.
   ///
-  /// Defaults to null, which results in boundaries that are the exact size of
-  /// the [child].
-  final Rect boundaryRect;
+  /// Defaults to EdgeInsets.zero, which results in boundaries that are the
+  /// exact same size and position as the child.
+  final EdgeInsets boundaryMargin;
 
   /// The child to perform the transformations on.
   ///
@@ -250,7 +252,12 @@ class InteractiveViewer extends StatelessWidget {
           child: child,
           maxScale: maxScale,
           minScale: minScale,
-          boundaryRect: boundaryRect,
+          boundaryRect: Rect.fromLTRB(
+            -boundaryMargin.left,
+            -boundaryMargin.top,
+            constraints.maxWidth + boundaryMargin.right,
+            constraints.maxHeight + boundaryMargin.bottom,
+          ),
           initialTranslation: initialTranslation,
           initialScale: initialScale,
           initialRotation: initialRotation,
@@ -467,12 +474,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     return renderObject.localToGlobal(Offset.zero);
   }
 
-  Rect get _boundaryRect {
-    assert(widget.size != null);
-    // Defaults to a Rect that matches the child perfectly.
-    return widget.boundaryRect ?? Offset.zero & widget.size;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -593,14 +594,14 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       return matrix;
     }
 
-    // Clamp translation so the viewport remains inside _boundaryRect.
+    // Clamp translation so the viewport remains inside widget.boundaryRect.
     final double scale = _transform.getMaxScaleOnAxis();
     final Size scaledSize = widget.size / scale;
     final Rect viewportBoundaries = Rect.fromLTRB(
-      _boundaryRect.left,
-      _boundaryRect.top,
-      _boundaryRect.right - scaledSize.width,
-      _boundaryRect.bottom - scaledSize.height,
+      widget.boundaryRect.left,
+      widget.boundaryRect.top,
+      widget.boundaryRect.right - scaledSize.width,
+      widget.boundaryRect.bottom - scaledSize.height,
     );
     // Translation is reversed (a positive translation moves the scene to the
     // right, viewport to the left).
@@ -661,13 +662,13 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     final double clampedScale = clampedTotalScale / currentScale;
     final Matrix4 nextMatrix = matrix.clone()..scale(clampedScale);
 
-    // Don't allow a scale that moves the viewport outside of _boundaryRect.
+    // Don't allow a scale that moves the viewport outside of widget.boundaryRect.
     // Add 1 pixel because Rect.contains excludes its bottom and right edges.
     final Rect boundaryRect = Rect.fromLTRB(
-      _boundaryRect.left,
-      _boundaryRect.top,
-      _boundaryRect.right + 1.0,
-      _boundaryRect.bottom + 1.0,
+      widget.boundaryRect.left,
+      widget.boundaryRect.top,
+      widget.boundaryRect.right + 1.0,
+      widget.boundaryRect.bottom + 1.0,
     );
     final Offset tl = fromViewport(const Offset(0, 0), nextMatrix);
     final Offset tr = fromViewport(Offset(widget.size.width, 0), nextMatrix);
@@ -688,7 +689,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
   // Return a new matrix representing the given matrix after applying the given
   // rotation transform.
-  // Rotating the scene cannot cause the viewport to view beyond _boundaryRect.
+  // Rotating the scene cannot cause the viewport to view beyond widget.boundaryRect.
   Matrix4 matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
     if (widget.disableRotation || rotation == 0) {
       return matrix;

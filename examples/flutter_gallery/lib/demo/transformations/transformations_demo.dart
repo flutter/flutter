@@ -54,7 +54,6 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
           // Draw the scene as big as is available, but allow the user to
           // translate beyond that to a visibleSize that's a bit bigger.
           final Size size = Size(constraints.maxWidth, constraints.maxHeight);
-          final Size visibleSize = Size(size.width * 3, size.height * 2);
           return InteractiveViewer(
             reset: _reset,
             onResetEnd: () {
@@ -65,11 +64,11 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
             child: CustomPaint(
               painter: painter,
             ),
-            boundaryRect: Rect.fromLTWH(
-              -visibleSize.width / 2,
-              -visibleSize.height / 2,
-              visibleSize.width,
-              visibleSize.height,
+            // TODO(justinmc): Simplify this by using margin that's not related
+            // to the size?
+            boundaryMargin: EdgeInsets.symmetric(
+              horizontal: size.width,
+              vertical: size.height / 2,
             ),
             // Center the board in the middle of the screen. It's drawn centered
             // at the origin, which is the top left corner of the
