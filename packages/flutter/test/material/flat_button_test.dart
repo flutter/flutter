@@ -659,7 +659,7 @@ void main() {
     flatButton = find.byType(FlatButton);
     expect(tester.widget<FlatButton>(flatButton).enabled, false);
   });
-  
+
   testWidgets('FlatButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
