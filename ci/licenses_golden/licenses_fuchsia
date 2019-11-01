@@ -1,4 +1,4 @@
-Signature: 3206d0cf85b6b3692f0c2e5171b048b9
+Signature: 9ccc5f19cc74f1d3b284857bd4436fbe
 
 UNUSED LICENSES:
 
@@ -1472,14 +1472,17 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/executor.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/executor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/irq.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/paged_vmo.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/irq.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/paged_vmo.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-default/include/lib/async-loop/default.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/paged_vmo.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/directory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/fd.h
