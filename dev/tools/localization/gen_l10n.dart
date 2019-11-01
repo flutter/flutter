@@ -9,6 +9,8 @@ import 'dart:io';
 import 'package:args/args.dart' as argslib;
 import 'package:path/path.dart' as path;
 
+import 'localizations_utils.dart';
+
 const String defaultFileTemplate = '''
 import 'dart:async';
 
@@ -190,10 +192,27 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 
-String genSupportedLocaleProperty(Set<String> supportedLocales) {
+String genSupportedLocaleProperty(List<LocaleInfo> supportedLocales) {
   const String prefix = 'static const List<Locale> supportedLocales = <Locale>[ \n    Locale(''';
   const String suffix = '),\n  ];';
-  return prefix + supportedLocales.toList().join('),\n    Locale(') + suffix;
+
+  String resultingProperty = prefix;
+
+  for (int index = 0; index < supportedLocales.length; index += 1) {
+    print(supportedLocales);
+    final String languageCode = supportedLocales[index].languageCode;
+    final String countryCode = supportedLocales[index].countryCode;
+    resultingProperty += '\'$languageCode\'';
+
+    if (countryCode != null)
+      resultingProperty += ', \'$countryCode\'';
+
+    if (index < supportedLocales.length - 1)
+      resultingProperty += '),\n    Locale(';
+  }
+  resultingProperty += suffix;
+
+  return resultingProperty;
 }
 
 Future<void> main(List<String> args) async {
@@ -209,17 +228,19 @@ Future<void> main(List<String> args) async {
   final File outputFile = File(path.join(l10nDirectory.path, '${results['output-file-prefix']}_localizations.dart'));
   final String stringsClassName = '${results['output-class-prefix']}Localizations';
 
-  final RegExp arbFilenameRE = RegExp(r'\w+_(\w+)\.arb$');
+  final RegExp arbFilenameRE = RegExp(r'^[^_]*_(\w+)\.arb$');
   final List<String> arbFilenames = <String>[];
   final Set<String> supportedLanguageCodes = <String>{};
+  final List<LocaleInfo> supportedLocales = <LocaleInfo>[];
 
   for (FileSystemEntity entity in l10nDirectory.listSync()) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && arbFilenameRE.hasMatch(entityPath)) {
       arbFilenames.add(entityPath);
       final String localeString = arbFilenameRE.firstMatch(entityPath)[1];
-      final List<String> codes = localeString.split('_'); // [language, script, country]
-      supportedLanguageCodes.add('\'${codes[0]}\'');
+      final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
+      supportedLocales.add(localeInfo);
+      supportedLanguageCodes.add('\'${localeInfo.languageCode}\'');
     }
   }
 
@@ -234,13 +255,13 @@ Future<void> main(List<String> args) async {
       classMethods.add(genPluralMethod(bundle, key));
     else
       classMethods.add(genSimpleMethod(bundle, key));
-  }
+  };
 
   outputFile.writeAsStringSync(
     defaultFileTemplate
       .replaceAll('@className', stringsClassName)
       .replaceAll('@classMethods', classMethods.join('\n'))
-      .replaceAll('@supportedLocales', genSupportedLocaleProperty(supportedLanguageCodes))
+      .replaceAll('@supportedLocales', genSupportedLocaleProperty(supportedLocales))
       .replaceAll('@supportedLanguageCodes', supportedLanguageCodes.toList().join(', '))
   );
 
