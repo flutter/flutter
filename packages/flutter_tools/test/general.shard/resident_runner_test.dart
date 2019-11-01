@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -626,6 +627,23 @@ void main() {
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
+
+  test('connect sets up log reader', () => testbed.run(() async {
+    final MockDevice mockDevice = MockDevice();
+    final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+    when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
+
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      mockDevice,
+      <FlutterView>[],
+      observatoryUris: <Uri>[ testUri ]
+    );
+
+    await flutterDevice.connect();
+    verify(mockLogReader.connectedVMServices = <VMService>[ mockVMService ]);
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, { ReloadSources reloadSources, Restart restart, CompileExpression compileExpression, io.CompressionOptions compression }) async => mockVMService,
+  }));
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
@@ -634,15 +652,22 @@ class MockVMService extends Mock implements VMService {}
 class MockDevFS extends Mock implements DevFS {}
 class MockIsolate extends Mock implements Isolate {}
 class MockDevice extends Mock implements Device {}
+class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(Device device, this.views)
-    : super(device, buildMode: BuildMode.debug, trackWidgetCreation: false);
+  TestFlutterDevice(Device device, this.views, { List<Uri> observatoryUris })
+    : super(device, buildMode: BuildMode.debug, trackWidgetCreation: false) {
+    _observatoryUris = observatoryUris;
+  }
 
   @override
   final List<FlutterView> views;
+
+  @override
+  List<Uri> get observatoryUris => _observatoryUris;
+  List<Uri> _observatoryUris;
 }
 
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
