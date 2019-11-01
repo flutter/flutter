@@ -889,7 +889,7 @@ class CupertinoDynamicColor extends Color {
   /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base] elevation
   /// level), unless [nullOk] is set to false, in which case an exception will be
   /// thrown.
-  CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = false }) {
+  CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = true }) {
     final Brightness brightness = _isPlatformBrightnessDependent
       ? CupertinoTheme.brightnessOf(context, nullOk: nullOk) ?? Brightness.light
       : Brightness.light;

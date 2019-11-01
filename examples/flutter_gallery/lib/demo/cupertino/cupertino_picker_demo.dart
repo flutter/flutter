@@ -17,21 +17,50 @@ class CupertinoPickerDemo extends StatefulWidget {
   _CupertinoPickerDemoState createState() => _CupertinoPickerDemoState();
 }
 
-class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
-  int _selectedColorIndex = 0;
+class _BottomPicker extends StatelessWidget {
+  const _BottomPicker({
+    Key key,
+    @required this.child,
+  }) : assert(child != null),
+       super(key: key);
 
-  Duration timer = const Duration();
+  final Widget child;
 
-  // Value that is shown in the date picker in date mode.
-  DateTime date = DateTime.now();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: _kPickerSheetHeight,
+      padding: const EdgeInsets.only(top: 6.0),
+      color: CupertinoColors.systemBackground.resolveFrom(context),
+      child: DefaultTextStyle(
+        style: TextStyle(
+          color: CupertinoColors.label.resolveFrom(context),
+          fontSize: 22.0,
+        ),
+        child: GestureDetector(
+          // Blocks taps from propagating to the modal sheet and popping.
+          onTap: () { },
+          child: SafeArea(
+            top: false,
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-  // Value that is shown in the date picker in time mode.
-  DateTime time = DateTime.now();
+class _Menu extends StatelessWidget {
+  const _Menu({
+    Key key,
+    @required this.children,
+  }) : assert(children != null),
+       super(key: key);
 
-  // Value that is shown in the date picker in dateAndTime mode.
-  DateTime dateTime = DateTime.now();
+  final List<Widget> children;
 
-  Widget _buildMenu(List<Widget> children) {
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: CupertinoTheme.of(context).scaffoldBackgroundColor,
@@ -54,32 +83,21 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       ),
     );
   }
+}
 
-  Widget _buildBottomPicker(Widget picker) {
-    return Builder(
-      builder: (BuildContext context) {
-        return Container(
-          height: _kPickerSheetHeight,
-          padding: const EdgeInsets.only(top: 6.0),
-          color: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
-          child: DefaultTextStyle(
-            style: TextStyle(
-              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: 22.0,
-            ),
-            child: GestureDetector(
-              // Blocks taps from propagating to the modal sheet and popping.
-              onTap: () { },
-              child: SafeArea(
-                top: false,
-                child: picker,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
+  int _selectedColorIndex = 0;
+
+  Duration timer = const Duration();
+
+  // Value that is shown in the date picker in date mode.
+  DateTime date = DateTime.now();
+
+  // Value that is shown in the date picker in time mode.
+  DateTime time = DateTime.now();
+
+  // Value that is shown in the date picker in dateAndTime mode.
+  DateTime dateTime = DateTime.now();
 
   Widget _buildColorPicker(BuildContext context) {
     final FixedExtentScrollController scrollController =
@@ -90,11 +108,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         await showCupertinoModalPopup<void>(
           context: context,
           builder: (BuildContext context) {
-            return _buildBottomPicker(
-              CupertinoPicker(
+            return _BottomPicker(
+              child: CupertinoPicker(
                 scrollController: scrollController,
                 itemExtent: _kPickerItemHeight,
-                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 onSelectedItemChanged: (int index) {
                   setState(() => _selectedColorIndex = index);
                 },
@@ -108,8 +126,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           },
         );
       },
-      child: _buildMenu(
-        <Widget>[
+      child: _Menu(
+        children: <Widget>[
           const Text('Favorite Color'),
           Text(
             coolColorNames[_selectedColorIndex],
@@ -126,9 +144,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         showCupertinoModalPopup<void>(
           context: context,
           builder: (BuildContext context) {
-            return _buildBottomPicker(
-              CupertinoTimerPicker(
-                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
+            return _BottomPicker(
+              child: CupertinoTimerPicker(
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 initialTimerDuration: timer,
                 onTimerDurationChanged: (Duration newTimer) {
                   setState(() => timer = newTimer);
@@ -138,8 +156,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           },
         );
       },
-      child: _buildMenu(
-        <Widget>[
+      child: _Menu(
+        children: <Widget>[
           const Text('Countdown Timer'),
           Text(
             '${timer.inHours}:'
@@ -158,9 +176,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         showCupertinoModalPopup<void>(
           context: context,
           builder: (BuildContext context) {
-            return _buildBottomPicker(
-              CupertinoDatePicker(
-                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
+            return _BottomPicker(
+              child: CupertinoDatePicker(
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 mode: CupertinoDatePickerMode.date,
                 initialDateTime: date,
                 onDateTimeChanged: (DateTime newDateTime) {
@@ -171,8 +189,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           },
         );
       },
-      child: _buildMenu(
-        <Widget>[
+      child: _Menu(
+        children: <Widget>[
           const Text('Date'),
           Text(
             DateFormat.yMMMMd().format(date),
@@ -189,9 +207,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         showCupertinoModalPopup<void>(
           context: context,
           builder: (BuildContext context) {
-            return _buildBottomPicker(
-              CupertinoDatePicker(
-                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
+            return _BottomPicker(
+              child: CupertinoDatePicker(
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 mode: CupertinoDatePickerMode.time,
                 initialDateTime: time,
                 onDateTimeChanged: (DateTime newDateTime) {
@@ -202,8 +220,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           },
         );
       },
-      child: _buildMenu(
-        <Widget>[
+      child: _Menu(
+        children: <Widget>[
           const Text('Time'),
           Text(
             DateFormat.jm().format(time),
@@ -220,9 +238,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         showCupertinoModalPopup<void>(
           context: context,
           builder: (BuildContext context) {
-            return _buildBottomPicker(
-              CupertinoDatePicker(
-                backgroundColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
+            return _BottomPicker(
+              child: CupertinoDatePicker(
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: dateTime,
                 onDateTimeChanged: (DateTime newDateTime) {
@@ -233,8 +251,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           },
         );
       },
-      child: _buildMenu(
-        <Widget>[
+      child: _Menu(
+        children: <Widget>[
           const Text('Date and Time'),
           Text(
             DateFormat.yMMMd().add_jm().format(dateTime),
