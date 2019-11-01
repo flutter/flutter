@@ -97,7 +97,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.behavior(AssetOutputBehavior()),
+    Source.behavior(AssetOutputBehavior('flutter_assets')),
   ];
 
   @override
@@ -108,7 +108,7 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
     Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
     Source.pattern('{OUTPUT_DIR}/LICENSE'),
-    Source.behavior(AssetOutputBehavior()),
+    Source.behavior(AssetOutputBehavior('flutter_assets')),
   ];
 
   @override
@@ -117,29 +117,23 @@ class CopyFlutterBundle extends Target {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-
-    // We're not smart enough to only remove assets that are removed. If
-    // anything changes blow away the whole directory.
-    if (environment.outputDir.existsSync()) {
-      environment.outputDir.deleteSync(recursive: true);
-    }
-    environment.outputDir.createSync(recursive: true);
+    final Directory outputDirectory = environment.outputDir.childDirectory('flutter_assets');
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
       final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
       final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
-          .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
+          .copySync(outputDirectory.childFile('kernel_blob.bin').path);
       fs.file(vmSnapshotData)
-          .copySync(environment.outputDir.childFile('vm_snapshot_data').path);
+          .copySync(outputDirectory.childFile('vm_snapshot_data').path);
       fs.file(isolateSnapshotData)
-          .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
+          .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
 
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
-    await copyAssets(assetBundle, environment);
+    await copyAssets(assetBundle, environment, 'flutter_assets');
   }
 
   @override
