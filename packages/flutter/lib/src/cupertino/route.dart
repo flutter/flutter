@@ -864,6 +864,10 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// It is only used when the method is called. Its corresponding widget can be
 /// safely removed from the tree before the popup is closed.
 ///
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// popup to the [Navigator] furthest from or nearest to the given `context`. It
+/// is `false` by default.
+///
 /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
 /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
 /// by the `builder` does not share a context with the location that
@@ -882,8 +886,10 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 Future<T> showCupertinoModalPopup<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  bool useRootNavigator = true,
 }) {
-  return Navigator.of(context, rootNavigator: true).push(
+  assert(useRootNavigator != null);
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(
     _CupertinoModalPopupRoute<T>(
       builder: builder,
       barrierLabel: 'Dismiss',
@@ -933,13 +939,17 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// It is only used when the method is called. Its corresponding widget can
 /// be safely removed from the tree before the dialog is closed.
 ///
-/// Returns a [Future] that resolves to the value (if any) that was passed to
-/// [Navigator.pop] when the dialog was closed.
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// dialog to the [Navigator] furthest from or nearest to the given `context`.
+/// By default, `useRootNavigator` is `true` and the dialog route created by
+/// this method is pushed to the root navigator.
 ///
-/// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
+///
+/// Returns a [Future] that resolves to the value (if any) that was passed to
+/// [Navigator.pop] when the dialog was closed.
 ///
 /// See also:
 ///
@@ -951,8 +961,10 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 Future<T> showCupertinoDialog<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  bool useRootNavigator = true,
 }) {
   assert(builder != null);
+  assert(useRootNavigator != null);
   return showGeneralDialog(
     context: context,
     barrierDismissible: false,
@@ -963,5 +975,6 @@ Future<T> showCupertinoDialog<T>({
       return builder(context);
     },
     transitionBuilder: _buildCupertinoDialogTransitions,
+    useRootNavigator: useRootNavigator,
   );
 }
