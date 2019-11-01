@@ -190,11 +190,11 @@ void main() {
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'dev', 'flutter', 'plugins'))
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
-        expect(registrant.readAsStringSync(), contains('package dev.flutter.plugins'));
+        expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -282,7 +282,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'dev', 'flutter', 'plugins'))
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.readAsStringSync(),
@@ -362,11 +362,11 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'dev', 'flutter', 'plugins'))
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
-        expect(registrant.readAsStringSync(), contains('package dev.flutter.plugins'));
+        expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
