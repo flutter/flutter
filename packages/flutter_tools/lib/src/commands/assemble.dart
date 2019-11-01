@@ -60,6 +60,12 @@ class AssembleCommand extends FlutterCommand {
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
     );
+    argParser.addFlag(
+      'timestamp-mode',
+      help: 'The maximum number of concurrent tasks the build system will run.',
+      negatable: false,
+      defaultsTo: false
+    );
   }
 
   @override
@@ -122,6 +128,7 @@ class AssembleCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
       resourcePoolSize: argResults['resource-pool-size'],
+      timestampModeEnabled: argResults['timestamp-mode'],
     ));
     if (!result.success) {
       for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {

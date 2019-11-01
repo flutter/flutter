@@ -17,7 +17,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import 'exceptions.dart';
-import 'file_hash_store.dart';
+import 'filestore.dart';
 import 'source.dart';
 
 export 'source.dart';
@@ -35,12 +35,20 @@ const int kMaxOpenFiles = 64;
 /// Configuration for the build system itself.
 class BuildSystemConfig {
   /// Create a new [BuildSystemConfig].
-  const BuildSystemConfig({this.resourcePoolSize});
+  const BuildSystemConfig({
+    this.resourcePoolSize,
+    this.timestampModeEnabled = false,
+  });
 
   /// The maximum number of concurrent tasks the build system will run.
   ///
   /// If not provided, defaults to [platform.numberOfProcessors].
   final int resourcePoolSize;
+
+  /// Whether to check for timestamps changes instead of computing file hashes.
+  ///
+  /// This will be faster for incremental builds. This defaults to `false`.
+  final bool timestampModeEnabled;
 }
 
 /// A Target describes a single step during a flutter build.
@@ -50,7 +58,7 @@ class BuildSystemConfig {
 ///
 /// To determine if the action for a target needs to be executed, the
 /// [BuildSystem] performs a hash of the file contents for both inputs and
-/// outputs. This is tracked separately in the [FileHashStore].
+/// outputs. This is tracked separately in the [FileStore].
 ///
 /// A Target has both implicit and explicit inputs and outputs. Only the
 /// later are safe to evaluate before invoking the [buildAction]. For example,
@@ -406,7 +414,7 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment, fs)
+    final FileStore fileCache = FileStore(environment, fs, buildSystemConfig.timestampModeEnabled)
       ..initialize();
 
     // Perform sanity checks on build.
@@ -462,7 +470,7 @@ class _BuildInstance {
   final Pool resourcePool;
   final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
   final Environment environment;
-  final FileHashStore fileCache;
+  final FileStore fileCache;
   final Map<String, File> inputFiles = <String, File>{};
   final Map<String, File> outputFiles = <String, File>{};
 
@@ -533,11 +541,11 @@ class _BuildInstance {
         node.outputs.clear();
         node.inputs.addAll(node.target.resolveInputs(environment).sources);
         node.outputs.addAll(node.target.resolveOutputs(environment).sources);
-        await fileCache.hashFiles(node.inputs);
+        await fileCache.updateFiles(node.inputs);
       }
 
       // Update hashes for output files.
-      await fileCache.hashFiles(node.outputs);
+      await fileCache.updateFiles(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
 
@@ -718,7 +726,7 @@ class Node {
   /// Returns whether this target can be skipped.
   Future<bool> computeChanges(
     Environment environment,
-    FileHashStore fileHashStore,
+    FileStore fileHashStore,
   ) async {
     final Set<String> currentOutputPaths = <String>{
       for (File file in outputs) file.path,
@@ -734,9 +742,9 @@ class Node {
       }
 
       final String absolutePath = file.path;
-      final String previousHash = fileHashStore.previousHashes[absolutePath];
-      if (fileHashStore.currentHashes.containsKey(absolutePath)) {
-        final String currentHash = fileHashStore.currentHashes[absolutePath];
+      final String previousHash = fileHashStore.previousStamps[absolutePath];
+      if (fileHashStore.currentStamps.containsKey(absolutePath)) {
+        final String currentHash = fileHashStore.currentStamps[absolutePath];
         if (currentHash != previousHash) {
           invalidatedReasons.add(InvalidatedReason.inputChanged);
           _dirty = true;
@@ -763,9 +771,9 @@ class Node {
         continue;
       }
       final String absolutePath = file.path;
-      final String previousHash = fileHashStore.previousHashes[absolutePath];
-      if (fileHashStore.currentHashes.containsKey(absolutePath)) {
-        final String currentHash = fileHashStore.currentHashes[absolutePath];
+      final String previousHash = fileHashStore.previousStamps[absolutePath];
+      if (fileHashStore.currentStamps.containsKey(absolutePath)) {
+        final String currentHash = fileHashStore.currentStamps[absolutePath];
         if (currentHash != previousHash) {
           invalidatedReasons.add(InvalidatedReason.outputChanged);
           _dirty = true;
@@ -788,7 +796,7 @@ class Node {
     // If we have files to hash, compute them asynchronously and then
     // update the result.
     if (sourcesToHash.isNotEmpty) {
-      final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
+      final List<File> dirty = await fileHashStore.updateFiles(sourcesToHash);
       if (dirty.isNotEmpty) {
         invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;

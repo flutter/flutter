@@ -61,23 +61,28 @@ class FileHash {
   }
 }
 
-/// A globally accessible cache of file hashes.
+/// A globally accessible cache that determines if files are up to date.
 ///
 /// In cases where multiple targets read the same source files as inputs, we
-/// avoid recomputing or storing multiple copies of hashes by delegating
-/// through this class. All file hashes are held in memory during a build
-/// operation, and persisted to cache in the root build directory.
+/// avoid recomputing or storing multiple copies of stamps by delegating
+/// through this class. All file stamps are held in memory during a build
+/// operation, and persisted to cache in the build directory.
+///
+/// By default, md5 hashes are used as the file stamp. [_timestampModeEnabled]
+/// can be used to configure faster checks for incremental builds.
 ///
 /// The format of the file store is subject to change and not part of its API.
-class FileHashStore {
-  FileHashStore(this.environment, this.fileSystem) :
+class FileStore {
+  FileStore(this.environment, this.fileSystem, [this._timestampModeEnabled = false]) :
     _cachePath = environment.buildDir.childFile(_kFileCache).path;
 
   final FileSystem fileSystem;
   final String _cachePath;
+  final bool _timestampModeEnabled;
+
   final Environment environment;
-  final HashMap<String, String> previousHashes = HashMap<String, String>();
-  final HashMap<String, String> currentHashes = HashMap<String, String>();
+  final HashMap<String, String> previousStamps = HashMap<String, String>();
+  final HashMap<String, String> currentStamps = HashMap<String, String>();
 
   // The name of the file which stores the file hashes.
   static const String _kFileCache = '.filecache';
@@ -85,7 +90,7 @@ class FileHashStore {
   // The current version of the file cache storage format.
   static const int _kVersion = 2;
 
-  /// Read file hashes from disk.
+  /// Read file store from disk.
   void initialize() {
     printTrace('Initializing file store');
     final File cacheFile = fileSystem.file(_cachePath);
@@ -113,17 +118,17 @@ class FileHashStore {
       return;
     }
     if (fileStorage.version != _kVersion) {
-      printTrace('file cache format updating, clearing old hashes.');
+      printTrace('file cache format updating, clearing old files.');
       cacheFile.deleteSync();
       return;
     }
     for (FileHash fileHash in fileStorage.files) {
-      previousHashes[fileHash.path] = fileHash.hash;
+      previousStamps[fileHash.path] = fileHash.hash;
     }
     printTrace('Done initializing file store');
   }
 
-  /// Persist file hashes to disk.
+  /// Persist file store to disk.
   void persist() {
     printTrace('Persisting file store');
     final File cacheFile = fileSystem.file(_cachePath);
@@ -131,7 +136,7 @@ class FileHashStore {
       cacheFile.createSync(recursive: true);
     }
     final List<FileHash> fileHashes = <FileHash>[];
-    for (MapEntry<String, String> entry in currentHashes.entries) {
+    for (MapEntry<String, String> entry in currentStamps.entries) {
       fileHashes.add(FileHash(entry.key, entry.value));
     }
     final FileStorage fileStorage = FileStorage(
@@ -153,24 +158,47 @@ class FileHashStore {
 
   /// Computes a hash of the provided files and returns a list of entities
   /// that were dirty.
-  Future<List<File>> hashFiles(List<File> files) async {
+  Future<List<File>> updateFiles(List<File> files) async {
     final List<File> dirty = <File>[];
-    final Pool openFiles = Pool(kMaxOpenFiles);
-    await Future.wait(<Future<void>>[
-       for (File file in files) _hashFile(file, dirty, openFiles)
-    ]);
+    if (!_timestampModeEnabled) {
+      final Pool openFiles = Pool(kMaxOpenFiles);
+      await Future.wait(<Future<void>>[
+        for (File file in files) _hashFile(file, dirty, openFiles)
+      ]);
+    } else {
+      for (File file in files) {
+        _timestampCheckFile(file, dirty);
+      }
+    }
     return dirty;
+  }
+
+  void _timestampCheckFile(File file, List<File> dirty) {
+    final String absolutePath = file.path;
+    final String previousTimestamp = previousStamps[absolutePath];
+    // If the file is missing it is assumed to be dirty.
+    if (!file.existsSync()) {
+      currentStamps.remove(absolutePath);
+      previousStamps.remove(absolutePath);
+      dirty.add(file);
+      return;
+    }
+    final String currentTimestamp = file.lastModifiedSync().millisecondsSinceEpoch.toString();
+    if (currentTimestamp != previousTimestamp) {
+      dirty.add(file);
+    }
+    currentStamps[absolutePath] = currentTimestamp;
   }
 
   Future<void> _hashFile(File file, List<File> dirty, Pool pool) async {
     final PoolResource resource = await pool.request();
     try {
       final String absolutePath = file.path;
-      final String previousHash = previousHashes[absolutePath];
+      final String previousHash = previousStamps[absolutePath];
       // If the file is missing it is assumed to be dirty.
       if (!file.existsSync()) {
-        currentHashes.remove(absolutePath);
-        previousHashes.remove(absolutePath);
+        currentStamps.remove(absolutePath);
+        previousStamps.remove(absolutePath);
         dirty.add(file);
         return;
       }
@@ -179,7 +207,7 @@ class FileHashStore {
       if (currentHash != previousHash) {
         dirty.add(file);
       }
-      currentHashes[absolutePath] = currentHash;
+      currentStamps[absolutePath] = currentHash;
     } finally {
       resource.release();
     }
