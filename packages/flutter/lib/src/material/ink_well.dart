@@ -508,7 +508,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       SelectAction.key: _createAction,
       if (!kIsWeb) ActivateAction.key: _createAction,
     };
-    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
+    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   @override
@@ -522,7 +522,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   @override
   void dispose() {
-    WidgetsBinding.instance.focusManager.removeHighlightModeListener(_handleFocusHighlightModeChange);
+    FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
     super.dispose();
   }
 
@@ -650,7 +650,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   void _updateFocusHighlights() {
     bool showFocus;
-    switch (WidgetsBinding.instance.focusManager.highlightMode) {
+    switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         showFocus = false;
         break;
@@ -773,11 +773,12 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
+    final bool canRequestFocus = enabled && widget.canRequestFocus;
     return Actions(
       actions: _actionMap,
       child: Focus(
         focusNode: widget.focusNode,
-        canRequestFocus: widget.canRequestFocus,
+        canRequestFocus: canRequestFocus,
         onFocusChange: _handleFocusUpdate,
         autofocus: widget.autofocus,
         child: MouseRegion(

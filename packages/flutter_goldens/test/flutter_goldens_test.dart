@@ -221,7 +221,13 @@ void main() {
           url = Uri.parse('https://flutter-gold.skia.org/json/ignores');
           mockHttpRequest = MockHttpClientRequest();
           mockHttpResponse = MockHttpClientResponse(utf8.encode(
-              ignoreResponseTemplate(pullRequestNumber: pullRequestNumber)
+              ignoreResponseTemplate(
+                pullRequestNumber: pullRequestNumber,
+                expires: DateTime.now()
+                  .add(const Duration(days: 1))
+                  .toString(),
+                otherTestName: 'unrelatedTest.1'
+              )
           ));
           when(mockHttpClient.getUrl(url))
             .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
@@ -239,23 +245,83 @@ void main() {
           );
         });
 
-        test('returns false for not ignored test and ignored pull request number', () async {
+        test('returns true for ignored test and not ignored pull request number', () async {
           expect(
             await skiaClient.testIsIgnoredForPullRequest(
               '5678',
               testName,
             ),
-            isFalse,
+            isTrue,
           );
         });
 
-        test('returns false for ignored test and not ignored pull request number', () async {
+        test('returns false for not ignored test and ignored pull request number', () async {
          expect(
             await skiaClient.testIsIgnoredForPullRequest(
               pullRequestNumber,
               'failure.png',
             ),
             isFalse,
+          );
+        });
+
+        test('throws exception for expired ignore', () async {
+          mockHttpResponse = MockHttpClientResponse(utf8.encode(
+            ignoreResponseTemplate(
+              pullRequestNumber: pullRequestNumber,
+            )
+          ));
+          when(mockHttpRequest.close())
+            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          final Future<bool> test = skiaClient.testIsIgnoredForPullRequest(
+            pullRequestNumber,
+            testName,
+          );
+          expect(
+            test,
+            throwsException,
+          );
+        });
+
+        test('throws exception for first expired ignore among multiple', () async {
+          mockHttpResponse = MockHttpClientResponse(utf8.encode(
+            ignoreResponseTemplate(
+              pullRequestNumber: pullRequestNumber,
+              otherExpires: DateTime.now()
+                .add(const Duration(days: 1))
+                .toString(),
+            )
+          ));
+          when(mockHttpRequest.close())
+            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          final Future<bool> test = skiaClient.testIsIgnoredForPullRequest(
+            pullRequestNumber,
+            testName,
+          );
+          expect(
+            test,
+            throwsException,
+          );
+        });
+
+        test('throws exception for later expired ignore among multiple', () async {
+          mockHttpResponse = MockHttpClientResponse(utf8.encode(
+            ignoreResponseTemplate(
+              pullRequestNumber: pullRequestNumber,
+              expires: DateTime.now()
+                .add(const Duration(days: 1))
+                .toString(),
+            )
+          ));
+          when(mockHttpRequest.close())
+            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          final Future<bool> test = skiaClient.testIsIgnoredForPullRequest(
+            pullRequestNumber,
+            testName,
+          );
+          expect(
+            test,
+            throwsException,
           );
         });
       });
@@ -355,21 +421,88 @@ void main() {
         );
       });
 
-      test('correctly determines testing environment', () {
-        platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'CIRRUS_CI' : 'true',
-            'CIRRUS_PR' : '',
-            'CIRRUS_BRANCH' : 'master',
-            'GOLD_SERVICE_ACCOUNT' : 'service account...',
-          },
-          operatingSystem: 'macos'
-        );
-        expect(
-          FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
-          isTrue,
-        );
+      group('correctly determines testing environment', () {
+        test('returns true', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '',
+              'CIRRUS_BRANCH': 'master',
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns false - PR active', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'CIRRUS_BRANCH': 'master',
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - no service account', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '',
+              'CIRRUS_BRANCH': 'master',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - not on cirrus', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_ID' : '1234567890',
+              'GOLD_SERVICE_ACCOUNT': 'service account...'
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - not on master', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '',
+              'CIRRUS_BRANCH': 'hotfix',
+              'GOLD_SERVICE_ACCOUNT': 'service account...'
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
       });
     });
 
@@ -389,6 +522,7 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'CIRRUS_CI' : 'true',
               'CIRRUS_PR' : '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...'
             },
             operatingSystem: 'macos'
           ),
@@ -406,20 +540,66 @@ void main() {
         ))
           .thenAnswer((_) => Future<bool>.value(false));
       });
+      group('correctly determines testing environment', () {
+        test('returns true', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
 
-      test('correctly determines testing environment', () {
-        platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'CIRRUS_CI' : 'true',
-            'CIRRUS_PR' : '1234',
-          },
-          operatingSystem: 'macos'
-        );
-        expect(
-          FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
-          isTrue,
-        );
+        test('returns false - no PR', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - no service account', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - not on Cirrus', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
       });
 
       test('comparison passes test that is ignored for this PR', () async {
@@ -439,7 +619,7 @@ void main() {
         );
       });
 
-      test('fails test that is not ignored for this PR', () async {
+      test('fails test that is not ignored', () async {
         when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
           .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
         when(mockSkiaClient.testIsIgnoredForPullRequest(
@@ -464,6 +644,51 @@ void main() {
           ),
           isTrue,
         );
+      });
+    });
+
+    group('Skipping', () {
+      group('correctly determines testing environment', () {
+        test('returns true on LUCI', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : '1234567890',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns true on Cirrus', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI' : 'yep',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+        test('returns false', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(
+              platform),
+            isFalse,
+          );
+        });
       });
     });
 
@@ -513,22 +738,6 @@ void main() {
             Uint8List.fromList(_kFailPngBytes),
             Uri.parse('flutter.new_golden_test.1'),
           ),
-          isTrue,
-        );
-      });
-    });
-
-    group('Skipping', () {
-      test('correctly determines testing environment', () {
-        platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'SWARMING_TASK_ID' : '1234567890',
-          },
-          operatingSystem: 'macos'
-        );
-        expect(
-          FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
           isTrue,
         );
       });
