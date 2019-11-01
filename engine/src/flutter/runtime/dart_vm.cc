@@ -9,7 +9,6 @@
 #include <mutex>
 #include <vector>
 
-#include "flutter/common/runtime.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/file.h"

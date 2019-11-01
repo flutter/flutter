@@ -43,13 +43,23 @@ feature_defines_list = [
 ]
 
 if (flutter_runtime_mode == "debug") {
-  feature_defines_list += [ "FLUTTER_RUNTIME_MODE=1" ]
+  feature_defines_list += [
+    "FLUTTER_RUNTIME_MODE=1",
+    "FLUTTER_JIT_RUNTIME=1",
+  ]
 } else if (flutter_runtime_mode == "profile") {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=2" ]
 } else if (flutter_runtime_mode == "release") {
-  feature_defines_list += [ "FLUTTER_RUNTIME_MODE=3" ]
+  feature_defines_list += [
+    "FLUTTER_RUNTIME_MODE=3",
+    "FLUTTER_RELEASE=1",
+  ]
 } else if (flutter_runtime_mode == "jit_release") {
-  feature_defines_list += [ "FLUTTER_RUNTIME_MODE=4" ]
+  feature_defines_list += [
+    "FLUTTER_RUNTIME_MODE=4",
+    "FLUTTER_RELEASE=1",
+    "FLUTTER_JIT_RUNTIME=1",
+  ]
 } else {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
 }

@@ -6,7 +6,6 @@
 
 #include <sstream>
 
-#include "flutter/common/runtime.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"

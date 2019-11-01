@@ -9,7 +9,6 @@
 #include <sstream>
 #include <string>
 
-#include "flutter/common/runtime.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/size.h"

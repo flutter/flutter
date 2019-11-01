@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "flutter/assets/directory_asset_bundle.h"
-#include "flutter/common/runtime.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/log_settings.h"
