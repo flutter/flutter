@@ -18,7 +18,6 @@ FILE: ../../../flutter/assets/directory_asset_bundle.h
 FILE: ../../../flutter/benchmarking/benchmarking.cc
 FILE: ../../../flutter/benchmarking/benchmarking.h
 FILE: ../../../flutter/common/exported_symbols.sym
-FILE: ../../../flutter/common/runtime.h
 FILE: ../../../flutter/common/settings.cc
 FILE: ../../../flutter/common/settings.h
 FILE: ../../../flutter/common/task_runners.cc

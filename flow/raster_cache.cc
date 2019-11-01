@@ -6,7 +6,6 @@
 
 #include <vector>
 
-#include "flutter/common/runtime.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/paint_utils.h"
 #include "flutter/fml/logging.h"

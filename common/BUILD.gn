@@ -10,7 +10,6 @@ config("flutter_config") {
 
 source_set("common") {
   sources = [
-    "runtime.h",
     "settings.cc",
     "settings.h",
     "task_runners.cc",
