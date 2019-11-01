@@ -1114,6 +1114,83 @@ void main() {
 
     expect(find.text('PopupMenuButton icon'), findsOneWidget);
   });
+
+  testWidgets('showMenu uses nested navigator by default', (WidgetTester tester) async {
+    final MenuObserver rootObserver = MenuObserver();
+    final MenuObserver nestedObserver = MenuObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showMenu<int>(
+                    context: context,
+                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    items: <PopupMenuItem<int>>[
+                      const PopupMenuItem<int>(
+                        value: 1, child: Text('1'),
+                      ),
+                    ],
+                  );
+                },
+                child: const Text('Show Menu'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.menuCount, 0);
+    expect(nestedObserver.menuCount, 1);
+  });
+
+  testWidgets('showMenu uses root navigator if useRootNavigator is true', (WidgetTester tester) async {
+    final MenuObserver rootObserver = MenuObserver();
+    final MenuObserver nestedObserver = MenuObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showMenu<int>(
+                    context: context,
+                    useRootNavigator: true,
+                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    items: <PopupMenuItem<int>>[
+                      const PopupMenuItem<int>(
+                        value: 1, child: Text('1'),
+                      ),
+                    ],
+                  );
+                },
+                child: const Text('Show Menu'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.menuCount, 1);
+    expect(nestedObserver.menuCount, 0);
+  });
 }
 
 class TestApp extends StatefulWidget {
@@ -1151,5 +1228,17 @@ class _TestAppState extends State<TestApp> {
         ),
       ),
     );
+  }
+}
+
+class MenuObserver extends NavigatorObserver {
+  int menuCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_PopupMenuRoute')) {
+      menuCount++;
+    }
+    super.didPush(route, previousRoute);
   }
 }

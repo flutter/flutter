@@ -655,19 +655,23 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// `showDialog` is originally called from. Use a [StatefulBuilder] or a
 /// custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
+/// The `child` argument is deprecated, and should be replaced with `builder`.
+///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
 ///
-/// The `child` argument is deprecated, and should be replaced with `builder`.
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// dialog to the [Navigator] furthest from or nearest to the given `context`.
+/// By default, `useRootNavigator` is `true` and the dialog route created by
+/// this method is pushed to the root navigator.
 ///
-/// Returns a [Future] that resolves to the value (if any) that was passed to
-/// [Navigator.pop] when the dialog was closed.
-///
-/// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
+///
+/// Returns a [Future] that resolves to the value (if any) that was passed to
+/// [Navigator.pop] when the dialog was closed.
 ///
 /// See also:
 ///
@@ -687,8 +691,10 @@ Future<T> showDialog<T>({
     'is appropriate for widgets built in the dialog.'
   ) Widget child,
   WidgetBuilder builder,
+  bool useRootNavigator = true,
 }) {
   assert(child == null || builder == null);
+  assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
@@ -711,5 +717,6 @@ Future<T> showDialog<T>({
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,
+    useRootNavigator: useRootNavigator,
   );
 }
