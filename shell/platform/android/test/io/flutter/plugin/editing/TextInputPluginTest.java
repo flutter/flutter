@@ -1,11 +1,14 @@
 package io.flutter.plugin.editing;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.provider.Settings;
 import android.util.SparseIntArray;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+
+import java.nio.ByteBuffer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,16 +21,38 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowBuild;
 import org.robolectric.shadows.ShadowInputMethodManager;
 
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.plugin.common.JSONMethodCodec;
+import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.platform.PlatformViewsController;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @Config(manifest = Config.NONE, shadows = TextInputPluginTest.TestImm.class, sdk = 27)
 @RunWith(RobolectricTestRunner.class)
 public class TextInputPluginTest {
+    @Test
+    public void textInputPlugin_RequestsReattachOnCreation() {
+        // Initialize a general TextInputPlugin.
+        InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+        TestImm testImm = Shadow.extract(RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+        testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+        View testView = new View(RuntimeEnvironment.application);
+
+        FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+        DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
+        TextInputPlugin textInputPlugin = new TextInputPlugin(testView, dartExecutor, mock(PlatformViewsController.class));
+
+        ByteBuffer message = JSONMethodCodec.INSTANCE.encodeMethodCall(new MethodCall("TextInputClient.requestExistingInputState", null));
+        verify(dartExecutor, times(1)).send("flutter/textinput", message, null);
+    }
+
     @Test
     public void setTextInputEditingState_doesNotRestartWhenTextIsIdentical() {
         // Initialize a general TextInputPlugin.
