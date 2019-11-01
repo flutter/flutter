@@ -64,7 +64,7 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[], cwd=buildr
   print 'Running %s in %s' % (executable_name, cwd)
   test_command = [ executable ] + flags
   print ' '.join(test_command)
-  subprocess.check_call(test_command, cwd=cwd)
+  subprocess.check_output(test_command, cwd=cwd)
 
 
 def RunCCTests(build_dir, filter):
@@ -155,10 +155,10 @@ def SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot
   ]
 
   if verbose_dart_snapshot:
-    subprocess.check_call(snapshot_command, cwd=buildroot_dir)
+    subprocess.check_output(snapshot_command, cwd=buildroot_dir)
   else:
     with open(os.devnull,"w") as out_file:
-      subprocess.check_call(snapshot_command, cwd=buildroot_dir, stdout=out_file)
+      subprocess.check_output(snapshot_command, cwd=buildroot_dir, stdout=out_file)
   assert os.path.exists(kernel_file_output)
 
 
@@ -190,7 +190,7 @@ def RunPubGet(build_dir, directory):
     os.path.join(build_dir, 'dart-sdk', 'bin', 'pub'),
     'get'
   ]
-  subprocess.check_call(pub_get_command, cwd=directory)
+  subprocess.check_output(pub_get_command, cwd=directory)
 
 
 def EnsureDebugUnoptSkyPackagesAreBuilt():
@@ -206,7 +206,7 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
   # Attempt running Ninja if the out directory exists.
   # We don't want to blow away any custom GN args the caller may have already set.
   if os.path.exists(variant_out_dir):
-    subprocess.check_call(ninja_command, cwd=buildroot_dir)
+    subprocess.check_output(ninja_command, cwd=buildroot_dir)
     return
 
   gn_command = [
@@ -217,8 +217,8 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
     '--no-lto',
   ]
 
-  subprocess.check_call(gn_command, cwd=buildroot_dir)
-  subprocess.check_call(ninja_command, cwd=buildroot_dir)
+  subprocess.check_output(gn_command, cwd=buildroot_dir)
+  subprocess.check_output(ninja_command, cwd=buildroot_dir)
 
 def EnsureJavaTestsAreBuilt(android_out_dir):
   ninja_command = [
@@ -231,7 +231,7 @@ def EnsureJavaTestsAreBuilt(android_out_dir):
   # Attempt running Ninja if the out directory exists.
   # We don't want to blow away any custom GN args the caller may have already set.
   if os.path.exists(android_out_dir):
-    subprocess.check_call(ninja_command, cwd=buildroot_dir)
+    subprocess.check_output(ninja_command, cwd=buildroot_dir)
     return
 
   # Otherwise prepare the directory first, then build the test.
@@ -242,8 +242,8 @@ def EnsureJavaTestsAreBuilt(android_out_dir):
     '--runtime-mode=debug',
     '--no-lto',
   ]
-  subprocess.check_call(gn_command, cwd=buildroot_dir)
-  subprocess.check_call(ninja_command, cwd=buildroot_dir)
+  subprocess.check_output(gn_command, cwd=buildroot_dir)
+  subprocess.check_output(ninja_command, cwd=buildroot_dir)
 
 def AssertExpectedJavaVersion():
   EXPECTED_VERSION = '1.8'
@@ -277,7 +277,7 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
     test_class
   ]
 
-  return subprocess.check_call(command)
+  return subprocess.check_output(command)
 
 def RunDartTests(build_dir, filter, verbose_dart_snapshot):
   # This one is a bit messy. The pubspec.yaml at flutter/testing/dart/pubspec.yaml
