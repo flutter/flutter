@@ -159,7 +159,6 @@ class Checkbox extends StatefulWidget {
 class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   bool get enabled => widget.onChanged != null;
   Map<LocalKey, ActionFactory> _actionMap;
-  bool _showHighlight = false;
 
   @override
   void initState() {
@@ -168,8 +167,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       SelectAction.key: _createAction,
       if (!kIsWeb) ActivateAction.key: _createAction,
     };
-    _updateHighlightMode(FocusManager.instance.highlightMode);
-    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   void _actionHandler(FocusNode node, Intent intent){
@@ -197,27 +194,11 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     );
   }
 
-  void _updateHighlightMode(FocusHighlightMode mode) {
-    switch (FocusManager.instance.highlightMode) {
-      case FocusHighlightMode.touch:
-        _showHighlight = false;
-        break;
-      case FocusHighlightMode.traditional:
-        _showHighlight = true;
-        break;
-    }
-  }
-
-  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
-    if (!mounted) {
-      return;
-    }
-    setState(() { _updateHighlightMode(mode); });
-  }
+  bool _showHighlight = false;
+  void _handleHighlightChanged(bool show) => setState(() { _showHighlight = show; });
 
   bool hovering = false;
-  void _handleMouseEnter(PointerEnterEvent event) => setState(() { hovering = true; });
-  void _handleMouseExit(PointerExitEvent event) => setState(() { hovering = false; });
+  void _handleHoverChanged(bool show) => setState(() { hovering = show; });
 
   @override
   Widget build(BuildContext context) {
@@ -233,35 +214,30 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         break;
     }
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
-    return MouseRegion(
-      onEnter: enabled ? _handleMouseEnter : null,
-      onExit: enabled ? _handleMouseExit : null,
-      child: Actions(
-        actions: _actionMap,
-        child: Focus(
-          focusNode: widget.focusNode,
-          autofocus: widget.autofocus,
-          canRequestFocus: enabled,
-          debugLabel: '${describeIdentity(widget)}(${widget.value})',
-          child: Builder(
-            builder: (BuildContext context) {
-              return _CheckboxRenderObjectWidget(
-                value: widget.value,
-                tristate: widget.tristate,
-                activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
-                checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
-                inactiveColor: enabled ? themeData.unselectedWidgetColor : themeData.disabledColor,
-                focusColor: widget.focusColor ?? themeData.focusColor,
-                hoverColor: widget.hoverColor ?? themeData.hoverColor,
-                onChanged: widget.onChanged,
-                additionalConstraints: additionalConstraints,
-                vsync: this,
-                hasFocus: enabled && _showHighlight && Focus.of(context).hasFocus,
-                hovering: enabled && _showHighlight && hovering,
-              );
-            },
-          ),
-        ),
+    return FocusableActionDetector(
+      actions: _actionMap,
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
+      enabled: enabled,
+      onShowFocusHighlight: _handleHighlightChanged,
+      onShowHoverHighlight: _handleHoverChanged,
+      child: Builder(
+        builder: (BuildContext context) {
+          return _CheckboxRenderObjectWidget(
+            value: widget.value,
+            tristate: widget.tristate,
+            activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
+            checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
+            inactiveColor: enabled ? themeData.unselectedWidgetColor : themeData.disabledColor,
+            focusColor: widget.focusColor ?? themeData.focusColor,
+            hoverColor: widget.hoverColor ?? themeData.hoverColor,
+            onChanged: widget.onChanged,
+            additionalConstraints: additionalConstraints,
+            vsync: this,
+            hasFocus: enabled && _showHighlight && Focus.of(context).hasFocus,
+            hovering: enabled && _showHighlight && hovering,
+          );
+        },
       ),
     );
   }
