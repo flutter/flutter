@@ -118,6 +118,9 @@ class CopyFlutterBundle extends Target {
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final Directory outputDirectory = environment.outputDir.childDirectory('flutter_assets');
+    if (!outputDirectory.existsSync()) {
+      outputDirectory.createSync(recursive: true); 
+    }
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
