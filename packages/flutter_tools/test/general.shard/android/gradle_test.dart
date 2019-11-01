@@ -132,6 +132,8 @@ void main() {
   });
 
   group('findBundleFile', () {
+    final Usage mockUsage = MockUsage();
+
     testUsingContext('Finds app bundle when flavor contains underscores in release mode', () {
       final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar'));
@@ -281,9 +283,39 @@ void main() {
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('aab not found', () {
+      final FlutterProject project = FlutterProject.current();
+      expect(
+        () {
+          findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar'));
+        },
+        throwsToolExit(
+          message:
+            'Gradle build failed to produce an .aab file. It\'s likely that this file '
+            'was generated under ${project.android.buildDirectory.path}, but the tool couldn\'t find it.'
+        )
+      );
+      verify(
+        mockUsage.sendEvent(
+          any,
+          any,
+          label: 'gradle-expected-file-not-found',
+          parameters: const <String, String> {
+            'cd37': 'androidGradlePluginVersion: 5.6.2, fileExtension: .aab',
+          },
+        ),
+      ).called(1);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Usage: () => mockUsage,
+    });
   });
 
   group('findApkFiles', () {
+    final Usage mockUsage = MockUsage();
+
     testUsingContext('Finds APK without flavor in release', () {
       final FlutterProject project = MockFlutterProject();
       final AndroidProject androidProject = MockAndroidProject();
@@ -352,6 +384,37 @@ void main() {
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('apk not found', () {
+      final FlutterProject project = FlutterProject.current();
+      expect(
+        () {
+          findApkFiles(
+            project,
+            const AndroidBuildInfo(BuildInfo(BuildMode.debug, 'foo_bar')),
+          );
+        },
+        throwsToolExit(
+          message:
+            'Gradle build failed to produce an .apk file. It\'s likely that this file '
+            'was generated under ${project.android.buildDirectory.path}, but the tool couldn\'t find it.'
+        )
+      );
+      verify(
+        mockUsage.sendEvent(
+          any,
+          any,
+          label: 'gradle-expected-file-not-found',
+          parameters: const <String, String> {
+            'cd37': 'androidGradlePluginVersion: 5.6.2, fileExtension: .apk',
+          },
+        ),
+      ).called(1);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Usage: () => mockUsage,
+    });
   });
 
   group('gradle build', () {
@@ -363,15 +426,6 @@ void main() {
       ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
-    });
-
-    // Regression test for https://github.com/flutter/flutter/issues/34700
-    testUsingContext('Does not return nulls in apk list', () {
-      const AndroidBuildInfo buildInfo = AndroidBuildInfo(BuildInfo.debug);
-      expect(findApkFiles(FlutterProject.current(), buildInfo), <File>[]);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
     test('androidXPluginWarningRegex should match lines with the AndroidX plugin warnings', () {
@@ -1118,7 +1172,7 @@ plugin2=${plugin2.path}
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'gradle--random-event-label-failure',
+        label: 'gradle-random-event-label-failure',
         parameters: anyNamed('parameters'),
       )).called(1);
 
@@ -1199,7 +1253,7 @@ plugin2=${plugin2.path}
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'gradle--random-event-label-failure',
+        label: 'gradle-random-event-label-failure',
         parameters: anyNamed('parameters'),
       )).called(1);
 
@@ -1287,7 +1341,7 @@ plugin2=${plugin2.path}
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'gradle--random-event-label-success',
+        label: 'gradle-random-event-label-success',
         parameters: anyNamed('parameters'),
       )).called(1);
 
@@ -1373,7 +1427,7 @@ plugin2=${plugin2.path}
       verify(mockUsage.sendEvent(
         any,
         any,
-        label: 'gradle--random-event-label-failure',
+        label: 'gradle-random-event-label-failure',
         parameters: anyNamed('parameters'),
       )).called(1);
 
