@@ -442,6 +442,14 @@ class DebugAssetServer extends AssetServer {
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/javascript',
       });
+    } else if (request.url.path.endsWith('dart_sdk.js.map')) {
+      final File file = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+        'kernel',
+        'amd',
+        'dart_sdk.js.map',
+      ));
+      return Response.ok(file.readAsBytesSync());
     } else if (request.url.path.endsWith('dart_sdk.js')) {
       final File file = fs.file(fs.path.join(
         artifacts.getArtifactPath(Artifact.flutterWebSdk),
@@ -452,27 +460,31 @@ class DebugAssetServer extends AssetServer {
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/javascript',
       });
-    } else if (request.url.path.endsWith('dart_sdk.js.map')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.flutterWebSdk),
-        'kernel',
-        'amd',
-        'dart_sdk.js.map',
-      ));
-      return Response.ok(file.readAsBytesSync());
     } else if (request.url.path.endsWith('.dart')) {
       // This is likely a sourcemap request. The first segment is the
       // package name, and the rest is the path to the file relative to
       // the package uri. For example, `foo/bar.dart` would represent a
       // file at a path like `foo/lib/bar.dart`. If there is no leading
       // segment, then we assume it is from the current package.
+      String basePath = request.url.path;
+      basePath = basePath.replaceFirst('packages/build_web_compilers/', '');
+      basePath = basePath.replaceFirst('packages/', '');
 
       // Handle sdk requests that have mangled urls from engine build.
-      if (request.url.path.contains('flutter_web_sdk')) {
+      if (request.url.path.contains('dart-sdk')) {
         // Note: the request is a uri and not a file path, so they always use `/`.
-        final String sdkPath = fs.path.joinAll(request.url.path.split('flutter_web_sdk/').last.split('/'));
-        final String webSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
-        return Response.ok(fs.file(fs.path.join(webSdkPath, sdkPath)).readAsBytesSync());
+        final String sdkPath = fs.path.joinAll(request.url.path.split('dart-sdk/').last.split('/'));
+        final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+        final File candidateFile = fs.file(fs.path.join(dartSdkPath, sdkPath));
+        return Response.ok(candidateFile.readAsBytesSync());
+      }
+
+      // See if it is a flutter sdk path.
+      final String webSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+      final File candidateFile = fs.file(fs.path.join(webSdkPath,
+        basePath.split('/').join(platform.pathSeparator)));
+      if (candidateFile.existsSync()) {
+        return Response.ok(candidateFile.readAsBytesSync());
       }
 
       final String packageName = request.url.pathSegments.length == 1
