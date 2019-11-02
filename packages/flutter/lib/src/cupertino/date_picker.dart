@@ -129,20 +129,20 @@ enum CupertinoDatePickerMode {
   /// The AM/PM designation is shown only if [CupertinoDatePicker] does not use 24h format.
   /// Column order is subject to internationalization.
   ///
-  /// Example: [4 | 14 | PM].
+  /// Example: ` 4 | 14 | PM `.
   time,
   /// Mode that shows the date in month, day of month, and year.
   /// Name of month is spelled in full.
   /// Column order is subject to internationalization.
   ///
-  /// Example: [July | 13 | 2012].
+  /// Example: ` July | 13 | 2012 `.
   date,
   /// Mode that shows the date as day of the week, month, day of month and
   /// the time in hour, minute, and (optional) an AM/PM designation.
   /// The AM/PM designation is shown only if [CupertinoDatePicker] does not use 24h format.
   /// Column order is subject to internationalization.
   ///
-  /// Example: [Fri Jul 13 | 4 | 14 | PM]
+  /// Example: ` Fri Jul 13 | 4 | 14 | PM `
   dateAndTime,
 }
 
@@ -796,6 +796,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   // of the picker is invalid (e.g. February 30th 2018), and this dayController
   // is responsible for jumping to a valid value.
   FixedExtentScrollController dayController;
+  FixedExtentScrollController monthController;
+  FixedExtentScrollController yearController;
 
   // Estimated width of columns.
   Map<int, double> estimatedColumnWidths = <int, double>{};
@@ -808,6 +810,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     selectedYear = widget.initialDateTime.year;
 
     dayController = FixedExtentScrollController(initialItem: selectedDay - 1);
+    monthController = FixedExtentScrollController(initialItem: selectedMonth - 1);
+    yearController = FixedExtentScrollController(initialItem: selectedYear);
 
     PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
   }
@@ -821,6 +825,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
   @override
   void dispose() {
+    dayController.dispose();
+    monthController.dispose();
+    yearController.dispose();
+
     PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
     super.dispose();
   }
@@ -846,6 +854,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
   Widget _buildDayPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
     final int daysInCurrentMonth = DateTime(selectedYear, (selectedMonth + 1) % 12, 0).day;
+
     return CupertinoPicker(
       scrollController: dayController,
       offAxisFraction: offAxisFraction,
@@ -856,6 +865,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedDay = index + 1;
+        print('selectedDay: $selectedDay');
         if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
           widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
       },
@@ -878,7 +888,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
   Widget _buildMonthPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
     return CupertinoPicker(
-      scrollController: FixedExtentScrollController(initialItem: selectedMonth - 1),
+      scrollController: monthController,
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
@@ -887,6 +897,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedMonth = index + 1;
+        print('selectedMonth: $selectedMonth');
         if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
           widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
       },
@@ -905,7 +916,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
   Widget _buildYearPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
     return CupertinoPicker.builder(
-      scrollController: FixedExtentScrollController(initialItem: selectedYear),
+      scrollController: yearController,
       itemExtent: _kItemExtent,
       offAxisFraction: offAxisFraction,
       useMagnifier: _kUseMagnifier,
@@ -937,22 +948,62 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   bool _keepInValidRange(ScrollEndNotification notification) {
     // Whenever scrolling lands on an invalid entry, the picker
     // automatically scrolls to a valid one.
-    final int desiredDay = DateTime(selectedYear, selectedMonth, selectedDay).day;
-    if (desiredDay != selectedDay) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-        dayController.animateToItem(
-          // The next valid date is also the amount of days overflown.
-          dayController.selectedItem - desiredDay,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
-      });
+    final DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+
+    final bool minCheck = widget.minimumDate?.isBefore(selectedDate) ?? true;
+    final bool maxCheck = widget.maximumDate?.isAfter(selectedDate) ?? true;
+
+    if (minCheck && maxCheck) {
+      // Some months have 31 days.
+      if (selectedDate.day != selectedDay) {
+        final DateTime target = selectedDate.subtract(const Duration(days: 1));
+        print(target);
+        _scrollToDate(target);
+      }
+
+      return false;
     }
-    setState(() {
+
+    // minCheck and maxCheck can't both be false.
+    final DateTime targetDate = minCheck ? widget.maximumDate : widget.minimumDate;
+    _scrollToDate(targetDate);
+    return false;
+  }
+
+  void _scrollToDate(DateTime newDate) {
+    assert(newDate != null);
+
+    if (selectedYear != newDate.year || selectedMonth != newDate.month) {
       // Rebuild because the number of valid days per month are different
       // depending on the month and year.
+      setState(() {});
+    }
+
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      if (selectedYear != newDate.year) {
+        yearController.animateToItem(
+          newDate.year,
+          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 200) ,
+        );
+      }
+
+      if (selectedMonth != newDate.month) {
+        monthController.animateToItem(
+          newDate.month - 1,
+          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 200) ,
+        );
+      }
+
+      if (selectedDay != newDate.day) {
+        dayController.animateToItem(
+          newDate.day - 1,
+          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 200) ,
+        );
+      }
     });
-    return false;
   }
 
   @override
