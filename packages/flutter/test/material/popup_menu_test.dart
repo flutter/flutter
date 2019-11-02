@@ -1114,8 +1114,8 @@ void main() {
 
     expect(find.text('PopupMenuButton icon'), findsOneWidget);
   });
-  
-testWidgets('showMenu uses nested navigator by default', (WidgetTester tester) async {
+
+  testWidgets('showMenu uses nested navigator by default', (WidgetTester tester) async {
     final MenuObserver rootObserver = MenuObserver();
     final MenuObserver nestedObserver = MenuObserver();
 
