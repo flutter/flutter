@@ -100,15 +100,109 @@ class _DropdownScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();
 }
 
+class _DropdownMenuItemButton<T> extends StatefulWidget {
+  const _DropdownMenuItemButton({
+    Key key,
+    @required this.padding,
+    @required this.route,
+    @required this.buttonRect,
+    @required this.constraints,
+    @required this.itemIndex,
+  }) : super(key: key);
+
+  final _DropdownRoute<T> route;
+  final EdgeInsets padding;
+  final Rect buttonRect;
+  final BoxConstraints constraints;
+  final int itemIndex;
+
+  @override
+  _DropdownMenuItemButtonState<T> createState() => _DropdownMenuItemButtonState<T>();
+}
+
+class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
+  void _handleFocusChange(bool focused) {
+    bool inTraditionalMode;
+    switch (FocusManager.instance.highlightMode) {
+      case FocusHighlightMode.touch:
+        inTraditionalMode = false;
+        break;
+      case FocusHighlightMode.traditional:
+        inTraditionalMode = true;
+        break;
+    }
+
+    if (focused && inTraditionalMode) {
+      final _MenuLimits menuLimits = widget.route.getMenuLimits(widget.buttonRect, widget.constraints.maxHeight, widget.itemIndex);
+      widget.route.scrollController.animateTo(
+        menuLimits.scrollOffset,
+        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 100),
+      );
+    }
+  }
+
+  void _handleOnTap() {
+    Navigator.pop(
+      context,
+      _DropdownRouteResult<T>(widget.route.items[widget.itemIndex].item.value),
+    );
+  }
+
+  // On the web, enter doesn't select things, *except* in a <select>
+  // element, which is what a dropdown emulates.
+  static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(SelectAction.key),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    CurvedAnimation opacity;
+    final double unit = 0.5 / (widget.route.items.length + 1.5);
+    if (widget.itemIndex == widget.route.selectedIndex) {
+      opacity = CurvedAnimation(parent: widget.route.animation, curve: const Threshold(0.0));
+    } else {
+      final double start = (0.5 + (widget.itemIndex + 1) * unit).clamp(0.0, 1.0);
+      final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      opacity = CurvedAnimation(parent: widget.route.animation, curve: Interval(start, end));
+    }
+    Widget child = FadeTransition(
+      opacity: opacity,
+      child: InkWell(
+        autofocus: widget.itemIndex == widget.route.selectedIndex,
+        child: Container(
+          padding: widget.padding,
+          child: widget.route.items[widget.itemIndex],
+        ),
+        onTap: _handleOnTap,
+        onFocusChange: _handleFocusChange,
+      ),
+    );
+    if (kIsWeb) {
+      // On the web, enter doesn't select things, *except* in a <select>
+      // element, which is what a dropdown emulates.
+      child = Shortcuts(
+        shortcuts: _webShortcuts,
+        child: child,
+      );
+    }
+    return child;
+  }
+}
+
 class _DropdownMenu<T> extends StatefulWidget {
   const _DropdownMenu({
     Key key,
     this.padding,
     this.route,
+    this.buttonRect,
+    this.constraints,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
   final EdgeInsets padding;
+  final Rect buttonRect;
+  final BoxConstraints constraints;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -117,12 +211,6 @@ class _DropdownMenu<T> extends StatefulWidget {
 class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
   CurvedAnimation _fadeOpacity;
   CurvedAnimation _resize;
-
-  // On the web, enter doesn't select things, *except* in a <select>
-  // element, which is what a dropdown emulates.
-  static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(SelectAction.key),
-  };
 
   @override
   void initState() {
@@ -159,46 +247,15 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     final double unit = 0.5 / (route.items.length + 1.5);
     final List<Widget> children = <Widget>[];
     for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
-      CurvedAnimation opacity;
-      if (itemIndex == route.selectedIndex) {
-        opacity = CurvedAnimation(parent: route.animation, curve: const Threshold(0.0));
-      } else {
-        final double start = (0.5 + (itemIndex + 1) * unit).clamp(0.0, 1.0);
-        final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-        opacity = CurvedAnimation(parent: route.animation, curve: Interval(start, end));
-      }
-      Widget child = FadeTransition(
-        opacity: opacity,
-        child: InkWell(
-          autofocus: itemIndex == route.selectedIndex,
-          child: Container(
+      children.add(
+          _DropdownMenuItemButton<T>(
+            route: widget.route,
             padding: widget.padding,
-            child: route.items[itemIndex],
+            buttonRect: widget.buttonRect,
+            constraints: widget.constraints,
+            itemIndex: itemIndex,
           ),
-          onTap: () => Navigator.pop(
-            context,
-            _DropdownRouteResult<T>(route.items[itemIndex].item.value),
-          ),
-          onFocusChange: (bool focused) {
-            if (focused) {
-              widget.route.scrollController.animateTo(
-                route.getItemOffset(itemIndex),
-                curve: Curves.easeInOut,
-                duration: const Duration(milliseconds: 100),
-              );
-            }
-          },
-        ),
       );
-      if (kIsWeb) {
-        // On the web, enter doesn't select things, *except* in a <select>
-        // element, which is what a dropdown emulates.
-        child = Shortcuts(
-          shortcuts: _webShortcuts,
-          child: child,
-        );
-      }
-      children.add(child);
     }
 
     return FadeTransition(
@@ -270,7 +327,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, size.height);
+    final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, size.height, route.selectedIndex);
 
     assert(() {
       final Rect container = Offset.zero & size;
@@ -407,11 +464,11 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   // for the ListView that contains the menu items. The vertical center of the
   // selected item is aligned with the button's vertical center, as far as
   // that's possible given availableHeight.
-  _MenuLimits getMenuLimits(Rect buttonRect, double availableHeight) {
+  _MenuLimits getMenuLimits(Rect buttonRect, double availableHeight, int index) {
     final double maxMenuHeight = availableHeight - 2.0 * _kMenuItemHeight;
     final double buttonTop = buttonRect.top;
     final double buttonBottom = math.min(buttonRect.bottom, availableHeight);
-    final double selectedItemOffset = getItemOffset(selectedIndex);
+    final double selectedItemOffset = getItemOffset(index);
 
     // If the button is placed on the bottom or top of the screen, its top or
     // bottom may be less than [_kMenuItemHeight] from the edge of the screen.
@@ -491,7 +548,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     // Otherwise the initialScrollOffset is just a rough approximation based on
     // treating the items as if their heights were all equal to kMinInteractveDimension.
     if (route.scrollController == null) {
-      final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, constraints.maxHeight);
+      final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, constraints.maxHeight, selectedIndex);
       route.scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
     }
 
@@ -499,6 +556,8 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     Widget menu = _DropdownMenu<T>(
       route: route,
       padding: padding.resolve(textDirection),
+      buttonRect: buttonRect,
+      constraints: constraints,
     );
 
     if (theme != null)
