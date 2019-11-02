@@ -335,23 +335,10 @@ class NestedScrollViewState extends State<NestedScrollView> {
 
   /// The [ScrollController] provided to the [ScrollView] in [NestedScrollView.body].
   ///
-  /// Manipulating this scroll controller will affect the [ScrollPosition]
-  /// of [outerController] in the following manner:
-  ///
-  ///  * If the scroll position of the header sliver is greater than zero
-  ///    (which means that the header is fully or partially pushed up),
-  ///    decreasing the [ScrollPosition] of this controller
-  ///    (using e.g. [ScrollController.jumpTo]/[ScrollPosition.jumpTo])
-  ///    will decrease the [ScrollController.position] of the [outerController]
-  ///    by the same amount until it reaches zero.
-  ///    Visually, this means pulling the header sliver downwards into view.
-  ///  * If the scroll position is smaller than [ScrollPosition.maxScrollExtent]
-  ///    (which is equivalent to the height of the header sliver),
-  ///    increasing the [ScrollPosition] of this controller
-  ///    (using e.g. [ScrollController.jumpTo]/[ScrollPosition.jumpTo])
-  ///    will increase the [ScrollController.position] of the [outerController]
-  ///    by the same amount until it reaches [ScrollPosition.maxScrollExtent].
-  ///    Visually, this means pushing the header sliver upwards out of view.
+  /// Manipulating the [ScrollPosition] of this controller fully pushes the header sliver down,
+  /// i.e. the position of the [outerController] will be set to [ScrollPosition.maxScrollExtent],
+  /// unless you use [ScrollPosition.setPixels].
+  /// Visually, the header sliver will be completely expanded afterwards.
   ///
   /// See also:
   ///
@@ -364,11 +351,10 @@ class NestedScrollViewState extends State<NestedScrollView> {
   ///
   /// This is equivalent to [NestedScrollView.controller] if provided.
   ///
-  /// Manipulating this scroll controller will not alter the [ScrollPosition]
-  /// of [innerController] as the header sliver sits above the body,
-  /// which means that changing the position will visually move the body,
-  /// i.e. push it downwards or pull it upwards with the header sliver,
-  /// however, it will not affect the scroll position of the body.
+  /// Manipulating the [ScrollPosition] of this controller fully pulls back the inner body,
+  /// i.e. the position of the [innerController] will be set to [ScrollPosition.minScrollExtent],
+  /// unless you use [ScrollPosition.setPixels].
+  /// Visually, the inner body will be scrolled to its beginning.
   ///
   /// See also:
   ///

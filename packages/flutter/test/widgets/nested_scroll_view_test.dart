@@ -805,7 +805,76 @@ void main() {
     );
   });
 
-  testWidgets('Manipulating NestedScrollViewState.innerController should manipulate NestedScrollViewState.outerController', (WidgetTester tester) async {
+  // Test all cases in both directions for both controllers.
+  const List<List<dynamic>> nestedScrollViewStateControllersCases = <List<dynamic>>[
+    <dynamic>[0e0, kToolbarHeight, 'inner body not scrolled, header fully expanded.'],
+    <dynamic>[1e3, kToolbarHeight, 'inner body scrolled, header fully expanded.'],
+    <dynamic>[0e0, 0e0, 'inner body not scrolled, header not scrolled.'],
+    <dynamic>[1e3, 0e0, 'inner body scrolled, header not scrolled.'],
+    <dynamic>[0e0, kToolbarHeight / 3, 'inner body not scrolled, header partially scrolled.'],
+    <dynamic>[1e3, kToolbarHeight / 3, 'inner body scrolled, header partially scrolled.'],
+  ];
+
+  // Modifying the inner controller should always push the outer controller
+  // to maxScrollExtent unless setPixels is used.
+  for (final List<dynamic> values in nestedScrollViewStateControllersCases) {
+    testNestedScrollViewStateControllersInteractions(
+        'modifying inner controller with ${values[2]}',
+        (GlobalKey<NestedScrollViewState> globalKey) {
+          globalKey.currentState.innerController.position.setPixels(values[0]);
+          globalKey.currentState.outerController.position.setPixels(values[1]);
+
+          globalKey.currentState.innerController.jumpTo(5e2);
+
+          expect(globalKey.currentState.innerController.position.pixels, 5e2);
+          expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight);
+
+          // Mirrors the previous statement but uses setPixels.
+          globalKey.currentState.innerController.position.setPixels(values[0]);
+          globalKey.currentState.outerController.position.setPixels(values[1]);
+
+          // setPixels should never modify the other controller.
+          globalKey.currentState.innerController.position.setPixels(5e2);
+
+          expect(globalKey.currentState.innerController.position.pixels, 5e2);
+          expect(globalKey.currentState.outerController.position.pixels, values[1]);
+        },
+    );
+  }
+
+  // Modifying the outer controller should always pull the inner controller
+  // fully back to zero unless setPixels is used.
+  for (final List<dynamic> values in nestedScrollViewStateControllersCases) {
+    testNestedScrollViewStateControllersInteractions(
+      'modifying outer controller with ${values[2]}',
+      (GlobalKey<NestedScrollViewState> globalKey) {
+        globalKey.currentState.innerController.position.setPixels(values[0]);
+        globalKey.currentState.outerController.position.setPixels(values[1]);
+
+        globalKey.currentState.outerController.jumpTo(kToolbarHeight / 2);
+
+        expect(globalKey.currentState.innerController.position.pixels, 0);
+        expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight / 2);
+
+        // Mirrors the previous statements but uses setPixels.
+        globalKey.currentState.innerController.position.setPixels(values[0]);
+        globalKey.currentState.outerController.position.setPixels(values[1]);
+
+        // setPixels should never modify the other controller.
+        globalKey.currentState.outerController.position.setPixels(kToolbarHeight / 2);
+
+        expect(globalKey.currentState.innerController.position.pixels, values[0]);
+        expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight / 2);
+      },
+    );
+  }
+}
+
+void testNestedScrollViewStateControllersInteractions(
+    String caseDescription,
+    void Function(GlobalKey<NestedScrollViewState> globalKey) tests,
+    ) {
+  testWidgets('NestedScrollViewState controllers interactions: $caseDescription', (WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
 
     await tester.pumpWidget(Directionality(
@@ -834,52 +903,7 @@ void main() {
     expect(globalKey.currentState.outerController.position.pixels, 0);
     expect(globalKey.currentState.innerController.position.pixels, 0);
 
-    globalKey.currentState.innerController.jumpTo(1e3);
-
-    expect(globalKey.currentState.innerController.position.pixels, 1e3);
-    // The outer scroll view should be scrolled away with the inner body.
-    expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight);
-  });
-
-  testWidgets('Manipulating NestedScrollViewState.outerController should not manipulate NestedScrollViewState.innerController', (WidgetTester tester) async {
-    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
-
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: NestedScrollView(
-            key: globalKey,
-            body: ListView.builder(
-              itemBuilder: (BuildContext context, int index) {
-                return Text('$index');
-              },
-            ),
-            headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
-          ),
-        ),
-      ),
-    ));
-
-    expect(globalKey.currentState.outerController.position.pixels, 0);
-    expect(globalKey.currentState.innerController.position.pixels, 0);
-
-    // The outer scroll view is limited to kToolbarHeight as it is a SliverAppBar.
-    globalKey.currentState.outerController.jumpTo(kToolbarHeight);
-
-    expect(globalKey.currentState.innerController.position.pixels, 0);
-    expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight);
-
-    globalKey.currentState.outerController.jumpTo(2 * kToolbarHeight);
-    // The other scroll view cannot be scrolled more than all the way out.
-    expect(globalKey.currentState.outerController.position.pixels, kToolbarHeight);
-    expect(globalKey.currentState.innerController.position.pixels, 0);
+    tests(globalKey);
   });
 }
 
