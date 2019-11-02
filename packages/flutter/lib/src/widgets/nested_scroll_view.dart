@@ -287,8 +287,9 @@ class NestedScrollView extends StatefulWidget {
   NestedScrollViewState createState() => NestedScrollViewState();
 }
 
-/// This is the [State] for [NestedScrollView]. It allows you to obtain the scroll
-/// position of the children of your nested scroll view.
+/// The [State] for a [NestedScrollView].
+///
+/// It allows you to obtain the [ScrollController]s of the children of your [NestedScrollView].
 ///
 /// You can access the inner scroll controller via [innerController] and the outer
 /// controller with [outerController], however, notice that the outer scroll position
@@ -301,24 +302,30 @@ class NestedScrollView extends StatefulWidget {
 /// {@tool sample}
 ///
 /// You would access the [NestedScrollViewState] using a [GlobalKey].
+/// Using the following setup, you can access the inner scroll controller
+/// using `globalKey.currentState.innerController`.
 ///
 /// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   // You probably want to declare your GlobalKey outside of your build method.
+/// class ExampleWidget extends StatelessWidget {
 ///   final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
 ///
-///   return NestedScrollView(
-///     key: globalKey,
-///     headerSliverBuilder: (context, _) => const [SliverAppBar()],
-///     body: const CustomScrollView(
-///       // ...
-///     ),
-///   );
+///   @override
+///   Widget build(BuildContext context) {
+///     return NestedScrollView(
+///       key: globalKey,
+///       headerSliverBuilder: (context, _) => const [SliverAppBar()],
+///       body: const CustomScrollView(
+///         // ...
+///       ),
+///     );
+///   }
+///
+///   ScrollController get innerController {
+///     return globalKey.currentState.innerController;
+///   }
 /// }
 /// ```
 ///
-/// Now, you can access the inner scroll controller using `globalKey.currentState.innerController`.
 /// {@end-tool}
 ///
 /// Alternatively, you could also visit child elements of your parent widget to obtain
@@ -326,10 +333,47 @@ class NestedScrollView extends StatefulWidget {
 class NestedScrollViewState extends State<NestedScrollView> {
   final SliverOverlapAbsorberHandle _absorberHandle = SliverOverlapAbsorberHandle();
 
-  /// This controls the scroll of the scroll view in [NestedScrollView.body].
+  /// The [ScrollController] provided to the [ScrollView] in [NestedScrollView.body].
+  ///
+  /// Manipulating this scroll controller will affect the [ScrollPosition]
+  /// of [outerController] in the following manner:
+  ///
+  ///  * If the scroll position of the header sliver is greater than zero
+  ///    (which means that the header is fully or partially pushed up),
+  ///    decreasing the [ScrollPosition] of this controller
+  ///    (using e.g. [ScrollController.jumpTo]/[ScrollPosition.jumpTo])
+  ///    will decrease the [ScrollController.position] of the [outerController]
+  ///    by the same amount until it reaches zero.
+  ///    Visually, this means pulling the header sliver downwards into view.
+  ///  * If the scroll position is smaller than [ScrollPosition.maxScrollExtent]
+  ///    (which is equivalent to the height of the header sliver),
+  ///    increasing the [ScrollPosition] of this controller
+  ///    (using e.g. [ScrollController.jumpTo]/[ScrollPosition.jumpTo])
+  ///    will increase the [ScrollController.position] of the [outerController]
+  ///    by the same amount until it reaches [ScrollPosition.maxScrollExtent].
+  ///    Visually, this means pushing the header sliver upwards out of view.
+  ///
+  /// See also:
+  ///
+  ///  * [outerController], which exposes the [ScrollController] used by the [CustomScrollView]
+  ///    containing the [Sliver]s from [NestedScrollView.headerSliverBuilder].
   ScrollController get innerController => _coordinator._innerController;
 
-  /// This controls the scroll of the scroll view in [NestedScrollView.headerSliverBuilder].
+  /// The [ScrollController] used by the [CustomScrollView] containing
+  /// the [Sliver]s from [NestedScrollView.headerSliverBuilder].
+  ///
+  /// This is equivalent to [NestedScrollView.controller] if provided.
+  ///
+  /// Manipulating this scroll controller will not alter the [ScrollPosition]
+  /// of [innerController] as the header sliver sits above the body,
+  /// which means that changing the position will visually move the body,
+  /// i.e. push it downwards or pull it upwards with the header sliver,
+  /// however, it will not affect the scroll position of the body.
+  ///
+  /// See also:
+  ///
+  ///  * [innerController], which exposes the [ScrollController] provided to the
+  ///    [ScrollView] in [NestedScrollView.body].
   ScrollController get outerController => _coordinator._outerController;
 
   _NestedScrollCoordinator _coordinator;
