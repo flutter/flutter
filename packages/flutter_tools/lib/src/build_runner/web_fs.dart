@@ -354,27 +354,22 @@ class ReleaseAssetServer extends AssetServer {
     final Uri artifactUri = fs.directory(getWebBuildDirectory()).uri.resolveUri(request.url);
     final File file = fs.file(artifactUri);
     if (file.existsSync()) {
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': _guessExtension(file),
+      final Uint8List bytes = file.readAsBytesSync();
+      // Fallback to "application/octet-stream" on null which
+      // makes no claims as to the structure of the data.
+      final String mimeType = mime.lookupMimeType(file.path, headerBytes: bytes)
+        ?? 'application/octet-stream';
+      return Response.ok(bytes, headers: <String, String>{
+        'Content-Type': mimeType,
       });
     }
     if (request.url.path == '') {
       final File file = fs.file(fs.path.join(getWebBuildDirectory(), 'index.html'));
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': _guessExtension(file),
+        'Content-Type': 'text/html',
       });
     }
     return Response.notFound('');
-  }
-
-  String _guessExtension(File file) {
-    switch (fs.path.extension(file.path)) {
-      case '.js':
-        return 'text/javascript';
-      case '.html':
-        return 'text/html';
-    }
-    return 'text';
   }
 }
 

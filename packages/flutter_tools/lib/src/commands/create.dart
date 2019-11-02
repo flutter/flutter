@@ -10,7 +10,7 @@ import 'package:yaml/yaml.dart' as yaml;
 
 import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
-import '../android/gradle.dart' as gradle;
+import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/net.dart';
