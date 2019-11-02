@@ -100,6 +100,7 @@ class _DropdownScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();
 }
 
+// The widget that is the button wrapping the menu items.
 class _DropdownMenuItemButton<T> extends StatefulWidget {
   const _DropdownMenuItemButton({
     Key key,
@@ -133,7 +134,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     }
 
     if (focused && inTraditionalMode) {
-      final _MenuLimits menuLimits = widget.route.getMenuLimits(widget.buttonRect, widget.constraints.maxHeight, widget.itemIndex);
+      final _MenuLimits menuLimits = widget.route.getMenuLimits(
+          widget.buttonRect, widget.constraints.maxHeight, widget.itemIndex);
       widget.route.scrollController.animateTo(
         menuLimits.scrollOffset,
         curve: Curves.easeInOut,
@@ -149,8 +151,6 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     );
   }
 
-  // On the web, enter doesn't select things, *except* in a <select>
-  // element, which is what a dropdown emulates.
   static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
     LogicalKeySet(LogicalKeyboardKey.enter): const Intent(SelectAction.key),
   };
@@ -244,19 +244,16 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _DropdownRoute<T> route = widget.route;
-    final double unit = 0.5 / (route.items.length + 1.5);
-    final List<Widget> children = <Widget>[];
-    for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
-      children.add(
-          _DropdownMenuItemButton<T>(
-            route: widget.route,
-            padding: widget.padding,
-            buttonRect: widget.buttonRect,
-            constraints: widget.constraints,
-            itemIndex: itemIndex,
-          ),
-      );
-    }
+    final List<Widget> children = <Widget>[
+      for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex)
+        _DropdownMenuItemButton<T>(
+          route: widget.route,
+          padding: widget.padding,
+          buttonRect: widget.buttonRect,
+          constraints: widget.constraints,
+          itemIndex: itemIndex,
+        ),
+      ];
 
     return FadeTransition(
       opacity: _fadeOpacity,
