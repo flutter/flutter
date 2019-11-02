@@ -28,6 +28,7 @@ Matcher hasAndroidSemantics({
   bool isEnabled,
   bool isFocusable,
   bool isFocused,
+  bool isHeading,
   bool isPassword,
   bool isLongClickable,
 }) {
@@ -45,6 +46,7 @@ Matcher hasAndroidSemantics({
     isEnabled: isEnabled,
     isFocusable: isFocusable,
     isFocused: isFocused,
+    isHeading: isHeading,
     isPassword: isPassword,
     isLongClickable: isLongClickable,
   );
@@ -65,6 +67,7 @@ class _AndroidSemanticsMatcher extends Matcher {
     this.isEditable,
     this.isFocusable,
     this.isFocused,
+    this.isHeading,
     this.isPassword,
     this.isLongClickable,
   });
@@ -82,6 +85,7 @@ class _AndroidSemanticsMatcher extends Matcher {
   final bool isEnabled;
   final bool isFocusable;
   final bool isFocused;
+  final bool isHeading;
   final bool isPassword;
   final bool isLongClickable;
 
@@ -112,6 +116,8 @@ class _AndroidSemanticsMatcher extends Matcher {
       description.add(' with flag isFocusable: $isFocusable');
     if (isFocused != null)
       description.add(' with flag isFocused: $isFocused');
+    if (isHeading != null)
+      description.add(' with flag isHeading: $isHeading');
     if (isPassword != null)
       description.add(' with flag isPassword: $isPassword');
     if (isLongClickable != null)
@@ -155,6 +161,9 @@ class _AndroidSemanticsMatcher extends Matcher {
       return _failWithMessage('Expected isFocusable: $isFocusable', matchState);
     if (isFocused != null && isFocused != item.isFocused)
       return _failWithMessage('Expected isFocused: $isFocused', matchState);
+    // Heading is not available in all Android versions, so match anything if it is not set by the platform
+    if (isHeading != null && isHeading != item.isHeading && item.isHeading != null)
+      return _failWithMessage('Expected isHeading: $isHeading', matchState);
     if (isPassword != null && isPassword != item.isPassword)
       return _failWithMessage('Expected isPassword: $isPassword', matchState);
     if (isLongClickable != null && isLongClickable != item.isLongClickable)

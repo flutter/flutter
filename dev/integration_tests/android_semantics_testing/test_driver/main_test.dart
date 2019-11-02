@@ -61,6 +61,7 @@ void main() {
     group('TextField', () {
       setUpAll(() async {
         await driver.tap(find.text(textFieldRoute));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
       });
 
       test('TextField has correct Android semantics', () async {
@@ -148,6 +149,7 @@ void main() {
         );
 
         await driver.tap(passwordTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
           await getSemantics(passwordTextField),
@@ -167,6 +169,7 @@ void main() {
         );
 
         await driver.enterText('hello world');
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
           await getSemantics(passwordTextField),
@@ -630,5 +633,31 @@ void main() {
         await driver.tap(find.byValueKey('back'));
       });
     });
+
+    group('Headings', () {
+      setUpAll(() async {
+        await driver.tap(find.text(headingsRoute));
+      });
+
+      test('AppBar title has correct Android heading semantics', () async {
+        expect(
+          await getSemantics(find.byValueKey(appBarTitleKeyValue)),
+          hasAndroidSemantics(isHeading: true),
+        );
+      });
+
+      test('body text does not have Android heading semantics', () async {
+        expect(
+          await getSemantics(find.byValueKey(bodyTextKeyValue)),
+          hasAndroidSemantics(isHeading: false),
+        );
+      });
+
+      tearDownAll(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(find.byValueKey('back'));
+      });
+    });
+
   });
 }
