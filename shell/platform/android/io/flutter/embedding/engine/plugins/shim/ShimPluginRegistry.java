@@ -19,8 +19,8 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.PluginRegistry;
 
 /**
- * A {@link PluginRegistry} that is shimmed to use the new Android embedding and plugin API behind
- * the scenes.
+ * A {@link PluginRegistry} that is shimmed to let old plugins use the new Android embedding and
+ * plugin API behind the scenes.
  * <p>
  * The following is an example usage of {@code ShimPluginRegistry} within a {@code FlutterActivity}:
  * {@code
@@ -114,6 +114,7 @@ public class ShimPluginRegistry implements PluginRegistry {
         shimRegistrar.onDetachedFromEngine(binding);
       }
       flutterPluginBinding = null;
+      activityPluginBinding = null;
     }
 
     @Override
@@ -134,6 +135,7 @@ public class ShimPluginRegistry implements PluginRegistry {
 
     @Override
     public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+      activityPluginBinding = binding;
       for (ShimRegistrar shimRegistrar : shimRegistrars) {
         shimRegistrar.onReattachedToActivityForConfigChanges(binding);
       }
@@ -144,6 +146,7 @@ public class ShimPluginRegistry implements PluginRegistry {
       for (ShimRegistrar shimRegistrar : shimRegistrars) {
         shimRegistrar.onDetachedFromActivity();
       }
+      activityPluginBinding = null;
     }
   }
 }

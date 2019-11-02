@@ -424,6 +424,7 @@ action("robolectric_tests") {
     "test/io/flutter/embedding/engine/FlutterJNITest.java",
     "test/io/flutter/embedding/engine/RenderingComponentTest.java",
     "test/io/flutter/embedding/engine/dart/DartExecutorTest.java",
+    "test/io/flutter/embedding/engine/plugins/shim/ShimPluginRegistryTest.java",
     "test/io/flutter/embedding/engine/renderer/FlutterRendererTest.java",
     "test/io/flutter/embedding/engine/systemchannels/PlatformChannelTest.java",
     "test/io/flutter/plugin/common/StandardMessageCodecTest.java",

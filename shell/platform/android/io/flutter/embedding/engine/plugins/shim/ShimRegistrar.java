@@ -24,8 +24,8 @@ import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
 
 /**
- * A {@link PluginRegistry.Registrar} that is shimmed to use the new Android embedding and plugin
- * API behind the scenes.
+ * A {@link PluginRegistry.Registrar} that is shimmed let old plugins use the new Android embedding
+ * and plugin API behind the scenes.
  * <p>
  * Instances of {@code ShimRegistrar}s are vended internally by a {@link ShimPluginRegistry}.
  */
@@ -165,6 +165,7 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
     }
 
     pluginBinding = null;
+    activityPluginBinding = null;
   }
 
   @Override
