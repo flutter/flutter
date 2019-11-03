@@ -244,7 +244,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
     if (mode == BuildMode.debug) {
       final Status status = logger.startProgress(' ├─Add placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
-      await createIOSDebugFrameworkBinary(destinationAppFrameworkDirectory);
+      await createStubAppFramework(destinationAppFrameworkDirectory);
       status.stop();
     } else {
       await _produceAotAppFrameworkIfNeeded(mode, iPhoneModeDirectory, destinationAppFrameworkDirectory);

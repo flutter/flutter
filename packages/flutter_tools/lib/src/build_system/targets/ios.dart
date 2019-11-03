@@ -156,7 +156,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<RunResult> createIOSDebugFrameworkBinary(Directory appFrameworkDirectory) async {
+Future<RunResult> createStubAppFramework(Directory appFrameworkDirectory) async {
   if (!appFrameworkDirectory.existsSync()) {
     appFrameworkDirectory.createSync(recursive: true);
   }
