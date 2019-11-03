@@ -16,6 +16,7 @@ import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/targets/ios.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
@@ -242,7 +243,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
 
     if (mode == BuildMode.debug) {
-      // await createIOSDebugFrameworkBinary(destinationAppFrameworkDirectory);
+      await createIOSDebugFrameworkBinary(destinationAppFrameworkDirectory);
     } else {
       await _produceAotAppFrameworkIfNeeded(mode, iPhoneModeDirectory, destinationAppFrameworkDirectory);
     }
