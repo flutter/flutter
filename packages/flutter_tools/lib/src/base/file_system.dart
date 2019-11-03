@@ -173,7 +173,7 @@ bool isOlderThanReference({ @required FileSystemEntity entity, @required File re
     return true;
   }
   return referenceFile.existsSync()
-      && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
+      && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
 }
 
 /// Exception indicating that a file that was expected to exist was not found.
