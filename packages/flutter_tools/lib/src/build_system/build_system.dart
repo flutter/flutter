@@ -528,10 +528,10 @@ class _BuildInstance {
 
       node.inputs
         ..clear()
-        ..addAll(node.target.resolveInputs(environment).sources));
+        ..addAll(node.target.resolveInputs(environment).sources);
       node.outputs
         ..clear()
-        ..addAll(node.target.resolveOutputs(environment).sources)
+        ..addAll(node.target.resolveOutputs(environment).sources);
 
       // If we were missing the depfile, resolve  input files after executing the
       // target so that all file hashes are up to date on the next run.
