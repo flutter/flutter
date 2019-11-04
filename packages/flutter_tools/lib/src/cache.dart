@@ -106,7 +106,7 @@ class Cache {
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
       _artifacts.add(FlutterRunnerSDKArtifacts(this));
-      _artifacts.add(FlutterRunnerDebugSymbols(this, CipdArchiveResolver()));
+      _artifacts.add(FlutterRunnerDebugSymbols(this));
       for (String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
@@ -1063,12 +1063,16 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
 ///
 /// See also [CipdArchiveResolver].
 abstract class VersionedPackageResolver {
+  const VersionedPackageResolver();
+
   /// Returns the URL for the artifact.
   String resolveUrl(String packageName, String version);
 }
 
 /// Resolves the CIPD archive URL for a given package and version.
 class CipdArchiveResolver extends VersionedPackageResolver {
+  const CipdArchiveResolver();
+
   @override
   String resolveUrl(String packageName, String version) {
     return '$_cipdBaseUrl/flutter/$packageName/+/git_revision:$version';
@@ -1077,7 +1081,7 @@ class CipdArchiveResolver extends VersionedPackageResolver {
 
 /// The debug symbols for flutter runner for Fuchsia development.
 class FlutterRunnerDebugSymbols extends CachedArtifact {
-  FlutterRunnerDebugSymbols(Cache cache, this.packageResolver, {this.dryRun = false})
+  FlutterRunnerDebugSymbols(Cache cache, {this.packageResolver = const CipdArchiveResolver(), this.dryRun = false})
       : super('flutter_runner_debug_symbols', cache, DevelopmentArtifact.flutterRunner);
 
   final VersionedPackageResolver packageResolver;

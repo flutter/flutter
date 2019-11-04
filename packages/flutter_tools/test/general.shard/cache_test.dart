@@ -399,7 +399,7 @@ void main() {
 
     testUsingContext('Downloads Flutter runner debug symbols', () async {
       final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols =
-        FlutterRunnerDebugSymbols(mockCache, mockPackageResolver, dryRun: true);
+        FlutterRunnerDebugSymbols(mockCache, packageResolver: mockPackageResolver, dryRun: true);
 
       await flutterRunnerDebugSymbols.updateInner();
 
