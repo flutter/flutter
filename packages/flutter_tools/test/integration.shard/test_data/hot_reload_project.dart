@@ -23,8 +23,15 @@ class HotReloadProject extends Project {
   final String main = r'''
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
+  import 'package:flutter/services.dart';
+  import 'package:flutter/widgets.dart';
 
-  void main() => runApp(MyApp());
+  void main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    runApp(MyApp());
+  }
 
   int count = 1;
 
@@ -45,6 +52,7 @@ class HotReloadProject extends Project {
       // below, then that callback schedules another frame on which we do the
       // breakpoint.
       // tick 3 = second hot reload warmup reassemble frame (pre breakpoint)
+      print('life cycle ${SchedulerBinding.instance.lifecycleState}');
       if (count == 2) {
         SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
           SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
