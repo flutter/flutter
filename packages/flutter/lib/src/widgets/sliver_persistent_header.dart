@@ -68,7 +68,7 @@ abstract class SliverPersistentHeaderDelegate {
   /// Defaults to null.
   FloatingHeaderSnapConfiguration get snapConfiguration => null;
 
-  /// Specifies the [StretchCallback] and offset for execution.
+  /// Specifies an [AsyncCallback] and offset for execution.
   ///
   /// If the value of this property is null, then callback will not be
   /// triggered.

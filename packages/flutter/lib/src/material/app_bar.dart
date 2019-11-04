@@ -1180,14 +1180,14 @@ class SliverAppBar extends StatefulWidget {
   /// also stretch when the user over-scrolls.
   final bool stretch;
 
-  /// The offset of overscroll required to trigger a [StretchCallback].
+  /// The offset of overscroll required to activate [onStretchTrigger].
   ///
   /// This defaults to 100.0.
   final double stretchTriggerOffset;
 
   /// The callback function to be executed when a user over-scrolls to the
   /// offset specified by [stretchTriggerOffset].
-  final StretchCallback onStretchTrigger;
+  final AsyncCallback onStretchTrigger;
 
   @override
   _SliverAppBarState createState() => _SliverAppBarState();

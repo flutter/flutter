@@ -17,22 +17,15 @@ import 'sliver.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
-/// A callback function that's invoked when the [SliverAppBar] is pulled into an
-/// overscroll and stretched to the offset specified by
-/// [OverScrollHeaderStretchConfiguration.stretchTriggerOffset].
-///
-/// Must return a [Future].
-typedef StretchCallback = Future<void> Function();
-
-/// Specifies how a stretched header is to trigger a [StretchCallback].
+/// Specifies how a stretched header is to trigger an [AsyncCallback].
 ///
 /// See also:
 ///
 ///  * [SliverAppBar], which creates a header that can be stretched into an
 ///  overscroll area and trigger a callback function.
 class OverScrollHeaderStretchConfiguration {
-  /// Creates an object that specifies how a stretched header is to trigger a
-  /// [StretchCallback].
+  /// Creates an object that specifies how a stretched header may activate an
+  /// [AsyncCallback].
   OverScrollHeaderStretchConfiguration({
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
@@ -43,7 +36,7 @@ class OverScrollHeaderStretchConfiguration {
 
   /// The callback function to be executed when a user over-scrolls to the
   /// offset specified by [stretchTriggerOffset].
-  final StretchCallback onStretchTrigger;
+  final AsyncCallback onStretchTrigger;
 }
 
 /// A base class for slivers that have a [RenderBox] child which scrolls
@@ -69,10 +62,10 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// This is an abstract class; this constructor only initializes the [child].
   RenderSliverPersistentHeader({
     RenderBox child,
-    OverScrollHeaderStretchConfiguration stretchConfiguration,
+    this.stretchConfiguration,
   }) {
     this.child = child;
-    _stretchConfiguration = stretchConfiguration;
+//    _stretchConfiguration = stretchConfiguration;
   }
 
   double _lastStretchOffset;
@@ -111,7 +104,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   double _lastShrinkOffset = 0.0;
   bool _lastOverlapsContent = false;
 
-  /// Defines the parameters used to execute a [StretchCallback] when a
+  /// Defines the parameters used to execute an [AsyncCallback] when a
   /// stretching header over-scrolls.
   ///
   /// If [stretchConfiguration] is null then callback is not triggered.
@@ -120,13 +113,13 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   ///
   ///  * [SliverAppBar], which creates a header that can stretched into an
   ///  overscroll area and trigger a callback function.
-  OverScrollHeaderStretchConfiguration get stretchConfiguration => _stretchConfiguration;
-  OverScrollHeaderStretchConfiguration _stretchConfiguration;
-  set stretchConfiguration(OverScrollHeaderStretchConfiguration value) {
-    if (value == _stretchConfiguration)
-      return;
-    _stretchConfiguration = value;
-  }
+  OverScrollHeaderStretchConfiguration stretchConfiguration;// => _stretchConfiguration;
+//  OverScrollHeaderStretchConfiguration _stretchConfiguration;
+//  set stretchConfiguration(OverScrollHeaderStretchConfiguration value) {
+//    if (value == _stretchConfiguration)
+//      return;
+//    _stretchConfiguration = value;
+//  }
 
   /// Update the child render object if necessary.
   ///
