@@ -1409,6 +1409,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               keyboardAppearance: widget.keyboardAppearance,
           ),
       );
+      _textInputConnection.show();
 
       _updateSizeAndTransform();
       final TextStyle style = widget.style;
@@ -1421,8 +1422,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           textAlign: widget.textAlign,
         )
         ..setEditingState(localValue);
+    } else {
+      _textInputConnection.show();
     }
-    _textInputConnection.show();
   }
 
   void _closeInputConnectionIfNeeded() {

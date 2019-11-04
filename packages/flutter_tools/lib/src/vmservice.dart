@@ -18,7 +18,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
-import 'convert.dart' show base64;
+import 'convert.dart' show base64, utf8;
 import 'globals.dart';
 import 'version.dart';
 import 'vmservice_record_replay.dart';
@@ -98,6 +98,10 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOption
   }
   return IOWebSocketChannel(socket).cast<String>();
 }
+
+/// Override `VMServiceConnector` in [context] to return a different VMService
+/// from [VMService.connect] (used by tests).
+typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, { ReloadSources reloadSources, Restart restart, CompileExpression compileExpression, io.CompressionOptions compression });
 
 /// A connection to the Dart VM Service.
 // TODO(mklim): Test this, https://github.com/flutter/flutter/issues/23031
@@ -302,6 +306,17 @@ class VMService {
   /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
   static Future<VMService> connect(
     Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+    }) async {
+    final VMServiceConnector connector = context.get<VMServiceConnector>() ?? VMService._connect;
+    return connector(httpUri, reloadSources: reloadSources, restart: restart, compileExpression: compileExpression, compression: compression);
+  }
+
+  static Future<VMService> _connect(
+    Uri httpUri, {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
@@ -344,6 +359,8 @@ class VMService {
   // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
   Future<Stream<ServiceEvent>> get onIsolateEvent => onEvent('Isolate');
   Future<Stream<ServiceEvent>> get onTimelineEvent => onEvent('Timeline');
+  Future<Stream<ServiceEvent>> get onStdoutEvent => onEvent('Stdout'); // WriteEvent
+
   // TODO(johnmccutchan): Add FlutterView events.
 
   /// Returns a stream of VM service events.
@@ -643,6 +660,8 @@ class ServiceEvent extends ServiceObject {
   Map<String, dynamic> get extensionData => _extensionData;
   List<Map<String, dynamic>> _timelineEvents;
   List<Map<String, dynamic>> get timelineEvents => _timelineEvents;
+  String _message;
+  String get message => _message;
 
   // The possible 'kind' values.
   static const String kVMUpdate               = 'VMUpdate';
@@ -690,6 +709,11 @@ class ServiceEvent extends ServiceObject {
     // on a Stream.
     final List<dynamic> dynamicList = map['timelineEvents'];
     _timelineEvents = dynamicList?.cast<Map<String, dynamic>>();
+
+     final String base64Bytes = map['bytes'];
+     if (base64Bytes != null) {
+       _message = utf8.decode(base64.decode(base64Bytes)).trim();
+     }
   }
 
   bool get isPauseEvent {

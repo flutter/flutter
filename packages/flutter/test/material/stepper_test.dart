@@ -605,4 +605,56 @@ void main() {
 
     expect(find.text('Text After Stepper'), findsNothing);
   });
+
+  testWidgets("Vertical Stepper can't be focused when disabled.", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            currentStep: 0,
+            type: StepperType.vertical,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 0'),
+                state: StepState.disabled,
+                content: Text('Text 0'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true);
+    disabledNode.requestFocus();
+    await tester.pump();
+    expect(disabledNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets("Horizontal Stepper can't be focused when disabled.", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            currentStep: 0,
+            type: StepperType.horizontal,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 0'),
+                state: StepState.disabled,
+                content: Text('Text 0'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true);
+    disabledNode.requestFocus();
+    await tester.pump();
+    expect(disabledNode.hasPrimaryFocus, isFalse);
+  });
 }
