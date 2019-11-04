@@ -276,7 +276,7 @@ Future<void> main(List<String> args) async {
   final argslib.ArgParser parser = argslib.ArgParser();
   parser.addOption('arb-dir', defaultsTo: path.join('lib', 'l10n'));
   parser.addOption('template-arb-file', defaultsTo: 'app_en.arb');
-  parser.addOption('output-localization-file', defaultsTo: 'app_localizations');
+  parser.addOption('output-localization-file', defaultsTo: 'app_localizations.dart');
   parser.addOption('output-class', defaultsTo: 'AppLocalizations');
   final argslib.ArgResults results = parser.parse(args);
 
@@ -285,7 +285,7 @@ Future<void> main(List<String> args) async {
 
   final Directory l10nDirectory = Directory(arbPathString);
   final File templateArbFile = File(path.join(l10nDirectory.path, results['template-arb-file']));
-  final File outputFile = File(path.join(l10nDirectory.path, '$outputFileString.dart'));
+  final File outputFile = File(path.join(l10nDirectory.path, outputFileString));
   final String stringsClassName = results['output-class'];
 
   if (!l10nDirectory.existsSync())
@@ -296,7 +296,7 @@ Future<void> main(List<String> args) async {
   final String l10nDirectoryStatModeString = l10nDirectory.statSync().modeString();
   if (!_isDirectoryReadableAndWritable(l10nDirectoryStatModeString))
     exitWithError(
-      "The 'arb-dir' directory, $l10nDirectory, is not readable or writable.\n"
+      "The 'arb-dir' directory, $l10nDirectory, doesn't allow reading and writing.\n"
       'Please ensure that the user has read and write permissions.'
     );
   final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
