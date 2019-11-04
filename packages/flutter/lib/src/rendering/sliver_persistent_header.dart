@@ -65,7 +65,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     this.stretchConfiguration,
   }) {
     this.child = child;
-//    _stretchConfiguration = stretchConfiguration;
   }
 
   double _lastStretchOffset;
@@ -113,13 +112,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   ///
   ///  * [SliverAppBar], which creates a header that can stretched into an
   ///  overscroll area and trigger a callback function.
-  OverScrollHeaderStretchConfiguration stretchConfiguration;// => _stretchConfiguration;
-//  OverScrollHeaderStretchConfiguration _stretchConfiguration;
-//  set stretchConfiguration(OverScrollHeaderStretchConfiguration value) {
-//    if (value == _stretchConfiguration)
-//      return;
-//    _stretchConfiguration = value;
-//  }
+  OverScrollHeaderStretchConfiguration stretchConfiguration;
 
   /// Update the child render object if necessary.
   ///
