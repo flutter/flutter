@@ -78,7 +78,7 @@ class @className {
   /// Returns a list of localizations delegates containing this delegate along with
   /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
   /// and GlobalWidgetsLocalizations.delegate.
-  static const List<LocalizationsDelegate> localizationsDelegates = [
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -153,7 +153,7 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
     if (attributesMap.containsKey('placeholders')) {
       final Map<String, dynamic> placeholders = attributesMap['placeholders'];
       final String args = placeholders.keys.join(', ');
-      attributes.add('args: [$args]');
+      attributes.add('args: <Object>[$args]');
     }
   }
   return attributes;
@@ -304,12 +304,6 @@ Future<void> main(List<String> args) async {
     exitWithError(
       "The 'template-arb-file', $templateArbFile, is not readable.\n"
       'Please ensure that the user has read permissions.'
-    );
-  final String outputFileStatModeString = outputFile.statSync().modeString();
-  if (outputFileStatModeString[1] == '-')
-    exitWithError(
-      'The output file, $outputFile, is not writable.\n'
-      'Please ensure that the user has write permissions.'
     );
   if (!_isValidClassName(stringsClassName))
     exitWithError(
