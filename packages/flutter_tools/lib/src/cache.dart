@@ -106,6 +106,7 @@ class Cache {
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
       _artifacts.add(FlutterRunnerSDKArtifacts(this));
+      _artifacts.add(FlutterRunnerDebugSymbols(this));
       for (String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
@@ -1055,6 +1056,36 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
     final String url = '$_cipdBaseUrl/flutter/fuchsia/+/git_revision:$version';
     await _downloadZipArchive('Downloading package flutter runner...',
         Uri.parse(url), location);
+  }
+}
+
+/// The debug symbols for flutter runner for Fuchsia development.
+class FlutterRunnerDebugSymbols extends CachedArtifact {
+  FlutterRunnerDebugSymbols(Cache cache) : super(
+    'flutter_runner_debug_symbols',
+    cache,
+    DevelopmentArtifact.flutterRunner,
+  );
+
+  @override
+  Directory get location => cache.getArtifactDirectory(name);
+
+  @override
+  String get version => cache.getVersionFor('engine');
+
+  Future<void> _downloadDebugSymbols(String targetArch) async {
+    final String url = '$_cipdBaseUrl/flutter/fuchsia-debug-symbols-$targetArch/+/git_revision:$version';
+    await _downloadZipArchive('Downloading debug symbols for flutter runner - arch:$targetArch...',
+        Uri.parse(url), location);
+  }
+
+  @override
+  Future<void> updateInner() async {
+    if (!platform.isLinux && !platform.isMacOS) {
+      return Future<void>.value();
+    }
+    await _downloadDebugSymbols('x64');
+    await _downloadDebugSymbols('arm64');
   }
 }
 
