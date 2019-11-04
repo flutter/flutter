@@ -97,6 +97,7 @@ class WebFs {
     this._target,
     this._buildInfo,
     this._initializePlatform,
+    this._useSkia,
   );
 
   /// The server uri.
@@ -111,6 +112,7 @@ class WebFs {
   final String _target;
   final BuildInfo _buildInfo;
   final bool _initializePlatform;
+  final bool _useSkia;
   StreamSubscription<void> _connectedApps;
 
   static const String _kHostName = 'localhost';
@@ -146,7 +148,7 @@ class WebFs {
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
     if (!_useBuildRunner) {
-      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform);
+      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform, _useSkia);
       return true;
     }
     _client.startBuild();
@@ -171,6 +173,7 @@ class WebFs {
     @required BuildInfo buildInfo,
     @required bool skipDwds,
     @required bool initializePlatform,
+    @required bool useSkia,
     @required String hostname,
     @required String port,
   }) async {
@@ -302,7 +305,7 @@ class WebFs {
         handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
       }
     } else {
-      await buildWeb(flutterProject, target, buildInfo, initializePlatform);
+      await buildWeb(flutterProject, target, buildInfo, initializePlatform, useSkia);
       firstBuildCompleter.complete(true);
     }
 
@@ -325,6 +328,7 @@ class WebFs {
       target,
       buildInfo,
       initializePlatform,
+      useSkia,
     );
     if (!await firstBuildCompleter.future) {
       throw const BuildException();
