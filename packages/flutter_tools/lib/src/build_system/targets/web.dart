@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import '../../artifacts.dart';
 import '../../asset.dart';
 import '../../base/file_system.dart';
@@ -148,6 +150,8 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
+      if (Platform.environment.containsKey('FLUTTER_WEB_USE_SKIA'))
+        environment.defines['FLUTTER_WEB_USE_SKIA'] = Platform.environment['FLUTTER_WEB_USE_SKIA'],
       environment.buildDir.childFile('main.dart').path,
     ]);
     if (result.exitCode != 0) {
