@@ -24,19 +24,39 @@ import 'messages_all.dart';
 /// by `@className.of(context)`.
 ///
 /// Applications need to include `@className.delegate()` in their app\'s
-/// loclalizationDelegates list, and the locales they support in the app\'s
+/// localizationDelegates list, and the locales they support in the app\'s
 /// supportedLocales list. For example:
 ///
 /// ```
+/// import '@importFile';
+///
 /// return MaterialApp(
 ///   localizationsDelegates: @className.localizationsDelegates,
-///   supportedLocales: const <Locale>[
-///     Locale('en', 'US'),
-///     Locale('es', 'ES'),
-///   ],
+///   supportedLocales: @className.supportedLocales,
 ///   home: MyApplicationHome(),
 /// );
 /// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the @className.supportedLocales
+/// property.
+
 class @className {
   @className(Locale locale) : _localeName = locale.toString();
 
@@ -192,59 +212,123 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 
-String genSupportedLocaleProperty(List<LocaleInfo> supportedLocales) {
+String genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
   const String prefix = 'static const List<Locale> supportedLocales = <Locale>[ \n    Locale(''';
   const String suffix = '),\n  ];';
 
   String resultingProperty = prefix;
+  for (LocaleInfo locale in supportedLocales) {
+    final String languageCode = locale.languageCode;
+    final String countryCode = locale.countryCode;
 
-  for (int index = 0; index < supportedLocales.length; index += 1) {
-    final String languageCode = supportedLocales[index].languageCode;
-    final String countryCode = supportedLocales[index].countryCode;
     resultingProperty += '\'$languageCode\'';
-
     if (countryCode != null)
       resultingProperty += ', \'$countryCode\'';
-
-    if (index < supportedLocales.length - 1)
-      resultingProperty += '),\n    Locale(';
+    resultingProperty += '),\n    Locale(';
   }
+  resultingProperty = resultingProperty.substring(0, resultingProperty.length - '),\n    Locale('.length);
   resultingProperty += suffix;
 
   return resultingProperty;
 }
 
+bool _isValidClassName (String className) {
+  // Dart class name cannot contain non-alphanumeric symbols
+  if (className.contains(RegExp(r'[^a-zA-Z\d]')))
+    return false;
+  // Dart class name must start with upper case character
+  if (className[0].contains(RegExp(r'[a-z]')))
+    return false;
+  // Dart class name cannot start with a number
+  if (className[0].contains(RegExp(r'\d')))
+    return false;
+  return true;
+}
+
+String _importFilePath(String path, String fileName) {
+  String replaceLib = path.replaceAll('lib/', '');
+  return '$replaceLib/$fileName.dart';
+}
+
 Future<void> main(List<String> args) async {
   final argslib.ArgParser parser = argslib.ArgParser();
-  parser.addOption('dir-path', defaultsTo: path.join('lib', 'l10n'));
-  parser.addOption('input-arb-file', defaultsTo: 'app_en.arb');
-  parser.addOption('output-file-prefix', defaultsTo: 'app');
-  parser.addOption('output-class-prefix', defaultsTo: 'App');
+  parser.addOption('arb-dir', defaultsTo: path.join('lib', 'l10n'));
+  parser.addOption('template-arb-file', defaultsTo: 'app_en.arb');
+  parser.addOption('output-localization-file', defaultsTo: 'app_localizations');
+  parser.addOption('output-class', defaultsTo: 'AppLocalizations');
   final argslib.ArgResults results = parser.parse(args);
 
-  final Directory l10nDirectory = Directory(results['dir-path']);
-  final File inputArbFile = File(path.join(l10nDirectory.path, results['input-arb-file']));
-  final File outputFile = File(path.join(l10nDirectory.path, '${results['output-file-prefix']}_localizations.dart'));
-  final String stringsClassName = '${results['output-class-prefix']}Localizations';
+  final String arbPathString = results['arb-dir'];
+  final String outputFileString = results['output-localization-file'];
 
-  final RegExp arbFilenameRE = RegExp(r'^[^_]*_(\w+)\.arb$');
+  final Directory l10nDirectory = Directory(arbPathString);
+  final File inputArbFile = File(path.join(l10nDirectory.path, results['template-arb-file']));
+  final File outputFile = File(path.join(l10nDirectory.path, '$outputFileString.dart'));
+  final String stringsClassName = results['output-class'];
+
+  if (!l10nDirectory.existsSync())
+    exitWithError(
+      "The 'arb-dir' directory, $l10nDirectory, does not exist.\n"
+      'Make sure that the correct path was provided.'
+    );
+  if (!_isValidClassName(stringsClassName))
+    exitWithError(
+      "The 'output-class', $stringsClassName, is not valid Dart class name.\n"
+    );
+
   final List<String> arbFilenames = <String>[];
   final Set<String> supportedLanguageCodes = <String>{};
-  final List<LocaleInfo> supportedLocales = <LocaleInfo>[];
+  final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
   for (FileSystemEntity entity in l10nDirectory.listSync()) {
     final String entityPath = entity.path;
-    if (FileSystemEntity.isFileSync(entityPath) && arbFilenameRE.hasMatch(entityPath)) {
-      arbFilenames.add(entityPath);
-      final String localeString = arbFilenameRE.firstMatch(entityPath)[1];
-      final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
-      supportedLocales.add(localeInfo);
-      supportedLanguageCodes.add('\'${localeInfo.languageCode}\'');
+
+    if (FileSystemEntity.isFileSync(entityPath)) {
+      final RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
+      if (arbFilenameRE.hasMatch(entityPath)) {
+        final File arbFile = File(entityPath);
+        final Map<String, dynamic> arbContents = json.decode(arbFile.readAsStringSync());
+        String localeString = arbContents['@@locale'];
+
+        if (localeString == null) {
+          final RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
+          final RegExpMatch arbFileMatch = arbFilenameLocaleRE.firstMatch(entityPath);
+          if (arbFileMatch == null) {
+            exitWithError(
+              "The following .arb file's locale could not be determined: \n"
+              '$entityPath \n'
+              "Make sure that the locale is specified in the '@@locale' "
+              'property or as part of the filename (ie. file_en.arb)'
+            );
+          }
+
+          localeString = arbFilenameLocaleRE.firstMatch(entityPath)[1];
+        }
+
+        arbFilenames.add(entityPath);
+        final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
+        if (supportedLocales.contains(localeInfo))
+          exitWithError(
+            'Multiple arb files with the same locale detected. \n'
+            'Ensure that there is exactly one arb file for each locale.'
+          );
+        supportedLocales.add(localeInfo);
+        supportedLanguageCodes.add('\'${localeInfo.languageCode}\'');
+      }
     }
   }
 
   final List<String> classMethods = <String>[];
-  final Map<String, dynamic> bundle = json.decode(inputArbFile.readAsStringSync());
+
+  Map<String, dynamic> bundle;
+  try {
+    bundle = json.decode(inputArbFile.readAsStringSync());
+  } on FileSystemException catch (e) {
+    exitWithError('Unable to read input arb file: $e');
+  } on FormatException catch (e) {
+    exitWithError('Unable to parse arb file: $e');
+  }
+
   final RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
 
   for (String key in bundle.keys) {
@@ -254,12 +338,13 @@ Future<void> main(List<String> args) async {
       classMethods.add(genPluralMethod(bundle, key));
     else
       classMethods.add(genSimpleMethod(bundle, key));
-  };
+  }
 
   outputFile.writeAsStringSync(
     defaultFileTemplate
       .replaceAll('@className', stringsClassName)
       .replaceAll('@classMethods', classMethods.join('\n'))
+      .replaceAll('@importFile', _importFilePath(arbPathString, outputFileString))
       .replaceAll('@supportedLocales', genSupportedLocaleProperty(supportedLocales))
       .replaceAll('@supportedLanguageCodes', supportedLanguageCodes.toList().join(', '))
   );
