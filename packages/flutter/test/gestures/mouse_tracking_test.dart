@@ -51,13 +51,13 @@ void _ensureTestGestureBinding() {
 void main() {
   void _setUpMouseTracker({
     MouseDetectorAnnotationFinder annotationFinder,
-    bool Function(MouseCursorPlatformActivateSystemCursorDetails) handleActivateSystemCursor,
+    bool Function(MouseCursorActivateSystemShapeDetails) handleActivateSystemCursor,
   }) {
     final MouseTracker mouseTracker = MouseTracker(
       GestureBinding.instance.pointerRouter,
       annotationFinder,
-      _TestMouseCursorManager(
-        _TestMouseCursorPlatformDelegate(
+      MouseCursorManager(
+        platform: _TestMouseCursorPlatformDelegate(
           handleActivateSystemCursor,
         ),
       ),
@@ -67,7 +67,8 @@ void main() {
 
   // System cursors must be constants.
   const MouseCursor testCursor = SystemMouseCursors.grabbing;
-  const MouseCursorSystemShape testCursorShape = MouseCursorSystemShape.grabbing;
+  const int testCursorShape = 0x6631ce3e; // Same as _kSystemShapeGrabbing.
+  const int basicCursorShape = 0xf17aaabc; // Same as testCursor._kSystemShapeBasic
 
   // Set up a trivial test environment that includes one annotation.
   // This annotation records the enter, hover, and exit events it receives to
@@ -76,7 +77,7 @@ void main() {
   // The mouse tracker records the cursor requests it receives to `logCursors`.
   MouseTrackerAnnotation _setUpWithOneAnnotation({
     List<PointerEvent> logEvents,
-    List<MouseCursorPlatformActivateSystemCursorDetails> logCursors,
+    List<MouseCursorActivateSystemShapeDetails> logCursors,
   }) {
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) {
@@ -97,7 +98,7 @@ void main() {
       annotationFinder: (Offset position) sync* {
         yield annotation;
       },
-      handleActivateSystemCursor: (MouseCursorPlatformActivateSystemCursorDetails details) {
+      handleActivateSystemCursor: (MouseCursorActivateSystemShapeDetails details) {
         if (logCursors != null)
           logCursors.add(details);
         return true;
@@ -133,7 +134,7 @@ void main() {
 
   test('should detect enter, hover, and exit from Added, Hover, and Removed events', () {
     final List<PointerEvent> events = <PointerEvent>[];
-    final List<MouseCursorPlatformActivateSystemCursorDetails> cursorRequests = <MouseCursorPlatformActivateSystemCursorDetails>[];
+    final List<MouseCursorActivateSystemShapeDetails> cursorRequests = <MouseCursorActivateSystemShapeDetails>[];
     _setUpWithOneAnnotation(logEvents: events, logCursors: cursorRequests);
 
     final List<bool> listenerLogs = <bool>[];
@@ -152,8 +153,8 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 0.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
-    expect(cursorRequests, const <MouseCursorPlatformActivateSystemCursorDetails>[
-      MouseCursorPlatformActivateSystemCursorDetails(device: 0, systemShape: testCursorShape),
+    expect(cursorRequests, const <MouseCursorActivateSystemShapeDetails>[
+      MouseCursorActivateSystemShapeDetails(device: 0, systemShape: testCursorShape),
     ]);
     cursorRequests.clear();
     events.clear();
@@ -180,8 +181,8 @@ void main() {
       const PointerExitEvent(position: Offset(1.0, 201.0)),
     ]));
     expect(listenerLogs, <bool>[false]);
-    expect(cursorRequests, const <MouseCursorPlatformActivateSystemCursorDetails>[
-      MouseCursorPlatformActivateSystemCursorDetails(device: 0, systemShape: MouseCursorSystemShape.basic),
+    expect(cursorRequests, const <MouseCursorActivateSystemShapeDetails>[
+      MouseCursorActivateSystemShapeDetails(device: 0, systemShape: basicCursorShape),
     ]);
     cursorRequests.clear();
     events.clear();
@@ -196,8 +197,8 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 301.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
-    expect(cursorRequests, const <MouseCursorPlatformActivateSystemCursorDetails>[
-      MouseCursorPlatformActivateSystemCursorDetails(device: 0, systemShape: testCursorShape),
+    expect(cursorRequests, const <MouseCursorActivateSystemShapeDetails>[
+      MouseCursorActivateSystemShapeDetails(device: 0, systemShape: testCursorShape),
     ]);
     cursorRequests.clear();
     events.clear();
@@ -638,51 +639,6 @@ void main() {
     expect(logs, <String>['exitB', 'enterA', 'hoverA']);
   });
 
-  test('should not do anything on platforms that doesn\'t support mouse cursor', () {
-    final List<MouseCursorPlatformActivateSystemCursorDetails> cursorRequests = <MouseCursorPlatformActivateSystemCursorDetails>[];
-    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
-      onEnter: (PointerEnterEvent event) {},
-      cursor: () => testCursor,
-    );
-    final MouseTracker mouseTracker = MouseTracker(
-      GestureBinding.instance.pointerRouter,
-      (Offset position) sync* {
-        yield annotation;
-      },
-      _TestMouseCursorManager(
-        const MouseCursorUnsupportedPlatformDelegate()
-      ),
-    );
-    RendererBinding.instance.initMouseTracker(mouseTracker);
-    _mouseTracker.attachAnnotation(annotation);
-
-    // Enter
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(1.0, 0.0)),
-    ]));
-    expect(cursorRequests, isEmpty);
-    cursorRequests.clear();
-
-    // Hover
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
-    ]));
-    expect(cursorRequests, isEmpty);
-
-    // Remove
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(1.0, 201.0)),
-    ]));
-    expect(cursorRequests, isEmpty);
-    cursorRequests.clear();
-
-    // Add again
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(1.0, 301.0)),
-    ]));
-    expect(cursorRequests, isEmpty);
-    cursorRequests.clear();
-  });
 }
 
 ui.PointerData _pointerData(
@@ -842,26 +798,18 @@ Matcher _equalToEventsOnCriticalFields(List<PointerEvent> source) {
   return _EventListCriticalFieldsMatcher(source);
 }
 
-class _TestMouseCursorPlatformDelegate extends MouseCursorPlatformDelegate {
+class _TestMouseCursorPlatformDelegate extends MouseCursorPlatform {
   _TestMouseCursorPlatformDelegate(
     this.onActivateSystemCursor,
   );
 
-  final bool Function(MouseCursorPlatformActivateSystemCursorDetails) onActivateSystemCursor;
+  final bool Function(MouseCursorActivateSystemShapeDetails) onActivateSystemCursor;
 
   @override
-  Future<bool> activateSystemCursor(MouseCursorPlatformActivateSystemCursorDetails details) async {
+  Future<bool> activateSystemShape(MouseCursorActivateSystemShapeDetails details) async {
     if (onActivateSystemCursor != null) {
       return onActivateSystemCursor(details);
     }
     return true;
   }
-}
-
-class _TestMouseCursorManager extends MouseCursorManager {
-  _TestMouseCursorManager(this._platformDelegate);
-
-  @override
-  MouseCursorPlatformDelegate get platformDelegate => _platformDelegate;
-  final MouseCursorPlatformDelegate _platformDelegate;
 }

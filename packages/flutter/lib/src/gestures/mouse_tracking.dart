@@ -283,10 +283,6 @@ class MouseTracker extends ChangeNotifier {
   //
   // If `disconnectedMouseState` is provided, this state will be used instead,
   // but this mouse will be hovering no annotations.
-  //
-  // If `performChangeCursor` is provided, this function will be called when this
-  // device should change cursor. Otherwise, the default handler is to call
-  // `_cursorDelegate.setCursors`.
   void _checkDeviceUpdates({int device, _MouseState disconnectedMouseState}) {
     final _MouseState mouseState = disconnectedMouseState ?? _mouseStates[device];
     final bool thisDeviceIsConnected = mouseState != disconnectedMouseState;
