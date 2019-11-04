@@ -105,6 +105,16 @@ class _@classNameDelegate extends LocalizationsDelegate<@className> {
 }
 ''';
 
+const String getterMethodTemplate = '''
+  String get @methodName {
+    return Intl.message(
+      @message,
+      locale: _localeName,
+      @intlMethodArgs
+    );
+  }
+''';
+
 const String simpleMethodTemplate = '''
   String @methodName(@methodParameters) {
     return Intl.message(
@@ -150,21 +160,27 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
 }
 
 String genSimpleMethod(Map<String, dynamic> bundle, String key) {
-  String genMessage(Map<String, dynamic> bundle, String key) {
+  String genSimpleMethodMessage(Map<String, dynamic> bundle, String key) {
     String message = bundle[key];
     final Map<String, dynamic> attributesMap = bundle['@$key'];
-    if (attributesMap != null && attributesMap.containsKey('placeholders')) {
-      final Map<String, dynamic> placeholders = attributesMap['placeholders'];
-      for (String placeholder in placeholders.keys)
-        message = message.replaceAll('{$placeholder}', '\$$placeholder');
-    }
+    final Map<String, dynamic> placeholders = attributesMap['placeholders'];
+    for (String placeholder in placeholders.keys)
+      message = message.replaceAll('{$placeholder}', '\$$placeholder');
     return message;
   }
 
-  return simpleMethodTemplate
+  final Map<String, dynamic> attributesMap = bundle['@$key'];
+  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
+    return simpleMethodTemplate
+      .replaceAll('@methodName', key)
+      .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'Object').join(', '))
+      .replaceAll('@message', "'${genSimpleMethodMessage(bundle, key)}'")
+      .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
+  }
+
+  return getterMethodTemplate
     .replaceAll('@methodName', key)
-    .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'Object').join(', '))
-    .replaceAll('@message', "'${genMessage(bundle, key)}'")
+    .replaceAll('@message', "'${bundle[key]}'")
     .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
 }
 
