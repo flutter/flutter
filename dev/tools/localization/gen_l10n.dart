@@ -171,7 +171,13 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
   }
 
   final Map<String, dynamic> attributesMap = bundle['@$key'];
-  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
+  if (attributesMap == null)
+    exitWithError(
+      'Resource attribute "@$key" was not found. Please ensure that each '
+      'resource id has a corresponding resource attribute.'
+    );
+
+  if (attributesMap.containsKey('placeholders')) {
     return simpleMethodTemplate
       .replaceAll('@methodName', key)
       .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'Object').join(', '))
@@ -181,7 +187,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
 
   return getterMethodTemplate
     .replaceAll('@methodName', key)
-    .replaceAll('@message', "'${bundle[key]}'")
+    .replaceAll('@message', '${generateString(bundle[key])}')
     .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
 }
 
@@ -258,6 +264,19 @@ bool _isValidClassName(String className) {
     return false;
   // Dart class name cannot start with a number
   if (className[0].contains(RegExp(r'\d')))
+    return false;
+  return true;
+}
+
+bool _isValidGetterAndMethodName(String name) {
+  // Dart getter and method name cannot contain non-alphanumeric symbols
+  if (name.contains(RegExp(r'[^a-zA-Z\d]')))
+    return false;
+  // Dart class name must start with lower case character
+  if (name[0].contains(RegExp(r'[A-Z]')))
+    return false;
+  // Dart class name cannot start with a number
+  if (name[0].contains(RegExp(r'\d')))
     return false;
   return true;
 }
@@ -369,6 +388,11 @@ Future<void> main(List<String> args) async {
   for (String key in bundle.keys) {
     if (key.startsWith('@'))
       continue;
+    if (!_isValidGetterAndMethodName(key))
+      exitWithError(
+        'Invalid key format: $key \n It has to be in camel case, cannot start '
+        'with a number, and cannot contain non-alphanumeric characters.'
+      );
     if (pluralValueRE.hasMatch(bundle[key]))
       classMethods.add(genPluralMethod(bundle, key));
     else
