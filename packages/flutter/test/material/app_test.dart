@@ -241,10 +241,10 @@ void main() {
       ),
     );
 
-    expect(find.text('route "/"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
-    expect(find.text('route "/a/b"'), findsNothing);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/a/b"', skipOffstage: false), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
   testWidgets('Return value from pop is correct', (WidgetTester tester) async {
@@ -301,10 +301,10 @@ void main() {
         routes: routes,
       ),
     );
-    expect(find.text('route "/"'), findsOneWidget);
-    expect(find.text('route "/a"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
+    expect(find.text('route "/a"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a/b"'), findsOneWidget);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
   testWidgets('Initial route with missing step', (WidgetTester tester) async {
@@ -343,9 +343,9 @@ void main() {
         routes: routes,
       ),
     );
-    expect(find.text('route "/"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
 
     // changing initialRoute has no effect
     await tester.pumpWidget(
@@ -354,15 +354,15 @@ void main() {
         routes: routes,
       ),
     );
-    expect(find.text('route "/"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
 
     // removing it has no effect
     await tester.pumpWidget(MaterialApp(routes: routes));
-    expect(find.text('route "/"'), findsOneWidget);
+    expect(find.text('route "/"', skipOffstage: false), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
-    expect(find.text('route "/b"'), findsNothing);
+    expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
   testWidgets('onGenerateRoute / onUnknownRoute', (WidgetTester tester) async {

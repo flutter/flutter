@@ -36,32 +36,51 @@ Widget setupSimpleSegmentedControl() {
     0: Text('Child 1'),
     1: Text('Child 2'),
   };
-  final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
   return boilerplate(
-    child: CupertinoSlidingSegmentedControl<int>(
-      children: children,
-      controller: controller,
+    builder: (BuildContext context) {
+      return CupertinoSlidingSegmentedControl<int>(
+        children: children,
+        groupValue: groupValue,
+        onValueChanged: defaultCallback,
+      );
+    },
+  );
+}
+
+StateSetter setState;
+int groupValue = 0;
+void defaultCallback(int newValue) {
+  setState(() { groupValue = newValue; });
+}
+
+Widget boilerplate({ WidgetBuilder builder }) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(
+      child: StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return builder(context);
+      }),
     ),
   );
 }
 
-Widget boilerplate({ Widget child }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(child: child),
-  );
-}
-
 void main() {
-  testWidgets('Children and controller and padding arguments can not be null', (WidgetTester tester) async {
+
+  setUp(() {
+    setState = null;
+    groupValue = 0;
+  });
+
+  testWidgets('Children and onValueChanged and padding arguments can not be null', (WidgetTester tester) async {
+    groupValue = null;
     try {
       await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSlidingSegmentedControl<int>(
-            children: null,
-            controller: ValueNotifier<int>(null),
-          ),
+        CupertinoSlidingSegmentedControl<int>(
+          children: null,
+          groupValue: groupValue,
+          onValueChanged: defaultCallback,
         ),
       );
       fail('Should not be possible to create segmented control with null children');
@@ -76,26 +95,24 @@ void main() {
 
     try {
       await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSlidingSegmentedControl<int>(
-            children: children,
-            controller: null,
-          ),
+        CupertinoSlidingSegmentedControl<int>(
+          children: children,
+          groupValue: groupValue,
+          onValueChanged: null,
         ),
       );
-      fail('Should not be possible to create segmented control without a controller');
+      fail('Should not be possible to create segmented control without an onValueChanged');
     } on AssertionError catch (e) {
-      expect(e.toString(), contains('controller'));
+      expect(e.toString(), contains('onValueChanged'));
     }
 
     try {
       await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSlidingSegmentedControl<int>(
-            children: children,
-            controller: ValueNotifier<int>(null),
-            padding: null,
-          ),
+        CupertinoSlidingSegmentedControl<int>(
+          children: children,
+          groupValue: groupValue,
+          onValueChanged: defaultCallback,
+          padding: null,
         ),
       );
       fail('Should not be possible to create segmented control with null padding');
@@ -106,13 +123,13 @@ void main() {
 
   testWidgets('Need at least 2 children', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
+    groupValue = null;
     try {
       await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSlidingSegmentedControl<int>(
-            children: children,
-            controller: ValueNotifier<int>(null),
-          ),
+        CupertinoSlidingSegmentedControl<int>(
+          children: children,
+          groupValue: groupValue,
+          onValueChanged: defaultCallback,
         ),
       );
       fail('Should not be possible to create a segmented control with no children');
@@ -123,11 +140,10 @@ void main() {
       children[0] = const Text('Child 1');
 
       await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSlidingSegmentedControl<int>(
-            children: children,
-            controller: ValueNotifier<int>(null),
-          ),
+        CupertinoSlidingSegmentedControl<int>(
+          children: children,
+          groupValue: groupValue,
+          onValueChanged: defaultCallback,
         ),
       );
       fail('Should not be possible to create a segmented control with just one child');
@@ -135,20 +151,20 @@ void main() {
       expect(e.toString(), contains('children.length'));
     }
 
+    groupValue = -1;
     try {
       children[1] = const Text('Child 2');
       children[2] = const Text('Child 3');
       await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSlidingSegmentedControl<int>(
-            children: children,
-            controller: ValueNotifier<int>(-1),
-          ),
+        CupertinoSlidingSegmentedControl<int>(
+          children: children,
+          groupValue: groupValue,
+          onValueChanged: defaultCallback,
         ),
       );
-      fail('Should not be possible to create a segmented control with a controller pointing to a non-existent child');
+      fail('Should not be possible to create a segmented control with a groupValue pointing to a non-existent child');
     } on AssertionError catch (e) {
-      expect(e.toString(), contains('value must be either null or one of the keys in the children map'));
+      expect(e.toString(), contains('groupValue must be either null or one of the keys in the children map'));
     }
   });
 
@@ -185,11 +201,14 @@ void main() {
 
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: key,
-          children: children,
-          controller: ValueNotifier<int>(null),
-        ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: key,
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
@@ -204,12 +223,15 @@ void main() {
 
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: key,
-          padding: const EdgeInsets.fromLTRB(1, 3, 5, 7),
-          children: children,
-          controller: ValueNotifier<int>(null),
-        ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: key,
+            padding: const EdgeInsets.fromLTRB(1, 3, 5, 7),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
@@ -230,119 +252,29 @@ void main() {
       2: Text('Child 3'),
     };
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(0);
-
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: const ValueKey<String>('Segmented Control'),
-          children: children,
-          controller: controller,
-        ),
-      ),
-    );
-
-    expect(controller.value, 0);
-
-    await tester.tap(find.text('Child 2'));
-
-    expect(controller.value, 1);
-
-    // Tapping the currently selected item should not change controller's value.
-    bool valueChanged = false;
-    controller.addListener(() { valueChanged = true; });
-
-    await tester.tap(find.text('Child 2'));
-
-    expect(valueChanged, isFalse);
-    expect(controller.value, 1);
-  });
-
-  testWidgets('Changing controller works', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{
-      0: Text('Child 1'),
-      1: Text('Child 2'),
-      2: Text('Child 3'),
-    };
-
-    final ValueNotifier<int> controller = ValueNotifier<int>(0);
-    final ValueNotifier<int> newControlelr = ValueNotifier<int>(null);
-
-    await tester.pumpWidget(
-      boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: const ValueKey<String>('Segmented Control'),
-          children: children,
-          controller: controller,
-        ),
-      ),
-    );
-
-    expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 1'))),
-    );
-
-    await tester.pumpWidget(
-      boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: const ValueKey<String>('Segmented Control'),
-          children: children,
-          controller: newControlelr,
-        ),
-      ),
-    );
-
-    expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true),
-      isNull,
-    );
-  });
-
-  testWidgets('Can change controller value in build method', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{
-      0: Text('Child 1'),
-      1: Text('Child 2'),
-      2: Text('Child 3'),
-    };
-
-    int currentIndex = 0;
-    StateSetter setState;
-    final ValueNotifier<int> controller = ValueNotifier<int>(currentIndex);
-
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setter) {
-          setState = setter;
-          if (controller.value != currentIndex)
-            controller.value = currentIndex;
-          return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              key: const ValueKey<String>('Segmented Control'),
-              children: children,
-              controller: controller,
-            ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
           );
         },
       ),
     );
 
-    expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 1'))),
-    );
+    expect(groupValue, 0);
 
-    setState(() {
-      currentIndex = 2;
-    });
+    await tester.tap(find.text('Child 2'));
 
-    await tester.pump();
-    await tester.pumpAndSettle();
+    expect(groupValue, 1);
 
-    expect(
-      currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 3')), epsilon: 0.01),
-    );
+    // Tapping the currently selected item should not change groupValue.
+    await tester.tap(find.text('Child 2'));
+
+    expect(groupValue, 1);
   });
 
   testWidgets(
@@ -353,16 +285,15 @@ void main() {
         1: Icon(IconData(1)),
       };
 
-      final ValueNotifier<int> controller = ValueNotifier<int>(0);
-
       await tester.pumpWidget(
         CupertinoApp(
           theme: const CupertinoThemeData(brightness: Brightness.dark),
-          home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+          home: boilerplate(
+            builder: (BuildContext context) {
               return CupertinoSlidingSegmentedControl<int>(
                 children: children,
-                controller: controller,
+                groupValue: groupValue,
+                onValueChanged: defaultCallback,
               );
             },
           ),
@@ -371,7 +302,7 @@ void main() {
 
       DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
-      expect(textStyle.style.fontWeight, FontWeight.w600);
+      expect(textStyle.style.fontWeight, FontWeight.w500);
 
       await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();
@@ -379,6 +310,7 @@ void main() {
 
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
+      expect(groupValue, 1);
       expect(textStyle.style.fontWeight, FontWeight.normal);
     },
   );
@@ -389,7 +321,6 @@ void main() {
       1: Icon(IconData(1)),
     };
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(0);
     Brightness brightness = Brightness.light;
     StateSetter setState;
 
@@ -400,12 +331,15 @@ void main() {
           return MediaQuery(
             data: MediaQueryData(platformBrightness: brightness),
             child: boilerplate(
-              child: CupertinoSlidingSegmentedControl<int>(
-                children: children,
-                controller: controller,
-                thumbColor: CupertinoColors.systemGreen,
-                backgroundColor: CupertinoColors.systemRed,
-              ),
+              builder: (BuildContext context) {
+                return CupertinoSlidingSegmentedControl<int>(
+                  children: children,
+                  groupValue: groupValue,
+                  onValueChanged: defaultCallback,
+                  thumbColor: CupertinoColors.systemGreen,
+                  backgroundColor: CupertinoColors.systemRed,
+                );
+              },
             ),
           );
         },
@@ -443,14 +377,15 @@ void main() {
         2: Placeholder(),
       };
 
-      final ValueNotifier<int> controller = ValueNotifier<int>(0);
-
       await tester.pumpWidget(
         boilerplate(
-          child: CupertinoSlidingSegmentedControl<int>(
-            children: children,
-            controller: controller,
-          ),
+          builder: (BuildContext context) {
+            return CupertinoSlidingSegmentedControl<int>(
+              children: children,
+              groupValue: groupValue,
+              onValueChanged: defaultCallback,
+            );
+          },
         ),
       );
     },
@@ -468,16 +403,18 @@ void main() {
       1: Text('Child 2'),
     };
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(null);
-
+    groupValue = null;
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              controller: controller,
-            ),
+            builder: (BuildContext context) {
+              return CupertinoSlidingSegmentedControl<int>(
+                children: children,
+                groupValue: groupValue,
+                onValueChanged: defaultCallback,
+              );
+            },
           );
         },
       ),
@@ -496,14 +433,17 @@ void main() {
     };
 
     // Child 3 is intially selected.
-    final ValueNotifier<int> controller = ValueNotifier<int>(2);
+    groupValue = 2;
 
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          children: children,
-          controller: controller,
-        ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
@@ -571,15 +511,16 @@ void main() {
       2: Container(constraints: const BoxConstraints.tightFor(height: 200.0)),
     };
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(null);
-
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: const ValueKey<String>('Segmented Control'),
-          children: children,
-          controller: controller,
-        ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
@@ -600,14 +541,16 @@ void main() {
       2: Container(constraints: const BoxConstraints.tightFor(width: 200.0)),
     };
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(null);
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: const ValueKey<String>('Segmented Control'),
-          children: children,
-          controller: controller,
-        ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
@@ -628,19 +571,20 @@ void main() {
       1: SizedBox(width: 70),
     };
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(null);
-
     await tester.pumpWidget(
       boilerplate(
-        child: Row(
-          children: <Widget>[
-            CupertinoSlidingSegmentedControl<int>(
-              key: const ValueKey<String>('Segmented Control'),
-              children: children,
-              controller: controller,
-            ),
-          ],
-        ),
+        builder: (BuildContext context) {
+          return Row(
+            children: <Widget>[
+              CupertinoSlidingSegmentedControl<int>(
+                key: const ValueKey<String>('Segmented Control'),
+                children: children,
+                groupValue: groupValue,
+                onValueChanged: defaultCallback,
+              ),
+            ],
+          );
+        },
       ),
     );
 
@@ -660,14 +604,19 @@ void main() {
       1: Text('Child 2'),
     };
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(null);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
-          child: CupertinoSlidingSegmentedControl<int>(
-            children: children,
-            controller: controller,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return CupertinoSlidingSegmentedControl<int>(
+                children: children,
+                groupValue: groupValue,
+                onValueChanged: defaultCallback,
+              );
+            },
           ),
         ),
       ),
@@ -682,16 +631,19 @@ void main() {
       0: Text('Child 1'),
       1: Text('Child 2'),
     };
-
-    final ValueNotifier<int> controller = ValueNotifier<int>(0);
-
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
-          child: CupertinoSlidingSegmentedControl<int>(
-            children: children,
-            controller: controller,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return CupertinoSlidingSegmentedControl<int>(
+                children: children,
+                groupValue: groupValue,
+                onValueChanged: defaultCallback,
+              );
+            },
           ),
         ),
       ),
@@ -718,17 +670,15 @@ void main() {
       1: Text('Child 2'),
     };
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(0);
-
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: CupertinoSlidingSegmentedControl<int>(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
             children: children,
-            controller: controller,
-          ),
-        ),
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
@@ -810,25 +760,26 @@ void main() {
     children[0] = const Text('Child 1');
     children[1] = const SizedBox();
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(0);
-
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: const ValueKey<String>('Segmented Control'),
-          children: children,
-          controller: controller,
-        ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
-    expect(controller.value, 0);
+    expect(groupValue, 0);
 
     final Offset centerOfTwo = tester.getCenter(find.byWidget(children[1]));
     // Tap just inside segment bounds
     await tester.tapAt(centerOfTwo + const Offset(10, 0));
 
-    expect(controller.value, 1);
+    expect(groupValue, 1);
   });
 
   testWidgets('Thumb animation is correct when the selected segment changes', (WidgetTester tester) async {
@@ -917,19 +868,22 @@ void main() {
       1: Text('B'),
       2: Text('C'),
     };
-    final ValueNotifier<int> controller = ValueNotifier<int>(0);
 
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: const ValueKey<String>('Segmented Control'),
-          children: children,
-          controller: controller,
-        ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
     await tester.tap(find.text('B'));
+    await tester.pump();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 40));
 
@@ -965,15 +919,16 @@ void main() {
     children[2] = const Text('C');
     children[3] = const Text('D');
 
-    final ValueNotifier<int> controller = ValueNotifier<int>(0);
-
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: const ValueKey<String>('Segmented Control'),
-          children: children,
-          controller: controller,
-        ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
@@ -984,11 +939,14 @@ void main() {
     children[1] = const Text('B');
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoSlidingSegmentedControl<int>(
-          key: const ValueKey<String>('Segmented Control'),
-          children: children,
-          controller: controller,
-        ),
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
       ),
     );
 
@@ -1005,7 +963,6 @@ void main() {
       0: Text('Child 1'),
       1: Text('Child 2'),
     };
-    final ValueNotifier<int> controller = ValueNotifier<int>(0);
     final ScrollController scrollController = ScrollController();
 
     await tester.pumpWidget(
@@ -1015,9 +972,14 @@ void main() {
           controller: scrollController,
           children: <Widget>[
             const SizedBox(height: 100),
-            CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              controller: controller,
+            boilerplate(
+              builder: (BuildContext context) {
+                return CupertinoSlidingSegmentedControl<int>(
+                  children: children,
+                  groupValue: groupValue,
+                  onValueChanged: defaultCallback,
+                );
+              },
             ),
             const SizedBox(height: 1000),
           ],
@@ -1029,7 +991,7 @@ void main() {
     await tester.tap(find.text('Child 2'));
     await tester.pump();
 
-    expect(controller.value, 1);
+    expect(groupValue, 1);
 
     // Vertical drag works for the scroll view.
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Child 1')));
@@ -1043,14 +1005,14 @@ void main() {
     expect(scrollController.offset, 100);
 
     // Does not affect the segmented control.
-    expect(controller.value, 1);
+    expect(groupValue, 1);
 
     await gesture.moveBy(const Offset(0, 100));
     await gesture.up();
     await tester.pump();
 
     expect(scrollController.offset, 0);
-    expect(controller.value, 1);
+    expect(groupValue, 1);
 
     // Long press vertical drag is recognized by the segmented control.
     await gesture.down(tester.getCenter(find.text('Child 1')));
@@ -1061,7 +1023,7 @@ void main() {
 
     // Should not scroll.
     expect(scrollController.offset, 0);
-    expect(controller.value, 1);
+    expect(groupValue, 1);
 
     await gesture.moveBy(const Offset(0, 100));
     await gesture.moveBy(const Offset(0, 100));
@@ -1069,7 +1031,7 @@ void main() {
     await tester.pump();
 
     expect(scrollController.offset, 0);
-    expect(controller.value, 0);
+    expect(groupValue, 0);
 
     // Horizontal drag is recognized by the segmentedControl.
     await gesture.down(tester.getCenter(find.text('Child 1')));
@@ -1079,6 +1041,6 @@ void main() {
     await tester.pump();
 
     expect(scrollController.offset, 0);
-    expect(controller.value, 1);
+    expect(groupValue, 1);
   });
 }

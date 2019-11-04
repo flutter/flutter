@@ -24,6 +24,11 @@ void main() {
   final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
   group('AppContext', () {
+    FakeStopwatch fakeStopWatch;
+
+    setUp(() {
+      fakeStopWatch = FakeStopwatch();
+    });
     testUsingContext('error', () async {
       final BufferLogger mockLogger = BufferLogger();
       final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
@@ -39,6 +44,7 @@ void main() {
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: false),
       Platform: _kNoAnsiPlatform,
+      Stopwatch: () => fakeStopWatch,
     });
 
     testUsingContext('ANSI colored errors', () async {
@@ -60,6 +66,7 @@ void main() {
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
+      Stopwatch: () => fakeStopWatch,
     });
   });
 
@@ -217,7 +224,7 @@ void main() {
             '\b\b\b\b\b\b\b\b       $b' // second tick
             '\b\b\b\b\b\b\b\b        ' // clearing the spinner to put the time
             '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
-            '    0.0s\n', // replacing it with the time
+            '    5.0s\n', // replacing it with the time
           );
           done = true;
         });
@@ -227,6 +234,7 @@ void main() {
         OutputPreferences: () => OutputPreferences(showColor: true),
         Platform: () => FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
         Stdio: () => mockStdio,
+        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('AnsiStatus works for $testOs', () {
