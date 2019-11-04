@@ -269,4 +269,11 @@ class RenderSliverFlex extends RenderSliver with ContainerRenderObjectMixin<Rend
       }
     }
   }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    assert(child != null);
+    final SliverPhysicalParentData childParentData = child.parentData;
+    childParentData.applyPaintTransform(transform);
+  }
 }
