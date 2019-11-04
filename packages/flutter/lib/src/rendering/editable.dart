@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox, lerpDouble;
 
@@ -399,7 +400,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   static final Set<LogicalKeyboardKey> _modifierKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.control,
+    if (Platform.isMacOS) LogicalKeyboardKey.meta,
+    if (!Platform.isMacOS) LogicalKeyboardKey.control,
   };
 
   static final Set<LogicalKeyboardKey> _interestingKeys = <LogicalKeyboardKey>{
@@ -427,9 +429,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
+    final bool isModifierPressed = Platform.isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
     if (_movementKeys.contains(key)) {
-      _handleMovement(key, control: keyEvent.isControlPressed, shift: keyEvent.isShiftPressed);
-    } else if (keyEvent.isControlPressed && _shortcutKeys.contains(key)) {
+        _handleMovement(key, modifier: isModifierPressed, shift: keyEvent.isShiftPressed);
+    } else if (isModifierPressed && _shortcutKeys.contains(key)) {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
@@ -440,7 +443,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _handleMovement(
       LogicalKeyboardKey key, {
-      @required bool control,
+      @required bool modifier,
       @required bool shift,
     }) {
     TextSelection newSelection = selection;
@@ -453,8 +456,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // Because the user can use multiple keys to change how they select, the
     // new offset variable is threaded through these four functions and
     // potentially changes after each one.
-    if (control) {
-      // If control is pressed, we will decide which way to look for a word
+    if (modifier) {
+      // If control/command is pressed, we will decide which way to look for a word
       // based on which arrow is pressed.
       if (leftArrow && newSelection.extentOffset > 2) {
         final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: newSelection.extentOffset - 2));
@@ -533,7 +536,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   // Handles shortcut functionality including cut, copy, paste and select all
-  // using control + (X, C, V, A).
+  // using control/command + (X, C, V, A).
   Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
     assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
     if (key == LogicalKeyboardKey.keyC) {

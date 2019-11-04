@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -3017,24 +3018,24 @@ void main() {
 
     await tester.pump(); // Wait for autofocus to take effect.
 
-    Future<void> sendKeys(List<LogicalKeyboardKey> keys, {bool shift = false, bool control = false}) async {
+    Future<void> sendKeys(List<LogicalKeyboardKey> keys, {bool shift = false, bool modifier = false}) async {
       if (shift) {
         await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       }
-      if (control) {
-        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      if (modifier) {
+        await tester.sendKeyDownEvent(Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.controlLeft);
       }
       for (LogicalKeyboardKey key in keys) {
         await tester.sendKeyEvent(key);
         await tester.pump();
       }
-      if (control) {
-        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      if (modifier) {
+        await tester.sendKeyUpEvent(Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.controlLeft);
       }
       if (shift) {
         await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       }
-      if (shift || control) {
+      if (shift || modifier) {
         await tester.pump();
       }
     }
@@ -3093,7 +3094,7 @@ void main() {
         LogicalKeyboardKey.arrowRight,
       ],
       shift: true,
-      control: true,
+      modifier: true,
     );
 
     expect(selection, equals(const TextSelection(
@@ -3108,7 +3109,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      control: true,
+      modifier: true,
     );
 
     expect(selection, equals(const TextSelection(
@@ -3194,7 +3195,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.keyA,
       ],
-      control: true,
+      modifier: true,
     );
 
     expect(selection, equals(const TextSelection(
@@ -3223,7 +3224,7 @@ void main() {
         LogicalKeyboardKey.arrowRight,
         LogicalKeyboardKey.arrowRight,
       ],
-      control: true,
+      modifier: true,
     );
 
     expect(selection, equals(const TextSelection(
@@ -3254,7 +3255,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      control: true,
+      modifier: true,
     );
 
     expect(selection, equals(const TextSelection(
@@ -3269,7 +3270,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.keyX,
       ],
-      control: true,
+      modifier: true,
     );
 
     expect(selection, equals(const TextSelection(
@@ -3288,7 +3289,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.keyV,
       ],
-      control: true,
+      modifier: true,
     );
 
     expect(selection, equals(const TextSelection(
@@ -3304,7 +3305,7 @@ void main() {
         LogicalKeyboardKey.keyA,
         LogicalKeyboardKey.keyC,
       ],
-      control: true,
+      modifier: true,
     );
 
     expect(selection, equals(const TextSelection(
