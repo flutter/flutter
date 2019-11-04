@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox, lerpDouble;
 
@@ -400,12 +399,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   static final Set<LogicalKeyboardKey> _modifierKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.shift,
-    if (Platform.isMacOS) LogicalKeyboardKey.meta,
-    if (!Platform.isMacOS) LogicalKeyboardKey.control,
+    LogicalKeyboardKey.control,
+  };
+
+  static final Set<LogicalKeyboardKey> _macOsModifierKeys = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.shift,
+    LogicalKeyboardKey.meta,
   };
 
   static final Set<LogicalKeyboardKey> _interestingKeys = <LogicalKeyboardKey>{
     ..._modifierKeys,
+    ..._macOsModifierKeys,
     ..._nonModifierKeys,
   };
 
@@ -420,8 +424,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
     final LogicalKeyboardKey key = keyEvent.logicalKey;
 
+    final bool isMacOS = keyEvent.data is RawKeyEventDataMacOs;
     if (!_nonModifierKeys.contains(key) ||
-        keysPressed.difference(_modifierKeys).length > 1 ||
+        keysPressed.difference(isMacOS ? _macOsModifierKeys : _modifierKeys).length > 1 ||
         keysPressed.difference(_interestingKeys).isNotEmpty) {
       // If the most recently pressed key isn't a non-modifier key, or more than
       // one non-modifier key is down, or keys other than the ones we're interested in
@@ -429,7 +434,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    final bool isModifierPressed = Platform.isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
+    final bool isModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
     if (_movementKeys.contains(key)) {
         _handleMovement(key, modifier: isModifierPressed, shift: keyEvent.isShiftPressed);
     } else if (isModifierPressed && _shortcutKeys.contains(key)) {
