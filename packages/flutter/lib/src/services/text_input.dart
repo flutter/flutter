@@ -880,7 +880,7 @@ class TextInput {
 
   /// This method actually notifies the embedding of the client. It is utilized
   /// by [attach] and by [_handleTextInputInvocation] for the
-  /// `TextInputClient.reattach` method.
+  /// `TextInputClient.requestExistingInputState` method.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(connection != null);
     assert(connection._client != null);
