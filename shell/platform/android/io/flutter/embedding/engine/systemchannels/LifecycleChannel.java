@@ -39,4 +39,8 @@ public class LifecycleChannel {
     channel.send("AppLifecycleState.paused");
   }
 
+  public void appIsDetached() {
+    Log.v(TAG, "Sending AppLifecycleState.detached message.");
+    channel.send("AppLifecycleState.detached");
+  }
 }

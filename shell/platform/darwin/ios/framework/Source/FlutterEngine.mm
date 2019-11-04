@@ -180,6 +180,8 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   [self maybeSetupPlatformViewChannels];
 
   __block FlutterEngine* blockSelf = self;
+  [_flutterViewControllerWillDeallocObserver release];
+
   self.flutterViewControllerWillDeallocObserver =
       [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
                                                         object:viewController
@@ -201,6 +203,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 }
 
 - (void)notifyViewControllerDeallocated {
+  [[self lifecycleChannel] sendMessage:@"AppLifecycleState.detached"];
   if (!_allowHeadlessExecution) {
     [self destroyContext];
   } else {
