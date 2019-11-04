@@ -414,7 +414,7 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileStore fileCache = FileStore(environment, fs, buildSystemConfig.timestampModeEnabled)
+    final FileStore fileCache = FileStore.create(environment, fs, buildSystemConfig.timestampModeEnabled)
       ..initialize();
 
     // Perform sanity checks on build.
