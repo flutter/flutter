@@ -201,7 +201,7 @@ class EngineParagraph implements ui.Paragraph {
   }) {
     assert(boxHeightStyle != null);
     assert(boxWidthStyle != null);
-    if (_plainText == null) {
+    if (_plainText == null || start == end) {
       return <ui.TextBox>[];
     }
 
