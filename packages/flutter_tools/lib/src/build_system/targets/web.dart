@@ -133,6 +133,10 @@ class Dart2JSTarget extends Target {
       ? PackageMap.globalGeneratedPackagesPath
       : PackageMap.globalPackagesPath;
     final File outputFile = environment.buildDir.childFile('main.dart.js');
+    if (Platform.environment.containsKey('FLUTTER_WEB_USE_SKIA')) {
+      environment.defines['FLUTTER_WEB_USE_SKIA'] = Platform.environment['FLUTTER_WEB_USE_SKIA'];
+    }
+    
     final ProcessResult result = await processManager.run(<String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
