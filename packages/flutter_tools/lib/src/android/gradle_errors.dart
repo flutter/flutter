@@ -14,7 +14,7 @@ import 'gradle_utils.dart';
 typedef GradleErrorTest = bool Function(String);
 
 /// A Gradle error handled by the tool.
-class GradleHandledError{
+class GradleHandledError {
   const GradleHandledError({
     this.test,
     this.handler,
@@ -33,14 +33,14 @@ class GradleHandledError{
     bool shouldBuildPluginAsAar,
   }) handler;
 
-  /// The [BuildEvent] label is named gradle--[eventLabel].
+  /// The [BuildEvent] label is named gradle-[eventLabel].
   /// If not empty, the build event is logged along with
   /// additional metadata such as the attempt number.
   final String eventLabel;
 }
 
 /// The status of the Gradle build.
-enum GradleBuildStatus{
+enum GradleBuildStatus {
   /// The tool cannot recover from the failure and should exit.
   exit,
   /// The tool can retry the exact same build.
@@ -180,7 +180,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       // If the app doesn't use any plugin, then it's unclear where
       // the incompatibility is coming from.
       BuildEvent(
-        'gradle--android-x-failure',
+        'gradle-android-x-failure',
         eventError: 'app-not-using-plugins',
       ).send();
     }
@@ -192,7 +192,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
         'Please migrate your app to AndroidX. See https://goo.gl/CP92wY.'
       );
       BuildEvent(
-        'gradle--android-x-failure',
+        'gradle-android-x-failure',
         eventError: 'app-not-using-androidx',
       ).send();
     }
@@ -201,7 +201,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       // by this point the app is using AndroidX, the plugins are built as
       // AARs, Jetifier translated Support libraries for AndroidX equivalents.
       BuildEvent(
-        'gradle--android-x-failure',
+        'gradle-android-x-failure',
         eventError: 'using-jetifier',
       ).send();
     }
@@ -211,7 +211,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
         'The tool is about to try using Jetfier to solve the incompatibility.'
       );
       BuildEvent(
-        'gradle--android-x-failure',
+        'gradle-android-x-failure',
         eventError: 'not-using-jetifier',
       ).send();
       return GradleBuildStatus.retryWithAarPlugins;

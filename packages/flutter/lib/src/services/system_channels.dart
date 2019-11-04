@@ -166,6 +166,14 @@ class SystemChannels {
   ///    there is no existing state on the framework side, the call should
   ///    fizzle.
   ///
+  ///  * `TextInputClient.onConnectionClosed`: The text input connection closed
+  ///    on the platform side. For example the application is moved to
+  ///    background or used closed the virtual keyboard. This method informs
+  ///    [TextInputClient] to clear connection and finalize editing.
+  ///    `TextInput.clearClient` and `TextInput.hide` is not called after
+  ///    clearing the connection since on the platform side the connection is
+  ///    already finalized.
+  ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel textInput = OptionalMethodChannel(

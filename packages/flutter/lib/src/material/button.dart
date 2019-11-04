@@ -60,6 +60,7 @@ class RawMaterialButton extends StatefulWidget {
     this.autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
+    this.enableFeedback = true,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
        assert(shape != null),
        assert(elevation != null && elevation >= 0.0),
@@ -259,6 +260,16 @@ class RawMaterialButton extends StatefulWidget {
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool enableFeedback;
+
   @override
   _RawMaterialButtonState createState() => _RawMaterialButtonState();
 }
@@ -367,6 +378,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           onHover: _handleHoveredChanged,
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
+          enableFeedback: widget.enableFeedback,
           customBorder: effectiveShape,
           child: IconTheme.merge(
             data: IconThemeData(color: effectiveTextColor),

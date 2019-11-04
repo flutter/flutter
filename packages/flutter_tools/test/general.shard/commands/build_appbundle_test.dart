@@ -306,7 +306,7 @@ flutter:
       verify(mockUsage.sendEvent(
         'build',
         'appbundle',
-        label: 'gradle--r8-failure',
+        label: 'gradle-r8-failure',
         parameters: anyNamed('parameters'),
       )).called(1);
     },

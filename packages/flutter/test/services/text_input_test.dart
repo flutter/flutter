@@ -18,7 +18,7 @@ void main() {
     setUp(() {
       fakeTextChannel = FakeTextChannel((MethodCall call) async {});
       TextInput.setChannel(fakeTextChannel);
-      client = const FakeTextInputClient();
+      client = FakeTextInputClient();
     });
 
     tearDown(() {
@@ -150,22 +150,55 @@ void main() {
       expect(signed.hashCode == signedDecimal.hashCode, false);
       expect(decimal.hashCode == signedDecimal.hashCode, false);
     });
+
+    test('TextInputClient onConnectionClosed method is called', () async {
+      // Assemble a TextInputConnection so we can verify its change in state.
+      final FakeTextInputClient client = FakeTextInputClient();
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send onConnectionClosed message.
+      final ByteData messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[1],
+        'method': 'TextInputClient.onConnectionClosed',
+      });
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData _) {},
+      );
+
+      expect(client.latestMethodCall, 'connectionClosed');
+    });
   });
 }
 
 class FakeTextInputClient implements TextInputClient {
-  const FakeTextInputClient();
+  String latestMethodCall = '';
+
+  @override
+  void performAction(TextInputAction action) {
+    latestMethodCall = 'performAction';
+  }
+
+  @override
+  void updateEditingValue(TextEditingValue value) {
+    latestMethodCall = 'updateEditingValue';
+  }
+
+  @override
+  void updateFloatingCursor(RawFloatingCursorPoint point) {
+    latestMethodCall = 'updateFloatingCursor';
+  }
+
+  @override
+  void connectionClosed() {
+    latestMethodCall = 'connectionClosed';
+  }
 
   TextInputConfiguration get configuration => const TextInputConfiguration();
-
-  @override
-  void performAction(TextInputAction action) => throw UnimplementedError();
-
-  @override
-  void updateEditingValue(TextEditingValue value) => throw UnimplementedError();
-
-  @override
-  void updateFloatingCursor(RawFloatingCursorPoint point) => throw UnimplementedError();
 }
 
 class FakeTextChannel implements MethodChannel {

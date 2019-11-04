@@ -508,7 +508,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       SelectAction.key: _createAction,
       if (!kIsWeb) ActivateAction.key: _createAction,
     };
-    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
+    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   @override
@@ -522,7 +522,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   @override
   void dispose() {
-    WidgetsBinding.instance.focusManager.removeHighlightModeListener(_handleFocusHighlightModeChange);
+    FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
     super.dispose();
   }
 
@@ -650,7 +650,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   void _updateFocusHighlights() {
     bool showFocus;
-    switch (WidgetsBinding.instance.focusManager.highlightMode) {
+    switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         showFocus = false;
         break;
