@@ -304,15 +304,15 @@ class _InteractiveViewerSized extends StatefulWidget {
     @required this.child,
     @required this.size,
     this.maxScale,
-    this.minScale,
+    @required this.minScale,
     this.boundaryRect,
     this.initialTranslation,
     this.initialScale,
     this.initialRotation,
-    this.disableTranslation,
-    this.disableScale,
-    this.disableRotation,
-    this.reset,
+    @required this.disableTranslation,
+    @required this.disableScale,
+    @required this.disableRotation,
+    @required this.reset,
     this.onTapDown,
     this.onTapUp,
     this.onTap,
@@ -468,7 +468,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
   }
 
   // Get the offset of the current widget from the global screen coordinates.
-  // TODO(justinmc): Protect against calling this during first build.
   static Offset getOffset(BuildContext context) {
     final RenderBox renderObject = context.findRenderObject();
     return renderObject.localToGlobal(Offset.zero);
