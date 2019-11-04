@@ -68,17 +68,24 @@ class FileHash {
 /// through this class. All file stamps are held in memory during a build
 /// operation, and persisted to cache in the build directory.
 ///
-/// By default, md5 hashes are used as the file stamp. [_timestampModeEnabled]
+/// By default, md5 hashes are used as the file stamp. [timestampModeEnabled]
 /// can be used to configure faster checks for incremental builds.
 ///
 /// The format of the file store is subject to change and not part of its API.
-class FileStore {
-  FileStore(this.environment, this.fileSystem, [this._timestampModeEnabled = false]) :
-    _cachePath = environment.buildDir.childFile(_kFileCache).path;
+abstract class FileStore {
+  FileStore._(this.environment, this.fileSystem)
+    :  _cachePath = environment.buildDir.childFile(_kFileCache).path;
+
+  /// Create a new [FileStore] instance.
+  static FileStore create(Environment environment, FileSystem fileSystem, [bool timestampModeEnabled = false])  {
+    if (timestampModeEnabled) {
+      return _TimestampFileStore(environment, fileSystem);
+    }
+    return _HashFileStore(environment, fileSystem);
+  }
 
   final FileSystem fileSystem;
   final String _cachePath;
-  final bool _timestampModeEnabled;
 
   final Environment environment;
   final HashMap<String, String> previousStamps = HashMap<String, String>();
@@ -158,36 +165,21 @@ class FileStore {
 
   /// Computes a hash of the provided files and returns a list of entities
   /// that were dirty.
+  Future<List<File>> updateFiles(List<File> files);
+}
+
+// An implementation of the [FileStore] that uses file hashes.
+class _HashFileStore extends FileStore {
+  _HashFileStore(Environment environment, FileSystem fileSystem) : super._(environment, fileSystem);
+
+  @override
   Future<List<File>> updateFiles(List<File> files) async {
     final List<File> dirty = <File>[];
-    if (!_timestampModeEnabled) {
-      final Pool openFiles = Pool(kMaxOpenFiles);
-      await Future.wait(<Future<void>>[
-        for (File file in files) _hashFile(file, dirty, openFiles)
-      ]);
-    } else {
-      for (File file in files) {
-        _timestampCheckFile(file, dirty);
-      }
-    }
+    final Pool openFiles = Pool(kMaxOpenFiles);
+    await Future.wait(<Future<void>>[
+      for (File file in files) _hashFile(file, dirty, openFiles)
+    ]);
     return dirty;
-  }
-
-  void _timestampCheckFile(File file, List<File> dirty) {
-    final String absolutePath = file.path;
-    final String previousTimestamp = previousStamps[absolutePath];
-    // If the file is missing it is assumed to be dirty.
-    if (!file.existsSync()) {
-      currentStamps.remove(absolutePath);
-      previousStamps.remove(absolutePath);
-      dirty.add(file);
-      return;
-    }
-    final String currentTimestamp = file.lastModifiedSync().millisecondsSinceEpoch.toString();
-    if (currentTimestamp != previousTimestamp) {
-      dirty.add(file);
-    }
-    currentStamps[absolutePath] = currentTimestamp;
   }
 
   Future<void> _hashFile(File file, List<File> dirty, Pool pool) async {
@@ -211,5 +203,36 @@ class FileStore {
     } finally {
       resource.release();
     }
+  }
+}
+
+// An implementation of the [FileStore] that uses timestamp comparisons.
+class _TimestampFileStore extends FileStore {
+  _TimestampFileStore(Environment environment, FileSystem fileSystem) : super._(environment, fileSystem);
+
+  @override
+  Future<List<File>> updateFiles(List<File> files) async {
+    final List<File> dirty = <File>[];
+    for (File file in files) {
+      _timestampCheckFile(file, dirty);
+    }
+    return dirty;
+  }
+
+  void _timestampCheckFile(File file, List<File> dirty) {
+    final String absolutePath = file.path;
+    final String previousTimestamp = previousStamps[absolutePath];
+    // If the file is missing it is assumed to be dirty.
+    if (!file.existsSync()) {
+      currentStamps.remove(absolutePath);
+      previousStamps.remove(absolutePath);
+      dirty.add(file);
+      return;
+    }
+    final String currentTimestamp = file.lastModifiedSync().millisecondsSinceEpoch.toString();
+    if (currentTimestamp != previousTimestamp) {
+      dirty.add(file);
+    }
+    currentStamps[absolutePath] = currentTimestamp;
   }
 }

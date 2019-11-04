@@ -62,7 +62,8 @@ class AssembleCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'timestamp-mode',
-      help: 'The maximum number of concurrent tasks the build system will run.',
+      help: 'Whether to use timestamps instead of hashes to determine if a file '
+        'has been invalidated.',
       negatable: false,
       defaultsTo: false
     );

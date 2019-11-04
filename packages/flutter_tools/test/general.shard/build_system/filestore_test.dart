@@ -16,20 +16,20 @@ void main() {
   Testbed testbed;
   Environment environment;
 
-  for (bool timestampMode in <bool>[true, false]) {
-    setUp(() {
-      testbed = Testbed(setup: () {
-        fs.directory('build').createSync();
-        environment = Environment(
-          outputDir: fs.currentDirectory,
-          projectDir: fs.currentDirectory,
-        );
-        environment.buildDir.createSync(recursive: true);
-      });
+  setUp(() {
+    testbed = Testbed(setup: () {
+      fs.directory('build').createSync();
+      environment = Environment(
+        outputDir: fs.currentDirectory,
+        projectDir: fs.currentDirectory,
+      );
+      environment.buildDir.createSync(recursive: true);
     });
+  });
 
+  for (bool timestampMode in <bool>[true, false]) {
     test('Initializes file store with timestampmode:$timestampMode', () => testbed.run(() {
-      final FileStore filestore = FileStore(environment, fs, timestampMode);
+      final FileStore filestore = FileStore.create(environment, fs, timestampMode);
       filestore.initialize();
       filestore.persist();
 
@@ -47,7 +47,7 @@ void main() {
       final File file = fs.file('foo.dart')
         ..createSync()
         ..writeAsStringSync('hello');
-      final FileStore filestore = FileStore(environment, fs, timestampMode);
+      final FileStore filestore = FileStore.create(environment, fs, timestampMode);
       filestore.initialize();
       await filestore.updateFiles(<File>[file]);
       filestore.persist();
@@ -60,7 +60,7 @@ void main() {
       expect(fileStorage.files.single.path, file.path);
 
 
-      final FileStore newFileCache = FileStore(environment, fs, timestampMode);
+      final FileStore newFileCache = FileStore.create(environment, fs, timestampMode);
       newFileCache.initialize();
       expect(newFileCache.currentStamps, isEmpty);
       expect(newFileCache.previousStamps['foo.dart'],  currentHash);
@@ -77,7 +77,7 @@ void main() {
       final File file = fs.file('foo.dart')
         ..createSync()
         ..writeAsStringSync('hello');
-      final FileStore filestore = FileStore(environment, fs, timestampMode);
+      final FileStore filestore = FileStore.create(environment, fs, timestampMode);
       filestore.initialize();
       environment.buildDir.deleteSync(recursive: true);
 
@@ -87,7 +87,7 @@ void main() {
     }));
 
     test('handles hashing missing files with timestampmode:$timestampMode', () => testbed.run(() async {
-      final FileStore filestore = FileStore(environment, fs, timestampMode);
+      final FileStore filestore = FileStore.create(environment, fs, timestampMode);
       filestore.initialize();
 
       final List<File> results = await filestore.updateFiles(<File>[fs.file('hello.dart')]);
@@ -100,7 +100,7 @@ void main() {
     test('handles failure to persist file store with timestampmode:$timestampMode', () => testbed.run(() async {
       final BufferLogger bufferLogger = logger;
       final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(fs);
-      final FileStore filestore = FileStore(environment, fakeForwardingFileSystem, timestampMode);
+      final FileStore filestore = FileStore.create(environment, fakeForwardingFileSystem, timestampMode);
       final String cacheFile = environment.buildDir.childFile('.filecache').path;
       final MockFile mockFile = MockFile();
       when(mockFile.writeAsBytesSync(any)).thenThrow(const FileSystemException('Out of space!'));
@@ -116,7 +116,7 @@ void main() {
     test('handles failure to restore file store with timestampmode:$timestampMode', () => testbed.run(() async {
       final BufferLogger bufferLogger = logger;
       final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(fs);
-      final FileStore filestore = FileStore(environment, fakeForwardingFileSystem, timestampMode);
+      final FileStore filestore = FileStore.create(environment, fakeForwardingFileSystem, timestampMode);
       final String cacheFile = environment.buildDir.childFile('.filecache').path;
       final MockFile mockFile = MockFile();
       when(mockFile.readAsBytesSync()).thenThrow(const FileSystemException('Out of space!'));
