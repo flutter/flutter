@@ -171,16 +171,18 @@ enum AppLifecycleState {
   ///
   /// When the application is in this state, the engine will not call the
   /// [Window.onBeginFrame] and [Window.onDrawFrame] callbacks.
+  ///
+  /// Android apps in this state should assume that they may enter the
+  /// [suspending] state at any time.
   paused,
 
-  /// The application is still hosted on a flutter engine but is detached from
-  /// any host views.
+  /// The application will be suspended momentarily.
   ///
-  /// When the application is in this state, the engine is running without
-  /// a view. It can either be in the progress of attaching a view when engine
-  /// was first initializes, or after the view being destroyed due to a Navigator
-  /// pop.
-  detached,
+  /// When the application is in this state, the engine will not call the
+  /// [Window.onBeginFrame] and [Window.onDrawFrame] callbacks.
+  ///
+  /// On iOS, this state is currently unused.
+  suspending,
 }
 
 /// A representation of distances for each of the four edges of a rectangle,
