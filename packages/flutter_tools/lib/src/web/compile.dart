@@ -21,7 +21,7 @@ import '../reporting/reporting.dart';
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
-Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo, bool initializePlatform) async {
+Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo, bool initializePlatform, bool useSkia) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
@@ -42,6 +42,7 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
         kTargetFile: target,
         kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
+        'WebUseSkia': useSkia.toString(), 
       },
     ));
     if (!result.success) {
