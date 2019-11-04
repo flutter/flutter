@@ -9,7 +9,6 @@ import 'package:flutter/painting.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'binding.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
@@ -249,7 +248,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         }
       }
     });
-    return sorted.first;
+
+    if (sorted.isNotEmpty)
+      return sorted.first;
+
+    return null;
   }
 
   // Sorts nodes from left to right horizontally, and removes nodes that are
@@ -619,7 +622,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     // If we still didn't find any candidate, use the current node as a
     // fallback.
     candidate ??= currentNode;
-    candidate ??= WidgetsBinding.instance.focusManager.rootScope;
+    candidate ??= FocusManager.instance.rootScope;
     return candidate;
   }
 
@@ -803,7 +806,7 @@ class _RequestFocusActionBase extends Action {
 
   @override
   void invoke(FocusNode node, Intent intent) {
-    _previousFocus = WidgetsBinding.instance.focusManager.primaryFocus;
+    _previousFocus = primaryFocus;
     node.requestFocus();
   }
 

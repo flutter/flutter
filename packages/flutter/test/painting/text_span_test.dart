@@ -235,4 +235,29 @@ void main() {
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)).runtimeType, WidgetSpan);
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 3)).runtimeType, TextSpan);
   });
+
+  test('TextSpan with a null child should throw FlutterError', () {
+    const TextSpan text = TextSpan(
+      text: 'foo bar',
+      children: <InlineSpan>[
+        null,
+      ],
+    );
+    FlutterError error;
+    try {
+      text.computeToPlainText(StringBuffer());
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.toStringDeep(),
+      'FlutterError\n'
+      '   TextSpan contains a null child.\n'
+      '   A TextSpan object with a non-null child list should not have any\n'
+      '   nulls in its child list.\n'
+      '   The full text in question was:\n'
+      '     TextSpan("foo bar")\n'
+    );
+  });
+
 }

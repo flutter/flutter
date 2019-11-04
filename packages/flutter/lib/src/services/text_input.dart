@@ -386,6 +386,7 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.obscureText = false,
     this.autocorrect = true,
+    this.enableSuggestions = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
@@ -393,6 +394,7 @@ class TextInputConfiguration {
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
        assert(inputAction != null),
        assert(textCapitalization != null);
@@ -409,6 +411,20 @@ class TextInputConfiguration {
   ///
   /// Defaults to true.
   final bool autocorrect;
+
+  /// {@template flutter.services.textInput.enableSuggestions}
+  /// Whether to show input suggestions as the user types.
+  ///
+  /// This flag only affects Android. On iOS, suggestions are tied directly to
+  /// [autocorrect], so that suggestions are only shown when [autocorrect] is
+  /// true. On Android autocorrection and suggestion are controlled separately.
+  ///
+  /// Defaults to true. Cannot be null.
+  ///
+  /// See also:
+  ///  * <https://developer.android.com/reference/android/text/InputType.html#TYPE_TEXT_FLAG_NO_SUGGESTIONS>
+  /// {@endtemplate}
+  final bool enableSuggestions;
 
   /// What text to display in the text input control's action button.
   final String actionLabel;
@@ -439,6 +455,7 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
+      'enableSuggestions': enableSuggestions,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
@@ -633,6 +650,11 @@ abstract class TextInputClient {
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
+
+  /// Platform notified framework of closed connection.
+  ///
+  /// [TextInputClient] should cleanup its connection and finalize editing.
+  void connectionClosed();
 }
 
 /// An interface for interacting with a text input control.
@@ -734,6 +756,14 @@ class TextInputConnection {
     }
     assert(!attached);
   }
+
+  /// Platform sent a notification informing the connection is closed.
+  ///
+  /// [TextInputConnection] should clean current client connection.
+  void connectionClosedReceived() {
+    _clientHandler._currentConnection = null;
+    assert(!attached);
+  }
 }
 
 TextInputAction _toTextInputAction(String action) {
@@ -765,7 +795,7 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.newline':
       return TextInputAction.newline;
   }
-  throw FlutterError('Unknown text input action: $action');
+  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]);
 }
 
 FloatingCursorDragState _toTextCursorAction(String state) {
@@ -777,7 +807,7 @@ FloatingCursorDragState _toTextCursorAction(String state) {
     case 'FloatingCursorDragState.end':
       return FloatingCursorDragState.End;
   }
-  throw FlutterError('Unknown text cursor action: $state');
+  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]);
 }
 
 RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
@@ -813,6 +843,9 @@ class _TextInputClientHandler {
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        break;
+      case 'TextInputClient.onConnectionClosed':
+        _currentConnection._client.connectionClosed();
         break;
       default:
         throw MissingPluginException();

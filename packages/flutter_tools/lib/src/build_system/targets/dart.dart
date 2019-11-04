@@ -8,10 +8,8 @@ import '../../artifacts.dart';
 import '../../asset.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
-import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
-import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../globals.dart';
 import '../../project.dart';
@@ -41,27 +39,6 @@ const String kTrackWidgetCreation = 'TrackWidgetCreation';
 ///
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
-
-/// Finds the locations of all dart files within the project.
-///
-/// This does not attempt to determine if a file is used or imported, so it
-/// may otherwise report more files than strictly necessary.
-List<File> listDartSources(Environment environment) {
-  final Map<String, Uri> packageMap = PackageMap(environment.projectDir.childFile('.packages').path).map;
-  final List<File> dartFiles = <File>[];
-  for (Uri uri in packageMap.values) {
-    final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
-    if (!libDirectory.existsSync()) {
-      continue;
-    }
-    for (FileSystemEntity entity in libDirectory.listSync(recursive: true)) {
-      if (entity is File && entity.path.endsWith('.dart')) {
-        dartFiles.add(entity);
-      }
-    }
-  }
-  return dartFiles;
-}
 
 /// Copies the prebuilt flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
@@ -207,19 +184,33 @@ class KernelSnapshot extends Target {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'kernel_snapshot');
     }
+    if (environment.defines[kTargetPlatform] == null) {
+      throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
+    }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
     final String targetFileAbsolute = fs.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
+    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+
+    TargetModel targetModel = TargetModel.flutter;
+    if (targetPlatform == TargetPlatform.fuchsia_x64 ||
+        targetPlatform == TargetPlatform.fuchsia_arm64) {
+      targetModel = TargetModel.flutterRunner;
+    }
 
     final CompilerOutput output = await compiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+      sdkRoot: artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: targetPlatform,
+        mode: buildMode,
+      ),
       aot: buildMode != BuildMode.debug,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
-      targetModel: TargetModel.flutter,
+      targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
@@ -321,5 +312,54 @@ class AotElfRelease extends AotElfBase {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+  ];
+}
+
+/// Copies the prebuilt flutter aot bundle.
+// This is a one-off rule for implementing build aot in terms of assemble.
+abstract class CopyFlutterAotBundle extends Target {
+  const CopyFlutterAotBundle();
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.so'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/app.so'),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final File outputFile = environment.outputDir.childFile('app.so');
+    if (!outputFile.parent.existsSync()) {
+      outputFile.parent.createSync(recursive: true);
+    }
+    environment.buildDir.childFile('app.so').copySync(outputFile.path);
+  }
+}
+
+class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
+  const ProfileCopyFlutterAotBundle();
+
+  @override
+  String get name => 'profile_copy_aot_flutter_bundle';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfProfile(),
+  ];
+}
+
+class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
+  const ReleaseCopyFlutterAotBundle();
+
+  @override
+  String get name => 'release_copy_aot_flutter_bundle';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfRelease(),
   ];
 }

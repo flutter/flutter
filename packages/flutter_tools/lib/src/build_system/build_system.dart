@@ -406,7 +406,7 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment)
+    final FileHashStore fileCache = FileHashStore(environment, fs)
       ..initialize();
 
     // Perform sanity checks on build.
@@ -575,6 +575,9 @@ class ExceptionMeasurement {
   final String target;
   final dynamic exception;
   final StackTrace stackTrace;
+
+  @override
+  String toString() => 'target: $target\nexception:$exception\n$stackTrace';
 }
 
 /// Helper class to collect measurement data.

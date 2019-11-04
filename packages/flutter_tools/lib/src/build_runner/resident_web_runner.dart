@@ -36,6 +36,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   ResidentRunner createWebRunner(
     Device device, {
     String target,
+    @required bool stayResident,
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
@@ -46,6 +47,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       flutterProject: flutterProject,
       debuggingOptions: debuggingOptions,
       ipv6: ipv6,
+      stayResident: stayResident,
     );
   }
 }
@@ -57,12 +59,13 @@ class ResidentWebRunner extends ResidentRunner {
     @required this.flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
+    bool stayResident = true,
   }) : super(
           <FlutterDevice>[],
           target: target ?? fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
-          stayResident: true,
+          stayResident: stayResident,
         );
 
   final Device device;
@@ -255,6 +258,15 @@ class ResidentWebRunner extends ResidentRunner {
         'start or was killed by another process.');
     } on SocketException catch (err) {
       throwToolExit(err.toString());
+    } on StateError catch (err) {
+      final String message = err.toString();
+      if (message.contains('Unable to start build daemon')) {
+        throwToolExit(
+          'Failed to start build daemon. The process might have '
+          'exited unexpectedly during startup. Try running the application '
+          'again.');
+      }
+      rethrow;
     } finally {
       if (statusActive) {
         buildStatus.stop();
@@ -307,9 +319,15 @@ class ResidentWebRunner extends ResidentRunner {
     connectionInfoCompleter?.complete(
       DebugConnectionInfo(wsUri: websocketUri)
     );
-    final int result = await waitForAppToFinish();
+
+    if (stayResident) {
+      await waitForAppToFinish();
+    } else {
+      await stopEchoingDeviceLog();
+      await exitApp();
+    }
     await cleanupAtFinish();
-    return result;
+    return 0;
   }
 
   @override

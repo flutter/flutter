@@ -3,9 +3,10 @@
 [![Build Status - Cirrus][]][Build status]
 [![Gitter Channel][]][Gitter badge]
 
-Flutter is Google's mobile app SDK for crafting high-quality native interfaces
-on iOS and Android in record time. Flutter works with existing code, is used by
-developers and organizations around the world, and is free and open source.
+Flutter is Google's SDK for crafting beautiful, fast user experiences for
+mobile, web and desktop from a single codebase. Flutter works with existing
+code, is used by developers and organizations around the world, and is free
+and open source.
 
 ## Documentation
 
@@ -23,7 +24,7 @@ mailing list.
 We think Flutter will help you create beautiful, fast apps, with a productive,
 extensible and open development model.
 
-### Beautiful apps
+### Beautiful user experiences
 
 We want to enable designers to deliver their full creative vision without being
 forced to water it down due to limitations of the underlying framework.
@@ -35,13 +36,16 @@ iOS and Android.
 
 ![Reflectly hero image][Reflectly hero image]
 
-### Fast apps
+### Fast results
 
 Flutter is fast. It's powered by the same hardware-accelerated [Skia] 2D
 graphics library that underpins Chrome and Android. We architected Flutter to
 support glitch-free, jank-free graphics at the native speed of your device.
 Flutter code is powered by the world-class [Dart platform], which enables
-compilation to native 32-bit and 64-bit ARM code for iOS and Android.
+compilation to 32-bit and 64-bit ARM machine code for iOS and Android, as well
+as JavaScript for the web and Intel x64 for desktop devices.
+
+![Dart platforms][Dart platforms]
 
 ### Productive development
 
@@ -52,26 +56,11 @@ and see the results instantly without restarting your app or losing its state.
 
 ### Extensible and open model
 
-Flutter works with any development tool, but includes editor plug-ins for both
-[Visual Studio Code] and [IntelliJ / Android Studio]. Flutter provides
-[thousands of packages][Flutter packages] to speed your development, regardless
-of your target platform. And accessing platform features is easy. Here is a
-snippet from our [interop example]:
-
-```dart
-Future<void> getBatteryLevel() async {
-  var batteryLevel = 'unknown';
-  try {
-    int result = await methodChannel.invokeMethod('getBatteryLevel');
-    batteryLevel = 'Battery level: $result%';
-  } on PlatformException {
-    batteryLevel = 'Failed to get battery level.';
-  }
-  setState(() {
-    _batteryLevel = batteryLevel;
-  });
-}
-```
+Flutter works with any development tool (or none at all), but includes editor
+plug-ins for both [Visual Studio Code] and [IntelliJ / Android Studio]. Flutter
+provides [thousands of packages][Flutter packages] to speed your development,
+regardless of your target platform. And accessing other native code is easy,
+with support for both [FFI] and [platform-specific APIs][platform channels]. 
 
 Flutter is a fully open source project, and we welcome contributions.
 Information on how to get started can be found at our
@@ -86,6 +75,7 @@ Information on how to get started can be found at our
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter
 [widget catalog]: https://flutter.dev/widgets/
 [Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
+[Dart platforms]: https://dart.dev/assets/platforms-7f4d540acf9fe801b456ad74f9f855230a385014d05d9f5997c878b889a67a0f.svg
 [Skia]: https://skia.org/
 [Dart platform]: https://dart.dev/
 [Hot reload animation]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif
@@ -93,4 +83,6 @@ Information on how to get started can be found at our
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
 [Flutter packages]: https://pub.dev/flutter
+[FFI]: https://flutter.dev/docs/development/platform-integration/c-interop
+[platform channels]: https://flutter.dev/docs/development/platform-integration/platform-channels
 [interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel

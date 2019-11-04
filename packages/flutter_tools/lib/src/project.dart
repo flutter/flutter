@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
-import 'android/gradle.dart' as gradle;
+import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -572,6 +572,11 @@ class AndroidProject {
   String get group {
     final File gradleFile = hostAppGradleRoot.childFile('build.gradle');
     return _firstMatchInFile(gradleFile, _groupPattern)?.group(1);
+  }
+
+  /// The build directory where the Android artifacts are placed.
+  Directory get buildDirectory {
+    return parent.directory.childDirectory('build');
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {

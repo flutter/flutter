@@ -38,6 +38,7 @@ class RawMaterialButton extends StatefulWidget {
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
+    this.onLongPress,
     this.onHighlightChanged,
     this.mouseCursor,
     this.textStyle,
@@ -60,6 +61,7 @@ class RawMaterialButton extends StatefulWidget {
     this.autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
+    this.enableFeedback = true,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
        assert(shape != null),
        assert(elevation != null && elevation >= 0.0),
@@ -76,8 +78,21 @@ class RawMaterialButton extends StatefulWidget {
 
   /// Called when the button is tapped or otherwise activated.
   ///
-  /// If this is set to null, the button will be disabled, see [enabled].
+  /// If this callback and [onLongPress] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
   final VoidCallback onPressed;
+
+  /// Called when the button is long-pressed.
+  ///
+  /// If this callback and [onPressed] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
+  final VoidCallback onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -226,8 +241,8 @@ class RawMaterialButton extends StatefulWidget {
   /// Whether the button is enabled or disabled.
   ///
   /// Buttons are disabled by default. To enable a button, set its [onPressed]
-  /// property to a non-null value.
-  bool get enabled => onPressed != null;
+  /// or [onLongPress] properties to a non-null value.
+  bool get enabled => onPressed != null || onLongPress != null;
 
   /// Configures the minimum size of the tap target.
   ///
@@ -248,6 +263,16 @@ class RawMaterialButton extends StatefulWidget {
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
+
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool enableFeedback;
 
   @override
   _RawMaterialButtonState createState() => _RawMaterialButtonState();
@@ -356,6 +381,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           hoverColor: widget.hoverColor,
           onHover: _handleHoveredChanged,
           onTap: widget.onPressed,
+          onLongPress: widget.onLongPress,
+          enableFeedback: widget.enableFeedback,
           customBorder: effectiveShape,
           mouseCursor: widget.mouseCursor,
           child: IconTheme.merge(
