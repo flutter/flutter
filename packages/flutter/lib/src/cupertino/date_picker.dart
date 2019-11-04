@@ -311,10 +311,16 @@ class CupertinoDatePicker extends StatefulWidget {
     // columns, so they are placed together to one state.
     // The `date` mode has different children and is implemented in a different
     // state.
-    if (mode == CupertinoDatePickerMode.time || mode == CupertinoDatePickerMode.dateAndTime)
-      return _CupertinoDatePickerDateTimeState();
-    else
-      return _CupertinoDatePickerDateState();
+    switch (mode) {
+      case CupertinoDatePickerMode.time:
+      case CupertinoDatePickerMode.dateAndTime:
+        return _CupertinoDatePickerDateTimeState();
+      case CupertinoDatePickerMode.date:
+        return _CupertinoDatePickerDateState();
+    }
+
+    assert(false);
+    return _CupertinoDatePickerDateTimeState();
   }
 
   // Estimate the minimum width that each column needs to layout its content.
