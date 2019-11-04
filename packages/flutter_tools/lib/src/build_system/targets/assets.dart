@@ -15,9 +15,6 @@ import '../depfile.dart';
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
 ///
-/// [pathSuffix] may be optionally provided to add additional paths to the
-/// output directory.
-///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) async {
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
