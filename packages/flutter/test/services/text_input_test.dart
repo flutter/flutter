@@ -16,9 +16,7 @@ void main() {
     FakeTextInputClient client;
 
     setUp(() {
-      fakeTextChannel = FakeTextChannel((MethodCall call) async {
-        return;
-      });
+      fakeTextChannel = FakeTextChannel((MethodCall call) async {});
       TextInput.setChannel(fakeTextChannel);
       client = const FakeTextInputClient();
     });
@@ -30,6 +28,9 @@ void main() {
 
     test('text input client handler responds to reattach with setClient', () async {
       TextInput.attach(client, client.configuration);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+      ]);
 
       fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
 
@@ -44,8 +45,16 @@ void main() {
 
     test('text input client handler responds to reattach with setClient and text state', () async {
       final TextInputConnection connection = TextInput.attach(client, client.configuration);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+      ]);
+
       const TextEditingValue editingState = TextEditingValue(text: 'foo');
       connection.setEditingState(editingState);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        MethodCall('TextInput.setEditingState', editingState.toJSON()),
+      ]);
 
       fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
 
@@ -154,6 +163,7 @@ class FakeTextInputClient implements TextInputClient {
 
   @override
   void updateEditingValue(TextEditingValue value) => throw UnimplementedError();
+
   @override
   void updateFloatingCursor(RawFloatingCursorPoint point) => throw UnimplementedError();
 }
@@ -207,10 +217,10 @@ class FakeTextChannel implements MethodChannel {
       final String expectedString = utf8.decode(expectedData.buffer.asUint8List());
 
       if (outgoingString != expectedString) {
-        print('''Index $i did not match:
-${outgoingCalls[i]}
-${calls[i]}
-''');
+        print(
+          'Index $i did not match:\n'
+          '  actual: ${outgoingCalls[i]}'
+          '  expected: ${calls[i]}');
         hasError = true;
       }
     }

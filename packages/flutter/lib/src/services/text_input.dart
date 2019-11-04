@@ -927,7 +927,8 @@ class TextInput {
       return;
     final String method = methodCall.method;
 
-    // Reattach request needs to be handled regardless of the client ID.
+    // The requestExistingInputState request needs to be handled regardless of
+    // the client ID, as long as we have a _currentConnection.
     if (method == 'TextInputClient.requestExistingInputState') {
       assert(_currentConnection._client != null);
       _attach(_currentConnection, _currentConfiguration);
