@@ -25,8 +25,8 @@
   "timerPickerMinuteLabelOther": "דק’",
   "timerPickerSecondLabelOne": "שנ’",
   "timerPickerSecondLabelOther": "שנ’",
-  "cutButtonLabel": "גזירה",
-  "copyButtonLabel": "העתקה",
-  "pasteButtonLabel": "הדבקה",
-  "selectAllButtonLabel": "בחירת הכול"
+  "cutButtonLabel": "גזור",
+  "copyButtonLabel": "העתק",
+  "pasteButtonLabel": "הדבק",
+  "selectAllButtonLabel": "בחר הכל"
 }
