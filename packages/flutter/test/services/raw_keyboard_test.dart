@@ -779,7 +779,6 @@ void main() {
           'modifiers': 0x0,
         });
       }
-
       expect(() => _createFailingKey(), throwsAssertionError);
     });
     test('Control keyboard keys are correctly translated', () {

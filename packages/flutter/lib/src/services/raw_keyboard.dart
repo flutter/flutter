@@ -7,7 +7,6 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'keyboard_key.dart';
 import 'raw_keyboard_android.dart';
