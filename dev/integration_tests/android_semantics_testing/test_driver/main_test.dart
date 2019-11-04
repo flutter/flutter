@@ -39,7 +39,7 @@ void main() {
         'put',
         'secure',
         'enabled_accessibility_services',
-        'com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService',
+        'com.google.android.marvin.TalkBack/com.google.android.marvin.TalkBack.TalkBackService',
       ]);
       await run.exitCode;
     });
@@ -61,6 +61,7 @@ void main() {
     group('TextField', () {
       setUpAll(() async {
         await driver.tap(find.text(textFieldRoute));
+        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
       });
 
@@ -86,6 +87,7 @@ void main() {
         );
 
         await driver.tap(normalTextField);
+        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
@@ -106,6 +108,7 @@ void main() {
         );
 
         await driver.enterText('hello world');
+        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
@@ -149,6 +152,7 @@ void main() {
         );
 
         await driver.tap(passwordTextField);
+        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
@@ -169,6 +173,7 @@ void main() {
         );
 
         await driver.enterText('hello world');
+        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
@@ -654,7 +659,6 @@ void main() {
       });
 
       tearDownAll(() async {
-        await Future<void>.delayed(const Duration(milliseconds: 500));
         await driver.tap(find.byValueKey('back'));
       });
     });
