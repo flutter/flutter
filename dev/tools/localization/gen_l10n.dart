@@ -66,6 +66,7 @@ class @className {
     return initializeMessages(locale.toString())
       .then<@className>((void _) => @className(locale));
   }
+
   static @className of(BuildContext context) {
     return Localizations.of<@className>(context, @className);
   }
@@ -166,7 +167,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'];
     for (String placeholder in placeholders.keys)
       message = message.replaceAll('{$placeholder}', '\$$placeholder');
-    return message;
+    return generateString(message);
   }
 
   final Map<String, dynamic> attributesMap = bundle['@$key'];
@@ -174,7 +175,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     return simpleMethodTemplate
       .replaceAll('@methodName', key)
       .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'Object').join(', '))
-      .replaceAll('@message', "'${genSimpleMethodMessage(bundle, key)}'")
+      .replaceAll('@message', '${genSimpleMethodMessage(bundle, key)}')
       .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
   }
 
