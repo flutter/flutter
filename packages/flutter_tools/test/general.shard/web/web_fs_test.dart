@@ -124,6 +124,7 @@ void main() {
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: true,
+      useSkia: false,
       hostname: null,
       port: null,
     );
@@ -153,6 +154,7 @@ void main() {
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
+      useSkia: false,
       hostname: null,
       port: null,
     );
@@ -173,6 +175,7 @@ void main() {
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
+      useSkia: false,
       hostname: 'foo',
       port: '1234',
     );
@@ -205,6 +208,7 @@ void main() {
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
+      useSkia: false,
       hostname: 'foo',
       port: '1234',
     ), throwsA(isInstanceOf<Exception>()));
