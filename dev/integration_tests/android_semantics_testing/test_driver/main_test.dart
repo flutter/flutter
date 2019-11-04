@@ -39,7 +39,7 @@ void main() {
         'put',
         'secure',
         'enabled_accessibility_services',
-        'com.google.android.marvin.TalkBack/com.google.android.marvin.TalkBack.TalkBackService',
+        'com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService',
       ]);
       await run.exitCode;
     });
