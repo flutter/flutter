@@ -64,15 +64,16 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
             child: CustomPaint(
               painter: painter,
             ),
-            // TODO(justinmc): Simplify this by using margin that's not related
-            // to the size?
-            boundaryMargin: EdgeInsets.symmetric(
-              horizontal: size.width,
-              vertical: size.height / 2,
+            // The board is drawn centered at the origin, which is the top left
+            // corner in InteractiveViewer, so set boundaryMargin to accommodate
+            // that, and shift it to the center of the viewport
+            // with initialTranslation.
+            boundaryMargin: EdgeInsets.fromLTRB(
+              2 * size.width,
+              3 * size.height / 2,
+              size.width,
+              size.height / 2,
             ),
-            // Center the board in the middle of the screen. It's drawn centered
-            // at the origin, which is the top left corner of the
-            // InteractiveViewer.
             initialTranslation: Offset(size.width / 2, size.height / 2),
             onTapUp: _onTapUp,
           );

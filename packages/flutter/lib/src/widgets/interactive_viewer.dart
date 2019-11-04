@@ -79,6 +79,8 @@ class InteractiveViewer extends StatelessWidget {
        ),
        super(key: key);
 
+  // TODO(justinmc): Is this the best way to specify boundaries? I wanted to
+  // avoid requiring the user to know the size of the child and the constraints.
   /// A margin for the visible boundaries of the child.
   ///
   /// Any transformation that results in the viewport being able to view outside
@@ -90,7 +92,7 @@ class InteractiveViewer extends StatelessWidget {
   /// `EdgeInsets.all(double.infinity)`.
   ///
   /// Defaults to EdgeInsets.zero, which results in boundaries that are the
-  /// exact same size and position as the child.
+  /// exact same size and position as the constraints.
   final EdgeInsets boundaryMargin;
 
   /// The child to perform the transformations on.
