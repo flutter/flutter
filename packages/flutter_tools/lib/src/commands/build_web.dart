@@ -24,6 +24,14 @@ class BuildWebCommand extends BuildSubCommand {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
     );
+
+    argParser.addFlag('web-use-skia',
+      defaultsTo: false,
+      negatable: false,
+      hide: true,
+      help:
+      'Whether to use Skia rendering engine for web (EXPERIMENTAL)',
+    );
   }
 
   @override
@@ -53,7 +61,7 @@ class BuildWebCommand extends BuildSubCommand {
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    await buildWeb(flutterProject, target, buildInfo, argResults['web-initialize-platform']);
+    await buildWeb(flutterProject, target, buildInfo, argResults['web-initialize-platform'], argResults['web-use-skia']);
     return null;
   }
 }
