@@ -96,4 +96,40 @@ void main() async {
     paragraph2.layout(ParagraphConstraints(width: fontSize * 5.0));
     expect(paragraph2.height, closeTo(fontSize, 0.001)); // because it wraps
   });
+
+  test('getBoxesForRange returns a box', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+      textDirection: TextDirection.rtl,
+    ));
+    builder.addText('abcd');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 1000));
+    expect(
+      paragraph.getBoxesForRange(1, 2).single,
+      const TextBox.fromLTRBD(
+        10,
+        0,
+        20,
+        10,
+        TextDirection.rtl,
+      ),
+    );
+  });
+
+  test('getBoxesForRange return empty list for zero-length range', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+    ));
+    builder.addText('abcd');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 1000));
+    expect(paragraph.getBoxesForRange(0, 0), isEmpty);
+  });
 }
