@@ -42,7 +42,7 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
         kTargetFile: target,
         kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
-        'WebUseSkia': useSkia.toString(), 
+        'WebUseSkia': useSkia.toString(),
       },
     ));
     if (!result.success) {
