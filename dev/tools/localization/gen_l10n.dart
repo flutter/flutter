@@ -232,7 +232,7 @@ String genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
   return resultingProperty;
 }
 
-bool _isValidClassName (String className) {
+bool _isValidClassName(String className) {
   // Dart class name cannot contain non-alphanumeric symbols
   if (className.contains(RegExp(r'[^a-zA-Z\d]')))
     return false;
@@ -245,8 +245,14 @@ bool _isValidClassName (String className) {
   return true;
 }
 
+bool _isDirectoryReadableAndWritable(String statString) {
+  if (statString[0] == '-' || statString[1] == '-')
+    return false;
+  return true;
+}
+
 String _importFilePath(String path, String fileName) {
-  String replaceLib = path.replaceAll('lib/', '');
+  final String replaceLib = path.replaceAll('lib/', '');
   return '$replaceLib/$fileName.dart';
 }
 
@@ -262,7 +268,7 @@ Future<void> main(List<String> args) async {
   final String outputFileString = results['output-localization-file'];
 
   final Directory l10nDirectory = Directory(arbPathString);
-  final File inputArbFile = File(path.join(l10nDirectory.path, results['template-arb-file']));
+  final File templateArbFile = File(path.join(l10nDirectory.path, results['template-arb-file']));
   final File outputFile = File(path.join(l10nDirectory.path, '$outputFileString.dart'));
   final String stringsClassName = results['output-class'];
 
@@ -270,6 +276,24 @@ Future<void> main(List<String> args) async {
     exitWithError(
       "The 'arb-dir' directory, $l10nDirectory, does not exist.\n"
       'Make sure that the correct path was provided.'
+    );
+  final String l10nDirectoryStatModeString = l10nDirectory.statSync().modeString();
+  if (!_isDirectoryReadableAndWritable(l10nDirectoryStatModeString))
+    exitWithError(
+      "The 'arb-dir' directory, $l10nDirectory, is not readable or writable.\n"
+      'Please ensure that the user has read and write permissions.'
+    );
+  final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
+  if (templateArbFileStatModeString[0] == '-')
+    exitWithError(
+      "The 'template-arb-file', $templateArbFile, is not readable.\n"
+      'Please ensure that the user has read permissions.'
+    );
+  final String outputFileStatModeString = outputFile.statSync().modeString();
+  if (outputFileStatModeString[1] == '-')
+    exitWithError(
+      'The output file, $outputFile, is not writable.\n'
+      'Please ensure that the user has write permissions.'
     );
   if (!_isValidClassName(stringsClassName))
     exitWithError(
@@ -322,7 +346,7 @@ Future<void> main(List<String> args) async {
 
   Map<String, dynamic> bundle;
   try {
-    bundle = json.decode(inputArbFile.readAsStringSync());
+    bundle = json.decode(templateArbFile.readAsStringSync());
   } on FileSystemException catch (e) {
     exitWithError('Unable to read input arb file: $e');
   } on FormatException catch (e) {
