@@ -17,6 +17,8 @@ void main() {
     ProtocolDiscovery discoverer;
 
     group('no port forwarding', () {
+      int devicePort;
+
       /// Performs test set-up functionality that must be performed as part of
       /// the `test()` pass and not part of the `setUp()` pass.
       ///
@@ -35,7 +37,7 @@ void main() {
       /// See also: [runZoned]
       void initialize() {
         logReader = MockDeviceLogReader();
-        discoverer = ProtocolDiscovery.observatory(logReader, ipv6: false, hostPort: null, devicePort: null);
+        discoverer = ProtocolDiscovery.observatory(logReader, ipv6: false, hostPort: null, devicePort: devicePort);
       }
 
       tearDown(() {
@@ -118,6 +120,28 @@ void main() {
         final Uri uri = await uriFuture;
         expect(uri.port, 54804);
         expect('$uri', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+      });
+
+      testUsingContext('skips uri if port does not match the requested vmservice - requested last', () async {
+        devicePort = 12346;
+        initialize();
+        final Future<Uri> uriFuture = discoverer.uri;
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        final Uri uri = await uriFuture;
+        expect(uri.port, 12346);
+        expect('$uri', 'http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+      });
+
+      testUsingContext('skips uri if port does not match the requested vmservice - requested first', () async {
+        devicePort = 12346;
+        initialize();
+        final Future<Uri> uriFuture = discoverer.uri;
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+        final Uri uri = await uriFuture;
+        expect(uri.port, 12346);
+        expect('$uri', 'http://127.0.0.1:12346/PTwjm8Ii8qg=/');
       });
     });
 
