@@ -216,8 +216,9 @@ void main() {
       );
 
       // Distance between the first column and the last column.
-      final double distance =
-        tester.getCenter(find.text('sec.')).dx - tester.getCenter(find.text('12')).dx;
+      final double distance = tester.getCenter(
+        find.text('sec.')).dx - tester.getCenter(find.text('12'),
+      ).dx;
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -369,6 +370,28 @@ void main() {
       await tester.pump();
 
       expect(newDateTime.minute, 6);
+    });
+
+    test('initial date honors minimumDate & maximumDate', () {
+      expect(() {
+          CupertinoDatePicker(
+            onDateTimeChanged: (DateTime d) { },
+            initialDateTime: DateTime(2018, 10, 10),
+            minimumDate: DateTime(2018, 10, 11),
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(() {
+          CupertinoDatePicker(
+            onDateTimeChanged: (DateTime d) { },
+            initialDateTime: DateTime(2018, 10, 10),
+            maximumDate: DateTime(2018, 10, 9),
+          );
+        },
+        throwsAssertionError,
+      );
     });
 
     testWidgets('changing initialDateTime after first build does not do anything', (WidgetTester tester) async {
@@ -633,6 +656,73 @@ void main() {
         tester.getTopLeft(find.text('2018')).dy,
         tester.getTopLeft(find.text('28')).dy,
       );
+    });
+
+    testWidgets(
+      'picker automatically scrolls away from invalid date, '
+      "and onDateTimeChanged doesn't report these dates",
+      (WidgetTester tester) async {
+        DateTime date;
+        // 2016 is a leap year.
+        final DateTime minimum = DateTime(2016, 2, 29);
+        final DateTime maximum = DateTime(2018, 12, 31);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  minimumDate: minimum,
+                  maximumDate: maximum,
+                  onDateTimeChanged: (DateTime newDate) {
+                    date = newDate;
+                    // Callback doesn't transiently go into invalid dates.
+                    expect(newDate.isAtSameMomentAs(minimum) || newDate.isAfter(minimum), isTrue);
+                    expect(newDate.isAtSameMomentAs(maximum) || newDate.isBefore(maximum), isTrue);
+                  },
+                  initialDateTime: DateTime(2017, 2, 28),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // 2017 has 28 days in Feb so 29 is greyed out.
+        expect(
+          tester.widget<Text>(find.text('29')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray),
+        );
+
+        await tester.drag(find.text('2017'), const Offset(0.0, 32.0), touchSlopY: 0.0);
+        await tester.pump();
+        await tester.pumpAndSettle(); // Now the autoscrolling should happen.
+
+        expect(
+          date,
+          DateTime(2016, 2, 29),
+        );
+
+        // 2016 has 29 days in Feb so 29 is not greyed out.
+        expect(
+          tester.widget<Text>(find.text('29')).style.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray)),
+        );
+
+        await tester.drag(find.text('2016'), const Offset(0.0, -32.0), touchSlopY: 0.0);
+        await tester.pump(); // Once to trigger the post frame animate call.
+        await tester.pumpAndSettle();
+
+        expect(
+          date,
+          DateTime(2017, 2, 28),
+        );
+
+        expect(
+          tester.widget<Text>(find.text('29')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray),
+        );
     });
 
     testWidgets('picker automatically scrolls away from invalid date on day change', (WidgetTester tester) async {

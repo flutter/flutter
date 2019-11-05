@@ -45,8 +45,9 @@ const double _kTimerPickerColumnIntrinsicWidth = 106;
 // for now.
 const double _kTimerPickerNumberLabelFontSize = 23;
 
-TextStyle _themeTextStyle(BuildContext context) {
-  return CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
+TextStyle _themeTextStyle(BuildContext context, { bool isValid = true }) {
+  final TextStyle style = CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
+  return isValid ? style : style.copyWith(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context));
 }
 
 // Lays out the date picker based on how much space each single column needs.
@@ -129,20 +130,20 @@ enum CupertinoDatePickerMode {
   /// The AM/PM designation is shown only if [CupertinoDatePicker] does not use 24h format.
   /// Column order is subject to internationalization.
   ///
-  /// Example: [4 | 14 | PM].
+  /// Example: ` 4 | 14 | PM `.
   time,
   /// Mode that shows the date in month, day of month, and year.
   /// Name of month is spelled in full.
   /// Column order is subject to internationalization.
   ///
-  /// Example: [July | 13 | 2012].
+  /// Example: ` July | 13 | 2012 `.
   date,
   /// Mode that shows the date as day of the week, month, day of month and
   /// the time in hour, minute, and (optional) an AM/PM designation.
   /// The AM/PM designation is shown only if [CupertinoDatePicker] does not use 24h format.
   /// Column order is subject to internationalization.
   ///
-  /// Example: [Fri Jul 13 | 4 | 14 | PM]
+  /// Example: ` Fri Jul 13 | 4 | 14 | PM `
   dateAndTime,
 }
 
@@ -173,8 +174,8 @@ enum _PickerColumnType {
 ///
 /// Example of the picker in date mode:
 ///
-///  * US-English: [July | 13 | 2012]
-///  * Vietnamese: [13 | Tháng 7 | 2012]
+///  * US-English: ` July | 13 | 2012 `
+///  * Vietnamese: ` 13 | Tháng 7 | 2012 `
 ///
 /// Can be used with [showCupertinoModalPopup] to display the picker modally at
 /// the bottom of the screen.
@@ -202,10 +203,12 @@ class CupertinoDatePicker extends StatefulWidget {
   /// [maximumYear].
   ///
   /// [minimumDate] is the minimum date that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.dateAndTime] mode. Null if there's no limit.
+  /// [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.dateAndTime]
+  /// mode. Null if there's no limit.
   ///
   /// [maximumDate] is the maximum date that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.dateAndTime] mode. Null if there's no limit.
+  /// [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.dateAndTime]
+  /// mode. Null if there's no limit.
   ///
   /// [minimumYear] is the minimum year that the picker can be scrolled to in
   /// [CupertinoDatePickerMode.date] mode. Defaults to 1 and must not be null.
@@ -255,6 +258,14 @@ class CupertinoDatePicker extends StatefulWidget {
       'initial year is not smaller than maximum year',
     );
     assert(
+      mode != CupertinoDatePickerMode.date || minimumDate == null || !minimumDate.isAfter(this.initialDateTime),
+      'initial date ${this.initialDateTime} is not greater than or euqal to minimumDate $minimumDate',
+    );
+    assert(
+      mode != CupertinoDatePickerMode.date || maximumDate == null || !maximumDate.isBefore(this.initialDateTime),
+      'initial date ${this.initialDateTime} is not less than or euqal to maximumDate $maximumDate',
+    );
+    assert(
       this.initialDateTime.minute % minuteInterval == 0,
       'initial minute is not divisible by minute interval',
     );
@@ -273,12 +284,12 @@ class CupertinoDatePicker extends StatefulWidget {
   /// selected date time.
   final DateTime initialDateTime;
 
-  /// Minimum date that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.dateAndTime] mode. Null if there's no limit.
+  /// Minimum date that the picker can be scrolled to in [CupertinoDatePickerMode.date]
+  /// and [CupertinoDatePickerMode.dateAndTime] mode. Null if there's no limit.
   final DateTime minimumDate;
 
-  /// Maximum date that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.dateAndTime] mode. Null if there's no limit.
+  /// Maximum date that the picker can be scrolled to in [CupertinoDatePickerMode.date]
+  /// and [CupertinoDatePickerMode.dateAndTime] mode. Null if there's no limit.
   final DateTime maximumDate;
 
   /// Minimum year that the picker can be scrolled to in
@@ -311,10 +322,16 @@ class CupertinoDatePicker extends StatefulWidget {
     // columns, so they are placed together to one state.
     // The `date` mode has different children and is implemented in a different
     // state.
-    if (mode == CupertinoDatePickerMode.time || mode == CupertinoDatePickerMode.dateAndTime)
-      return _CupertinoDatePickerDateTimeState();
-    else
-      return _CupertinoDatePickerDateState();
+    switch (mode) {
+      case CupertinoDatePickerMode.time:
+      case CupertinoDatePickerMode.dateAndTime:
+        return _CupertinoDatePickerDateTimeState();
+      case CupertinoDatePickerMode.date:
+        return _CupertinoDatePickerDateState();
+    }
+
+    assert(false);
+    return _CupertinoDatePickerDateTimeState();
   }
 
   // Estimate the minimum width that each column needs to layout its content.
@@ -796,6 +813,14 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   // of the picker is invalid (e.g. February 30th 2018), and this dayController
   // is responsible for jumping to a valid value.
   FixedExtentScrollController dayController;
+  FixedExtentScrollController monthController;
+  FixedExtentScrollController yearController;
+
+  bool isDayPickerScrolling = false;
+  bool isMonthPickerScrolling = false;
+  bool isYearPickerScrolling = false;
+
+  bool get isScrolling => isDayPickerScrolling || isMonthPickerScrolling || isYearPickerScrolling;
 
   // Estimated width of columns.
   Map<int, double> estimatedColumnWidths = <int, double>{};
@@ -808,6 +833,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     selectedYear = widget.initialDateTime.year;
 
     dayController = FixedExtentScrollController(initialItem: selectedDay - 1);
+    monthController = FixedExtentScrollController(initialItem: selectedMonth - 1);
+    yearController = FixedExtentScrollController(initialItem: selectedYear);
 
     PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
   }
@@ -821,6 +848,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
   @override
   void dispose() {
+    dayController.dispose();
+    monthController.dispose();
+    yearController.dispose();
+
     PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
     super.dispose();
   }
@@ -844,115 +875,208 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     estimatedColumnWidths[_PickerColumnType.year.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.year, localizations, context);
   }
 
+  // The DateTime of the last day of a given month in a given year.
+  // Let `DateTime` handle the year/month overflow.
+  DateTime _lastDayInMonth(int year, int month) => DateTime(year, month + 1, 0);
+
   Widget _buildDayPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
-    final int daysInCurrentMonth = DateTime(selectedYear, (selectedMonth + 1) % 12, 0).day;
-    return CupertinoPicker(
-      scrollController: dayController,
-      offAxisFraction: offAxisFraction,
-      itemExtent: _kItemExtent,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      backgroundColor: widget.backgroundColor,
-      squeeze: _kSqueeze,
-      onSelectedItemChanged: (int index) {
-        selectedDay = index + 1;
-        if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
-          widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
-      },
-      children: List<Widget>.generate(31, (int index) {
-        TextStyle textStyle = _themeTextStyle(context);
-        if (index >= daysInCurrentMonth) {
-          textStyle = textStyle.copyWith(color: CupertinoColors.inactiveGray);
+    final int daysInCurrentMonth = _lastDayInMonth(selectedYear, selectedMonth).day;
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollStartNotification) {
+          isDayPickerScrolling = true;
+        } else if (notification is ScrollEndNotification) {
+          isDayPickerScrolling = false;
+          _pickerDidStopScrolling();
         }
-        return itemPositioningBuilder(
-          context,
-          Text(
-            localizations.datePickerDayOfMonth(index + 1),
-            style: textStyle,
-          ),
-        );
-      }),
-      looping: true,
+
+        return false;
+      },
+      child: CupertinoPicker(
+        scrollController: dayController,
+        offAxisFraction: offAxisFraction,
+        itemExtent: _kItemExtent,
+        useMagnifier: _kUseMagnifier,
+        magnification: _kMagnification,
+        backgroundColor: widget.backgroundColor,
+        squeeze: _kSqueeze,
+        onSelectedItemChanged: (int index) {
+          selectedDay = index + 1;
+          if (_isCurrentDateValid)
+            widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
+        },
+        children: List<Widget>.generate(31, (int index) {
+          final int day = index + 1;
+          return itemPositioningBuilder(
+            context,
+            Text(
+              localizations.datePickerDayOfMonth(day),
+              style: _themeTextStyle(context, isValid: day <= daysInCurrentMonth),
+            ),
+          );
+        }),
+        looping: true,
+      ),
     );
   }
 
   Widget _buildMonthPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
-    return CupertinoPicker(
-      scrollController: FixedExtentScrollController(initialItem: selectedMonth - 1),
-      offAxisFraction: offAxisFraction,
-      itemExtent: _kItemExtent,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      backgroundColor: widget.backgroundColor,
-      squeeze: _kSqueeze,
-      onSelectedItemChanged: (int index) {
-        selectedMonth = index + 1;
-        if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
-          widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollStartNotification) {
+          isMonthPickerScrolling = true;
+        } else if (notification is ScrollEndNotification) {
+          isMonthPickerScrolling = false;
+          _pickerDidStopScrolling();
+        }
+
+        return false;
       },
-      children: List<Widget>.generate(12, (int index) {
-        return itemPositioningBuilder(
-          context,
-          Text(
-            localizations.datePickerMonth(index + 1),
-            style: _themeTextStyle(context),
-          ),
-        );
-      }),
-      looping: true,
+      child: CupertinoPicker(
+        scrollController: monthController,
+        offAxisFraction: offAxisFraction,
+        itemExtent: _kItemExtent,
+        useMagnifier: _kUseMagnifier,
+        magnification: _kMagnification,
+        backgroundColor: widget.backgroundColor,
+        squeeze: _kSqueeze,
+        onSelectedItemChanged: (int index) {
+          selectedMonth = index + 1;
+          if (_isCurrentDateValid)
+            widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
+        },
+        children: List<Widget>.generate(12, (int index) {
+          final int month = index + 1;
+          final bool isInvalidMonth = (widget?.minimumDate?.year == selectedYear && widget.minimumDate.month > month)
+                                   || (widget?.maximumDate?.year == selectedYear && widget.maximumDate.month < month);
+
+          return itemPositioningBuilder(
+            context,
+            Text(
+              localizations.datePickerMonth(month),
+              style: _themeTextStyle(context, isValid: !isInvalidMonth),
+            ),
+          );
+        }),
+        looping: true,
+      ),
     );
   }
 
   Widget _buildYearPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
-    return CupertinoPicker.builder(
-      scrollController: FixedExtentScrollController(initialItem: selectedYear),
-      itemExtent: _kItemExtent,
-      offAxisFraction: offAxisFraction,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      backgroundColor: widget.backgroundColor,
-      onSelectedItemChanged: (int index) {
-        selectedYear = index;
-        if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
-          widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
-      },
-      itemBuilder: (BuildContext context, int index) {
-        if (index < widget.minimumYear)
-          return null;
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollStartNotification) {
+          isYearPickerScrolling = true;
+        } else if (notification is ScrollEndNotification) {
+          isYearPickerScrolling = false;
+          _pickerDidStopScrolling();
+        }
 
-        if (widget.maximumYear != null && index > widget.maximumYear)
-          return null;
-
-        return itemPositioningBuilder(
-          context,
-          Text(
-            localizations.datePickerYear(index),
-            style: _themeTextStyle(context),
-          ),
-        );
+        return false;
       },
+      child: CupertinoPicker.builder(
+        scrollController: yearController,
+        itemExtent: _kItemExtent,
+        offAxisFraction: offAxisFraction,
+        useMagnifier: _kUseMagnifier,
+        magnification: _kMagnification,
+        backgroundColor: widget.backgroundColor,
+        onSelectedItemChanged: (int index) {
+          selectedYear = index;
+          if (_isCurrentDateValid)
+            widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
+        },
+        itemBuilder: (BuildContext context, int year) {
+          if (year < widget.minimumYear)
+            return null;
+
+          if (widget.maximumYear != null && year > widget.maximumYear)
+            return null;
+
+          final bool isValidYear = (widget?.minimumDate == null || widget.minimumDate.year <= year)
+                                && (widget?.maximumDate == null || widget.maximumDate.year >= year);
+
+          return itemPositioningBuilder(
+            context,
+            Text(
+              localizations.datePickerYear(year),
+              style: _themeTextStyle(context, isValid: isValidYear),
+            ),
+          );
+        },
+      ),
     );
   }
 
-  bool _keepInValidRange(ScrollEndNotification notification) {
+  bool get _isCurrentDateValid {
+    final DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+
+    final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
+    final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
+
+    return !minCheck && !maxCheck && selectedDate.day == selectedDay;
+  }
+
+  // One or more pickers have just stopped scrolling.
+  void _pickerDidStopScrolling() {
+    // Call setState to update the greyed out days/months/years, as the currently
+    // selected year/month may have changed.
+    setState(() { });
+
+    if (isScrolling) {
+      return;
+    }
+
     // Whenever scrolling lands on an invalid entry, the picker
     // automatically scrolls to a valid one.
-    final int desiredDay = DateTime(selectedYear, selectedMonth, selectedDay).day;
-    if (desiredDay != selectedDay) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-        dayController.animateToItem(
-          // The next valid date is also the amount of days overflown.
-          dayController.selectedItem - desiredDay,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
-      });
+    final DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+
+    final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
+    final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
+
+    if (minCheck || maxCheck) {
+      // We have minCheck === !maxCheck.
+      final DateTime targetDate = minCheck ? widget.minimumDate : widget.maximumDate;
+      _scrollToDate(targetDate);
+      return;
     }
-    setState(() {
-      // Rebuild because the number of valid days per month are different
-      // depending on the month and year.
+
+    // Some months have less days (e.g. February). Go to the last day of that month
+    // if the selectedDay exceeds the maximum.
+    if (selectedDate.day != selectedDay) {
+      final DateTime lastDay = _lastDayInMonth(selectedYear, selectedMonth);
+      _scrollToDate(lastDay);
+    }
+  }
+
+  void _scrollToDate(DateTime newDate) {
+    assert(newDate != null);
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      if (selectedYear != newDate.year) {
+        yearController.animateToItem(
+          newDate.year,
+          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 200) ,
+        );
+      }
+
+      if (selectedMonth != newDate.month) {
+        monthController.animateToItem(
+          newDate.month - 1,
+          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 200) ,
+        );
+      }
+
+      if (selectedDay != newDate.day) {
+        dayController.animateToItem(
+          newDate.day - 1,
+          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 200) ,
+        );
+      }
     });
-    return false;
   }
 
   @override
@@ -1025,17 +1149,14 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
     return MediaQuery(
       data: const MediaQueryData(textScaleFactor: 1.0),
-      child: NotificationListener<ScrollEndNotification>(
-        onNotification: _keepInValidRange,
-        child: DefaultTextStyle.merge(
-          style: _kDefaultPickerTextStyle,
-          child: CustomMultiChildLayout(
-            delegate: _DatePickerLayoutDelegate(
-              columnWidths: columnWidths,
-              textDirectionFactor: textDirectionFactor,
-            ),
-            children: pickers,
+      child: DefaultTextStyle.merge(
+        style: _kDefaultPickerTextStyle,
+        child: CustomMultiChildLayout(
+          delegate: _DatePickerLayoutDelegate(
+            columnWidths: columnWidths,
+            textDirectionFactor: textDirectionFactor,
           ),
+          children: pickers,
         ),
       ),
     );
