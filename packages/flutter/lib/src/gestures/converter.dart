@@ -8,38 +8,6 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'events.dart';
 
-class _PointerState {
-  _PointerState(this.lastPosition);
-
-  int get pointer => _pointer; // The identifier used in PointerEvent objects.
-  int _pointer;
-  static int _pointerCount = 0;
-  void startNewPointer() {
-    _pointerCount += 1;
-    _pointer = _pointerCount;
-  }
-
-  bool get down => _down;
-  bool _down = false;
-  void setDown() {
-    assert(!_down);
-    _down = true;
-  }
-  void setUp() {
-    assert(_down);
-    _down = false;
-  }
-
-  Offset lastPosition;
-
-  Offset deltaTo(Offset to) => to - lastPosition;
-
-  @override
-  String toString() {
-    return '_PointerState(pointer: $pointer, down: $down, lastPosition: $lastPosition)';
-  }
-}
-
 // Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
 //
 // TODO(tongmu): This patch is supposed to be done by embedders. Patching it
@@ -67,25 +35,6 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
 /// objects.
 class PointerEventConverter {
   PointerEventConverter._();
-
-  /// Clears internal state mapping platform pointer identifiers to
-  /// [PointerEvent] pointer identifiers.
-  ///
-  /// Visible only so that tests can reset the global state contained in
-  /// [PointerEventConverter].
-  @visibleForTesting
-  static void clearPointers() => _pointers.clear();
-
-  // Map from platform pointer identifiers to PointerEvent pointer identifiers.
-  // Static to guarantee that pointers are unique.
-  static final Map<int, _PointerState> _pointers = <int, _PointerState>{};
-
-  static _PointerState _ensureStateForPointer(ui.PointerData datum, Offset position) {
-    return _pointers.putIfAbsent(
-      datum.device,
-      () => _PointerState(position),
-    );
-  }
 
   /// Expand the given packet of pointer data into a sequence of framework
   /// pointer events.
@@ -256,62 +205,6 @@ class PointerEventConverter {
       } else {
         switch (datum.signalKind) {
           case ui.PointerSignalKind.scroll:
-            // Devices must be added before they send scroll events.
-            assert(_pointers.containsKey(datum.device));
-            final _PointerState state = _ensureStateForPointer(datum, position);
-            if (state.lastPosition != position) {
-              // Synthesize a hover/move of the pointer to the scroll location
-              // before sending the scroll event, if necessary, so that clients
-              // don't have to worry about native ordering of hover and scroll
-              // events.
-              if (state.down) {
-                yield PointerMoveEvent(
-                  timeStamp: timeStamp,
-                  pointer: state.pointer,
-                  kind: kind,
-                  device: datum.device,
-                  position: position,
-                  delta: state.deltaTo(position),
-                  buttons: _synthesiseDownButtons(datum.buttons, kind),
-                  obscured: datum.obscured,
-                  pressure: datum.pressure,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distanceMax: datum.distanceMax,
-                  size: datum.size,
-                  radiusMajor: radiusMajor,
-                  radiusMinor: radiusMinor,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                  synthesized: true,
-                );
-              } else {
-                yield PointerHoverEvent(
-                  timeStamp: timeStamp,
-                  kind: kind,
-                  device: datum.device,
-                  position: position,
-                  delta: state.deltaTo(position),
-                  buttons: datum.buttons,
-                  obscured: datum.obscured,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distance: datum.distance,
-                  distanceMax: datum.distanceMax,
-                  size: datum.size,
-                  radiusMajor: radiusMajor,
-                  radiusMinor: radiusMinor,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                  synthesized: true,
-                );
-              }
-              state.lastPosition = position;
-            }
             final Offset scrollDelta =
                 Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
             yield PointerScrollEvent(
