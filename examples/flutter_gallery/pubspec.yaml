@@ -17,6 +17,7 @@ dependencies:
   video_player: 0.10.2+5
   scoped_model: 1.0.1
   shrine_images: 1.1.2
+  rally_assets: 1.0.0
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets: 0.1.9+2
@@ -199,6 +200,8 @@ flutter:
     - packages/shrine_images/35-0.jpg
     - packages/shrine_images/36-0.jpg
     - packages/shrine_images/37-0.jpg
+    - packages/rally_assets/logo.png
+    - packages/rally_assets/thumb.png
 
   fonts:
     - family: Raleway
@@ -260,5 +263,21 @@ flutter:
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Italic.ttf
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
+    - family: Roboto Condensed
+      fonts:
+      - asset: packages/rally_assets/RobotoCondensed-Light.ttf
+        weight: 400
+      - asset: packages/rally_assets/RobotoCondensed-Regular.ttf
+        weight: 500
+      - asset: packages/rally_assets/RobotoCondensed-Bold.ttf
+        weight: 700
+    - family: Eczar
+      fonts:
+      - asset: packages/rally_assets/Eczar-Regular.ttf
+        weight: 400
+      - asset: packages/rally_assets/Eczar-SemiBold.ttf
+        weight: 600
+      - asset: packages/rally_assets/Eczar-Bold.ttf
+        weight: 700
 
-# PUBSPEC CHECKSUM: 8b43
+# PUBSPEC CHECKSUM: 55a6
