@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
@@ -32,12 +33,12 @@ namespace txt {
 class TestFontManager : public AssetFontManager {
  public:
   TestFontManager(std::unique_ptr<FontAssetProvider> font_provider,
-                  std::string test_font_family_name);
+                  std::vector<std::string> test_font_family_names);
 
   ~TestFontManager() override;
 
  private:
-  std::string test_font_family_name_;
+  std::vector<std::string> test_font_family_names_;
 
   SkFontStyleSet* onMatchFamily(const char family_name[]) const override;
 

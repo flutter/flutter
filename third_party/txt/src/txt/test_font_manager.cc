@@ -21,14 +21,23 @@ namespace txt {
 
 TestFontManager::TestFontManager(
     std::unique_ptr<FontAssetProvider> font_provider,
-    std::string test_font_family_name)
+    std::vector<std::string> test_font_family_names)
     : AssetFontManager(std::move(font_provider)),
-      test_font_family_name_(test_font_family_name) {}
+      test_font_family_names_(test_font_family_names) {}
 
 TestFontManager::~TestFontManager() = default;
 
 SkFontStyleSet* TestFontManager::onMatchFamily(const char family_name[]) const {
-  return AssetFontManager::onMatchFamily(test_font_family_name_.c_str());
+  // Find the requested name in the list, if not found, default to the first
+  // font family in the test font family list.
+  std::string requested_name(family_name);
+  std::string sanitized_name = test_font_family_names_[0];
+  for (const std::string& test_family : test_font_family_names_) {
+    if (requested_name == test_family) {
+      sanitized_name = test_family;
+    }
+  }
+  return AssetFontManager::onMatchFamily(sanitized_name.c_str());
 }
 
 }  // namespace txt

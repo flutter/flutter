@@ -7,13 +7,15 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "third_party/skia/include/core/SkStream.h"
 
 namespace flutter {
 
-std::unique_ptr<SkStreamAsset> GetTestFontData();
+std::vector<std::unique_ptr<SkStreamAsset>> GetTestFontData();
 std::string GetTestFontFamilyName();
+std::vector<std::string> GetTestFontFamilyNames();
 
 }  // namespace flutter
 
