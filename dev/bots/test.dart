@@ -61,8 +61,8 @@ const int kWebBatchSize = 20;
 //
 // TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileBlacklist = <String>[
+  // This test doesn't compile because it depends on code outside the flutter package.
   'test/examples/sector_layout_test.dart',
-  'test/widgets/text_test.dart',
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
