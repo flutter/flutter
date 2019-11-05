@@ -72,7 +72,7 @@ void main() {
     await tester.pumpWidget(
       TestWidget((BuildContext context) {
         disposeCalled = true;
-        context.ancestorStateOfType(const TypeMatcher<Container>());
+        context.ancestorStateOfType<State>();
       }),
     );
     await tester.pumpWidget(Container());
@@ -85,7 +85,7 @@ void main() {
     await tester.pumpWidget(
       TestWidget((BuildContext context) {
         disposeCalled = true;
-        context.ancestorRenderObjectOfType(const TypeMatcher<Container>());
+        context.ancestorRenderObjectOfType<RenderObject>();
       }),
     );
     await tester.pumpWidget(Container());

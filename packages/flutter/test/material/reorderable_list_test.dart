@@ -189,7 +189,7 @@ void main() {
           return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
               .evaluate()
               .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+              .ancestorStateOfType<_StatefulState>();
         }
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
@@ -619,7 +619,7 @@ void main() {
           return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
               .evaluate()
               .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+              .ancestorStateOfType<_StatefulState>();
         }
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(

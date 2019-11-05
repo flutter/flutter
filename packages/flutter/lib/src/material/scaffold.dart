@@ -1307,7 +1307,7 @@ class Scaffold extends StatefulWidget {
   static ScaffoldState of(BuildContext context, { bool nullOk = false }) {
     assert(nullOk != null);
     assert(context != null);
-    final ScaffoldState result = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
+    final ScaffoldState result = context.ancestorStateOfType<ScaffoldState>();
     if (nullOk || result != null)
       return result;
     throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1406,7 +1406,7 @@ class Scaffold extends StatefulWidget {
       final _ScaffoldScope scaffold = context.inheritFromWidgetOfExactType(_ScaffoldScope);
       return scaffold?.hasDrawer ?? false;
     } else {
-      final ScaffoldState scaffold = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
+      final ScaffoldState scaffold = context.ancestorStateOfType<ScaffoldState>();
       return scaffold?.hasDrawer ?? false;
     }
   }

@@ -335,16 +335,6 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   }
 }
 
-/// This class is a work-around for the "is" operator not accepting a variable value as its right operand
-@optionalTypeArgs
-class TypeMatcher<T> {
-  /// Creates a type matcher for the given type parameter.
-  const TypeMatcher();
-
-  /// Returns true if the given object is of type `T`.
-  bool check(dynamic object) => object is T;
-}
-
 /// Describes the configuration for an [Element].
 ///
 /// Widgets are the central class hierarchy in the Flutter framework. A widget
@@ -2011,7 +2001,7 @@ abstract class BuildContext {
   Widget ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
-  /// that matches the given [TypeMatcher].
+  /// that is an instance of the given type [T].
   ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
@@ -2038,26 +2028,24 @@ abstract class BuildContext {
   /// {@tool sample}
   ///
   /// ```dart
-  /// ScrollableState scrollable = context.ancestorStateOfType(
-  ///   const TypeMatcher<ScrollableState>(),
-  /// );
+  /// ScrollableState scrollable = context.ancestorStateOfType<ScrollableState>();
   /// ```
   /// {@end-tool}
-  State ancestorStateOfType(TypeMatcher matcher);
+  T ancestorStateOfType<T extends State>();
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
-  /// that matches the given [TypeMatcher].
+  /// that is an instance of the given type [T].
   ///
   /// Functions the same way as [ancestorStateOfType] but keeps visiting subsequent
-  /// ancestors until there are none of the type matching [TypeMatcher] remaining.
+  /// ancestors until there are none of the type instance of [T] remaining.
   /// Then returns the last one found.
   ///
   /// This operation is O(N) as well though N is the entire widget tree rather than
   /// a subtree.
-  State rootAncestorStateOfType(TypeMatcher matcher);
+  T rootAncestorStateOfType<T extends State>();
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
-  /// that matches the given [TypeMatcher].
+  /// that is an instance of the given type [T].
   ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
@@ -2075,7 +2063,7 @@ abstract class BuildContext {
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [ancestorRenderObjectOfType] in [State.didChangeDependencies].
-  RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
+  T ancestorRenderObjectOfType<T extends RenderObject>();
 
   /// Walks the ancestor chain, starting with the parent of this build context's
   /// widget, invoking the argument for each ancestor. The callback is given a
@@ -3481,11 +3469,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  State ancestorStateOfType(TypeMatcher matcher) {
+  T ancestorStateOfType<T extends State>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null) {
-      if (ancestor is StatefulElement && matcher.check(ancestor.state))
+      if (ancestor is StatefulElement && ancestor.state is T)
         break;
       ancestor = ancestor._parent;
     }
@@ -3494,12 +3482,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  State rootAncestorStateOfType(TypeMatcher matcher) {
+  T rootAncestorStateOfType<T extends State>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     StatefulElement statefulAncestor;
     while (ancestor != null) {
-      if (ancestor is StatefulElement && matcher.check(ancestor.state))
+      if (ancestor is StatefulElement && ancestor.state is T)
         statefulAncestor = ancestor;
       ancestor = ancestor._parent;
     }
@@ -3507,11 +3495,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
+  T ancestorRenderObjectOfType<T extends RenderObject>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null) {
-      if (ancestor is RenderObjectElement && matcher.check(ancestor.renderObject))
+      if (ancestor is RenderObjectElement && ancestor.renderObject is T)
         break;
       ancestor = ancestor._parent;
     }
