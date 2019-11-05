@@ -55,6 +55,8 @@ enum CustomDimensions {
   commandBuildAppBundleBuildMode, // cd42
   buildEventError,  // cd43
   commandResultEventMaxRss,  // cd44
+  commandRunAndroidEmbeddingVersion, // cd45
+  commandPackagesAndroidEmbeddingVersion, // cd46
 }
 
 String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';
