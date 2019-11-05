@@ -190,7 +190,7 @@ Future<RunResult> createStubAppFramework(Directory appFrameworkDirectory) async 
   } finally {
     try {
       tempDir.deleteSync(recursive: true);
-    } on FileSystemException catch (error) {
+    } on FileSystemException catch (_) {
       // Best effort. Sometimes we can't delete things from system temp.
     }
   }
