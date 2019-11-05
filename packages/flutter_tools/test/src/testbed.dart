@@ -64,7 +64,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///           });
 ///         })
 ///
-///         test('Can delete a file', () => testBed.run(() {
+///         test('Can delete a file', () => testbed.run(() {
 ///           expect(fs.file('foo').existsSync(), true);
 ///           fs.file('foo').deleteSync();
 ///           expect(fs.file('foo').existsSync(), false);
