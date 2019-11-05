@@ -75,7 +75,7 @@ define("main_module", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._isolate_helper.startRootIsolate(() => {}, []);
   dart_sdk._debugger.registerDevtoolsFormatter();
-  dart_sdk.ui.webOnlyInitializePlatform();
+  let voidToNull = () => (voidToNull = dart_sdk.dart.constFn(dart_sdk.dart.fnType(dart_sdk.core.Null, [dart_sdk.dart.void])))();
 
   // Attach the main entrypoint and hot reload functionality to the window.
   window.\$mainEntrypoint = app.main.main;
@@ -85,11 +85,13 @@ define("main_module", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
       dart_sdk.dart.hotRestart();
       window.\$mainEntrypoint();
       if (cb != null) {
-        cb();
+        window.requestAnimationFrame(cb);
       }
     }
   }
-  app.main.main();
+  dart_sdk.ui.webOnlyInitializePlatform().then(dart_sdk.core.Null, dart_sdk.dart.fn(_ => {
+    app.main.main();
+  }, voidToNull()));
 });
 
 // Require JS configuration.

@@ -115,6 +115,18 @@ class WebAssetServer {
       file = fs.file(fs.path.join(getAssetBuildDirectory(), fs.path.relative(assetPath)));
     }
 
+    // If it isn't a project source or an asset, it must be a dart SDK source.
+    // or a flutter web SDK source.
+    if (!file.existsSync()) {
+      final Directory dartSdkParent = fs.directory(artifacts.getArtifactPath(Artifact.engineDartSdkPath)).parent;
+      file = fs.file(fs.path.joinAll(<String>[dartSdkParent.path, ...request.uri.pathSegments]));
+    }
+
+    if (!file.existsSync()) {
+      final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+      file = fs.file(fs.path.joinAll(<String>[flutterWebSdk, ...request.uri.pathSegments]));
+    }
+
     if (!file.existsSync()) {
       response.statusCode = HttpStatus.notFound;
       await response.close();
@@ -276,6 +288,12 @@ class WebDevFS implements DevFS {
         'amd',
         'dart_sdk.js',
       ));
+      final File dartSdkSourcemap = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+        'kernel',
+        'amd',
+        'dart_sdk.js.map',
+      ));
       _webAssetServer.writeFile('/main.dart.js', generateBootstrapScript(
         requireUrl: requireJS.path,
         mapperUrl: null,
@@ -285,6 +303,7 @@ class WebDevFS implements DevFS {
         entrypoint: '$mainPath.js',
       ));
       _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
+      _webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
     }
     final DateTime candidateCompileTime = DateTime.now();
     if (fullRestart) {
