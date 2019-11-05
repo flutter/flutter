@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../base/common.dart';
@@ -65,13 +66,18 @@ String findChromeExecutable() {
   return null;
 }
 
+@visibleForTesting
+void resetChromeForTesting() {
+  ChromeLauncher._currentCompleter = Completer<Chrome>();
+}
+
 /// Responsible for launching chrome with devtools configured.
 class ChromeLauncher {
   const ChromeLauncher();
 
   static bool get hasChromeInstance => _currentCompleter.isCompleted;
 
-  static final Completer<Chrome> _currentCompleter = Completer<Chrome>();
+  static Completer<Chrome> _currentCompleter = Completer<Chrome>();
 
   /// Whether we can locate the chrome executable.
   bool canFindChrome() {
@@ -89,15 +95,31 @@ class ChromeLauncher {
   /// a `headfull` browser.
   ///
   /// `skipCheck` does not attempt to make a devtools connection before returning.
-  Future<Chrome> launch(String url, { bool headless = false, bool skipCheck = false }) async {
+  Future<Chrome> launch(String url, { bool headless = false, bool skipCheck = false, Directory dataDir }) async {
+    // This is a JSON file which contains configuration from the
+    // browser session, such as window position. It is located
+    // under the Chrome data-dir folder.
+    final String preferencesPath = fs.path.join('Default', 'preferences');
+
     final String chromeExecutable = findChromeExecutable();
-    final Directory dataDir = fs.systemTempDirectory.createTempSync('flutter_tool.');
+    final Directory activeDataDir = fs.systemTempDirectory.createTempSync('flutter_tool.');
+    // Seed data dir with previous state.
+
+    final File savedPreferencesFile = fs.file(fs.path.join(dataDir?.path ?? '', preferencesPath));
+    final File destinationFile = fs.file(fs.path.join(activeDataDir.path, preferencesPath));
+    if (dataDir != null) {
+      if (savedPreferencesFile.existsSync()) {
+        destinationFile.parent.createSync(recursive: true);
+        savedPreferencesFile.copySync(destinationFile.path);
+      }
+    }
+
     final int port = await os.findFreePort();
     final List<String> args = <String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
       // allowing for the remote debug port to be enabled.
-      '--user-data-dir=${dataDir.path}',
+      '--user-data-dir=${activeDataDir.path}',
       '--remote-debugging-port=$port',
       // When the DevTools has focus we don't want to slow down the application.
       '--disable-background-timer-throttling',
@@ -116,6 +138,21 @@ class ChromeLauncher {
     ];
 
     final Process process = await processManager.start(args);
+
+    // When the process exits, copy the user settings back to the provided
+    // data-dir.
+    if (dataDir != null) {
+      unawaited(process.exitCode.whenComplete(() {
+        if (destinationFile.existsSync()) {
+          savedPreferencesFile.parent.createSync(recursive: true);
+          // If the file contains a crash string, remove it to hide
+          // the popup on next run.
+          final String contents = destinationFile.readAsStringSync();
+          savedPreferencesFile.writeAsStringSync(contents
+            .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));
+        }
+      }));
+    }
 
     // Wait until the DevTools are listening before trying to connect.
     await process.stderr

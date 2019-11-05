@@ -79,7 +79,7 @@ String getFlutterRoot(Project project) {
 
 void addAarTask(Project project, variant) {
     String variantName = variant.name.capitalize()
-    String taskName = "assembleAar${variantName}"
+    String taskName = "assembleAar$variantName"
     project.tasks.create(name: taskName) {
         // This check is required to be able to configure the archives before `uploadArchives` runs.
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
@@ -136,13 +136,32 @@ projectsEvaluated {
     assert rootProject.hasProperty("is-plugin")
     if (rootProject.property("is-plugin").toBoolean()) {
         assert rootProject.hasProperty("output-dir")
-        // In plugin projects, the Android library is the root project.
+        // In plugin projects, the root project is the plugin.
         configureProject(rootProject, rootProject.property("output-dir"))
         return
     }
-    // In module projects, the Android library project is the `:flutter` subproject.
-    Project androidLibraryProject = rootProject.subprojects.find { it.name == "flutter" }
-    assert androidLibraryProject != null
-    assert androidLibraryProject.hasProperty("output-dir")
-    configureProject(androidLibraryProject, androidLibraryProject.property("output-dir"))
+    // The module project is the `:flutter` subproject.
+    Project moduleProject = rootProject.subprojects.find { it.name == "flutter" }
+    assert moduleProject != null
+    assert moduleProject.hasProperty("output-dir")
+    configureProject(moduleProject, moduleProject.property("output-dir"))
+
+    // Gets the plugin subprojects.
+    Set<Project> modulePlugins = rootProject.subprojects.findAll {
+        it.name != "flutter" && it.name != "app"
+    }
+    // When a module is built as a Maven artifacts, plugins must also be built this way
+    // because the module POM's file will include a dependency on the plugin Maven artifact.
+    // This is due to the Android Gradle Plugin expecting all library subprojects to be published
+    // as Maven artifacts.
+    modulePlugins.each { pluginProject ->
+        configureProject(pluginProject, moduleProject.property("output-dir"))
+        moduleProject.android.libraryVariants.all { variant ->
+            // Configure the `assembleAar<variantName>` task for each plugin's projects and make
+            // the module's equivalent task depend on the plugin's task.
+            String variantName = variant.name.capitalize()
+            moduleProject.tasks.findByPath("assembleAar$variantName")
+                .dependsOn(pluginProject.tasks.findByPath("assembleAar$variantName"))
+        }
+    }
 }

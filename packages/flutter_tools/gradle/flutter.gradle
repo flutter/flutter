@@ -264,18 +264,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (useLocalEngine()) {
             throw new GradleException("Local engine isn't supported when building the plugins as AAR")
         }
-        List<Project> projects = [project]
-        // Module projects set the `hostProjects` extra property in `include_flutter.groovy`.
-        // This is required to set the local repository in each host app project.
-        if (project.ext.has("hostProjects")) {
-            projects.addAll(project.ext.get("hostProjects"))
-        }
-        // Configure the repository for the plugins.
-        projects.each { hostProject ->
-            hostProject.repositories {
-                maven {
-                    url "${getPluginBuildDir()}/outputs/repo"
-                }
+        project.repositories {
+            maven {
+                url "${getPluginBuildDir()}/outputs/repo"
             }
         }
         getPluginList().each { pluginName, pluginPath ->

@@ -154,6 +154,19 @@ void main() {
     Logger: () => DelegateLogger(BufferLogger()),
   }));
 
+  test('Can successfully run and disconnect with --no-resident', () => testbed.run(() async {
+    _setupMocks();
+    residentWebRunner = ResidentWebRunner(
+      mockWebDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ipv6: true,
+      stayResident: false,
+    );
+
+    expect(await residentWebRunner.run(), 0);
+  }));
+
   test('Listens to stdout streams before running main', () => testbed.run(() async {
     _setupMocks();
     final BufferLogger bufferLogger = logger;
