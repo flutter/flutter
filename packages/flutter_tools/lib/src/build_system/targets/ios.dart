@@ -177,7 +177,7 @@ Future<RunResult> createStubAppFramework(Directory appFrameworkDirectory) async 
   static const int Moo = 88;
   ''');
 
-    return xcode.clang(<String>[
+    return await xcode.clang(<String>[
       '-x',
       'c',
       stubSource.path,
