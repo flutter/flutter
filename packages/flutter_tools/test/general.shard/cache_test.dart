@@ -408,7 +408,7 @@ void main() {
         mockPackageResolver.resolveUrl('fuchsia-debug-symbols-arm64', any),
       ]);
     });
-  });
+  }, skip: !platform.isLinux);
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {
