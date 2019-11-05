@@ -2336,22 +2336,25 @@ class RoundSliderThumbShape extends SliderComponentShape {
     );
 
     final evaluatedElevation = elevationTween.evaluate(activationAnimation);
+    final Color color = colorTween.evaluate(enableAnimation);
     final radius = radiusTween.evaluate(enableAnimation);
     Path path = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
     canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
 
-    // Clear the space of the track and shadow so the thumb can be drawn.
-    context.canvas.drawCircle(
-      center,
-      radius,
-      Paint()..color = sliderTheme.surfaceColor.withOpacity(1)
-    );
+    // If the thumb is translucent, clear the space of the track and shadow so
+    // the thumb can be drawn without interference.
+    if (color.alpha != 0xff) {
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()..color = sliderTheme.surfaceColor.withOpacity(1),
+      );
+    }
 
     canvas.drawCircle(
         center,
-        radiusTween.evaluate(enableAnimation),
-        Paint()
-          ..color = colorTween.evaluate(enableAnimation)
+        radius,
+        Paint()..color = color,
     );
   }
 }
@@ -2464,20 +2467,25 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     }
 
     final double evaluatedElevation = isPressed ? elevationTween.evaluate(activationAnimation) : elevation;
+    final Color color = colorTween.evaluate(enableAnimation);
     final Path shadowPath = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
     canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
 
-    // Clear the space of the track and shadow so the thumb can be drawn.
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()..color = sliderTheme.surfaceColor.withOpacity(1)
-    );
+    // If the thumb is translucent, clear the space of the track and shadow so
+    // the thumb can be drawn without interference.
+    if (color.alpha != 0xff) {
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()
+          ..color = sliderTheme.surfaceColor.withOpacity(1),
+      );
+    }
 
     canvas.drawCircle(
       center,
       radius,
-      Paint()..color = colorTween.evaluate(enableAnimation)
+      Paint()..color = color,
     );
   }
 }
