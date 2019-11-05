@@ -131,6 +131,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: TransformationsDemo.routeName,
       buildRoute: (BuildContext context) => const TransformationsDemo(),
     ),
+    GalleryDemo(
+      title: 'Table',
+      subtitle: 'Yes',
+      icon: GalleryIcons.data_table,
+      category: _kDemos,
+      routeName: TableDemo.routeName,
+      buildRoute: (BuildContext context) => const TableDemo(),
+    ),
 
     // Style
     GalleryDemo(

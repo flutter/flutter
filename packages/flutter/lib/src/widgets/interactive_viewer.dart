@@ -12,6 +12,8 @@ enum _GestureType {
   rotate,
 }
 
+final UniqueKey _childKey = UniqueKey();
+
 /// This widget allows 2D transform interactions on its child in relation to its
 /// parent. The user can transform the child by dragging to pan or pinching to
 /// zoom and rotate. All event callbacks for GestureDetector are supported, and
@@ -254,12 +256,7 @@ class InteractiveViewer extends StatelessWidget {
           child: child,
           maxScale: maxScale,
           minScale: minScale,
-          boundaryRect: Rect.fromLTRB(
-            -boundaryMargin.left,
-            -boundaryMargin.top,
-            constraints.maxWidth + boundaryMargin.right,
-            constraints.maxHeight + boundaryMargin.bottom,
-          ),
+          boundaryMargin: boundaryMargin,
           initialTranslation: initialTranslation,
           initialScale: initialScale,
           initialRotation: initialRotation,
@@ -307,7 +304,7 @@ class _InteractiveViewerSized extends StatefulWidget {
     @required this.size,
     this.maxScale,
     @required this.minScale,
-    this.boundaryRect,
+    this.boundaryMargin,
     this.initialTranslation,
     this.initialScale,
     this.initialRotation,
@@ -354,6 +351,8 @@ class _InteractiveViewerSized extends StatefulWidget {
        );
 
   final Widget child;
+  // TODO(justinmc): This is the size of the viewport, so consider naming it as
+  // such.
   final Size size;
   final bool reset;
   final GestureTapDownCallback onTapDown;
@@ -384,7 +383,7 @@ class _InteractiveViewerSized extends StatefulWidget {
   final GestureScaleEndCallback onScaleEnd;
   final double maxScale;
   final double minScale;
-  final Rect boundaryRect;
+  final EdgeInsets boundaryMargin;
   final bool disableTranslation;
   final bool disableScale;
   final bool disableRotation;
@@ -475,6 +474,19 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     return renderObject.localToGlobal(Offset.zero);
   }
 
+  // TODO(justinmc): Cache.
+  Rect get _boundaryRect {
+    assert(_childKey.currentContext != null);
+    final RenderBox renderBoxContainer = _childKey.currentContext.findRenderObject();
+    final Size childSize = renderBoxContainer.paintBounds.size;
+    return Rect.fromLTRB(
+      -widget.boundaryMargin.left,
+      -widget.boundaryMargin.top,
+      childSize.width + widget.boundaryMargin.right,
+      childSize.height + widget.boundaryMargin.bottom,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -503,7 +515,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
   @override
   Widget build(BuildContext context) {
     // A GestureDetector allows the detection of panning and zooming gestures on
-    // its child, which is the CustomPaint.
+    // the child.
     return GestureDetector(
       behavior: HitTestBehavior.opaque, // Necessary when translating off screen
       onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) {
@@ -575,13 +587,18 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       onScaleEnd: _onScaleEnd,
       onScaleStart: _onScaleStart,
       onScaleUpdate: _onScaleUpdate,
+      // TODO(justinmc): Do I need this ClipRect?
       child: ClipRect(
         child: Transform(
           transform: _transform,
-          child: Container(
-            width: widget.size.width,
-            height: widget.size.height,
-            child: widget.child,
+          child: OverflowBox(
+            alignment: Alignment.topLeft,
+            maxWidth: double.infinity,
+            maxHeight: double.infinity,
+            child: Container(
+              key: _childKey,
+              child: widget.child,
+            ),
           ),
         ),
       ),
@@ -595,14 +612,15 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       return matrix;
     }
 
-    // Clamp translation so the viewport remains inside widget.boundaryRect.
+    // Clamp translation so the viewport remains inside _boundaryRect.
     final double scale = _transform.getMaxScaleOnAxis();
     final Size scaledSize = widget.size / scale;
+    // Add 1 pixel because Rect.contains excludes its bottom and right edges.
     final Rect viewportBoundaries = Rect.fromLTRB(
-      widget.boundaryRect.left,
-      widget.boundaryRect.top,
-      widget.boundaryRect.right - scaledSize.width,
-      widget.boundaryRect.bottom - scaledSize.height,
+      _boundaryRect.left,
+      _boundaryRect.top,
+      _boundaryRect.right - scaledSize.width,
+      _boundaryRect.bottom - scaledSize.height,
     );
     // Translation is reversed (a positive translation moves the scene to the
     // right, viewport to the left).
@@ -614,30 +632,31 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     );
 
     // Does both the x and y translation fit in the boundaries?
-    final Matrix4 nextMatrixXY = matrix.clone()..translate(
+    final Matrix4 nextMatrix = matrix.clone()..translate(
       translation.dx,
       translation.dy,
     );
-    if (translationBoundaries.contains(_getMatrixTranslation(nextMatrixXY))) {
-      return nextMatrixXY;
+    final Offset nextTranslation = _getMatrixTranslation(nextMatrix);
+    if (translationBoundaries.contains(nextTranslation)) {
+      return nextMatrix;
     }
 
     // x and y translation together doesn't fit, but does just x?
-    final Matrix4 nextMatrixX = matrix.clone()..translate(
-      translation.dx,
-      0.0,
-    );
-    if (translationBoundaries.contains(_getMatrixTranslation(nextMatrixX))) {
-      return nextMatrixX;
+    if (translationBoundaries.left <= nextTranslation.dx
+      && translationBoundaries.right >= nextTranslation.dx) {
+      return matrix.clone()..translate(
+        translation.dx,
+        0.0,
+      );
     }
 
     // Neither of above fit, so try if just y translation fits.
-    final Matrix4 nextMatrixY = matrix.clone()..translate(
-      0.0,
-      translation.dy,
-    );
-    if (translationBoundaries.contains(_getMatrixTranslation(nextMatrixY))) {
-      return nextMatrixY;
+    if (translationBoundaries.top <= nextTranslation.dy
+      && translationBoundaries.bottom >= nextTranslation.dy) {
+      return matrix.clone()..translate(
+        0.0,
+        translation.dy,
+      );
     }
 
     // Nothing fits, so return the unmodified original matrix.
@@ -663,14 +682,15 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     final double clampedScale = clampedTotalScale / currentScale;
     final Matrix4 nextMatrix = matrix.clone()..scale(clampedScale);
 
-    // Don't allow a scale that moves the viewport outside of widget.boundaryRect.
+    // Don't allow a scale that moves the viewport outside of _boundaryRect.
     // Add 1 pixel because Rect.contains excludes its bottom and right edges.
     final Rect boundaryRect = Rect.fromLTRB(
-      widget.boundaryRect.left,
-      widget.boundaryRect.top,
-      widget.boundaryRect.right + 1.0,
-      widget.boundaryRect.bottom + 1.0,
+      _boundaryRect.left,
+      _boundaryRect.top,
+      _boundaryRect.right + 1.0,
+      _boundaryRect.bottom + 1.0,
     );
+    // TODO(justinmc): This needs to be updated to use childSize too I think.
     final Offset tl = fromViewport(const Offset(0, 0), nextMatrix);
     final Offset tr = fromViewport(Offset(widget.size.width, 0), nextMatrix);
     final Offset bl = fromViewport(Offset(0, widget.size.height), nextMatrix);
@@ -690,7 +710,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
   // Return a new matrix representing the given matrix after applying the given
   // rotation transform.
-  // Rotating the scene cannot cause the viewport to view beyond widget.boundaryRect.
+  // Rotating the scene cannot cause the viewport to view beyond _boundaryRect.
   Matrix4 matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
     if (widget.disableRotation || rotation == 0) {
       return matrix;
