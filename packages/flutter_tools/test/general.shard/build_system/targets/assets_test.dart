@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
@@ -65,7 +67,7 @@ flutter:
 
     // See https://github.com/flutter/flutter/issues/35293
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), false);
-  }));
+  }), skip: Platform.isWindows); // See https://github.com/google/file.dart/issues/131
 
   test('FlutterPlugins updates required files as needed', () => testbed.run(() async {
     fs.file('pubspec.yaml')
