@@ -387,6 +387,28 @@ void main() {
       Cache: () => mockCache,
     });
   });
+
+  group('Flutter runner debug symbols', () {
+    MockCache mockCache;
+    MockVersionedPackageResolver mockPackageResolver;
+
+    setUp(() {
+      mockCache = MockCache();
+      mockPackageResolver = MockVersionedPackageResolver();
+    });
+
+    testUsingContext('Downloads Flutter runner debug symbols', () async {
+      final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols =
+        FlutterRunnerDebugSymbols(mockCache, packageResolver: mockPackageResolver, dryRun: true);
+
+      await flutterRunnerDebugSymbols.updateInner();
+
+      verifyInOrder(<void>[
+        mockPackageResolver.resolveUrl('fuchsia-debug-symbols-x64', any),
+        mockPackageResolver.resolveUrl('fuchsia-debug-symbols-arm64', any),
+      ]);
+    });
+  }, skip: !platform.isLinux);
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {
@@ -425,3 +447,4 @@ class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockPlatform extends Mock implements Platform {}
+class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
