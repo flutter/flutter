@@ -248,7 +248,7 @@ public class FlutterEngine {
    */
   private void registerPlugins() {
     try {
-      Class generatedPluginRegistrant = Class.forName("io.plugins.GeneratedPluginRegistrant");
+      Class<?> generatedPluginRegistrant = Class.forName("io.plugins.GeneratedPluginRegistrant");
       Method registrationMethod = generatedPluginRegistrant.getDeclaredMethod("registerWith", FlutterEngine.class);
       registrationMethod.invoke(null, this);
     } catch (Exception e) {
