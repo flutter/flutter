@@ -468,11 +468,14 @@ class IosProject implements XcodeBasedProject {
   /// Symlink the Flutter.framework as a placeholder so the host app can find the headers in its header search paths
   /// until this framework can be swapped out by the Xcode backend script or a pod install.
   void _copyFlutterFramework() {
+    final Directory cachedEngineFrameworkArtifacts = fs.directory(xcode.flutterFrameworkDir(BuildMode.debug));
+    if (!cachedEngineFrameworkArtifacts.existsSync()) {
+      // flutter build ios has not yet been run.
+      return;
+    }
+
     final Directory ephemeralFramework = ephemeralDirectory.childDirectory('Flutter').childDirectory('engine');
     ephemeralFramework.createSync(recursive: true);
-    // Just need something in the header search paths on until this framework can be swapped out by the
-    // Flutter script run in the host app.
-    final Directory cachedEngineFrameworkArtifacts = fs.directory(xcode.flutterFrameworkDir(BuildMode.debug));
     final Directory cachedFlutterFramework = cachedEngineFrameworkArtifacts.childDirectory('Flutter.framework');
     final Link temporaryFramework = ephemeralFramework.childLink('Flutter.framework');
     temporaryFramework.createSync(cachedFlutterFramework.path);
