@@ -455,7 +455,6 @@ class IosProject implements XcodeBasedProject {
     _deleteIfExistsSync(ephemeralDirectory);
 
     _copyFlutterFramework();
-
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
@@ -473,14 +472,14 @@ class IosProject implements XcodeBasedProject {
     ephemeralFramework.createSync(recursive: true);
     // Just need something in the header search paths on until this framework can be swapped out by the
     // Flutter script run in the host app.
-    final String cachedEngineFrameworkArtifacts = fs.path.join(xcode.flutterFrameworkDir(BuildMode.debug));
-    final String cachedFlutterFramework = fs.path.join(cachedEngineFrameworkArtifacts, 'Flutter.framework');
+    final Directory cachedEngineFrameworkArtifacts = fs.directory(xcode.flutterFrameworkDir(BuildMode.debug));
+    final Directory cachedFlutterFramework = cachedEngineFrameworkArtifacts.childDirectory('Flutter.framework');
     final Link temporaryFramework = ephemeralFramework.childLink('Flutter.framework');
-    temporaryFramework.createSync(cachedFlutterFramework);
+    temporaryFramework.createSync(cachedFlutterFramework.path);
 
-    final String cachedFlutterPodspec = fs.path.join(cachedEngineFrameworkArtifacts, 'Flutter.podspec');
-    final Link temporaryPodspec = ephemeralFramework.childLink('Flutter.podspec');
-    temporaryPodspec.createSync(cachedFlutterPodspec);
+    final File cachedFlutterPodspec = cachedEngineFrameworkArtifacts.childFile('Flutter.podspec');
+    final File temporaryPodspec = ephemeralFramework.childFile('Flutter.podspec');
+    cachedFlutterPodspec.copySync(temporaryPodspec.path);
   }
 
   Future<void> makeHostAppEditable() async {

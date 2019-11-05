@@ -166,19 +166,20 @@ Future<void> main() async {
         );
       });
 
-      final bool ephemeralFramework = exists(Directory(path.join(
+      final bool ephemeralFramework = exists(File(path.join(
         projectDir.path,
         '.ios',
         'Flutter',
         'engine',
         'Flutter.framework',
+        'Flutter',
       )));
 
       if (!ephemeralFramework) {
         return TaskResult.failure('Failed to copy framework after regeneration from template');
       }
 
-      final bool ephemeralPodspec = exists(Directory(path.join(
+      final bool ephemeralPodspec = exists(File(path.join(
         projectDir.path,
         '.ios',
         'Flutter',
