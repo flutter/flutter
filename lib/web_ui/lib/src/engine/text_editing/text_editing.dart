@@ -437,7 +437,8 @@ class TextEditingElement {
   }
 
   void _maybeSendAction(html.KeyboardEvent event) {
-    if (event.keyCode == _kReturnKeyCode) {
+    if (_inputConfiguration.inputType.submitActionOnEnter &&
+        event.keyCode == _kReturnKeyCode) {
       event.preventDefault();
       _onAction(_inputConfiguration.inputAction);
     }

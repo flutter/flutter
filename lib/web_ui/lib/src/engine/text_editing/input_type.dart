@@ -59,6 +59,9 @@ abstract class EngineInputType {
   /// <https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inputmode>.
   String get inputmodeAttribute;
 
+  /// Whether this input type allows the "Enter" key to submit the input action.
+  bool get submitActionOnEnter => true;
+
   /// Create the appropriate DOM element for this input type.
   html.HtmlElement createDomElement() => html.InputElement();
 
@@ -123,6 +126,9 @@ class MultilineInputType extends EngineInputType {
 
   @override
   final String inputmodeAttribute = null;
+
+  @override
+  bool get submitActionOnEnter => false;
 
   @override
   html.HtmlElement createDomElement() => html.TextAreaElement();
