@@ -406,6 +406,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
       break;
     case AndroidEmbeddingVersion.v1:
+    default:
       for (Map<String, dynamic> plugin in androidPlugins) {
         if (!plugin['supportsEmbeddingV1'] && plugin['supportsEmbeddingV2']) {
           throwToolExit(
