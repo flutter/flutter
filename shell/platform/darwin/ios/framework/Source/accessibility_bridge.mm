@@ -20,18 +20,20 @@ constexpr int32_t kRootNodeId = 0;
 
 flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     UIAccessibilityScrollDirection direction) {
-  // To describe scroll direction, UIAccessibilityScrollDirection uses the direction the scroll bar
-  // moves in and SemanticsAction uses the direction the finger moves in. Both move in opposite
-  // directions, which is why the following maps left to right and vice versa.
+  // To describe the vertical scroll direction, UIAccessibilityScrollDirection uses the
+  // direction the scroll bar moves in and SemanticsAction uses the direction the finger
+  // moves in. However, the horizontal scroll direction matches the SemanticsAction direction.
+  // That is way the following maps vertical opposite of the SemanticsAction, but the horizontal
+  // maps directly.
   switch (direction) {
     case UIAccessibilityScrollDirectionRight:
     case UIAccessibilityScrollDirectionPrevious:  // TODO(abarth): Support RTL using
                                                   // _node.textDirection.
-      return flutter::SemanticsAction::kScrollLeft;
+      return flutter::SemanticsAction::kScrollRight;
     case UIAccessibilityScrollDirectionLeft:
     case UIAccessibilityScrollDirectionNext:  // TODO(abarth): Support RTL using
                                               // _node.textDirection.
-      return flutter::SemanticsAction::kScrollRight;
+      return flutter::SemanticsAction::kScrollLeft;
     case UIAccessibilityScrollDirectionUp:
       return flutter::SemanticsAction::kScrollDown;
     case UIAccessibilityScrollDirectionDown:
