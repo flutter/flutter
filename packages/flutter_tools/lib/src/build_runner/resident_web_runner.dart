@@ -515,7 +515,8 @@ class ResidentWebRunner extends ResidentRunner {
           'returnByValue': true,
         });
       } on WipError catch (err) {
-        return OperationResult(1, err.toString());
+        printError(err.toString());
+        return OperationResult(1, '');
       }
     }
     return OperationResult.ok;
