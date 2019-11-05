@@ -1037,10 +1037,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
 
-/// The [State] for [PopupMenuButton].
+/// The [State] for a [PopupMenuButton]. 
 ///
-/// It allows you to call [showButtonMenu] manually, which is
-/// normally called when the user taps the button.
+/// It allows you to call [showButtonMenu] manually, which is normally
+/// called when the user taps the button.
 ///
 /// You can obtain this state by providing a [GlobalKey] to your
 /// [PopupMenuButton], i.e. `GlobalKey<PopupMenuButtonState>` to
