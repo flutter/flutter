@@ -199,3 +199,15 @@ class CommandResultEvent extends UsageEvent {
     }
   }
 }
+
+/// An event that reports on changes in the configuration of analytics.
+class AnalyticsConfigEvent extends UsageEvent {
+  AnalyticsConfigEvent({
+    /// Whether analytics reporting is being enabled (true) or disabled (false).
+    @required bool enabled,
+  }) : super(
+    'analytics',
+    'enabled',
+    label: enabled ? 'true' : 'false',
+  );
+}

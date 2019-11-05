@@ -15,12 +15,14 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
+import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
 
 class UpgradeCommand extends FlutterCommand {
-  UpgradeCommand() {
+  UpgradeCommand([UpgradeCommandRunner commandRunner])
+    : _commandRunner = commandRunner ?? UpgradeCommandRunner() {
     argParser
       ..addFlag(
         'force',
@@ -32,9 +34,13 @@ class UpgradeCommand extends FlutterCommand {
         'continue',
         hide: true,
         negatable: false,
-        help: 'For the second half of the upgrade flow requiring the new version of Flutter. Should not be invoked manually, but re-entrantly by the standard upgrade command.',
+        help: 'For the second half of the upgrade flow requiring the new '
+              'version of Flutter. Should not be invoked manually, but '
+              're-entrantly by the standard upgrade command.',
       );
   }
+
+  final UpgradeCommandRunner _commandRunner;
 
   @override
   final String name = 'upgrade';
@@ -52,8 +58,7 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final UpgradeCommandRunner upgradeCommandRunner = UpgradeCommandRunner();
-    await upgradeCommandRunner.runCommand(
+    await _commandRunner.runCommand(
       argResults['force'],
       argResults['continue'],
       GitTagVersion.determine(),
@@ -141,9 +146,13 @@ class UpgradeCommandRunner {
   // This method should only be called if the upgrade command is invoked
   // re-entrantly with the `--continue` flag
   Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
+    // Make sure the welcome message re-display is delayed until the end.
+    persistentToolState.redisplayWelcomeMessage = false;
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
+    // Force the welcome message to re-display following the upgrade.
+    persistentToolState.redisplayWelcomeMessage = true;
   }
 
   Future<bool> hasUncomittedChanges() async {
