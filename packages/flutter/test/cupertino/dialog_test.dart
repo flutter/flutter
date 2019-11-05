@@ -251,7 +251,7 @@ void main() {
       tester.getSize(
         find.byType(ClipRRect)
       ),
-      equals(const Size(310.0, 560.0)),
+      equals(const Size(310.0, 560.0 - 24.0 * 2)),
     );
 
     // Check sizes/locations of the text. The text is large so these 2 buttons are stacked.
@@ -259,7 +259,7 @@ void main() {
     // regular font. However, when using the test font, "Cancel" becomes 2 lines which
     // is why the height we're verifying for "Cancel" is larger than "OK".
     expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 162.0)));
-    expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0)));
+    expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0 + 24.0)));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')), equals(const Size(310.0, 148.0)));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'OK')), equals(const Size(310.0, 98.0)));
   });
@@ -300,10 +300,12 @@ void main() {
     await tester.pump();
 
     const double topAndBottomMargin = 40.0;
+    const double topAndBottomPadding = 24.0 * 2;
+    const double leftAndRightPadding = 40.0 * 2;
     final Finder modalFinder = find.byType(ClipRRect);
     expect(
       tester.getSize(modalFinder),
-      equals(const Size(200.0, 100.0 - topAndBottomMargin)),
+      equals(const Size(200.0 - leftAndRightPadding, 100.0 - topAndBottomMargin - topAndBottomPadding)),
     );
   });
 
@@ -645,7 +647,7 @@ void main() {
     // should be in a scrollable area equal to half the dialog height.
     expect(
       actionsSectionBox.size.height,
-      280.0,
+      280.0 - 24.0,
     );
   });
 
@@ -1052,6 +1054,36 @@ void main() {
     expect(find.byKey(const Key('option_1')), findsOneWidget);
     expect(find.byKey(const Key('option_2')), findsOneWidget);
     expect(find.byKey(const Key('option_3')), findsNothing);
+  });
+
+  testWidgets('Dialog widget insets by MediaQuery viewInsets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(viewInsets: EdgeInsets.zero),
+          child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
+        ),
+      ),
+    );
+
+    final Rect placeholderRectWithoutInsets = tester.getRect(find.byType(Placeholder));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(viewInsets: EdgeInsets.fromLTRB(40.0, 30.0, 20.0, 10.0)),
+          child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
+        ),
+      ),
+    );
+
+    // no change yet because padding is animated
+    expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    // once animation settles the dialog is padded by the new viewInsets
+    expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
   });
 }
 
