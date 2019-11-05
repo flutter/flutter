@@ -361,7 +361,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'track-widget-creation',
       hide: !hasEffect && !verboseHelp,
-      defaultsTo: false, // this will soon be changed to true
+      defaultsTo: true,
       help: 'Track widget creation locations. This enables features such as the widget inspector. '
             'This parameter is only functional in debug mode (i.e. when compiling JIT, not AOT).',
     );
@@ -447,9 +447,8 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (flutterUsage.isFirstRun) {
-          flutterUsage.printWelcome();
-        }
+        // Prints the welcome message if needed.
+        flutterUsage.printWelcome();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult;
@@ -538,7 +537,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     if (shouldRunPub) {
-      await pubGet(context: PubContext.getVerifyContext(name));
+      await pub.get(context: PubContext.getVerifyContext(name));
       final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
@@ -734,7 +733,8 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
       // No artifacts currently supported.
       return null;

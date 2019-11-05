@@ -203,9 +203,7 @@ class FlutterWebTestEntrypointBuilder implements Builder {
     await bootstrapDdc(
       buildStep,
       platform: flutterWebPlatform,
-      // skipPlatformCheck should be true.
-      // See: https://github.com/dart-lang/build/issues/2484
-      skipPlatformCheck: false,
+      skipPlatformCheck: true,
     );
   }
 }
@@ -234,9 +232,7 @@ class FlutterWebEntrypointBuilder implements Builder {
     await bootstrapDdc(
       buildStep,
       platform: flutterWebPlatform,
-      // skipPlatformCheck should be true.
-      // See: https://github.com/dart-lang/build/issues/2484
-      skipPlatformCheck: false,
+      skipPlatformCheck: true,
     );
   }
 }
@@ -281,7 +277,8 @@ Future<void> main() async {
   // The following parameters are hard-coded in Flutter's test embedder. Since
   // we don't have an embedder yet this is the lowest-most layer we can put
   // this stuff in.
-  await ui.webOnlyInitializeEngine();
+  ui.debugEmulateFlutterTesterEnvironment = true;
+  await ui.webOnlyInitializePlatform();
   // TODO(flutterweb): remove need for dynamic cast.
   (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
   (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);

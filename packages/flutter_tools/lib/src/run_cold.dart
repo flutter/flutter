@@ -114,6 +114,8 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
+    writeVmserviceFile();
+
     if (stayResident && !traceStartup) {
       return waitForAppToFinish();
     }
@@ -168,6 +170,10 @@ class ColdRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async {
+    for (FlutterDevice flutterDevice in flutterDevices) {
+      flutterDevice.device.dispose();
+    }
+
     await stopEchoingDeviceLog();
   }
 

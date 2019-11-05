@@ -349,16 +349,20 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: Column(
-              children: const <Widget>[
-                ListTile(
+              children: <Widget>[
+                const ListTile(
                   title: Text('one'),
                 ),
                 ListTile(
-                  title: Text('two'),
+                  title: const Text('two'),
+                  onTap: () {},
+                ),
+                const ListTile(
+                  title: Text('three'),
                   selected: true,
                 ),
-                ListTile(
-                  title: Text('three'),
+                const ListTile(
+                  title: Text('four'),
                   enabled: false,
                 ),
               ],
@@ -368,33 +372,47 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            label: 'one',
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isEnabled,
-            ],
-          ),
-          TestSemantics.rootChild(
-            label: 'two',
-            flags: <SemanticsFlag>[
-              SemanticsFlag.isSelected,
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isEnabled,
-            ],
-          ),
-          TestSemantics.rootChild(
-            label: 'three',
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasEnabledState,
-            ],
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+              ],
+              label: 'one',
+            ),
+            TestSemantics.rootChild(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              label: 'two',
+            ),
+            TestSemantics.rootChild(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isSelected,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+              ],
+              label: 'three',
+            ),
+            TestSemantics.rootChild(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+              ],
+              label: 'four',
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
       ),
-      ignoreTransform: true, ignoreId: true, ignoreRect: true),
     );
 
     semantics.dispose();
@@ -1118,5 +1136,52 @@ void main() {
 
     expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 56.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
+  });
+  testWidgets('ListTile only accepts focus when enabled', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                enabled: true,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump(); // Let the focus take effect.
+
+    final FocusNode tileNode = Focus.of(childKey.currentContext);
+    tileNode.requestFocus();
+    await tester.pump(); // Let the focus take effect.
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+
+    expect(tileNode.hasPrimaryFocus, isTrue);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                enabled: false,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.binding.focusManager.primaryFocus, isNot(equals(tileNode)));
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
   });
 }

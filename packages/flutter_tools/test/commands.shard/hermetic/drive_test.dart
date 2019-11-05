@@ -73,6 +73,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -83,6 +84,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns 1 when app fails to run', () async {
@@ -99,6 +101,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -109,6 +112,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns 1 when app file is outside package', () async {
@@ -118,6 +122,7 @@ void main() {
         '--no-wrap',
         'drive',
         '--target=$appFile',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -130,6 +135,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns 1 when app file is in the root dir', () async {
@@ -139,6 +145,7 @@ void main() {
         '--no-wrap',
         'drive',
         '--target=$appFile',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -152,6 +159,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns 0 when test ends successfully', () async {
@@ -178,11 +186,13 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       await createTestCommandRunner(command).run(args);
       expect(testLogger.errorText, isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns exitCode set by test runner', () async {
@@ -208,6 +218,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -218,6 +229,7 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     group('findTargetDevice', () {
@@ -232,6 +244,7 @@ void main() {
         expect(device.name, 'specified-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
       });
     });
 
@@ -242,6 +255,7 @@ void main() {
         expect(await findTargetDevice(), isNull);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: platform,
       });
 
@@ -254,6 +268,7 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: platform,
       });
 
@@ -285,6 +300,7 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: platform,
       });
     }
@@ -312,6 +328,7 @@ void main() {
         expect(device.name, 'mock-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: macOsPlatform,
       });
     });
@@ -365,6 +382,7 @@ void main() {
         final List<String> args = <String>[
           'drive',
           '--target=$testApp',
+          '--no-pub',
         ];
         try {
           await createTestCommandRunner(command).run(args);
@@ -382,6 +400,7 @@ void main() {
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('does not use pre-built app if --build arg provided', () async {
@@ -391,6 +410,7 @@ void main() {
           'drive',
           '--build',
           '--target=$testApp',
+          '--no-pub',
         ];
         try {
           await createTestCommandRunner(command).run(args);
@@ -408,6 +428,7 @@ void main() {
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('uses prebuilt app if --no-build arg provided', () async {
@@ -417,6 +438,7 @@ void main() {
           'drive',
           '--no-build',
           '--target=$testApp',
+          '--no-pub',
         ];
         try {
           await createTestCommandRunner(command).run(args);
@@ -434,7 +456,116 @@ void main() {
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
       });
+    });
+
+    group('debugging options', () {
+      DebuggingOptions debuggingOptions;
+
+      String testApp, testFile;
+
+      setUp(() {
+        restoreAppStarter();
+      });
+
+      Future<void> appStarterSetup() async {
+        mockDevice = MockDevice();
+        testDeviceManager.addDevice(mockDevice);
+
+        final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
+        when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);
+        final MockLaunchResult mockLaunchResult = MockLaunchResult();
+        when(mockLaunchResult.started).thenReturn(true);
+        when(mockDevice.startApp(
+          null,
+          mainPath: anyNamed('mainPath'),
+          route: anyNamed('route'),
+          debuggingOptions: anyNamed('debuggingOptions'),
+          platformArgs: anyNamed('platformArgs'),
+          prebuiltApplication: anyNamed('prebuiltApplication'),
+        )).thenAnswer((Invocation invocation) async {
+          debuggingOptions = invocation.namedArguments[#debuggingOptions];
+          return mockLaunchResult;
+        });
+        when(mockDevice.isAppInstalled(any))
+            .thenAnswer((_) => Future<bool>.value(false));
+
+        testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
+        testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+
+        testRunner = (List<String> testArgs, String observatoryUri) async {
+          throwToolExit(null, exitCode: 123);
+        };
+        appStopper = expectAsync1(
+          (DriveCommand command) async {
+            return true;
+          },
+          count: 2,
+        );
+
+        final MemoryFileSystem memFs = fs;
+        await memFs.file(testApp).writeAsString('main() {}');
+        await memFs.file(testFile).writeAsString('main() {}');
+      }
+
+      void _testOptionThatDefaultsToFalse(
+        String optionName,
+        bool setToTrue,
+        bool optionValue(),
+      ) {
+        testUsingContext('$optionName ${setToTrue ? 'works' : 'defaults to false'}', () async {
+          await appStarterSetup();
+
+          final List<String> args = <String>[
+            'drive',
+            '--target=$testApp',
+            if (setToTrue) optionName,
+            '--no-pub',
+          ];
+          try {
+            await createTestCommandRunner(command).run(args);
+          } on ToolExit catch (e) {
+            expect(e.exitCode, 123);
+            expect(e.message, null);
+          }
+          verify(mockDevice.startApp(
+            null,
+            mainPath: anyNamed('mainPath'),
+            route: anyNamed('route'),
+            debuggingOptions: anyNamed('debuggingOptions'),
+            platformArgs: anyNamed('platformArgs'),
+            prebuiltApplication: false,
+          ));
+          expect(optionValue(), setToTrue ? isTrue : isFalse);
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        });
+      }
+
+      void testOptionThatDefaultsToFalse(
+        String optionName,
+        bool optionValue(),
+      ) {
+        _testOptionThatDefaultsToFalse(optionName, true, optionValue);
+        _testOptionThatDefaultsToFalse(optionName, false, optionValue);
+      }
+
+      testOptionThatDefaultsToFalse(
+        '--dump-skp-on-shader-compilation',
+        () => debuggingOptions.dumpSkpOnShaderCompilation,
+      );
+
+      testOptionThatDefaultsToFalse(
+        '--verbose-system-logs',
+        () => debuggingOptions.verboseSystemLogs,
+      );
+
+      testOptionThatDefaultsToFalse(
+        '--cache-sksl',
+        () => debuggingOptions.cacheSkSL,
+      );
     });
   });
 }

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
-import 'android/gradle.dart' as gradle;
+import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -288,6 +288,9 @@ abstract class XcodeBasedProject {
 
   /// True if the host app project is using Swift.
   Future<bool> get isSwift;
+
+  /// Directory containing symlinks to pub cache plugins source generated on `pod install`.
+  Directory get symlinks;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -349,6 +352,9 @@ class IosProject implements XcodeBasedProject {
 
   /// The 'Info.plist' file of the host app.
   File get hostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
+
+  @override
+  Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
   Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppBundleName.xcodeproj');
@@ -568,6 +574,11 @@ class AndroidProject {
     return _firstMatchInFile(gradleFile, _groupPattern)?.group(1);
   }
 
+  /// The build directory where the Android artifacts are placed.
+  Directory get buildDirectory {
+    return parent.directory.childDirectory('build');
+  }
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       _regenerateLibrary();
@@ -611,7 +622,7 @@ class AndroidProject {
     _overwriteFromTemplate(fs.path.join(
       'module',
       'android',
-      featureFlags.isNewAndroidEmbeddingEnabled ? 'library_new_embedding' : 'library',
+      featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
     ), ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
     gradle.injectGradleWrapperIfNeeded(ephemeralDirectory);
@@ -625,7 +636,7 @@ class AndroidProject {
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
-        'useNewAndroidEmbedding': featureFlags.isNewAndroidEmbeddingEnabled,
+        'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
@@ -741,6 +752,9 @@ class MacOSProject implements XcodeBasedProject {
 
   @override
   Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
+
+  @override
+  Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
 
   @override
   Future<bool> get isSwift async => true;

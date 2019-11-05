@@ -204,7 +204,7 @@ abstract class Target {
     return <String, Object>{
       'name': name,
       'dependencies': <String>[
-        for (Target target in dependencies) target.name
+        for (Target target in dependencies) target.name,
       ],
       'inputs': <String>[
         for (File file in resolveInputs(environment).sources) file.path,
@@ -406,7 +406,7 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment)
+    final FileHashStore fileCache = FileHashStore(environment, fs)
       ..initialize();
 
     // Perform sanity checks on build.
@@ -502,7 +502,7 @@ class _BuildInstance {
         outputFiles[output.path] = output;
       }
       for (File input in node.inputs) {
-        final String resolvedPath = input.resolveSymbolicLinksSync();
+        final String resolvedPath = input.absolute.path;
         if (outputFiles.containsKey(resolvedPath)) {
           continue;
         }
@@ -526,17 +526,20 @@ class _BuildInstance {
       await node.target.build(environment);
       printTrace('${node.target.name}: Complete');
 
-      // If we were missing the depfile, resolve files after executing the
+      node.inputs
+        ..clear()
+        ..addAll(node.target.resolveInputs(environment).sources);
+      node.outputs
+        ..clear()
+        ..addAll(node.target.resolveOutputs(environment).sources);
+
+      // If we were missing the depfile, resolve  input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
-        node.inputs.clear();
-        node.outputs.clear();
-        node.inputs.addAll(node.target.resolveInputs(environment).sources);
-        node.outputs.addAll(node.target.resolveOutputs(environment).sources);
         await fileCache.hashFiles(node.inputs);
       }
 
-      // Update hashes for output files.
+      // Always update hashes for output files.
       await fileCache.hashFiles(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
@@ -575,6 +578,9 @@ class ExceptionMeasurement {
   final String target;
   final dynamic exception;
   final StackTrace stackTrace;
+
+  @override
+  String toString() => 'target: $target\nexception:$exception\n$stackTrace';
 }
 
 /// Helper class to collect measurement data.
@@ -704,7 +710,7 @@ class Node {
   /// One or more reasons why a task was invalidated.
   ///
   /// May be empty if the task was skipped.
-  final Set<InvalidedReason> invalidatedReasons = <InvalidedReason>{};
+  final Set<InvalidatedReason> invalidatedReasons = <InvalidatedReason>{};
 
   /// Whether this node needs an action performed.
   bool get dirty => _dirty;
@@ -735,7 +741,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          invalidatedReasons.add(InvalidedReason.inputChanged);
+          invalidatedReasons.add(InvalidatedReason.inputChanged);
           _dirty = true;
         }
       } else {
@@ -749,13 +755,13 @@ class Node {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
-        invalidatedReasons.add(InvalidedReason.outputSetChanged);
+        invalidatedReasons.add(InvalidatedReason.outputSetChanged);
         // if this isn't a current output file there is no reason to compute the hash.
         continue;
       }
       final File file = fs.file(previousOutput);
       if (!file.existsSync()) {
-        invalidatedReasons.add(InvalidedReason.outputMissing);
+        invalidatedReasons.add(InvalidatedReason.outputMissing);
         _dirty = true;
         continue;
       }
@@ -764,7 +770,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          invalidatedReasons.add(InvalidedReason.outputChanged);
+          invalidatedReasons.add(InvalidatedReason.outputChanged);
           _dirty = true;
         }
       } else {
@@ -772,9 +778,14 @@ class Node {
       }
     }
 
-    // If we depend on a file that doesnt exist on disk, kill the build.
+    // If we depend on a file that doesnt exist on disk, mark the build as
+    // dirty. if the rule is not correctly specified, this will result in it
+    // always being rerun.
     if (missingInputs.isNotEmpty) {
-      throw MissingInputException(missingInputs, target.name);
+      _dirty = true;
+      final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
+      printTrace('invalidated build due to missing files: $missingMessage');
+      invalidatedReasons.add(InvalidatedReason.inputMissing);
     }
 
     // If we have files to hash, compute them asynchronously and then
@@ -782,7 +793,7 @@ class Node {
     if (sourcesToHash.isNotEmpty) {
       final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
       if (dirty.isNotEmpty) {
-        invalidatedReasons.add(InvalidedReason.inputChanged);
+        invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;
       }
     }
@@ -790,8 +801,12 @@ class Node {
   }
 }
 
-/// A description of why a task was rerun.
-enum InvalidedReason {
+/// A description of why a target was rerun.
+enum InvalidatedReason {
+  /// An input file that was expected is missing. This can occur when using
+  /// depfile dependencies, or if a target is incorrectly specified.
+  inputMissing,
+
   /// An input file has an updated hash.
   inputChanged,
 

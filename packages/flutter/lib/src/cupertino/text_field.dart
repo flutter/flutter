@@ -13,9 +13,12 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
-// Value extracted via color reader from iOS simulator.
+// Value inspected from Xcode 11 & iOS 13.0 Simulator.
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
-  color: CupertinoColors.lightBackgroundGray,
+  color: CupertinoDynamicColor.withBrightness(
+    color: Color(0x33000000),
+    darkColor: Color(0x33FFFFFF),
+  ),
   style: BorderStyle.solid,
   width: 0.0,
 );
@@ -25,16 +28,27 @@ const Border _kDefaultRoundedBorder = Border(
   left: _kDefaultRoundedBorderSide,
   right: _kDefaultRoundedBorderSide,
 );
-// Counted manually on magnified simulator.
+
 const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
+  color: CupertinoDynamicColor.withBrightness(
+    color: CupertinoColors.white,
+    darkColor: CupertinoColors.black,
+  ),
   border: _kDefaultRoundedBorder,
-  borderRadius: BorderRadius.all(Radius.circular(4.0)),
+  borderRadius: BorderRadius.all(Radius.circular(5.0)),
 );
 
-// Value extracted via color reader from iOS simulator.
-const Color _kSelectionHighlightColor = Color(0x667FAACF);
-const Color _kInactiveTextColor = Color(0xFFC2C2C2);
-const Color _kDisabledBackground = Color(0xFFFAFAFA);
+const Color _kDisabledBackground = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFFAFAFA),
+  darkColor: Color(0xFF050505),
+);
+
+// Value inspected from Xcode 11 & iOS 13.0 Simulator.
+// Note it may not be consistent with https://developer.apple.com/design/resources/.
+const CupertinoDynamicColor _kClearButtonColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFF636366),
+  darkColor: Color(0xFFAEAEB2),
+);
 
 // An eyeballed value that moves the cursor slightly left of where it is
 // rendered for text on Android so it's positioning more accurately matches the
@@ -80,7 +94,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   void onSingleTapUp(TapUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
-    // this handler. If the the clear button widget recognizes the up event,
+    // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
       final RenderBox renderBox = _state._clearGlobalKey.currentContext.findRenderObject();
@@ -183,8 +197,8 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], and [textAlign] properties must not be
-  /// null.
+  /// [scrollPadding], [suffixMode], [textAlign], and [enableSuggestions] properties
+  /// must not be null.
   ///
   /// See also:
   ///
@@ -200,8 +214,8 @@ class CupertinoTextField extends StatefulWidget {
     this.padding = const EdgeInsets.all(6.0),
     this.placeholder,
     this.placeholderStyle = const TextStyle(
-      fontWeight: FontWeight.w300,
-      color: _kInactiveTextColor,
+      fontWeight: FontWeight.w400,
+      color: CupertinoColors.placeholderText,
     ),
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,
@@ -221,6 +235,7 @@ class CupertinoTextField extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
+    this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
     this.expands = false,
@@ -246,6 +261,7 @@ class CupertinoTextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
@@ -260,6 +276,7 @@ class CupertinoTextField extends StatefulWidget {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength > 0),
        assert(clearButtonMode != null),
        assert(prefixMode != null),
@@ -399,6 +416,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.enableSuggestions}
+  final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
@@ -546,7 +566,8 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
@@ -772,12 +793,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 if (widget.onChanged != null && textChanged)
                   widget.onChanged(_effectiveController.text);
               } : null,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
                 child: Icon(
                   CupertinoIcons.clear_thick_circled,
                   size: 18.0,
-                  color: _kInactiveTextColor,
+                  color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
                 ),
               ),
             ),
@@ -798,17 +819,49 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    final TextStyle textStyle = themeData.textTheme.textStyle.merge(widget.style);
-    final TextStyle placeholderStyle = textStyle.merge(widget.placeholderStyle);
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
-    final Color cursorColor = widget.cursorColor ?? themeData.primaryColor;
-    final Color disabledColor = CupertinoTheme.of(context).brightness == Brightness.light
-      ? _kDisabledBackground
-      : CupertinoColors.darkBackgroundGray;
 
-    final BoxDecoration effectiveDecoration = enabled
-      ? widget.decoration
-      : widget.decoration?.copyWith(color: widget.decoration?.color ?? disabledColor);
+    final TextStyle resolvedStyle = widget.style?.copyWith(
+      color: CupertinoDynamicColor.resolve(widget.style?.color, context),
+      backgroundColor: CupertinoDynamicColor.resolve(widget.style?.backgroundColor, context),
+    );
+
+    final TextStyle textStyle = themeData.textTheme.textStyle.merge(resolvedStyle);
+
+    final TextStyle resolvedPlaceholderStyle = widget.placeholderStyle?.copyWith(
+      color: CupertinoDynamicColor.resolve(widget.placeholderStyle?.color, context),
+      backgroundColor: CupertinoDynamicColor.resolve(widget.placeholderStyle?.backgroundColor, context),
+    );
+
+    final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
+
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
+    final Color cursorColor = CupertinoDynamicColor.resolve(widget.cursorColor, context) ?? themeData.primaryColor;
+    final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
+
+    final Color decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
+
+    final BoxBorder border = widget.decoration?.border;
+    Border resolvedBorder = border;
+    if (border is Border) {
+      BorderSide resolveBorderSide(BorderSide side) {
+        return side == BorderSide.none
+          ? side
+          : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
+      }
+      resolvedBorder = border == null || border.runtimeType != Border
+        ? border
+        : Border(
+          top: resolveBorderSide(border.top),
+          left: resolveBorderSide(border.left),
+          bottom: resolveBorderSide(border.bottom),
+          right: resolveBorderSide(border.right),
+        );
+    }
+
+    final BoxDecoration effectiveDecoration = widget.decoration?.copyWith(
+      border: resolvedBorder,
+      color: enabled ? decorationColor : (decorationColor ?? disabledColor),
+    );
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -830,10 +883,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           autofocus: widget.autofocus,
           obscureText: widget.obscureText,
           autocorrect: widget.autocorrect,
+          enableSuggestions: widget.enableSuggestions,
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          selectionColor: _kSelectionHighlightColor,
+          selectionColor: CupertinoTheme.of(context).primaryColor.withOpacity(0.2),
           selectionControls: widget.selectionEnabled
             ? cupertinoTextSelectionControls : null,
           onChanged: widget.onChanged,
@@ -848,7 +902,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorOpacityAnimates: true,
           cursorOffset: cursorOffset,
           paintCursorAboveText: true,
-          backgroundCursorColor: CupertinoColors.inactiveGray,
+          backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,
           dragStartBehavior: widget.dragStartBehavior,

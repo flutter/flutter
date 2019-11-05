@@ -128,13 +128,12 @@ flutter_tools:lib/''');
       targetModel: anyNamed('targetModel'),
       linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
       aot: anyNamed('aot'),
-      enableAsserts: anyNamed('enableAsserts'),
+      buildMode: anyNamed('buildMode'),
       trackWidgetCreation: anyNamed('trackWidgetCreation'),
       extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
       packagesPath: anyNamed('packagesPath'),
       fileSystemRoots: anyNamed('fileSystemRoots'),
       fileSystemScheme: anyNamed('fileSystemScheme'),
-      targetProductVm: anyNamed('targetProductVm'),
       platformDill: anyNamed('platformDill'),
       initializeFromDill: anyNamed('initializeFromDill'),
     )).thenAnswer((Invocation invocation) async {
@@ -153,10 +152,9 @@ flutter_tools:lib/''');
     when(mockKernelCompiler.compile(
       sdkRoot: anyNamed('sdkRoot'),
       aot: anyNamed('aot'),
-      enableAsserts: anyNamed('enableAsserts'),
+      buildMode: anyNamed('buildMode'),
       trackWidgetCreation: false,
       targetModel: anyNamed('targetModel'),
-      targetProductVm: anyNamed('targetProductVm'),
       outputFilePath: anyNamed('outputFilePath'),
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
@@ -170,6 +168,30 @@ flutter_tools:lib/''');
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
 
+  test('kernel_snapshot can disable track-widget-creation on debug builds', () => testbed.run(() async {
+    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
+    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
+      return mockKernelCompiler;
+    });
+    when(mockKernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      aot: anyNamed('aot'),
+      buildMode: anyNamed('buildMode'),
+      trackWidgetCreation: false,
+      targetModel: anyNamed('targetModel'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      packagesPath: anyNamed('packagesPath'),
+      mainPath: anyNamed('mainPath'),
+    )).thenAnswer((Invocation _) async {
+      return const CompilerOutput('example', 0, <Uri>[]);
+    });
+
+    await const KernelSnapshot().build(androidEnvironment..defines[kTrackWidgetCreation] = 'false');
+  }, overrides: <Type, Generator>{
+    KernelCompilerFactory: () => MockKernelCompilerFactory(),
+  }));
+
   test('kernel_snapshot does use track widget creation on debug builds', () => testbed.run(() async {
     final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
     when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
@@ -178,10 +200,9 @@ flutter_tools:lib/''');
     when(mockKernelCompiler.compile(
       sdkRoot: anyNamed('sdkRoot'),
       aot: anyNamed('aot'),
-      enableAsserts: anyNamed('enableAsserts'),
+      buildMode: anyNamed('buildMode'),
       trackWidgetCreation: true,
       targetModel: anyNamed('targetModel'),
-      targetProductVm: anyNamed('targetProductVm'),
       outputFilePath: anyNamed('outputFilePath'),
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
@@ -215,14 +236,12 @@ flutter_tools:lib/''');
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
-
   test('aot_elf_profile throws error if missing target platform', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const AotElfProfile(),
         androidEnvironment..defines.remove(kTargetPlatform));
 
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
-
 
   test('aot_assembly_profile throws error if missing build mode', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(),
@@ -335,14 +354,12 @@ flutter_tools:lib/''');
     ProcessManager: () => mockProcessManager,
   }));
 
-  test('list dart sources handles packages without lib directories', () => testbed.run(() {
-    fs.file('.packages')
-      ..createSync()
-      ..writeAsStringSync('''
-# Generated
-example:fiz/lib/''');
-    fs.directory('fiz').createSync();
-    expect(listDartSources(androidEnvironment), <File>[]);
+  test('Profile/ReleaseCopyFlutterAotBundle copies .so to correct output directory', () => testbed.run(() async {
+    androidEnvironment.buildDir.createSync(recursive: true);
+    androidEnvironment.buildDir.childFile('app.so').createSync();
+    await const ProfileCopyFlutterAotBundle().build(androidEnvironment);
+
+    expect(androidEnvironment.outputDir.childFile('app.so').existsSync(), true);
   }));
 }
 
@@ -391,13 +408,13 @@ class FakeKernelCompiler implements KernelCompiler {
     TargetModel targetModel = TargetModel.flutter,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    bool enableAsserts = false,
+    BuildMode buildMode,
+    bool causalAsyncStacks = true,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    bool targetProductVm = false,
     String platformDill,
     String initializeFromDill,
   }) async {
