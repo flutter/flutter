@@ -88,7 +88,6 @@ class CopyFlutterBundle extends Target {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final Directory outputDirectory = environment.outputDir.childDirectory('flutter_assets');
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
@@ -96,11 +95,11 @@ class CopyFlutterBundle extends Target {
       final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
       final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
-          .copySync(outputDirectory.childFile('kernel_blob.bin').path);
+          .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
       fs.file(vmSnapshotData)
-          .copySync(outputDirectory.childFile('vm_snapshot_data').path);
+          .copySync(environment.outputDir.childFile('vm_snapshot_data').path);
       fs.file(isolateSnapshotData)
-          .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
+          .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
     final Depfile assetDepfile = await copyAssets(environment, environment.outputDir);
     assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
@@ -333,6 +332,7 @@ abstract class CopyFlutterAotBundle extends Target {
   }
 }
 
+// This is a one-off rule for implementing build aot in terms of assemble.
 class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
   const ProfileCopyFlutterAotBundle();
 
@@ -342,10 +342,10 @@ class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
   @override
   List<Target> get dependencies => const <Target>[
     AotElfProfile(),
-    CopyFlutterBundle(),
   ];
 }
 
+// This is a one-off rule for implementing build aot in terms of assemble.
 class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
   const ReleaseCopyFlutterAotBundle();
 
@@ -355,6 +355,5 @@ class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
   @override
   List<Target> get dependencies => const <Target>[
     AotElfRelease(),
-    CopyFlutterBundle(),
   ];
 }
