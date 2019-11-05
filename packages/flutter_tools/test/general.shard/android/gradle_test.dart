@@ -1501,56 +1501,115 @@ plugin2=${plugin2.path}
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('build aar uses selected local engine', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
-
-      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
+    testUsingContext('indicates how to consume an AAR', () async {
+      final File manifestFile = fs.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync('''
-        name: test
-        version: 1.0.0+1
-        dependencies:
-          flutter:
-            sdk: flutter
         flutter:
           module:
-            androidX: false
             androidPackage: com.example.test
-            iosBundleIdentifier: com.example.test
         '''
       );
 
-      final File gradlew = fs.file('path/to/project/.android/gradlew');
-      gradlew.createSync(recursive: true);
+      fs.file('.android/gradlew').createSync(recursive: true);
 
-      fs.file('path/to/project/.android/gradle.properties')
+      fs.file('.android/gradle.properties')
         .writeAsStringSync('irrelevant');
 
-      fs.file('path/to/project/.android/build.gradle')
+      fs.file('.android/build.gradle')
         .createSync(recursive: true);
-
-      when(mockProcessManager.run(
-          <String> ['/path/to/project/.android/gradlew', '-v'],
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-      )).thenAnswer(
-          (_) async => ProcessResult(1, 0, '5.1.1', ''),
-      );
-
-      // write schemaData otherwise pubspec.yaml file can't be loaded
-      writeEmptySchemaFile(fs);
-      fs.currentDirectory = 'path/to/project';
 
       // Let any process start. Assert after.
       when(mockProcessManager.run(
         any,
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenAnswer(
-          (_) async => ProcessResult(1, 0, '', ''),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      fs.directory('build/outputs/repo').createSync(recursive: true);
+
+      await buildGradleAar(
+        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
+        project: FlutterProject.current(),
+        outputDir: fs.directory('build/'),
+        target: '',
       );
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(
+        logger.statusText,
+        contains('Built build/outputs/repo'),
+      );
+      expect(
+        logger.statusText,
+        contains('''
+Consuming the Module
+  1. Open <host>/app/build.gradle
+  2. Ensure you have the repositories configured, otherwise add them:
+
+      repositories {
+        maven {
+            url 'build/outputs/repo'
+        }
+        maven {
+            url 'http://download.flutter.io'
+        }
+      }
+
+  3. Make the host app depend on the release module:
+
+      dependencies {
+        releaseImplementation 'com.example.test:flutter_release:1.0'
+      }
+
+To learn more, visit https://flutter.dev/go/build-aar'''));
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('build aar uses selected local engine', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
+
+      final File manifestFile = fs.file('pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('''
+        flutter:
+          module:
+            androidPackage: com.example.test
+        '''
+      );
+
+      final File gradlew = fs.file('.android/gradlew');
+      gradlew.createSync(recursive: true);
+
+      fs.file('.android/gradle.properties')
+        .writeAsStringSync('irrelevant');
+
+      fs.file('.android/build.gradle')
+        .createSync(recursive: true);
+
+      when(mockProcessManager.run(
+          <String> ['.android/gradlew', '-v'],
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '5.1.1', ''));
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
       fs.directory('build/outputs/repo').createSync(recursive: true);
 
       await buildGradleAar(
@@ -1566,7 +1625,7 @@ plugin2=${plugin2.path}
         workingDirectory: anyNamed('workingDirectory')),
       ).captured.last;
 
-      expect(actualGradlewCall, contains('/path/to/project/.android/gradlew'));
+      expect(actualGradlewCall, contains('/.android/gradlew'));
       expect(actualGradlewCall, contains('-PlocalEngineOut=out/android_arm'));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,

@@ -545,6 +545,45 @@ Future<void> buildGradleAar({
     '$successMark Built ${fs.path.relative(repoDirectory.path)}.',
     color: TerminalColor.green,
   );
+  _printHowToConsumeAar(
+    buildMode: androidBuildInfo.buildInfo.modeName,
+    androidPackage: project.manifest.androidPackage,
+    repoPath: repoDirectory.path,
+  );
+}
+
+/// Prints how to consume the AAR from a host app.
+void _printHowToConsumeAar({
+  @required String buildMode,
+  @required String androidPackage,
+  @required String repoPath,
+}) {
+  assert(buildMode != null);
+  assert(androidPackage != null);
+  assert(repoPath != null);
+
+  printStatus('''
+
+${terminal.bolden('Consuming the Module')}
+  1. Open ${fs.path.join('<host>', 'app', 'build.gradle')}
+  2. Ensure you have the repositories configured, otherwise add them:
+
+      repositories {
+        maven {
+            url '$repoPath'
+        }
+        maven {
+            url 'http://download.flutter.io'
+        }
+      }
+
+  3. Make the host app depend on the $buildMode module:
+
+      dependencies {
+        ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0'
+      }
+
+To learn more, visit https://flutter.dev/go/build-aar''');
 }
 
 String _hex(List<int> bytes) {
