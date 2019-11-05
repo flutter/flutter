@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/aot.dart';
-
+import '../aot.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../ios/bitcode.dart';

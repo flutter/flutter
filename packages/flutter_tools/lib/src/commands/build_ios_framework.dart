@@ -5,19 +5,19 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/bundle.dart';
 
 import '../aot.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/targets/ios.dart';
+import '../bundle.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
