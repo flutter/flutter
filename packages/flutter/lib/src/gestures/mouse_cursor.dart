@@ -6,12 +6,11 @@ import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
-/// Details for [MouseCursorPlatform.activateShape], such as the
-/// target device and the system cursor shape.
+/// Details for [MouseCursorPlatform.activateShape], such as the target device
+/// and the cursor shape.
 @immutable
 class MouseCursorActivateShapeDetails {
-  /// Create details for a [MouseCursorPlatform.activateShape]
-  /// call.
+  /// Create details for a [MouseCursorPlatform.activateShape] call.
   ///
   /// All parameters must not be null.
   const MouseCursorActivateShapeDetails({
@@ -22,7 +21,7 @@ class MouseCursorActivateShapeDetails {
   /// The pointer device that should change cursor.
   final int device;
 
-  /// The kind of system cursor that should change to.
+  /// The kind of cursor shape that the device should change to.
   final int shape;
 
   @override
@@ -38,35 +37,43 @@ class MouseCursorActivateShapeDetails {
 
   @override
   String toString() {
-    return '$runtimeType(device: $device, systemShape: $shape)';
+    return '$runtimeType(device: $device, shape: $shape)';
   }
 }
 
-/// An interface to perform actions related to mouse cursors on the platform.
+/// An interface consists of actions that can be called to manipulate mouse
+/// cursor on the current platform.
 ///
 /// See also:
 ///
 ///  * [MouseCursor], whose subclasses and methods use this class to perform
 ///    operations.
-///  * [StandardMouseCursorPlatform], which is the implementation used by the
-///    framework, and uses a method channel to talk to the platform.
+///  * [StandardMouseCursorPlatform], which is the standard implementation used
+///    by the framework, and uses a method channel to talk to the platform.
 ///  * [MouseCursorManager], which takes this class as a parameter.
 abstract class MouseCursorPlatform {
   /// Create a [MouseCursorPlatform].
   const MouseCursorPlatform();
 
-  /// Asks the platform to change the cursor of `details.device` to the system
-  /// shape specified by `details.systemShape`.
+  /// Request the platform to change the cursor of `details.device` to the shape
+  /// specified by `details.shape`.
   ///
-  /// It resolves to true if the operation is successful, false if the
-  /// operation is unsupported by the platform, or rejects to error if the
+  /// {@template flutter.mouseCursor.shape}
+  /// A mouse cursor shape is a platform-independent integer, used as a unique
+  /// identifier for a kind of mouse cursor, such as "open hand" or "waiting
+  /// hourglass". Its value does not have any meaning, often a result of some
+  /// kind of hashing, and is used by [MouseCursorPlatform] by passing it to the
+  /// platform as-is.
+  /// {@endtemplate}
+  ///
+  /// The method resolves to true if the operation is successful, false if the
+  /// operation is unsupported by the platform, or rejects to an error if the
   /// operation is implemented but an error occurs.
   Future<bool> activateShape(MouseCursorActivateShapeDetails details);
 }
 
-
-/// Details for [MouseCursor.activate], such as the target device and the
-/// platform.
+/// Details to activate a mouse cursor in [MouseCursor.activate], such as the
+/// target device and the platform.
 @immutable
 class MouseCursorActivateDetails {
   /// Create details for a [MouseCursor.activate] call.
@@ -74,15 +81,15 @@ class MouseCursorActivateDetails {
   /// All parameters must not be null.
   const MouseCursorActivateDetails({
     @required this.device,
-    @required this.platformDelegate,
-  }) : assert(device != null), assert(platformDelegate != null);
+    @required this.platform,
+  }) : assert(device != null), assert(platform != null);
 
   /// The pointer device that should change cursor.
   final int device;
 
-  /// The delegate of the platform that the program is currently running on,
-  /// with which the cursor can perform operations related to mouse cursor.
-  final MouseCursorPlatform platformDelegate;
+  /// A set of actions that can be called to manipulate mouse cursor on the
+  /// current platform.
+  final MouseCursorPlatform platform;
 }
 
 /// An interface for mouse cursor definitions.
@@ -140,7 +147,8 @@ abstract class MouseCursor {
   }
 }
 
-/// A mouse cursor that does nothing when activated.
+/// A mouse cursor whose [MouseCursor.activate] method does nothing and returns
+/// true.
 ///
 /// See also:
 ///
@@ -150,7 +158,6 @@ class NoopMouseCursor extends MouseCursor {
   /// Create a [NoopMouseCursor].
   const NoopMouseCursor();
 
-  /// Does nothing and immediately returns true.
   @override
   Future<bool> activate(MouseCursorActivateDetails details) async {
     return true;
@@ -160,23 +167,33 @@ class NoopMouseCursor extends MouseCursor {
   String describeCursor() => 'noop';
 }
 
-// A mouse cursor based on resources provided by the platform.
-//
-// See also:
-//
-//  * [SystemMouseCursors], which lists all system mouse cursors.
+/// A mouse cursor specified with a constant shape.
+///
+/// {@macro flutter.mouseCursor.shape}
+///
+/// See also:
+///
+///  * [SystemMouseCursors], which lists all system mouse cursors.
 @immutable
-class RegularMouseCursor extends MouseCursor {
-  const RegularMouseCursor(this.shape, this.description)
+class ConstantMouseCursor extends MouseCursor {
+  /// Create a [ConstantMouseCursor] by providing the shape and a short
+  /// description of the cursor.
+  ///
+  /// All arguments must not be null.
+  const ConstantMouseCursor(this.shape, this.description)
     : assert(shape != null), assert(description != null);
 
+  /// The cursor shape that this cursor will change a device into.
   final int shape;
 
+  /// A short description of this cursor. Usually one or several words.
+  ///
+  /// The [describeCursor] method returns this value as a result.
   final String description;
 
   @override
   Future<bool> activate(MouseCursorActivateDetails details) {
-    return details.platformDelegate.activateShape(
+    return details.platform.activateShape(
       MouseCursorActivateShapeDetails(
         device: details.device,
         shape: shape,
@@ -193,13 +210,15 @@ class RegularMouseCursor extends MouseCursor {
 /// A manager that maintains states related to mouse cursor and provides a
 /// simple interface to operate [MouseCursor]s.
 ///
-/// Widgets should not call [MouseCursorManager]'s methods directly, instead
-/// they should assign [MouseCursor]s to regions, and let [MouseTracker] handle
-/// cursor changes.
+/// This class is used by [MouseTracker], and should not be called directly by
+/// widgets. Widgets that want to programmatically set cursors should assign
+/// [MouseCursor]s to regions using [MouseRegion] or related tools.
 ///
 /// See also:
 ///
 ///  * [MouseCursor], which talks more about handling mouse cursors.
+///  * [MouseRegion], which is the idiomatic way of assigning mouse cursors
+///    to regions.
 ///  * [MouseTracker], which uses this class.
 class MouseCursorManager {
   /// Create a MouseCursorManager by providing the platform delegate.
@@ -223,7 +242,7 @@ class MouseCursorManager {
   Future<void> setDeviceCursor(int device, MouseCursor cursor) async {
     final MouseCursorActivateDetails details = MouseCursorActivateDetails(
       device: device,
-      platformDelegate: platform,
+      platform: platform,
     );
     final bool implemented = await cursor.activate(details);
     if (!implemented) {
@@ -237,9 +256,9 @@ class MouseCursorManager {
 ///
 /// System cursors are mouse cursors that are included in a platform, available
 /// without external resources. [SystemMouseCursors] is a superset of the system
-/// cursors of every platform that Flutter supports. A cursor that is
-/// unimplemented by a platform will fallback to another cursor or the basic
-/// cursor.
+/// cursors of every platform that Flutter supports. A cursor that is not
+/// implemented on a platform will fallback to some other cursor or the basic
+/// cursor depending on the implementation of the Flutter engine on the platform.
 class SystemMouseCursors {
   /// A special value that tells Flutter to release the control of cursors.
   ///
@@ -249,46 +268,41 @@ class SystemMouseCursors {
   /// or other layers that manages the cursor by itself.
   static const MouseCursor releaseControl = NoopMouseCursor();
 
+  // The shape of Flutter's system cursors are chosen as the first 8 bytes of
+  // the MD5 hash of the cursor's name at the time it is created.
+
   /// Displays no cursor at the pointer.
-  static const MouseCursor none = RegularMouseCursor(_kSystemShapeNone, 'none');
+  static const MouseCursor none = ConstantMouseCursor(0x334c4a4c, 'none');
 
   /// The platform-dependent basic cursor. Typically the shape of an arrow.
   ///
   /// This cursor is the fallback of unimplemented cursors, and guarantees to
   /// be implemented by all platforms.
-  static const MouseCursor basic = RegularMouseCursor(_kSystemShapeBasic, 'basic');
+  static const MouseCursor basic = ConstantMouseCursor(0xf17aaabc, 'basic');
 
   /// A cursor that indicates links or something that needs to be emphasized
   /// to be clickable.
   ///
   /// Typically the shape of a pointing hand.
-  static const MouseCursor click = RegularMouseCursor(_kSystemShapeClick, 'click');
+  static const MouseCursor click = ConstantMouseCursor(0xa8affc08, 'click');
 
   /// A cursor that indicates a selectable text.
   ///
   /// Typically the shape of a capital I.
-  static const MouseCursor text = RegularMouseCursor(_kSystemShapeText, 'text');
+  static const MouseCursor text = ConstantMouseCursor(0x1cb251ec, 'text');
 
   /// A cursor that indicates an unpermitted action.
   ///
   /// Typically the shape of a circle with a diagnal line.
-  static const MouseCursor forbidden = RegularMouseCursor(_kSystemShapeForbidden, 'forbidden');
+  static const MouseCursor forbidden = ConstantMouseCursor(0x350f9d68, 'forbidden');
 
   /// A cursor that indicates something that can be dragged.
   ///
   /// Typically the shape of an open hand.
-  static const MouseCursor grab = RegularMouseCursor(_kSystemShapeGrab, 'grab');
+  static const MouseCursor grab = ConstantMouseCursor(0x28b91f80, 'grab');
 
   /// A cursor that indicates something that is being dragged.
   ///
   /// Typically the shape of a closed hand.
-  static const MouseCursor grabbing = RegularMouseCursor(_kSystemShapeGrabbing, 'grabbing');
-
-  static const int _kSystemShapeNone = 0x334c4a4c;
-  static const int _kSystemShapeBasic = 0xf17aaabc;
-  static const int _kSystemShapeClick = 0xa8affc08;
-  static const int _kSystemShapeText = 0x1cb251ec;
-  static const int _kSystemShapeForbidden = 0x7fa3b767;
-  static const int _kSystemShapeGrab = 0x28b91f80;
-  static const int _kSystemShapeGrabbing = 0x6631ce3e;
+  static const MouseCursor grabbing = ConstantMouseCursor(0x6631ce3e, 'grabbing');
 }
