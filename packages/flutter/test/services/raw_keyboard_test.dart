@@ -1,7 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,54 +13,62 @@ class _ModifierCheck {
 void main() {
   group('RawKeyboard', () {
     testWidgets('keysPressed is maintained', (WidgetTester tester) async {
-      expect(RawKeyboard.instance.keysPressed, isEmpty);
-      await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-      expect(
-        RawKeyboard.instance.keysPressed,
-        equals(
-          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
-        ),
-      );
-      await simulateKeyDownEvent(LogicalKeyboardKey.shiftRight);
-      expect(
-        RawKeyboard.instance.keysPressed,
-        equals(
-          <LogicalKeyboardKey>{
-            LogicalKeyboardKey.shiftLeft,
-            LogicalKeyboardKey.shiftRight,
-          },
-        ),
-      );
-      await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
-      expect(
-        RawKeyboard.instance.keysPressed,
-        equals(
-          <LogicalKeyboardKey>{
-            LogicalKeyboardKey.shiftLeft,
-            LogicalKeyboardKey.shiftRight,
-            LogicalKeyboardKey.keyA,
-          },
-        ),
-      );
-      await simulateKeyUpEvent(LogicalKeyboardKey.keyA);
-      expect(
-        RawKeyboard.instance.keysPressed,
-        equals(
-          <LogicalKeyboardKey>{
-            LogicalKeyboardKey.shiftLeft,
-            LogicalKeyboardKey.shiftRight,
-          },
-        ),
-      );
-      await simulateKeyUpEvent(LogicalKeyboardKey.shiftRight);
-      expect(
-        RawKeyboard.instance.keysPressed,
-        equals(
-          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
-        ),
-      );
-      await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      for (String platform in ['linux', 'android', 'macos', 'fuchsia']) {
+        RawKeyboard.instance.clearKeysPressed();
+        expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+        await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.controlLeft,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.controlLeft,
+              LogicalKeyboardKey.keyA,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.controlLeft,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+      }
     });
 
     testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
