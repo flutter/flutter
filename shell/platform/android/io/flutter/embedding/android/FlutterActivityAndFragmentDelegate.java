@@ -461,6 +461,8 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
       platformPlugin = null;
     }
 
+    flutterEngine.getLifecycleChannel().appIsDetached();
+
     // Destroy our FlutterEngine if we're not set to retain it.
     if (host.shouldDestroyEngineWithHost()) {
       flutterEngine.destroy();

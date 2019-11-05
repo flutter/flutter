@@ -225,4 +225,70 @@
   [engine setViewController:nil];
 }
 
+- (void)testFlutterViewControllerDetachingSendsApplicationLifecycle {
+  XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
+
+  // Let the engine finish booting (at the end of which the channels are properly set-up) before
+  // moving onto the next step of showing the next view controller.
+  ScreenBeforeFlutter* rootVC = [[ScreenBeforeFlutter alloc] initWithEngineRunCompletion:^void() {
+    [engineStartedExpectation fulfill];
+  }];
+
+  [self waitForExpectationsWithTimeout:5 handler:nil];
+
+  UIApplication* application = UIApplication.sharedApplication;
+  application.delegate.window.rootViewController = rootVC;
+  FlutterEngine* engine = rootVC.engine;
+
+  NSMutableArray* lifecycleExpectations = [NSMutableArray arrayWithCapacity:10];
+
+  // Expected sequence from showing the FlutterViewController is inactive and resumed.
+  [lifecycleExpectations addObjectsFromArray:@[
+    [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.inactive"
+                                                    forStep:@"showing a FlutterViewController"],
+    [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.resumed"
+                                                    forStep:@"showing a FlutterViewController"]
+  ]];
+  // At the end of Flutter VC, we want to make sure it deallocs and sends detached signal.
+  // Using autoreleasepool will guarantee that.
+  FlutterViewController* flutterVC;
+  @autoreleasepool {
+    flutterVC = [rootVC showFlutter];
+    [engine.lifecycleChannel setMessageHandler:^(id message, FlutterReply callback) {
+      if (lifecycleExpectations.count == 0) {
+        XCTFail(@"Unexpected lifecycle transition: %@", message);
+        return;
+      }
+      XCAppLifecycleTestExpectation* nextExpectation = [lifecycleExpectations objectAtIndex:0];
+      if (![[nextExpectation expectedLifecycle] isEqualToString:message]) {
+        XCTFail(@"Expected lifecycle %@ but instead received %@",
+                [nextExpectation expectedLifecycle], message);
+        return;
+      }
+
+      [nextExpectation fulfill];
+      [lifecycleExpectations removeObjectAtIndex:0];
+    }];
+
+    [self waitForExpectations:lifecycleExpectations timeout:5];
+
+    // Starts dealloc flutter VC.
+    [lifecycleExpectations addObjectsFromArray:@[
+      [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.inactive"
+                                                      forStep:@"detaching a FlutterViewController"],
+      [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.paused"
+                                                      forStep:@"detaching a FlutterViewController"],
+      [[XCAppLifecycleTestExpectation alloc]
+          initForLifecycle:@"AppLifecycleState.detached"
+                   forStep:@"detaching a FlutterViewController"]
+    ]];
+    [flutterVC dismissViewControllerAnimated:NO completion:nil];
+    flutterVC = nil;
+  }
+  [self waitForExpectations:lifecycleExpectations timeout:5];
+
+  [engine.lifecycleChannel setMessageHandler:nil];
+  [engine setViewController:nil];
+}
+
 @end

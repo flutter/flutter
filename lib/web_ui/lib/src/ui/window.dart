@@ -73,18 +73,13 @@ enum AppLifecycleState {
   ///
   /// When the application is in this state, the engine will not call the
   /// [Window.onBeginFrame] and [Window.onDrawFrame] callbacks.
-  ///
-  /// Android apps in this state should assume that they may enter the
-  /// [suspending] state at any time.
   paused,
 
-  /// The application will be suspended momentarily.
+  /// The application is detached from view.
   ///
-  /// When the application is in this state, the engine will not call the
-  /// [Window.onBeginFrame] and [Window.onDrawFrame] callbacks.
-  ///
-  /// On iOS, this state is currently unused.
-  suspending,
+  /// When the application is in this state, the engine is running without
+  /// a platform UI.
+  detached,
 }
 
 /// A representation of distances for each of the four edges of a rectangle,
