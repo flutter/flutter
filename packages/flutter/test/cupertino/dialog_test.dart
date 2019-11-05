@@ -978,19 +978,19 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.10, 0.001));
+    expect(transition.opacity.value, closeTo(0.40, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.156, 0.001));
+    expect(transition.opacity.value, closeTo(0.437, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.324, 0.001));
+    expect(transition.opacity.value, closeTo(0.55, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.606, 0.001));
+    expect(transition.opacity.value, closeTo(0.737, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));

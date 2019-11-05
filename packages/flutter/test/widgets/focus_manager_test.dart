@@ -66,9 +66,12 @@ void main() {
       FocusNode(
         debugLabel: 'Label',
       ).debugFillProperties(builder);
-      final List<String> description = builder.properties.where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode n) => n.toString()).toList();
+      final List<String> description = builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
       expect(description, <String>[
-        'debugLabel: "Label"',
+        'context: null',
+        'canRequestFocus: true',
+        'hasFocus: false',
+        'hasPrimaryFocus: false'
       ]);
     });
   });
@@ -582,48 +585,50 @@ void main() {
         callCount++;
       }
 
-      final FocusManager focusManager = WidgetsBinding.instance.focusManager;
-      focusManager.addHighlightModeListener(handleModeChange);
-      addTearDown(() => focusManager.removeHighlightModeListener(handleModeChange));
+      FocusManager.instance.addHighlightModeListener(handleModeChange);
+      addTearDown(() => FocusManager.instance.removeHighlightModeListener(handleModeChange));
       expect(callCount, equals(0));
       expect(lastMode, isNull);
-      focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
-      expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
       await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
       expect(callCount, equals(1));
       expect(lastMode, FocusHighlightMode.traditional);
-      expect(focusManager.highlightMode, equals(FocusHighlightMode.traditional));
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
       await tester.tap(find.byType(Container));
       expect(callCount, equals(2));
       expect(lastMode, FocusHighlightMode.touch);
-      expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
       final TestGesture gesture = await tester.startGesture(Offset.zero, kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await gesture.up();
       expect(callCount, equals(3));
       expect(lastMode, FocusHighlightMode.traditional);
-      expect(focusManager.highlightMode, equals(FocusHighlightMode.traditional));
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
       await tester.tap(find.byType(Container));
       expect(callCount, equals(4));
       expect(lastMode, FocusHighlightMode.touch);
-      expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
-      focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       expect(callCount, equals(5));
       expect(lastMode, FocusHighlightMode.traditional);
-      expect(focusManager.highlightMode, equals(FocusHighlightMode.traditional));
-      focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
       expect(callCount, equals(6));
       expect(lastMode, FocusHighlightMode.touch);
-      expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
     });
     testWidgets('implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       FocusScopeNode(
         debugLabel: 'Scope Label',
       ).debugFillProperties(builder);
-      final List<String> description = builder.properties.where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode n) => n.toString()).toList();
+      final List<String> description = builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
       expect(description, <String>[
-        'debugLabel: "Scope Label"',
+        'context: null',
+        'canRequestFocus: true',
+        'hasFocus: false',
+        'hasPrimaryFocus: false'
       ]);
     });
     testWidgets('debugDescribeFocusTree produces correct output', (WidgetTester tester) async {
@@ -663,43 +668,36 @@ void main() {
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← [root]\n'
           ' │\n'
           ' └─rootScope: FocusScopeNode#00000(Root Focus Scope)\n'
-          '   │ FOCUSED\n'
-          '   │ debugLabel: "Root Focus Scope"\n'
+          '   │ IN FOCUS PATH\n'
           '   │ focusedChildren: FocusScopeNode#00000\n'
           '   │\n'
           '   ├─Child 1: FocusScopeNode#00000(Scope 1)\n'
           '   │ │ context: Container-[GlobalKey#00000]\n'
-          '   │ │ debugLabel: "Scope 1"\n'
           '   │ │\n'
           '   │ └─Child 1: FocusNode#00000(Parent 1)\n'
           '   │   │ context: Container-[GlobalKey#00000]\n'
-          '   │   │ debugLabel: "Parent 1"\n'
           '   │   │\n'
           '   │   ├─Child 1: FocusNode#00000(Child 1)\n'
           '   │   │   context: Container-[GlobalKey#00000]\n'
-          '   │   │   debugLabel: "Child 1"\n'
           '   │   │\n'
           '   │   └─Child 2: FocusNode#00000\n'
           '   │       context: Container-[GlobalKey#00000]\n'
           '   │\n'
           '   └─Child 2: FocusScopeNode#00000\n'
           '     │ context: Container-[GlobalKey#00000]\n'
-          '     │ FOCUSED\n'
+          '     │ IN FOCUS PATH\n'
           '     │ focusedChildren: FocusNode#00000(Child 4)\n'
           '     │\n'
           '     └─Child 1: FocusNode#00000(Parent 2)\n'
           '       │ context: Container-[GlobalKey#00000]\n'
-          '       │ FOCUSED\n'
-          '       │ debugLabel: "Parent 2"\n'
+          '       │ IN FOCUS PATH\n'
           '       │\n'
           '       ├─Child 1: FocusNode#00000(Child 3)\n'
           '       │   context: Container-[GlobalKey#00000]\n'
-          '       │   debugLabel: "Child 3"\n'
           '       │\n'
           '       └─Child 2: FocusNode#00000(Child 4)\n'
           '           context: Container-[GlobalKey#00000]\n'
-          '           FOCUSED\n'
-          '           debugLabel: "Child 4"\n'
+          '           PRIMARY FOCUS\n'
         ));
     });
   });

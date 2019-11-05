@@ -74,7 +74,7 @@ class TextFormField extends FormField<String> {
   /// When a [controller] is specified, [initialValue] must be null (the
   /// default). If [controller] is null, then a [TextEditingController]
   /// will be constructed automatically and its `text` will be initialized
-  /// to [initalValue] or the empty string.
+  /// to [initialValue] or the empty string.
   ///
   /// For documentation about the various parameters, see the [TextField] class
   /// and [new TextField], the constructor.
@@ -98,6 +98,7 @@ class TextFormField extends FormField<String> {
     bool showCursor,
     bool obscureText = false,
     bool autocorrect = true,
+    bool enableSuggestions = true,
     bool autovalidate = false,
     bool maxLengthEnforced = true,
     int maxLines = 1,
@@ -125,6 +126,7 @@ class TextFormField extends FormField<String> {
        assert(readOnly != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSuggestions != null),
        assert(autovalidate != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -139,6 +141,7 @@ class TextFormField extends FormField<String> {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength > 0),
        assert(enableInteractiveSelection != null),
        super(
@@ -176,6 +179,7 @@ class TextFormField extends FormField<String> {
         showCursor: showCursor,
         obscureText: obscureText,
         autocorrect: autocorrect,
+        enableSuggestions: enableSuggestions,
         maxLengthEnforced: maxLengthEnforced,
         maxLines: maxLines,
         minLines: minLines,

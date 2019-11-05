@@ -91,6 +91,10 @@ presented.
    which includes advice for designing APIs for Flutter, and how to
    format code in the framework.
 
+8. [Flutter design doc template](https://flutter.dev/go/template),
+   which should be used when proposing a new technical design.  This is a good
+   practice to do before coding more intricate changes.
+
 In addition to the above, there are many pages on [our
 Wiki](https://github.com/flutter/flutter/wiki/) that may be of
 interest. For a curated list of pages see the sidebar on the wiki's
