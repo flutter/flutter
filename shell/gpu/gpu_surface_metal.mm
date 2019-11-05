@@ -23,6 +23,9 @@ GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceDelegate* delegate,
   }
 
   layer.get().pixelFormat = MTLPixelFormatBGRA8Unorm;
+  // Flutter needs to read from the color attachment in cases where there are effects such as
+  // backdrop filters.
+  layer.get().framebufferOnly = NO;
 
   auto metal_device = fml::scoped_nsprotocol<id<MTLDevice>>([layer_.get().device retain]);
   auto metal_queue = fml::scoped_nsprotocol<id<MTLCommandQueue>>([metal_device newCommandQueue]);
