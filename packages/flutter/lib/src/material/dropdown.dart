@@ -1299,6 +1299,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     Key key,
     T value,
     @required List<DropdownMenuItem<T>> items,
+    DropdownButtonBuilder selectedItemBuilder,
     Widget hint,
     @required this.onChanged,
     this.decoration = const InputDecoration(),
@@ -1347,6 +1348,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                child: DropdownButton<T>(
                  value: value,
                  items: items,
+                 selectedItemBuilder: selectedItemBuilder,
                  hint: hint,
                  onChanged: onChanged == null ? null : field.didChange,
                  disabledHint: disabledHint,
