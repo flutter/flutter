@@ -49,6 +49,7 @@ class UserMessages {
   String androidCantRunJavaBinary(String javaBinary) => 'Cannot execute $javaBinary to determine the version';
   String get androidUnknownJavaVersion => 'Could not determine java version';
   String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
+  String androidJavaMinimumVersion(String javaVersion) => 'Java version $javaVersion is older than the minimum recommended version of 1.8';
   String androidSdkLicenseOnly(String envKey) =>
       'Android SDK contains licenses only.\n'
       'Your first build of an Android application will take longer than usual, '

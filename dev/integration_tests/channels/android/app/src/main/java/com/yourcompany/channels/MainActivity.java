@@ -9,12 +9,13 @@ import java.nio.ByteBuffer;
 import java.util.Date;
 
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 
-import dev.flutter.plugins.GeneratedPluginRegistrant;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.*;
+import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
   @Override

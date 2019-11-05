@@ -5,12 +5,13 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import 'package:flutter_tools/src/android/gradle.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -202,6 +203,18 @@ void main() {
         );
       }
     });
+
+    testUsingContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {
+      when(platform.environment).thenReturn(const <String, String>{
+        'FLUTTER_STORAGE_BASE_URL': ' http://foo',
+      });
+      final Cache cache = Cache();
+      final CachedArtifact artifact = MaterialFonts(cache);
+
+      expect(() => artifact.storageBaseUrl, throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      Platform: () => MockPlatform(),
+    });
   });
 
   testUsingContext('flattenNameSubdirs', () {
@@ -303,7 +316,7 @@ void main() {
           expect(args[1], '-b');
           expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
           expect(args[5], 'resolveDependencies');
-          expect(invocation.namedArguments[#environment], gradleEnv);
+          expect(invocation.namedArguments[#environment], gradleEnvironment);
           return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
         });
 
@@ -317,11 +330,43 @@ void main() {
     });
   });
 
-  group('Unsigned mac artifacts', () {
+  group('macOS artifacts', () {
     MockCache mockCache;
 
     setUp(() {
       mockCache = MockCache();
+    });
+
+    testUsingContext('verifies executables for libimobiledevice in isUpToDateInner', () async {
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('libimobiledevice', mockCache);
+      when(mockCache.getArtifactDirectory(any)).thenReturn(fs.currentDirectory);
+      iosUsbArtifacts.location.createSync();
+      final File ideviceIdFile = iosUsbArtifacts.location.childFile('idevice_id')
+        ..createSync();
+      iosUsbArtifacts.location.childFile('ideviceinfo')
+        ..createSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), true);
+
+      ideviceIdFile.deleteSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), false);
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Does not verify executables for openssl in isUpToDateInner', () async {
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('openssl', mockCache);
+      when(mockCache.getArtifactDirectory(any)).thenReturn(fs.currentDirectory);
+      iosUsbArtifacts.location.createSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), true);
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('use unsigned when specified', () async {
@@ -379,3 +424,4 @@ class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockPlatform extends Mock implements Platform {}

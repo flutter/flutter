@@ -622,6 +622,73 @@ void _tests() {
     // button and the right edge of the 800 wide window.
     expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
   });
+
+  testWidgets('uses root navigator by default', (WidgetTester tester) async {
+    final PickerObserver rootObserver = PickerObserver();
+    final PickerObserver nestedObserver = PickerObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
+                  );
+                },
+                child: const Text('Show Picker'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.pickerCount, 1);
+    expect(nestedObserver.pickerCount, 0);
+  });
+
+  testWidgets('uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+    final PickerObserver rootObserver = PickerObserver();
+    final PickerObserver nestedObserver = PickerObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showTimePicker(
+                    context: context,
+                    useRootNavigator: false,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
+                  );
+                },
+                child: const Text('Show Picker'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.pickerCount, 0);
+    expect(nestedObserver.pickerCount, 1);
+  });
 }
 
 final Finder findDialPaint = find.descendant(
@@ -693,5 +760,17 @@ class _CustomPainterSemanticsTester {
       );
     }
     expect(tester.renderObject(findDialPaint), expectedLabels);
+  }
+}
+
+class PickerObserver extends NavigatorObserver {
+  int pickerCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      pickerCount++;
+    }
+    super.didPush(route, previousRoute);
   }
 }

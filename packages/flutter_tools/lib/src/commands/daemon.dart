@@ -435,6 +435,7 @@ class AppDomain extends Domain {
         target: target,
         debuggingOptions: options,
         ipv6: ipv6,
+        stayResident: true,
       );
     } else if (enableHotReload) {
       runner = HotRunner(

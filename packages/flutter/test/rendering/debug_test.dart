@@ -151,7 +151,7 @@ void main() {
           ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
         const Offset(0.0, 500),
       );
-    } catch(e) {
+    } catch (e) {
       error = e;
     }
     expect(error, isNull);
@@ -184,7 +184,7 @@ void main() {
           ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
         const Offset(0.0, 500),
       );
-    } catch(e) {
+    } catch (e) {
       error = e;
     }
     expect(error, isNull);

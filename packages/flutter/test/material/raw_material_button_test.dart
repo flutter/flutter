@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -47,6 +48,7 @@ void main() {
       Shortcuts(
         shortcuts: <LogicalKeySet, Intent>{
           LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+          LogicalKeySet(LogicalKeyboardKey.space): const Intent(SelectAction.key),
         },
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -65,12 +67,38 @@ void main() {
     focusNode.requestFocus();
     await tester.pump();
 
+    // Web doesn't react to enter, just space.
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump(const Duration(milliseconds: 10));
+
+    if (!kIsWeb) {
+      final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+      expect(splash, paints..circle(color: splashColor));
+    }
+
+    await tester.pumpAndSettle();
+
+    expect(pressed, kIsWeb ? isFalse : isTrue);
+
+    pressed = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+
+    expect(pressed, isTrue);
+
+    pressed = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump(const Duration(milliseconds: 10));
 
     final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as dynamic;
     expect(splash, paints..circle(color: splashColor));
 
+    await tester.pumpAndSettle();
+
+    expect(pressed, isTrue);
+
+    pressed = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
 
     expect(pressed, isTrue);
@@ -283,7 +311,7 @@ void main() {
     const Key key = Key('test');
     const Color focusColor = Color(0xff00ff00);
 
-    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -382,7 +410,7 @@ void main() {
     const Key key = Key('test');
     const Color hoverColor = Color(0xff00ff00);
 
-    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -406,5 +434,80 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
     expect(box, paints..rect(color: hoverColor));
+  });
+
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+
+    bool wasPressed;
+    Finder rawMaterialButton;
+
+    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: RawMaterialButton(
+          child: const Text('button'),
+          onPressed: onPressed,
+          onLongPress: onLongPress,
+        ),
+      );
+    }
+
+    // onPressed not null, onLongPress null.
+    wasPressed = false;
+    await tester.pumpWidget(
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+    );
+    rawMaterialButton = find.byType(RawMaterialButton);
+    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
+    await tester.tap(rawMaterialButton);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress not null.
+    wasPressed = false;
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+    );
+    rawMaterialButton = find.byType(RawMaterialButton);
+    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
+    await tester.longPress(rawMaterialButton);
+    expect(wasPressed, true);
+
+    // onPressed null, onLongPress null.
+    await tester.pumpWidget(
+      buildFrame(onPressed: null, onLongPress: null),
+    );
+    rawMaterialButton = find.byType(RawMaterialButton);
+    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);
+  });
+
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+    bool didPressButton = false;
+    bool didLongPressButton = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RawMaterialButton(
+          onPressed: () {
+            didPressButton = true;
+          },
+          onLongPress: () {
+            didLongPressButton = true;
+          },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final Finder rawMaterialButton = find.byType(RawMaterialButton);
+    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
+
+    expect(didPressButton, isFalse);
+    await tester.tap(rawMaterialButton);
+    expect(didPressButton, isTrue);
+
+    expect(didLongPressButton, isFalse);
+    await tester.longPress(rawMaterialButton);
+    expect(didLongPressButton, isTrue);
   });
 }

@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.NonNull
-import dev.flutter.plugins.GeneratedPluginRegistrant
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry
@@ -14,6 +13,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
+import io.flutter.plugins.GeneratedPluginRegistrant
 
 class MainActivity : FlutterActivity() {
     class SimplePlatformView(context: Context) : PlatformView {

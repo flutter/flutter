@@ -1127,6 +1127,25 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
     });
+    testWidgets('Focus traversal does not break when no focusable is available on a MaterialApp',   (WidgetTester tester) async {
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Container()
+        )
+      );
+
+      RawKeyboard.instance.addListener((RawKeyEvent event) {
+        events.add(event);
+      });
+
+      await tester.idle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.idle();
+
+      expect(events.length, 2);
+    });
   });
 }
 
