@@ -131,14 +131,6 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: TransformationsDemo.routeName,
       buildRoute: (BuildContext context) => const TransformationsDemo(),
     ),
-    GalleryDemo(
-      title: 'Rally',
-      subtitle: 'A personal finance app',
-      icon: GalleryIcons.data_table,
-      category: _kDemos,
-      routeName: RallyDemo.routeName,
-      buildRoute: (BuildContext context) => const RallyDemo(),
-    ),
 
     // Style
     GalleryDemo(
