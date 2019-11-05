@@ -337,14 +337,12 @@ public final class GeneratedPluginRegistrant {
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
 {{/needsShim}}
 {{#plugins}}
-  {{#supportsEmbeddingV2}}
+  {{#usesEmbedding2}}
     flutterEngine.getPlugins().add(new {{package}}.{{class}}());
-  {{/supportsEmbeddingV2}}
-  {{^supportsEmbeddingV2}}
-    {{#supportsEmbeddingV1}}
-      {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
-    {{/supportsEmbeddingV1}}
-  {{/supportsEmbeddingV2}}
+  {{/usesEmbedding2}}
+  {{^usesEmbedding2}}
+    {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
+  {{/usesEmbedding2}}
 {{/plugins}}
   }
 }
@@ -398,24 +396,14 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
       // then add  shim for the old plugins.
       for (Map<String, dynamic> plugin in androidPlugins) {
-        if (plugin['supportsEmbeddingV1'] && !plugin['supportsEmbeddingV2']) {
+        if (!plugin['usesEmbedding2']) {
           templateContext['needsShim'] = true;
           break;
         }
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
-      break;
-    case AndroidEmbeddingVersion.v1:
+    break;
     default:
-      for (Map<String, dynamic> plugin in androidPlugins) {
-        if (!plugin['supportsEmbeddingV1'] && plugin['supportsEmbeddingV2']) {
-          throwToolExit(
-            'The plugin `${plugin['name']}` requires your app to be migrated to '
-            'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
-            'and re-run this command.'
-          );
-        }
-      }
       templateContent = _androidPluginRegistryTemplateOldEmbedding;
       break;
   }

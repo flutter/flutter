@@ -64,20 +64,17 @@ class AndroidPlugin extends PluginPlatform {
       'name': name,
       'package': package,
       'class': pluginClass,
-      // Mustache doesn't support complex types.
-      'supportsEmbeddingV1': _supportedEmbedings.contains('1'),
-      'supportsEmbeddingV2': _supportedEmbedings.contains('2'),
+      'usesEmbedding2': _embeddingVersion == '2',
     };
   }
 
-  Set<String> _cachedEmbeddingVersion;
+  String _cachedEmbeddingVersion;
 
   /// Returns the version of the Android embedding.
-  Set<String> get _supportedEmbedings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
+  String get _embeddingVersion => _cachedEmbeddingVersion ??= _getEmbeddingVersion();
 
-  Set<String> _getSupportedEmbeddings() {
+  String _getEmbeddingVersion() {
     assert(pluginPath != null);
-    final Set<String> supportedEmbeddings = <String>{};
     final String baseMainPath = fs.path.join(
       pluginPath,
       'android',
@@ -116,15 +113,9 @@ class AndroidPlugin extends PluginPlatform {
     }
     if (mainClassContent
         .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
-      supportedEmbeddings.add('2');
-    } else {
-      supportedEmbeddings.add('1');
+      return '2';
     }
-    if (mainClassContent.contains('registerWith(Registrar registrar)') ||
-        mainClassContent.contains('registerWith(registrar: Registrar)')) {
-      supportedEmbeddings.add('1');
-    }
-    return supportedEmbeddings;
+    return '1';
   }
 }
 
