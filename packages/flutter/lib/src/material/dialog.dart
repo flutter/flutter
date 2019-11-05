@@ -65,16 +65,20 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.material.material.elevation}
   final double elevation;
 
+  /// {@template flutter.material.dialog.insetAnimationDuration}
   /// The duration of the animation to show when the system keyboard intrudes
   /// into the space that the dialog is placed in.
   ///
   /// Defaults to 100 milliseconds.
+  /// {@endtemplate}
   final Duration insetAnimationDuration;
 
+  /// {@template flutter.material.dialog.insetAnimationCurve}
   /// The curve to use for the animation shown when the system keyboard intrudes
   /// into the space that the dialog is placed in.
   ///
   /// Defaults to [Curves.decelerate].
+  /// {@endtemplate}
   final Curve insetAnimationCurve;
 
   /// {@template flutter.material.dialog.shape}
