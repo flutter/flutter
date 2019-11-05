@@ -229,7 +229,9 @@ class AOTSnapshotter {
     @required bool quiet
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
-    if (!quiet) printStatus('Building App.framework for $targetArch...');
+    if (!quiet) {
+      printStatus('Building App.framework for $targetArch...');
+    }
 
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,

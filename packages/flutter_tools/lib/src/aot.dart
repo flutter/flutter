@@ -20,6 +20,8 @@ import 'globals.dart';
 import 'ios/bitcode.dart';
 import 'project.dart';
 
+/// Builds AOT snapshots given a platform, build mode and a path to a Dart
+/// library.
 class AotBuilder {
   Future<void> build({
     @required TargetPlatform platform,
@@ -68,7 +70,7 @@ class AotBuilder {
       final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: reportTimings);
 
       // Compile to kernel.
-      String kernelOut = await snapshotter.compileKernel(
+      final String kernelOut = await snapshotter.compileKernel(
         platform: platform,
         buildMode: buildMode,
         mainPath: mainDartFile,

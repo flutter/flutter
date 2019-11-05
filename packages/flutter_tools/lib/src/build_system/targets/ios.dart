@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/common.dart';
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
@@ -157,25 +159,36 @@ class AotAssemblyProfile extends AotAssemblyBase {
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
 Future<RunResult> createStubAppFramework(Directory appFrameworkDirectory) async {
-  if (!appFrameworkDirectory.existsSync()) {
-    appFrameworkDirectory.createSync(recursive: true);
+  File outputFile;
+  try {
+    if (!appFrameworkDirectory.existsSync()) {
+      appFrameworkDirectory.createSync(recursive: true);
+    }
+
+    outputFile = appFrameworkDirectory.childFile('App');
+    outputFile.createSync(recursive: true);
+  } catch (e) {
+    throwToolExit('Failed to create App.framework stub at ${appFrameworkDirectory.path}');
   }
 
-  final File outputFile = appFrameworkDirectory.childFile('App');
-  outputFile.createSync(recursive: true);
-  final File debugApp = fs.systemTempDirectory.createTempSync('createDebugFramework').childFile('debug_app.cc')
-    ..writeAsStringSync(r'''
-static const int Moo = 88;
-''');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
+  try {
+    final File stubSource = tempDir.childFile('debug_app.cc')
+      ..writeAsStringSync(r'''
+  static const int Moo = 88;
+  ''');
 
-  return xcode.clang(<String>[
-    '-x',
-    'c',
-    debugApp.path,
-    '-dynamiclib',
-    '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
-    '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
-    '-install_name', '@rpath/App.framework/App',
-    '-o', outputFile.path,
-  ]);
+    return xcode.clang(<String>[
+      '-x',
+      'c',
+      stubSource.path,
+      '-dynamiclib',
+      '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+      '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-install_name', '@rpath/App.framework/App',
+      '-o', outputFile.path,
+    ]);
+  } finally {
+    tempDir.deleteSync();
+  }
 }
