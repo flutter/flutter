@@ -125,22 +125,6 @@ void main() {
       MockFeatureFlags featureFlags;
       MockXcodeProjectInterpreter xcodeProjectInterpreter;
 
-      const String kAndroidManifestUsingOldEmbedding = '''
-  <manifest>
-      <application>
-      </application>
-  </manifest>
-  ''';
-      const String kAndroidManifestUsingNewEmbedding = '''
-  <manifest>
-      <application>
-          <meta-data
-              android:name="flutterEmbedding"
-              android:value="2" />
-      </application>
-  </manifest>
-  ''';
-
       setUp(() {
         featureFlags = MockFeatureFlags();
         when(featureFlags.isLinuxEnabled).thenReturn(false);
