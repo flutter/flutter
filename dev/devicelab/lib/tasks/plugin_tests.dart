@@ -26,10 +26,12 @@ TaskFunction combine(List<TaskFunction> tasks) {
 /// Defines task that creates new Flutter project, adds a local and remote
 /// plugin, and then builds the specified [buildTarget].
 class PluginTest {
-  PluginTest(this.buildTarget, this.options);
+  PluginTest(this.buildTarget, this.options, { this.pluginCreateEnvs, this.appCreateEnvs });
 
   final String buildTarget;
   final List<String> options;
+  final Map<String, String> pluginCreateEnvs;
+  final Map<String, String> appCreateEnvs;
 
   Future<TaskResult> call() async {
     final Directory tempDir =
@@ -38,12 +40,12 @@ class PluginTest {
       section('Create plugin');
       final _FlutterProject plugin = await _FlutterProject.create(
           tempDir, options,
-          name: 'plugintest', template: 'plugin');
+          name: 'plugintest', template: 'plugin', environment: pluginCreateEnvs);
       section('Test plugin');
       await plugin.test();
       section('Create Flutter app');
       final _FlutterProject app = await _FlutterProject.create(tempDir, options,
-          name: 'plugintestapp', template: 'app');
+          name: 'plugintestapp', template: 'app', environment: appCreateEnvs);
       try {
         if (buildTarget == 'ios')
           await prepareProvisioningCertificates(app.rootPath);
@@ -95,8 +97,13 @@ class _FlutterProject {
   }
 
   static Future<_FlutterProject> create(
-      Directory directory, List<String> options,
-      {String name, String template}) async {
+      Directory directory,
+      List<String> options,
+      {
+        String name,
+        String template,
+        Map<String, String> environment,
+      }) async {
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -107,6 +114,7 @@ class _FlutterProject {
           ...options,
           name,
         ],
+        environment: environment,
       );
     });
     return _FlutterProject(directory, name);
