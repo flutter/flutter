@@ -304,15 +304,15 @@ class CupertinoColors {
   /// The color for text labels containing secondary content, equivalent to
   /// [UIColor.secondaryLabel](https://developer.apple.com/documentation/uikit/uicolor/3173136-secondarylabel).
   static const CupertinoDynamicColor secondaryLabel = CupertinoDynamicColor(
-    color: Color.fromARGB(255, 0, 0, 0),
-    darkColor: Color.fromARGB(255, 255, 255, 255),
-    highContrastColor: Color.fromARGB(255, 0, 0, 0),
-    darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
-    elevatedColor: Color.fromARGB(255, 0, 0, 0),
-    darkElevatedColor: Color.fromARGB(255, 255, 255, 255),
-    highContrastElevatedColor: Color.fromARGB(255, 0, 0, 0),
-    darkHighContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
-  );
+    color: Color.fromARGB(153, 60, 60, 67),
+    darkColor: Color.fromARGB(153, 235, 235, 245),
+    highContrastColor: Color.fromARGB(173, 60, 60, 67),
+    darkHighContrastColor: Color.fromARGB(173, 235, 235, 245),
+    elevatedColor: Color.fromARGB(153, 60, 60, 67),
+    darkElevatedColor: Color.fromARGB(153, 235, 235, 245),
+    highContrastElevatedColor: Color.fromARGB(173, 60, 60, 67),
+    darkHighContrastElevatedColor: Color.fromARGB(173, 235, 235, 245),
+);
 
   /// The color for text labels containing tertiary content, equivalent to
   /// [UIColor.tertiaryLabel](https://developer.apple.com/documentation/uikit/uicolor/3173153-tertiarylabel).
@@ -889,7 +889,7 @@ class CupertinoDynamicColor extends Color {
   /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base] elevation
   /// level), unless [nullOk] is set to false, in which case an exception will be
   /// thrown.
-  CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = false }) {
+  CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = true }) {
     final Brightness brightness = _isPlatformBrightnessDependent
       ? CupertinoTheme.brightnessOf(context, nullOk: nullOk) ?? Brightness.light
       : Brightness.light;

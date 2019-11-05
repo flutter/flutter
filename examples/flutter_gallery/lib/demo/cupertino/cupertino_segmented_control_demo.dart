@@ -46,7 +46,13 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
     ),
   };
 
-  int sharedValue = 0;
+  int currentSegment = 0;
+
+  void onValueChanged(int newValue) {
+    setState(() {
+      currentSegment = newValue;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,23 +66,28 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
         trailing: CupertinoDemoDocumentationButton(CupertinoSegmentedControlDemo.routeName),
       ),
       child: DefaultTextStyle(
-        style: CupertinoTheme.of(context).textTheme.textStyle,
+        style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 13),
         child: SafeArea(
           child: Column(
             children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-              ),
+              const Padding(padding: EdgeInsets.all(16.0)),
               SizedBox(
                 width: 500.0,
                 child: CupertinoSegmentedControl<int>(
                   children: children,
-                  onValueChanged: (int newValue) {
-                    setState(() {
-                      sharedValue = newValue;
-                    });
-                  },
-                  groupValue: sharedValue,
+                  onValueChanged: onValueChanged,
+                  groupValue: currentSegment,
+                ),
+              ),
+              SizedBox(
+                width: 500,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: CupertinoSlidingSegmentedControl<int>(
+                    children: children,
+                    onValueChanged: onValueChanged,
+                    groupValue: currentSegment,
+                  ),
                 ),
               ),
               Expanded(
@@ -85,36 +96,43 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                     vertical: 32.0,
                     horizontal: 16.0,
                   ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 64.0,
-                      horizontal: 16.0,
+                  child: CupertinoUserInterfaceLevel(
+                    data: CupertinoUserInterfaceLevelData.elevated,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 64.0,
+                            horizontal: 16.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                            borderRadius: BorderRadius.circular(3.0),
+                            boxShadow: const <BoxShadow>[
+                              BoxShadow(
+                                offset: Offset(0.0, 3.0),
+                                blurRadius: 5.0,
+                                spreadRadius: -1.0,
+                                color: _kKeyUmbraOpacity,
+                              ),
+                              BoxShadow(
+                                offset: Offset(0.0, 6.0),
+                                blurRadius: 10.0,
+                                spreadRadius: 0.0,
+                                color: _kKeyPenumbraOpacity,
+                              ),
+                              BoxShadow(
+                                offset: Offset(0.0, 1.0),
+                                blurRadius: 18.0,
+                                spreadRadius: 0.0,
+                                color: _kAmbientShadowOpacity,
+                              ),
+                            ],
+                          ),
+                          child: icons[currentSegment],
+                        );
+                      },
                     ),
-                    decoration: BoxDecoration(
-                      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(3.0),
-                      boxShadow: const <BoxShadow>[
-                        BoxShadow(
-                          offset: Offset(0.0, 3.0),
-                          blurRadius: 5.0,
-                          spreadRadius: -1.0,
-                          color: _kKeyUmbraOpacity,
-                        ),
-                        BoxShadow(
-                          offset: Offset(0.0, 6.0),
-                          blurRadius: 10.0,
-                          spreadRadius: 0.0,
-                          color: _kKeyPenumbraOpacity,
-                        ),
-                        BoxShadow(
-                          offset: Offset(0.0, 1.0),
-                          blurRadius: 18.0,
-                          spreadRadius: 0.0,
-                          color: _kAmbientShadowOpacity,
-                        ),
-                      ],
-                    ),
-                    child: icons[sharedValue],
                   ),
                 ),
               ),
