@@ -175,18 +175,23 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 
 - (void)setViewController:(FlutterViewController*)viewController {
   FML_DCHECK(self.iosPlatformView);
-  _viewController = [viewController getWeakPtr];
+  _viewController =
+      viewController ? [viewController getWeakPtr] : fml::WeakPtr<FlutterViewController>();
   self.iosPlatformView->SetOwnerViewController(_viewController);
   [self maybeSetupPlatformViewChannels];
 
-  __block FlutterEngine* blockSelf = self;
-  self.flutterViewControllerWillDeallocObserver =
-      [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
-                                                        object:viewController
-                                                         queue:[NSOperationQueue mainQueue]
-                                                    usingBlock:^(NSNotification* note) {
-                                                      [blockSelf notifyViewControllerDeallocated];
-                                                    }];
+  if (viewController) {
+    __block FlutterEngine* blockSelf = self;
+    self.flutterViewControllerWillDeallocObserver =
+        [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
+                                                          object:viewController
+                                                           queue:[NSOperationQueue mainQueue]
+                                                      usingBlock:^(NSNotification* note) {
+                                                        [blockSelf notifyViewControllerDeallocated];
+                                                      }];
+  } else {
+    self.flutterViewControllerWillDeallocObserver = nil;
+  }
 }
 
 - (void)setFlutterViewControllerWillDeallocObserver:(id<NSObject>)observer {
@@ -201,6 +206,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 }
 
 - (void)notifyViewControllerDeallocated {
+  [[self lifecycleChannel] sendMessage:@"AppLifecycleState.detached"];
   if (!_allowHeadlessExecution) {
     [self destroyContext];
   } else {

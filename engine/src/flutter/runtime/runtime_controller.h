@@ -120,7 +120,7 @@ class RuntimeController final : public WindowClient {
     std::string variant_code;
     std::vector<std::string> locale_data;
     std::string user_settings_data = "{}";
-    std::string lifecycle_state;
+    std::string lifecycle_state = "AppLifecycleState.detached";
     bool semantics_enabled = false;
     bool assistive_technology_enabled = false;
     int32_t accessibility_feature_flags_ = 0;
