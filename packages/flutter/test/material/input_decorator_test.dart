@@ -3574,7 +3574,7 @@ void main() {
                 labelText: 'label',
                 alignLabelWithHint: alignLabelWithHint,
                 hintText: 'hint',
-                hintStyle: TextStyle(
+                hintStyle: const TextStyle(
                   fontFamily: 'Cough',
                 ),
               ),
@@ -3586,8 +3586,12 @@ void main() {
 
     await tester.pumpWidget(buildFrame(true));
     await tester.pumpAndSettle();
-    // These numbers should be the values from using alphabetic baselines.
+
+    // These numbers should be the values from using alphabetic baselines:
+    // Ideographic (incorrect) value is 31.299999713897705
     expect(tester.getTopLeft(find.text('hint')).dy, 28.75);
+
+    // Ideographic (incorrect) value is 50.299999713897705
     expect(tester.getBottomLeft(find.text('hint')).dy, 47.75);
   });
 }
