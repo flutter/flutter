@@ -396,6 +396,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
                 data: const SliderThemeData(
                   showValueIndicator: ShowValueIndicator.always,
 //                  rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
+//                  thumbColor: Color(0x40FF0000)
                 ),
                 child: MediaQuery(
                   data: MediaQuery.of(context).copyWith(
