@@ -81,14 +81,16 @@ define("main_module", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   window.\$mainEntrypoint = app.main.main;
   if (window.\$hotReload == null) {
     window.\$hotReload = function(cb) {
-      dart_sdk.developer.invokeExtension("ext.flutter.disassemble", "{}");
-      dart_sdk.dart.hotRestart();
-      window.\$mainEntrypoint();
-      if (cb != null) {
-        window.requestAnimationFrame(cb);
-      }
+      dart_sdk.developer.invokeExtension("ext.flutter.disassemble", "{}").then((_) => {
+        dart_sdk.dart.hotRestart();
+        dart_sdk.ui.webOnlyInitializePlatform().then(dart_sdk.core.Null, dart_sdk.dart.fn(_ => {
+          window.\$mainEntrypoint();
+          window.requestAnimationFrame(cb);
+        }, voidToNull()));
+      });
     }
   }
+
   dart_sdk.ui.webOnlyInitializePlatform().then(dart_sdk.core.Null, dart_sdk.dart.fn(_ => {
     app.main.main();
   }, voidToNull()));

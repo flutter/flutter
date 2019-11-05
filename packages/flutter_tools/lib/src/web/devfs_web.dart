@@ -294,9 +294,16 @@ class WebDevFS implements DevFS {
         'amd',
         'dart_sdk.js.map',
       ));
+      final File stackTraceMapper = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        'lib',
+        'dev_compiler',
+        'web',
+        'dart_stack_trace_mapper.js',
+      ));
       _webAssetServer.writeFile('/main.dart.js', generateBootstrapScript(
         requireUrl: requireJS.path,
-        mapperUrl: null,
+        mapperUrl: stackTraceMapper.path,
         entrypoint: '$mainPath.js',
       ));
       _webAssetServer.writeFile('/main_module.js', generateMainModule(

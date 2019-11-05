@@ -507,12 +507,16 @@ class ResidentWebRunner extends ResidentRunner {
     if (fullRestart) {
       await _wipConnection.sendCommand('Page.reload');
     } else {
-      await _wipConnection.debugger
-        .sendCommand('Runtime.evaluate', params: <String, Object>{
-        'expression': 'window.\$hotReloadHook([$modules])',
-        'awaitPromise': true,
-        'returnByValue': true,
-      });
+      try {
+        await _wipConnection.debugger
+          .sendCommand('Runtime.evaluate', params: <String, Object>{
+          'expression': 'window.\$hotReloadHook([$modules])',
+          'awaitPromise': true,
+          'returnByValue': true,
+        });
+      } on WipError catch (err) {
+        return OperationResult(1, err.toString());
+      }
     }
     return OperationResult.ok;
   }
