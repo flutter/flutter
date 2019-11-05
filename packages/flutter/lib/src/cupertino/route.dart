@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/animation.dart' show Curves;
 
 import 'colors.dart';
+import 'interface_level.dart';
 
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
@@ -840,7 +841,10 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return builder(context);
+    return CupertinoUserInterfaceLevel(
+      data: CupertinoUserInterfaceLevelData.elevated,
+      child: Builder(builder: builder),
+    );
   }
 
   @override

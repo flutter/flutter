@@ -41,59 +41,53 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
     return DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.textStyle,
       child: CupertinoPageScaffold(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: CupertinoTheme.of(context).brightness == Brightness.light
-                ? CupertinoColors.extraLightBackgroundGray
-                : CupertinoColors.darkBackgroundGray,
-          ),
-          child: CustomScrollView(
-            // If left unspecified, the [CustomScrollView] appends an
-            // [AlwaysScrollableScrollPhysics]. Behind the scene, the ScrollableState
-            // will attach that [AlwaysScrollableScrollPhysics] to the output of
-            // [ScrollConfiguration.of] which will be a [ClampingScrollPhysics]
-            // on Android.
-            // To demonstrate the iOS behavior in this demo and to ensure that the list
-            // always scrolls, we specifically use a [BouncingScrollPhysics] combined
-            // with a [AlwaysScrollableScrollPhysics]
-            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-            slivers: <Widget>[
-              CupertinoSliverNavigationBar(
-                largeTitle: const Text('Refresh'),
-                // We're specifying a back label here because the previous page
-                // is a Material page. CupertinoPageRoutes could auto-populate
-                // these back labels.
-                previousPageTitle: 'Cupertino',
-                trailing: CupertinoDemoDocumentationButton(CupertinoRefreshControlDemo.routeName),
-              ),
-              CupertinoSliverRefreshControl(
-                onRefresh: () {
-                  return Future<void>.delayed(const Duration(seconds: 2))
-                      ..then<void>((_) {
-                        if (mounted) {
-                          setState(() => repopulateList());
-                        }
-                      });
-                },
-              ),
-              SliverSafeArea(
-                top: false, // Top safe area is consumed by the navigation bar.
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      return _ListItem(
-                        name: randomizedContacts[index][0],
-                        place: randomizedContacts[index][1],
-                        date: randomizedContacts[index][2],
-                        called: randomizedContacts[index][3] == 'true',
-                      );
-                    },
-                    childCount: 20,
-                  ),
+        backgroundColor: CupertinoColors.systemGroupedBackground,
+        child: CustomScrollView(
+          // If left unspecified, the [CustomScrollView] appends an
+          // [AlwaysScrollableScrollPhysics]. Behind the scene, the ScrollableState
+          // will attach that [AlwaysScrollableScrollPhysics] to the output of
+          // [ScrollConfiguration.of] which will be a [ClampingScrollPhysics]
+          // on Android.
+          // To demonstrate the iOS behavior in this demo and to ensure that the list
+          // always scrolls, we specifically use a [BouncingScrollPhysics] combined
+          // with a [AlwaysScrollableScrollPhysics]
+          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              largeTitle: const Text('Refresh'),
+              // We're specifying a back label here because the previous page
+              // is a Material page. CupertinoPageRoutes could auto-populate
+              // these back labels.
+              previousPageTitle: 'Cupertino',
+              trailing: CupertinoDemoDocumentationButton(CupertinoRefreshControlDemo.routeName),
+            ),
+            CupertinoSliverRefreshControl(
+              onRefresh: () {
+                return Future<void>.delayed(const Duration(seconds: 2))
+                ..then<void>((_) {
+                    if (mounted) {
+                      setState(() => repopulateList());
+                    }
+                });
+              },
+            ),
+            SliverSafeArea(
+              top: false, // Top safe area is consumed by the navigation bar.
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return _ListItem(
+                      name: randomizedContacts[index][0],
+                      place: randomizedContacts[index][1],
+                      date: randomizedContacts[index][2],
+                      called: randomizedContacts[index][3] == 'true',
+                    );
+                  },
+                  childCount: 20,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -163,7 +157,7 @@ class _ListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      color: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
       height: 60.0,
       padding: const EdgeInsets.only(top: 9.0),
       child: Row(
