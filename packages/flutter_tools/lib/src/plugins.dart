@@ -404,7 +404,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         }
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
-    break;
+      break;
     case AndroidEmbeddingVersion.v1:
       for (Map<String, dynamic> plugin in androidPlugins) {
         if (!plugin['supportsEmbeddingV1'] && plugin['supportsEmbeddingV2']) {
@@ -416,9 +416,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         }
       }
       templateContent = _androidPluginRegistryTemplateOldEmbedding;
-    break;
-    default:
-      throwToolExit('Unsupported Android embedding');
+      break;
   }
   printTrace('Generating $registryPath');
   _renderTemplateToFile(

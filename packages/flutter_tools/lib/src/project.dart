@@ -671,7 +671,7 @@ class AndroidProject {
       }
     }
     return AndroidEmbeddingVersion.v1;
-    }
+  }
 }
 
 /// Iteration of the embedding Java API in the engine used by the Android project.
