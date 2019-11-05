@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show lerpDouble, ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/animation.dart' show Curves;
 
 import 'colors.dart';
+import 'interface_level.dart';
 
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
@@ -253,17 +254,18 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    final Widget child = builder(context);
     final Widget result = Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      child: builder(context),
+      child: child,
     );
     assert(() {
-      if (result == null) {
-        throw FlutterError(
-          'The builder for route "${settings.name}" returned null.\n'
-          'Route builders must never return null.'
-        );
+      if (child == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('The builder for route "${settings.name}" returned null.'),
+          ErrorDescription('Route builders must never return null.'),
+        ]);
       }
       return true;
     }());
@@ -792,11 +794,15 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
 class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   _CupertinoModalPopupRoute({
-    this.builder,
-    this.barrierLabel,
     this.barrierColor,
+    this.barrierLabel,
+    this.builder,
+    ImageFilter filter,
     RouteSettings settings,
-  }) : super(settings: settings);
+  }) : super(
+         filter: filter,
+         settings: settings,
+       );
 
   final WidgetBuilder builder;
 
@@ -839,7 +845,10 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return builder(context);
+    return CupertinoUserInterfaceLevel(
+      data: CupertinoUserInterfaceLevelData.elevated,
+      child: Builder(builder: builder),
+    );
   }
 
   @override
@@ -863,6 +872,10 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// It is only used when the method is called. Its corresponding widget can be
 /// safely removed from the tree before the popup is closed.
 ///
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// popup to the [Navigator] furthest from or nearest to the given `context`. It
+/// is `false` by default.
+///
 /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
 /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
 /// by the `builder` does not share a context with the location that
@@ -881,12 +894,16 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 Future<T> showCupertinoModalPopup<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  ImageFilter filter,
+  bool useRootNavigator = true,
 }) {
-  return Navigator.of(context, rootNavigator: true).push(
+  assert(useRootNavigator != null);
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(
     _CupertinoModalPopupRoute<T>(
-      builder: builder,
-      barrierLabel: 'Dismiss',
       barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+      barrierLabel: 'Dismiss',
+      builder: builder,
+      filter: filter,
     ),
   );
 }
@@ -932,13 +949,17 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// It is only used when the method is called. Its corresponding widget can
 /// be safely removed from the tree before the dialog is closed.
 ///
-/// Returns a [Future] that resolves to the value (if any) that was passed to
-/// [Navigator.pop] when the dialog was closed.
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// dialog to the [Navigator] furthest from or nearest to the given `context`.
+/// By default, `useRootNavigator` is `true` and the dialog route created by
+/// this method is pushed to the root navigator.
 ///
-/// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
+///
+/// Returns a [Future] that resolves to the value (if any) that was passed to
+/// [Navigator.pop] when the dialog was closed.
 ///
 /// See also:
 ///
@@ -950,8 +971,10 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 Future<T> showCupertinoDialog<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  bool useRootNavigator = true,
 }) {
   assert(builder != null);
+  assert(useRootNavigator != null);
   return showGeneralDialog(
     context: context,
     barrierDismissible: false,
@@ -962,5 +985,6 @@ Future<T> showCupertinoDialog<T>({
       return builder(context);
     },
     transitionBuilder: _buildCupertinoDialogTransitions,
+    useRootNavigator: useRootNavigator,
   );
 }

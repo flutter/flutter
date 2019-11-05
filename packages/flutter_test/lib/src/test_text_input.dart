@@ -55,6 +55,12 @@ class TestTextInput {
     _isRegistered = false;
   }
 
+  /// Log for method calls.
+  ///
+  /// For all registered channels, handled calls are added to the list. Can
+  /// be cleaned using [clearLog].
+  final List<MethodCall> log = <MethodCall>[];
+
   /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
   ///
   /// Use [register] and [unregister] methods to control this value.
@@ -78,6 +84,7 @@ class TestTextInput {
   Map<String, dynamic> editingState;
 
   Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {
+    log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
         _client = methodCall.arguments[0];
@@ -117,6 +124,28 @@ class TestTextInput {
         MethodCall(
           'TextInputClient.updateEditingState',
           <dynamic>[_client, value.toJSON()],
+        ),
+      ),
+      (ByteData data) { /* response from framework is discarded */ },
+    );
+  }
+
+  /// Simulates the user closing the text input connection.
+  ///
+  /// For example:
+  /// - User pressed the home button and sent the application to background.
+  /// - User closed the virtual keyboard.
+  void closeConnection() {
+    // Not using the `expect` function because in the case of a FlutterDriver
+    // test this code does not run in a package:test test zone.
+    if (_client == 0)
+      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+    _binaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.onConnectionClosed',
+           <dynamic>[_client,]
         ),
       ),
       (ByteData data) { /* response from framework is discarded */ },

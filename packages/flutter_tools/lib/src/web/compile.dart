@@ -75,6 +75,7 @@ class WebCompilationProxy {
     @required Directory projectDirectory,
     @required String projectName,
     String testOutputDir,
+    List<String> testFiles,
     BuildMode mode,
     bool initializePlatform,
   }) async {

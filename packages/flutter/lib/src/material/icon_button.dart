@@ -151,6 +151,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
+    this.enableFeedback = true,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
@@ -269,6 +270,16 @@ class IconButton extends StatelessWidget {
   /// used for accessibility.
   final String tooltip;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool enableFeedback;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -314,6 +325,7 @@ class IconButton extends StatelessWidget {
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
         onTap: onPressed,
+        enableFeedback: enableFeedback,
         child: result,
         focusColor: focusColor ?? Theme.of(context).focusColor,
         hoverColor: hoverColor ?? Theme.of(context).hoverColor,

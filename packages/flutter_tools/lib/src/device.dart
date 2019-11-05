@@ -23,6 +23,7 @@ import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'vmservice.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
@@ -178,7 +179,8 @@ class DeviceManager {
     if (hasSpecifiedAllDevices) {
       devices = <Device>[
         for (Device device in devices)
-          if (await device.targetPlatform != TargetPlatform.fuchsia &&
+          if (await device.targetPlatform != TargetPlatform.fuchsia_arm64 &&
+              await device.targetPlatform != TargetPlatform.fuchsia_x64 &&
               await device.targetPlatform != TargetPlatform.web_javascript)
             device,
       ];
@@ -250,28 +252,32 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   final String name;
   ItemListNotifier<Device> _items;
-  Poller _poller;
+  Timer _timer;
 
   Future<List<Device>> pollingGetDevices();
 
   void startPolling() {
-    if (_poller == null) {
+    if (_timer == null) {
       _items ??= ItemListNotifier<Device>();
-
-      _poller = Poller(() async {
-        try {
-          final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
-          _items.updateWithNewList(devices);
-        } on TimeoutException {
-          printTrace('Device poll timed out. Will retry.');
-        }
-      }, _pollingInterval);
+      _timer = _initTimer();
     }
   }
 
+  Timer _initTimer() {
+    return Timer(_pollingInterval, () async {
+      try {
+        final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+        _items.updateWithNewList(devices);
+      } on TimeoutException {
+        printTrace('Device poll timed out. Will retry.');
+      }
+      _timer = _initTimer();
+    });
+  }
+
   void stopPolling() {
-    _poller?.cancel();
-    _poller = null;
+    _timer?.cancel();
+    _timer = null;
   }
 
   @override
@@ -339,7 +345,8 @@ abstract class Device {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
       default:
         return false;
     }
@@ -612,6 +619,10 @@ abstract class DeviceLogReader {
   /// A broadcast stream where each element in the string is a line of log output.
   Stream<String> get logLines;
 
+  /// Some logs can be obtained from a VM service stream.
+  /// Set this after the VM services are connected.
+  List<VMService> connectedVMServices;
+
   @override
   String toString() => name;
 
@@ -638,6 +649,9 @@ class NoOpDeviceLogReader implements DeviceLogReader {
 
   @override
   int appPid;
+
+  @override
+  List<VMService> connectedVMServices;
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();

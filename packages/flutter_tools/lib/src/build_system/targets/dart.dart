@@ -2,20 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:pool/pool.dart';
-
 import '../../artifacts.dart';
-import '../../asset.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
-import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
-import '../../dart/package_map.dart';
-import '../../devfs.dart';
 import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
+import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 
@@ -42,27 +37,6 @@ const String kTrackWidgetCreation = 'TrackWidgetCreation';
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
 
-/// Finds the locations of all dart files within the project.
-///
-/// This does not attempt to determine if a file is used or imported, so it
-/// may otherwise report more files than strictly necessary.
-List<File> listDartSources(Environment environment) {
-  final Map<String, Uri> packageMap = PackageMap(environment.projectDir.childFile('.packages').path).map;
-  final List<File> dartFiles = <File>[];
-  for (Uri uri in packageMap.values) {
-    final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
-    if (!libDirectory.existsSync()) {
-      continue;
-    }
-    for (FileSystemEntity entity in libDirectory.listSync(recursive: true)) {
-      if (entity is File && entity.path.endsWith('.dart')) {
-        dartFiles.add(entity);
-      }
-    }
-  }
-  return dartFiles;
-}
-
 /// Copies the prebuilt flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
 class CopyFlutterBundle extends Target {
@@ -76,7 +50,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.behavior(AssetOutputBehavior()),
+    Source.depfile('flutter_assets.d'),
   ];
 
   @override
@@ -84,10 +58,7 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
-    Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/LICENSE'),
-    Source.behavior(AssetOutputBehavior()),
+    Source.depfile('flutter_assets.d'),
   ];
 
   @override
@@ -96,12 +67,6 @@ class CopyFlutterBundle extends Target {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-
-    // We're not smart enough to only remove assets that are removed. If
-    // anything changes blow away the whole directory.
-    if (environment.outputDir.existsSync()) {
-      environment.outputDir.deleteSync(recursive: true);
-    }
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
@@ -115,38 +80,14 @@ class CopyFlutterBundle extends Target {
       fs.file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
-
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    await assetBundle.build();
-    await copyAssets(assetBundle, environment);
+    final Depfile assetDepfile = await copyAssets(environment, environment.outputDir);
+    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
   ];
-}
-
-/// A helper function to copy an [assetBundle] into an [environment]'s output directory,
-/// plus an optional [pathSuffix]
-Future<void> copyAssets(AssetBundle assetBundle, Environment environment, [String pathSuffix = '']) async {
-  final Pool pool = Pool(kMaxOpenFiles);
-  await Future.wait<void>(
-    assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-      final PoolResource resource = await pool.request();
-      try {
-        final File file = fs.file(fs.path.join(environment.outputDir.path, pathSuffix, entry.key));
-        file.parent.createSync(recursive: true);
-        final DevFSContent content = entry.value;
-        if (content is DevFSFileContent && content.file is File) {
-          await (content.file as File).copy(file.path);
-        } else {
-          await file.writeAsBytes(await entry.value.contentsAsBytes());
-        }
-      } finally {
-        resource.release();
-      }
-  }));
 }
 
 /// Copies the prebuilt flutter bundle for release mode.
@@ -158,15 +99,12 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.behavior(AssetOutputBehavior()),
+    Source.depfile('flutter_assets.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/LICENSE'),
-    Source.behavior(AssetOutputBehavior()),
+    Source.depfile('flutter_assets.d'),
   ];
 
   @override
@@ -207,19 +145,33 @@ class KernelSnapshot extends Target {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'kernel_snapshot');
     }
+    if (environment.defines[kTargetPlatform] == null) {
+      throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
+    }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
     final String targetFileAbsolute = fs.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
+    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+
+    TargetModel targetModel = TargetModel.flutter;
+    if (targetPlatform == TargetPlatform.fuchsia_x64 ||
+        targetPlatform == TargetPlatform.fuchsia_arm64) {
+      targetModel = TargetModel.flutterRunner;
+    }
 
     final CompilerOutput output = await compiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+      sdkRoot: artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: targetPlatform,
+        mode: buildMode,
+      ),
       aot: buildMode != BuildMode.debug,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
-      targetModel: TargetModel.flutter,
+      targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
@@ -231,7 +183,6 @@ class KernelSnapshot extends Target {
     }
   }
 }
-
 
 /// Supports compiling a dart kernel file to an ELF binary.
 abstract class AotElfBase extends Target {
@@ -322,5 +273,54 @@ class AotElfRelease extends AotElfBase {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+  ];
+}
+
+/// Copies the prebuilt flutter aot bundle.
+// This is a one-off rule for implementing build aot in terms of assemble.
+abstract class CopyFlutterAotBundle extends Target {
+  const CopyFlutterAotBundle();
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.so'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/app.so'),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final File outputFile = environment.outputDir.childFile('app.so');
+    if (!outputFile.parent.existsSync()) {
+      outputFile.parent.createSync(recursive: true);
+    }
+    environment.buildDir.childFile('app.so').copySync(outputFile.path);
+  }
+}
+
+class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
+  const ProfileCopyFlutterAotBundle();
+
+  @override
+  String get name => 'profile_copy_aot_flutter_bundle';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfProfile(),
+  ];
+}
+
+class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
+  const ReleaseCopyFlutterAotBundle();
+
+  @override
+  String get name => 'release_copy_aot_flutter_bundle';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfRelease(),
   ];
 }

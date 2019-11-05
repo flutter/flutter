@@ -22,6 +22,7 @@ import 'compile.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart';
 import 'globals.dart';
 import 'project.dart';
 import 'run_cold.dart';
@@ -36,12 +37,17 @@ class FlutterDevice {
     this.fileSystemScheme,
     this.viewFilter,
     TargetModel targetModel = TargetModel.flutter,
+    TargetPlatform targetPlatform,
     List<String> experimentalFlags,
     ResidentCompiler generator,
     @required BuildMode buildMode,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
-         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+         artifacts.getArtifactPath(
+           Artifact.flutterPatchedSdkPath,
+           platform: targetPlatform,
+           mode: buildMode,
+         ),
          buildMode: buildMode,
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
@@ -65,14 +71,35 @@ class FlutterDevice {
     ResidentCompiler generator,
   }) async {
     ResidentCompiler generator;
-    if (flutterProject.hasBuilders) {
+    final TargetPlatform targetPlatform = await device.targetPlatform;
+    if (device.platformType == PlatformType.fuchsia) {
+      targetModel = TargetModel.flutterRunner;
+    }
+    if (featureFlags.isWebIncrementalCompilerEnabled &&
+        targetPlatform == TargetPlatform.web_javascript) {
+      generator = ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildMode),
+        buildMode: buildMode,
+        trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots,
+        fileSystemScheme: fileSystemScheme,
+        targetModel: TargetModel.dartdevc,
+        experimentalFlags: experimentalFlags,
+        platformDill: artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode),
+      );
+    } else if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
+        targetPlatform: targetPlatform,
         buildMode: buildMode,
         flutterProject: flutterProject,
       );
     } else {
       generator = ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+        artifacts.getArtifactPath(
+          Artifact.flutterPatchedSdkPath,
+          platform: targetPlatform,
+          mode: buildMode,
+        ),
         buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots,
@@ -89,6 +116,7 @@ class FlutterDevice {
       viewFilter: viewFilter,
       experimentalFlags: experimentalFlags,
       targetModel: targetModel,
+      targetPlatform: targetPlatform,
       generator: generator,
       buildMode: buildMode,
     );
@@ -135,6 +163,7 @@ class FlutterDevice {
       printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
     vmServices = localVmServices;
+    device.getLogReader(app: package).connectedVMServices = vmServices;
   }
 
   Future<void> refreshViews() async {

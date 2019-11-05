@@ -4,9 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/globals.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -167,6 +169,15 @@ void main() {
           'Please choose something: \n'
           '\n');
     });
+
+    testUsingContext('Does not set single char mode when a terminal is not attached', () {
+      when(stdio.stdin).thenThrow(StateError('This should not be called'));
+      when(stdio.stdinHasTerminal).thenReturn(false);
+
+      terminal.singleCharMode = true;
+    }, overrides: <Type, Generator>{
+      Stdio: () => MockStdio(),
+    });
   });
 }
 
@@ -178,3 +189,5 @@ class TestTerminal extends AnsiTerminal {
     return mockStdInStream;
   }
 }
+
+class MockStdio extends Mock implements Stdio {}

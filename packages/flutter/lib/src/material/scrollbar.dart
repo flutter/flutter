@@ -36,6 +36,7 @@ class Scrollbar extends StatefulWidget {
   const Scrollbar({
     Key key,
     @required this.child,
+    this.controller,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -46,10 +47,12 @@ class Scrollbar extends StatefulWidget {
   /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
 
+  /// {@macro flutter.cupertino.cupertinoScrollbar.controller}
+  final ScrollController controller;
+
   @override
   _ScrollbarState createState() => _ScrollbarState();
 }
-
 
 class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   ScrollbarPainter _materialPainter;
@@ -148,6 +151,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
         child: widget.child,
+        controller: widget.controller,
       );
     }
     return NotificationListener<ScrollNotification>(

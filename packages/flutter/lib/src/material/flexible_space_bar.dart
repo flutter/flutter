@@ -3,14 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 
-/// The collapsing effect while the space bar expands or collapses.
+/// The collapsing effect while the space bar collapses from its full size.
 enum CollapseMode {
   /// The background widget will scroll in a parallax fashion.
   parallax,
@@ -22,16 +24,114 @@ enum CollapseMode {
   none,
 }
 
-/// The part of a material design [AppBar] that expands and collapses.
+/// The stretching effect while the space bar stretches beyond its full size.
+enum StretchMode {
+  /// The background widget will expand to fill the extra space.
+  zoomBackground,
+
+  /// The background will blur using a [ImageFilter.blur] effect.
+  blurBackground,
+
+  /// The title will fade away as the user over-scrolls.
+  fadeTitle,
+}
+
+/// The part of a material design [AppBar] that expands, collapses, and
+/// stretches.
 ///
 /// Most commonly used in in the [SliverAppBar.flexibleSpace] field, a flexible
 /// space bar expands and contracts as the app scrolls so that the [AppBar]
 /// reaches from the top of the app to the top of the scrolling contents of the
-/// app.
+/// app. Furthermore is included functionality for stretch behavior. When
+/// [SliverAppBar.stretch] is true, and your [ScrollPhysics] allow for
+/// overscroll, this space will stretch with the overscroll.
 ///
 /// The widget that sizes the [AppBar] must wrap it in the widget returned by
 /// [FlexibleSpaceBar.createSettings], to convey sizing information down to the
 /// [FlexibleSpaceBar].
+///
+/// {@tool snippet --template=freeform}
+/// This sample application demonstrates the different features of the
+/// [FlexibleSpaceBar] when used in a [SliverAppBar]. This app bar is configured
+/// to stretch into the overscroll space, and uses the
+/// [FlexibleSpaceBar.stretchModes] to apply `fadeTitle`, `blurBackground` and
+/// `zoomBackground`. The app bar also makes use of [CollapseMode.parallax] by
+/// default.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+/// ```dart
+/// void main() => runApp(MaterialApp(home: MyApp()));
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: CustomScrollView(
+///         physics: const BouncingScrollPhysics(),
+///         slivers: <Widget>[
+///           SliverAppBar(
+///             stretch: true,
+///             onStretchTrigger: () {
+///               // Function callback for stretch
+///               return;
+///             },
+///             expandedHeight: 300.0,
+///             flexibleSpace: FlexibleSpaceBar(
+///               stretchModes: <StretchMode>[
+///                 StretchMode.zoomBackground,
+///                 StretchMode.blurBackground,
+///                 StretchMode.fadeTitle,
+///               ],
+///               centerTitle: true,
+///               title: const Text('Flight Report'),
+///               background: Stack(
+///                 fit: StackFit.expand,
+///                 children: [
+///                   Image.network(
+///                     'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+///                     fit: BoxFit.cover,
+///                   ),
+///                   const DecoratedBox(
+///                     decoration: BoxDecoration(
+///                       gradient: LinearGradient(
+///                         begin: Alignment(0.0, 0.5),
+///                         end: Alignment(0.0, 0.0),
+///                         colors: <Color>[
+///                           Color(0x60000000),
+///                           Color(0x00000000),
+///                         ],
+///                       ),
+///                     ),
+///                   ),
+///                 ],
+///               ),
+///             ),
+///           ),
+///           SliverList(
+///             delegate: SliverChildListDelegate([
+///               ListTile(
+///                 leading: Icon(Icons.wb_sunny),
+///                 title: Text('Sunday'),
+///                 subtitle: Text('sunny, h: 80, l: 65'),
+///               ),
+///               ListTile(
+///                 leading: Icon(Icons.wb_sunny),
+///                 title: Text('Monday'),
+///                 subtitle: Text('sunny, h: 80, l: 65'),
+///               ),
+///               // ListTiles++
+///             ]),
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+///
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -49,6 +149,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.centerTitle,
     this.titlePadding,
     this.collapseMode = CollapseMode.parallax,
+    this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
   }) : assert(collapseMode != null),
        super(key: key);
 
@@ -72,6 +173,11 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Defaults to [CollapseMode.parallax].
   final CollapseMode collapseMode;
+
+  /// Stretch effect while over-scrolling,
+  ///
+  /// Defaults to include [StretchMode.zoomBackground].
+  final List<StretchMode> stretchModes;
 
   /// Defines how far the [title] is inset from either the widget's
   /// bottom-left or its center.
@@ -167,87 +273,131 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
   @override
   Widget build(BuildContext context) {
-    final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
-    assert(settings != null, 'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().');
-
-    final List<Widget> children = <Widget>[];
-
-    final double deltaExtent = settings.maxExtent - settings.minExtent;
-
-    // 0.0 -> Expanded
-    // 1.0 -> Collapsed to toolbar
-    final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
-
-    // background image
-    if (widget.background != null) {
-      final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
-      const double fadeEnd = 1.0;
-      assert(fadeStart <= fadeEnd);
-      final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
-      if (opacity > 0.0) {
-        children.add(Positioned(
-          top: _getCollapsePadding(t, settings),
-          left: 0.0,
-          right: 0.0,
-          height: settings.maxExtent,
-          child: Opacity(
-            opacity: opacity,
-            child: widget.background,
-          ),
-        ));
-      }
-    }
-
-    if (widget.title != null) {
-      final ThemeData theme = Theme.of(context);
-
-      Widget title;
-      switch (theme.platform) {
-        case TargetPlatform.iOS:
-          title = widget.title;
-          break;
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.android:
-          title = Semantics(
-            namesRoute: true,
-            child: widget.title,
-          );
-      }
-
-      final double opacity = settings.toolbarOpacity;
-      if (opacity > 0.0) {
-        TextStyle titleStyle = theme.primaryTextTheme.title;
-        titleStyle = titleStyle.copyWith(
-          color: titleStyle.color.withOpacity(opacity)
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
+        assert(
+          settings != null,
+          'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().',
         );
-        final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
-        final EdgeInsetsGeometry padding = widget.titlePadding ??
-          EdgeInsetsDirectional.only(
-            start: effectiveCenterTitle ? 0.0 : 72.0,
-            bottom: 16.0,
-          );
-        final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
-        final Matrix4 scaleTransform = Matrix4.identity()
-          ..scale(scaleValue, scaleValue, 1.0);
-        final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
-        children.add(Container(
-          padding: padding,
-          child: Transform(
-            alignment: titleAlignment,
-            transform: scaleTransform,
-            child: Align(
-              alignment: titleAlignment,
-              child: DefaultTextStyle(
-                style: titleStyle,
-                child: title,
-              ),
-            ),
-          ),
-        ));
-      }
-    }
 
-    return ClipRect(child: Stack(children: children));
+        final List<Widget> children = <Widget>[];
+
+        final double deltaExtent = settings.maxExtent - settings.minExtent;
+
+        // 0.0 -> Expanded
+        // 1.0 -> Collapsed to toolbar
+        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
+
+        // background
+        if (widget.background != null) {
+          final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
+          const double fadeEnd = 1.0;
+          assert(fadeStart <= fadeEnd);
+          final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
+          if (opacity > 0.0) {
+            double height = settings.maxExtent;
+
+            // StretchMode.zoomBackground
+            if (widget.stretchModes.contains(StretchMode.zoomBackground) &&
+              constraints.maxHeight > height) {
+              height = constraints.maxHeight;
+            }
+
+            children.add(Positioned(
+              top: _getCollapsePadding(t, settings),
+              left: 0.0,
+              right: 0.0,
+              height: height,
+              child: Opacity(
+                opacity: opacity,
+                child: widget.background,
+              ),
+            ));
+
+            // StretchMode.blurBackground
+            if (widget.stretchModes.contains(StretchMode.blurBackground) &&
+              constraints.maxHeight > settings.maxExtent) {
+              final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
+              children.add(Positioned.fill(
+                child: BackdropFilter(
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                  filter: ui.ImageFilter.blur(
+                    sigmaX: blurAmount,
+                    sigmaY: blurAmount,
+                  )
+                )
+              ));
+            }
+          }
+        }
+
+        // title
+        if (widget.title != null) {
+          final ThemeData theme = Theme.of(context);
+
+          Widget title;
+          switch (theme.platform) {
+            case TargetPlatform.iOS:
+              title = widget.title;
+              break;
+            case TargetPlatform.fuchsia:
+            case TargetPlatform.android:
+              title = Semantics(
+                namesRoute: true,
+                child: widget.title,
+              );
+          }
+
+          // StretchMode.fadeTitle
+          if (widget.stretchModes.contains(StretchMode.fadeTitle) &&
+            constraints.maxHeight > settings.maxExtent) {
+            final double stretchOpacity = 1 -
+              ((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0);
+            title = Opacity(
+              opacity: stretchOpacity,
+              child: title,
+            );
+          }
+
+          final double opacity = settings.toolbarOpacity;
+          if (opacity > 0.0) {
+            TextStyle titleStyle = theme.primaryTextTheme.title;
+            titleStyle = titleStyle.copyWith(
+              color: titleStyle.color.withOpacity(opacity)
+            );
+            final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
+            final EdgeInsetsGeometry padding = widget.titlePadding ??
+              EdgeInsetsDirectional.only(
+                start: effectiveCenterTitle ? 0.0 : 72.0,
+                bottom: 16.0,
+              );
+            final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
+            final Matrix4 scaleTransform = Matrix4.identity()
+              ..scale(scaleValue, scaleValue, 1.0);
+            final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
+            children.add(Container(
+              padding: padding,
+              child: Transform(
+                alignment: titleAlignment,
+                transform: scaleTransform,
+                child: Align(
+                  alignment: titleAlignment,
+                  child: DefaultTextStyle(
+                    style: titleStyle,
+                    child: title,
+                  ),
+                ),
+              ),
+            ));
+          }
+        }
+
+        return ClipRect(child: Stack(children: children));
+      }
+    );
   }
 }
 
