@@ -95,7 +95,6 @@ class AotAndroidAssetBundle extends AndroidAssetBundle {
   String get name => 'aot_android_asset_bundle';
 }
 
-
 /// Build a profile android application's Dart artifacts.
 class ProfileAndroidApplication extends CopyFlutterAotBundle {
   const ProfileAndroidApplication();

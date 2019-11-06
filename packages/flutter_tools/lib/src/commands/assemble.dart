@@ -38,7 +38,7 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugAndroidApplication(),
   ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
-  // These are on-off rules for bundle and aot compat
+  // These are one-off rules for bundle and aot compat
   ReleaseCopyFlutterAotBundle(),
   ProfileCopyFlutterAotBundle(),
   CopyFlutterBundle(),
