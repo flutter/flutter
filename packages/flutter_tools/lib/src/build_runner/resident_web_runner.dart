@@ -489,26 +489,20 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       'Syncing files to device ${device.device.name}...',
       timeout: timeoutConfiguration.fastOperation,
     );
-    UpdateFSReport report;
-    try {
-      report = await device.devFS.update(
-        mainPath: mainPath,
-        target: target,
-        bundle: assetBundle,
-        firstBuildTime: firstBuildTime,
-        bundleFirstUpload: isFirstUpload,
-        generator: device.generator,
-        fullRestart: fullRestart,
-        dillOutputPath: dillOutputPath,
-        projectRootPath: projectRootPath,
-        pathToReload: getReloadPath(fullRestart: fullRestart),
-        invalidatedFiles: invalidatedFiles,
-        trackWidgetCreation: true,
-      );
-    } on DevFSException {
-      devFSStatus.cancel();
-      return UpdateFSReport(success: false);
-    }
+    final UpdateFSReport report = await device.devFS.update(
+      mainPath: mainPath,
+      target: target,
+      bundle: assetBundle,
+      firstBuildTime: firstBuildTime,
+      bundleFirstUpload: isFirstUpload,
+      generator: device.generator,
+      fullRestart: fullRestart,
+      dillOutputPath: dillOutputPath,
+      projectRootPath: projectRootPath,
+      pathToReload: getReloadPath(fullRestart: fullRestart),
+      invalidatedFiles: invalidatedFiles,
+      trackWidgetCreation: true,
+    );
     devFSStatus.stop();
     printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
     return report;

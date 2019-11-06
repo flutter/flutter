@@ -349,7 +349,10 @@ class UpdateFSReport {
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
 
-  // Only used for JavaScript compilation.
+  /// JavaScript modules produced by the incremental compiler in `dartdevc`
+  /// mode.
+  ///
+  /// Only used for JavaScript compilation.
   List<String> invalidatedModules;
 
   void incorporateResults(UpdateFSReport report) {
