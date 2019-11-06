@@ -41,13 +41,6 @@ static void UpdateNativeThreadLabelNames(const std::string& label,
   set_thread_name(runners.GetIOTaskRunner(), label, ".io");
 }
 
-static fml::RefPtr<flutter::PlatformMessage> MakeLocalizationPlatformMessage(
-    const fuchsia::intl::Profile& intl_profile) {
-  return fml::MakeRefCounted<flutter::PlatformMessage>(
-      "flutter/localization", MakeLocalizationPlatformMessageData(intl_profile),
-      nullptr);
-}
-
 Engine::Engine(Delegate& delegate,
                std::string thread_label,
                std::shared_ptr<sys::ServiceDirectory> svc,
@@ -262,49 +255,6 @@ Engine::Engine(Delegate& delegate,
   //  This platform does not get a separate surface platform view creation
   //  notification. Fire one eagerly.
   shell_->GetPlatformView()->NotifyCreated();
-
-  // Connect to the intl property provider.
-  {
-    intl_property_provider_.set_error_handler([](zx_status_t status) {
-      FML_LOG(ERROR) << "Failed to connect to "
-                     << fuchsia::intl::PropertyProvider::Name_ << ": "
-                     << zx_status_get_string(status);
-    });
-
-    // Note that we're using the runner's services, not the component's.
-    // Flutter locales should be updated regardless of whether the component has
-    // direct access to the fuchsia.intl.PropertyProvider service.
-    ZX_ASSERT(runner_services->Connect(intl_property_provider_.NewRequest()) ==
-              ZX_OK);
-
-    auto get_profile_callback = [flutter_runner_engine =
-                                     weak_factory_.GetWeakPtr()](
-                                    const fuchsia::intl::Profile& profile) {
-      if (!flutter_runner_engine) {
-        return;
-      }
-      if (!profile.has_locales()) {
-        FML_LOG(WARNING) << "Got intl Profile without locales";
-      }
-      auto message = MakeLocalizationPlatformMessage(profile);
-      FML_VLOG(-1) << "Sending LocalizationPlatformMessage";
-      flutter_runner_engine->shell_->GetPlatformView()->DispatchPlatformMessage(
-          message);
-    };
-
-    FML_VLOG(-1) << "Requesting intl Profile";
-
-    // Make the initial request
-    intl_property_provider_->GetProfile(get_profile_callback);
-
-    // And register for changes
-    intl_property_provider_.events().OnChange = [this, runner_services,
-                                                 get_profile_callback]() {
-      FML_VLOG(-1) << fuchsia::intl::PropertyProvider::Name_ << ": OnChange";
-      runner_services->Connect(intl_property_provider_.NewRequest());
-      intl_property_provider_->GetProfile(get_profile_callback);
-    };
-  }
 
   // Launch the engine in the appropriate configuration.
   auto run_configuration = flutter::RunConfiguration::InferFromSettings(
