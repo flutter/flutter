@@ -220,7 +220,7 @@ class FlutterPlugin implements Plugin<Project> {
 
         List<String> platforms = getTargetPlatforms().collect()
         // Debug mode includes x86 and x64, which are commonly used in emulators.
-        if (flutterBuildMode == "debug") {
+        if (flutterBuildMode == "debug" && !useLocalEngine()) {
             platforms.add("android-x86")
             platforms.add("android-x64")
         }
