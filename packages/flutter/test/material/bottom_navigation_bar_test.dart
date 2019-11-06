@@ -1191,6 +1191,7 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   flags: <SemanticsFlag>[
+                    SemanticsFlag.isFocusable,
                     SemanticsFlag.isSelected,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
@@ -1198,11 +1199,13 @@ void main() {
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
@@ -1252,6 +1255,7 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   flags: <SemanticsFlag>[
+                    SemanticsFlag.isFocusable,
                     SemanticsFlag.isSelected,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
@@ -1259,11 +1263,13 @@ void main() {
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
@@ -1420,10 +1426,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile(
-          'bottom_navigation_bar.shifting_transition.$pump.png',
-          version: 2,
-        ),
+        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
       );
     }
   }, skip: isBrowser);
@@ -1553,6 +1556,7 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   flags: <SemanticsFlag>[
+                    SemanticsFlag.isFocusable,
                     SemanticsFlag.isSelected,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
@@ -1560,6 +1564,7 @@ void main() {
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Green\nTab 2 of 2',
                   textDirection: TextDirection.ltr,
@@ -1608,12 +1613,14 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
+                    SemanticsFlag.isFocusable,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Red\nTab 1 of 2',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Green\nTab 2 of 2',
                   textDirection: TextDirection.ltr,

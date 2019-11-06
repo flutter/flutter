@@ -7,12 +7,15 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -36,7 +39,6 @@ class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter
 
 void main() {
   MockProcessManager mockProcessManager;
-  MemoryFileSystem memoryFilesystem;
   MockProcess mockProcess;
   MockPlatform macosPlatform;
   MockPlatform notMacosPlatform;
@@ -47,7 +49,6 @@ void main() {
 
   setUp(() {
     mockProcessManager = MockProcessManager();
-    memoryFilesystem = MemoryFileSystem();
     mockProcess = MockProcess();
     macosPlatform = MockPlatform();
     notMacosPlatform = MockPlatform();
@@ -58,7 +59,7 @@ void main() {
       return const Stream<List<int>>.empty();
     });
     when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-      return const Stream<List<int>>.empty();
+      return Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('STDOUT STUFF')]);
     });
     when(macosPlatform.isMacOS).thenReturn(true);
     when(macosPlatform.isWindows).thenReturn(false);
@@ -121,7 +122,27 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('macOS build does not spew stdout to status logger', () async {
+    final BufferLogger bufferLogger = logger;
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    createMinimalMockProjectFiles();
+    setUpMockXcodeBuildHandler('Debug');
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--debug']
+    );
+    expect(bufferLogger.statusText, isNot(contains('STDOUT STUFF')));
+    expect(bufferLogger.traceText, contains('STDOUT STUFF'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => mockProcessManager,
+    Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -135,7 +156,7 @@ void main() {
       const <String>['build', 'macos', '--debug']
     );
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -151,7 +172,7 @@ void main() {
       const <String>['build', 'macos', '--profile']
     );
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
@@ -168,7 +189,7 @@ void main() {
       const <String>['build', 'macos', '--release']
     );
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),

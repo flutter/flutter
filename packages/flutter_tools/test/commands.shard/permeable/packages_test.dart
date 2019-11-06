@@ -10,12 +10,15 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess;
+import '../../src/testbed.dart';
 
 class AlwaysTrueBotDetector implements BotDetector {
   const AlwaysTrueBotDetector();
@@ -206,7 +209,9 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForRemotePubInvocation);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
 
     testUsingContext('get --offline fetches packages', () async {
       final String projectPath = await createProject(tempDir,
@@ -217,7 +222,9 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForCreateFlutterProject);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
 
     testUsingContext('set the number of plugins as usage value', () async {
       final String projectPath = await createProject(tempDir,
@@ -229,7 +236,9 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesNumberPlugins, '0'));
-    }, timeout: allowForCreateFlutterProject);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
 
     testUsingContext('indicate that the project is not a module in usage value', () async {
       final String projectPath = await createProject(tempDir,
@@ -241,7 +250,9 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesProjectModule, 'false'));
-    }, timeout: allowForCreateFlutterProject);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
 
     testUsingContext('indicate that the project is a module in usage value', () async {
       final String projectPath = await createProject(tempDir,
@@ -253,7 +264,39 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesProjectModule, 'true'));
-    }, timeout: allowForCreateFlutterProject);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
+
+    testUsingContext('indicate that Android project reports v1 in usage value', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub']);
+      removeGeneratedFiles(projectPath);
+
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesAndroidEmbeddingVersion, 'v1'));
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isAndroidEmbeddingV2Enabled: false),
+      Pub: () => const Pub(),
+    });
+
+    testUsingContext('indicate that Android project reports v2 in usage value', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub']);
+      removeGeneratedFiles(projectPath);
+
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesAndroidEmbeddingVersion, 'v2'));
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isAndroidEmbeddingV2Enabled: true),
+      Pub: () => const Pub(),
+    });
 
     testUsingContext('upgrade fetches packages', () async {
       final String projectPath = await createProject(tempDir,
@@ -264,7 +307,9 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForRemotePubInvocation);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
 
     testUsingContext('get fetches packages and injects plugin', () async {
       final String projectPath = await createProjectWithPlugin('path_provider',
@@ -275,7 +320,9 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectModulePluginInjected(projectPath);
-    }, timeout: allowForRemotePubInvocation);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
 
     testUsingContext('get fetches packages and injects plugin in plugin project', () async {
       final String projectPath = await createProject(
@@ -294,7 +341,9 @@ void main() {
 
       expectDependenciesResolved(exampleProjectPath);
       expectPluginInjected(exampleProjectPath);
-    }, timeout: allowForRemotePubInvocation);
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
   });
 
   group('packages test/pub', () {
@@ -317,6 +366,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
       BotDetector: () => const AlwaysFalseBotDetector(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('test with bot', () async {
@@ -331,6 +381,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
       BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('run', () async {
@@ -344,6 +395,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
+      Pub: () => const Pub(),
     });
 
     testUsingContext('pub publish', () async {
@@ -368,6 +420,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
+      Pub: () => const Pub(),
     });
 
     testUsingContext('publish', () async {
@@ -380,6 +433,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
       BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('packages publish', () async {
@@ -392,6 +446,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
       BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('deps', () async {
@@ -404,6 +459,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
       BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('cache', () async {
@@ -416,6 +472,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
       BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('version', () async {
@@ -428,6 +485,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
       BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('uploader', () async {
@@ -440,6 +498,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
       BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('global', () async {
@@ -453,6 +512,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
       BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
     });
   });
 }

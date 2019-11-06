@@ -503,10 +503,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_cursor_test.cupertino.0.png',
-        version: 3,
-      ),
+      matchesGoldenFile('text_field_cursor_test.cupertino.0.png'),
     );
   });
 
@@ -536,10 +533,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_cursor_test.cupertino.1.png',
-        version: 3,
-      ),
+      matchesGoldenFile('text_field_cursor_test.cupertino.1.png'),
     );
   });
 
@@ -2755,7 +2749,7 @@ void main() {
         tester.renderObject<RenderEditable>(
           find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
         ).text.style.color,
-        CupertinoColors.white,
+        isSameColorAs(CupertinoColors.white),
       );
     },
   );
@@ -2905,7 +2899,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(renderEditable.cursorColor, CupertinoColors.activeOrange.darkColor);
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue.darkColor);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -3042,10 +3036,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_test.disabled.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_field_test.disabled.png'),
     );
   });
 
@@ -3869,5 +3860,91 @@ void main() {
         expect(find.text('Paste'), findsOneWidget);
       },
     );
+  });
+  testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
+    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller2 = TextEditingController();
+    final TextEditingController controller3 = TextEditingController();
+    final TextEditingController controller4 = TextEditingController();
+    final TextEditingController controller5 = TextEditingController();
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'Field 1');
+    final FocusNode focusNode2 = FocusNode(debugLabel: 'Field 2');
+    final FocusNode focusNode3 = FocusNode(debugLabel: 'Field 3');
+    final FocusNode focusNode4 = FocusNode(debugLabel: 'Field 4');
+    final FocusNode focusNode5 = FocusNode(debugLabel: 'Field 5');
+
+    // Lay out text fields in a "+" formation, and focus the center one.
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                width: 100.0,
+                child: CupertinoTextField(
+                  controller: controller1,
+                  focusNode: focusNode1,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    width: 100.0,
+                    child: CupertinoTextField(
+                      controller: controller2,
+                      focusNode: focusNode2,
+                    ),
+                  ),
+                  Container(
+                    width: 100.0,
+                    child: CupertinoTextField(
+                      controller: controller3,
+                      focusNode: focusNode3,
+                    ),
+                  ),
+                  Container(
+                    width: 100.0,
+                    child: CupertinoTextField(
+                      controller: controller4,
+                      focusNode: focusNode4,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                width: 100.0,
+                child: CupertinoTextField(
+                  controller: controller5,
+                  focusNode: focusNode5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    focusNode3.requestFocus();
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
   });
 }

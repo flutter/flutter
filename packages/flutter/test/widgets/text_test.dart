@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -59,7 +61,7 @@ void main() {
     final Size largeSize = tester.getSize(find.byType(RichText));
     expect(largeSize.width, 105.0);
     expect(largeSize.height, equals(21.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
@@ -87,7 +89,7 @@ void main() {
     final Size largeSize = tester.getSize(find.byType(RichText));
     expect(largeSize.width, anyOf(131.0, 130.0));
     expect(largeSize.height, equals(26.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Text throws a nice error message if there\'s no Directionality', (WidgetTester tester) async {
     await tester.pumpWidget(const Text('Hello'));
@@ -157,7 +159,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), null);
-  });
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -232,6 +234,7 @@ void main() {
             TestSemantics(
               label: 'Clickable',
               actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -281,9 +284,8 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               label: ' this is a cat-astrophe',
@@ -338,6 +340,7 @@ void main() {
               label: 'world',
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
           ],
         ),
@@ -389,9 +392,8 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               label: ' this is a regrettable event',
@@ -411,7 +413,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
@@ -454,9 +456,8 @@ void main() {
               rect: const Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
               label: 'RIS',
               textDirection: TextDirection.rtl,  // in the last string we switched to RTL using RLE.
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               rect: const Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
@@ -490,6 +491,46 @@ void main() {
     );
     semantics.dispose();
   }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
+
+  testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <TextSpan>[
+            TextSpan(
+              text: 'click me',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'click me',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink]
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(
+      expectedSemantics,
+      ignoreTransform: true,
+      ignoreId: true,
+      ignoreRect: true,
+    ));
+    semantics.dispose();
+  });
 
   testWidgets('inline widgets generate semantic nodes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -534,9 +575,8 @@ void main() {
             TestSemantics(
               label: 'pebble',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               label: ' in the ',
@@ -564,7 +604,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser);
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -612,9 +652,8 @@ void main() {
             TestSemantics(
               label: 'pebble',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
               rect: const Rect.fromLTRB(52.0, 48.0, 228.0, 84.0),
             ),
             TestSemantics(
@@ -645,7 +684,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser);
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
 
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -760,7 +799,15 @@ void main() {
     final Size textSizeLongestLine = tester.getSize(find.byType(Text));
     expect(textSizeLongestLine.width, equals(630.0));
     expect(textSizeLongestLine.height, equals(fontHeight * 2));
-  }, skip: isBrowser);
+  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+
+  testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
+    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+    builder.addText('hello');
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+    expect(paragraph.getBoxesForRange(2, 2), isEmpty);
+  });
 }
 
 Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {

@@ -13,6 +13,7 @@ import '../runner/flutter_command.dart';
 /// The directory in the Flutter cache for each platform's artifacts.
 const Map<TargetPlatform, String> flutterArtifactPlatformDirectory = <TargetPlatform, String>{
   TargetPlatform.windows_x64: 'windows-x64',
+  TargetPlatform.linux_x64: 'linux-x64',
 };
 
 // TODO(jonahwilliams): this should come from a configuration in each build
@@ -37,14 +38,14 @@ class UnpackCommand extends FlutterCommand {
   UnpackCommand() {
     argParser.addOption(
       'target-platform',
-      allowed: <String>['windows-x64'],
+      allowed: <String>['windows-x64', 'linux-x64'],
     );
     argParser.addOption('cache-dir',
         help: 'Location to output platform specific artifacts.');
   }
 
   @override
-  String get description => 'unpack desktop artifacts';
+  String get description => '(DEPRECATED) unpack desktop artifacts';
 
   @override
   String get name => 'unpack';
@@ -61,6 +62,9 @@ class UnpackCommand extends FlutterCommand {
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
         result.add(DevelopmentArtifact.windows);
+        break;
+      case TargetPlatform.linux_x64:
+        result.add(DevelopmentArtifact.linux);
         break;
       default:
     }
@@ -116,6 +120,8 @@ class ArtifactUnpacker {
       case TargetPlatform.windows_x64:
         cacheStamp = 'windows-sdk';
         break;
+      case TargetPlatform.linux_x64:
+        return true;
       default:
         throwToolExit('Unsupported target platform: $platform');
     }

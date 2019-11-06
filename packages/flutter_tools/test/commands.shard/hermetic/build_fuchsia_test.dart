@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,28 +24,21 @@ import '../../src/mocks.dart';
 void main() {
   Cache.disableLocking();
 
-  MemoryFileSystem memoryFileSystem;
   MockPlatform linuxPlatform;
   MockPlatform windowsPlatform;
   MockFuchsiaSdk fuchsiaSdk;
-  MockFuchsiaArtifacts fuchsiaArtifacts;
-  MockFuchsiaArtifacts fuchsiaArtifactsNoCompiler;
 
   setUp(() {
-    memoryFileSystem = MemoryFileSystem();
     linuxPlatform = MockPlatform();
     windowsPlatform = MockPlatform();
     fuchsiaSdk = MockFuchsiaSdk();
-    fuchsiaArtifacts = MockFuchsiaArtifacts();
-    fuchsiaArtifactsNoCompiler = MockFuchsiaArtifacts();
 
     when(linuxPlatform.isLinux).thenReturn(true);
     when(linuxPlatform.isWindows).thenReturn(false);
+    when(linuxPlatform.isMacOS).thenReturn(false);
     when(windowsPlatform.isWindows).thenReturn(true);
     when(windowsPlatform.isLinux).thenReturn(false);
     when(windowsPlatform.isMacOS).thenReturn(false);
-    when(fuchsiaArtifacts.kernelCompiler).thenReturn(MockFile());
-    when(fuchsiaArtifactsNoCompiler.kernelCompiler).thenReturn(null);
   });
 
   group('Fuchsia build fails gracefully when', () {
@@ -57,8 +51,8 @@ void main() {
           throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
-      FileSystem: () => memoryFileSystem,
-      FuchsiaArtifacts: () => fuchsiaArtifacts,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('there is no cmx file', () async {
@@ -74,8 +68,8 @@ void main() {
           throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
-      FileSystem: () => memoryFileSystem,
-      FuchsiaArtifacts: () => fuchsiaArtifacts,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('on Windows platform', () async {
@@ -96,8 +90,8 @@ void main() {
           throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
-      FileSystem: () => memoryFileSystem,
-      FuchsiaArtifacts: () => fuchsiaArtifacts,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('there is no Fuchsia kernel compiler', () async {
@@ -118,8 +112,8 @@ void main() {
           throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
-      FileSystem: () => memoryFileSystem,
-      FuchsiaArtifacts: () => fuchsiaArtifactsNoCompiler,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -143,7 +137,8 @@ void main() {
     expect(fs.file(farPath).existsSync(), isTrue);
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
-    FileSystem: () => memoryFileSystem,
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FuchsiaSdk: () => fuchsiaSdk,
   });
 }
@@ -229,7 +224,3 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
   final FuchsiaKernelCompiler fuchsiaKernelCompiler =
       MockFuchsiaKernelCompiler();
 }
-
-class MockFile extends Mock implements File {}
-
-class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}

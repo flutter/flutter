@@ -18,11 +18,15 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:process/process.dart';
 
 import 'context.dart';
+import 'fake_process_manager.dart';
+import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
@@ -31,12 +35,14 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
   FileSystem: () => MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
+  ProcessManager: () => FakeProcessManager.any(),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
   Signals: () => FakeSignals(),  // prevent registering actual signal handlers.
+  Pub: () => ThrowingPub(), // prevent accidental invocations of pub.
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -58,7 +64,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///           });
 ///         })
 ///
-///         test('Can delete a file', () => testBed.run(() {
+///         test('Can delete a file', () => testbed.run(() {
 ///           expect(fs.file('foo').existsSync(), true);
 ///           fs.file('foo').deleteSync();
 ///           expect(fs.file('foo').existsSync(), false);
@@ -84,7 +90,7 @@ class Testbed {
   ///
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
-  FutureOr<T> run<T>(FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
+  Future<T> run<T>(FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
     final Map<Type, Generator> testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
@@ -693,7 +699,8 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isNewAndroidEmbeddingEnabled = false,
+    this.isAndroidEmbeddingV2Enabled = false,
+    this.isWebIncrementalCompilerEnabled = false,
 });
 
   @override
@@ -709,5 +716,88 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowsEnabled;
 
   @override
-  final bool isNewAndroidEmbeddingEnabled;
+  final bool isAndroidEmbeddingV2Enabled;
+
+  @override
+  final bool isWebIncrementalCompilerEnabled;
+
+  @override
+  bool isEnabled(Feature feature) {
+    switch (feature) {
+      case flutterWebFeature:
+        return isWebEnabled;
+      case flutterLinuxDesktopFeature:
+        return isLinuxEnabled;
+      case flutterMacOSDesktopFeature:
+        return isMacOSEnabled;
+      case flutterWindowsDesktopFeature:
+        return isWindowsEnabled;
+      case flutterAndroidEmbeddingV2Feature:
+        return isAndroidEmbeddingV2Enabled;
+      case flutterWebIncrementalCompiler:
+        return isWebIncrementalCompilerEnabled;
+    }
+    return false;
+  }
+}
+
+class DelegateLogger implements Logger {
+  DelegateLogger(this.delegate);
+
+  final Logger delegate;
+  Status status;
+
+  @override
+  bool get quiet => delegate.quiet;
+
+  @override
+  set quiet(bool value) => delegate.quiet;
+
+  @override
+  bool get hasTerminal => delegate.hasTerminal;
+
+  @override
+  bool get isVerbose => delegate.isVerbose;
+
+  @override
+  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
+    delegate.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
+    delegate.printStatus(message,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printTrace(String message) {
+    delegate.printTrace(message);
+  }
+
+  @override
+  void sendNotification(String message, {String progressId}) {
+    delegate.sendNotification(message, progressId: progressId);
+  }
+
+  @override
+  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
+    return status;
+  }
+
+  @override
+  bool get supportsColor => delegate.supportsColor;
 }

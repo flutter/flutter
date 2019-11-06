@@ -129,6 +129,8 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.actions = const <Widget>[],
     this.scrollController,
     this.actionScrollController,
+    this.insetAnimationDuration = const Duration(milliseconds: 100),
+    this.insetAnimationCurve = Curves.decelerate,
   }) : assert(actions != null),
        super(key: key);
 
@@ -172,6 +174,12 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///  * [scrollController], which can be used for controlling the [content]
   ///    section when it is long.
   final ScrollController actionScrollController;
+
+  /// {@macro flutter.material.dialog.insetAnimationDuration}
+  final Duration insetAnimationDuration;
+
+  /// {@macro flutter.material.dialog.insetAnimationCurve}
+  final Curve insetAnimationCurve;
 
   Widget _buildContent(BuildContext context) {
     final List<Widget> children = <Widget>[
@@ -224,22 +232,35 @@ class CupertinoAlertDialog extends StatelessWidget {
         ),
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            return Center(
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
-                width: isInAccessibilityMode
-                  ? _kAccessibilityCupertinoDialogWidth
-                  : _kCupertinoDialogWidth,
-                child: CupertinoPopupSurface(
-                  isSurfacePainted: false,
-                  child: Semantics(
-                    namesRoute: true,
-                    scopesRoute: true,
-                    explicitChildNodes: true,
-                    label: localizations.alertDialogLabel,
-                    child: _CupertinoDialogRenderWidget(
-                      contentSection: _buildContent(context),
-                      actionsSection: _buildActions(),
+            return AnimatedPadding(
+              padding: MediaQuery.of(context).viewInsets +
+                  const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+              duration: insetAnimationDuration,
+              curve: insetAnimationCurve,
+              child: MediaQuery.removeViewInsets(
+                removeLeft: true,
+                removeTop: true,
+                removeRight: true,
+                removeBottom: true,
+                context: context,
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
+                    width: isInAccessibilityMode
+                      ? _kAccessibilityCupertinoDialogWidth
+                      : _kCupertinoDialogWidth,
+                    child: CupertinoPopupSurface(
+                      isSurfacePainted: false,
+                      child: Semantics(
+                        namesRoute: true,
+                        scopesRoute: true,
+                        explicitChildNodes: true,
+                        label: localizations.alertDialogLabel,
+                        child: _CupertinoDialogRenderWidget(
+                          contentSection: _buildContent(context),
+                          actionsSection: _buildActions(),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -1039,6 +1060,7 @@ class _ActionButtonParentData extends MultiChildLayoutParentData {
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
+    Key key,
     this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
@@ -1046,7 +1068,8 @@ class CupertinoDialogAction extends StatelessWidget {
     @required this.child,
   }) : assert(child != null),
        assert(isDefaultAction != null),
-       assert(isDestructiveAction != null);
+       assert(isDestructiveAction != null),
+       super(key: key);
 
   /// The callback that is called when the button is tapped or otherwise
   /// activated.

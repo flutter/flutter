@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 class MockOnPressedFunction implements Function {
   int called = 0;
@@ -294,8 +295,9 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isButton,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
           ],
           label: 'link',
         ),
@@ -396,6 +398,74 @@ void main() {
 
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
+
+  group('feedback', () {
+    FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback?.dispose();
+    });
+
+    testWidgets('IconButton with disabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              enableFeedback: false,
+              icon: const Icon(Icons.link),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(IconButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('IconButton with enabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              enableFeedback: true,
+              icon: const Icon(Icons.link),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(IconButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('IconButton with enabled feedback by default', (WidgetTester tester) async {
+      await tester.pumpWidget(Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.link),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(IconButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }
 

@@ -26,7 +26,27 @@ enum HandlePositionInViewport {
   leftEdge, rightEdge, within,
 }
 
+class MockClipboard {
+  Object _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
+        break;
+    }
+  }
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final MockClipboard mockClipboard = MockClipboard();
+  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+
   setUp(() {
     debugResetSemanticsIdCounter();
     controller = TextEditingController();
@@ -99,6 +119,7 @@ void main() {
     expect(editableText.maxLines, equals(1));
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
+    expect(editableText.enableSuggestions, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
   });
@@ -305,6 +326,36 @@ void main() {
         equals('TextInputType.visiblePassword'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
+  });
+
+  testWidgets('enableSuggestions flag is sent to the engine properly', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    const bool enableSuggestions = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              enableSuggestions: enableSuggestions,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+    expect(tester.testTextInput.setClientArgs['enableSuggestions'], enableSuggestions);
   });
 
   testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
@@ -532,6 +583,175 @@ void main() {
         equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
+  });
+
+  testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(state.wantKeepAlive, true);
+
+    tester.testTextInput.log.clear();
+    tester.testTextInput.closeConnection();
+    await tester.idle();
+
+    // Widget does not have focus anymore.
+    expect(state.wantKeepAlive, false);
+    // No method calls are sent from the framework.
+    // This makes sure hide/clearClient methods are not called after connection
+    // closed.
+    expect(tester.testTextInput.log, isEmpty);
+  });
+
+  testWidgets('closed connection reopened when user focused', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test3';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals('test3'));
+    expect(state.wantKeepAlive, true);
+
+    tester.testTextInput.log.clear();
+    tester.testTextInput.closeConnection();
+    await tester.pumpAndSettle();
+
+    // Widget does not have focus anymore.
+    expect(state.wantKeepAlive, false);
+    // No method calls are sent from the framework.
+    // This makes sure hide/clearClient methods are not called after connection
+    // closed.
+    expect(tester.testTextInput.log, isEmpty);
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
+    controller.text = 'test2';
+    expect(tester.testTextInput.editingState['text'], equals('test2'));
+    // Widget regained the focus.
+    expect(state.wantKeepAlive, true);
+  });
+
+  testWidgets('closed connection reopened when user focused on another field', (WidgetTester tester) async {
+    final EditableText testNameField =
+      EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        maxLines: null,
+        keyboardType: TextInputType.text,
+        style: textStyle,
+        cursorColor: cursorColor,
+      );
+
+    final EditableText testPhoneField =
+      EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: TextInputType.phone,
+        maxLines: 3,
+        style: textStyle,
+        cursorColor: cursorColor,
+      );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: ListView(
+              children: <Widget>[
+                testNameField,
+                testPhoneField,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap, enter text.
+    await tester.tap(find.byWidget(testNameField));
+    await tester.showKeyboard(find.byWidget(testNameField));
+    controller.text = 'test';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byWidget(testNameField));
+    expect(state.wantKeepAlive, true);
+
+    tester.testTextInput.log.clear();
+    tester.testTextInput.closeConnection();
+
+    // Widget does not have focus anymore.
+    expect(state.wantKeepAlive, false);
+    // No method calls are sent from the framework.
+    // This makes sure hide/clearClient methods are not called after connection
+    // closed.
+    expect(tester.testTextInput.log, isEmpty);
+
+    // For the next fields, tap, enter text.
+    await tester.tap(find.byWidget(testPhoneField));
+    await tester.showKeyboard(find.byWidget(testPhoneField));
+    controller.text = '650123123';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('650123123'));
+    // Widget regained the focus.
+    expect(state.wantKeepAlive, true);
   });
 
   /// Toolbar is not used in Flutter Web. Skip this check.
@@ -785,12 +1005,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Dobunezumi mitai ni utsukushiku naritai';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.getData')
-          return const <String, dynamic>{'text': clipboardContent};
-        return null;
-      });
+    Clipboard.setData(const ClipboardData(text: clipboardContent));
 
     // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byType(EditableText);
@@ -2760,6 +2975,360 @@ void main() {
     expect(controller.selection.extent.offset, 5);
   }, skip: isBrowser);
 
+  testWidgets('keyboard text selection works as expected', (WidgetTester tester) async {
+    // Text with two separate words to select.
+    const String testText = 'Now is the time for\n'
+        'all good people\n'
+        'to come to the aid\n'
+        'of their country.';
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    TextSelection selection;
+    SelectionChangedCause cause;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography(platform: TargetPlatform.android).black.subhead,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause newCause) {
+              selection = newSelection;
+              cause = newCause;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    Future<void> sendKeys(List<LogicalKeyboardKey> keys, {bool shift = false, bool control = false}) async {
+      if (shift) {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      }
+      if (control) {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      }
+      for (LogicalKeyboardKey key in keys) {
+        await tester.sendKeyEvent(key);
+        await tester.pump();
+      }
+      if (control) {
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      }
+      if (shift) {
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      }
+      if (shift || control) {
+        await tester.pump();
+      }
+    }
+
+    // Select a few characters using shift right arrow
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+    );
+
+    expect(cause, equals(SelectionChangedCause.keyboard));
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: 3,
+      affinity: TextAffinity.upstream,
+    )));
+
+    // Select fewer characters using shift left arrow
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    )));
+
+    // Try to select before the first character, nothing should change.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    )));
+
+    // Select the first two words.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+      control: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: 6,
+      affinity: TextAffinity.upstream,
+    )));
+
+    // Unselect the second word.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      control: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: 4,
+      affinity: TextAffinity.upstream,
+    )));
+
+    // Select the next line.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: 20,
+      affinity: TextAffinity.upstream,
+    )));
+
+    // Move forward one character to reset the selection.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 21,
+      extentOffset: 21,
+      affinity: TextAffinity.downstream,
+    )));
+
+    // Select the next line.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 21,
+      extentOffset: 40,
+      affinity: TextAffinity.downstream,
+    )));
+
+    // Select to the end of the string by going down.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 21,
+      extentOffset: testText.length,
+      affinity: TextAffinity.downstream,
+    )));
+
+    // Go back up one line to set selection up to part of the last line.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 21,
+      extentOffset: 58,
+      affinity: TextAffinity.downstream,
+    )));
+
+    // Select All
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyA,
+      ],
+      control: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: testText.length,
+      affinity: TextAffinity.downstream,
+    )));
+
+    // Jump to beginning of selection.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.downstream,
+    )));
+
+    // Jump forward three words.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      control: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 10,
+      extentOffset: 10,
+      affinity: TextAffinity.downstream,
+    )));
+
+    // Select some characters backward.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 10,
+      extentOffset: 7,
+      affinity: TextAffinity.downstream,
+    )));
+
+    // Select a word backward.
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      control: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 10,
+      extentOffset: 4,
+      affinity: TextAffinity.downstream,
+    )));
+    expect(controller.text, equals(testText));
+
+    // Cut
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyX,
+      ],
+      control: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 10,
+      extentOffset: 4,
+      affinity: TextAffinity.downstream,
+    )));
+    expect(controller.text, equals('Now  time for\n'
+        'all good people\n'
+        'to come to the aid\n'
+        'of their country.'));
+    expect((await Clipboard.getData(Clipboard.kTextPlain)).text, equals('is the'));
+
+    // Paste
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyV,
+      ],
+      control: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 10,
+      extentOffset: 4,
+      affinity: TextAffinity.downstream,
+    )));
+    expect(controller.text, equals(testText));
+
+    // Copy All
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyA,
+        LogicalKeyboardKey.keyC,
+      ],
+      control: true,
+    );
+
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: testText.length,
+      affinity: TextAffinity.downstream,
+    )));
+    expect(controller.text, equals(testText));
+    expect((await Clipboard.getData(Clipboard.kTextPlain)).text, equals(testText));
+
+    // Delete
+    await sendKeys(
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.delete,
+      ],
+    );
+    expect(selection, equals(const TextSelection(
+      baseOffset: 0,
+      extentOffset: 72,
+      affinity: TextAffinity.downstream,
+    )));
+    expect(controller.text, isEmpty);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -2981,6 +3550,77 @@ void main() {
     expect(scrollable.controller.position.pixels, equals(14));
     expect(scrollable.controller.position.pixels, equals(renderEditable.maxScrollExtent));
   }, skip: isBrowser);
+
+  testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    expect(
+      () {
+        EditableText(
+          backgroundCursorColor: cursorColor,
+          controller: controller,
+          cursorColor: cursorColor,
+          focusNode: focusNode,
+          maxLines: 1,
+          obscureText: true,
+          style: textStyle,
+        );
+      },
+      returnsNormally,
+    );
+    expect(
+      () {
+        EditableText(
+          backgroundCursorColor: cursorColor,
+          controller: controller,
+          cursorColor: cursorColor,
+          focusNode: focusNode,
+          maxLines: 2,
+          obscureText: true,
+          style: textStyle,
+        );
+      },
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    const String testText = 'flutter is the best!';
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText et = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: et,
+        ),
+      ),
+    ));
+
+    await tester.showKeyboard(find.byType(EditableText));
+    expect(log.length, 7);
+    // TextInput.show should be before TextInput.setEditingState
+    final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
+    int index = 0;
+    for (MethodCall m in log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
+  });
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {

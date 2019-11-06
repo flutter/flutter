@@ -305,6 +305,150 @@ void main() {
     tileRect = tester.getRect(find.byType(AboutListTile));
     expect(tileRect.height, 48.0);
   });
+
+  testWidgets('showLicensePage uses nested navigator by default', (WidgetTester tester) async {
+    final LicensePageObserver rootObserver = LicensePageObserver();
+    final LicensePageObserver nestedObserver = LicensePageObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      initialRoute: '/',
+      onGenerateRoute: (_) {
+        return PageRouteBuilder<dynamic>(
+          pageBuilder: (_, __, ___) => Navigator(
+            observers: <NavigatorObserver>[nestedObserver],
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<dynamic>(
+                pageBuilder: (BuildContext context, _, __) {
+                  return RaisedButton(
+                    onPressed: () {
+                      showLicensePage(
+                        context: context,
+                        applicationName: 'A',
+                      );
+                    },
+                    child: const Text('Show License Page'),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.licensePageCount, 0);
+    expect(nestedObserver.licensePageCount, 1);
+  });
+
+  testWidgets('showLicensePage uses root navigator if useRootNavigator is true', (WidgetTester tester) async {
+    final LicensePageObserver rootObserver = LicensePageObserver();
+    final LicensePageObserver nestedObserver = LicensePageObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      initialRoute: '/',
+      onGenerateRoute: (_) {
+        return PageRouteBuilder<dynamic>(
+          pageBuilder: (_, __, ___) => Navigator(
+            observers: <NavigatorObserver>[nestedObserver],
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<dynamic>(
+                pageBuilder: (BuildContext context, _, __) {
+                  return RaisedButton(
+                    onPressed: () {
+                      showLicensePage(
+                        context: context,
+                        useRootNavigator: true,
+                        applicationName: 'A',
+                      );
+                    },
+                    child: const Text('Show License Page'),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.licensePageCount, 1);
+    expect(nestedObserver.licensePageCount, 0);
+  });
+
+  testWidgets('showAboutDialog uses root navigator by default', (WidgetTester tester) async {
+    final AboutDialogObserver rootObserver = AboutDialogObserver();
+    final AboutDialogObserver nestedObserver = AboutDialogObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showAboutDialog(
+                    context: context,
+                    applicationName: 'A',
+                  );
+                },
+                child: const Text('Show About Dialog'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.dialogCount, 1);
+    expect(nestedObserver.dialogCount, 0);
+  });
+
+  testWidgets('showAboutDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+    final AboutDialogObserver rootObserver = AboutDialogObserver();
+    final AboutDialogObserver nestedObserver = AboutDialogObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showAboutDialog(
+                    context: context,
+                    useRootNavigator: false,
+                    applicationName: 'A',
+                  );
+                },
+                child: const Text('Show About Dialog'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.dialogCount, 0);
+    expect(nestedObserver.dialogCount, 1);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {
@@ -320,5 +464,29 @@ class FakeLicenseEntry extends LicenseEntry {
   Iterable<LicenseParagraph> get paragraphs {
     _paragraphsCalled = true;
     return <LicenseParagraph>[];
+  }
+}
+
+class LicensePageObserver extends NavigatorObserver {
+  int licensePageCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route is MaterialPageRoute<dynamic>) {
+      licensePageCount++;
+    }
+    super.didPush(route, previousRoute);
+  }
+}
+
+class AboutDialogObserver extends NavigatorObserver {
+  int dialogCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      dialogCount++;
+    }
+    super.didPush(route, previousRoute);
   }
 }
