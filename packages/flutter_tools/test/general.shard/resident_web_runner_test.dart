@@ -67,11 +67,12 @@ void main() {
     when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
     testbed = Testbed(
       setup: () {
-        residentWebRunner = ResidentWebRunner(
+        residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
           mockFlutterDevice,
           flutterProject: FlutterProject.current(),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           ipv6: true,
+          stayResident: true,
         );
       },
       overrides: <Type, Generator>{
@@ -126,11 +127,12 @@ void main() {
 
   test('runner with web server device does not support debugging', () => testbed.run(() {
     when(mockFlutterDevice.device).thenReturn(WebServerDevice());
-    final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
+    final ResidentRunner profileResidentWebRunner =  residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
+      stayResident: true,
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -142,11 +144,12 @@ void main() {
 
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
      when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
-    final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
+    final ResidentRunner profileResidentWebRunner =  residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
+      stayResident: true,
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -195,7 +198,7 @@ void main() {
 
   test('Can successfully run and disconnect with --no-resident', () => testbed.run(() async {
     _setupMocks();
-    residentWebRunner = ResidentWebRunner(
+    residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -231,11 +234,12 @@ void main() {
   }));
 
   test('Does not run main with --start-paused', () => testbed.run(() async {
-    residentWebRunner = ResidentWebRunner(
+    residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
+      stayResident: true,
     );
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();

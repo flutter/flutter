@@ -35,11 +35,12 @@ void main() {
     when(mockFlutterDevice.device).thenReturn(mockWebDevice);
     testbed = Testbed(
       setup: () {
-        residentWebRunner = ResidentWebRunner(
+        residentWebRunner =  residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
           mockFlutterDevice,
           flutterProject: FlutterProject.current(),
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           ipv6: true,
+          stayResident: true,
         );
       },
       overrides: <Type, Generator>{
