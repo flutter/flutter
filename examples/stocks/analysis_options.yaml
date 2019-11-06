@@ -1,5 +1,0 @@
-include: package:pedantic/analysis_options.yaml
-
-analyzer:
-  exclude:
-    - lib/i18n/messages_*.dart
