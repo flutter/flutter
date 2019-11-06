@@ -243,7 +243,7 @@ class Actions extends InheritedWidget {
   /// The `context` argument must not be null.
   static ActionDispatcher of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final InheritedElement inheritedElement = context.ancestorInheritedElementForWidgetOfExactType(Actions);
+    final InheritedElement inheritedElement = context.ancestorInheritedElementForWidgetOfExactType<Actions>();
     final Actions inherited = context.inheritFromElement(inheritedElement);
     assert(() {
       if (nullOk) {

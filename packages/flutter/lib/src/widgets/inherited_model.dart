@@ -120,7 +120,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   // The [result] will be a list of all of context's type T ancestors concluding
   // with the one that supports the specified model [aspect].
   static void _findModels<T extends InheritedModel<Object>>(BuildContext context, Object aspect, List<InheritedElement> results) {
-    final InheritedElement model = context.ancestorInheritedElementForWidgetOfExactType(T);
+    final InheritedElement model = context.ancestorInheritedElementForWidgetOfExactType<T>();
     if (model == null)
       return;
 

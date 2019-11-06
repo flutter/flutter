@@ -1961,7 +1961,7 @@ abstract class BuildContext {
   /// widget this context depends on.
   T inheritFromWidgetOfExactType<T extends InheritedWidget>({ Object aspect });
 
-  /// Obtains the element corresponding to the nearest widget of the given type,
+  /// Obtains the element corresponding to the nearest widget of the given type [T],
   /// which must be the type of a concrete [InheritedWidget] subclass.
   ///
   /// Calling this method is O(1) with a small constant factor.
@@ -1975,7 +1975,7 @@ abstract class BuildContext {
   /// [inheritFromWidgetOfExactType] in [State.didChangeDependencies]. It is
   /// safe to use this method from [State.deactivate], which is called whenever
   /// the widget is removed from the tree.
-  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
+  InheritedElement ancestorInheritedElementForWidgetOfExactType<T extends InheritedWidget>();
 
   /// Returns the nearest ancestor widget of the given type, which must be the
   /// type of a concrete [Widget] subclass.
@@ -3448,9 +3448,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
+  InheritedElement ancestorInheritedElementForWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
+    final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[T];
     return ancestor;
   }
 

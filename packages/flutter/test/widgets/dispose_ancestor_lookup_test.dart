@@ -46,7 +46,7 @@ void main() {
     await tester.pumpWidget(
       TestWidget((BuildContext context) {
         disposeCalled = true;
-        context.ancestorInheritedElementForWidgetOfExactType(Container);
+        context.ancestorInheritedElementForWidgetOfExactType<InheritedWidget>();
       }),
     );
     await tester.pumpWidget(Container());
