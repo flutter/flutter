@@ -159,7 +159,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// If no ancestor of type T exists, null is returned.
   static T inheritFrom<T extends InheritedModel<Object>>(BuildContext context, { Object aspect }) {
     if (aspect == null)
-      return context.inheritFromWidgetOfExactType(T);
+      return context.inheritFromWidgetOfExactType<T>();
 
     // Create a dependency on all of the type T ancestor models up until
     // a model is found for which isSupportedAspect(aspect) is true.

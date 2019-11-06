@@ -85,7 +85,7 @@ class ChipTheme extends InheritedTheme {
   ///  * [ChipThemeData], which describes the actual configuration of a chip
   ///    theme.
   static ChipThemeData of(BuildContext context) {
-    final ChipTheme inheritedTheme = context.inheritFromWidgetOfExactType(ChipTheme);
+    final ChipTheme inheritedTheme = context.inheritFromWidgetOfExactType<ChipTheme>();
     return inheritedTheme?.data ?? Theme.of(context).chipTheme;
   }
 

@@ -538,7 +538,7 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// some [DraggableScrollableSheet] is listening for updates, `false`
   /// otherwise.
   static bool reset(BuildContext context) {
-    final _InheritedResetNotifier notifier = context.inheritFromWidgetOfExactType(_InheritedResetNotifier);
+    final _InheritedResetNotifier notifier = context.inheritFromWidgetOfExactType<_InheritedResetNotifier>();
     if (notifier == null) {
       return false;
     }
@@ -590,7 +590,7 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   ///
   /// Returns true if the notifier requested a reset, false otherwise.
   static bool shouldReset(BuildContext context) {
-    final InheritedWidget widget = context.inheritFromWidgetOfExactType(_InheritedResetNotifier);
+    final InheritedWidget widget = context.inheritFromWidgetOfExactType<_InheritedResetNotifier>();
     if (widget == null) {
       return false;
     }

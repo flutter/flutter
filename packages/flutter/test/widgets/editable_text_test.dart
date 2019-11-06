@@ -1589,7 +1589,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     final int semanticsId = render.debugSemantics.id;
 
@@ -1682,7 +1682,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     final int semanticsId = render.debugSemantics.id;
 
@@ -1784,7 +1784,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     final int semanticsId = render.debugSemantics.id;
 
@@ -1885,7 +1885,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     final int semanticsId = render.debugSemantics.id;
 
@@ -2311,7 +2311,7 @@ void main() {
     ));
 
     // Simulate selection change via tap to show handles.
-    final RenderEditable render = tester.allRenderObjects
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
         .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
     expect(render.text.style.fontStyle, FontStyle.italic);
   });
@@ -2798,8 +2798,8 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-      final List<Widget> transitions =
-        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final List<FadeTransition> transitions =
+        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
       // On Android, an empty app contains a single FadeTransition. The following
       // two are the left and right text selection handles, respectively.
       final FadeTransition left = transitions[1];
@@ -3383,8 +3383,8 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-      final List<Widget> transitions =
-        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final List<FadeTransition> transitions =
+        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
 

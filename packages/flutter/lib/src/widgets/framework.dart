@@ -1920,7 +1920,7 @@ abstract class BuildContext {
   /// be called apply to this method as well.
   InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
 
-  /// Obtains the nearest widget of the given type, which must be the type of a
+  /// Obtains the nearest widget of the given type [T], which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
   /// that widget such that when that widget changes (or a new widget of that
   /// type is introduced, or the widget goes away), this build context is
@@ -1955,11 +1955,11 @@ abstract class BuildContext {
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
   ///
-  /// The [aspect] parameter is only used when [targetType] is an
+  /// The [aspect] parameter is only used when [T] is an
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
+  T inheritFromWidgetOfExactType<T extends InheritedWidget>({ Object aspect });
 
   /// Obtains the element corresponding to the nearest widget of the given type,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -3436,9 +3436,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect }) {
+  T inheritFromWidgetOfExactType<T extends InheritedWidget>({ Object aspect }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
+    final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[T];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
       return inheritFromElement(ancestor, aspect: aspect);

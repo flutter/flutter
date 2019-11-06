@@ -272,7 +272,7 @@ class Shortcuts extends StatefulWidget {
   /// The [context] argument must not be null.
   static ShortcutManager of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final _ShortcutsMarker inherited = context.inheritFromWidgetOfExactType(_ShortcutsMarker);
+    final _ShortcutsMarker inherited = context.inheritFromWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
       if (nullOk) {
         return true;

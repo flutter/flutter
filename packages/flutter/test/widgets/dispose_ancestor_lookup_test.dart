@@ -33,7 +33,7 @@ void main() {
     await tester.pumpWidget(
       TestWidget((BuildContext context) {
         disposeCalled = true;
-        context.inheritFromWidgetOfExactType(Container);
+        context.inheritFromWidgetOfExactType<InheritedWidget>();
       }),
     );
     await tester.pumpWidget(Container());
