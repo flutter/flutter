@@ -423,8 +423,7 @@ void main() {
     expect(controller.offset, 800.0);
   });
 
-  group('SliverOpacity - ', ()
-  {
+  group('SliverOpacity - ', () {
     Widget _boilerPlate(Widget sliver) {
       return Localizations(
         locale: const Locale('en', 'us'),
@@ -446,8 +445,8 @@ void main() {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       // Opacity 1.0: Semantics and painting
-      await tester.pumpWidget(
-        _boilerPlate(const SliverOpacity(
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
           sliver: SliverToBoxAdapter(
             child: Text(
               'a',
@@ -456,17 +455,14 @@ void main() {
           ),
           opacity: 1.0,
         ),
-        ));
+      ));
 
-      expect(semantics.nodesWith(
-        label: 'a',
-      ), hasLength(1));
-
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
       expect(find.byType(SliverOpacity), paints..paragraph());
 
       // Opacity 0.0: Nothing
-      await tester.pumpWidget(
-        _boilerPlate(const SliverOpacity(
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
           sliver: SliverToBoxAdapter(
             child: Text(
               'a',
@@ -474,18 +470,15 @@ void main() {
             )
           ),
           opacity: 0.0,
-        ),
-        ));
+        )
+      ));
 
-      expect(semantics.nodesWith(
-        label: 'a',
-      ), hasLength(0));
-
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
       expect(find.byType(SliverOpacity), paintsNothing);
 
       // Opacity 0.0 with semantics: Just semantics
-      await tester.pumpWidget(
-        _boilerPlate(const SliverOpacity(
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
           sliver: SliverToBoxAdapter(
             child: Text(
               'a',
@@ -495,17 +488,14 @@ void main() {
           opacity: 0.0,
           alwaysIncludeSemantics: true,
         ),
-        ));
+      ));
 
-      expect(semantics.nodesWith(
-        label: 'a',
-      ), hasLength(1));
-
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
       expect(find.byType(SliverOpacity), paintsNothing);
 
       // Opacity 0.0 without semantics: Nothing
-      await tester.pumpWidget(
-        _boilerPlate(const SliverOpacity(
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
           sliver: SliverToBoxAdapter(
             child: Text(
               'a',
@@ -515,17 +505,14 @@ void main() {
           opacity: 0.0,
           alwaysIncludeSemantics: false,
         ),
-        ));
+      ));
 
-      expect(semantics.nodesWith(
-        label: 'a',
-      ), hasLength(0));
-
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
       expect(find.byType(SliverOpacity), paintsNothing);
 
       // Opacity 0.1: Semantics and painting
-      await tester.pumpWidget(
-        _boilerPlate(const SliverOpacity(
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
           sliver: SliverToBoxAdapter(
             child: Text(
               'a',
@@ -534,17 +521,14 @@ void main() {
           ),
           opacity: 0.1,
         ),
-        ));
+      ));
 
-      expect(semantics.nodesWith(
-        label: 'a',
-      ), hasLength(1));
-
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
       expect(find.byType(SliverOpacity), paints..paragraph());
 
       // Opacity 0.1 without semantics: Still has semantics and painting
-      await tester.pumpWidget(
-        _boilerPlate(const SliverOpacity(
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
           sliver: SliverToBoxAdapter(
             child: Text(
               'a',
@@ -554,17 +538,14 @@ void main() {
           opacity: 0.1,
           alwaysIncludeSemantics: false,
         ),
-        ));
+      ));
 
-      expect(semantics.nodesWith(
-        label: 'a',
-      ), hasLength(1));
-
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
       expect(find.byType(SliverOpacity), paints..paragraph());
 
       // Opacity 0.1 with semantics: Semantics and painting
-      await tester.pumpWidget(
-        _boilerPlate(const SliverOpacity(
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
           sliver: SliverToBoxAdapter(
             child: Text(
               'a',
@@ -574,12 +555,9 @@ void main() {
           opacity: 0.1,
           alwaysIncludeSemantics: true,
         ),
-        ));
+      ));
 
-      expect(semantics.nodesWith(
-        label: 'a',
-      ), hasLength(1));
-
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
       expect(find.byType(SliverOpacity), paints..paragraph());
 
       semantics.dispose();
