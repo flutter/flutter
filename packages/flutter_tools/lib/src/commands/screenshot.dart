@@ -64,17 +64,19 @@ class ScreenshotCommand extends FlutterCommand {
   Device device;
 
   static void validateOptions(String screenshotType, Device device, String observatoryUri) {
-    if (screenshotType == _kDeviceType) {
-      if (device == null) {
-        throwToolExit('Must have a connected device for screenshot type $screenshotType');
-      }
-      if (!device.supportsScreenshot) {
-        throwToolExit('Screenshot not supported for ${device.name}.');
-      }
-    } else {
-      if (observatoryUri == null) {
-        throwToolExit('Observatory URI must be specified for screenshot type $screenshotType');
-      }
+    switch (screenshotType) {
+      case _kDeviceType:
+        if (device == null) {
+          throwToolExit('Must have a connected device for screenshot type $screenshotType');
+        }
+        if (!device.supportsScreenshot) {
+          throwToolExit('Screenshot not supported for ${device.name}.');
+        }
+        break;
+      default:
+        if (observatoryUri == null) {
+          throwToolExit('Observatory URI must be specified for screenshot type $screenshotType');
+        }
     }
   }
 
