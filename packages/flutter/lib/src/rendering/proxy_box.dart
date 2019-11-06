@@ -713,6 +713,10 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 
 }
 
+/// Returns an alpha value representative of the provided [opacity] value.
+///
+/// The [opacity] value may not be null, an must be between 0.0 and 1.0,
+/// inclusive.
 int getAlphaFromOpacity(double opacity) => (opacity * 255).round();
 
 /// Makes its child partially transparent.
