@@ -337,7 +337,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
   /// The [ScrollController] provided to the [ScrollView] in [NestedScrollView.body].
   ///
   /// Manipulating the [ScrollPosition] of this controller fully pushes the header sliver up,
-  /// i.e. the position of the [outerController] will be set to [ScrollPosition.minScrollExtent],
+  /// i.e. the position of the [outerController] will be set to [ScrollPosition.maxScrollExtent],
   /// unless you use [ScrollPosition.setPixels].
   /// Visually, the header sliver will be not be visible, i.e. it is "pushed" up out of view.
   ///
