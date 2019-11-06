@@ -400,11 +400,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   static final Set<LogicalKeyboardKey> _modifierKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.shift,
     LogicalKeyboardKey.control,
+    LogicalKeyboardKey.alt,
   };
 
   static final Set<LogicalKeyboardKey> _macOsModifierKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.shift,
     LogicalKeyboardKey.meta,
+    LogicalKeyboardKey.alt,
   };
 
   static final Set<LogicalKeyboardKey> _interestingKeys = <LogicalKeyboardKey>{
@@ -434,10 +436,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    final bool isModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
+    final bool isWordModifierPressed = isMacOS ? keyEvent.isAltPressed : keyEvent.isControlPressed;
+    final bool isLineModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isAltPressed;
+    final bool isShortcutModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
     if (_movementKeys.contains(key)) {
-        _handleMovement(key, modifier: isModifierPressed, shift: keyEvent.isShiftPressed);
-    } else if (isModifierPressed && _shortcutKeys.contains(key)) {
+        _handleMovement(key, wordModifier: isWordModifierPressed, lineModifier: isLineModifierPressed, shift: keyEvent.isShiftPressed);
+    } else if (isShortcutModifierPressed && _shortcutKeys.contains(key)) {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
@@ -448,9 +452,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _handleMovement(
       LogicalKeyboardKey key, {
-      @required bool modifier,
+      @required bool wordModifier,
+      @required bool lineModifier,
       @required bool shift,
     }) {
+    if (wordModifier && lineModifier) {
+      // If both modifiers are down, nothing happens on any of the platforms.
+      return;
+    }
+
     TextSelection newSelection = selection;
 
     final bool rightArrow = key == LogicalKeyboardKey.arrowRight;
@@ -458,11 +468,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final bool upArrow = key == LogicalKeyboardKey.arrowUp;
     final bool downArrow = key == LogicalKeyboardKey.arrowDown;
 
-    // Because the user can use multiple keys to change how they select, the
-    // new offset variable is threaded through these four functions and
-    // potentially changes after each one.
-    if (modifier) {
-      // If control/command is pressed, we will decide which way to look for a word
+    // Jump to begin/end of word.
+    if (wordModifier) {
+      // If control/option is pressed, we will decide which way to look for a word
       // based on which arrow is pressed.
       if (leftArrow && newSelection.extentOffset > 2) {
         final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: newSelection.extentOffset - 2));
@@ -472,6 +480,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset - 1);
       }
     }
+
+    // Jump to begin/end of line.
+    if (lineModifier) {
+      // If control/command is pressed, we will decide which way to expand to
+      // the beginning/end of the line based on which arrow is pressed.
+      if (leftArrow) {
+        newSelection = newSelection.copyWith(extentOffset: 0);
+      } else if (rightArrow) {
+        newSelection = newSelection.copyWith(extentOffset: text.text.length);
+      }
+    }
+
     // Set the new offset to be +/- 1 depending on which arrow is pressed
     // If shift is down, we also want to update the previous cursor location
     if (rightArrow && newSelection.extentOffset < text.toPlainText().length) {
