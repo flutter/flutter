@@ -52,6 +52,7 @@ class StockStrings {
     return initializeMessages(locale.toString())
       .then<StockStrings>((void _) => StockStrings(locale));
   }
+
   static StockStrings of(BuildContext context) {
     return Localizations.of<StockStrings>(context, StockStrings);
   }
@@ -73,13 +74,13 @@ class StockStrings {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[ 
-    Locale('en', 'EN'),
+    Locale('en', 'US'),
     Locale('es', 'ES'),
   ];
 
   String title() {
     return Intl.message(
-      'Stocks',
+      r'Stocks',
       locale: _localeName,
       name: 'title',
       desc: 'Title for the Stocks application',
@@ -89,7 +90,7 @@ class StockStrings {
 
   String market() {
     return Intl.message(
-      'MARKET',
+      r'MARKET',
       locale: _localeName,
       name: 'market',
       desc: 'Label for the Market tab',
@@ -99,7 +100,7 @@ class StockStrings {
 
   String portfolio() {
     return Intl.message(
-      'PORTFOLIO',
+      r'PORTFOLIO',
       locale: _localeName,
       name: 'portfolio',
       desc: 'Label for the Portfolio tab',

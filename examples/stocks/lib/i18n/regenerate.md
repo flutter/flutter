@@ -7,7 +7,7 @@ the [Dart `intl` package](https://github.com/dart-lang/intl).
 
 Rebuilding everything requires two steps.
 
-1. Create the English and Spanish localizations, `stocks_en_EN.arb` and
+1. Create the English and Spanish localizations, `stocks_en_US.arb` and
 `stocks_es_ES.arb`. See the [ARB specifications](https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification)
 for more info.
 
@@ -17,7 +17,7 @@ for more info.
 
 ```dart
 dart ${FLUTTER_PATH}/dev/tools/localization/gen_l10n.dart --arb-dir=lib/i18n
-  --template-arb-file=stocks_en_EN.arb --output-localization-file=stock_strings
+  --template-arb-file=stocks_en_EN.arb --output-localization-file=stock_strings.dart
   --output-class=StockStrings
 ```
 
