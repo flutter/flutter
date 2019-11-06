@@ -1567,7 +1567,6 @@ To learn more, visit https://flutter.dev/go/build-aar'''));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       AndroidStudio: () => mockAndroidStudio,
-      Artifacts: () => mockArtifacts,
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fs,
@@ -1652,7 +1651,7 @@ To learn more, visit https://flutter.dev/go/build-aar'''));
 
       expect(actualGradlewCall, contains('/android/gradlew'));
       expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_arm'));
-      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/local_engine_repo.rand0'));
+      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
       expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
 
     }, overrides: <Type, Generator>{
@@ -1728,7 +1727,7 @@ To learn more, visit https://flutter.dev/go/build-aar'''));
 
       expect(actualGradlewCall, contains('/.android/gradlew'));
       expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_arm'));
-      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/local_engine_repo.rand0'));
+      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
       expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
 
     }, overrides: <Type, Generator>{
@@ -1765,7 +1764,9 @@ FlutterProject generateFakeAppBundle(String directoryName, String fileName) {
 }
 
 Platform fakePlatform(String name) {
-  return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
+  return FakePlatform.fromPlatform(const LocalPlatform())
+    ..operatingSystem = name
+    ..stdoutSupportsAnsi = false;
 }
 
 class FakeGradleUtils extends GradleUtils {

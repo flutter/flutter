@@ -858,7 +858,14 @@ Directory _getLocalEngineRepo({
 
   final String abi = getEnumName(androidBuildInfo.targetArchs.first);
   final Directory localEngineRepo = fs.systemTempDirectory
-    .createTempSync('local_engine_repo.');
+    .createTempSync('flutter_tool_local_engine_repo.');
+
+  // Remove the local engine repo before the tool exits.
+  addShutdownHook(
+    () => localEngineRepo.deleteSync(recursive: true),
+    ShutdownStage.CLEANUP,
+  );
+
   final String buildMode = androidBuildInfo.buildInfo.modeName;
   final String artifactVersion = _getLocalArtifactVersion(
     fs.path.join(
@@ -898,10 +905,5 @@ Directory _getLocalEngineRepo({
       ),
     );
   }
-  // Remove the local engine repo before the tool exits.
-  addShutdownHook(
-    () => localEngineRepo.deleteSync(recursive: true),
-    ShutdownStage.CLEANUP,
-  );
   return localEngineRepo;
 }
