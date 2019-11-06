@@ -70,6 +70,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         androidBuildInfo: androidBuildInfo,
         target: target,
         outputDir: outputDirectory,
+        printHowToConsumeAaar: true,
       );
     } finally {
       androidSdk.reinitialize();

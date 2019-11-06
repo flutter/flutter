@@ -472,7 +472,14 @@ Future<void> buildGradleAar({
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required Directory outputDir,
+  @required bool printHowToConsumeAaar,
 }) async {
+  assert(project != null);
+  assert(androidBuildInfo != null);
+  assert(target != null);
+  assert(outputDir != null);
+  assert(printHowToConsumeAaar != null);
+
   if (androidSdk == null) {
     exitWithNoSdkMessage();
   }
@@ -564,11 +571,13 @@ Future<void> buildGradleAar({
     '$successMark Built ${fs.path.relative(repoDirectory.path)}.',
     color: TerminalColor.green,
   );
-  _printHowToConsumeAar(
-    buildMode: androidBuildInfo.buildInfo.modeName,
-    androidPackage: project.manifest.androidPackage,
-    repoPath: repoDirectory.path,
-  );
+  if (printHowToConsumeAaar) {
+    _printHowToConsumeAar(
+      buildMode: androidBuildInfo.buildInfo.modeName,
+      androidPackage: project.manifest.androidPackage,
+      repoPath: repoDirectory.path,
+    );
+  }
 }
 
 /// Prints how to consume the AAR from a host app.
@@ -688,6 +697,7 @@ Future<void> buildPluginsAsAar(
         ),
         target: '',
         outputDir: buildDirectory,
+        printHowToConsumeAaar: false,
       );
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it
