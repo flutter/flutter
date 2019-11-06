@@ -50,6 +50,7 @@ void main() {
   MockWipDebugger mockWipDebugger;
 
   setUp(() {
+    resetChromeForTesting();
     mockWebFs = MockFlutterWebFs();
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
