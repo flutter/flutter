@@ -329,16 +329,17 @@ class NestedScrollView extends StatefulWidget {
 /// {@end-tool}
 ///
 /// Alternatively, you could also visit child elements of your parent widget to obtain
-/// the state if you know exactly that the widget is a direct descendant.
+/// the state if you know exactly that the widget is a direct descendant
+/// (see [BuildContext.visitChildElements] or [Element.visitChildren]).
 class NestedScrollViewState extends State<NestedScrollView> {
   final SliverOverlapAbsorberHandle _absorberHandle = SliverOverlapAbsorberHandle();
 
   /// The [ScrollController] provided to the [ScrollView] in [NestedScrollView.body].
   ///
-  /// Manipulating the [ScrollPosition] of this controller fully pushes the header sliver down,
-  /// i.e. the position of the [outerController] will be set to [ScrollPosition.maxScrollExtent],
+  /// Manipulating the [ScrollPosition] of this controller fully pushes the header sliver up,
+  /// i.e. the position of the [outerController] will be set to [ScrollPosition.minScrollExtent],
   /// unless you use [ScrollPosition.setPixels].
-  /// Visually, the header sliver will be completely expanded afterwards.
+  /// Visually, the header sliver will be not be visible, i.e. it is "pushed" up out of view.
   ///
   /// See also:
   ///
@@ -354,7 +355,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
   /// Manipulating the [ScrollPosition] of this controller fully pulls back the inner body,
   /// i.e. the position of the [innerController] will be set to [ScrollPosition.minScrollExtent],
   /// unless you use [ScrollPosition.setPixels].
-  /// Visually, the inner body will be scrolled to its beginning.
+  /// Visually, the inner body will be scrolled to its beginning, i.e. it is "pulled" back.
   ///
   /// See also:
   ///
