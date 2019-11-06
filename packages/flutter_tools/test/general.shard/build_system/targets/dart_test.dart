@@ -159,7 +159,7 @@ flutter_tools:lib/''');
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
-      linkPlatformKernelIn: true,
+      linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
