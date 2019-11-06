@@ -610,7 +610,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
         // to handle the case where we fail to connect.
         buildStatus.stop();
         statusActive = false;
-        if (debuggingOptions.browserLaunch && supportsServiceProtocol) {
+        if (supportsServiceProtocol) {
           buildStatus = logger.startProgress(
             'Attempting to connect to browser instance..',
             timeout: const Duration(seconds: 30),
@@ -626,9 +626,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           },
         );
         if (supportsServiceProtocol) {
-          final bool useDebugExtension = device is WebServerDevice
-            ? debuggingOptions.startPaused
-            : !debuggingOptions.browserLaunch;
+          final bool useDebugExtension = device is WebServerDevice && debuggingOptions.startPaused;
           _connectionResult = await _webFs.connect(useDebugExtension);
           unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
         }
@@ -745,7 +743,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
       }
     }
     // Allows browser refresh hot restart on non-debug builds.
-    if (device is ChromeDevice && debuggingOptions.browserLaunch) {
+    if (device is ChromeDevice) {
       try {
         final Chrome chrome = await ChromeLauncher.connectedInstance;
         final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
