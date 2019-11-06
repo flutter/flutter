@@ -23,8 +23,15 @@ class HotReloadProject extends Project {
   final String main = r'''
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
+  import 'package:flutter/services.dart';
+  import 'package:flutter/widgets.dart';
 
-  void main() => runApp(MyApp());
+  void main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    runApp(MyApp());
+  }
 
   int count = 1;
 
