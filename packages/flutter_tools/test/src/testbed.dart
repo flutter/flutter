@@ -22,8 +22,10 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'common.dart' as tester;
 import 'context.dart';
 import 'fake_process_manager.dart';
 import 'throwing_pub.dart';
@@ -85,6 +87,16 @@ class Testbed {
 
   final FutureOr<void> Function() _setup;
   final Map<Type, Generator> _overrides;
+
+  /// Runs the `test` within a tool zone.
+  ///
+  /// Unlike [run], this sets up a test group on its own.
+  @isTest
+  void test<T>(String name, FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
+    tester.test(name, () {
+      return run(test, overrides: overrides);
+    });
+  }
 
   /// Runs `test` within a tool zone.
   ///
@@ -800,4 +812,96 @@ class DelegateLogger implements Logger {
 
   @override
   bool get supportsColor => delegate.supportsColor;
+}
+
+/// An implementation of the Cache which does not download or require locking.
+class FakeCache implements Cache {
+  @override
+  bool includeAllPlatforms;
+
+  @override
+  bool useUnsignedMacBinaries;
+
+  @override
+  Future<bool> areRemoteArtifactsAvailable({String engineVersion, bool includeAllPlatforms = true}) async {
+    return true;
+  }
+
+  @override
+  String get dartSdkVersion => null;
+
+  @override
+  MapEntry<String, String> get dyLdLibEntry => null;
+
+  @override
+  String get engineRevision => null;
+
+  @override
+  Directory getArtifactDirectory(String name) {
+    return fs.currentDirectory;
+  }
+
+  @override
+  Directory getCacheArtifacts() {
+    return fs.currentDirectory;
+  }
+
+  @override
+  Directory getCacheDir(String name) {
+    return fs.currentDirectory;
+  }
+
+  @override
+  Directory getDownloadDir() {
+    return fs.currentDirectory;
+  }
+
+  @override
+  Directory getRoot() {
+    return fs.currentDirectory;
+  }
+
+  @override
+  File getStampFileFor(String artifactName) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  String getStampFor(String artifactName) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  Future<String> getThirdPartyFile(String urlStr, String serviceName) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  String getVersionFor(String artifactName) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  Directory getWebSdkDirectory() {
+    return fs.currentDirectory;
+  }
+
+  @override
+  bool isOlderThanToolsStamp(FileSystemEntity entity) {
+    return false;
+  }
+
+  @override
+  bool isUpToDate() {
+    return true;
+  }
+
+  @override
+  void setStampFor(String artifactName, String version) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+  }
 }
