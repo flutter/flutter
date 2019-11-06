@@ -91,6 +91,11 @@ group("flutter") {
       ]
     }
   }
+
+  # Fuchsia currently only supports a subset of our unit tests
+  if (is_fuchsia) {
+    public_deps += [ "$flutter_root/fml:fml_tests" ]
+  }
 }
 
 config("config") {
