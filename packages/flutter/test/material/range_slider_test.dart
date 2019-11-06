@@ -1033,15 +1033,17 @@ void main() {
 
     // Check default theme for enabled widget.
     expect(sliderBox, paints
-      ..rect(color: sliderTheme.inactiveTrackColor)
+      ..rrect(color: sliderTheme.inactiveTrackColor)
       ..rect(color: sliderTheme.activeTrackColor)
-      ..rect(color: sliderTheme.inactiveTrackColor));
+      ..rrect(color: sliderTheme.inactiveTrackColor));
     expect(sliderBox, paints
       ..circle(color: sliderTheme.thumbColor)
       ..circle(color: sliderTheme.thumbColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
@@ -1058,18 +1060,22 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.inactiveTrackColor)
+          ..rrect(color: sliderTheme.inactiveTrackColor)
           ..rect(color: activeColor)
-          ..rect(color: sliderTheme.inactiveTrackColor));
+          ..rrect(color: sliderTheme.inactiveTrackColor));
     expect(
         sliderBox,
         paints
+          ..circle(color: Colors.white)
           ..circle(color: activeColor)
+          ..circle(color: Colors.white)
           ..circle(color: activeColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
   testWidgets('Range Slider uses the right theme colors for the right shapes when setting the inactive color', (WidgetTester tester) async {
@@ -1084,9 +1090,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: inactiveColor)
+          ..rrect(color: inactiveColor)
           ..rect(color: sliderTheme.activeTrackColor)
-          ..rect(color: inactiveColor));
+          ..rrect(color: inactiveColor));
     expect(
         sliderBox,
         paints
@@ -1095,6 +1101,8 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
   testWidgets('Range Slider uses the right theme colors for the right shapes with active and inactive colors', (WidgetTester tester) async {
@@ -1114,18 +1122,20 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: inactiveColor)
+          ..rrect(color: inactiveColor)
           ..rect(color: activeColor)
-          ..rect(color: inactiveColor));
+          ..rrect(color: inactiveColor));
     expect(
         sliderBox,
         paints
+          ..circle(color: Colors.white)
           ..circle(color: activeColor)
+          ..circle(color: Colors.white)
           ..circle(color: activeColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
   testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider', (WidgetTester tester) async {
@@ -1139,9 +1149,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.inactiveTrackColor)
+          ..rrect(color: sliderTheme.inactiveTrackColor)
           ..rect(color: sliderTheme.activeTrackColor)
-          ..rect(color: sliderTheme.inactiveTrackColor));
+          ..rrect(color: sliderTheme.inactiveTrackColor));
     expect(
         sliderBox,
         paints
@@ -1154,6 +1164,8 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
   testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors', (WidgetTester tester) async {
@@ -1175,9 +1187,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: inactiveColor)
+          ..rrect(color: inactiveColor)
           ..rect(color: activeColor)
-          ..rect(color: inactiveColor));
+          ..rrect(color: inactiveColor));
     expect(
         sliderBox,
         paints
@@ -1185,12 +1197,16 @@ void main() {
           ..circle(color: activeColor)
           ..circle(color: inactiveColor)
           ..circle(color: activeColor)
+          ..circle(color: Colors.white)
           ..circle(color: activeColor)
+          ..circle(color: Colors.white)
           ..circle(color: activeColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
@@ -1206,12 +1222,14 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.disabledInactiveTrackColor)
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor)
           ..rect(color: sliderTheme.disabledActiveTrackColor)
-          ..rect(color: sliderTheme.disabledInactiveTrackColor));
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
 
   });
 
@@ -1233,12 +1251,14 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.disabledInactiveTrackColor)
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor)
           ..rect(color: sliderTheme.disabledActiveTrackColor)
-          ..rect(color: sliderTheme.disabledInactiveTrackColor));
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
   });
 
   testWidgets('Range Slider uses the right theme colors for the right shapes when the value indicators are showing', (WidgetTester tester) async {
@@ -1298,24 +1318,6 @@ void main() {
     await gesture.up();
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
-
-    // Testing the custom colors are used for the indicator.
-    await tester.pumpWidget(buildApp(
-      divisions: 3,
-      activeColor: customColor1,
-      inactiveColor: customColor2,
-    ));
-    gesture = await tester.startGesture(topRight);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(values.end, equals(1));
-    expect(
-      sliderBox,
-      paints
-        ..path(color: customColor1)
-        ..path(color: customColor1),
-    );
-    await gesture.up();
   });
 
   testWidgets('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {
