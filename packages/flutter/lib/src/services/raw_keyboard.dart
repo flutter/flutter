@@ -297,8 +297,8 @@ abstract class RawKeyEvent extends Diagnosticable {
         );
         break;
       default:
-        // We don't yet implement raw key events on iOS or other platforms, but
-        // we don't hit this exception because the engine never sends us these
+        // Raw key events are not yet implemented  on iOS or other platforms,
+        // but this exception isn't hit, because the engine never sends these
         // messages.
         throw FlutterError('Unknown keymap for key events: $keymap');
     }
@@ -543,12 +543,12 @@ class RawKeyboard {
     const _ModifierSidePair(ModifierKey.scrollLockModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.scrollLock},
     const _ModifierSidePair(ModifierKey.functionModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.fn},
     // The symbolModifier doesn't have a key representation on any of the
-    // platforms, so we're not mapping it here.
+    // platforms, so don't map it here.
   };
 
-  // The list of all modifier keys that are represented in modifier key bit masks
-  // on all platforms, so that we can clear them out of pressedKeys when
-  // synchronizing them.
+  // The list of all modifier keys that are represented in modifier key bit
+  // masks on all platforms, so that they can be cleared out of pressedKeys when
+  // synchronizing.
   static final Set<LogicalKeyboardKey> _allModifiers = <LogicalKeyboardKey>{
     LogicalKeyboardKey.altLeft,
     LogicalKeyboardKey.altRight,
@@ -574,11 +574,11 @@ class RawKeyboard {
         'producing unsupported modifier combinations.');
       modifierKeys.addAll(mappedKeys);
     }
-    // We don't send any key events for these changes, since we *should* get
+    // Don't send any key events for these changes, since there *should* be
     // separate events for each modifier key down/up that occurs while the app
     // has focus. This is just to synchronize the modifier keys when they are
-    // pressed/released while the app doesn't have focus, because we want to
-    // make sure that _keysPressed reflects reality at all times.
+    // pressed/released while the app doesn't have focus, to make sure that
+    // _keysPressed reflects reality at all times.
     _keysPressed.removeAll(_allModifiers);
     _keysPressed.addAll(modifierKeys);
   }

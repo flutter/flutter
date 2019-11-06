@@ -81,8 +81,8 @@ void main() {
         platform: 'macos',
         isDown: true,
       );
-      // Change the modifiers so that they show the shift key is already down
-      // when we get this event, but it's not in keysPressed yet.
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
       // dispatch the modified data.
       await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -106,8 +106,8 @@ void main() {
         platform: 'android',
         isDown: true,
       );
-      // Change the modifiers so that they show the shift key is already down
-      // when we get this event, but it's not in keysPressed yet.
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
       data['metaState'] |= RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
       // dispatch the modified data.
       await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -131,8 +131,8 @@ void main() {
         platform: 'fuchsia',
         isDown: true,
       );
-      // Change the modifiers so that they show the shift key is already down
-      // when we get this event, but it's not in keysPressed yet.
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= RawKeyEventDataFuchsia.modifierLeftShift;
       // dispatch the modified data.
       await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -156,8 +156,8 @@ void main() {
         platform: 'linux',
         isDown: true,
       );
-      // Change the modifiers so that they show the shift key is already down
-      // when we get this event, but it's not in keysPressed yet.
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= GLFWKeyHelper.modifierShift;
       // dispatch the modified data.
       await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(

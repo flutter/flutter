@@ -752,7 +752,7 @@ void main() {
         }
       }
 
-      // Test to make sure that we follow the same path backwards and forwards.
+      // Test to make sure that the same path is followed backwards and forwards.
       await tester.pump();
       expectState(<bool>[null, null, null, null, true, null]);
       clear();
