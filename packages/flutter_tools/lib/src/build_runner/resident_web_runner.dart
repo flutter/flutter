@@ -101,7 +101,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   @override
   bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
 
-  // WebServer device is debuggable when running with --start-paused.
+  /// WebServer device is debuggable when running with --start-paused.
   bool get deviceIsDebuggable => device is! WebServerDevice || debuggingOptions.startPaused;
 
   WebFs _webFs;
