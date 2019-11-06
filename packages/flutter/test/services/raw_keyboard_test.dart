@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -70,7 +71,7 @@ void main() {
         await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
       }
-    });
+    }, skip: kIsWeb);
 
     testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);

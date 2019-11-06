@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1004,7 +1005,7 @@ void main() {
       expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
-    });
+    }, skip: kIsWeb);
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
       final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
