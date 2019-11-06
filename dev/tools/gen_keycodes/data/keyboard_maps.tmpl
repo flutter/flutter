@@ -53,6 +53,12 @@ const Map<int, LogicalKeyboardKey> kMacOsNumPadMap = <int, LogicalKeyboardKey>{
 @@@MACOS_NUMPAD_MAP@@@
 };
 
+/// A map of macOS key codes which are numbered function keys, so that they
+/// can be excluded when asking "is the Fn modifier down?".
+const Map<int, LogicalKeyboardKey> kMacOsFunctionKeyMap = <int, LogicalKeyboardKey>{
+@@@MACOS_FUNCTION_KEY_MAP@@@
+};
+
 /// Maps GLFW-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kGlfwToLogicalKey = <int, LogicalKeyboardKey>{
 @@@GLFW_KEY_CODE_MAP@@@
