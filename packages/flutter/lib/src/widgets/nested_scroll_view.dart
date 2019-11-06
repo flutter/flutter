@@ -1317,7 +1317,7 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
 /// A sliver that wraps another, forcing its layout extent to be treated as
 /// overlap.
 ///
-/// The difference between the overlap requested by the [child] sliver and the
+/// The difference between the overlap requested by the child [sliver] and the
 /// overlap reported by this widget, called the _absorbed overlap_, is reported
 /// to the [SliverOverlapAbsorberHandle], which is typically passed to a
 /// [SliverOverlapInjector].
@@ -1331,14 +1331,12 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
   /// [SliverOverlapAbsorberHandle].
   ///
   /// The [handle] must not be null.
-  ///
-  /// The [child] must be a sliver.
   const SliverOverlapAbsorber({
     Key key,
     @required this.handle,
-    Widget child,
+    Widget sliver,
   }) : assert(handle != null),
-       super(key: key, child: child);
+       super(key: key, child: sliver);
 
   /// The object in which the absorbed overlap is recorded.
   ///
@@ -1369,7 +1367,7 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
 /// A sliver that wraps another, forcing its layout extent to be treated as
 /// overlap.
 ///
-/// The difference between the overlap requested by the [child] sliver and the
+/// The difference between the overlap requested by the child [sliver] and the
 /// overlap reported by this widget, called the _absorbed overlap_, is reported
 /// to the [SliverOverlapAbsorberHandle], which is typically passed to a
 /// [RenderSliverOverlapInjector].
@@ -1379,13 +1377,13 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   ///
   /// The [handle] must not be null.
   ///
-  /// The [child] must be a [RenderSliver].
+  /// The [sliver] must be a [RenderSliver].
   RenderSliverOverlapAbsorber({
     @required SliverOverlapAbsorberHandle handle,
-    RenderSliver child,
+    RenderSliver sliver,
   }) : assert(handle != null),
        _handle = handle {
-    this.child = child;
+    child = sliver;
   }
 
   /// The object in which the absorbed overlap is recorded.
@@ -1486,9 +1484,9 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
   const SliverOverlapInjector({
     Key key,
     @required this.handle,
-    Widget child,
+    Widget sliver,
   }) : assert(handle != null),
-       super(key: key, child: child);
+       super(key: key, child: sliver);
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   ///
