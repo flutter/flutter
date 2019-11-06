@@ -85,21 +85,18 @@ public class FlutterActivityAndFragmentDelegateTest {
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsResumed();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
     // When the Activity/Fragment is resumed, a resumed message should have been sent to Flutter.
     delegate.onResume();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
     // When the Activity/Fragment is paused, an inactive message should have been sent to Flutter.
     delegate.onPause();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
     // When the Activity/Fragment is stopped, a paused message should have been sent to Flutter.
     // Notice that Flutter uses the term "paused" in a different way, and at a different time
@@ -108,14 +105,6 @@ public class FlutterActivityAndFragmentDelegateTest {
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
-
-    // When activity detaches, a detached message should have been sent to Flutter.
-    delegate.onDetach();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsDetached();
   }
 
   @Test
