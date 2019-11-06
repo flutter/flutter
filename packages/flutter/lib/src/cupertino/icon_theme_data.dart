@@ -24,4 +24,15 @@ class CupertinoIconThemeData extends IconThemeData {
     final Color resolvedColor = CupertinoDynamicColor.resolve(color, context);
     return resolvedColor == color ? this : copyWith(color: resolvedColor);
   }
+
+  /// Creates a copy of this icon theme but with the given fields replaced with
+  /// the new values.
+  @override
+  CupertinoIconThemeData copyWith({ Color color, double opacity, double size }) {
+    return CupertinoIconThemeData(
+      color: color ?? this.color,
+      opacity: opacity ?? this.opacity,
+      size: size ?? this.size,
+    );
+  }
 }

@@ -284,10 +284,10 @@ class CupertinoThemeData extends Diagnosticable {
       _brightness,
       convertColor(_primaryColor),
       convertColor(_primaryContrastingColor),
-      textTheme?.resolveFrom(context, nullOk: nullOk),
+      _textTheme?.resolveFrom(context, nullOk: nullOk),
       convertColor(_barBackgroundColor),
       convertColor(_scaffoldBackgroundColor),
-      _defaults.resolveFrom(context, nullOk: nullOk),
+      _defaults.resolveFrom(context, _textTheme == null, nullOk: nullOk),
     );
   }
 
@@ -413,7 +413,7 @@ class _CupertinoThemeDefaults {
   final Color scaffoldBackgroundColor;
   final _CupertinoTextThemeDefaults textThemeDefaults;
 
-  _CupertinoThemeDefaults resolveFrom(BuildContext context, { @required bool nullOk }) {
+  _CupertinoThemeDefaults resolveFrom(BuildContext context, bool resolveTextTheme, { @required bool nullOk }) {
     assert(nullOk != null);
     Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
@@ -423,7 +423,7 @@ class _CupertinoThemeDefaults {
       convertColor(primaryContrastingColor),
       convertColor(barBackgroundColor),
       convertColor(scaffoldBackgroundColor),
-      textThemeDefaults?.resolveFrom(context, nullOk: nullOk),
+      resolveTextTheme ? textThemeDefaults?.resolveFrom(context, nullOk: nullOk) : textThemeDefaults,
     );
   }
 }

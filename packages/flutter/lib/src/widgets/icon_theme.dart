@@ -60,7 +60,13 @@ class IconTheme extends InheritedTheme {
   /// ```
   static IconThemeData of(BuildContext context) {
     final IconThemeData iconThemeData = _getInheritedIconThemeData(context).resolve(context);
-    return iconThemeData.isConcrete ? iconThemeData : const IconThemeData.fallback().merge(iconThemeData);
+    return iconThemeData.isConcrete
+      ? iconThemeData
+      : iconThemeData.copyWith(
+        size: iconThemeData.size ?? const IconThemeData.fallback().size,
+        color: iconThemeData.color ?? const IconThemeData.fallback().color,
+        opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
+      );
   }
 
   static IconThemeData _getInheritedIconThemeData(BuildContext context) {
