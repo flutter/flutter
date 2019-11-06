@@ -256,7 +256,8 @@ Future<Process> startProcess(
   assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  print('\nExecuting: $command in $finalWorkingDirectory');
+  print('\nExecuting: $command in $finalWorkingDirectory'
+      + (environment != null ? ' with environment $environment' : ''));
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
