@@ -39,8 +39,8 @@ class AotBuilder {
       throwToolExit('No AOT build platform specified');
     }
     if (_canUseAssemble(platform)
-        && extraGenSnapshotOptions == null
-        && extraFrontEndOptions == null) {
+        && extraGenSnapshotOptions?.isEmpty != false
+        && extraFrontEndOptions?.isEmpty != false) {
       await _buildWithAssemble(
         targetFile: mainDartFile,
         outputDir: outputPath,
