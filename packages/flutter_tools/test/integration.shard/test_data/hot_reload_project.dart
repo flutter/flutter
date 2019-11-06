@@ -52,7 +52,6 @@ class HotReloadProject extends Project {
       // below, then that callback schedules another frame on which we do the
       // breakpoint.
       // tick 3 = second hot reload warmup reassemble frame (pre breakpoint)
-      print('life cycle ${SchedulerBinding.instance.lifecycleState}');
       if (count == 2) {
         SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
           SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
