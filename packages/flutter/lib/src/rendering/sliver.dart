@@ -12,6 +12,7 @@ import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
@@ -1815,5 +1816,160 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
       hasVisualOverflow: childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     setChildParentData(child, constraints, geometry);
+  }
+}
+
+/// Makes its sliver child partially transparent.
+///
+/// This class paints its sliver child into an intermediate buffer and then
+/// blends the sliver child back into the scene, partially transparent.
+///
+/// For values of opacity other than 0.0 and 1.0, this class is relatively
+/// expensive because it requires painting the sliver child into an intermediate
+/// buffer. For the value 0.0, the sliver child is simply not painted at all.
+/// For the value 1.0, the sliver child is painted immediately without an
+/// intermediate buffer.
+class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
+  /// Creates a partially transparent render object.
+  ///
+  /// The [opacity] argument must be between 0.0 and 1.0, inclusive.
+  RenderSliverOpacity({
+    double opacity = 1.0,
+    bool alwaysIncludeSemantics = false,
+    RenderSliver sliver,
+  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+      assert(alwaysIncludeSemantics != null),
+      _opacity = opacity,
+      _alwaysIncludeSemantics = alwaysIncludeSemantics,
+      _alpha = getAlphaFromOpacity(opacity) {
+    child = sliver;
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
+
+  int _alpha;
+
+  /// The fraction to scale the child's alpha value.
+  ///
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e., invisible).
+  ///
+  /// The opacity must not be null.
+  ///
+  /// Values 1.0 and 0.0 are painted with a fast path. Other values
+  /// require painting the child into an intermediate buffer, which is
+  /// expensive.
+  double get opacity => _opacity;
+  double _opacity;
+  set opacity(double value) {
+    assert(value != null);
+    assert(value >= 0.0 && value <= 1.0);
+    if (_opacity == value)
+      return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
+    final bool wasVisible = _alpha != 0;
+    _opacity = value;
+    _alpha = getAlphaFromOpacity(_opacity);
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+    if (wasVisible != (_alpha != 0))
+      markNeedsSemanticsUpdate();
+  }
+
+  /// Whether child semantics are included regardless of the opacity.
+  ///
+  /// If false, semantics are excluded when [opacity] is 0.0.
+  ///
+  /// Defaults to false.
+  bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
+  bool _alwaysIncludeSemantics;
+  set alwaysIncludeSemantics(bool value) {
+    if (value == _alwaysIncludeSemantics)
+      return;
+    _alwaysIncludeSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SliverPhysicalParentData)
+      child.parentData = SliverPhysicalParentData();
+  }
+
+  @override
+  void performLayout() {
+    assert(child != null);
+    child.layout(constraints, parentUsesSize: true);
+    geometry = child.geometry;
+  }
+
+  @override
+  bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+    return child != null
+      && child.geometry.hitTestExtent > 0
+      && child.hitTest(
+        result,
+        mainAxisPosition: mainAxisPosition,
+        crossAxisPosition: crossAxisPosition,
+      );
+  }
+
+  @override
+  double childMainAxisPosition(RenderSliver child) {
+    assert(child != null);
+    assert(child == this.child);
+    return 0.0;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null && child.geometry.visible) {
+      if (_alpha == 0) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
+        return;
+      }
+      if (_alpha == 255) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
+        context.paintChild(child, offset);
+        return;
+      }
+      assert(needsCompositing);
+      layer = context.pushOpacity(
+        offset,
+        _alpha,
+        _paintWithOpacity,
+        oldLayer: layer,
+      );
+    }
+  }
+
+  void _paintWithOpacity(PaintingContext context, Offset offset) => context.paintChild(child, offset);
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    assert(child != null);
+    final SliverPhysicalParentData childParentData = child.parentData;
+    childParentData.applyPaintTransform(transform);
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
+      visitor(child);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('opacity', opacity));
+    properties.add(FlagProperty(
+      'alwaysIncludeSemantics',
+      value: alwaysIncludeSemantics,
+      ifTrue: 'alwaysIncludeSemantics',
+    ));
   }
 }

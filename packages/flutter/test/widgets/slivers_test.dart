@@ -3,8 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+
+import '../rendering/mock_canvas.dart';
+import 'semantics_tester.dart';
 
 Future<void> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {
   return tester.pumpWidget(
@@ -417,6 +421,169 @@ void main() {
     await tester.pumpAndSettle();
     // It will be corrected after a auto scroll animation.
     expect(controller.offset, 800.0);
+  });
+
+  group('SliverOpacity - ', ()
+  {
+    Widget _boilerPlate(Widget sliver) {
+      return Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: CustomScrollView(slivers: <Widget>[sliver])
+          )
+        )
+      );
+    }
+
+    testWidgets('painting & semantics', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+
+      // Opacity 1.0: Semantics and painting
+      await tester.pumpWidget(
+        _boilerPlate(const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 1.0,
+        ),
+        ));
+
+      expect(semantics.nodesWith(
+        label: 'a',
+      ), hasLength(1));
+
+      expect(find.byType(SliverOpacity), paints..paragraph());
+
+      // Opacity 0.0: Nothing
+      await tester.pumpWidget(
+        _boilerPlate(const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.0,
+        ),
+        ));
+
+      expect(semantics.nodesWith(
+        label: 'a',
+      ), hasLength(0));
+
+      expect(find.byType(SliverOpacity), paintsNothing);
+
+      // Opacity 0.0 with semantics: Just semantics
+      await tester.pumpWidget(
+        _boilerPlate(const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.0,
+          alwaysIncludeSemantics: true,
+        ),
+        ));
+
+      expect(semantics.nodesWith(
+        label: 'a',
+      ), hasLength(1));
+
+      expect(find.byType(SliverOpacity), paintsNothing);
+
+      // Opacity 0.0 without semantics: Nothing
+      await tester.pumpWidget(
+        _boilerPlate(const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.0,
+          alwaysIncludeSemantics: false,
+        ),
+        ));
+
+      expect(semantics.nodesWith(
+        label: 'a',
+      ), hasLength(0));
+
+      expect(find.byType(SliverOpacity), paintsNothing);
+
+      // Opacity 0.1: Semantics and painting
+      await tester.pumpWidget(
+        _boilerPlate(const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.1,
+        ),
+        ));
+
+      expect(semantics.nodesWith(
+        label: 'a',
+      ), hasLength(1));
+
+      expect(find.byType(SliverOpacity), paints..paragraph());
+
+      // Opacity 0.1 without semantics: Still has semantics and painting
+      await tester.pumpWidget(
+        _boilerPlate(const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.1,
+          alwaysIncludeSemantics: false,
+        ),
+        ));
+
+      expect(semantics.nodesWith(
+        label: 'a',
+      ), hasLength(1));
+
+      expect(find.byType(SliverOpacity), paints..paragraph());
+
+      // Opacity 0.1 with semantics: Semantics and painting
+      await tester.pumpWidget(
+        _boilerPlate(const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.1,
+          alwaysIncludeSemantics: true,
+        ),
+        ));
+
+      expect(semantics.nodesWith(
+        label: 'a',
+      ), hasLength(1));
+
+      expect(find.byType(SliverOpacity), paints..paragraph());
+
+      semantics.dispose();
+    });
   });
 }
 

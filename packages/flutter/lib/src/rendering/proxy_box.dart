@@ -713,7 +713,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 
 }
 
-int _getAlphaFromOpacity(double opacity) => (opacity * 255).round();
+int getAlphaFromOpacity(double opacity) => (opacity * 255).round();
 
 /// Makes its child partially transparent.
 ///
@@ -737,7 +737,7 @@ class RenderOpacity extends RenderProxyBox {
        assert(alwaysIncludeSemantics != null),
        _opacity = opacity,
        _alwaysIncludeSemantics = alwaysIncludeSemantics,
-       _alpha = _getAlphaFromOpacity(opacity),
+       _alpha = getAlphaFromOpacity(opacity),
        super(child);
 
   @override
@@ -765,7 +765,7 @@ class RenderOpacity extends RenderProxyBox {
     final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
-    _alpha = _getAlphaFromOpacity(_opacity);
+    _alpha = getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
     markNeedsPaint();
@@ -895,7 +895,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
 
   void _updateOpacity() {
     final int oldAlpha = _alpha;
-    _alpha = _getAlphaFromOpacity(_opacity.value.clamp(0.0, 1.0));
+    _alpha = getAlphaFromOpacity(_opacity.value.clamp(0.0, 1.0));
     if (oldAlpha != _alpha) {
       final bool didNeedCompositing = _currentlyNeedsCompositing;
       _currentlyNeedsCompositing = _alpha > 0 && _alpha < 255;
