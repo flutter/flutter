@@ -1,4 +1,4 @@
-Signature: 25dad30fe021ac972ef0a9e2e3b7ab6b
+Signature: 4395723ead34075392262caa18f40ccc
 
 UNUSED LICENSES:
 
@@ -1359,6 +1359,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/valgrind/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_ninja/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_toolchain/VERSION
 FILE: ../../../third_party/skia/infra/bots/calmbench.isolate
+FILE: ../../../third_party/skia/infra/bots/canvaskit.isolate
 FILE: ../../../third_party/skia/infra/bots/cfg.json
 FILE: ../../../third_party/skia/infra/bots/compile.isolate
 FILE: ../../../third_party/skia/infra/bots/compile_android_framework.isolate
@@ -1371,6 +1372,8 @@ FILE: ../../../third_party/skia/infra/bots/isolate_android_sdk_linux.isolate
 FILE: ../../../third_party/skia/infra/bots/isolate_gcloud_linux.isolate
 FILE: ../../../third_party/skia/infra/bots/isolate_go.isolate
 FILE: ../../../third_party/skia/infra/bots/jobs.json
+FILE: ../../../third_party/skia/infra/bots/lottie_web.isolate
+FILE: ../../../third_party/skia/infra/bots/pathkit.isolate
 FILE: ../../../third_party/skia/infra/bots/perf_skia_bundled.isolate
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Android_API26.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Android_ASAN.json
@@ -1427,6 +1430,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/flutter_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/parent_revision_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/docker/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/doxygen/examples/full.expected/doxygen.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/env/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-AndroidOne-GPU-Mali400MP2-arm-Release-All-Android_SkottieTracing.json
@@ -1635,7 +1639,9 @@ FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/resources.isolate
 FILE: ../../../third_party/skia/infra/bots/run_recipe.isolate
+FILE: ../../../third_party/skia/infra/bots/skottie_wasm.isolate
 FILE: ../../../third_party/skia/infra/bots/skpbench_skia_bundled.isolate
+FILE: ../../../third_party/skia/infra/bots/skqp.isolate
 FILE: ../../../third_party/skia/infra/bots/swarm_recipe.isolate
 FILE: ../../../third_party/skia/infra/bots/task_drivers.isolate
 FILE: ../../../third_party/skia/infra/bots/tasks.json
@@ -2238,6 +2244,7 @@ FILE: ../../../third_party/skia/src/core/SkDistanceFieldGen.cpp
 FILE: ../../../third_party/skia/src/core/SkDistanceFieldGen.h
 FILE: ../../../third_party/skia/src/core/SkDrawable.cpp
 FILE: ../../../third_party/skia/src/core/SkFont.cpp
+FILE: ../../../third_party/skia/src/core/SkFont_serial.cpp
 FILE: ../../../third_party/skia/src/core/SkForceCPlusPlusLinking.cpp
 FILE: ../../../third_party/skia/src/core/SkHalf.cpp
 FILE: ../../../third_party/skia/src/core/SkImageGenerator.cpp
@@ -3461,6 +3468,7 @@ FILE: ../../../third_party/skia/src/core/SkStrikeForGPU.cpp
 FILE: ../../../third_party/skia/src/core/SkStrikeForGPU.h
 FILE: ../../../third_party/skia/src/core/SkStrikeSpec.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.cpp
+FILE: ../../../third_party/skia/src/core/SkVMBlitter.h
 FILE: ../../../third_party/skia/src/core/SkYUVMath.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVMath.h
 FILE: ../../../third_party/skia/src/core/SkZip.h
