@@ -87,18 +87,29 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     DevelopmentArtifact.iOS,
   };
 
-  @override
-  Future<void> validateCommand() async {
-    await super.validateCommand();
-    if (argResults['xcframework'] && xcode.majorVersion < 11) {
-      throwToolExit('--xcframework requires Xcode 11.');
+  FlutterProject _project;
+
+  List<BuildMode> get buildModes {
+    final List<BuildMode> buildModes = <BuildMode>[];
+
+    if (argResults['debug']) {
+      buildModes.add(BuildMode.debug);
     }
+    if (argResults['profile']) {
+      buildModes.add(BuildMode.profile);
+    }
+    if (argResults['release']) {
+      buildModes.add(BuildMode.release);
+    }
+
+    return buildModes;
   }
 
   @override
-  Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = FlutterProject.current();
-    if (!flutterProject.isModule) {
+  Future<void> validateCommand() async {
+    await super.validateCommand();
+    _project = FlutterProject.current();
+    if (!_project.isModule) {
       throwToolExit('Building frameworks for iOS is only supported from a module.');
     }
 
@@ -109,24 +120,16 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     if (!argResults['universal'] && !argResults['xcframework']) {
       throwToolExit('--universal or --xcframework is required.');
     }
-    final List<BuildMode> buildModes = <BuildMode>[];
-
-    if (argResults['debug']) {
-      buildModes.add(BuildMode.debug);
+    if (argResults['xcframework'] && xcode.majorVersion < 11) {
+      throwToolExit('--xcframework requires Xcode 11.');
     }
-
-    if (argResults['profile']) {
-      buildModes.add(BuildMode.profile);
-    }
-
-    if (argResults['release']) {
-      buildModes.add(BuildMode.release);
-    }
-
     if (buildModes.isEmpty) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
     }
+  }
 
+  @override
+  Future<FlutterCommandResult> runCommand() async {
     final String outputArgument = argResults['output']
         ?? fs.path.join(fs.currentDirectory.path, 'build', 'ios', 'framework');
 
@@ -160,12 +163,12 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       await _produceFlutterFramework(outputDirectory, mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
 
       // Build aot, create module.framework and copy.
-      await _produceAppFramework(mode, iPhoneBuildOutput, modeDirectory, flutterProject);
+      await _produceAppFramework(mode, iPhoneBuildOutput, modeDirectory);
 
       // Build and copy plugins.
-      await processPodsIfNeeded(flutterProject.ios, getIosBuildDirectory(), mode);
-      if (hasPlugins(flutterProject)) {
-        await _producePlugins(flutterProject, xcodeBuildConfiguration, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory, outputDirectory);
+      await processPodsIfNeeded(_project.ios, getIosBuildDirectory(), mode);
+      if (hasPlugins(_project)) {
+        await _producePlugins(xcodeBuildConfiguration, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory, outputDirectory);
       }
 
       final Status status = logger.startProgress(' └─Moving to ${fs.path.relative(modeDirectory.path)}', timeout: timeoutConfiguration.slowOperation);
@@ -248,7 +251,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     status.stop();
   }
 
-  Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory modeDirectory, FlutterProject flutterProject) async {
+  Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory modeDirectory) async {
     const String appFrameworkName = 'App.framework';
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
 
@@ -260,7 +263,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       await _produceAotAppFrameworkIfNeeded(mode, iPhoneBuildOutput, destinationAppFrameworkDirectory);
     }
 
-    final File sourceInfoPlist = flutterProject.ios.hostAppRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
+    final File sourceInfoPlist = _project.ios.hostAppRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
     final File destinationInfoPlist = destinationAppFrameworkDirectory.childFile('Info.plist')..createSync(recursive: true);
 
     destinationInfoPlist.writeAsBytesSync(sourceInfoPlist.readAsBytesSync());
@@ -299,7 +302,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   }
 
   Future<void> _producePlugins(
-    FlutterProject flutterProject,
     String xcodeBuildConfiguration,
     Directory iPhoneBuildOutput,
     Directory simulatorBuildOutput,
@@ -319,10 +321,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
     ];
 
-    final FlutterProject flutterProject = FlutterProject.current();
     await processUtils.run(
       pluginsBuildCommand,
-      workingDirectory: flutterProject.ios.hostAppRoot.childDirectory('Pods').path,
+      workingDirectory: _project.ios.hostAppRoot.childDirectory('Pods').path,
       allowReentrantFlutter: false,
     );
 
@@ -341,7 +342,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
     await processUtils.run(
       pluginsBuildCommand,
-      workingDirectory: flutterProject.ios.hostAppRoot.childDirectory('Pods').path,
+      workingDirectory: _project.ios.hostAppRoot.childDirectory('Pods').path,
       allowReentrantFlutter: false,
     );
 
