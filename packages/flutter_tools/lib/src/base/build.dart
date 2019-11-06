@@ -94,6 +94,7 @@ class AOTSnapshotter {
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
+    bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
       printError('Bitcode is only supported for iOS.');
@@ -208,6 +209,7 @@ class AOTSnapshotter {
         assemblyPath: stripSymbols ? '$assembly.stripped.S' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
+        quiet: quiet,
       );
       if (result.exitCode != 0) {
         return result.exitCode;
@@ -224,9 +226,12 @@ class AOTSnapshotter {
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
+    @required bool quiet
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
-    printStatus('Building App.framework for $targetArch...');
+    if (!quiet) {
+      printStatus('Building App.framework for $targetArch...');
+    }
 
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
