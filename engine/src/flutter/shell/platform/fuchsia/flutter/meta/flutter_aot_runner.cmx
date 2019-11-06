@@ -15,7 +15,6 @@
       "fuchsia.device.NameProvider",
       "fuchsia.feedback.CrashReporter",
       "fuchsia.fonts.Provider",
-      "fuchsia.intl.PropertyProvider",
       "fuchsia.net.NameLookup",
       "fuchsia.netstack.Netstack",
       "fuchsia.posix.socket.Provider",
