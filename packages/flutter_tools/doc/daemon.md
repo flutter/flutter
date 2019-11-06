@@ -168,7 +168,7 @@ This is sent once a web application is being served and available for the user t
 
 ### Daemon-to-Editor Requests
 
-These requests _come_ from the Flutter daemon and should be responded to by the client/editor.
+These requests come _from_ the Flutter daemon and should be responded to by the client/editor.
 
 #### app.exposeUrl
 
