@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,6 +13,167 @@ class _ModifierCheck {
 }
 
 void main() {
+  group('RawKeyboard', () {
+    testWidgets('keysPressed is maintained', (WidgetTester tester) async {
+      for (String platform in <String>['linux', 'android', 'macos', 'fuchsia']) {
+        RawKeyboard.instance.clearKeysPressed();
+        expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+        await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.controlLeft,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.controlLeft,
+              LogicalKeyboardKey.keyA,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.controlLeft,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+      }
+    }, skip: kIsWeb);
+
+    testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'macos',
+        isDown: true,
+      );
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
+      data['modifiers'] |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+        ),
+      );
+    });
+
+    testWidgets('keysPressed modifiers are synchronized with key events on android', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'android',
+        isDown: true,
+      );
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
+      data['metaState'] |= RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+        ),
+      );
+    });
+
+    testWidgets('keysPressed modifiers are synchronized with key events on fuchsia', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'fuchsia',
+        isDown: true,
+      );
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
+      data['modifiers'] |= RawKeyEventDataFuchsia.modifierLeftShift;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+        ),
+      );
+    });
+
+    testWidgets('keysPressed modifiers are synchronized with key events on linux', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'linux',
+        isDown: true,
+      );
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
+      data['modifiers'] |= GLFWKeyHelper.modifierShift;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+        ),
+      );
+    });
+  });
+
   group('RawKeyEventDataAndroid', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
       RawKeyEventDataAndroid.modifierAlt | RawKeyEventDataAndroid.modifierLeftAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.left),
@@ -195,11 +357,11 @@ void main() {
       final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'android',
-        'keyCode': 23,  // DPAD_CENTER code.
+        'keyCode': 23, // DPAD_CENTER code.
         'plainCodePoint': 0,
         'codePoint': 0,
         'character': null,
-        'scanCode': 317,  // Left side thumb joystick center click button.
+        'scanCode': 317, // Left side thumb joystick center click button.
         'metaState': 0,
         'source': 0x501, // Gamepad and keyboard source.
         'deviceId': 1,
@@ -213,11 +375,11 @@ void main() {
       final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'android',
-        'keyCode': 23,  // DPAD_CENTER code.
+        'keyCode': 23, // DPAD_CENTER code.
         'plainCodePoint': 0,
         'codePoint': 0,
         'character': null,
-        'scanCode': 317,  // Left side thumb joystick center click button.
+        'scanCode': 317, // Left side thumb joystick center click button.
         'metaState': 0,
         'source': 0x501, // Gamepad and keyboard source.
         'deviceId': 10,
@@ -365,7 +527,6 @@ void main() {
       RawKeyEventDataMacOs.modifierOption | RawKeyEventDataMacOs.modifierRightOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.right),
       RawKeyEventDataMacOs.modifierShift | RawKeyEventDataMacOs.modifierLeftShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.left),
       RawKeyEventDataMacOs.modifierShift | RawKeyEventDataMacOs.modifierRightShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.right),
-      RawKeyEventDataMacOs.modifierFunction: _ModifierCheck(ModifierKey.functionModifier, KeyboardSide.all),
       RawKeyEventDataMacOs.modifierControl | RawKeyEventDataMacOs.modifierLeftControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.left),
       RawKeyEventDataMacOs.modifierControl | RawKeyEventDataMacOs.modifierRightControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.right),
       RawKeyEventDataMacOs.modifierCommand | RawKeyEventDataMacOs.modifierLeftCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.left),
@@ -404,8 +565,8 @@ void main() {
     });
     test('modifier keys are recognized when combined', () {
       for (int modifier in modifierTests.keys) {
-        if (modifier == RawKeyEventDataMacOs.modifierFunction) {
-          // No need to combine function key with itself.
+        if (modifier == RawKeyEventDataMacOs.modifierCapsLock) {
+          // No need to combine caps lock key with itself.
           continue;
         }
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
@@ -415,18 +576,18 @@ void main() {
           'plainCodePoint': 0x64,
           'characters': 'a',
           'charactersIgnoringModifiers': 'a',
-          'modifiers': modifier | RawKeyEventDataMacOs.modifierFunction,
+          'modifiers': modifier | RawKeyEventDataMacOs.modifierCapsLock,
         });
         final RawKeyEventDataMacOs data = event.data;
         for (ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier].key == key || key == ModifierKey.functionModifier) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: '$key should be pressed with metaState $modifier '
-                  "and additional key ${RawKeyEventDataMacOs.modifierFunction}, but isn't.",
+                  "and additional key ${RawKeyEventDataMacOs.modifierCapsLock}, but isn't.",
             );
-            if (key != ModifierKey.functionModifier) {
+            if (key != ModifierKey.capsLockModifier) {
               expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
             } else {
               expect(data.getModifierSide(key), equals(KeyboardSide.all));
@@ -436,7 +597,7 @@ void main() {
               data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier '
-                  'and additional key ${RawKeyEventDataMacOs.modifierFunction}.',
+                  'and additional key ${RawKeyEventDataMacOs.modifierCapsLock}.',
             );
           }
         }
