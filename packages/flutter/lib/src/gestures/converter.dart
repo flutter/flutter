@@ -45,6 +45,7 @@ class PointerEventConverter {
   /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
     for (ui.PointerData datum in data) {
+      print('event ${datum.toStringFull()}');
       final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
       final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
       final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
@@ -93,6 +94,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              synthesized: datum.synthesized,
             );
             break;
           case ui.PointerChange.down:
@@ -139,6 +141,7 @@ class PointerEventConverter {
               orientation: datum.orientation,
               tilt: datum.tilt,
               platformData: datum.platformData,
+              synthesized: datum.synthesized,
             );
             break;
           case ui.PointerChange.up:

@@ -26,7 +26,6 @@ TestGestureFlutterBinding _binding = TestGestureFlutterBinding();
 
 void ensureTestGestureBinding() {
   _binding ??= TestGestureFlutterBinding();
-  PointerEventConverter.clearPointers();
   assert(GestureBinding.instance != null);
 }
 
@@ -278,8 +277,6 @@ void main() {
     expect(events[3].buttons, equals(kPrimaryButton));
     expect(events[4].runtimeType, equals(PointerUpEvent));
     expect(events[4].buttons, equals(0));
-
-    PointerEventConverter.clearPointers();
   });
 
   test('Should synthesize kPrimaryButton for stylus', () {
@@ -313,8 +310,6 @@ void main() {
       expect(events[3].buttons, equals(kPrimaryButton | kSecondaryStylusButton));
       expect(events[4].runtimeType, equals(PointerUpEvent));
       expect(events[4].buttons, equals(0));
-
-      PointerEventConverter.clearPointers();
     }
   });
 
@@ -345,8 +340,6 @@ void main() {
     expect(events[3].buttons, equals(kPrimaryButton));
     expect(events[4].runtimeType, equals(PointerUpEvent));
     expect(events[4].buttons, equals(0));
-
-    PointerEventConverter.clearPointers();
   });
 
   test('Should not synthesize kPrimaryButton for mouse', () {
@@ -378,8 +371,6 @@ void main() {
       expect(events[3].buttons, equals(kMiddleMouseButton | kSecondaryMouseButton));
       expect(events[4].runtimeType, equals(PointerUpEvent));
       expect(events[4].buttons, equals(0));
-
-      PointerEventConverter.clearPointers();
     }
   });
 }
