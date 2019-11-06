@@ -73,7 +73,7 @@ class StockStrings {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[ 
+  static const List<Locale> supportedLocales = <Locale>[
     Locale('en', 'US'),
     Locale('es', 'ES'),
   ];
@@ -117,7 +117,7 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
   Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
 
   @override
-  bool isSupported(Locale locale) => ['en', 'es'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'es'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_StockStringsDelegate old) => false;
