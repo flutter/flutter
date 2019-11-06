@@ -1666,6 +1666,7 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
 /// and hides it when it is false:
 ///
 /// ```dart
+/// bool _visible = true;
 /// List<Widget> listItems = <Widget>[
 ///   Text('Now you see me,'),
 ///   Text('Now you don\'t!'),
