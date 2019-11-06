@@ -65,11 +65,11 @@ abstract class AndroidAssetBundle extends Target {
 
 /// An implementation of [AndroidAssetBundle] that includes dependencies on vm
 /// and isolate data.
-class DebugAndroidAssetBundle extends AndroidAssetBundle {
-  const DebugAndroidAssetBundle();
+class DebugAndroidApplication extends AndroidAssetBundle {
+  const DebugAndroidApplication();
 
   @override
-  String get name => 'debug_android_asset_bundle';
+  String get name => 'debug_android_application';
 
   @override
   List<Source> get inputs => <Source>[
@@ -95,18 +95,6 @@ class AotAndroidAssetBundle extends AndroidAssetBundle {
   String get name => 'aot_android_asset_bundle';
 }
 
-/// Build a debug android application's Dart artifacts.
-class DebugAndroidApplication extends CopyFlutterAotBundle {
-  const DebugAndroidApplication();
-
-  @override
-  String get name => 'debug_android_application';
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    DebugAndroidAssetBundle(),
-  ];
-}
 
 /// Build a profile android application's Dart artifacts.
 class ProfileAndroidApplication extends CopyFlutterAotBundle {
