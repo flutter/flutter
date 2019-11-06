@@ -369,6 +369,9 @@ class TextEditingElement {
   void _initDomElement(InputConfiguration inputConfig) {
     domElement = inputConfig.inputType.createDomElement();
     inputConfig.inputType.configureDomElement(domElement);
+    if (inputConfig.obscureText) {
+      domElement.setAttribute('type', 'password');
+    }
     _setStaticStyleAttributes(domElement);
     owner._setDynamicStyleAttributes(domElement);
     domRenderer.glassPaneElement.append(domElement);
