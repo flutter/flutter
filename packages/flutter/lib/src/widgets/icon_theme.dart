@@ -79,7 +79,7 @@ class IconTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final IconTheme iconTheme = context.ancestorWidgetOfExactType(IconTheme);
+    final IconTheme iconTheme = context.ancestorWidgetOfExactType<IconTheme>();
     return identical(this, iconTheme) ? child : IconTheme(data: data, child: child);
   }
 

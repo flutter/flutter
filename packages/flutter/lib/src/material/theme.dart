@@ -176,7 +176,7 @@ class _InheritedTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final _InheritedTheme ancestorTheme = context.ancestorWidgetOfExactType(_InheritedTheme);
+    final _InheritedTheme ancestorTheme = context.ancestorWidgetOfExactType<_InheritedTheme>();
     return identical(this, ancestorTheme) ? child : Theme(data: theme.data, child: child);
   }
 

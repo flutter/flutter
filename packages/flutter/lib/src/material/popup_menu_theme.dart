@@ -151,7 +151,7 @@ class PopupMenuTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final PopupMenuTheme ancestorTheme = context.ancestorWidgetOfExactType(PopupMenuTheme);
+    final PopupMenuTheme ancestorTheme = context.ancestorWidgetOfExactType<PopupMenuTheme>();
     return identical(this, ancestorTheme) ? child : PopupMenuTheme(data: data, child: child);
   }
 

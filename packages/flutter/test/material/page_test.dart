@@ -29,7 +29,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     FadeTransition widget2Opacity =
-        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(FadeTransition);
+        tester.element(find.text('Page 2')).ancestorWidgetOfExactType<FadeTransition>();
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
@@ -53,7 +53,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     widget2Opacity =
-        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(FadeTransition);
+        tester.element(find.text('Page 2')).ancestorWidgetOfExactType<FadeTransition>();
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.

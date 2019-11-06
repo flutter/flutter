@@ -232,7 +232,7 @@ class ButtonTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ButtonTheme ancestorTheme = context.ancestorWidgetOfExactType(ButtonTheme);
+    final ButtonTheme ancestorTheme = context.ancestorWidgetOfExactType<ButtonTheme>();
     return identical(this, ancestorTheme) ? child : ButtonTheme.fromButtonThemeData(data: data, child: child);
   }
 

@@ -165,7 +165,7 @@ class DefaultTextStyle extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final DefaultTextStyle defaultTextStyle = context.ancestorWidgetOfExactType(DefaultTextStyle);
+    final DefaultTextStyle defaultTextStyle = context.ancestorWidgetOfExactType<DefaultTextStyle>();
     return identical(this, defaultTextStyle) ? child : DefaultTextStyle(
       style: style,
       textAlign: textAlign,

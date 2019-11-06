@@ -117,7 +117,7 @@ class ListTileTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ListTileTheme ancestorTheme = context.ancestorWidgetOfExactType(ListTileTheme);
+    final ListTileTheme ancestorTheme = context.ancestorWidgetOfExactType<ListTileTheme>();
     return identical(this, ancestorTheme) ? child : ListTileTheme(
       dense: dense,
       style: style,

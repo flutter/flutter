@@ -59,7 +59,7 @@ void main() {
     await tester.pumpWidget(
       TestWidget((BuildContext context) {
         disposeCalled = true;
-        context.ancestorWidgetOfExactType(Container);
+        context.ancestorWidgetOfExactType<Container>();
       }),
     );
     await tester.pumpWidget(Container());
