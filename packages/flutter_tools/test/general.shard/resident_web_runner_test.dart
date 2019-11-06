@@ -144,7 +144,7 @@ void main() {
 
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
      when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
-    final ResidentRunner profileResidentWebRunner =  residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+    final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),

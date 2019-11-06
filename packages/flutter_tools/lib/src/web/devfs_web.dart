@@ -338,8 +338,8 @@ class WebDevFS implements DevFS {
       manifestFile = fs.file('${compilerOutput.outputFilename}.json');
       sourcemapFile = fs.file('${compilerOutput.outputFilename}.map');
       modules = _webAssetServer.write(codeFile, manifestFile, sourcemapFile);
-    } on FileSystemException {
-      throwToolExit('Incremental compiler did not produce expected output.');
+    } on FileSystemException catch (err) {
+      throwToolExit('Failed to load recompiled sources:\n$err');
     }
     return UpdateFSReport(success: true, syncedBytes: codeFile.lengthSync(),
       invalidatedSourcesCount: invalidatedFiles.length)

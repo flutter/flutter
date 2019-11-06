@@ -177,7 +177,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   @override
   Future<void> debugDumpApp() async {
     try {
-      await _vmService.callServiceExtension(
+      await _vmService?.callServiceExtension(
         'ext.flutter.debugDumpApp',
       );
     } on vmservice.RPCError {
@@ -369,7 +369,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       applicationBinary: null,
     );
     if (package == null) {
-      printError('No application found for TargetPlatform.web_javascript.');
+      printError('This application is not configured to build on the web.');
       printError('To add web support to a project, run `flutter create .`.');
       return 1;
     }
@@ -561,7 +561,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
       applicationBinary: null,
     );
     if (package == null) {
-      printError('No application found for TargetPlatform.web_javascript.');
+      printError('This application is not configured to build on the web.');
       printError('To add web support to a project, run `flutter create .`.');
       return 1;
     }
@@ -638,7 +638,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
       // Thrown if a build daemon is already running with different configuration.
       throwToolExit(
           'Another build daemon is already running with different configuration.\n'
-          'Try exiting other Flutter processes in this project and try again.');
+          'Exit other Flutter processes running in this project and try again.');
     } on WebSocketException {
       throwToolExit('Failed to connect to WebSocket.');
     } on BuildException {
@@ -762,12 +762,14 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
       try {
         await _vmService.streamCancel('Stdout');
       } on vmservice.RPCError {
-        // Ignore this specific error.
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're not already subscribed.
       }
       try {
         await _vmService.streamListen('Stdout');
       } on vmservice.RPCError {
-        // Ignore this specific error.
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're not already subscribed.
       }
       _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
         final String message = utf8.decode(base64.decode(log.bytes)).trim();
