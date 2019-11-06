@@ -154,14 +154,11 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
         return _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
       case ModifierKey.capsLockModifier:
         return independentModifier & modifierCapsLock != 0;
+    // On macOS, the function modifier bit is set for any function key, like F1,
+    // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
+    // that of the Fn modifier key, so there's no good way to emulate that on
+    // macOS.
       case ModifierKey.functionModifier:
-        return false;
-        // on macOS, the function modifier happens for any function key, like
-        // F1, F2, etc., but the meaning of ModifierKey.modifierFunction is that
-        // of the Fn modifier key, so we check specifically if that the modifier
-        // key is pressed, and ignore the other function keys for this purpose.
-//        return independentModifier & modifierFunction != 0
-//            && !kMacOsFunctionKeyMap.containsKey(keyCode);
       case ModifierKey.numLockModifier:
       case ModifierKey.symbolModifier:
       case ModifierKey.scrollLockModifier:
