@@ -160,8 +160,8 @@ flutter_tools:lib/''');
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
       extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
-      fileSystemRoots: anyNamed('FileSystemRoots'),
-      fileSystemScheme: anyNamed('FileSystemScheme')
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme')
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -187,8 +187,8 @@ flutter_tools:lib/''');
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
       extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
-      fileSystemRoots: anyNamed('FileSystemRoots'),
-      fileSystemScheme: anyNamed('FileSystemScheme')
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme')
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -214,8 +214,8 @@ flutter_tools:lib/''');
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
       extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
-      fileSystemRoots: anyNamed('FileSystemRoots'),
-      fileSystemScheme: anyNamed('FileSystemScheme')
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme')
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
