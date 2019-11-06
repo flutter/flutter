@@ -942,6 +942,42 @@ void main() {
     });
   });
 
+  testWidgets('an empty opaque MouseRegion is effective', (WidgetTester tester) async {
+    bool bottomRegionIsHovered = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.topLeft,
+              child: MouseRegion(
+                  onEnter: (_) { bottomRegionIsHovered = true; },
+                  onHover: (_) { bottomRegionIsHovered = true; },
+                  onExit: (_) { bottomRegionIsHovered = true; },
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                ),
+              ),
+            ),
+            const MouseRegion(opaque: true),
+          ],
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(20, 20));
+    addTearDown(gesture.removePointer);
+
+    await gesture.moveTo(const Offset(5, 5));
+    await tester.pump();
+    await gesture.moveTo(const Offset(20, 20));
+    await tester.pump();
+    expect(bottomRegionIsHovered, isFalse);
+  });
+
   testWidgets('RenderMouseRegion\'s debugFillProperties when default', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderMouseRegion().debugFillProperties(builder);

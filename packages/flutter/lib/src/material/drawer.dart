@@ -546,9 +546,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   onTap: close,
                   child: Semantics(
                     label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
-                    child: Container( // The drawer's "scrim"
-                      color: _scrimColorTween.evaluate(_controller),
-                    ),
+                    child: MouseRegion(
+                      opaque: true,
+                      child: Container( // The drawer's "scrim"
+                        color: _scrimColorTween.evaluate(_controller),
+                      ),
+                    )
                   ),
                 ),
               ),

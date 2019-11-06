@@ -2705,7 +2705,8 @@ class RenderMouseRegion extends RenderProxyBox {
     final bool annotationWillBeActive = (
         _onEnter != null ||
         _onHover != null ||
-        _onExit != null
+        _onExit != null ||
+        opaque
       ) &&
       RendererBinding.instance.mouseTracker.mouseIsConnected;
     if (annotationWasActive != annotationWillBeActive) {
