@@ -58,13 +58,7 @@ abstract class MouseCursorPlatform {
   /// Request the platform to change the cursor of `details.device` to the shape
   /// specified by `details.shape`.
   ///
-  /// {@template flutter.mouseCursor.shape}
-  /// A mouse cursor shape is a platform-independent integer, used as a unique
-  /// identifier for a kind of mouse cursor, such as "open hand" or "waiting
-  /// hourglass". Its value does not have any meaning, often a result of some
-  /// kind of hashing, and is used by [MouseCursorPlatform] by passing it to the
-  /// platform as-is.
-  /// {@endtemplate}
+  /// {@macro flutter.mouseCursor.shape}
   ///
   /// The method resolves to true if the operation is successful, false if the
   /// operation is unsupported by the platform, or rejects to an error if the
@@ -96,15 +90,73 @@ class MouseCursorActivateDetails {
 ///
 /// A mouse cursor is a graphical image on the screen that echoes the movement
 /// of a pointer device, such as a mouse or a stylus. A [MouseCursor] object
-/// is a stateless definition of a kind of mouse cursor, such as an arrow,
-/// a pointing hand, or an I-beam.
+/// defines a kind of mouse cursor, such as an arrow, a pointing
+/// hand, or an I-beam. It does so by defining the actions that the platform
+/// should do when this cursor is activated, i.e. by overriding
+/// [MouseCursor.activate].
 ///
-/// A [MouseCursor] object is used by being assigned to a region. The most
-/// common way of doing so is [MouseRegion], which is wrapped and exposed by
-/// many other widgets.
+/// ## Use mouse cursors
 ///
-/// When a pointer enters a region that is assigned with a [MouseCursor], the
-/// cursor's [MouseCursor.activate] is called.
+/// A [MouseCursor] object is used by being assigned to a region. Many widgets
+/// already exposes such API, such as [InkWell.mouseCursor].
+///
+/// To do it manually, wrap a region with [MouseRegion] assigned with a mouse
+/// cursor object. When a pointer enters this region, the cursor's
+/// [MouseCursor.activate] will be called.
+///
+/// {@tool snippet --template=stateless_widget_material}
+/// This sample creates a rectangular region that is wrapped by a [MouseRegion]
+/// with a mouse cursor. The mouse pointer becomes an I-beam when hovering on it.
+///
+/// ```dart imports
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/gestures.dart';
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: MouseRegion(
+///       cursor: SystemMouseCursors.text,
+///       child: Container(
+///         width: 200,
+///         height: 100,
+///         decoration: BoxDecoration(
+///           color: Colors.blue,
+///           border: Border.all(color: Colors.yellow),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## Different kinds of cursors
+///
+/// System cursors are cursors provided by the platform that the program is
+/// running on, and are the most common cursors. [SystemMouseCursors] collects a
+/// superset of system cursor from all platforms that Flutter supports.
+///
+/// [ConstantMouseCursor] are cursors created using a fixed shape.
+/// {@template flutter.mouseCursor.shape}
+/// A mouse cursor shape is a platform-independent integer, used as a unique
+/// identifier for a kind of mouse cursor, such as an arrow or a pointing hand.
+/// The value of a shape integer does not have any meaning, often a result of
+/// some kind of hashing, and is passed to the platform as-is.
+/// {@endtemplate}
+/// System cursors are instances of [ConstantMouseCursor].
+///
+/// ## Other components of the system
+///
+/// [MouseCursorManager] is an interface that provides imperative control over
+/// mouse cursors. However it is designed for the mouse tracking system and
+/// should not be used directly by widgets. It is typically created in
+/// [RendererBinding.initMouseTracker] and owned by [MouseTracker].
+///
+/// [MouseCursorPlatform] is an interface that provides low-level control
+/// to the platform. It is used by [MouseCursor.activate] to perform
+/// manipulations.
 ///
 /// See also:
 ///
@@ -169,11 +221,14 @@ class NoopMouseCursor extends MouseCursor {
 
 /// A mouse cursor specified with a constant shape.
 ///
+/// System cursors are instances of [ConstantMouseCursor].
+///
 /// {@macro flutter.mouseCursor.shape}
 ///
 /// See also:
 ///
-///  * [SystemMouseCursors], which lists all system mouse cursors.
+///  * [SystemMouseCursors], which collects many system mouse cursors, which use
+///    this class.
 @immutable
 class ConstantMouseCursor extends MouseCursor {
   /// Create a [ConstantMouseCursor] by providing the shape and a short
@@ -205,10 +260,21 @@ class ConstantMouseCursor extends MouseCursor {
   String describeCursor() {
     return description;
   }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final ConstantMouseCursor typed = other;
+    return typed.shape == shape;
+  }
+
+  @override
+  int get hashCode => shape;
 }
 
-/// A manager that maintains states related to mouse cursor and provides a
-/// simple interface to operate [MouseCursor]s.
+/// A manager that maintains states related to mouse cursor and provides
+/// imperative operations to manipulate [MouseCursor]s.
 ///
 /// This class is used by [MouseTracker], and should not be called directly by
 /// widgets. Widgets that want to programmatically set cursors should assign
@@ -254,11 +320,13 @@ class MouseCursorManager {
 
 /// A collection of system [MouseCursor]s.
 ///
-/// System cursors are mouse cursors that are included in a platform, available
-/// without external resources. [SystemMouseCursors] is a superset of the system
-/// cursors of every platform that Flutter supports. A cursor that is not
-/// implemented on a platform will fallback to some other cursor or the basic
-/// cursor depending on the implementation of the Flutter engine on the platform.
+/// System cursors are mouse cursors provided by the current platform, available
+/// without external resources, and are therefore the most common cursors.
+///
+/// [SystemMouseCursors] is a superset of the system cursors of every platform
+/// that Flutter supports, therefore some of these objects might map to the same
+/// shape, or fallback to the basic arrow. This mapping is implemented by the
+/// Flutter engine that the program is running on.
 class SystemMouseCursors {
   /// A special value that tells Flutter to release the control of cursors.
   ///
