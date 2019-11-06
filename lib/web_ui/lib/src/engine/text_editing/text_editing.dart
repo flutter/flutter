@@ -17,6 +17,8 @@ void _emptyCallback(dynamic _) {}
 ///
 /// They are assigned once during the creation of the DOM element.
 void _setStaticStyleAttributes(html.HtmlElement domElement) {
+  domElement.classes.add(HybridTextEditing.textEditingClass);
+
   final html.CssStyleDeclaration elementStyle = domElement.style;
   elementStyle
     ..whiteSpace = 'pre-wrap'
@@ -532,6 +534,14 @@ class HybridTextEditing {
       return _customEditingElement;
     }
     return _defaultEditingElement;
+  }
+
+  /// A CSS class name used to identify all elements used for text editing.
+  @visibleForTesting
+  static const String textEditingClass = 'flt-text-editing';
+
+  static bool isEditingElement(html.Element element) {
+    return element.classes.contains(textEditingClass);
   }
 
   /// Requests that [customEditingElement] is used for managing text editing state
