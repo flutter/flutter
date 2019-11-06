@@ -96,7 +96,6 @@ class FlutterPlugin implements Plugin<Project> {
     private String localEngine
     private String localEngineSrcPath
     private Properties localProperties
-    private File flutterJar
     private String engineVersion
 
     @Override
@@ -144,8 +143,9 @@ class FlutterPlugin implements Plugin<Project> {
             throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
         }
 
-        engineVersion = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version")
-                .toFile().text.trim()
+        engineVersion = useLocalEngine()
+            ? "+" // Match any version since there's only one.
+            : "1.0.0-" + Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version").toFile().text.trim()
 
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
@@ -178,31 +178,18 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-
         if (useLocalEngine()) {
-            String engineOutPath = project.property('localEngineOut')
+            // This is required to pass the local engine to flutter build aot.
+            String engineOutPath = project.property('local-engine-out')
             File engineOut = project.file(engineOutPath)
             if (!engineOut.isDirectory()) {
-                throw new GradleException('localEngineOut must point to a local engine build')
-            }
-            Path baseEnginePath = Paths.get(engineOut.absolutePath)
-            flutterJar = baseEnginePath.resolve("flutter.jar").toFile()
-            if (!flutterJar.isFile()) {
-                throw new GradleException("Local engine jar not found: $flutterJar")
+                throw new GradleException('local-engine-out must point to a local engine build')
             }
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
-            // The local engine is built for one of the build type.
-            // However, we use the same engine for each of the build types.
-            project.android.buildTypes.each {
-                addApiDependencies(project, it.name, project.files {
-                    flutterJar
-                })
-            }
-        } else {
-            project.android.buildTypes.each this.&addFlutterDependencies
-            project.android.buildTypes.whenObjectAdded this.&addFlutterDependencies
         }
+        project.android.buildTypes.each this.&addFlutterDependencies
+        project.android.buildTypes.whenObjectAdded this.&addFlutterDependencies
     }
 
     /**
@@ -212,17 +199,24 @@ class FlutterPlugin implements Plugin<Project> {
      *    2. libflutter.so
      */
     void addFlutterDependencies(buildType) {
+        String flutterBuildMode = buildModeFor(buildType)
+        if (!supportsBuildMode(flutterBuildMode)) {
+            return
+        }
+        String repository = useLocalEngine()
+            ? project.property('local-engine-repo')
+            : MAVEN_REPO
+
         project.rootProject.allprojects {
             repositories {
                 maven {
-                    url MAVEN_REPO
+                    url repository
                 }
             }
         }
-        String flutterBuildMode = buildModeFor(buildType)
         // Add the embedding dependency.
         addApiDependencies(project, buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion")
+                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
 
         List<String> platforms = getTargetPlatforms().collect()
         // Debug mode includes x86 and x64, which are commonly used in emulators.
@@ -234,7 +228,7 @@ class FlutterPlugin implements Plugin<Project> {
             String arch = PLATFORM_ARCH_MAP[platform].replace("-", "_")
             // Add the `libflutter.so` dependency.
             addApiDependencies(project, buildType.name,
-                    "io.flutter:${arch}_$flutterBuildMode:1.0.0-$engineVersion")
+                    "io.flutter:${arch}_$flutterBuildMode:$engineVersion")
         }
     }
 
@@ -260,9 +254,6 @@ class FlutterPlugin implements Plugin<Project> {
         if (!buildPluginAsAar()) {
             getPluginList().each this.&configurePluginProject
             return
-        }
-        if (useLocalEngine()) {
-            throw new GradleException("Local engine isn't supported when building the plugins as AAR")
         }
         project.repositories {
             maven {
@@ -326,24 +317,13 @@ class FlutterPlugin implements Plugin<Project> {
             // In AGP 3.5, the embedding must be added as an API implementation,
             // so java8 features are desugared against the runtime classpath.
             // For more, see https://github.com/flutter/flutter/issues/40126
-            if (flutterJar) {
-                addApiDependencies(
-                    pluginProject,
-                    buildType.name,
-                    project.files {
-                        flutterJar
-                    }
-                )
+            if (!supportsBuildMode(flutterBuildMode)) {
                 return
             }
             addApiDependencies(
                 pluginProject,
                 buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion",
-                {
-                    // Include the embedding transitive dependencies since plugins may depend on them.
-                    transitive = true
-                }
+                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
             )
         }
         pluginProject.afterEvaluate {
@@ -425,7 +405,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Boolean useLocalEngine() {
-        return project.hasProperty('localEngineOut')
+        return project.hasProperty('local-engine-repo')
     }
 
     private Boolean isVerbose() {
@@ -450,6 +430,19 @@ class FlutterPlugin implements Plugin<Project> {
 
     private static Boolean buildPluginAsAar() {
         return System.getProperty('build-plugins-as-aars') == 'true'
+    }
+
+    // Returns true if the build mode is supported by the current call to Gradle.
+    // This only relevant when using a local engine. Because the engine
+    // is built for a specific mode, the call to Gradle must match that mode.
+    private Boolean supportsBuildMode(String flutterBuildMode) {
+        if (!useLocalEngine()) {
+            return true;
+        }
+        assert project.hasProperty('local-engine-build-mode')
+        // Don't configure dependencies for a build mode that the local engine
+        // doesn't support.
+        return project.property('local-engine-build-mode') == flutterBuildMode
     }
 
     private void addCompileOnlyDependency(Project project, String variantName, Object dependency, Closure config = null) {
