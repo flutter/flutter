@@ -163,15 +163,6 @@ class SourceVisitor implements ResolvedFiles {
     }
   }
 
-  /// Visit a [Source] which contains a [SourceBehavior].
-  void visitBehavior(SourceBehavior sourceBehavior) {
-    if (inputs) {
-      sources.addAll(sourceBehavior.inputs(environment));
-    } else {
-      sources.addAll(sourceBehavior.outputs(environment));
-    }
-  }
-
   /// Visit a [Source] which is defined by an [Artifact] from the flutter cache.
   ///
   /// If the [Artifact] points to a directory then all child files are included.
@@ -194,10 +185,6 @@ abstract class Source {
   /// This source is a file-uri which contains some references to magic
   /// environment variables.
   const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
-
-  /// This source is produced by the [SourceBehavior] class.
-  const factory Source.behavior(SourceBehavior behavior) = _SourceBehavior;
-
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
@@ -222,32 +209,8 @@ abstract class Source {
   /// evaluated before the build.
   ///
   /// For example, [Source.pattern] and [Source.version] are not implicit
-  /// provided they do not use any wildcards. [Source.behavior] and
-  /// [Source.function] are always implicit.
+  /// provided they do not use any wildcards.
   bool get implicit;
-}
-
-/// An interface for describing input and output copies together.
-abstract class SourceBehavior {
-  const SourceBehavior();
-
-  /// The inputs for a particular target.
-  List<File> inputs(Environment environment);
-
-  /// The outputs for a particular target.
-  List<File> outputs(Environment environment);
-}
-
-class _SourceBehavior implements Source {
-  const _SourceBehavior(this.value);
-
-  final SourceBehavior value;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitBehavior(value);
-
-  @override
-  bool get implicit => true;
 }
 
 class _PatternSource implements Source {

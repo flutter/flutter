@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.lang.StringBuilder;
 
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
@@ -82,6 +83,10 @@ public class MainActivity extends FlutterActivity {
         flags.put("isEnabled", node.isEnabled());
         flags.put("isFocusable", node.isFocusable());
         flags.put("isFocused", node.isFocused());
+        // heading flag is only available on Android Pie or newer
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            flags.put("isHeading", node.isHeading());
+        }
         flags.put("isPassword", node.isPassword());
         flags.put("isLongClickable", node.isLongClickable());
         result.put("flags", flags);

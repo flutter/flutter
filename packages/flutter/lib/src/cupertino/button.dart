@@ -33,7 +33,7 @@ class CupertinoButton extends StatefulWidget {
     this.color,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
     this.minSize = kMinInteractiveDimensionCupertino,
-    this.pressedOpacity = 0.1,
+    this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
@@ -53,7 +53,7 @@ class CupertinoButton extends StatefulWidget {
     this.padding,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
     this.minSize = kMinInteractiveDimensionCupertino,
-    this.pressedOpacity = 0.1,
+    this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
@@ -102,7 +102,7 @@ class CupertinoButton extends StatefulWidget {
   /// The opacity that the button will fade to when it is pressed.
   /// The button will have an opacity of 1.0 when it is not pressed.
   ///
-  /// This defaults to 0.1. If null, opacity will not change on pressed if using
+  /// This defaults to 0.4. If null, opacity will not change on pressed if using
   /// your own custom effects is desired.
   final double pressedOpacity;
 

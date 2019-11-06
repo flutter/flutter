@@ -66,6 +66,7 @@ class @className {
     return initializeMessages(locale.toString())
       .then<@className>((void _) => @className(locale));
   }
+
   static @className of(BuildContext context) {
     return Localizations.of<@className>(context, @className);
   }
@@ -166,21 +167,27 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'];
     for (String placeholder in placeholders.keys)
       message = message.replaceAll('{$placeholder}', '\$$placeholder');
-    return message;
+    return generateString(message);
   }
 
   final Map<String, dynamic> attributesMap = bundle['@$key'];
-  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
+  if (attributesMap == null)
+    exitWithError(
+      'Resource attribute "@$key" was not found. Please ensure that each '
+      'resource id has a corresponding resource attribute.'
+    );
+
+  if (attributesMap.containsKey('placeholders')) {
     return simpleMethodTemplate
       .replaceAll('@methodName', key)
       .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'Object').join(', '))
-      .replaceAll('@message', "'${genSimpleMethodMessage(bundle, key)}'")
+      .replaceAll('@message', '${genSimpleMethodMessage(bundle, key)}')
       .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
   }
 
   return getterMethodTemplate
     .replaceAll('@methodName', key)
-    .replaceAll('@message', "'${bundle[key]}'")
+    .replaceAll('@message', '${generateString(bundle[key])}')
     .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
 }
 
@@ -261,6 +268,19 @@ bool _isValidClassName(String className) {
   return true;
 }
 
+bool _isValidGetterAndMethodName(String name) {
+  // Dart getter and method name cannot contain non-alphanumeric symbols
+  if (name.contains(RegExp(r'[^a-zA-Z\d]')))
+    return false;
+  // Dart class name must start with lower case character
+  if (name[0].contains(RegExp(r'[A-Z]')))
+    return false;
+  // Dart class name cannot start with a number
+  if (name[0].contains(RegExp(r'\d')))
+    return false;
+  return true;
+}
+
 bool _isDirectoryReadableAndWritable(String statString) {
   if (statString[0] == '-' || statString[1] == '-')
     return false;
@@ -276,7 +296,7 @@ Future<void> main(List<String> args) async {
   final argslib.ArgParser parser = argslib.ArgParser();
   parser.addOption('arb-dir', defaultsTo: path.join('lib', 'l10n'));
   parser.addOption('template-arb-file', defaultsTo: 'app_en.arb');
-  parser.addOption('output-localization-file', defaultsTo: 'app_localizations');
+  parser.addOption('output-localization-file', defaultsTo: 'app_localizations.dart');
   parser.addOption('output-class', defaultsTo: 'AppLocalizations');
   final argslib.ArgResults results = parser.parse(args);
 
@@ -285,7 +305,7 @@ Future<void> main(List<String> args) async {
 
   final Directory l10nDirectory = Directory(arbPathString);
   final File templateArbFile = File(path.join(l10nDirectory.path, results['template-arb-file']));
-  final File outputFile = File(path.join(l10nDirectory.path, '$outputFileString.dart'));
+  final File outputFile = File(path.join(l10nDirectory.path, outputFileString));
   final String stringsClassName = results['output-class'];
 
   if (!l10nDirectory.existsSync())
@@ -296,7 +316,7 @@ Future<void> main(List<String> args) async {
   final String l10nDirectoryStatModeString = l10nDirectory.statSync().modeString();
   if (!_isDirectoryReadableAndWritable(l10nDirectoryStatModeString))
     exitWithError(
-      "The 'arb-dir' directory, $l10nDirectory, is not readable or writable.\n"
+      "The 'arb-dir' directory, $l10nDirectory, doesn't allow reading and writing.\n"
       'Please ensure that the user has read and write permissions.'
     );
   final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
@@ -368,6 +388,11 @@ Future<void> main(List<String> args) async {
   for (String key in bundle.keys) {
     if (key.startsWith('@'))
       continue;
+    if (!_isValidGetterAndMethodName(key))
+      exitWithError(
+        'Invalid key format: $key \n It has to be in camel case, cannot start '
+        'with a number, and cannot contain non-alphanumeric characters.'
+      );
     if (pluralValueRE.hasMatch(bundle[key]))
       classMethods.add(genPluralMethod(bundle, key));
     else
