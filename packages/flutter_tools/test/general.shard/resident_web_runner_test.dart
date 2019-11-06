@@ -12,17 +12,22 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
+import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -36,6 +41,13 @@ void main() {
   MockChromeDevice mockChromeDevice;
   MockAppConnection mockAppConnection;
   MockFlutterDevice mockFlutterDevice;
+  MockWebDevFS mockWebDevFS;
+  MockResidentCompiler mockResidentCompiler;
+  MockChrome mockChrome;
+  MockChromeConnection mockChromeConnection;
+  MockChromeTab mockChromeTab;
+  MockWipConnection mockWipConnection;
+  MockWipDebugger mockWipDebugger;
 
   setUp(() {
     mockWebFs = MockFlutterWebFs();
@@ -44,6 +56,13 @@ void main() {
     mockChromeDevice = MockChromeDevice();
     mockAppConnection = MockAppConnection();
     mockFlutterDevice = MockFlutterDevice();
+    mockWebDevFS = MockWebDevFS();
+    mockResidentCompiler = MockResidentCompiler();
+    mockChrome = MockChrome();
+    mockChromeConnection = MockChromeConnection();
+    mockChromeTab = MockChromeTab();
+    mockWipConnection = MockWipConnection();
+    mockWipDebugger = MockWipDebugger();
     when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
     testbed = Testbed(
       setup: () {
@@ -91,6 +110,17 @@ void main() {
       return const Stream<Event>.empty();
     });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
+    when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
+    when(mockWebDevFS.sources).thenReturn(<Uri>[]);
+    when(mockFlutterDevice.generator).thenReturn(mockResidentCompiler);
+    when(mockChrome.chromeConnection).thenReturn(mockChromeConnection);
+    when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
+      return mockChromeTab;
+    });
+    when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
+      return mockWipConnection;
+    });
+    when(mockWipConnection.debugger).thenReturn(mockWipDebugger);
   }
 
   test('runner with web server device does not support debugging', () => testbed.run(() {
@@ -250,6 +280,94 @@ void main() {
     verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
+  }));
+
+  test('Can hot reload after attaching - experimental', () => testbed.run(() async {
+    _setupMocks();
+    launchChromeInstance(mockChrome);
+    when(mockWebDevFS.update(
+      mainPath: anyNamed('mainPath'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+    )).thenAnswer((Invocation invocation) async {
+      return UpdateFSReport(success: true)
+        ..invalidatedModules = <String>['example'];
+    });
+    final BufferLogger bufferLogger = logger;
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
+
+    expect(bufferLogger.statusText, contains('Reloaded application in'));
+    expect(result.code, 0);
+    verify(mockResidentCompiler.accept()).called(2);
+	  // ensure that analytics are sent.
+    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
+    })).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockFlutterUsage(),
+    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
+  }));
+
+  test('Can hot restart after attaching - experimental', () => testbed.run(() async {
+    _setupMocks();
+    launchChromeInstance(mockChrome);
+    when(mockWebDevFS.update(
+      mainPath: anyNamed('mainPath'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+    )).thenAnswer((Invocation invocation) async {
+      return UpdateFSReport(success: true)
+        ..invalidatedModules = <String>['example'];
+    });
+    final BufferLogger bufferLogger = logger;
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    expect(bufferLogger.statusText, contains('Restarted application in'));
+    expect(result.code, 0);
+    verify(mockResidentCompiler.accept()).called(2);
+	  // ensure that analytics are sent.
+    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
+    })).called(1);
+    verifyNever(Usage.instance.sendTiming('hot', 'web-incremental-restart', any));
+  }, overrides: <Type, Generator>{
+    Usage: () => MockFlutterUsage(),
+    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
   test('Can hot restart after attaching', () => testbed.run(() async {
@@ -772,3 +890,10 @@ class MockAppConnection extends Mock implements AppConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
+class MockWebDevFS extends Mock implements DevFS {}
+class MockResidentCompiler extends Mock implements ResidentCompiler {}
+class MockChrome extends Mock implements Chrome {}
+class MockChromeConnection extends Mock implements ChromeConnection {}
+class MockChromeTab extends Mock implements ChromeTab {}
+class MockWipConnection extends Mock implements WipConnection {}
+class MockWipDebugger extends Mock implements WipDebugger {}

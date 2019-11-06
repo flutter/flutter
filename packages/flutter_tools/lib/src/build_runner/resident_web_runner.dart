@@ -379,7 +379,18 @@ class ResidentWebRunner extends ResidentRunner {
         benchmarkMode: benchmarkMode,
       );
       status.stop();
-      flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      final String verb = fullRestart ? 'Restarted' : 'Reloaded';
+      printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      if (!fullRestart) {
+        flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      }
+      HotEvent('restart',
+        targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
+        sdkName: await device.device.sdkNameAndVersion,
+        emulator: false,
+        fullRestart: true,
+        reason: reason,
+      ).send();
       return result;
     }
 
@@ -537,21 +548,33 @@ class ResidentWebRunner extends ResidentRunner {
       urisToMonitor: device.devFS.sources,
       packagesPath: packagesFilePath,
     );
-    final UpdateFSReport results = UpdateFSReport(success: true);
-    results.incorporateResults(await device.updateDevFS(
-      mainPath: mainPath,
-      target: target,
-      bundle: assetBundle,
-      firstBuildTime: firstBuildTime,
-      bundleFirstUpload: isFirstUpload,
-      bundleDirty: !isFirstUpload && rebuildBundle,
-      fullRestart: fullRestart,
-      projectRootPath: projectRootPath,
-      pathToReload: getReloadPath(fullRestart: fullRestart),
-      invalidatedFiles: invalidatedFiles,
-      dillOutputPath: dillOutputPath,
-    ));
-    return results;
+    final Status devFSStatus = logger.startProgress(
+      'Syncing files to device ${device.device.name}...',
+      timeout: timeoutConfiguration.fastOperation,
+    );
+    UpdateFSReport report;
+    try {
+      report = await device.devFS.update(
+        mainPath: mainPath,
+        target: target,
+        bundle: assetBundle,
+        firstBuildTime: firstBuildTime,
+        bundleFirstUpload: isFirstUpload,
+        generator: device.generator,
+        fullRestart: fullRestart,
+        dillOutputPath: dillOutputPath,
+        projectRootPath: projectRootPath,
+        pathToReload: getReloadPath(fullRestart: fullRestart),
+        invalidatedFiles: invalidatedFiles,
+        trackWidgetCreation: true,
+      );
+    } on DevFSException {
+      devFSStatus.cancel();
+      return UpdateFSReport(success: false);
+    }
+    devFSStatus.stop();
+    printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    return report;
   }
 
   @override
