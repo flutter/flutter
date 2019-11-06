@@ -1946,6 +1946,11 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
     assert(isEnabled != null);
     assert(isDiscrete != null);
     assert(textDirection != null);
+
+    if (sliderTheme.trackHeight <= 0) {
+      return;
+    }
+
     // Assign the track segment paints, which are left: active, right: inactive,
     // but reversed for right to left text.
     final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor , end: sliderTheme.activeTrackColor);
@@ -2728,6 +2733,11 @@ class _RectangularSliderValueIndicatorPathPainter {
     Color backgroundPaintColor,
     Color strokePaintColor,
   }) {
+    if (scale == 0.0) {
+      // Zero scale essentially means "do not draw anything", so it's safe to just return.
+      return;
+    }
+
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, mediaQueryData.textScaleFactor);
     final double horizontalShift = getHorizontalShift(
       parentBox: parentBox,
