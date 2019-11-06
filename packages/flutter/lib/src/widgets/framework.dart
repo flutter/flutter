@@ -1531,7 +1531,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///   final Color color;
 ///
 ///   static FrogColor of(BuildContext context) {
-///     return context.inheritFromWidgetOfExactType(FrogColor) as FrogColor;
+///     return context.inheritFromWidgetOfExactType<FrogColor>();
 ///   }
 ///
 ///   @override
