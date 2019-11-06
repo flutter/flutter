@@ -1,4 +1,4 @@
-Signature: f38817fef6d5c82164e147c0a8cdd2e0
+Signature: 1cbd9233e4bef369fa7a4ee0ef232811
 
 UNUSED LICENSES:
 
@@ -1424,11 +1424,9 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/bu
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Build-Win-Clang-x86_64-Release-ParentRevision.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Housekeeper-Weekly-RecreateSKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/cross_repo_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/flutter_trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/parent_revision_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/docker/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/doxygen/examples/full.expected/doxygen.json
@@ -1486,8 +1484,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/andr
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_trybot_failure.json
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_unrecognized_target.json
-FILE: ../../../third_party/skia/infra/bots/recipes/calmbench.expected/Calmbench-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All.json
-FILE: ../../../third_party/skia/infra/bots/recipes/calmbench.expected/Calmbench-Ubuntu17-Clang-Golo-GPU-QuadroP400-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/check_generated_files.expected/Housekeeper-PerCommit-CheckGeneratedFiles.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Clang-x86-Debug.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/normal_bot.json
@@ -1552,7 +1548,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skqp_test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-universal-devrel-All-Android_SKQP.json
 FILE: ../../../third_party/skia/infra/bots/recipes/sync_and_compile.expected/Build-Debian9-Clang-universal-devrel-Android_SKQP.json
-FILE: ../../../third_party/skia/infra/bots/recipes/sync_and_compile.expected/Build-Debian9-Clang-x86_64-Release-ParentRevision.json
 FILE: ../../../third_party/skia/infra/bots/recipes/sync_and_compile.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/sync_and_compile.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/sync_and_compile.expected/Build-Win10-Clang-x86_64-Release-NoDEPS.json
@@ -1628,8 +1623,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/pathkit
 FILE: ../../../third_party/skia/infra/bots/recipes/test_skqp_emulator.expected/Test-Debian9-Clang-GCE-CPU-Emulator-x86-devrel-All-Android_SKQP.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_buildstats_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_buildstats_results.expected/trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/normal_bot.json
-FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/alternate_bucket.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/failed_all.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/failed_once.json
