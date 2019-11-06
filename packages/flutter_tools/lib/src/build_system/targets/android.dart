@@ -47,11 +47,11 @@ abstract class AndroidAssetBundle extends Target {
       final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
       final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
-          .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
+          .copySync(outputDirectory.childFile('kernel_blob.bin').path);
       fs.file(vmSnapshotData)
-          .copySync(environment.outputDir.childFile('vm_snapshot_data').path);
+          .copySync(outputDirectory.childFile('vm_snapshot_data').path);
       fs.file(isolateSnapshotData)
-          .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
+          .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
     final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
     assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));

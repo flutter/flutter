@@ -41,9 +41,8 @@ void main() {
     await const DebugAndroidApplication().build(environment);
 
     expect(fs.file(fs.path.join('out', 'isolate_snapshot_data')).existsSync(), true);
-    expect(fs.file(fs.path.join('out', 'vm_snapshot_data')).existsSync(), true);
-    expect(fs.file(fs.path.join('out', 'kernel_blob.bin')).existsSync(), true);
-    expect(fs.directory(fs.path.join('out', 'flutter_assets')).existsSync(), true);
+    expect(fs.file(fs.path.join('out', 'flutter_assets', 'vm_snapshot_data')).existsSync(), true);
+    expect(fs.file(fs.path.join('out', 'flutter_assets', 'kernel_blob.bin')).existsSync(), true);
   });
 
   testbed.test('profile bundle contains expected resources', () async {
