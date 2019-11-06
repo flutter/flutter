@@ -523,7 +523,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
-        child: const MouseRegion(),
+        child: const MouseRegion(opaque: false),
       ),
     );
     final RenderMouseRegion listener = tester.renderObject(find.byType(MouseRegion));
@@ -538,6 +538,7 @@ void main() {
       Transform.scale(
         scale: 2.0,
         child: MouseRegion(
+          opaque: false,
           onHover: (PointerHoverEvent _) {},
         ),
       ),
@@ -550,7 +551,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
-        child: const MouseRegion(),
+        child: const MouseRegion(opaque: false),
       ),
     );
     expect(listener.needsCompositing, isFalse);
