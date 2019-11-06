@@ -437,10 +437,13 @@ void verify_b141980393() {
 void can_display_platform_view_with_pixel_ratio() {
   window.onBeginFrame = (Duration duration) {
     SceneBuilder builder = SceneBuilder();
-    builder.pushOffset(0.0, 20.0);
+    builder.pushOffset(0.0, 0.0); // base
+    builder.addPicture(Offset(0.0, 0.0), CreateGradientBox(Size(400.0, 300.0)));
+    builder.pushOffset(0.0, 20.0); // offset
     builder.addPlatformView(42, width: 400.0, height: 280.0);
-    builder.addPicture(Offset(0.0, 0.0), CreateSimplePicture());
-    builder.pop();
+    builder.pop(); // offset
+    builder.addPicture(Offset(0.0, 0.0), CreateColoredBox(Color.fromARGB(128, 255, 0, 0), Size(400.0, 300.0)));
+    builder.pop(); // base
     window.render(builder.build());
   };
   window.scheduleFrame();
