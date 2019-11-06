@@ -161,7 +161,7 @@ void main() {
     final BufferLogger bufferLogger = logger;
 
     expect(await residentWebRunner.run(), 1);
-    expect(bufferLogger.errorText, contains('No application found for TargetPlatform.web_javascript'));
+    expect(bufferLogger.errorText, contains('This application is not configured to build on the web'));
   }));
 
   test('Exits on run if target file does not exist', () => testbed.run(() async {
