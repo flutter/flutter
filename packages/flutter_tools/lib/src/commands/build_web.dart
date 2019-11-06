@@ -24,6 +24,13 @@ class BuildWebCommand extends BuildSubCommand {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
     );
+    argParser.addMultiOption('web-define',
+        hide: true,
+        splitCommas: true,
+        help: 'An environment variable to be passed to the web compilers'
+              'when building the Flutter Web app.',
+        valueHelp: 'VARIABLE=value',
+    );
   }
 
   @override
@@ -53,7 +60,7 @@ class BuildWebCommand extends BuildSubCommand {
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    await buildWeb(flutterProject, target, buildInfo, argResults['web-initialize-platform']);
+    await buildWeb(flutterProject, target, buildInfo, argResults['web-initialize-platform'], argResults['web-define']);
     return null;
   }
 }

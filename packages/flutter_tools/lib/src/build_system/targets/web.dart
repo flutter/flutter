@@ -26,6 +26,11 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
+/// A comma-separated list of environment variable definitions.
+///
+/// These take the form of FOO=bar,BAZ=quux. These are passed to the compiler.
+const String kWebDefines = 'WebDefines';
+
 /// Generates an entrypoint for a web target.
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
@@ -124,6 +129,13 @@ class Dart2JSTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
+    final String webDefines = environment.defines[kWebDefines];
+    List<String> parsedWebDefines;
+    if (webDefines == null || webDefines.isEmpty) {
+      parsedWebDefines = const <String>[];
+    } else {
+      parsedWebDefines = environment.defines[kWebDefines].split(',');
+    }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = fs.path.join(artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
     final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
@@ -147,6 +159,7 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
+      for (String define in parsedWebDefines) '-D$define',
       environment.buildDir.childFile('main.dart').path,
     ]);
     if (result.exitCode != 0) {

@@ -510,7 +510,7 @@ class DebuggingOptions {
     this.vmserviceOutFile,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
+  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false })
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,

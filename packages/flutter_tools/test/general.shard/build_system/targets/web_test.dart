@@ -236,6 +236,32 @@ void main() {
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(),
   }));
+
+  test('Dart2JSTarget calls dart2js with expected args in release with environment variables', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kWebDefines] = 'MY_TEST_VAR=true,TEST_STRING=foo';
+    when(processManager.run(any)).thenAnswer((Invocation invocation) async {
+      return FakeProcessResult(exitCode: 0);
+    });
+    await const Dart2JSTarget().build(environment);
+
+    final List<String> expected = <String>[
+      fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
+      '--libraries-spec=' + fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
+      '-O4',
+      '-o',
+      environment.buildDir.childFile('main.dart.js').absolute.path,
+      '--packages=.packages',
+      '-Ddart.vm.product=true',
+      '-DMY_TEST_VAR=true',
+      '-DTEST_STRING=foo',
+      environment.buildDir.childFile('main.dart').absolute.path,
+    ];
+    verify(processManager.run(expected)).called(1);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(),
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}

@@ -57,6 +57,7 @@ void main() {
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
+      <String>[],
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 

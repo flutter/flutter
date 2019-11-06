@@ -72,7 +72,7 @@ typedef DwdsFactory = Future<Dwds> Function({
   bool enableDebugExtension,
 });
 
-/// A function with the same signatuure as [WebFs.start].
+/// A function with the same signature as [WebFs.start].
 typedef WebFsFactory = Future<WebFs> Function({
   @required String target,
   @required FlutterProject flutterProject,
@@ -83,7 +83,7 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required String port,
 });
 
-/// The dev filesystem responsible for building and serving  web applications.
+/// The dev filesystem responsible for building and serving web applications.
 class WebFs {
   @visibleForTesting
   WebFs(
@@ -146,7 +146,7 @@ class WebFs {
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
     if (!_useBuildRunner) {
-      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform);
+      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform, <String>[]);
       return true;
     }
     _client.startBuild();
@@ -302,7 +302,7 @@ class WebFs {
         handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
       }
     } else {
-      await buildWeb(flutterProject, target, buildInfo, initializePlatform);
+      await buildWeb(flutterProject, target, buildInfo, initializePlatform, <String>[]);
       firstBuildCompleter.complete(true);
     }
 
