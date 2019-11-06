@@ -22,7 +22,7 @@ class StandardMouseCursorPlatform extends MouseCursorPlatform {
   @override
   Future<bool> activateShape(MouseCursorActivateShapeDetails details) {
     assert(details != null);
-    return channel.invokeMethod<void>(
+    return channel.invokeMethod<bool>(
       'activateShape',
       <String, dynamic>{
         'device': details.device,
