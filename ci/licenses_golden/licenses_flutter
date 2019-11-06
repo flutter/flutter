@@ -869,6 +869,8 @@ FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_root_surface_
 FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_software.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_with_platform_layer_on_bottom.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_with_root_layer_only.png
+FILE: ../../../flutter/shell/platform/embedder/fixtures/dpr_noxform.png
+FILE: ../../../flutter/shell/platform/embedder/fixtures/dpr_xform.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/gradient.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/gradient_xform.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/main.dart

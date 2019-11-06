@@ -148,8 +148,7 @@ SkCanvas* EmbedderExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
 static FlutterLayer MakeBackingStoreLayer(
     const SkISize& frame_size,
     const FlutterBackingStore* store,
-    const SkMatrix& surface_transformation,
-    double device_pixel_ratio) {
+    const SkMatrix& surface_transformation) {
   FlutterLayer layer = {};
 
   layer.struct_size = sizeof(layer);
@@ -160,9 +159,7 @@ static FlutterLayer MakeBackingStoreLayer(
       SkRect::MakeWH(frame_size.width(), frame_size.height());
 
   const auto transformed_layer_bounds =
-      SkMatrix::Concat(surface_transformation,
-                       SkMatrix::MakeScale(device_pixel_ratio))
-          .mapRect(layer_bounds);
+      surface_transformation.mapRect(layer_bounds);
 
   layer.offset.x = transformed_layer_bounds.x();
   layer.offset.y = transformed_layer_bounds.y();
@@ -231,6 +228,8 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
   // while making sure to take into account any surface transformations.
   if (auto root_canvas = root_render_target_->GetRenderSurface()->getCanvas()) {
     root_canvas->setMatrix(pending_surface_transformation_);
+    root_canvas->scale(pending_device_pixel_ratio_,
+                       pending_device_pixel_ratio_);
     root_canvas->clear(SK_ColorTRANSPARENT);
     root_canvas->drawPicture(
         root_picture_recorder_->finishRecordingAsPicture());
@@ -243,8 +242,7 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
     presented_layers.push_back(MakeBackingStoreLayer(
         pending_frame_size_,                     // frame size
         root_render_target_->GetBackingStore(),  // backing store
-        pending_surface_transformation_,         // surface transformation
-        pending_device_pixel_ratio_              // device pixel ratio
+        pending_surface_transformation_          // surface transformation
         ));
   }
 
@@ -318,6 +316,8 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
     }
 
     render_canvas->setMatrix(pending_surface_transformation_);
+    render_canvas->scale(pending_device_pixel_ratio_,
+                         pending_device_pixel_ratio_);
     render_canvas->clear(SK_ColorTRANSPARENT);
     render_canvas->drawPicture(picture);
     render_canvas->flush();
@@ -326,8 +326,7 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
     presented_layers.push_back(MakeBackingStoreLayer(
         pending_frame_size_,               // frame size
         render_target->GetBackingStore(),  // backing store
-        pending_surface_transformation_,   // surface transformation
-        pending_device_pixel_ratio_        // device pixel ratio
+        pending_surface_transformation_    // surface transformation
         ));
   }
 
