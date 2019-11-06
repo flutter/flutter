@@ -85,6 +85,7 @@ void main() {
       // Now the editing element should have focus.
       expect(document.activeElement, input);
       expect(editingElement.domElement, input);
+      expect(input.getAttribute('type'), null);
 
       // Input is appended to the glass pane.
       expect(domRenderer.glassPaneElement.contains(editingElement.domElement),
@@ -97,6 +98,25 @@ void main() {
       );
       // The focus is back to the body.
       expect(document.activeElement, document.body);
+    });
+
+    test('Knows how to create password fields', () {
+      final InputConfiguration config = InputConfiguration(
+        inputType: EngineInputType.text,
+        inputAction: 'TextInputAction.done',
+        obscureText: true,
+      );
+      editingElement.enable(
+        config,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      expect(document.getElementsByTagName('input'), hasLength(1));
+      final InputElement input = document.getElementsByTagName('input')[0];
+      expect(editingElement.domElement, input);
+      expect(input.getAttribute('type'), 'password');
+
+      editingElement.disable();
     });
 
     test('Can read editing state correctly', () {
