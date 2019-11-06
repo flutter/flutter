@@ -79,15 +79,6 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    String dataDescription;
-    switch (_data) {
-      case CupertinoUserInterfaceLevelData.base:
-        dataDescription = 'base';
-        break;
-      case CupertinoUserInterfaceLevelData.elevated:
-        dataDescription = 'elevated';
-        break;
-    }
-    properties.add(StringProperty('user interface level', dataDescription, showName: false));
+    properties.add(EnumProperty<CupertinoUserInterfaceLevelData>('user interface level', _data));
   }
 }

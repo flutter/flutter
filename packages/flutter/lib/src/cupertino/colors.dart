@@ -672,7 +672,7 @@ class CupertinoColors {
 /// * [CupertinoTheme.of], a static method that retrieves the ambient [CupertinoThemeData],
 ///   and then resolves [CupertinoDynamicColor]s used in the retrieved data.
 @immutable
-class CupertinoDynamicColor extends Color {
+class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Diagnosticable {
   /// Creates an adaptive [Color] that changes its effective color based on the
   /// [BuildContext] given. The default effective color is [color].
   ///
@@ -1029,7 +1029,7 @@ class CupertinoDynamicColor extends Color {
   }
 
   @override
-  String toString() {
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
     String toString(String name, Color color) {
       final String marker = color == _effectiveColor ? '*' : '';
       return '$marker$name = $color$marker';
@@ -1046,6 +1046,59 @@ class CupertinoDynamicColor extends Color {
     ];
 
     return '${_debugLabel ?? runtimeType.toString()}(${xs.join(', ')}), ${_debugResolveContext ?? "UNRESOLVED"}';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(createCupertinoColorProperty('color', color));
+    if (_isPlatformBrightnessDependent)
+      properties.add(createCupertinoColorProperty('darkColor', darkColor));
+    if (_isHighContrastDependent)
+      properties.add(createCupertinoColorProperty('highContrastColor', highContrastColor));
+    if (_isPlatformBrightnessDependent && _isHighContrastDependent)
+      properties.add(createCupertinoColorProperty('darkHighContrastColor', darkHighContrastColor));
+    if (_isInterfaceElevationDependent)
+      properties.add(createCupertinoColorProperty('elevatedColor', elevatedColor));
+    if (_isPlatformBrightnessDependent && _isInterfaceElevationDependent)
+      properties.add(createCupertinoColorProperty('darkElevatedColor', darkElevatedColor));
+    if (_isHighContrastDependent && _isInterfaceElevationDependent)
+      properties.add(createCupertinoColorProperty('highContrastElevatedColor', highContrastElevatedColor));
+    if (_isPlatformBrightnessDependent && _isHighContrastDependent && _isInterfaceElevationDependent)
+      properties.add(createCupertinoColorProperty('darkHighContrastElevatedColor', darkHighContrastElevatedColor));
+  }
+}
+
+/// Creates a diagnostics property for [CupertinoDynamicColor].
+///
+/// The [showName], [style], and [level] arguments must not be null.
+DiagnosticsProperty<Color> createCupertinoColorProperty(
+  String name,
+  Color value, {
+    bool showName = true,
+    Object defaultValue = kNoDefaultValue,
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.shallow,
+    DiagnosticLevel level = DiagnosticLevel.info,
+}) {
+  if (value is CupertinoDynamicColor) {
+    return DiagnosticsProperty<CupertinoDynamicColor>(
+      name,
+      value,
+      description: value._debugLabel,
+      showName: showName,
+      defaultValue: defaultValue,
+      style: style,
+      level: level,
+    );
+  } else {
+    return ColorProperty(
+      name,
+      value,
+      showName: showName,
+      defaultValue: defaultValue,
+      style: style,
+      level: level,
+    );
   }
 }
 

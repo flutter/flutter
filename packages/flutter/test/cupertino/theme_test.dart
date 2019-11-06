@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart' show SetEquality;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -162,6 +165,36 @@ void main() {
     iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.activeOrange));
     expect(buildCount, 2);
     expect(iconTheme.color, CupertinoColors.activeOrange);
+  });
+
+  testWidgets('CupertinoTheme diagnostics', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const CupertinoThemeData().debugFillProperties(builder);
+
+    final Set<String> description = builder.properties
+      .map((DiagnosticsNode node) => node.name.toString())
+      .toSet();
+
+    expect(
+      const SetEquality<String>().equals(
+        description,
+        <String>{ 'brightness',
+          'primaryColor',
+          'primaryContrastingColor',
+          'barBackgroundColor',
+          'scaffoldBackgroundColor',
+          'textStyle',
+          'actionTextStyle',
+          'tabLabelTextStyle',
+          'navTitleTextStyle',
+          'navLargeTitleTextStyle',
+          'navActionTextStyle',
+          'pickerTextStyle',
+          'dateTimePickerTextStyle'
+        }
+      ),
+      isTrue,
+    );
   });
 
   Brightness currentBrightness;

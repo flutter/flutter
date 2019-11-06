@@ -135,7 +135,7 @@ class CupertinoTextThemeData extends Diagnosticable {
     TextStyle pickerTextStyle,
     TextStyle dateTimePickerTextStyle,
   }) : this._raw(
-         const _DefaultCupertinoTextThemeData(),
+         const _DefaultCupertinoTextThemeDataBuilder(),
          primaryColor,
          textStyle,
          actionTextStyle,
@@ -160,7 +160,7 @@ class CupertinoTextThemeData extends Diagnosticable {
     this._dateTimePickerTextStyle,
   ) : assert((_navActionTextStyle != null && _actionTextStyle != null) || _primaryColor != null);
 
-  final _DefaultCupertinoTextThemeData _defaults;
+  final _DefaultCupertinoTextThemeDataBuilder _defaults;
   final Color _primaryColor;
 
   final TextStyle _textStyle;
@@ -248,11 +248,27 @@ class CupertinoTextThemeData extends Diagnosticable {
       dateTimePickerTextStyle ?? _dateTimePickerTextStyle,
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    const CupertinoTextThemeData defaultData = CupertinoTextThemeData();
+    properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: defaultData.textStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('actionTextStyle', actionTextStyle, defaultValue: defaultData.actionTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('tabLabelTextStyle', tabLabelTextStyle, defaultValue: defaultData.tabLabelTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('navTitleTextStyle', navTitleTextStyle, defaultValue: defaultData.navTitleTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('navLargeTitleTextStyle', navLargeTitleTextStyle, defaultValue: defaultData.navLargeTitleTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('navActionTextStyle', navActionTextStyle, defaultValue: defaultData.navActionTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('pickerTextStyle', pickerTextStyle, defaultValue: defaultData.pickerTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('dateTimePickerTextStyle', dateTimePickerTextStyle, defaultValue: defaultData.dateTimePickerTextStyle));
+  }
 }
 
+
+
 @immutable
-class _DefaultCupertinoTextThemeData extends Diagnosticable {
-  const _DefaultCupertinoTextThemeData({
+class _DefaultCupertinoTextThemeDataBuilder {
+  const _DefaultCupertinoTextThemeDataBuilder({
     this.labelColor = CupertinoColors.label,
     this.inactiveGrayColor = CupertinoColors.inactiveGray,
   }) : assert(labelColor != null),
@@ -277,11 +293,11 @@ class _DefaultCupertinoTextThemeData extends Diagnosticable {
   TextStyle actionTextStyle({ Color primaryColor }) => _kDefaultActionTextStyle.copyWith(color: primaryColor);
   TextStyle navActionTextStyle({ Color primaryColor }) => actionTextStyle(primaryColor: primaryColor);
 
-  _DefaultCupertinoTextThemeData resolveFrom(BuildContext context, bool nullOk) {
+  _DefaultCupertinoTextThemeDataBuilder resolveFrom(BuildContext context, bool nullOk) {
     final Color resolvedLabelColor = CupertinoDynamicColor.resolve(labelColor, context, nullOk: nullOk);
     final Color resolvedInactiveGray = CupertinoDynamicColor.resolve(inactiveGrayColor, context, nullOk: nullOk);
     return resolvedLabelColor == labelColor && resolvedInactiveGray == CupertinoColors.inactiveGray
       ? this
-      : _DefaultCupertinoTextThemeData(labelColor: resolvedLabelColor, inactiveGrayColor: resolvedInactiveGray);
+      : _DefaultCupertinoTextThemeDataBuilder(labelColor: resolvedLabelColor, inactiveGrayColor: resolvedInactiveGray);
   }
 }

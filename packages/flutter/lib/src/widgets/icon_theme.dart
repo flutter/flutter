@@ -86,6 +86,6 @@ class IconTheme extends InheritedTheme {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IconThemeData>('data', data, showName: false));
+    data.debugFillProperties(properties);
   }
 }
