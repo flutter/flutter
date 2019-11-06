@@ -432,9 +432,9 @@ class FlutterPlugin implements Plugin<Project> {
         return System.getProperty('build-plugins-as-aars') == 'true'
     }
 
-    // Returns true if the build supports a build mode.
-    // This only relevant when building using a local engine. Because the engine
-    // is built for a specific mode, the build must match that mode when using a local engine.
+    // Returns true if the build mode is supported by the current call to Gradle.
+    // This only relevant when using a local engine. Because the engine
+    // is built for a specific mode, the call to Gradle must match that mode.
     private Boolean supportsBuildMode(String flutterBuildMode) {
         if (!useLocalEngine()) {
             return true;
