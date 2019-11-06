@@ -60,6 +60,7 @@ class Chrome extends Browser {
         '--window-size=$kMaxScreenshotWidth,$kMaxScreenshotHeight', // When headless, this is the actual size of the viewport
         '--disable-extensions',
         '--disable-popup-blocking',
+        // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
         '--bwsi',
         '--no-first-run',
         '--no-default-browser-check',

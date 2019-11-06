@@ -4,6 +4,23 @@
 
 part of engine;
 
+/// Contains a whitelist of keys that must be sent to Flutter under all
+/// circumstances.
+///
+/// When keys are pressed in a text field, we generally don't want to send them
+/// to Flutter. This list of keys is the exception to that rule. Keys in this
+/// list will be sent to Flutter even if pressed in a text field.
+///
+/// A good example is the "Tab" and "Shift" keys which are used by the framework
+/// to move focus between text fields.
+const List<String> _alwaysSentKeys = <String>[
+  'Alt',
+  'Control',
+  'Meta',
+  'Shift',
+  'Tab',
+];
+
 /// Provides keyboard bindings, such as the `flutter/keyevent` channel.
 class Keyboard {
   /// Initializes the [Keyboard] singleton.
@@ -50,6 +67,10 @@ class Keyboard {
   static const JSONMessageCodec _messageCodec = JSONMessageCodec();
 
   void _handleHtmlEvent(html.KeyboardEvent event) {
+    if (_shouldIgnoreEvent(event)) {
+      return;
+    }
+
     if (_shouldPreventDefault(event)) {
       event.preventDefault();
     }
@@ -64,6 +85,20 @@ class Keyboard {
 
     ui.window.onPlatformMessage('flutter/keyevent',
         _messageCodec.encodeMessage(eventData), _noopCallback);
+  }
+
+  /// Whether the [Keyboard] class should ignore the given [html.KeyboardEvent].
+  ///
+  /// When this method returns true, it prevents the keyboard event from being
+  /// sent to Flutter.
+  bool _shouldIgnoreEvent(html.KeyboardEvent event) {
+    // Keys in the [_alwaysSentKeys] list should never be ignored.
+    if (_alwaysSentKeys.contains(event.key)) {
+      return false;
+    }
+    // Other keys should be ignored if triggered on a text field.
+    return event.target is html.Element &&
+        HybridTextEditing.isEditingElement(event.target);
   }
 
   bool _shouldPreventDefault(html.KeyboardEvent event) {
