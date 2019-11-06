@@ -99,7 +99,7 @@ class _@classNameDelegate extends LocalizationsDelegate<@className> {
   Future<@className> load(Locale locale) => @className.load(locale);
 
   @override
-  bool isSupported(Locale locale) => [@supportedLanguageCodes].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[@supportedLanguageCodes].contains(locale.languageCode);
 
   @override
   bool shouldReload(_@classNameDelegate old) => false;
@@ -236,7 +236,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
 }
 
 String genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
-  const String prefix = 'static const List<Locale> supportedLocales = <Locale>[ \n    Locale(''';
+  const String prefix = 'static const List<Locale> supportedLocales = <Locale>[\n    Locale(''';
   const String suffix = '),\n  ];';
 
   String resultingProperty = prefix;
@@ -289,7 +289,7 @@ bool _isDirectoryReadableAndWritable(String statString) {
 
 String _importFilePath(String path, String fileName) {
   final String replaceLib = path.replaceAll('lib/', '');
-  return '$replaceLib/$fileName.dart';
+  return '$replaceLib/$fileName';
 }
 
 Future<void> main(List<String> args) async {
