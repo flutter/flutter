@@ -166,6 +166,20 @@ This is sent when an app is stopped or detached from. The `params` field will be
 
 This is sent once a web application is being served and available for the user to access. The `params` field will be a map with a string `url` field and a boolean `launched` indicating whether the application has already been launched in a browser (this will generally be true for a browser device unless `--no-web-browser-launch` was used, and false for the headless `web-server` device).
 
+### Daemon-to-Editor Requests
+
+These requests _come_ from the Flutter daemon and should be responded to by the client/editor.
+
+#### app.exposeUrl
+
+This request is sent by the server when it has a local URL that needs to be exposed to the end user. This is to support running on a remote machine where a URL (for example `http://localhost:1234`) may not be directly accessible to the end user. With this URL clients can perform tunnelling and then provide the tunneled URL back to Flutter so that it can be used in code that will be executed on the end users machine (for example wehen a web application needs to be able to connect back to a service like the DWDS debugging service).
+
+This request will only be sent if a web application was run in a mode that requires mapped URLs (such as using `--no-web-browser-launch` for browser devices or the headless `web-server` device when debugging). If a client does not respond within a period of time, the URL will be used un-mapped, however clients are encouraged to respond immediately with the same URL if that is the required behaviour (such as when running locally) to avoid a delay.
+
+The request will contain an `id` field and a `params` field that is a map containing a string `url` field.
+
+The response should be sent using the same `id` as the request with a `params` map containing the mapped `url` (or the same URL in the case where the client does not need to perform any mapping).
+
 ### device domain
 
 #### device.getDevices
