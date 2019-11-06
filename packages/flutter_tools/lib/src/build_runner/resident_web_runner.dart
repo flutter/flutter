@@ -96,12 +96,13 @@ abstract class ResidentWebRunner extends ResidentRunner {
 
   // Only the debug builds of the web support the service protocol.
   @override
-  bool get supportsServiceProtocol =>
-      isRunningDebug && device.device is! WebServerDevice;
+  bool get supportsServiceProtocol => isRunningDebug && deviceIsDebuggable;
 
   @override
-  bool get debuggingEnabled =>
-      isRunningDebug && device.device is! WebServerDevice;
+  bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
+
+  // WebServer device is debuggable when running with --start-paused.
+  bool get deviceIsDebuggable => device is! WebServerDevice || debuggingOptions.startPaused;
 
   WebFs _webFs;
   ConnectionResult _connectionResult;
@@ -602,7 +603,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           initializePlatform: debuggingOptions.initializePlatform,
           hostname: debuggingOptions.hostname,
           port: debuggingOptions.port,
-          skipDwds: device.device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
+          skipDwds: !deviceIsDebuggable || !debuggingOptions.buildInfo.isDebug,
           dartDefines: dartDefines,
         );
         // When connecting to a browser, update the message with a seemsSlow notification
@@ -625,7 +626,10 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           },
         );
         if (supportsServiceProtocol) {
-          _connectionResult = await _webFs.connect(debuggingOptions);
+          final bool useDebugExtension = device is WebServerDevice
+            ? debuggingOptions.startPaused
+            : !debuggingOptions.browserLaunch;
+          _connectionResult = await _webFs.connect(useDebugExtension);
           unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
         }
         if (statusActive) {

@@ -250,7 +250,11 @@ class WebServerDevice extends Device {
     bool ipv6 = false,
   }) async {
     final String url = platformArgs['uri'] as String;
-    printStatus('$mainPath is being served at $url', emphasis: true);
+    if (debuggingOptions.startPaused) {
+      printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
+    } else {
+      printStatus('$mainPath is being served at $url', emphasis: true);
+    }
     logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
     return LaunchResult.succeeded(observatoryUri: null);
   }
