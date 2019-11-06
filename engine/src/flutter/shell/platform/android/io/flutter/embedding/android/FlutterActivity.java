@@ -494,7 +494,7 @@ public class FlutterActivity extends Activity
           PackageManager.GET_META_DATA|PackageManager.GET_ACTIVITIES
       );
       Bundle metadata = activityInfo.metaData;
-      int splashScreenId = metadata != null ? metadata.getInt(SPLASH_SCREEN_META_DATA_KEY) : null;
+      int splashScreenId = metadata != null ? metadata.getInt(SPLASH_SCREEN_META_DATA_KEY) : 0;
       return splashScreenId != 0
           ? Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP
             ? getResources().getDrawable(splashScreenId, getTheme())
