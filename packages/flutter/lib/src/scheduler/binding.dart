@@ -333,8 +333,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         _setFramesEnabledState(true);
         break;
       case AppLifecycleState.paused:
-      case AppLifecycleState.detached:
         _setFramesEnabledState(false);
+        break;
+      default:
         break;
     }
   }
@@ -352,8 +353,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         return AppLifecycleState.resumed;
       case 'AppLifecycleState.inactive':
         return AppLifecycleState.inactive;
-      case 'AppLifecycleState.detached':
-        return AppLifecycleState.detached;
     }
     return null;
   }
