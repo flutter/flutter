@@ -123,8 +123,7 @@ fi
 cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
 
 # Upload new API docs when running on Cirrus
-# TODO(jackson): Temporarily enabling this for PRs, revert before landing
-if [[ -n "$CIRRUS_CI" ]]; then
+if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
   if [[ "$CIRRUS_BRANCH" == "master" ]]; then
     echo "Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
