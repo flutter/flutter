@@ -33,9 +33,6 @@ import io.flutter.view.FlutterCallbackInformation;
 /**
  * Interface between Flutter embedding's Java code and Flutter engine's C/C++ code.
  *
- * WARNING: THIS CLASS IS EXPERIMENTAL. DO NOT SHIP A DEPENDENCY ON THIS CODE.
- * IF YOU USE IT, WE WILL BREAK YOU.
- *
  * Flutter's engine is built with C/C++. The Android Flutter embedding is responsible for
  * coordinating Android OS events and app user interactions with the C/C++ engine. Such coordination
  * requires messaging from an Android app in Java code to the C/C++ engine code. This

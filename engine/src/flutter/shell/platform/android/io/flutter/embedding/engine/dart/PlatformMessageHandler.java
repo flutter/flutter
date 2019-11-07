@@ -8,8 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * WARNING: THIS CLASS IS EXPERIMENTAL. DO NOT SHIP A DEPENDENCY ON THIS CODE.
- * IF YOU USE IT, WE WILL BREAK YOU.
+ * Handler that receives messages from Dart code.
  */
 public interface PlatformMessageHandler {
   void handleMessageFromDart(@NonNull final String channel, @Nullable byte[] message, final int replyId);

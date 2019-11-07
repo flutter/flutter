@@ -37,8 +37,6 @@ import io.flutter.plugin.platform.PlatformViewsController;
 /**
  * A single Flutter execution environment.
  * <p>
- * WARNING: THIS CLASS IS CURRENTLY EXPERIMENTAL. USE AT YOUR OWN RISK.
- * <p>
  * The {@code FlutterEngine} is the container through which Dart code can be run in an Android
  * application.
  * <p>
