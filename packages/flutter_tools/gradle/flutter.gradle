@@ -774,6 +774,7 @@ class FlutterTask extends BaseFlutterTask {
     }
 
     FileCollection readDependencies(File dependenciesFile) {
+      if (dependenciesFile.exists()) {
         // Dependencies file has Makefile syntax:
         //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
         String depText = dependenciesFile.text
@@ -782,6 +783,8 @@ class FlutterTask extends BaseFlutterTask {
         // then we replace all escaped spaces with regular spaces
         def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
         return project.files(depList)
+      }
+      return project.files();
     }
 
     @InputFiles
