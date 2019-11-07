@@ -123,19 +123,17 @@ fi
 cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
 
 # Upload new API docs when running on Cirrus
-# TODO(jackson): Temporarily enabling upload for PRs, revert before landing
+# TODO(jackson): Temporarily enabling this for PRs, revert before landing
 if [[ -n "$CIRRUS_CI" ]]; then
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
-  # TODO(jackson): Temporarily enabling upload for PRs, revert before landing
-  # if [[ "$CIRRUS_BRANCH" == "master" ]]; then
+  if [[ "$CIRRUS_BRANCH" == "master" ]]; then
     echo "Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
     # Disable search indexing on the master staging site so searches get only
     # the stable site.
     echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
     export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
     deploy 5 master-docs-flutter-dev
-  # TODO(jackson): Temporarily enabling upload for PRs, revert before landing
-  # fi
+  fi
 
   if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
     # Enable search indexing on the master staging site so searches get only
