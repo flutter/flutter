@@ -23,6 +23,23 @@ import 'messages_all.dart';
 /// );
 /// ```
 ///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```
+/// dependencies:
+///   # rest of dependencies
+///
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: 0.16.0
+///   intl_translation: 0.17.7
+///
+///   # rest of dependencies
+/// ```
+///
 /// ## iOS Applications
 ///
 /// iOS applications define key application metadata, including supported
@@ -42,7 +59,6 @@ import 'messages_all.dart';
 /// you wish to add from the pop-up menu in the Value field. This list should
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
-
 class StockStrings {
   StockStrings(Locale locale) : _localeName = locale.toString();
 
