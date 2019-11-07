@@ -1482,7 +1482,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-    print('EditableText handling selection change: $selection');
     widget.controller.selection = selection;
 
     // This will show the keyboard for all selection changes on the

@@ -3301,7 +3301,7 @@ void main() {
       reason: 'on $platform',
     );
 
-    // Select to the end of the line.
+    // Select to the end of the selection.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -3340,7 +3340,7 @@ void main() {
       equals(
         const TextSelection(
           baseOffset: 21,
-          extentOffset: 0,
+          extentOffset: 55,
           affinity: TextAffinity.downstream,
         ),
       ),

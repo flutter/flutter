@@ -369,12 +369,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
     // changed.
-    print('Received selection change: $nextSelection $cause');
     if (nextSelection == selection && cause != SelectionChangedCause.keyboard) {
       return;
     }
     if (onSelectionChanged != null) {
-      print('Applied selection change: $selection $cause');
       onSelectionChanged(nextSelection, this, cause);
     }
   }
@@ -424,8 +422,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleKeyEvent(RawKeyEvent keyEvent) {
     if (keyEvent is! RawKeyDownEvent || onSelectionChanged == null)
       return;
-
-    print('Keys down: ${RawKeyboard.instance.keysPressed}');
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
     final LogicalKeyboardKey key = keyEvent.logicalKey;
 
@@ -471,46 +467,84 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final bool upArrow = key == LogicalKeyboardKey.arrowUp;
     final bool downArrow = key == LogicalKeyboardKey.arrowDown;
 
+    // Returns true if [c] represents a whitespace code unit.
+    bool isWhitespace(int c) => (c <= 0x000D && c >= 0x0009) || c == 0x0020;
+
+    // Find the previous non-whitespace character
+    int previousNonWhitespace(int extent) {
+      int result = math.max(extent - 1, 0);
+      final String plain = text.toPlainText();
+      while (result > 0 && isWhitespace(plain.codeUnitAt(result))) {
+        result--;
+      }
+      return result;
+    }
+
+    int nextNonWhitespace(int extent) {
+      final String plain = text.toPlainText();
+      int result = math.min(extent + 1, plain.length);
+      while (result < plain.length && isWhitespace(plain.codeUnitAt(result))) {
+        result++;
+      }
+      return result;
+    }
+
     // Jump to begin/end of word.
     if (wordModifier) {
-      // If control/option is pressed, we will decide which way to look for a word
-      // based on which arrow is pressed.
-      if (leftArrow && newSelection.extentOffset > 2) {
-        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: newSelection.extentOffset - 2));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset + 1);
-      } else if (rightArrow && newSelection.extentOffset < text.toPlainText().length - 2) {
-        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: newSelection.extentOffset + 1));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset - 1);
+      // If control/option is pressed, we will decide which way to look for a
+      // word based on which arrow is pressed.
+      if (leftArrow) {
+        // When going left, we want to skip over any whitespace before the word,
+        // so we go back to the first non-whitespace before asking for the word
+        // boundary, since _selectWordAtOffset finds the word boundaries without
+        // including whitespace.
+        final int startPoint = previousNonWhitespace(newSelection.extentOffset);
+        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
+        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
+      } else if (rightArrow) {
+        // When going right, we want to skip over any whitespace after the word,
+        // so we go forward to the first non-whitespace character before asking
+        // for the word bounds, since _selectWordAtOffset finds the word
+        // boundaries without including whitespace.
+        final int startPoint = nextNonWhitespace(newSelection.extentOffset);
+        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
+        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
       }
-    }
-
-    // Jump to begin/end of line.
-    if (lineModifier) {
+    } else if (lineModifier) {
       // If control/command is pressed, we will decide which way to expand to
       // the beginning/end of the line based on which arrow is pressed.
-      if (leftArrow && newSelection.extentOffset > 2) {
-        final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: newSelection.extentOffset - 2));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset + 1);
-      } else if (rightArrow && newSelection.extentOffset < text.toPlainText().length - 2) {
-        final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: newSelection.extentOffset + 1));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset - 1);
+      if (leftArrow) {
+        // When going left, we want to skip over any whitespace before the line,
+        // so we go back to the first non-whitespace before asking for the line
+        // bounds, since _selectLineAtOffset finds the line boundaries without
+        // including whitespace (like the newline).
+        final int startPoint = previousNonWhitespace(newSelection.extentOffset);
+        final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
+        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
+      } else if (rightArrow) {
+        // When going right, we want to skip over any whitespace after the line,
+        // so we go forward to the first non-whitespace character before asking
+        // for the line bounds, since _selectLineAtOffset finds the line
+        // boundaries without including whitespace (like the newline).
+        final int startPoint = nextNonWhitespace(newSelection.extentOffset);
+        final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
+        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
+      }
+    } else {
+      if (rightArrow && newSelection.extentOffset < text.toPlainText().length) {
+        newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset + 1);
+        if (shift) {
+          _cursorResetLocation += 1;
+        }
+      }
+      if (leftArrow && newSelection.extentOffset > 0) {
+        newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset - 1);
+        if (shift) {
+          _cursorResetLocation -= 1;
+        }
       }
     }
 
-    // Set the new offset to be +/- 1 depending on which arrow is pressed
-    // If shift is down, we also want to update the previous cursor location
-    if (rightArrow && newSelection.extentOffset < text.toPlainText().length) {
-      newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset + 1);
-      if (shift) {
-        _cursorResetLocation += 1;
-      }
-    }
-    if (leftArrow && newSelection.extentOffset > 0) {
-      newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset - 1);
-      if (shift) {
-        _cursorResetLocation -= 1;
-      }
-    }
     // Handles moving the cursor vertically as well as taking care of the
     // case where the user moves the cursor to the end or beginning of the text
     // and then back up or down.
@@ -545,7 +579,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
     }
 
-    // Just place the collapsed selection at the new position if shift isn't down.
+    // Just place the collapsed selection at the end or beginning of the region
+    // if shift isn't down.
     if (!shift) {
       // We want to put the cursor at the correct location depending on which
       // arrow is used while there is a selection.
@@ -553,15 +588,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       if (!selection.isCollapsed) {
         if (leftArrow) {
           newOffset = newSelection.baseOffset < newSelection.extentOffset ? newSelection.baseOffset : newSelection.extentOffset;
-          print('Left $newSelection $newOffset');
         } else if (rightArrow) {
           newOffset = newSelection.baseOffset > newSelection.extentOffset ? newSelection.baseOffset : newSelection.extentOffset;
-          print('Right $newSelection $newOffset');
         }
       }
       newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
     }
-    print('Setting to new selection: $newSelection cursor:$_cursorResetLocation');
+
+    // Update the text selection delegate so that the engine knows what we did.
+    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
     _handleSelectionChange(
       newSelection,
       SelectionChangedCause.keyboard,
