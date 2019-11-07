@@ -278,7 +278,7 @@ enum Thumb {
 /// by creating subclasses of [SliderTrackShape],
 /// [SliderComponentShape], and/or [SliderTickMarkShape]. See
 /// [RoundSliderThumbShape], [RectangularSliderTrackShape],
-/// [RoundSliderTickMarkShape], [PaddleSliderValueIndicatorShape], and
+/// [RoundSliderTickMarkShape], [RectangularSliderValueIndicatorShape], and
 /// [RoundSliderOverlayShape] for examples.
 ///
 /// The track painting can be skipped by specifying 0 for [trackHeight].
@@ -2340,10 +2340,10 @@ class RoundSliderThumbShape extends SliderComponentShape {
       end: pressedElevation,
     );
 
-    final evaluatedElevation = elevationTween.evaluate(activationAnimation);
+    final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
     final Color color = colorTween.evaluate(enableAnimation);
-    final radius = radiusTween.evaluate(enableAnimation);
-    Path path = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
+    final double radius = radiusTween.evaluate(enableAnimation);
+    final Path path = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
     canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
 
     // If the thumb is translucent, clear the space of the track and shadow so
@@ -2563,7 +2563,13 @@ class RoundSliderOverlayShape extends SliderComponentShape {
   }
 }
 
-/// TODO(antrob): docs
+/// The default shape of a [Slider]'s value indicator.
+///
+/// See also:
+///
+///  * [Slider], which includes a value indicator defined by this shape.
+///  * [SliderTheme], which can be used to configure the slider value indicator
+///    of all sliders in a widget subtree.
 class RectangularSliderValueIndicatorShape extends SliderComponentShape {
   /// Create a slider value indicator that resembles a rectangular tooltip.
   const RectangularSliderValueIndicatorShape();
@@ -2607,7 +2613,13 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
   }
 }
 
-/// TODO(antrob): docs
+/// The default shape of a [RangeSlider]'s value indicators.
+///
+/// See also:
+///
+///  * [RangeSlider], which includes value indicators defined by this shape.
+///  * [SliderTheme], which can be used to configure the range slider value
+///    indicator of all sliders in a widget subtree.
 class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShape {
   /// Create a range slider value indicator that resembles a rectangular tooltip.
   const RectangularRangeSliderValueIndicatorShape();
@@ -2618,10 +2630,11 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
-    TextPainter labelPainter,
-    MediaQueryData mediaQueryData,
+    @required TextPainter labelPainter,
+    @required MediaQueryData mediaQueryData,
   }) {
     assert(labelPainter != null);
+    assert(mediaQueryData != null);
     return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, mediaQueryData);
   }
 
@@ -2804,7 +2817,7 @@ class _RectangularSliderValueIndicatorPathPainter {
   }
 }
 
-/// The default shape of a [Slider]'s value indicator.
+/// A variant shape of a [Slider]'s value indicator .
 ///
 /// See also:
 ///
@@ -2867,7 +2880,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   }
 }
 
-/// The default shape of a [RangeSlider]'s value indicators.
+/// A variant shape of a [RangeSlider]'s value indicators.
 ///
 /// See also:
 ///

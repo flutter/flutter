@@ -1262,8 +1262,6 @@ void main() {
   });
 
   testWidgets('Range Slider uses the right theme colors for the right shapes when the value indicators are showing', (WidgetTester tester) async {
-    const Color customColor1 = Color(0xcafefeed);
-    const Color customColor2 = Color(0xdeadbeef);
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
     RangeValues values = const RangeValues(0.5, 0.75);
@@ -1305,7 +1303,7 @@ void main() {
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
-    TestGesture gesture = await tester.startGesture(topRight);
+    final TestGesture gesture = await tester.startGesture(topRight);
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
     expect(values.end, equals(1));

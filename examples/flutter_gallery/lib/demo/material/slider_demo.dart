@@ -59,18 +59,18 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset center, {
-    @required Animation<double> activationAnimation,
-    @required Animation<double> enableAnimation,
-    bool isDiscrete = false,
-    bool isEnabled = false,
-    bool isOnTop,
-    @required SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    Thumb thumb,
-    bool isPressed,
-  }) {
+      PaintingContext context,
+      Offset center, {
+        @required Animation<double> activationAnimation,
+        @required Animation<double> enableAnimation,
+        bool isDiscrete = false,
+        bool isEnabled = false,
+        bool isOnTop,
+        @required SliderThemeData sliderTheme,
+        TextDirection textDirection,
+        Thumb thumb,
+        MediaQueryData mediaQueryData,
+      }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -121,18 +121,18 @@ class _CustomThumbShape extends SliderComponentShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    bool isDiscrete,
-    TextPainter labelPainter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-    MediaQueryData mediaQueryData,
-  }) {
+      PaintingContext context,
+      Offset thumbCenter, {
+        Animation<double> activationAnimation,
+        Animation<double> enableAnimation,
+        bool isDiscrete,
+        TextPainter labelPainter,
+        RenderBox parentBox,
+        SliderThemeData sliderTheme,
+        TextDirection textDirection,
+        double value,
+        MediaQueryData mediaQueryData,
+      }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -161,18 +161,18 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    bool isDiscrete,
-    TextPainter labelPainter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-    MediaQueryData mediaQueryData,
-  }) {
+      PaintingContext context,
+      Offset thumbCenter, {
+        Animation<double> activationAnimation,
+        Animation<double> enableAnimation,
+        bool isDiscrete,
+        TextPainter labelPainter,
+        RenderBox parentBox,
+        SliderThemeData sliderTheme,
+        TextDirection textDirection,
+        double value,
+        MediaQueryData mediaQueryData,
+      }) {
     final Canvas canvas = context.canvas;
     final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -191,13 +191,12 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       Paint()..color = paintColor,
     );
     canvas.drawLine(
-      thumbCenter,
-      thumbCenter + slideUpOffset,
-      Paint()
-        ..color = paintColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0,
-    );
+        thumbCenter,
+        thumbCenter + slideUpOffset,
+        Paint()
+          ..color = paintColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0);
     labelPainter.paint(canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
   }
 }
@@ -243,58 +242,44 @@ class _SlidersState extends State<_Sliders> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 40.0),
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          SizedBox(height: 40),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-//              Semantics(
-//                label: 'Editable numerical value',
-//                child: SizedBox(
-//                  width: 64,
-//                  height: 48,
-//                  child: TextField(
-//                    textAlign: TextAlign.center,
-//                    onSubmitted: (String value) {
-//                      final double newValue = double.tryParse(value);
-//                      if (newValue != null && newValue != _continuousValue) {
-//                        setState(() {
-//                          _continuousValue = newValue.clamp(0, 100);
-//                        });
-//                      }
-//                    },
-//                    keyboardType: TextInputType.number,
-//                    controller: TextEditingController(
-//                      text: _continuousValue.toStringAsFixed(0),
-//                    ),
-//                  ),
-//                ),
-//              ),
-              SliderTheme(
-                data: const SliderThemeData(
-                  showValueIndicator: ShowValueIndicator.always,
-//                  valueIndicatorShape: PaddleSliderValueIndicatorShape(),
-                ),
-                child: MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    textScaleFactor: 3.11,
-//                  textScaleFactor: 1,
-                  ),
-                  child: Slider.adaptive(
-                    value: _continuousValue,
-                    min: 0.0,
-                    max: 100.0,
-                    label: '${(_continuousValue).toStringAsFixed(4)}',
-                    onChanged: (double value) {
-                      setState(() {
-                        _continuousValue = value;
-                      });
+              Semantics(
+                label: 'Editable numerical value',
+                child: SizedBox(
+                  width: 64,
+                  height: 48,
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    onSubmitted: (String value) {
+                      final double newValue = double.tryParse(value);
+                      if (newValue != null && newValue != _continuousValue) {
+                        setState(() {
+                          _continuousValue = newValue.clamp(0, 100);
+                        });
+                      }
                     },
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(
+                      text: _continuousValue.toStringAsFixed(0),
+                    ),
                   ),
                 ),
+              ),
+              Slider.adaptive(
+                value: _continuousValue,
+                min: 0.0,
+                max: 100.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _continuousValue = value;
+                  });
+                },
               ),
               const Text('Continuous with Editable Numerical Value'),
             ],
@@ -309,24 +294,17 @@ class _SlidersState extends State<_Sliders> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              SliderTheme(
-                data: SliderThemeData(
-//                  tickMarkShape: RoundSliderTickMarkShape(tickMarkRadius: 1),
-//                  activeTickMarkColor: Colors.green.withOpacity(0.75),
-//                  inactiveTickMarkColor: Colors.green.withOpacity(0.75),
-                ),
-                child: Slider.adaptive(
-                  value: _discreteValue,
-                  min: 0.0,
-                  max: 200.0,
-                  divisions: 5,
-                  label: '${_discreteValue.round()}',
-                  onChanged: (double value) {
-                    setState(() {
-                      _discreteValue = value;
-                    });
-                  },
-                ),
+              Slider.adaptive(
+                value: _discreteValue,
+                min: 0.0,
+                max: 200.0,
+                divisions: 5,
+                label: '${_discreteValue.round()}',
+                onChanged: (double value) {
+                  setState(() {
+                    _discreteValue = value;
+                  });
+                },
               ),
               const Text('Discrete'),
             ],
@@ -343,7 +321,6 @@ class _SlidersState extends State<_Sliders> {
                   overlayColor: theme.colorScheme.onSurface.withOpacity(0.12),
                   thumbColor: Colors.deepPurple,
                   valueIndicatorColor: Colors.deepPurpleAccent,
-                  trackHeight: 2,
                   thumbShape: _CustomThumbShape(),
                   valueIndicatorShape: _CustomValueIndicatorShape(),
                   valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: theme.colorScheme.onSurface),
@@ -383,39 +360,24 @@ class _RangeSlidersState extends State<_RangeSliders> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 120.0),
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              SliderTheme(
-                data: const SliderThemeData(
-                  showValueIndicator: ShowValueIndicator.always,
-//                  rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
-//                  thumbColor: Color(0x40FF0000)
-                ),
-                child: MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-//                    textScaleFactor: 1,
-                    textScaleFactor: 3.11,
-                  ),
-                child: RangeSlider(
-                  values: _continuousValues,
-                  min: 0.0,
-                  max: 100.0,
-                  labels: RangeLabels(_continuousValues.start.round().toString(), _continuousValues.end.round().toString()),
-                  onChanged: (RangeValues values) {
-                    setState(() {
-                      _continuousValues = values;
-                    });
-                  },
-                ),
+              RangeSlider(
+                values: _continuousValues,
+                min: 0.0,
+                max: 100.0,
+                onChanged: (RangeValues values) {
+                  setState(() {
+                    _continuousValues = values;
+                  });
+                },
               ),
-    ),
               const Text('Continuous'),
             ],
           ),
@@ -450,13 +412,11 @@ class _RangeSlidersState extends State<_RangeSliders> {
               SliderTheme(
                 data: SliderThemeData(
                   activeTrackColor: Colors.deepPurple,
-                  inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.5),
-                  activeTickMarkColor: theme.colorScheme.onSurface.withOpacity(0.7),
-                  inactiveTickMarkColor:  theme.colorScheme.surface.withOpacity(0.7),
-                  overlayColor: theme.colorScheme.onSurface.withOpacity(0.12),
-                  valueIndicatorColor: Colors.deepPurpleAccent,
+                  inactiveTrackColor: Colors.black26,
+                  activeTickMarkColor: Colors.white70,
+                  inactiveTickMarkColor: Colors.black,
+                  overlayColor: Colors.black12,
                   thumbColor: Colors.deepPurple,
-                  trackHeight: 2,
                   rangeThumbShape: _CustomRangeThumbShape(),
                   showValueIndicator: ShowValueIndicator.never,
                 ),
@@ -481,4 +441,3 @@ class _RangeSlidersState extends State<_RangeSliders> {
     );
   }
 }
-
