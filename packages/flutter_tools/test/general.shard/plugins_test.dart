@@ -265,6 +265,100 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
+      testUsingContext('exits the tool if an app uses the v1 embedding and a plugin only supports the v2 embedding', () async {
+        when(flutterProject.isModule).thenReturn(false);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
+
+        final Directory pluginUsingJavaAndNewEmbeddingDir =
+          fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+        pluginUsingJavaAndNewEmbeddingDir
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('''
+  flutter:
+    plugin:
+      androidPackage: plugin1
+      pluginClass: UseNewEmbedding
+  ''');
+        pluginUsingJavaAndNewEmbeddingDir
+          .childDirectory('android')
+          .childDirectory('src')
+          .childDirectory('main')
+          .childDirectory('java')
+          .childDirectory('plugin1')
+          .childFile('UseNewEmbedding.java')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
+
+        flutterProject.directory
+          .childFile('.packages')
+          .writeAsStringSync('''
+plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}
+''');
+        await expectLater(
+          () async {
+            await injectPlugins(flutterProject);
+          },
+          throwsToolExit(
+            message: 'The plugin `plugin1` requires your app to be migrated to the Android embedding v2. '
+                     'Follow the steps on https://flutter.dev/go/android-project-migration and re-run this command.'
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('allows app use a plugin that supports v1 and v2 embedding', () async {
+        when(flutterProject.isModule).thenReturn(false);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
+
+        final Directory pluginUsingJavaAndNewEmbeddingDir =
+          fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+        pluginUsingJavaAndNewEmbeddingDir
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('''
+  flutter:
+    plugin:
+      androidPackage: plugin1
+      pluginClass: UseNewEmbedding
+  ''');
+        pluginUsingJavaAndNewEmbeddingDir
+          .childDirectory('android')
+          .childDirectory('src')
+          .childDirectory('main')
+          .childDirectory('java')
+          .childDirectory('plugin1')
+          .childFile('UseNewEmbedding.java')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            'import io.flutter.embedding.engine.plugins.FlutterPlugin;\n'
+            'PluginRegistry\n'
+            'registerWith(Irrelevant registrar)\n'
+          );
+
+        flutterProject.directory
+          .childFile('.packages')
+          .writeAsStringSync('''
+plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}
+''');
+        await injectPlugins(flutterProject);
+
+        final File registrant = flutterProject.directory
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+
+        expect(registrant.existsSync(), isTrue);
+        expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
+        expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
       testUsingContext('Registrant doesn\'t use new embedding if app doesn\'t use new embedding', () async {
         when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
