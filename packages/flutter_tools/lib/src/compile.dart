@@ -28,7 +28,7 @@ class KernelCompilerFactory {
   const KernelCompilerFactory();
 
   Future<KernelCompiler> create(FlutterProject flutterProject) async {
-    if (flutterProject.hasBuilders) {
+    if (flutterProject?.hasBuilders == true) {
       final CodegenDaemon codegenDaemon = await codeGenerator
         .daemon(flutterProject);
       codegenDaemon.startBuild();
