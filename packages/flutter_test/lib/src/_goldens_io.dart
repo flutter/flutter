@@ -101,7 +101,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     );
 
     if (!result.passed) {
-      await generateFailureOutput(result, golden, basedir);
+      generateFailureOutput(result, golden, basedir);
     }
     return result.passed;
   }
@@ -124,12 +124,12 @@ class LocalComparisonOutput {
   /// Writes out diffs from the [ComparisonResult] of a golden file test.
   ///
   /// Will throw an error if a null result is provided.
-  Future<void> generateFailureOutput(
+  void generateFailureOutput(
     ComparisonResult result,
     Uri golden,
     Uri basedir, {
     String key = '',
-  }) async {
+  }) {
     String additionalFeedback = '';
     if (result.diffs != null) {
       additionalFeedback = '\nFailure feedback can be found at '

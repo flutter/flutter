@@ -509,7 +509,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
     for (MapEntry<String, ComparisonResult> entry in failureDiffs.entries) {
       if (await skiaClient.isValidDigestForExpectation(entry.key, golden.path))
-        await generateFailureOutput(entry.value, golden, basedir, key: entry.key);
+        generateFailureOutput(entry.value, golden, basedir, key: entry.key);
     }
     return false;
   }
