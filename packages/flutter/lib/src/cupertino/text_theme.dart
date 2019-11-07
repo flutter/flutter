@@ -8,9 +8,9 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
-// accordingly after changing the default color here, as their implementation
-// depends on the default value of the color field.
+// Please update _TextThemeDefaultsBuilder accordingly after changing the default
+// color here, as their implementation depends on the default value of the color
+// field.
 //
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTextStyle = TextStyle(
@@ -22,9 +22,9 @@ const TextStyle _kDefaultTextStyle = TextStyle(
   decoration: TextDecoration.none,
 );
 
-// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
-// accordingly after changing the default color here, as their implementation
-// depends on the default value of the color field.
+// Please update _TextThemeDefaultsBuilder accordingly after changing the default
+// color here, as their implementation depends on the default value of the color
+// field.
 //
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultActionTextStyle = TextStyle(
@@ -36,9 +36,9 @@ const TextStyle _kDefaultActionTextStyle = TextStyle(
   decoration: TextDecoration.none,
 );
 
-// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
-// accordingly after changing the default color here, as their implementation
-// depends on the default value of the color field.
+// Please update _TextThemeDefaultsBuilder accordingly after changing the default
+// color here, as their implementation depends on the default value of the color
+// field.
 //
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
@@ -49,9 +49,6 @@ const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   color: CupertinoColors.inactiveGray,
 );
 
-// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
-// accordingly after changing the default color here, as their implementation
-// depends on the default value of the color field.
 const TextStyle _kDefaultMiddleTitleTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Text',
@@ -61,9 +58,6 @@ const TextStyle _kDefaultMiddleTitleTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
-// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
-// accordingly after changing the default color here, as their implementation
-// depends on the default value of the color field.
 const TextStyle _kDefaultLargeTitleTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
@@ -73,9 +67,9 @@ const TextStyle _kDefaultLargeTitleTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
-// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
-// accordingly after changing the default color here, as their implementation
-// depends on the default value of the color field.
+// Please update _TextThemeDefaultsBuilder accordingly after changing the default
+// color here, as their implementation depends on the default value of the color
+// field.
 //
 // Inspected on iOS 13 simulator with "Debug View Hierarchy".
 // Value extracted from off-center labels. Centered labels have a font size of 25pt.
@@ -88,9 +82,9 @@ const TextStyle _kDefaultPickerTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
-// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
-// accordingly after changing the default color here, as their implementation
-// depends on the default value of the color field.
+// Please update _TextThemeDefaultsBuilder accordingly after changing the default
+// color here, as their implementation depends on the default value of the color
+// field.
 //
 // Inspected on iOS 13 simulator with "Debug View Hierarchy".
 // Value extracted from off-center labels. Centered labels have a font size of 25pt.
