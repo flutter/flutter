@@ -113,7 +113,6 @@ Future<void> main(List<String> args) async {
     'tool_coverage': _runToolCoverage,
     'tool_tests': _runToolTests,
     'web_tests': _runWebTests,
-    'web_integration_tests': _runWebIntegrationTests,
   });
 }
 
