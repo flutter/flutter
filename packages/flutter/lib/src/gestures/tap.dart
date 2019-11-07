@@ -497,7 +497,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapCancel({PointerDownEvent down, PointerCancelEvent cancel, String reason}) {
-    final String note = reason == '' ? reason : ' $reason';
+    final String note = reason == '' ? reason : '$reason ';
     switch (down.buttons) {
       case kPrimaryButton:
         if (onTapCancel != null)

@@ -333,8 +333,9 @@ plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()
           .childFile('UseNewEmbedding.java')
           ..createSync(recursive: true)
           ..writeAsStringSync(
-            'import io.flutter.embedding.engine.plugins.FlutterPlugin;'
-            'registerWith(Registrar registrar)'
+            'import io.flutter.embedding.engine.plugins.FlutterPlugin;\n'
+            'PluginRegistry\n'
+            'registerWith(Irrelevant registrar)\n'
           );
 
         flutterProject.directory
