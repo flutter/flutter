@@ -15,7 +15,12 @@ dependencies:
   url_launcher: 5.2.5
   cupertino_icons: 0.1.2
   video_player: 0.10.2+5
-  scoped_model: 1.0.1
+  # waiting new version handling https://github.com/flutter/flutter/pull/44189
+  # scoped_model: 1.0.1
+  scoped_model:
+    git:
+      url: https://github.com/a14n/scoped_model.git
+      ref: BuildContext-methods-generics
   shrine_images: 1.1.2
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
