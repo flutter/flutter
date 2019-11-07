@@ -143,7 +143,7 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
   configSetting: 'enable-android-embedding-v2',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
 );
 
