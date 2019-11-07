@@ -129,7 +129,7 @@ class CupertinoTextThemeData extends Diagnosticable {
     TextStyle pickerTextStyle,
     TextStyle dateTimePickerTextStyle,
   }) : this._raw(
-         const _TextThemeDefaultsBuilder(),
+         const _TextThemeDefaultsBuilder(CupertinoColors.label, CupertinoColors.inactiveGray),
          primaryColor,
          textStyle,
          actionTextStyle,
@@ -261,11 +261,11 @@ class CupertinoTextThemeData extends Diagnosticable {
 
 @immutable
 class _TextThemeDefaultsBuilder {
-  const _TextThemeDefaultsBuilder({
-    this.labelColor = CupertinoColors.label,
-    this.inactiveGrayColor = CupertinoColors.inactiveGray,
-  }) : assert(labelColor != null),
-       assert(inactiveGrayColor != null);
+  const _TextThemeDefaultsBuilder(
+    this.labelColor,
+    this.inactiveGrayColor,
+  ) : assert(labelColor != null),
+      assert(inactiveGrayColor != null);
 
   final Color labelColor;
   final Color inactiveGrayColor;
@@ -291,6 +291,6 @@ class _TextThemeDefaultsBuilder {
     final Color resolvedInactiveGray = CupertinoDynamicColor.resolve(inactiveGrayColor, context, nullOk: nullOk);
     return resolvedLabelColor == labelColor && resolvedInactiveGray == CupertinoColors.inactiveGray
       ? this
-      : _TextThemeDefaultsBuilder(labelColor: resolvedLabelColor, inactiveGrayColor: resolvedInactiveGray);
+      : _TextThemeDefaultsBuilder(resolvedLabelColor, resolvedInactiveGray);
   }
 }
