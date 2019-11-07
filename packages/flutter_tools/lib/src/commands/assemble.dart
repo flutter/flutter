@@ -18,6 +18,7 @@ import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
@@ -79,6 +80,19 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   String get name => 'assemble';
+
+  @override
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final String projectDir = fs.file(targetFile).parent.parent.path;
+    final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
+    if (futterProject == null) {
+      return const <CustomDimensions, String>{};
+    }
+    return <CustomDimensions, String>{
+      CustomDimensions.commandBuildBundleTargetPlatform: argResults['target-platform'],
+      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
+    };
+  }
 
   /// The target we are building.
   Target get target {

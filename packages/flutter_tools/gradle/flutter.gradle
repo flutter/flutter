@@ -727,7 +727,6 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--local-engine", localEngine
                 args "--local-engine-src-path", localEngineSrcPath
             }
-            args "--suppress-analytics"
             if (verbose) {
                 args "--verbose"
             } else {
@@ -782,17 +781,14 @@ class FlutterTask extends BaseFlutterTask {
     }
 
     FileCollection readDependencies(File dependenciesFile) {
-        if (dependenciesFile.exists()) {
-            // Dependencies file has Makefile syntax:
-            //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
-            String depText = dependenciesFile.text
-            // So we split list of files by non-escaped(by backslash) space,
-            def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
-            // then we replace all escaped spaces with regular spaces
-            def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
-            return project.files(depList)
-        }
-        return project.files()
+        // Dependencies file has Makefile syntax:
+        //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
+        String depText = dependenciesFile.text
+        // So we split list of files by non-escaped(by backslash) space,
+        def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
+        // then we replace all escaped spaces with regular spaces
+        def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
+        return project.files(depList)
     }
 
     @InputFiles
