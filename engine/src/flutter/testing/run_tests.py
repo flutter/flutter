@@ -148,7 +148,6 @@ def SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot
     '--sdk-root',
     flutter_patched_sdk,
     '--incremental',
-    '--strong',
     '--target=flutter',
     '--packages',
     test_packages,
