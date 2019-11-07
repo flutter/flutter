@@ -13,9 +13,6 @@ import java.util.*;
 /**
  * Arguments that can be delivered to the Flutter shell when it is created.
  * <p>
- * WARNING: THIS CLASS IS EXPERIMENTAL. DO NOT SHIP A DEPENDENCY ON THIS CODE.
- * IF YOU USE IT, WE WILL BREAK YOU.
- * <p>
  * The term "shell" refers to the native code that adapts Flutter to different platforms. Flutter's
  * Android Java code initializes a native "shell" and passes these arguments to that native shell
  * when it is initialized. See {@link io.flutter.view.FlutterMain#ensureInitializationComplete(Context, String[])}

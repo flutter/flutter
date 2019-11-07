@@ -20,9 +20,6 @@ import io.flutter.plugin.common.BinaryMessenger;
 /**
  * Message conduit for 2-way communication between Android and Dart.
  * <p>
- * WARNING: THIS CLASS IS EXPERIMENTAL. DO NOT SHIP A DEPENDENCY ON THIS CODE.
- * IF YOU USE IT, WE WILL BREAK YOU.
- * <p>
  * See {@link BinaryMessenger}, which sends messages from Android to Dart
  * <p>
  * See {@link PlatformMessageHandler}, which handles messages to Android from Dart
