@@ -363,7 +363,7 @@ class CreateCommand extends FlutterCommand {
       final Set<String> existingOrganizations = await project.organizationNames;
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
-      } else if (1 < existingOrganizations.length) {
+      } else if (existingOrganizations.length > 1) {
         throwToolExit(
           'Ambiguous organization in existing files: $existingOrganizations. '
           'The --org command line argument must be specified to recreate project.'
