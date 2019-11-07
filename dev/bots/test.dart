@@ -113,6 +113,7 @@ Future<void> main(List<String> args) async {
     'tool_coverage': _runToolCoverage,
     'tool_tests': _runToolTests,
     'web_tests': _runWebTests,
+    'web_integration_tests': _runWebIntegrationTests,
   });
 }
 
@@ -763,6 +764,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
+    if (Platform.isLinux) () => _runDevicelabTest('web_incremental_test'),
   ]..shuffle(math.Random(0));
 
   final int testsPerShard = tests.length ~/ kDeviceLabShardCount;

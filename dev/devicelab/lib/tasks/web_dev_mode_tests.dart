@@ -20,12 +20,21 @@ const String kFirstRecompileTime  = 'FirstRecompileTime';
 const String kSecondStartupTime = 'SecondStartupTime';
 const String kSecondRestartTime = 'SecondRestartTime';
 
-TaskFunction createWebDevModeTest() {
+
+abstract class WebDevice {
+  static const String chrome = 'chrome';
+  static const String webServer = 'web-server';
+}
+
+TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompiler) {
   return () async {
     final List<String> options = <String>[
-      '--hot', '-d', 'web-server', '--verbose', '--resident', '--target=lib/main.dart',
+      '--hot', '-d', webDevice, '--verbose', '--resident', '--target=lib/main.dart',
     ];
     int hotRestartCount = 0;
+    final String expectedMessage = webDevice == WebDevice.webServer
+      ? 'Recompile complete'
+      : 'Reloaded application';
     final Map<String, int> measurements = <String, int>{};
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
@@ -38,6 +47,8 @@ TaskFunction createWebDevModeTest() {
               <String>['packages', 'get'],
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
+                if (enableIncrementalCompiler)
+                  'WEB_INCREMENTAL_COMPILER': 'true',
               },
           );
           await packagesGet.exitCode;
@@ -46,6 +57,8 @@ TaskFunction createWebDevModeTest() {
               flutterCommandArgs('run', options),
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
+                if (enableIncrementalCompiler)
+                  'WEB_INCREMENTAL_COMPILER': 'true',
               },
           );
 
@@ -65,7 +78,7 @@ TaskFunction createWebDevModeTest() {
                 ..start();
               process.stdin.write('R');
             }
-            if (line.contains('Recompile complete')) {
+            if (line.contains(expectedMessage)) {
               if (hotRestartCount == 0) {
                 measurements[kFirstRestartTime] = sw.elapsedMilliseconds;
                 // Update the file and reload again.
@@ -119,6 +132,8 @@ TaskFunction createWebDevModeTest() {
               flutterCommandArgs('run', options),
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
+                if (enableIncrementalCompiler)
+                  'WEB_INCREMENTAL_COMPILER': 'true',
               },
           );
           final Completer<void> stdoutDone = Completer<void>();
@@ -135,7 +150,7 @@ TaskFunction createWebDevModeTest() {
                 ..start();
               process.stdin.write('R');
             }
-            if (line.contains('Recompile complete')) {
+            if (line.contains(expectedMessage)) {
                measurements[kSecondRestartTime] = sw.elapsedMilliseconds;
               process.stdin.writeln('q');
             }
