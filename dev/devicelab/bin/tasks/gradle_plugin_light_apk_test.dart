@@ -19,7 +19,7 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...debugAssets,
           ...baseApkFiles,
@@ -29,7 +29,7 @@ Future<void> main() async {
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'lib/arm64-v8a/libapp.so',
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
@@ -45,7 +45,7 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...debugAssets,
           ...baseApkFiles,
@@ -54,7 +54,7 @@ Future<void> main() async {
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
@@ -69,7 +69,7 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...debugAssets,
           ...baseApkFiles,
@@ -78,7 +78,7 @@ Future<void> main() async {
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
@@ -92,14 +92,14 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           ...debugAssets,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
@@ -113,14 +113,14 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...flutterAssets,
           ...baseApkFiles,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           ...debugAssets,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',

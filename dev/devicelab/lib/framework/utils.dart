@@ -13,6 +13,8 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'framework.dart';
+
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
@@ -632,45 +634,34 @@ void checkFileNotExists(String file) {
   }
 }
 
-void _checkExitCode(int code) {
-  if (code != 0) {
-    throw Exception(
-      'Unexpected exit code = $code!',
-    );
+/// Check that `collection` contains all entries in `values`.
+void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
+  for (T value in values) {
+    if (!collection.contains(value)) {
+      throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
+    }
   }
 }
 
-Future<void> _execAndCheck(String executable, List<String> args) async {
-  _checkExitCode(await exec(executable, args));
+/// Check that `collection` does not contain any entries in `values`
+void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
+  for (T value in values) {
+    if (collection.contains(value)) {
+      throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
+    }
+  }
 }
 
-// Measure the CPU/GPU percentage for [duration] while a Flutter app is running
-// on an iOS device (e.g., right after a Flutter driver test has finished, which
-// doesn't close the Flutter app, and the Flutter app has an indefinite
-// animation). The return should have a format like the following json
-// ```
-// {"gpu_percentage":12.6,"cpu_percentage":18.15}
-// ```
-Future<Map<String, dynamic>> measureIosCpuGpu({
-    Duration duration = const Duration(seconds: 10),
-    String deviceId,
-}) async {
-  await _execAndCheck('pub', <String>[
-    'global',
-    'activate',
-    'gauge',
-    '0.1.4',
-  ]);
-
-  await _execAndCheck('pub', <String>[
-    'global',
-    'run',
-    'gauge',
-    'ioscpugpu',
-    'new',
-    if (deviceId != null) ...<String>['-w', deviceId],
-    '-l',
-    '${duration.inMilliseconds}',
-  ]);
-  return json.decode(file('$cwd/result.json').readAsStringSync());
+/// Checks that the contents of a [File] at `filePath` contains the specified
+/// [Pattern]s, otherwise throws a [TaskResult].
+void checkFileContains(List<Pattern> patterns, String filePath) {
+  final String fileContent = File(filePath).readAsStringSync();
+  for (Pattern pattern in patterns) {
+    if (!fileContent.contains(pattern)) {
+      throw TaskResult.failure(
+        'Expected to find `$pattern` in `$filePath` '
+        'instead it found:\n$fileContent'
+      );
+    }
+  }
 }

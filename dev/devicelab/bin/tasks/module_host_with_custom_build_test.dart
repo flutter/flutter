@@ -123,7 +123,7 @@ Future<void> main() async {
 
       section('Verify snapshots in app-demo-debug.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
         ...debugAssets,
       ], await getFilesInApk(demoDebugApk));
@@ -166,7 +166,7 @@ Future<void> main() async {
 
       section('Verify snapshots in app-demo-debug.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
         ...debugAssets,
       ], await getFilesInApk(demoDebugApk2));
@@ -201,7 +201,7 @@ Future<void> main() async {
 
       section('Verify snapshots in app-demo-staging.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
         ...debugAssets,
       ], await getFilesInApk(demoStagingApk));
@@ -238,7 +238,7 @@ Future<void> main() async {
 
       section('Verify AOT blobs in app-demo-release-unsigned.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
         'lib/arm64-v8a/libflutter.so',
         'lib/arm64-v8a/libapp.so',
@@ -276,7 +276,7 @@ Future<void> main() async {
 
       section('Verify AOT blobs in app-demo-prod-unsigned.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',
