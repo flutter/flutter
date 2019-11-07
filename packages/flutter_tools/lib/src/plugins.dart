@@ -152,9 +152,8 @@ class Plugin {
     if (yaml.containsKey('platforms')) {
       final int numKeys = yaml.keys.toSet().length;
       if (numKeys != 1) {
-        return <String>[
-          'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}',
-        ];
+        //TODO(cyanglaz): revert this to return an error once we default our support to federated plugins.
+        return _validateLegacyYaml(yaml);
       } else {
         return _validateMultiPlatformYaml(yaml['platforms']);
       }
