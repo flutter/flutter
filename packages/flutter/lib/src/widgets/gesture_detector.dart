@@ -131,8 +131,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///
 /// {@tool sample}
 ///
-/// This example of a [Container] containing a black light bulb wrapped in a
-/// [GestureDetector].
+/// This example of a [Container] contains a black light bulb wrapped in a [GestureDetector].
 /// It turns the light bulb yellow when the "turn lights on" button is tapped
 /// by setting the `_lights` field:
 ///
@@ -171,11 +170,11 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///
 /// {@tool sample}
 ///
-/// This example of a red [Container] wrapping a [GestureDetector] widget. On
-/// this example the since the [GestureDetector] does not have a child it
-/// assumes the size of its parent, making the area of the surrounding
-/// [Container] clickable.
-/// When tapped turns the [Container] yellow by setting the `_color` field:
+/// This example of a red [Container] wraps a [GestureDetector] widget.
+/// Since the [GestureDetector] does not have a child it takes on the size of
+/// its parent making the entire area of the surrounding [Container] clickable.
+/// assumes the size of its parent, making the area of the surrounding [Container] clickable.
+/// When tapped the [Container] turns yellow by setting the `_color` field:
 ///
 /// ```dart
 /// Container(
