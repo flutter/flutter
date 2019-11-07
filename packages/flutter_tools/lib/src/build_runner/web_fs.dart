@@ -69,6 +69,7 @@ typedef DwdsFactory = Future<Dwds> Function({
   LogWriter logWriter,
   bool verbose,
   bool enableDebugExtension,
+  UrlEncoder urlEncoder,
 });
 
 /// A function with the same signature as [WebFs.start].
@@ -82,6 +83,12 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required String port,
   @required List<String> dartDefines,
 });
+
+/// Used for exposing URLs to the end user by passing the request out to the
+/// daemon client.
+UrlTunneller get tunnelUrl => context.get<UrlTunneller>() ?? (String url) => Future<String>.value(url);
+
+typedef UrlTunneller = Future<String> Function(String url);
 
 /// The dev filesystem responsible for building and serving  web applications.
 class WebFs {
@@ -298,6 +305,7 @@ class WebFs {
           serveDevTools: false,
           verbose: false,
           enableDebugExtension: true,
+          urlEncoder: tunnelUrl,
           logWriter: (dynamic level, String message) => printTrace(message),
         );
         handler = pipeline.addHandler(dwds.handler);

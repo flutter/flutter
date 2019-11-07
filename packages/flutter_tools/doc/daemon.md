@@ -172,9 +172,11 @@ These requests come _from_ the Flutter daemon and should be responded to by the 
 
 #### app.exposeUrl
 
+This request is enabled only if `flutter run` is run with the `--web-allow-expose-url` flag.
+
 This request is sent by the server when it has a local URL that needs to be exposed to the end user. This is to support running on a remote machine where a URL (for example `http://localhost:1234`) may not be directly accessible to the end user. With this URL clients can perform tunnelling and then provide the tunneled URL back to Flutter so that it can be used in code that will be executed on the end users machine (for example wehen a web application needs to be able to connect back to a service like the DWDS debugging service).
 
-This request will only be sent if a web application was run in a mode that requires mapped URLs (such as using `--no-web-browser-launch` for browser devices or the headless `web-server` device when debugging). If a client does not respond within a period of time, the URL will be used un-mapped, however clients are encouraged to respond immediately with the same URL if that is the required behaviour (such as when running locally) to avoid a delay.
+This request will only be sent if a web application was run in a mode that requires mapped URLs (such as using `--no-web-browser-launch` for browser devices or the headless `web-server` device when debugging).
 
 The request will contain an `id` field and a `params` field that is a map containing a string `url` field.
 

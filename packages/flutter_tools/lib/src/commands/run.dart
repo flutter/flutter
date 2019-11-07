@@ -7,11 +7,13 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_runner/web_fs.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../features.dart';
@@ -301,6 +303,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
       );
     } else {
       return DebuggingOptions.enabled(
@@ -321,6 +324,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         vmserviceOutFile: stringArg('vmservice-out-file'),
       );
     }
@@ -348,28 +352,37 @@ class RunCommand extends RunCommandBase {
         dartDefines: dartDefines,
       );
       AppInstance app;
-      try {
-        final String applicationBinaryPath = stringArg('use-application-binary');
-        app = await daemon.appDomain.startApp(
-          devices.first, fs.currentDirectory.path, targetFile, route,
-          _createDebuggingOptions(), hotMode,
-          applicationBinary: applicationBinaryPath == null
-              ? null
-              : fs.file(applicationBinaryPath),
-          trackWidgetCreation: boolArg('track-widget-creation'),
-          projectRootPath: stringArg('project-root'),
-          packagesFilePath: globalResults['packages'] as String,
-          dillOutputPath: stringArg('output-dill'),
-          ipv6: ipv6,
-        );
-      } catch (error) {
-        throwToolExit(error.toString());
-      }
       final DateTime appStartedTime = systemClock.now();
-      final int result = await app.runner.waitForAppToFinish();
-      if (result != 0) {
-        throwToolExit(null, exitCode: result);
-      }
+      await context.run<void>(
+        body: () async {
+          try {
+            final String applicationBinaryPath = stringArg('use-application-binary');
+            app = await daemon.appDomain.startApp(
+              devices.first, fs.currentDirectory.path, targetFile, route,
+              _createDebuggingOptions(), hotMode,
+              applicationBinary: applicationBinaryPath == null
+                  ? null
+                  : fs.file(applicationBinaryPath),
+              trackWidgetCreation: boolArg('track-widget-creation'),
+              projectRootPath: stringArg('project-root'),
+              packagesFilePath: globalResults['packages'] as String,
+              dillOutputPath: stringArg('output-dill'),
+              ipv6: ipv6,
+            );
+          } catch (error) {
+            throwToolExit(error.toString());
+          }
+          final int result = await app.runner.waitForAppToFinish();
+          if (result != 0) {
+            throwToolExit(null, exitCode: result);
+          }
+        },
+        overrides: <Type, Generator>{
+          UrlTunneller: boolArg('web-allow-expose-url')
+            ? () => daemon.daemonDomain.exposeUrl
+            : (String url) => url,
+        },
+      );
       return FlutterCommandResult(
         ExitStatus.success,
         timingLabelParts: <String>['daemon'],
