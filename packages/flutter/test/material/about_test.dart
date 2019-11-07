@@ -452,7 +452,7 @@ void main() {
 
   ///Test to make sure that the widget in the title of AboutListTile behaves as
   ///expected similar to the widget that would be placed in ListTile
-  testWidgets('AboutListTile.child offseet equals ListTile.title', (
+  testWidgets("AboutListTile's child should not be offset when the icon is not specified.", (
       WidgetTester tester) async {
     const Text aboutText = Text('About');
     const Text headingText = Text('Some Heading');
