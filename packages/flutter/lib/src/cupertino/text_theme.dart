@@ -135,7 +135,7 @@ class CupertinoTextThemeData extends Diagnosticable {
     TextStyle pickerTextStyle,
     TextStyle dateTimePickerTextStyle,
   }) : this._raw(
-         const _DefaultCupertinoTextThemeDataBuilder(),
+         const _TextThemeDefaultsBuilder(),
          primaryColor,
          textStyle,
          actionTextStyle,
@@ -160,7 +160,7 @@ class CupertinoTextThemeData extends Diagnosticable {
     this._dateTimePickerTextStyle,
   ) : assert((_navActionTextStyle != null && _actionTextStyle != null) || _primaryColor != null);
 
-  final _DefaultCupertinoTextThemeDataBuilder _defaults;
+  final _TextThemeDefaultsBuilder _defaults;
   final Color _primaryColor;
 
   final TextStyle _textStyle;
@@ -265,10 +265,9 @@ class CupertinoTextThemeData extends Diagnosticable {
 }
 
 
-
 @immutable
-class _DefaultCupertinoTextThemeDataBuilder {
-  const _DefaultCupertinoTextThemeDataBuilder({
+class _TextThemeDefaultsBuilder {
+  const _TextThemeDefaultsBuilder({
     this.labelColor = CupertinoColors.label,
     this.inactiveGrayColor = CupertinoColors.inactiveGray,
   }) : assert(labelColor != null),
@@ -293,11 +292,11 @@ class _DefaultCupertinoTextThemeDataBuilder {
   TextStyle actionTextStyle({ Color primaryColor }) => _kDefaultActionTextStyle.copyWith(color: primaryColor);
   TextStyle navActionTextStyle({ Color primaryColor }) => actionTextStyle(primaryColor: primaryColor);
 
-  _DefaultCupertinoTextThemeDataBuilder resolveFrom(BuildContext context, bool nullOk) {
+  _TextThemeDefaultsBuilder resolveFrom(BuildContext context, bool nullOk) {
     final Color resolvedLabelColor = CupertinoDynamicColor.resolve(labelColor, context, nullOk: nullOk);
     final Color resolvedInactiveGray = CupertinoDynamicColor.resolve(inactiveGrayColor, context, nullOk: nullOk);
     return resolvedLabelColor == labelColor && resolvedInactiveGray == CupertinoColors.inactiveGray
       ? this
-      : _DefaultCupertinoTextThemeDataBuilder(labelColor: resolvedLabelColor, inactiveGrayColor: resolvedInactiveGray);
+      : _TextThemeDefaultsBuilder(labelColor: resolvedLabelColor, inactiveGrayColor: resolvedInactiveGray);
   }
 }
