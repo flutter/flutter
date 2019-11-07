@@ -37,7 +37,7 @@ class FuchsiaKernelCompiler {
     final String manifestPath = fs.path.join(outDir, '$appName.dilpmanifest');
     final String kernelCompiler = artifacts.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
-      platform: TargetPlatform.fuchsia_x64,  // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (!fs.isFileSync(kernelCompiler)) {
@@ -45,7 +45,7 @@ class FuchsiaKernelCompiler {
     }
     final String platformDill = artifacts.getArtifactPath(
       Artifact.platformKernelDill,
-      platform: TargetPlatform.fuchsia_x64,  // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (!fs.isFileSync(platformDill)) {
