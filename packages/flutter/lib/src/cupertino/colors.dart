@@ -783,7 +783,7 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
 
   final String _debugLabel;
 
-  final dynamic _debugResolveContext;
+  final Element _debugResolveContext;
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and base interface elevation.
@@ -976,7 +976,7 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
         }
     }
 
-    dynamic _debugContext = 'Resolved';
+    Element _debugContext;
     assert(() {
       _debugContext = context;
       return true;
@@ -1016,7 +1016,7 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
   @override
   int get hashCode {
     return hashValues(
-      _effectiveColor,
+      value,
       color,
       darkColor,
       highContrastColor,
@@ -1045,12 +1045,14 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
       if (_isPlatformBrightnessDependent && _isHighContrastDependent && _isInterfaceElevationDependent) toString('darkHighContrastElevatedColor', darkHighContrastElevatedColor),
     ];
 
-    return '${_debugLabel ?? runtimeType.toString()}(${xs.join(', ')}), ${_debugResolveContext ?? "UNRESOLVED"}';
+    return '${_debugLabel ?? runtimeType.toString()}(${xs.join(', ')}, resolved by: ${_debugResolveContext?.widget ?? "UNRESOLVED"})';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    if (_debugLabel != null)
+      properties.add(MessageProperty('debugLabel', _debugLabel));
     properties.add(createCupertinoColorProperty('color', color));
     if (_isPlatformBrightnessDependent)
       properties.add(createCupertinoColorProperty('darkColor', darkColor));
@@ -1066,6 +1068,17 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
       properties.add(createCupertinoColorProperty('highContrastElevatedColor', highContrastElevatedColor));
     if (_isPlatformBrightnessDependent && _isHighContrastDependent && _isInterfaceElevationDependent)
       properties.add(createCupertinoColorProperty('darkHighContrastElevatedColor', darkHighContrastElevatedColor));
+
+    if (_debugResolveContext != null)
+      properties.add(DiagnosticsProperty<Element>('last resolved', _debugResolveContext));
+  }
+
+  /// Asserts that the
+  void debugAssertIsEqual({
+    Color expectedColor,
+    InformationCollector informationCollector,
+  }) {
+
   }
 }
 
@@ -1100,14 +1113,4 @@ DiagnosticsProperty<Color> createCupertinoColorProperty(
       level: level,
     );
   }
-}
-
-class _DiagnosticResolveContext extends DiagnosticsProperty<BuildContext> {
-  _DiagnosticResolveContext(BuildContext context)
-    : assert(context != null),
-      super(
-        'last resolved against',
-        context,
-        level: DiagnosticLevel.hidden,
-      );
 }
