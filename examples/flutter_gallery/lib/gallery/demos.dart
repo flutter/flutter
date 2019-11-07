@@ -131,6 +131,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: TransformationsDemo.routeName,
       buildRoute: (BuildContext context) => const TransformationsDemo(),
     ),
+    GalleryDemo(
+      title: 'Pesto',
+      subtitle: 'Simple recipe browser',
+      icon: Icons.adjust,
+      category: _kDemos,
+      routeName: PestoDemo.routeName,
+      buildRoute: (BuildContext context) => const PestoDemo(),
+    ),
 
     // Style
     GalleryDemo(
@@ -555,23 +563,6 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const VideoDemo(),
     ),
   ];
-
-  // Keep Pesto around for its regression test value. It is not included
-  // in (release builds) the performance tests.
-  assert(() {
-    galleryDemos.insert(0,
-      GalleryDemo(
-        title: 'Pesto',
-        subtitle: 'Simple recipe browser',
-        icon: Icons.adjust,
-        category: _kDemos,
-        routeName: PestoDemo.routeName,
-        buildRoute: (BuildContext context) => const PestoDemo(),
-      ),
-    );
-    return true;
-  }());
-
   return galleryDemos;
 }
 
