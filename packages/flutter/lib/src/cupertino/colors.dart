@@ -1072,14 +1072,6 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
     if (_debugResolveContext != null)
       properties.add(DiagnosticsProperty<Element>('last resolved', _debugResolveContext));
   }
-
-  /// Asserts that the
-  void debugAssertIsEqual({
-    Color expectedColor,
-    InformationCollector informationCollector,
-  }) {
-
-  }
 }
 
 /// Creates a diagnostics property for [CupertinoDynamicColor].
