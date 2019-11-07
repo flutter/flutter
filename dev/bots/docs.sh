@@ -121,6 +121,10 @@ fi
 # Ensure google webmaster tools can verify our site.
 cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
 
+# TEMPORARILY EXIT WITHOUT UPLOADING
+# TODO(gspencergoog): Renable once Firebase outage is resolved.
+exit 0
+
 # Upload new API docs when running on Cirrus
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
