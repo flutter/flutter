@@ -70,7 +70,6 @@ void main() {
                 key: expandedKey,
                 initiallyExpanded: true,
                 title: const Text('Expanded'),
-                subtitle: const Text('Subtitle'),
                 backgroundColor: Colors.red,
                 children: <Widget>[
                   ListTile(
@@ -215,5 +214,36 @@ void main() {
     expect(textColor(collapsedTitleKey), _accentColor);
     expect(iconColor(expandedIconKey), _unselectedWidgetColor);
     expect(iconColor(collapsedIconKey), _accentColor);
+  });
+
+  testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          accentColor: _accentColor,
+          unselectedWidgetColor: _unselectedWidgetColor,
+          textTheme: const TextTheme(subhead: TextStyle(color: _headerColor)),
+        ),
+        home: Material(
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                const ListTile(title: Text('Top')),
+                ExpansionTile(
+                  initiallyExpanded: true,
+                  title: const Text('Title'),
+                  subtitle: const Text('Subtitle'),
+                  backgroundColor: Colors.red,
+                  children: const <Widget>[ListTile(title: Text('0'))],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Subtitle'), findsOneWidget);
   });
 }

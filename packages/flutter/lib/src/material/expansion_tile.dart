@@ -54,7 +54,7 @@ class ExpansionTile extends StatefulWidget {
   /// Typically a [Text] widget.
   final Widget title;
 
-  /// Additional content displayed bellow the title
+  /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
   final Widget subtitle;
