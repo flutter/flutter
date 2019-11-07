@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -69,7 +69,29 @@ Future<void> main() async {
         'vm_snapshot_data',
       ));
 
-      section('Check profile, release builds has Dart dylib');
+      section('Check debug build has no Dart AOT');
+
+      // There's still an App.framework with a dylib, but it's empty.
+      checkFileExists(path.join(
+        outputPath,
+        'Debug',
+        'App.framework',
+        'App',
+      ));
+
+      final String aotSymbols = await dylibSymbols(path.join(
+        outputPath,
+        'Debug',
+        'App.framework',
+        'App',
+      ));
+
+      if (aotSymbols.contains('architecture') ||
+          aotSymbols.contains('_kDartVmSnapshot')) {
+        throw TaskResult.failure('Debug App.framework contains AOT');
+      }
+
+      section('Check profile, release builds has Dart AOT dylib');
 
       for (String mode in <String>['Profile', 'Release']) {
         checkFileExists(path.join(
@@ -78,6 +100,25 @@ Future<void> main() async {
           'App.framework',
           'App',
         ));
+
+        final String aotSymbols = await dylibSymbols(path.join(
+          outputPath,
+          mode,
+          'App.framework',
+          'App',
+        ));
+
+        if (!aotSymbols.contains('armv7')) {
+          throw TaskResult.failure('$mode App.framework armv7 architecture missing');
+        }
+
+        if (!aotSymbols.contains('arm64')) {
+          throw TaskResult.failure('$mode App.framework arm64 architecture missing');
+        }
+
+        if (!aotSymbols.contains('_kDartVmSnapshot')) {
+          throw TaskResult.failure('$mode App.framework missing Dart AOT');
+        }
 
         checkFileNotExists(path.join(
           outputPath,

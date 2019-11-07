@@ -31,7 +31,7 @@ Future<void> main() async {
           'release',
           'app-release.aab',
         );
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...baseAabFiles,
           ...flutterAabAssets,
           'base/lib/arm64-v8a/libapp.so',
@@ -66,7 +66,7 @@ Future<void> main() async {
           'productionRelease',
           'app-production-release.aab',
         );
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...baseAabFiles,
           ...flutterAabAssets,
           'base/lib/arm64-v8a/libapp.so',
@@ -102,7 +102,7 @@ Future<void> main() async {
           'flavor_underscoreRelease',
           'app-flavor_underscore-release.aab',
         );
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...baseAabFiles,
           ...flutterAabAssets,
           'base/lib/arm64-v8a/libapp.so',
@@ -137,7 +137,7 @@ Future<void> main() async {
           'productionRelease',
           'app-production-release.aab',
         );
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...baseAabFiles,
           ...flutterAabAssets,
           'base/lib/arm64-v8a/libapp.so',
@@ -163,14 +163,14 @@ Future<void> main() async {
         );
 
         final Iterable<String> bundleFiles = await getFilesInAppBundle(releaseBundle);
-        checkItContains<String>(<String>[
+        checkCollectionContains<String>(<String>[
           ...baseAabFiles,
           ...flutterAabAssets,
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
         ], bundleFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'base/lib/arm64-v8a/libapp.so',
           'base/lib/arm64-v8a/libflutter.so',
         ], bundleFiles);
