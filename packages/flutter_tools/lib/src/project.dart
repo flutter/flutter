@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle_utils.dart' as gradle;
@@ -642,6 +643,43 @@ class AndroidProject {
       overwriteExisting: true,
     );
   }
+
+  AndroidEmbeddingVersion getEmbeddingVersion() {
+    if (appManifestFile == null || !appManifestFile.existsSync()) {
+      return AndroidEmbeddingVersion.v1;
+    }
+    xml.XmlDocument document;
+    try {
+      document = xml.parse(appManifestFile.readAsStringSync());
+    } on xml.XmlParserException {
+      throwToolExit('Error parsing $appManifestFile '
+                    'Please ensure that the android manifest is a valid XML document and try again.');
+    } on FileSystemException {
+      throwToolExit('Error reading $appManifestFile even though it exists. '
+                    'Please ensure that you have read permission to this file and try again.');
+    }
+    for (xml.XmlElement metaData in document.findAllElements('meta-data')) {
+      final String name = metaData.getAttribute('android:name');
+      if (name == 'flutterEmbedding') {
+        final String embeddingVersionString = metaData.getAttribute('android:value');
+        if (embeddingVersionString == '1') {
+          return AndroidEmbeddingVersion.v1;
+        }
+        if (embeddingVersionString == '2') {
+          return AndroidEmbeddingVersion.v2;
+        }
+      }
+    }
+    return AndroidEmbeddingVersion.v1;
+  }
+}
+
+/// Iteration of the embedding Java API in the engine used by the Android project.
+enum AndroidEmbeddingVersion {
+  /// V1 APIs based on io.flutter.app.FlutterActivity.
+  v1,
+  /// V2 APIs based on io.flutter.embedding.android.FlutterActivity.
+  v2,
 }
 
 /// Represents the web sub-project of a Flutter project.

@@ -1,33 +1,26 @@
-## Regenerating the i18n files
+# Regenerating the i18n files
 
-The files in this directory are based on ../lib/stock_strings.dart
-which defines all of the localizable strings used by the stocks
-app. The stocks app uses
-the [Dart `intl` package](https://github.com/dart-lang/intl).
+The files in this directory are used to generate `stock_strings.dart`, which
+is used by the stocks application to look up localized message strings. The
+stocks app uses the [Dart `intl` package](https://github.com/dart-lang/intl).
 
 Rebuilding everything requires two steps.
 
-With the `examples/stocks` as the current directory, generate
-`intl_messages.arb` from `lib/stock_strings.dart`:
-```
-flutter pub pub run intl_translation:extract_to_arb --output-dir=lib/i18n lib/stock_strings.dart
-```
-The `intl_messages.arb` file is a JSON format map with one entry for
-each `Intl.message()` function defined in `stock_strings.dart`. This
-file was used to create the English and Spanish localizations,
-`stocks_en.arb` and `stocks_es.arb`. The `intl_messages.arb` wasn't
-checked into the repository, since it only serves as a template for
-the other `.arb` files.
+1. Create or update the English and Spanish localizations, `stocks_en_US.arb`
+and `stocks_es_ES.arb`. See the [ARB specification](https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification)
+for more info.
 
+2. With `examples/stocks` as the current directory, generate a
+`messages_<locale>.dart` for each `stocks_<locale>.arb` file,
+`messages_all.dart`, and `stock_strings.dart` with the following command:
 
-With the `examples/stocks` as the current directory, generate a
-`stock_messages_<locale>.dart` for each `stocks_<locale>.arb` file and
-`stock_messages_all.dart`, which imports all of the messages files:
-```
-flutter pub pub run intl_translation:generate_from_arb --output-dir=lib/i18n \
-   --generated-file-prefix=stock_ --no-use-deferred-loading lib/*.dart lib/i18n/stocks_*.arb
+```dart
+dart ${FLUTTER_PATH}/dev/tools/localization/gen_l10n.dart --arb-dir=lib/i18n
+  --template-arb-file=stocks_en_EN.arb --output-localization-file=stock_strings.dart
+  --output-class=StockStrings
 ```
 
-The `StockStrings` class uses the generated `initializeMessages()`
-function (`stock_messages_all.dart`) to load the localized messages
-and `Intl.message()` to look them up.
+The `StockStrings` class uses the generated `initializeMessages()`function
+(`messages_all.dart`) to load the localized messages and `Intl.message()`
+to look them up. The generated class's API documentation explains how to add
+the new localizations delegate and supported locales to the Flutter application.

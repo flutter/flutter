@@ -162,6 +162,7 @@ flutter_tools:lib/''');
       extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
       fileSystemRoots: anyNamed('fileSystemRoots'),
       fileSystemScheme: anyNamed('fileSystemScheme')
+      linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -189,11 +190,14 @@ flutter_tools:lib/''');
       extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
       fileSystemRoots: anyNamed('fileSystemRoots'),
       fileSystemScheme: anyNamed('fileSystemScheme')
+      linkPlatformKernelIn: false,
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(androidEnvironment..defines[kTrackWidgetCreation] = 'false');
+    await const KernelSnapshot().build(androidEnvironment
+      ..defines[kBuildMode] = 'debug'
+      ..defines[kTrackWidgetCreation] = 'false');
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
@@ -216,6 +220,7 @@ flutter_tools:lib/''');
       extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
       fileSystemRoots: anyNamed('fileSystemRoots'),
       fileSystemScheme: anyNamed('fileSystemScheme')
+      linkPlatformKernelIn: false,
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });

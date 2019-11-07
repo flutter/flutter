@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:mustache/mustache.dart' as mustache;
-import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -338,14 +337,12 @@ public final class GeneratedPluginRegistrant {
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
 {{/needsShim}}
 {{#plugins}}
-  {{#supportsEmbeddingV2}}
+  {{#usesEmbedding2}}
     flutterEngine.getPlugins().add(new {{package}}.{{class}}());
-  {{/supportsEmbeddingV2}}
-  {{^supportsEmbeddingV2}}
-    {{#supportsEmbeddingV1}}
-      {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
-    {{/supportsEmbeddingV1}}
-  {{/supportsEmbeddingV2}}
+  {{/usesEmbedding2}}
+  {{^usesEmbedding2}}
+    {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
+  {{/usesEmbedding2}}
 {{/plugins}}
   }
 }
@@ -364,30 +361,10 @@ List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String typ
 
 /// Returns the version of the Android embedding that the current
 /// [project] is using.
-String _getAndroidEmbeddingVersion(FlutterProject project) {
+AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
   assert(project.android != null);
 
-  final File androidManifest = project.android.appManifestFile;
-  if (androidManifest == null || !androidManifest.existsSync()) {
-    return '1';
-  }
-  xml.XmlDocument document;
-  try {
-    document = xml.parse(androidManifest.readAsStringSync());
-  } on xml.XmlParserException {
-    throwToolExit('Error parsing ${project.android.appManifestFile} '
-                  'Please ensure that the android manifest is a valid XML document and try again.');
-  } on FileSystemException {
-    throwToolExit('Error reading ${project.android.appManifestFile} even though it exists. '
-                  'Please ensure that you have read permission to this file and try again.');
-  }
-  for (xml.XmlElement metaData in document.findAllElements('meta-data')) {
-    final String name = metaData.getAttribute('android:name');
-    if (name == 'flutterEmbedding') {
-      return metaData.getAttribute('android:value');
-    }
-  }
-  return '1';
+  return project.android.getEmbeddingVersion();
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -412,34 +389,23 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     'GeneratedPluginRegistrant.java',
   );
   String templateContent;
-  final String appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
+  final AndroidEmbeddingVersion appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
   switch (appEmbeddingVersion) {
-    case '2':
+    case AndroidEmbeddingVersion.v2:
       templateContext['needsShim'] = false;
       // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
       // then add  shim for the old plugins.
       for (Map<String, dynamic> plugin in androidPlugins) {
-        if (plugin['supportsEmbeddingV1'] && !plugin['supportsEmbeddingV2']) {
+        if (!plugin['usesEmbedding2']) {
           templateContext['needsShim'] = true;
           break;
         }
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
     break;
-    case '1':
-      for (Map<String, dynamic> plugin in androidPlugins) {
-        if (!plugin['supportsEmbeddingV1'] && plugin['supportsEmbeddingV2']) {
-          throwToolExit(
-            'The plugin `${plugin['name']}` requires your app to be migrated to '
-            'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
-            'and re-run this command.'
-          );
-        }
-      }
-      templateContent = _androidPluginRegistryTemplateOldEmbedding;
-    break;
     default:
-      throwToolExit('Unsupported Android embedding');
+      templateContent = _androidPluginRegistryTemplateOldEmbedding;
+      break;
   }
   printTrace('Generating $registryPath');
   _renderTemplateToFile(

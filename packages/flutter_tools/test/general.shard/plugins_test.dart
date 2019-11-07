@@ -125,22 +125,6 @@ void main() {
       MockFeatureFlags featureFlags;
       MockXcodeProjectInterpreter xcodeProjectInterpreter;
 
-      const String kAndroidManifestUsingOldEmbedding = '''
-  <manifest>
-      <application>
-      </application>
-  </manifest>
-  ''';
-      const String kAndroidManifestUsingNewEmbedding = '''
-  <manifest>
-      <application>
-          <meta-data
-              android:name="flutterEmbedding"
-              android:value="2" />
-      </application>
-  </manifest>
-  ''';
-
       setUp(() {
         featureFlags = MockFeatureFlags();
         when(featureFlags.isLinuxEnabled).thenReturn(false);
@@ -154,13 +138,7 @@ void main() {
 
       testUsingContext('Registrant uses old embedding in app project', () async {
         when(flutterProject.isModule).thenReturn(false);
-
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
         await injectPlugins(flutterProject);
 
@@ -179,13 +157,7 @@ void main() {
 
       testUsingContext('Registrant uses new embedding if app uses new embedding', () async {
         when(flutterProject.isModule).thenReturn(false);
-
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingNewEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
 
         await injectPlugins(flutterProject);
 
@@ -204,13 +176,7 @@ void main() {
 
       testUsingContext('Registrant uses shim for plugins using old embedding if app uses new embedding', () async {
         when(flutterProject.isModule).thenReturn(false);
-
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingNewEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
 
         final Directory pluginUsingJavaAndNewEmbeddingDir =
           fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
@@ -299,120 +265,9 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
-      testUsingContext('exits the tool if an app uses the v1 embedding and a plugin only supports the v2 embedding', () async {
-        when(flutterProject.isModule).thenReturn(false);
-
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
-
-        final Directory pluginUsingJavaAndNewEmbeddingDir =
-          fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
-        pluginUsingJavaAndNewEmbeddingDir
-          .childFile('pubspec.yaml')
-          .writeAsStringSync('''
-  flutter:
-    plugin:
-      androidPackage: plugin1
-      pluginClass: UseNewEmbedding
-  ''');
-        pluginUsingJavaAndNewEmbeddingDir
-          .childDirectory('android')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childDirectory('java')
-          .childDirectory('plugin1')
-          .childFile('UseNewEmbedding.java')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
-
-        flutterProject.directory
-          .childFile('.packages')
-          .writeAsStringSync('''
-plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}
-''');
-        await expectLater(
-          () async {
-            await injectPlugins(flutterProject);
-          },
-          throwsToolExit(
-            message: 'The plugin `plugin1` requires your app to be migrated to the Android embedding v2. '
-                     'Follow the steps on https://flutter.dev/go/android-project-migration and re-run this command.'
-          ),
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-      });
-
-      testUsingContext('allows app use a plugin that supports v1 and v2 embedding', () async {
-        when(flutterProject.isModule).thenReturn(false);
-
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
-
-        final Directory pluginUsingJavaAndNewEmbeddingDir =
-          fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
-        pluginUsingJavaAndNewEmbeddingDir
-          .childFile('pubspec.yaml')
-          .writeAsStringSync('''
-  flutter:
-    plugin:
-      androidPackage: plugin1
-      pluginClass: UseNewEmbedding
-  ''');
-        pluginUsingJavaAndNewEmbeddingDir
-          .childDirectory('android')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childDirectory('java')
-          .childDirectory('plugin1')
-          .childFile('UseNewEmbedding.java')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            'import io.flutter.embedding.engine.plugins.FlutterPlugin;'
-            'registerWith(Registrar registrar)'
-          );
-
-        flutterProject.directory
-          .childFile('.packages')
-          .writeAsStringSync('''
-plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}
-''');
-        await injectPlugins(flutterProject);
-
-        final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
-
-        expect(registrant.existsSync(), isTrue);
-        expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
-        expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-      });
-
       testUsingContext('Registrant doesn\'t use new embedding if app doesn\'t use new embedding', () async {
         when(flutterProject.isModule).thenReturn(false);
-
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
         await injectPlugins(flutterProject);
 
@@ -431,13 +286,7 @@ plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()
 
       testUsingContext('Registrant uses old embedding in module project', () async {
         when(flutterProject.isModule).thenReturn(true);
-
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
         await injectPlugins(flutterProject);
 
@@ -456,13 +305,7 @@ plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()
 
       testUsingContext('Registrant uses new embedding if module uses new embedding', () async {
         when(flutterProject.isModule).thenReturn(true);
-
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingNewEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
 
         await injectPlugins(flutterProject);
 
@@ -481,13 +324,7 @@ plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()
 
       testUsingContext('Registrant doesn\'t use new embedding if module doesn\'t use new embedding', () async {
         when(flutterProject.isModule).thenReturn(true);
-
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
         await injectPlugins(flutterProject);
 
@@ -521,14 +358,6 @@ plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()
       testUsingContext('Registrant for web doesn\'t escape slashes in imports', () async {
         when(flutterProject.isModule).thenReturn(true);
         when(featureFlags.isWebEnabled).thenReturn(true);
-
-        // injectPlugins will crash if there is no AndroidManifest
-        final File androidManifest = flutterProject.directory
-          .childDirectory('android')
-          .childFile('AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
-        when(androidProject.appManifestFile).thenReturn(androidManifest);
 
         final Directory webPluginWithNestedFile =
             fs.systemTempDirectory.createTempSync('web_plugin_with_nested');

@@ -256,7 +256,8 @@ Future<Process> startProcess(
   assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  print('\nExecuting: $command in $finalWorkingDirectory');
+  print('\nExecuting: $command in $finalWorkingDirectory'
+      + (environment != null ? ' with environment $environment' : ''));
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
@@ -620,6 +621,13 @@ Uri parseServiceUri(String line, {
 /// Checks that the file exists, otherwise throws a [FileSystemException].
 void checkFileExists(String file) {
   if (!exists(File(file))) {
+    throw FileSystemException('Expected file to exit.', file);
+  }
+}
+
+/// Checks that the file does not exists, otherwise throws a [FileSystemException].
+void checkFileNotExists(String file) {
+  if (exists(File(file))) {
     throw FileSystemException('Expected file to exit.', file);
   }
 }
