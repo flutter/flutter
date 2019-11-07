@@ -65,10 +65,18 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
           final Completer<void> stdoutDone = Completer<void>();
           final Completer<void> stderrDone = Completer<void>();
           final Stopwatch sw = Stopwatch()..start();
+          bool restarted = false;
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
+            // TODO(jonahwilliams): non-dwds builds do not know when the browser is loaded.
+            if (line.contains('Ignoring terminal input')) {
+              Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
+                process.stdin.write(restarted ? 'q' : 'r');
+              });
+              return;
+            }
             if (line.contains('To hot restart')) {
               // measure clean start-up time.
               sw.stop();
@@ -76,7 +84,8 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
               sw
                 ..reset()
                 ..start();
-              process.stdin.write('R');
+              process.stdin.write('r');
+              return;
             }
             if (line.contains(expectedMessage)) {
               if (hotRestartCount == 0) {
@@ -93,9 +102,10 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
                 sw
                   ..reset()
                   ..start();
-                process.stdin.writeln('R');
+                process.stdin.writeln('r');
                 ++hotRestartCount;
               } else {
+                restarted = true;
                 measurements[kFirstRecompileTime] = sw.elapsedMilliseconds;
                 // Quit after second hot restart.
                 process.stdin.writeln('q');
@@ -138,20 +148,29 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
           );
           final Completer<void> stdoutDone = Completer<void>();
           final Completer<void> stderrDone = Completer<void>();
+          bool restarted = false;
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-
+            // TODO(jonahwilliams): non-dwds builds do not know when the browser is loaded.
+            if (line.contains('Ignoring terminal input')) {
+              Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
+                process.stdin.write(restarted ? 'q' : 'r');
+              });
+              return;
+            }
             if (line.contains('To hot restart')) {
               measurements[kSecondStartupTime] = sw.elapsedMilliseconds;
               sw
                 ..reset()
                 ..start();
-              process.stdin.write('R');
+              process.stdin.write('r');
+              return;
             }
             if (line.contains(expectedMessage)) {
-               measurements[kSecondRestartTime] = sw.elapsedMilliseconds;
+              restarted = true;
+              measurements[kSecondRestartTime] = sw.elapsedMilliseconds;
               process.stdin.writeln('q');
             }
             print('stdout: $line');
