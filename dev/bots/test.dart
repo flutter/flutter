@@ -106,7 +106,6 @@ Future<void> main(List<String> args) async {
   print('═' * 80);
   await selectShard(const <String, ShardRunner>{
     'add_to_app_tests': _runAddToAppTests,
-    'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
     'build_tests': _runBuildTests,
     'framework_coverage': _runFrameworkCoverage,
     'framework_tests': _runFrameworkTests,
@@ -352,17 +351,6 @@ Future<void> _runAddToAppTests() async {
   if (Platform.isMacOS) {
     print('${green}Running add-to-app iOS integration tests$reset...');
     final String addToAppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app');
-    await runCommand('./build_and_test.sh',
-      <String>[],
-      workingDirectory: addToAppDir,
-    );
-  }
-}
-
-Future<void> _runAddToAppLifeCycleTests() async {
-  if (Platform.isMacOS) {
-    print('${green}Running add-to-app life cycle iOS integration tests$reset...');
-    final String addToAppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app_life_cycle');
     await runCommand('./build_and_test.sh',
       <String>[],
       workingDirectory: addToAppDir,
@@ -773,6 +761,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
 
     // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
     // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
+    if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
   ]..shuffle(math.Random(0));

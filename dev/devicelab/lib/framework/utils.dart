@@ -625,6 +625,13 @@ void checkFileExists(String file) {
   }
 }
 
+/// Checks that the file does not exists, otherwise throws a [FileSystemException].
+void checkFileNotExists(String file) {
+  if (exists(File(file))) {
+    throw FileSystemException('Expected file to exit.', file);
+  }
+}
+
 void _checkExitCode(int code) {
   if (code != 0) {
     throw Exception(
