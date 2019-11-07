@@ -39,7 +39,7 @@ echo "Compiling to kernel..."
 "$HOST_TOOLS/dart" \
   "$HOST_TOOLS/gen/frontend_server.dart.snapshot" \
   --sdk-root "$HOST_TOOLS/flutter_patched_sdk" \
-  --strong --target=flutter \
+  --target=flutter \
   --no-link-platform \
   --output-dill "$OUTDIR/App.framework/flutter_assets/kernel_blob.bin" \
   "${BASH_SOURCE%/*}/lib/main.dart"
