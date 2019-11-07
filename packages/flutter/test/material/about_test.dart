@@ -450,40 +450,24 @@ void main() {
     expect(nestedObserver.dialogCount, 1);
   });
 
-  ///Test to make sure that the widget in the title of AboutListTile behaves as
-  ///expected similar to the widget that would be placed in ListTile
-  testWidgets("AboutListTile's child should not be offset when the icon is not specified.", (
-      WidgetTester tester) async {
-    const Text aboutText = Text('About');
-    const Text headingText = Text('Some Heading');
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          drawer: Drawer(
-            child: ListView(
-              children: const <Widget>[
-                ListTile(title: headingText),
-                AboutListTile(child: aboutText,),
-              ],
+  testWidgets(
+      "AboutListTile's child should not be offset when the icon is not specified.",
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: AboutListTile(
+                child: Text('About'),
+              ),
             ),
           ),
-          appBar: AppBar(),
-        ),
-      ),
-    );
+        );
 
-    await tester.tap(find.byType(IconButton));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
-
-    final double headingOffset = tester
-        .getTopLeft(find.byWidget(headingText))
-        .dx;
-    final double aboutOffset = tester
-        .getTopLeft(find.byWidget(aboutText))
-        .dx;
-    expect(headingOffset == aboutOffset, true);
-  });
+        expect(
+            find.descendant(
+                of: find.byType(AboutListTile), matching: find.byType(Icon)),
+            findsNothing);
+      });
 }
 
 class FakeLicenseEntry extends LicenseEntry {
