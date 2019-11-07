@@ -69,7 +69,12 @@ enum FramePhase {
 
 /// Time-related performance metrics of a frame.
 ///
-/// See [Window.onReportTimings] for how to get this.
+/// If you're using the whole Flutter framework, please use
+/// [SchedulerBinding.addTimingsCallback] to get this. It's preferred over using
+/// [Window.onReportTimings] directly because
+/// [SchedulerBinding.addTimingsCallback] allows multiple callbacks. If
+/// [SchedulerBinding] is unavailable, then see [Window.onReportTimings] for how
+/// to get this.
 ///
 /// The metrics in debug mode (`flutter run` without any flags) may be very
 /// different from those in profile and release modes due to the debug overhead.
@@ -932,6 +937,10 @@ class Window {
 
   /// A callback that is invoked to report the [FrameTiming] of recently
   /// rasterized frames.
+  ///
+  /// It's prefered to use [SchedulerBinding.addTimingsCallback] than to use
+  /// [Window.onReportTimings] directly because
+  /// [SchedulerBinding.addTimingsCallback] allows multiple callbacks.
   ///
   /// This can be used to see if the application has missed frames (through
   /// [FrameTiming.buildDuration] and [FrameTiming.rasterDuration]), or high
