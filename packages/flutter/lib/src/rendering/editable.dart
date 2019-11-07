@@ -369,10 +369,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
     // changed.
+    print('Received selection change: $nextSelection $cause');
     if (nextSelection == selection && cause != SelectionChangedCause.keyboard) {
       return;
     }
     if (onSelectionChanged != null) {
+      print('Applied selection change: $selection $cause');
       onSelectionChanged(nextSelection, this, cause);
     }
   }
@@ -423,6 +425,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (keyEvent is! RawKeyDownEvent || onSelectionChanged == null)
       return;
 
+    print('Keys down: ${RawKeyboard.instance.keysPressed}');
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
     final LogicalKeyboardKey key = keyEvent.logicalKey;
 
@@ -485,11 +488,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (lineModifier) {
       // If control/command is pressed, we will decide which way to expand to
       // the beginning/end of the line based on which arrow is pressed.
-      final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: newSelection.extentOffset));
-      if (leftArrow) {
-        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
-      } else if (rightArrow) {
-        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
+      if (leftArrow && newSelection.extentOffset > 2) {
+        final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: newSelection.extentOffset - 2));
+        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset + 1);
+      } else if (rightArrow && newSelection.extentOffset < text.toPlainText().length - 2) {
+        final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: newSelection.extentOffset + 1));
+        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset - 1);
       }
     }
 
@@ -547,14 +551,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // arrow is used while there is a selection.
       int newOffset = newSelection.extentOffset;
       if (!selection.isCollapsed) {
-        if (leftArrow)
+        if (leftArrow) {
           newOffset = newSelection.baseOffset < newSelection.extentOffset ? newSelection.baseOffset : newSelection.extentOffset;
-        else if (rightArrow)
+          print('Left $newSelection $newOffset');
+        } else if (rightArrow) {
           newOffset = newSelection.baseOffset > newSelection.extentOffset ? newSelection.baseOffset : newSelection.extentOffset;
+          print('Right $newSelection $newOffset');
+        }
       }
       newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
     }
-
+    print('Setting to new selection: $newSelection cursor:$_cursorResetLocation');
     _handleSelectionChange(
       newSelection,
       SelectionChangedCause.keyboard,
@@ -1589,6 +1596,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         _textLayoutLastMinWidth == constraints.minWidth,
     'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
     final TextRange line = _textPainter.getLineBoundary(position);
+    if (position.offset >= line.end)
+      return TextSelection.fromPosition(position);
     // If text is obscured, the entire string should be treated as one line.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: text.toPlainText().length);
