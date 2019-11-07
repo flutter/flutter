@@ -308,8 +308,14 @@ String _importFilePath(String path, String fileName) {
   return '$replaceLib/$fileName';
 }
 
-Future<void> main(List<String> args) async {
+Future<void> main(List<String> arguments) async {
   final argslib.ArgParser parser = argslib.ArgParser();
+  parser.addFlag(
+    'help',
+    defaultsTo: false,
+    negatable: false,
+    help: 'Print this help message.',
+  );
   parser.addOption(
     'arb-dir',
     defaultsTo: path.join('lib', 'l10n'),
@@ -336,7 +342,12 @@ Future<void> main(List<String> args) async {
     help: 'The Dart class name to use for the output localization and '
       'localizations delegate classes.',
   );
-  final argslib.ArgResults results = parser.parse(args);
+
+  final argslib.ArgResults results = parser.parse(arguments);
+  if (results['help'] == true) {
+    print(parser.usage);
+    exit(0);
+  }
 
   final String arbPathString = results['arb-dir'];
   final String outputFileString = results['output-localization-file'];
