@@ -741,6 +741,27 @@ void main() {
           isTrue,
         );
       });
+
+      test('compare properly awaits validation & output before failing.', () async {
+        final Completer<bool> completer = Completer<bool>();
+        when(mockSkiaClient.isValidDigestForExpectation(
+          '55109a4bed52acc780530f7a9aeff6c0',
+          'library.flutter.golden_test.1.png',
+        ))
+          .thenAnswer((_) => completer.future);
+        final Future<bool> result = comparator.compare(
+          Uint8List.fromList(_kFailPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        bool shouldThrow = true;
+        result.then((_) {
+          if (shouldThrow)
+            fail('Compare completed before validation completed!');
+        });
+        await Future<void>.value();
+        shouldThrow = false;
+        completer.complete(Future<bool>.value(false));
+      });
     });
   });
 }
