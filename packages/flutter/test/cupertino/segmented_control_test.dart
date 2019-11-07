@@ -369,7 +369,7 @@ void main() {
               },
               groupValue: sharedValue,
               unselectedColor: CupertinoColors.lightBackgroundGray,
-              selectedColor: CupertinoColors.activeGreen,
+              selectedColor: CupertinoColors.activeGreen.color,
               borderColor: CupertinoColors.black,
               pressedColor: const Color(0x638CFC7B),
             ),
@@ -383,8 +383,8 @@ void main() {
 
     expect(getRenderSegmentedControl(tester).borderColor, CupertinoColors.black);
     expect(textStyle.style.color, CupertinoColors.lightBackgroundGray);
-    expect(iconTheme.data.color, CupertinoColors.activeGreen);
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen);
+    expect(iconTheme.data.color, CupertinoColors.activeGreen.color);
+    expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen.color);
     expect(getBackgroundColor(tester, 1), CupertinoColors.lightBackgroundGray);
 
     await tester.tap(find.widgetWithIcon(IconTheme, const IconData(1)));
@@ -393,17 +393,17 @@ void main() {
     textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
-    expect(textStyle.style.color, CupertinoColors.activeGreen);
+    expect(textStyle.style.color, CupertinoColors.activeGreen.color);
     expect(iconTheme.data.color, CupertinoColors.lightBackgroundGray);
     expect(getBackgroundColor(tester, 0), CupertinoColors.lightBackgroundGray);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
+    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen.color);
 
     final Offset center = tester.getCenter(find.text('Child 1'));
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     expect(getBackgroundColor(tester, 0), const Color(0x638CFC7B));
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
+    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen.color);
   });
 
   testWidgets('Widgets are centered within segments', (WidgetTester tester) async {
