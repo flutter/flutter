@@ -44,8 +44,7 @@ import 'messages_all.dart';
 ///
 /// ```
 /// dependencies:
-///   # rest of dependencies
-///
+///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
 ///   intl: 0.16.0
