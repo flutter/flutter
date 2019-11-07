@@ -57,6 +57,15 @@ class Board extends Object with IterableMixin<BoardPoint> {
   @override
   Iterator<BoardPoint> get iterator => _BoardIterator(_boardPoints);
 
+  // Get the size in pixels of the entire board.
+  Size get size {
+    final double centerToFlat = sqrt(3) / 2 * hexagonRadius;
+    return Size(
+      (boardRadius * 2 + 1) * centerToFlat * 2,
+      2 * (hexagonRadius + boardRadius * 1.5 * hexagonRadius),
+    );
+  }
+
   // For a given q axial coordinate, get the range of possible r values
   // See the definition of BoardPoint for more information about hex grids and
   // axial coordinates.

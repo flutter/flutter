@@ -4,7 +4,7 @@ import 'package:flutter/rendering.dart';
 class TableDemo extends StatefulWidget {
   const TableDemo({ Key key }) : super(key: key);
 
-  static const String routeName = '/transformations';
+  static const String routeName = '/table';
 
   @override _TableDemoState createState() => _TableDemoState();
 }
@@ -24,7 +24,7 @@ class _TableDemoState extends State<TableDemo> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: const Text('2D Tranformations'),
+        title: const Text('Scrollable Table'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.help),

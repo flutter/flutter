@@ -1,8 +1,9 @@
 import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart' show Vector3;
+import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
-import 'package:flutter/gestures.dart' show kMinFlingVelocity;
+import 'package:flutter/scheduler.dart';
 
 // A single user event can only represent one of these gestures. The user can't
 // do multiple at the same time, which results in more precise transformations.
@@ -12,7 +13,7 @@ enum _GestureType {
   rotate,
 }
 
-final UniqueKey _childKey = UniqueKey();
+final GlobalKey _childKey = GlobalKey();
 
 /// This widget allows 2D transform interactions on its child in relation to its
 /// parent. The user can transform the child by dragging to pan or pinching to
@@ -474,23 +475,37 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     return renderObject.localToGlobal(Offset.zero);
   }
 
-  // TODO(justinmc): Cache.
+  Rect _boundaryRectCached;
   Rect get _boundaryRect {
+    if (_boundaryRectCached != null) {
+      return _boundaryRectCached;
+    }
     assert(_childKey.currentContext != null);
     final RenderBox renderBoxContainer = _childKey.currentContext.findRenderObject();
+    // TODO(justinmc): I'm getting the error about needing to set
+    // parentCanUseSize here...
     final Size childSize = renderBoxContainer.paintBounds.size;
-    return Rect.fromLTRB(
+    _boundaryRectCached = Rect.fromLTRB(
       -widget.boundaryMargin.left,
       -widget.boundaryMargin.top,
       childSize.width + widget.boundaryMargin.right,
       childSize.height + widget.boundaryMargin.bottom,
     );
+    return _boundaryRectCached;
   }
 
   @override
   void initState() {
     super.initState();
-    _transform = _initialTransform;
+
+    // _initialTransform depends on the size of the child, which isn't available
+    // until after the initial render.
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      setState(() {
+        _transform = _initialTransform;
+      });
+    });
+
     _controller = AnimationController(
       vsync: this,
     );
@@ -505,6 +520,11 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
   @override
   void didUpdateWidget(_InteractiveViewerSized oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.child != oldWidget.child
+      || widget.boundaryMargin != oldWidget.boundaryMargin) {
+      print('justin clear _boundaryRectCached b/c ${widget.child != oldWidget.child} ${widget.boundaryMargin != oldWidget.boundaryMargin}');
+      _boundaryRectCached = null;
+    }
     if (widget.reset && !oldWidget.reset && _animationReset == null) {
       _animateResetInitialize();
     } else if (!widget.reset && oldWidget.reset && _animationReset != null) {

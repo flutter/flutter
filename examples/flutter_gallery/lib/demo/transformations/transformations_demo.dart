@@ -25,12 +25,30 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     hexagonMargin: _kHexagonMargin,
   );
 
+  CustomPaint _childCached;
+  CustomPaint get _child {
+    if (_childCached != null) {
+      final _BoardPainter painter = _childCached.painter;
+      if (painter.board == _board) {
+        return _childCached;
+      }
+    }
+    _childCached = CustomPaint(
+      size: _board.size,
+      painter: _BoardPainter(
+        board: _board,
+      ),
+    );
+    return _childCached;
+  }
+
+  @override
+  void didUpdateWidget(TransformationsDemo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
   @override
   Widget build (BuildContext context) {
-    final BoardPainter painter = BoardPainter(
-      board: _board,
-    );
-
     // The scene is drawn by a CustomPaint, but user interaction is handled by
     // the InteractiveViewer parent widget.
     return Scaffold(
@@ -53,7 +71,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         builder: (BuildContext context, BoxConstraints constraints) {
           // Draw the scene as big as is available, but allow the user to
           // translate beyond that to a visibleSize that's a bit bigger.
-          final Size size = Size(constraints.maxWidth, constraints.maxHeight);
+          final Size viewportSize = Size(constraints.maxWidth, constraints.maxHeight);
           return InteractiveViewer(
             reset: _reset,
             onResetEnd: () {
@@ -61,20 +79,21 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
                 _reset = false;
               });
             },
-            child: CustomPaint(
-              painter: painter,
-            ),
+            child: _child,
             // The board is drawn centered at the origin, which is the top left
             // corner in InteractiveViewer, so set boundaryMargin to accommodate
             // that, and shift it to the center of the viewport
             // with initialTranslation.
-            boundaryMargin: EdgeInsets.fromLTRB(
-              2 * size.width,
-              3 * size.height / 2,
-              size.width,
-              size.height / 2,
+            boundaryMargin: const EdgeInsets.fromLTRB(
+              840.0,
+              840.0,
+              -100.0,
+              0,
             ),
-            initialTranslation: Offset(size.width / 2, size.height / 2),
+            initialTranslation: Offset(
+              viewportSize.width / 2,
+              viewportSize.height / 2,
+            ),
             onTapUp: _onTapUp,
           );
         },
@@ -160,8 +179,8 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
 
 // CustomPainter is what is passed to CustomPaint and actually draws the scene
 // when its `paint` method is called.
-class BoardPainter extends CustomPainter {
-  const BoardPainter({
+class _BoardPainter extends CustomPainter {
+  const _BoardPainter({
     this.board,
   });
 
@@ -182,7 +201,7 @@ class BoardPainter extends CustomPainter {
 
   // We should repaint whenever the board changes, such as board.selected.
   @override
-  bool shouldRepaint(BoardPainter oldDelegate) {
+  bool shouldRepaint(_BoardPainter oldDelegate) {
     return oldDelegate.board != board;
   }
 }
