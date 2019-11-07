@@ -224,9 +224,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///
   /// If the same callback is added twice, it will be executed twice.
   void addTimingsCallback(TimingsCallback callback) {
-    // TODO(liyuqian): once this is merged, modify the doc of
-    //  [Window.onReportTimings] inside the engine repo to recommend using this
-    // API instead of using [Window.onReportTimings] directly.
     _timingsCallbacks.add(callback);
     if (_timingsCallbacks.length == 1) {
       assert(window.onReportTimings == null);
