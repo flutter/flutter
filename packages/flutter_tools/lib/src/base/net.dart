@@ -5,8 +5,10 @@
 import 'dart:async';
 
 import '../base/context.dart';
+import '../convert.dart';
 import '../globals.dart';
 import 'common.dart';
+import 'file_system.dart';
 import 'io.dart';
 import 'platform.dart';
 
@@ -14,16 +16,39 @@ const int kNetworkProblemExitCode = 50;
 
 typedef HttpClientFactory = HttpClient Function();
 
-/// Download a file from the given URL and return the bytes.
-Future<List<int>> fetchUrl(Uri url, {int maxAttempts}) async {
+/// Download a file from the given URL.
+///
+/// If a destination file is not provided, returns the bytes.
+///
+/// If a destination file is provided, streams the bytes to that file and
+/// returns an empty list.
+///
+/// If [maxAttempts] is exceeded, returns null.
+Future<List<int>> fetchUrl(Uri url, {
+  int maxAttempts,
+  File destFile,
+}) async {
   int attempts = 0;
   int durationSeconds = 1;
   while (true) {
     attempts += 1;
-    final List<int> result = await _attempt(url);
-    if (result != null) {
-      return result;
+    _MemoryIOSink memorySink;
+    IOSink sink;
+    if (destFile == null) {
+      memorySink = _MemoryIOSink();
+      sink = memorySink;
+    } else {
+      sink = destFile.openWrite();
     }
+
+    final bool result = await _attempt(
+      url,
+      destSink: sink,
+    );
+    if (result) {
+      return memorySink?.writes?.takeBytes() ?? <int>[];
+    }
+
     if (maxAttempts != null && attempts >= maxAttempts) {
       printStatus('Download failed -- retry $attempts');
       return null;
@@ -38,10 +63,14 @@ Future<List<int>> fetchUrl(Uri url, {int maxAttempts}) async {
 }
 
 /// Check if the given URL points to a valid endpoint.
-Future<bool> doesRemoteFileExist(Uri url) async =>
-  (await _attempt(url, onlyHeaders: true)) != null;
+Future<bool> doesRemoteFileExist(Uri url) async => await _attempt(url, onlyHeaders: true);
 
-Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
+// Returns true on success and false on failure.
+Future<bool> _attempt(Uri url, {
+  IOSink destSink,
+  bool onlyHeaders = false,
+}) async {
+  assert(onlyHeaders || destSink != null);
   printTrace('Downloading: $url');
   HttpClient httpClient;
   if (context.get<HttpClientFactory>() != null) {
@@ -81,19 +110,19 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
     );
   } on SocketException catch (error) {
     printTrace('Download error: $error');
-    return null;
+    return false;
   } on HttpException catch (error) {
     printTrace('Download error: $error');
-    return null;
+    return false;
   }
   assert(response != null);
 
   // If we're making a HEAD request, we're only checking to see if the URL is
   // valid.
   if (onlyHeaders) {
-    return (response.statusCode == 200) ? <int>[] : null;
+    return response.statusCode == HttpStatus.ok;
   }
-  if (response.statusCode != 200) {
+  if (response.statusCode != HttpStatus.ok) {
     if (response.statusCode > 0 && response.statusCode < 500) {
       throwToolExit(
         'Download failed.\n'
@@ -104,15 +133,79 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
     }
     // 5xx errors are server errors and we can try again
     printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
-    return null;
+    return false;
   }
   printTrace('Received response from server, collecting bytes...');
   try {
-    final BytesBuilder responseBody = BytesBuilder(copy: false);
-    await response.forEach(responseBody.add);
-    return responseBody.takeBytes();
+    assert(destSink != null);
+    await response.forEach(destSink.add);
+    return true;
   } on IOException catch (error) {
     printTrace('Download error: $error');
-    return null;
+    return false;
+  } finally {
+    await destSink?.flush();
+    await destSink?.close();
   }
+}
+
+/// An IOSink that collects whatever is written to it.
+class _MemoryIOSink implements IOSink {
+  @override
+  Encoding encoding = utf8;
+
+  final BytesBuilder writes = BytesBuilder(copy: false);
+
+  @override
+  void add(List<int> data) {
+    writes.add(data);
+  }
+
+  @override
+  Future<void> addStream(Stream<List<int>> stream) {
+    final Completer<void> completer = Completer<void>();
+    stream.listen(add).onDone(completer.complete);
+    return completer.future;
+  }
+
+  @override
+  void writeCharCode(int charCode) {
+    add(<int>[charCode]);
+  }
+
+  @override
+  void write(Object obj) {
+    add(encoding.encode('$obj'));
+  }
+
+  @override
+  void writeln([ Object obj = '' ]) {
+    add(encoding.encode('$obj\n'));
+  }
+
+  @override
+  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
+    bool addSeparator = false;
+    for (dynamic object in objects) {
+      if (addSeparator) {
+        write(separator);
+      }
+      write(object);
+      addSeparator = true;
+    }
+  }
+
+  @override
+  void addError(dynamic error, [ StackTrace stackTrace ]) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> get done => close();
+
+  @override
+  Future<void> close() async { }
+
+  @override
+  Future<void> flush() async { }
 }
