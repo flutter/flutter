@@ -2984,30 +2984,52 @@ void main() {
       WidgetTester tester,
       List<LogicalKeyboardKey> keys, {
         bool shift = false,
-        bool modifier = false,
+        bool wordModifier = false,
+        bool lineModifier = false,
+        bool shortcutModifier = false,
         String platform,
       }) async {
     if (shift) {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
     }
-    if (modifier) {
+    if (shortcutModifier) {
       await tester.sendKeyDownEvent(
-          platform == 'macos' ? LogicalKeyboardKey.meta : LogicalKeyboardKey.controlLeft,
+          platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+          platform: platform);
+    }
+    if (wordModifier) {
+      await tester.sendKeyDownEvent(
+          platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+          platform: platform);
+    }
+    if (lineModifier) {
+      await tester.sendKeyDownEvent(
+          platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
           platform: platform);
     }
     for (LogicalKeyboardKey key in keys) {
       await tester.sendKeyEvent(key, platform: platform);
       await tester.pump();
     }
-    if (modifier) {
+    if (lineModifier) {
       await tester.sendKeyUpEvent(
-          platform == 'macos' ? LogicalKeyboardKey.meta : LogicalKeyboardKey.controlLeft,
+          platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+          platform: platform);
+    }
+    if (wordModifier) {
+      await tester.sendKeyUpEvent(
+          platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+          platform: platform);
+    }
+    if (shortcutModifier) {
+      await tester.sendKeyUpEvent(
+          platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
           platform: platform);
     }
     if (shift) {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
     }
-    if (shift || modifier) {
+    if (shift || wordModifier || lineModifier) {
       await tester.pump();
     }
   }
@@ -3128,7 +3150,7 @@ void main() {
         LogicalKeyboardKey.arrowRight,
       ],
       shift: true,
-      modifier: true,
+      wordModifier: true,
       platform: platform,
     );
 
@@ -3151,7 +3173,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      modifier: true,
+      wordModifier: true,
       platform: platform,
     );
 
@@ -3279,13 +3301,59 @@ void main() {
       reason: 'on $platform',
     );
 
+    // Select to the end of the line.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      lineModifier: true,
+      shift: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 21,
+          extentOffset: 72,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select to the beginning of the line.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      lineModifier: true,
+      shift: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 21,
+          extentOffset: 0,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
     // Select All
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.keyA,
       ],
-      modifier: true,
+      shortcutModifier: true,
       platform: platform,
     );
 
@@ -3330,7 +3398,7 @@ void main() {
         LogicalKeyboardKey.arrowRight,
         LogicalKeyboardKey.arrowRight,
       ],
-      modifier: true,
+      wordModifier: true,
       platform: platform,
     );
 
@@ -3377,7 +3445,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      modifier: true,
+      wordModifier: true,
       platform: platform,
     );
 
@@ -3400,7 +3468,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.keyX,
       ],
-      modifier: true,
+      shortcutModifier: true,
       platform: platform,
     );
 
@@ -3435,7 +3503,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.keyV,
       ],
-      modifier: true,
+      shortcutModifier: true,
       platform: platform,
     );
 
@@ -3459,7 +3527,7 @@ void main() {
         LogicalKeyboardKey.keyA,
         LogicalKeyboardKey.keyC,
       ],
-      modifier: true,
+      shortcutModifier: true,
       platform: platform,
     );
 

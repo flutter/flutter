@@ -827,6 +827,15 @@ class TextPainter {
     return range;
   }
 
+  /// Returns the text range of the line at the given offset.
+  ///
+  /// The newline, if any, is included in the range.
+  TextRange getLineBoundary(TextPosition position) {
+    assert(!_needsLayout);
+    final List<int> indices = _paragraph.getLineBoundary(position.offset);
+    return TextRange(start: indices[0], end: indices[1]);
+  }
+
   /// Returns the full list of [LineMetrics] that describe in detail the various
   /// metrics of each laid out line.
   ///

@@ -485,10 +485,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (lineModifier) {
       // If control/command is pressed, we will decide which way to expand to
       // the beginning/end of the line based on which arrow is pressed.
+      final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: newSelection.extentOffset));
       if (leftArrow) {
-        newSelection = newSelection.copyWith(extentOffset: 0);
+        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
       } else if (rightArrow) {
-        newSelection = newSelection.copyWith(extentOffset: text.text.length);
+        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
       }
     }
 
@@ -1581,6 +1582,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return TextSelection(baseOffset: 0, extentOffset: text.toPlainText().length);
     }
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
+  }
+
+  TextSelection _selectLineAtOffset(TextPosition position) {
+    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
+        _textLayoutLastMinWidth == constraints.minWidth,
+    'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    final TextRange line = _textPainter.getLineBoundary(position);
+    // If text is obscured, the entire string should be treated as one line.
+    if (obscureText) {
+      return TextSelection(baseOffset: 0, extentOffset: text.toPlainText().length);
+    }
+    return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }
 
   Rect _caretPrototype;
