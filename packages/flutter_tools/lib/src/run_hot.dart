@@ -11,7 +11,6 @@ import 'package:pool/pool.dart';
 
 import 'base/async_guard.dart';
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -26,29 +25,6 @@ import 'globals.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
-
-class HotRunnerConfig {
-  /// Should the hot runner assume that the minimal Dart dependencies do not change?
-  bool stableDartDependencies = false;
-
-  /// Whether the hot runner should scan for modified files asynchronously.
-  bool asyncScanning = false;
-
-  /// A hook for implementations to perform any necessary initialization prior
-  /// to a hot restart. Should return true if the hot restart should continue.
-  Future<bool> setupHotRestart() async {
-    return true;
-  }
-  /// A hook for implementations to perform any necessary operations right
-  /// before the runner is about to be shut down.
-  Future<void> runPreShutdownOperations() async {
-    return;
-  }
-}
-
-HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
-
-const bool kHotReloadDefault = true;
 
 class DeviceReloadReport {
   DeviceReloadReport(this.device, this.reports);
@@ -635,21 +611,25 @@ class HotRunner extends ResidentRunner {
     );
     OperationResult result;
     try {
-      result = await _reloadSources(
-        targetPlatform: targetPlatform,
-        sdkName: sdkName,
-        emulator: emulator,
-        pause: pauseAfterRestart,
-        reason: reason,
-        onSlow: (String message) {
-          status?.cancel();
-          status = logger.startProgress(
-            message,
-            timeout: timeoutConfiguration.slowOperation,
-            progressId: 'hot.reload',
-          );
-        },
-      );
+      if (!await hotRunnerConfig.preHotReloadTask()) {
+        result = OperationResult(1, 'preHotReloadTasks failed');
+      } else {
+        result = await _reloadSources(
+          targetPlatform: targetPlatform,
+          sdkName: sdkName,
+          emulator: emulator,
+          pause: pauseAfterRestart,
+          reason: reason,
+          onSlow: (String message) {
+            status?.cancel();
+            status = logger.startProgress(
+              message,
+              timeout: timeoutConfiguration.slowOperation,
+              progressId: 'hot.reload',
+            );
+          },
+        );
+      }
     } on rpc.RpcException {
       HotEvent('exception',
         targetPlatform: targetPlatform,

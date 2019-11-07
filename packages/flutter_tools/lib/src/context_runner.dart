@@ -49,7 +49,7 @@ import 'macos/xcode.dart';
 import 'macos/xcode_validator.dart';
 import 'mdns_discovery.dart';
 import 'reporting/reporting.dart';
-import 'run_hot.dart';
+import 'resident_runner.dart';
 import 'version.dart';
 import 'web/chrome.dart';
 import 'web/workflow.dart';

@@ -9,7 +9,6 @@ import '../../base/process_manager.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart';
-import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
@@ -126,9 +125,7 @@ class Dart2JSTarget extends Target {
     final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = fs.path.join(artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
-    final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
-      ? PackageMap.globalGeneratedPackagesPath
-      : PackageMap.globalPackagesPath;
+    final String packageFile = PackageMap.globalPackagesPath;
     final File outputFile = environment.buildDir.childFile('main.dart.js');
     final ProcessResult result = await processManager.run(<String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),

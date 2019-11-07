@@ -153,7 +153,7 @@ class RunCommand extends RunCommandBase {
       )
       ..addFlag('hot',
         negatable: true,
-        defaultsTo: kHotReloadDefault,
+        defaultsTo: true,
         help: 'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
       )
       ..addFlag('resident',

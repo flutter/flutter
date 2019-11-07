@@ -94,16 +94,16 @@ class TestCompiler {
   @visibleForTesting
   Future<ResidentCompiler> createCompiler() async {
     if (flutterProject.hasBuilders) {
-      return CodeGeneratingResidentCompiler.create(
-        flutterProject: flutterProject,
-        buildMode: buildMode,
-        trackWidgetCreation: trackWidgetCreation,
-        compilerMessageConsumer: _reportCompilerMessage,
-        initializeFromDill: testFilePath,
-        // We already ran codegen once at the start, we only need to
-        // configure builders.
-        runCold: true,
-      );
+      final CodegenDaemon codegenDaemon = await codeGenerator
+        .daemon(flutterProject);
+      codegenDaemon.startBuild();
+      await for (CodegenStatus status in codegenDaemon.buildResults) {
+        if (status == CodegenStatus.Succeeded || status == CodegenStatus.Failed) {
+          // We still attempt to run the tests if codegen failed, since the failure
+          // may not be reachable from whatever test we are executing.
+          break;
+        }
+      }
     }
     return ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),

@@ -37,6 +37,8 @@ const String kSupportedBuildDaemonVersion = '2.1.0';
 class BuildRunner extends CodeGenerator {
   const BuildRunner();
 
+  static CodegenDaemon _codegenDaemonInstance;
+
   @override
   Future<void> generateBuildScript(FlutterProject flutterProject) async {
     final Directory entrypointDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint'));
@@ -142,6 +144,9 @@ class BuildRunner extends CodeGenerator {
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions = const <String> [],
   }) async {
+    if (_codegenDaemonInstance != null) {
+      return _codegenDaemonInstance;
+    }
     await generateBuildScript(flutterProject);
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final File buildSnapshot = flutterProject
@@ -154,7 +159,7 @@ class BuildRunner extends CodeGenerator {
         .childDirectory('flutter_tool')
         .childFile('.packages')
         .path;
-    final Status status = logger.startProgress('starting build daemon...', timeout: null);
+    final Status status = logger.startProgress('Starting build daemon...', timeout: null);
     BuildDaemonClient buildDaemonClient;
     try {
       final List<String> command = <String>[
@@ -191,7 +196,7 @@ class BuildRunner extends CodeGenerator {
       builder.target = 'test';
       builder.outputLocation = outputLocation.toBuilder();
     }));
-    return _BuildRunnerCodegenDaemon(buildDaemonClient);
+    return _codegenDaemonInstance = _BuildRunnerCodegenDaemon(buildDaemonClient);
   }
 }
 
@@ -202,7 +207,7 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
 
   @override
   CodegenStatus get lastStatus => _lastStatus;
-  CodegenStatus _lastStatus;
+  CodegenStatus _lastStatus = CodegenStatus.Started;
 
   @override
   Stream<CodegenStatus> get buildResults => buildDaemonClient.buildResults.map((build.BuildResults results) {

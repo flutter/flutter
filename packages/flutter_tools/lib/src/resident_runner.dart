@@ -10,6 +10,7 @@ import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
@@ -28,6 +29,51 @@ import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
+
+/// Configuration for the hot runner.
+class HotRunnerConfig {
+  /// Should the hot runner assume that the minimal Dart dependencies do not change?
+  bool stableDartDependencies = false;
+
+  /// Whether the hot runner should scan for modified files asynchronously.
+  bool asyncScanning = false;
+
+  final List<Future<bool> Function()> _preHotReloadTasks = <Future<bool> Function()>[];
+
+  /// Registers a new task to be called before a hot reload.
+  void registerPreHotReloadTask(Future<bool> Function() task) {
+    _preHotReloadTasks.add(task);
+  }
+
+  /// Perform work before starting the hot reload process, returning whether
+  /// it is safe to continue.
+  ///
+  /// These tasks are executed concurrently.
+  Future<bool> preHotReloadTask() async {
+    if (_preHotReloadTasks.isEmpty) {
+      return true;
+    }
+    final List<bool> result = await Future.wait(<Future<bool>>[
+      for (Future<bool> Function() task in _preHotReloadTasks)
+        task()
+    ]);
+    return result.every((bool value) => value);
+  }
+
+  /// A hook for implementations to perform any necessary initialization prior
+  /// to a hot restart. Should return true if the hot restart should continue.
+  Future<bool> setupHotRestart() async {
+    return true;
+  }
+  /// A hook for implementations to perform any necessary operations right
+  /// before the runner is about to be shut down.
+  Future<void> runPreShutdownOperations() async {
+    return;
+  }
+}
+
+/// The [HotRunnerConfig] instance.
+HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
 
 class FlutterDevice {
   FlutterDevice(
@@ -70,11 +116,31 @@ class FlutterDevice {
     List<String> experimentalFlags,
     ResidentCompiler generator,
   }) async {
+    // If the builders key is present in the pubspec, spawn an automatic
+    // build_daemon to wait for source builds before hot reloading.
+    if (flutterProject.hasBuilders) {
+      final CodegenDaemon codegenDaemon = await codeGenerator
+        .daemon(flutterProject);
+      hotRunnerConfig.registerPreHotReloadTask(() async {
+        // We still attempt to run the tests if codegen failed, since the failure
+        // may not be reachable from whatever entrypoint we are executing.
+        if (codegenDaemon.lastStatus != CodegenStatus.Started) {
+          return true;
+        }
+        await for (CodegenStatus status in codegenDaemon.buildResults) {
+          if (status != CodegenStatus.Started) {
+            return true;
+          }
+        }
+        return false;
+      });
+    }
     ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
+
     if (featureFlags.isWebIncrementalCompilerEnabled &&
         targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
@@ -86,12 +152,6 @@ class FlutterDevice {
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode),
-      );
-    } else if (flutterProject.hasBuilders) {
-      generator = await CodeGeneratingResidentCompiler.create(
-        targetPlatform: targetPlatform,
-        buildMode: buildMode,
-        flutterProject: flutterProject,
       );
     } else {
       generator = ResidentCompiler(

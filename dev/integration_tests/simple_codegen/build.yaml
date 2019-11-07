@@ -5,4 +5,5 @@ builders:
     builder_factories:
       - simpleBuilder
     build_extensions: {'.spec':['.dart']}
-    auto_apply: all_packages
+    build_to: source
+    auto_apply: root_package

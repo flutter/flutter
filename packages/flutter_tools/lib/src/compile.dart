@@ -28,10 +28,21 @@ class KernelCompilerFactory {
   const KernelCompilerFactory();
 
   Future<KernelCompiler> create(FlutterProject flutterProject) async {
-    if (flutterProject == null || !flutterProject.hasBuilders) {
-      return const KernelCompiler();
+    if (flutterProject.hasBuilders) {
+      final CodegenDaemon codegenDaemon = await codeGenerator
+        .daemon(flutterProject);
+      codegenDaemon.startBuild();
+      if (codegenDaemon.lastStatus == CodegenStatus.Started) {
+        // We still attempt to run the tests if codegen failed, since the failure
+        // may not be reachable from whatever entrypoint we are executing.
+        await for (CodegenStatus status in codegenDaemon.buildResults) {
+          if (status != CodegenStatus.Started) {
+            break;
+          }
+        }
+      }
     }
-    return const CodeGeneratingKernelCompiler();
+    return const KernelCompiler();
   }
 }
 
