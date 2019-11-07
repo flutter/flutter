@@ -226,8 +226,9 @@ abstract class FlutterCommand extends Command<void> {
             'discovered.',
     );
     argParser.addOption('host-vmservice-port',
-      help: 'Listen to the given port for a vmservice connection.\n'
-            'Specifying port 0 (the default) will find a random free host port.'
+      help: 'When a device-side vmservice port is forwarded to a host-side '
+            'port, use this value as the host port.\nSpecifying port 0 '
+            '(the default) will find a random free host port.'
     );
     _usesPortOption = true;
   }
@@ -235,12 +236,20 @@ abstract class FlutterCommand extends Command<void> {
   /// Gets the vmservice port provided to in the 'observatory-port' or
   /// 'host-vmservice-port option.
   ///
+  /// Only one of "host-vmservice-port" and "observatory-port" may be
+  /// specified.
+  ///
   /// If no port is set, returns null.
   int get hostVmservicePort {
     if (!_usesPortOption ||
         argResults['observatory-port'] == null ||
         argResults['host-vmservice-port'] == null) {
       return null;
+    }
+    if (argResults.wasParsed('observatory-port') &&
+        argResults.wasParsed('host-vmservice-port')) {
+      throwToolExit('Only one of "--observatory-port" and '
+        '"--host-vmservice-port" may be specified.');
     }
     try {
       return int.parse(argResults['observatory-port'] ?? argResults['host-vmservice-port']);

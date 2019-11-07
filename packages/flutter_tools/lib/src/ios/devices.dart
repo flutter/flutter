@@ -376,8 +376,8 @@ class IOSDevice extends Device {
         localUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
           packageId,
           this,
-          ipv6,
-          debuggingOptions.hostVmservicePort,
+          usesIpv6: ipv6,
+          hostVmservicePort: debuggingOptions.hostVmservicePort,
         );
         if (localUri != null) {
           UsageEvent('ios-mdns', 'success').send();
