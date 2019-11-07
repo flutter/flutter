@@ -5,9 +5,10 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
-import 'android/gradle.dart' as gradle;
+import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -288,6 +289,9 @@ abstract class XcodeBasedProject {
 
   /// True if the host app project is using Swift.
   Future<bool> get isSwift;
+
+  /// Directory containing symlinks to pub cache plugins source generated on `pod install`.
+  Directory get symlinks;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -349,6 +353,9 @@ class IosProject implements XcodeBasedProject {
 
   /// The 'Info.plist' file of the host app.
   File get hostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
+
+  @override
+  Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
   Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppBundleName.xcodeproj');
@@ -568,6 +575,11 @@ class AndroidProject {
     return _firstMatchInFile(gradleFile, _groupPattern)?.group(1);
   }
 
+  /// The build directory where the Android artifacts are placed.
+  Directory get buildDirectory {
+    return parent.directory.childDirectory('build');
+  }
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       _regenerateLibrary();
@@ -608,7 +620,11 @@ class AndroidProject {
 
   void _regenerateLibrary() {
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'library'), ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join(
+      'module',
+      'android',
+      featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
+    ), ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
     gradle.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
@@ -621,11 +637,49 @@ class AndroidProject {
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
+        'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
     );
   }
+
+  AndroidEmbeddingVersion getEmbeddingVersion() {
+    if (appManifestFile == null || !appManifestFile.existsSync()) {
+      return AndroidEmbeddingVersion.v1;
+    }
+    xml.XmlDocument document;
+    try {
+      document = xml.parse(appManifestFile.readAsStringSync());
+    } on xml.XmlParserException {
+      throwToolExit('Error parsing $appManifestFile '
+                    'Please ensure that the android manifest is a valid XML document and try again.');
+    } on FileSystemException {
+      throwToolExit('Error reading $appManifestFile even though it exists. '
+                    'Please ensure that you have read permission to this file and try again.');
+    }
+    for (xml.XmlElement metaData in document.findAllElements('meta-data')) {
+      final String name = metaData.getAttribute('android:name');
+      if (name == 'flutterEmbedding') {
+        final String embeddingVersionString = metaData.getAttribute('android:value');
+        if (embeddingVersionString == '1') {
+          return AndroidEmbeddingVersion.v1;
+        }
+        if (embeddingVersionString == '2') {
+          return AndroidEmbeddingVersion.v2;
+        }
+      }
+    }
+    return AndroidEmbeddingVersion.v1;
+  }
+}
+
+/// Iteration of the embedding Java API in the engine used by the Android project.
+enum AndroidEmbeddingVersion {
+  /// V1 APIs based on io.flutter.app.FlutterActivity.
+  v1,
+  /// V2 APIs based on io.flutter.embedding.android.FlutterActivity.
+  v2,
 }
 
 /// Represents the web sub-project of a Flutter project.
@@ -736,6 +790,9 @@ class MacOSProject implements XcodeBasedProject {
 
   @override
   Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
+
+  @override
+  Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
 
   @override
   Future<bool> get isSwift async => true;

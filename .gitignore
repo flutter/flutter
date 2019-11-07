@@ -18,6 +18,7 @@
 
 # Visual Studio Code related
 .vscode/
+.project
 
 # Flutter repo-specific
 /bin/cache/
@@ -80,6 +81,7 @@ unlinked_spec.ds
 **/ios/.generated/
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
@@ -97,3 +99,4 @@ coverage/
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+!/dev/ci/**/Gemfile.lock

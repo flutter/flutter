@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../convert.dart';
 import '../globals.dart';
+import 'common.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -470,10 +471,13 @@ class _DefaultProcessUtils implements ProcessUtils {
       stderrSubscription.asFuture<void>(),
     ]);
 
-    await waitGroup<void>(<Future<void>>[
-      stdoutSubscription.cancel(),
-      stderrSubscription.cancel(),
-    ]);
+    // The streams as futures have already completed, so waiting for the
+    // potentially async stream cancellation to complete likely has no benefit.
+    // Further, some Stream implementations commonly used in tests don't
+    // complete the Future returned here, which causes tests using
+    // mocks/FakeAsync to fail when these Futures are awaited.
+    unawaited(stdoutSubscription.cancel());
+    unawaited(stderrSubscription.cancel());
 
     return await process.exitCode;
   }

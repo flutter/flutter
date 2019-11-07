@@ -26,8 +26,7 @@ import 'dart:async';
 /// completed with its result when passed the error object and stack trace.
 ///
 /// After the returned [Future] is completed, whether it be with a value or an
-/// error, all further errors resulting from the execution of [fn] both
-/// synchronous and asynchronous are ignored.
+/// error, all further errors resulting from the execution of [fn] are ignored.
 ///
 /// Rationale:
 ///
@@ -49,11 +48,11 @@ import 'dart:async';
 ///
 /// As such, it would be convenient if the `try {} catch {}` here could handle
 /// not only errors completing the awaited [Future]s it contains, but also
-/// any otherwise unhandled asynchronous errors occuring as a result of awaited
+/// any otherwise unhandled asynchronous errors occurring as a result of awaited
 /// expressions. This is how `await` is often assumed to work, which leads to
 /// unexpected unhandled exceptions.
 ///
-/// [asyncGuard] is intended to wrap awaited expressions occuring in a `try`
+/// [asyncGuard] is intended to wrap awaited expressions occurring in a `try`
 /// block. The behavior described above gives the behavior that users
 /// intuitively expect from `await`. Consider the snippet:
 /// ```
@@ -79,9 +78,10 @@ import 'dart:async';
 /// [onError] must have type `FutureOr<T> Function(Object error)` or
 /// `FutureOr<T> Function(Object error, StackTrace stackTrace)` otherwise an
 /// [ArgumentError] will be thrown synchronously.
-Future<T> asyncGuard<T>(Future<T> Function() fn, {
-    Function onError,
-  }) {
+Future<T> asyncGuard<T>(
+  Future<T> Function() fn, {
+  Function onError,
+}) {
   if (onError != null &&
       onError is! _UnaryOnError<T> &&
       onError is! _BinaryOnError<T>) {
@@ -99,10 +99,10 @@ Future<T> asyncGuard<T>(Future<T> Function() fn, {
       completer.completeError(e, s);
       return;
     }
-    if (onError is _UnaryOnError) {
-      completer.complete(onError(e));
-    } else if (onError is _BinaryOnError) {
+    if (onError is _BinaryOnError) {
       completer.complete(onError(e, s));
+    } else if (onError is _UnaryOnError) {
+      completer.complete(onError(e));
     }
   }
 

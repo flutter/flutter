@@ -445,6 +445,7 @@ class DevFS {
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
+    final DateTime candidateCompileTime = DateTime.now();
 
     // Update modified files
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
@@ -476,7 +477,6 @@ class DevFS {
       generator.reset();
     }
     printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-    lastCompiled = DateTime.now();
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
@@ -486,6 +486,8 @@ class DevFS {
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }
+    // Only update the last compiled time if we successfully compiled.
+    lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
     //

@@ -178,7 +178,7 @@ class ShapeDecoration extends Decoration {
   ///
   /// This value may be misleading. See the discussion at [ShapeBorder.dimensions].
   @override
-  EdgeInsets get padding => shape.dimensions;
+  EdgeInsetsGeometry get padding => shape.dimensions;
 
   @override
   bool get isComplex => shadows != null;

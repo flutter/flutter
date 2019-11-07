@@ -91,21 +91,19 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # codegen_integration_linux:
-  #   description: >
-  #     Runs codegeneration and verifies that it can execute
-  #     correctly.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
+  codegen_integration_linux:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # uncaught_image_error_linux:
-  #   description: >
-  #     Ensures that an error thrown into the zone can be caught by the ImageStream
-  #     completer
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
+  uncaught_image_error_linux:
+    description: >
+      Ensures that an error thrown into the zone can be caught by the ImageStream
+      completer
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   flutter_gallery_android__compile:
     description: >
@@ -128,13 +126,12 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # windows_chrome_dev_mode:
-  #   description: >
-  #     Run flutter web on the devicelab and hot restart.
-  #   stage: devicelab_win
-  #   required_agent_capabilities: ["windows/android"]
-  #   flaky: true
+  windows_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
 
   # Android on-device tests
 
@@ -348,20 +345,18 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # linux_chrome_dev_mode:
-  #   description: >
-  #     Run flutter web on the devicelab and hot restart.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-  #   flaky: true
+  linux_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # web_size__compile_test:
-  #   description: >
-  #     Measures the size of a dart2js bundle.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
+  web_size__compile_test:
+    description: >
+      Measures the size of a dart2js bundle.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   image_list_reported_duration:
     description: >
@@ -375,12 +370,11 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # build_benchmark:
-  #   description: >
-  #     Measures APK build performance across config changes.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
+  build_benchmark:
+    description: >
+      Measures APK build performance across config changes.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   # iOS on-device tests
 
@@ -509,12 +503,13 @@ tasks:
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
 
-  system_debug_ios:
-    description: >
-      Tests that the Engine correctly initializes the system debugger for debug-mode iOS apps.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    timeout_in_minutes: 10
+  # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/41133
+  # system_debug_ios:
+  #   description: >
+  #     Tests that the Engine correctly initializes the system debugger for debug-mode iOS apps.
+  #   stage: devicelab_ios
+  #   required_agent_capabilities: ["mac/ios"]
+  #   timeout_in_minutes: 10
 
   ios_sample_catalog_generator:
     description: >
@@ -522,12 +517,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  # macos_chrome_dev_mode:
-  #   description: >
-  #     Run flutter web on the devicelab and hot restart.
-  #   stage: devicelab_ios
-  #   required_agent_capabilities: ["mac/ios"]
-  #   flaky: true # marked as flaky while infra is under heavy development
+  macos_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true # marked as flaky while infra is under heavy development
 
   build_benchmark_ios:
     description: >
@@ -608,6 +603,12 @@ tasks:
   flutter_test_performance:
     description: >
       Measures performance of running flutter test.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  dartdocs:
+    description: >
+      Tracks how many members are still lacking documentation.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 

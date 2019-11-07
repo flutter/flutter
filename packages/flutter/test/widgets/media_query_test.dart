@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Brightness;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -19,7 +20,27 @@ void main() {
       ),
     );
     expect(tested, isTrue);
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isNotNull);
+    expect(exception ,isFlutterError);
+    final FlutterError error = exception;
+    expect(error.diagnostics.length, 3);
+    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(
+      error.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   MediaQuery.of() called with a context that does not contain a\n'
+        '   MediaQuery.\n'
+        '   No MediaQuery ancestor could be found starting from the context\n'
+        '   that was passed to MediaQuery.of(). This can happen because you\n'
+        '   do not have a WidgetsApp or MaterialApp widget (those widgets\n'
+        '   introduce a MediaQuery), or it can happen if the context you use\n'
+        '   comes from a widget above those widgets.\n'
+        '   The context used was:\n'
+        '     Builder\n',
+      ),
+    );
   });
 
   testWidgets('MediaQuery defaults to null', (WidgetTester tester) async {
@@ -171,6 +192,60 @@ void main() {
     expect(unpadded.boldText, true);
   });
 
+  testWidgets('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
+    const Size size = Size(2.0, 4.0);
+    const double devicePixelRatio = 2.0;
+    const double textScaleFactor = 1.2;
+    const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+
+    MediaQueryData unpadded;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: size,
+          devicePixelRatio: devicePixelRatio,
+          textScaleFactor: textScaleFactor,
+          padding: padding,
+          viewPadding: viewPadding,
+          viewInsets: viewInsets,
+          alwaysUse24HourFormat: true,
+          accessibleNavigation: true,
+          invertColors: true,
+          disableAnimations: true,
+          boldText: true,
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.removePadding(
+              removeTop: true,
+              context: context,
+              child: Builder(
+                builder: (BuildContext context) {
+                  unpadded = MediaQuery.of(context);
+                  return Container();
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(unpadded.size, size);
+    expect(unpadded.devicePixelRatio, devicePixelRatio);
+    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.padding, padding.copyWith(top: 0));
+    expect(unpadded.viewPadding, viewPadding.copyWith(top: viewInsets.top));
+    expect(unpadded.viewInsets, viewInsets);
+    expect(unpadded.alwaysUse24HourFormat, true);
+    expect(unpadded.accessibleNavigation, true);
+    expect(unpadded.invertColors, true);
+    expect(unpadded.disableAnimations, true);
+    expect(unpadded.boldText, true);
+  });
+
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
@@ -187,7 +262,7 @@ void main() {
           devicePixelRatio: devicePixelRatio,
           textScaleFactor: textScaleFactor,
           padding: padding,
-          viewPadding : viewPadding,
+          viewPadding: viewPadding,
           viewInsets: viewInsets,
           alwaysUse24HourFormat: true,
           accessibleNavigation: true,
@@ -228,6 +303,60 @@ void main() {
     expect(unpadded.boldText, true);
   });
 
+  testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
+    const Size size = Size(2.0, 4.0);
+    const double devicePixelRatio = 2.0;
+    const double textScaleFactor = 1.2;
+    const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+
+    MediaQueryData unpadded;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: size,
+          devicePixelRatio: devicePixelRatio,
+          textScaleFactor: textScaleFactor,
+          padding: padding,
+          viewPadding: viewPadding,
+          viewInsets: viewInsets,
+          alwaysUse24HourFormat: true,
+          accessibleNavigation: true,
+          invertColors: true,
+          disableAnimations: true,
+          boldText: true,
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.removeViewInsets(
+              context: context,
+              removeBottom: true,
+              child: Builder(
+                builder: (BuildContext context) {
+                  unpadded = MediaQuery.of(context);
+                  return Container();
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(unpadded.size, size);
+    expect(unpadded.devicePixelRatio, devicePixelRatio);
+    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.padding, padding);
+    expect(unpadded.viewPadding, viewPadding.copyWith(bottom: 8));
+    expect(unpadded.viewInsets, viewInsets.copyWith(bottom: 0));
+    expect(unpadded.alwaysUse24HourFormat, true);
+    expect(unpadded.accessibleNavigation, true);
+    expect(unpadded.invertColors, true);
+    expect(unpadded.disableAnimations, true);
+    expect(unpadded.boldText, true);
+  });
+
   testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
@@ -244,7 +373,7 @@ void main() {
           devicePixelRatio: devicePixelRatio,
           textScaleFactor: textScaleFactor,
           padding: padding,
-          viewPadding : viewPadding,
+          viewPadding: viewPadding,
           viewInsets: viewInsets,
           alwaysUse24HourFormat: true,
           accessibleNavigation: true,
@@ -277,6 +406,60 @@ void main() {
     expect(unpadded.textScaleFactor, textScaleFactor);
     expect(unpadded.padding, EdgeInsets.zero);
     expect(unpadded.viewPadding, EdgeInsets.zero);
+    expect(unpadded.viewInsets, viewInsets);
+    expect(unpadded.alwaysUse24HourFormat, true);
+    expect(unpadded.accessibleNavigation, true);
+    expect(unpadded.invertColors, true);
+    expect(unpadded.disableAnimations, true);
+    expect(unpadded.boldText, true);
+  });
+
+  testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
+    const Size size = Size(2.0, 4.0);
+    const double devicePixelRatio = 2.0;
+    const double textScaleFactor = 1.2;
+    const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+
+    MediaQueryData unpadded;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: size,
+          devicePixelRatio: devicePixelRatio,
+          textScaleFactor: textScaleFactor,
+          padding: padding,
+          viewPadding: viewPadding,
+          viewInsets: viewInsets,
+          alwaysUse24HourFormat: true,
+          accessibleNavigation: true,
+          invertColors: true,
+          disableAnimations: true,
+          boldText: true,
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.removeViewPadding(
+              context: context,
+              removeLeft: true,
+              child: Builder(
+                builder: (BuildContext context) {
+                  unpadded = MediaQuery.of(context);
+                  return Container();
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(unpadded.size, size);
+    expect(unpadded.devicePixelRatio, devicePixelRatio);
+    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.padding, padding.copyWith(left: 0));
+    expect(unpadded.viewPadding, viewPadding.copyWith(left: 0));
     expect(unpadded.viewInsets, viewInsets);
     expect(unpadded.alwaysUse24HourFormat, true);
     expect(unpadded.accessibleNavigation, true);

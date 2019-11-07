@@ -9,13 +9,18 @@ part of reporting;
 /// If sending values for custom dimensions is required, extend this class as
 /// below.
 class UsageEvent {
-  UsageEvent(this.category, this.parameter);
+  UsageEvent(this.category, this.parameter, {
+    this.label,
+    this.value,
+  });
 
   final String category;
   final String parameter;
+  final String label;
+  final int value;
 
   void send() {
-    flutterUsage.sendEvent(category, parameter);
+    flutterUsage.sendEvent(category, parameter, label: label, value: value);
   }
 }
 
@@ -92,8 +97,11 @@ class DoctorResultEvent extends UsageEvent {
   DoctorResultEvent({
     @required this.validator,
     @required this.result,
-  }) : super('doctorResult.${validator.runtimeType}',
-             result.typeStr);
+  }) : super(
+    'doctor-result',
+    '${validator.runtimeType}',
+    label: result.typeStr,
+  );
 
   final DoctorValidator validator;
   final ValidationResult result;
@@ -101,7 +109,7 @@ class DoctorResultEvent extends UsageEvent {
   @override
   void send() {
     if (validator is! GroupedValidator) {
-      flutterUsage.sendEvent(category, parameter);
+      flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
     final GroupedValidator group = validator;
@@ -113,23 +121,29 @@ class DoctorResultEvent extends UsageEvent {
   }
 }
 
-/// An event that reports success or failure of a pub get.
-class PubGetEvent extends UsageEvent {
-  PubGetEvent({
-    @required bool success,
-  }) : super('packages-pub-get', success ? 'success' : 'failure');
+/// An event that reports on the result of a pub invocation.
+class PubResultEvent extends UsageEvent {
+  PubResultEvent({
+    @required String context,
+    @required String result,
+  }) : super('pub-result', context, label: result);
 }
 
 /// An event that reports something about a build.
 class BuildEvent extends UsageEvent {
-  BuildEvent(String parameter, {
+  BuildEvent(String label, {
     this.command,
     this.settings,
     this.eventError,
   }) : super(
-    'build' +
-      (FlutterCommand.current == null ? '' : '-${FlutterCommand.current.name}'),
-    parameter);
+    // category
+    'build',
+    // parameter
+    FlutterCommand.current == null ?
+      'unspecified' :
+      '${FlutterCommand.current.name}',
+    label: label,
+  );
 
   final String command;
   final String settings;
@@ -145,7 +159,12 @@ class BuildEvent extends UsageEvent {
       if (eventError != null)
         CustomDimensions.buildEventError: eventError,
     });
-    flutterUsage.sendEvent(category, parameter, parameters: parameters);
+    flutterUsage.sendEvent(
+      category,
+      parameter,
+      label: label,
+      parameters: parameters,
+    );
   }
 }
 
@@ -156,17 +175,39 @@ class CommandResultEvent extends UsageEvent {
 
   @override
   void send() {
-    int maxRss;
+    // An event for the command result.
+    flutterUsage.sendEvent(
+      'tool-command-result',
+      category,
+      label: parameter,
+    );
+
+    // A separate event for the memory highwater mark. This is a separate event
+    // so that we can get the command result even if trying to grab maxRss
+    // throws an exception.
     try {
-      maxRss = processInfo.maxRss;
-    } catch (e) {
-      // If grabbing the maxRss fails for some reason, just leave it off the
-      // event.
+      final int maxRss = processInfo.maxRss;
+      flutterUsage.sendEvent(
+        'tool-command-max-rss',
+        category,
+        label: parameter,
+        value: maxRss,
+      );
+    } catch (error) {
+      // If grabbing the maxRss fails for some reason, just don't send an event.
+      printTrace('Querying maxRss failed with error: $error');
     }
-    final Map<String, String> parameters = _useCdKeys(<CustomDimensions, String>{
-      if (maxRss != null)
-        CustomDimensions.commandResultEventMaxRss: maxRss.toString(),
-    });
-    flutterUsage.sendEvent(category, parameter, parameters: parameters);
   }
+}
+
+/// An event that reports on changes in the configuration of analytics.
+class AnalyticsConfigEvent extends UsageEvent {
+  AnalyticsConfigEvent({
+    /// Whether analytics reporting is being enabled (true) or disabled (false).
+    @required bool enabled,
+  }) : super(
+    'analytics',
+    'enabled',
+    label: enabled ? 'true' : 'false',
+  );
 }

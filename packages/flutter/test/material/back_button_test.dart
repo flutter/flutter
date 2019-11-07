@@ -119,6 +119,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      isFocusable: true,
     ));
     handle.dispose();
   });

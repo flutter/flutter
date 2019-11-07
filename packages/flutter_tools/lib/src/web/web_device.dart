@@ -61,7 +61,7 @@ class ChromeDevice extends Device {
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
-    return NoOpDeviceLogReader(app.name);
+    return NoOpDeviceLogReader(app?.name);
   }
 
   @override
@@ -132,7 +132,10 @@ class ChromeDevice extends Device {
     // for the web initialization and server logic.
     final String url = platformArgs['uri'];
     if (debuggingOptions.browserLaunch) {
-      _chrome = await chromeLauncher.launch(url);
+      _chrome = await chromeLauncher.launch(url,
+        dataDir: fs.currentDirectory
+          .childDirectory('.dart_tool')
+          .childDirectory('chrome-device'));
     } else {
       printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
       logger.sendNotification(url, progressId: 'debugExtension');
@@ -190,7 +193,7 @@ String parseVersionForWindows(String input) {
 /// A special device type to allow serving for arbitrary browsers.
 class WebServerDevice extends Device {
   WebServerDevice() : super(
-    'headless-server',
+    'web-server',
     platformType: PlatformType.web,
     category: Category.web,
     ephemeral: false,
@@ -228,7 +231,7 @@ class WebServerDevice extends Device {
   }
 
   @override
-  String get name => 'Headless Server';
+  String get name => 'Web Server';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();

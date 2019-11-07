@@ -27,23 +27,58 @@ void main() {
   });
 
   testWidgets('Activity indicator dark mode', (WidgetTester tester) async {
+    final Key key = UniqueKey();
     await tester.pumpWidget(
-      const MediaQuery(
-        data: MediaQueryData(platformBrightness: Brightness.light),
-        child: CupertinoActivityIndicator(),
+      Center(
+        child: MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.light),
+          child: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: CupertinoColors.white,
+              child: const CupertinoActivityIndicator(animating: false, radius: 35),
+            ),
+          ),
+        ),
       ),
     );
 
-    expect(find.byType(CupertinoActivityIndicator), paints..rrect(color: const Color(0x99606067)));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('activityIndicator.paused.light.png'),
+    );
 
     await tester.pumpWidget(
-      const MediaQuery(
-        data: MediaQueryData(platformBrightness: Brightness.dark),
-        child: CupertinoActivityIndicator(),
+      Center(
+        child: MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: CupertinoColors.black,
+              child: const CupertinoActivityIndicator(animating: false, radius: 35),
+            ),
+          ),
+        ),
       ),
     );
 
-    expect(find.byType(CupertinoActivityIndicator), paints..rrect(color: const Color(0x99EBEBF5)));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('activityIndicator.paused.dark.png'),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/41345.
+  testWidgets('has the correct corner radius', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoActivityIndicator(animating: false, radius: 100),
+    );
+
+    expect(
+      find.byType(CupertinoActivityIndicator),
+      paints..rrect(rrect: const RRect.fromLTRBXY(-100, 10, -50, -10, 10, 10)),
+    );
   });
 }
 

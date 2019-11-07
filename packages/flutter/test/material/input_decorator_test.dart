@@ -509,12 +509,12 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getBottomLeft(find.text('text')).dy, 28.0);
-    expect(tester.getTopLeft(find.text('hint')).dy, 12.0);
-    expect(tester.getBottomLeft(find.text('hint')).dy, 28.0);
-    expect(getBorderBottom(tester), 40.0);
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 16.0);
+    expect(tester.getBottomLeft(find.text('hint')).dy, 32.0);
+    expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
 
     expect(tester.getSize(find.text('hint')).width, tester.getSize(find.text('text')).width);
@@ -1026,6 +1026,103 @@ void main() {
     expect(tester.getBottomLeft(find.text(kError1)), const Offset(12.0, 76.0));
   });
 
+  testWidgets('InputDecoration helperMaxLines', (WidgetTester tester) async {
+    const String kHelper1 = 'e0';
+    const String kHelper2 = 'e0\ne1';
+    const String kHelper3 = 'e0\ne1\ne2';
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: kHelper3,
+          helperMaxLines: 3,
+          errorText: null,
+          filled: true,
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 100dps:
+    //
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    //    8 - below the border padding
+    //   36 - helper text (3 lines, ahem font size 12dps)
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 100.0));
+    expect(tester.getTopLeft(find.text(kHelper3)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kHelper3)), const Offset(12.0, 100.0));
+
+    // Overall height for this InputDecorator is 12 less than the first
+    // one, 88dps, because helperText only occupies two lines.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: kHelper3,
+          helperMaxLines: 2,
+          errorText: null,
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 88.0));
+    expect(tester.getTopLeft(find.text(kHelper3)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kHelper3)), const Offset(12.0, 88.0));
+
+    // Overall height for this InputDecorator is 12 less than the first
+    // one, 88dps, because helperText only occupies two lines.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: kHelper2,
+          helperMaxLines: 3,
+          errorText: null,
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 88.0));
+    expect(tester.getTopLeft(find.text(kHelper2)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kHelper2)), const Offset(12.0, 88.0));
+
+    // Overall height for this InputDecorator is 24 less than the first
+    // one, 88dps, because helperText only occupies one line.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: kHelper1,
+          helperMaxLines: 3,
+          errorText: null,
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
+    expect(tester.getTopLeft(find.text(kHelper1)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kHelper1)), const Offset(12.0, 76.0));
+  });
+
   testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1047,14 +1144,14 @@ void main() {
     // The prefix and suffix wrap the input text and are left and right justified
     // respectively. They should have the same height as the input text (16).
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.text('p')).height, 16.0);
     expect(tester.getSize(find.text('s')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('p')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('p')).dy, 16.0);
     expect(tester.getTopLeft(find.text('p')).dx, 12.0);
-    expect(tester.getTopLeft(find.text('s')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('s')).dy, 16.0);
     expect(tester.getTopRight(find.text('s')).dx, 788.0);
 
     // layout is a row: [p text s]
@@ -1082,18 +1179,18 @@ void main() {
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.text('p')).height, 16.0);
     expect(tester.getSize(find.text('s')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('p')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('s')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('p')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('s')).dy, 16.0);
     expect(tester.getTopRight(find.text('s')).dx, 788.0);
     expect(tester.getSize(find.byType(Icon)).height, 24.0);
 
     // The 24dps high icon is centered on the 16dps high input line
-    expect(tester.getTopLeft(find.byType(Icon)).dy, 8.0);
+    expect(tester.getTopLeft(find.byType(Icon)).dy, 12.0);
 
     // layout is a row: [icon, p text s]
     expect(tester.getTopLeft(find.byType(Icon)).dx, 0.0);
@@ -1842,10 +1939,10 @@ void main() {
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 44.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 13.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 29.0);
-        expect(getBorderBottom(tester), 44.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
 
@@ -1863,10 +1960,10 @@ void main() {
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 44.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 13.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 29.0);
-        expect(getBorderBottom(tester), 44.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
 
@@ -2001,7 +2098,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled
     // (dx) - 12 = (text offset)x.
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 60.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
     final double dx = tester.getRect(find.byType(InputDecorator)).right;
     expect(tester.getRect(find.text('test')).right, dx - 12.0);
   });
@@ -2021,7 +2118,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled and top left offset is (0, 0)
     // 0 + 12 = 12.
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 60.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
     expect(tester.getRect(find.text('test')).left, 12.0);
   });
 
@@ -2139,13 +2236,13 @@ void main() {
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.text('p')).height, 16.0);
     expect(tester.getSize(find.text('s')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('p')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('s')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('p')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('s')).dy, 16.0);
 
     // layout is a row: [s text p]
     expect(tester.getTopLeft(find.text('s')).dx, 12.0);
@@ -2242,10 +2339,10 @@ void main() {
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
     expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
-    expect(getBorderBottom(tester), 40.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(getBorderBottom(tester), kMinInteractiveDimension); // 40 bumped up to minimum.
     expect(getBorderWeight(tester), 1.0);
   }, skip: isBrowser);
 
@@ -2263,9 +2360,9 @@ void main() {
     // Overall height for this InputDecorator is 16dps:
     //   16 - input text (ahem font size 16dps)
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 16 bumped up to minimum.
     expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
     expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 0.0);
 
@@ -2281,11 +2378,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
     expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
     expect(tester.getSize(find.text('hint')).height, 16.0);
-    expect(tester.getTopLeft(find.text('hint')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 16.0);
     expect(getBorderWeight(tester), 0.0);
   }, skip: isBrowser);
 
@@ -2321,13 +2418,13 @@ void main() {
     //      10 - label (ahem font size 10dps)
     //   17.75 - bottom padding (empty input text still appears here)
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 45.5));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 45.5 bumped up to minimum.
     expect(tester.getSize(find.text('hint')).height, 10.0);
     expect(tester.getSize(find.text('label')).height, 10.0);
     expect(tester.getSize(find.text('text')).height, 10.0);
-    expect(tester.getTopLeft(find.text('hint')).dy, 23.5);
-    expect(tester.getTopLeft(find.text('label')).dy, 17.75);
-    expect(tester.getTopLeft(find.text('text')).dy, 23.5);
+    expect(tester.getTopLeft(find.text('hint')).dy, 24.75);
+    expect(tester.getTopLeft(find.text('label')).dy, 19.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 24.75);
   }, skip: isBrowser);
 
   testWidgets('InputDecorator with empty style overrides', (WidgetTester tester) async {
@@ -2703,6 +2800,7 @@ void main() {
       const InputDecorationTheme(
         labelStyle: themeStyle,
         helperStyle: themeStyle,
+        helperMaxLines: 5,
         hintStyle: themeStyle,
         errorStyle: themeStyle,
         errorMaxLines: 4,
@@ -2721,6 +2819,7 @@ void main() {
 
     expect(decoration.labelStyle, decorationStyle);
     expect(decoration.helperStyle, decorationStyle);
+    expect(decoration.helperMaxLines, 5);
     expect(decoration.hintStyle, decorationStyle);
     expect(decoration.errorStyle, decorationStyle);
     expect(decoration.errorMaxLines, 4);
@@ -2861,19 +2960,13 @@ void main() {
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile(
-          'input_decorator.outline_icon_label.ltr.png',
-          version: null,
-        ),
+        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile(
-          'input_decorator.outline_icon_label.rtl.png',
-          version: null,
-        ),
+        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
       );
     },
   );
@@ -3024,6 +3117,7 @@ void main() {
     final String debugString = const InputDecorationTheme(
       labelStyle: TextStyle(height: 1.0),
       helperStyle: TextStyle(height: 2.0),
+      helperMaxLines: 5,
       hintStyle: TextStyle(height: 3.0),
       errorStyle: TextStyle(height: 4.0),
       errorMaxLines: 5,
@@ -3412,6 +3506,7 @@ void main() {
     const InputDecorationTheme(
       labelStyle: TextStyle(),
       helperStyle: TextStyle(),
+      helperMaxLines: 6,
       hintStyle: TextStyle(),
       errorMaxLines: 5,
       hasFloatingPlaceholder: false,
@@ -3436,6 +3531,7 @@ void main() {
     expect(description, <String>[
       'labelStyle: TextStyle(<all styles inherited>)',
       'helperStyle: TextStyle(<all styles inherited>)',
+      'helperMaxLines: 6',
       'hintStyle: TextStyle(<all styles inherited>)',
       'errorMaxLines: 5',
       'hasFloatingPlaceholder: false',
@@ -3454,5 +3550,48 @@ void main() {
       'border: UnderlineInputBorder()',
       'alignLabelWithHint: true',
     ]);
+  });
+
+  testWidgets('uses alphabetic baseline for CJK layout', (WidgetTester tester) async {
+    await tester.binding.setLocale('zh', 'CN');
+    final Typography typography = Typography();
+
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController();
+    // The dense theme uses ideographic baselines
+    Widget buildFrame(bool alignLabelWithHint) {
+      return MaterialApp(
+        theme: ThemeData(
+          textTheme: typography.dense,
+        ),
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                labelText: 'label',
+                alignLabelWithHint: alignLabelWithHint,
+                hintText: 'hint',
+                hintStyle: const TextStyle(
+                  fontFamily: 'Cough',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+
+    // These numbers should be the values from using alphabetic baselines:
+    // Ideographic (incorrect) value is 31.299999713897705
+    expect(tester.getTopLeft(find.text('hint')).dy, 28.75);
+
+    // Ideographic (incorrect) value is 50.299999713897705
+    expect(tester.getBottomLeft(find.text('hint')).dy, 47.75);
   });
 }

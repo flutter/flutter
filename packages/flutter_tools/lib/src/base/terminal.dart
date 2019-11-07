@@ -9,15 +9,6 @@ import '../globals.dart';
 import 'context.dart';
 import 'io.dart' as io;
 import 'platform.dart';
-import 'utils.dart';
-
-final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
-
-AnsiTerminal get terminal {
-  return (context == null || context.get<AnsiTerminal>() == null)
-      ? _kAnsiTerminal
-      : context.get<AnsiTerminal>();
-}
 
 enum TerminalColor {
   red,
@@ -29,11 +20,26 @@ enum TerminalColor {
   grey,
 }
 
-final OutputPreferences _kOutputPreferences = OutputPreferences();
+AnsiTerminal get terminal {
+  return context?.get<AnsiTerminal>() ?? _defaultAnsiTerminal;
+}
 
-OutputPreferences get outputPreferences => (context == null || context.get<OutputPreferences>() == null)
-    ? _kOutputPreferences
-    : context.get<OutputPreferences>();
+/// Warning mark to use in stdout or stderr.
+String get warningMark {
+  return terminal.bolden(terminal.color('[!]', TerminalColor.red));
+}
+
+/// Success mark to use in stdout.
+String get successMark {
+  return terminal.bolden(terminal.color('✓', TerminalColor.green));
+}
+
+final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal();
+
+OutputPreferences get outputPreferences {
+  return context?.get<OutputPreferences>() ?? _defaultOutputPreferences;
+}
+final OutputPreferences _defaultOutputPreferences = OutputPreferences();
 
 /// A class that contains the context settings for command text output to the
 /// console.
@@ -42,31 +48,32 @@ class OutputPreferences {
     bool wrapText,
     int wrapColumn,
     bool showColor,
-  }) : wrapText = wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
+  }) : wrapText = wrapText ?? io.stdio.hasTerminal,
        _overrideWrapColumn = wrapColumn,
        showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
+
+  /// A version of this class for use in tests.
+  OutputPreferences.test() : wrapText = false, _overrideWrapColumn = null, showColor = false;
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
   /// wrapped (newlines added between words) to be no longer than the
   /// [wrapColumn] specifies. Defaults to true if there is a terminal. To
   /// determine if there's a terminal, [OutputPreferences] asks the context's
-  /// stdio to see, and if that's not set, it tries creating a new [io.Stdio]
-  /// and asks it if there is a terminal.
+  /// stdio.
   final bool wrapText;
+
+  /// The terminal width used by the [wrapText] function if there is no terminal
+  /// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
+  static const int kDefaultTerminalColumns = 100;
 
   /// The column at which output sent to the context's [Logger] instance
   /// (e.g. from the [printError] or [printStatus] functions) will be wrapped.
   /// Ignored if [wrapText] is false. Defaults to the width of the output
   /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
-  /// To find out if we're writing to a terminal, it tries the context's stdio,
-  /// and if that's not set, it tries creating a new [io.Stdio] and asks it, if
-  /// that doesn't have an idea of the terminal width, then we just use a
-  /// default of 100. It will be ignored if [wrapText] is false.
   final int _overrideWrapColumn;
   int get wrapColumn {
-    return  _overrideWrapColumn ?? io.stdio?.terminalColumns
-      ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
+    return _overrideWrapColumn ?? io.stdio.terminalColumns ?? kDefaultTerminalColumns;
   }
 
   /// Whether or not to output ANSI color codes when writing to the output
@@ -159,16 +166,17 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? clear : '\n\n';
 
   set singleCharMode(bool value) {
-    final Stream<List<int>> stdin = io.stdin;
-    if (stdin is io.Stdin && stdin.hasTerminal) {
-      // The order of setting lineMode and echoMode is important on Windows.
-      if (value) {
-        stdin.echoMode = false;
-        stdin.lineMode = false;
-      } else {
-        stdin.lineMode = true;
-        stdin.echoMode = true;
-      }
+    if (!io.stdinHasTerminal) {
+      return;
+    }
+    final io.Stdin stdin = io.stdin;
+    // The order of setting lineMode and echoMode is important on Windows.
+    if (value) {
+      stdin.echoMode = false;
+      stdin.lineMode = false;
+    } else {
+      stdin.lineMode = true;
+      stdin.echoMode = true;
     }
   }
 

@@ -83,8 +83,8 @@ class PathBoundsMatcher extends Matcher {
 
 class PathPointsMatcher extends Matcher {
   const PathPointsMatcher({
-      this.includes = const <Offset>[],
-      this.excludes = const <Offset>[],
+    this.includes = const <Offset>[],
+    this.excludes = const <Offset>[],
   }) : super();
 
   final Iterable<Offset> includes;
@@ -327,7 +327,7 @@ void main() {
         ),
       );
 
-      final BoxDecoration decoration = tester.widget<DecoratedBox>(
+      BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
@@ -336,11 +336,37 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(4.0),
+        BorderRadius.circular(5),
       );
       expect(
-        decoration.border.bottom.color,
-        CupertinoColors.lightBackgroundGray,
+        decoration.border.bottom.color.value,
+        0x33000000,
+      );
+
+      // Dark mode.
+      await tester.pumpWidget(
+        const CupertinoApp(
+          theme: CupertinoThemeData(brightness: Brightness.dark),
+          home: Center(
+            child: CupertinoTextField(),
+          ),
+        ),
+      );
+
+      decoration = tester.widget<DecoratedBox>(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(DecoratedBox),
+        ),
+      ).decoration;
+
+      expect(
+        decoration.borderRadius,
+        BorderRadius.circular(5),
+      );
+      expect(
+        decoration.border.bottom.color.value,
+        0x33FFFFFF,
       );
     },
   );
@@ -477,10 +503,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_cursor_test.cupertino.0.png',
-        version: 2,
-      ),
+      matchesGoldenFile('text_field_cursor_test.cupertino.0.png'),
     );
   });
 
@@ -510,10 +533,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_cursor_test.cupertino.1.png',
-        version: 2,
-      ),
+      matchesGoldenFile('text_field_cursor_test.cupertino.1.png'),
     );
   });
 
@@ -569,6 +589,23 @@ void main() {
     },
   );
 
+  testWidgets('placeholder dark mode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoTextField(
+            placeholder: 'placeholder',
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    );
+
+    final Text placeholder = tester.widget(find.text('placeholder'));
+    expect(placeholder.style.color.value, CupertinoColors.placeholderText.darkColor.value);
+  });
+
   testWidgets(
     'placeholders are lightly colored and disappears once typing starts',
     (WidgetTester tester) async {
@@ -583,7 +620,7 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color, const Color(0xFFC2C2C2));
+      expect(placeholder.style.color.value, CupertinoColors.placeholderText.color.value);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
@@ -1290,6 +1327,49 @@ void main() {
     expect(text.style.fontWeight, FontWeight.w400);
   });
 
+
+  testWidgets('text field toolbar options correctly changes options', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+              toolbarOptions: const ToolbarOptions(copy: true),
+            ),
+          ],
+        ),
+      ),
+    );
+
+      // Long press to put the cursor after the "w".
+      const int index = 3;
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Selected text shows 'Copy'.
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Select All'), findsNothing);
+  });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
 
@@ -2658,8 +2738,8 @@ void main() {
       ).decoration;
 
       expect(
-        decoration.border.bottom.color,
-        CupertinoColors.lightBackgroundGray, // Border color is the same regardless.
+        decoration.border.bottom.color.value,
+        0x33FFFFFF,
       );
 
       await tester.enterText(find.byType(CupertinoTextField), 'smoked meat');
@@ -2669,7 +2749,7 @@ void main() {
         tester.renderObject<RenderEditable>(
           find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
         ).text.style.color,
-        CupertinoColors.white,
+        isSameColorAs(CupertinoColors.white),
       );
     },
   );
@@ -2819,7 +2899,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(renderEditable.cursorColor, CupertinoColors.activeOrange.darkColor);
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue.darkColor);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2835,19 +2915,38 @@ void main() {
   });
 
   testWidgets('cursor can override color from theme', (WidgetTester tester) async {
+    const CupertinoDynamicColor cursorColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0x12345678),
+      darkColor: Color(0x87654321),
+    );
+
     await tester.pumpWidget(
       const CupertinoApp(
         theme: CupertinoThemeData(),
         home: Center(
           child: CupertinoTextField(
-            cursorColor: Color(0xFFF44336),
+            cursorColor: cursorColor,
           ),
         ),
       ),
     );
 
-    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
-    expect(editableText.cursorColor, const Color(0xFFF44336));
+    EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor.value, 0x12345678);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoTextField(
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor.value, 0x87654321);
   });
 
   testWidgets('iOS shows selection handles', (WidgetTester tester) async {
@@ -2922,9 +3021,12 @@ void main() {
             child: SizedBox(
               width: 200,
               height: 200,
-              child: CupertinoTextField(
-                controller: TextEditingController(text: 'lorem'),
-                enabled: false,
+              child: RepaintBoundary(
+                key: const ValueKey<int>(1),
+                child: CupertinoTextField(
+                  controller: TextEditingController(text: 'lorem'),
+                  enabled: false,
+                ),
               ),
             ),
           ),
@@ -2933,11 +3035,8 @@ void main() {
     );
 
     await expectLater(
-      find.byType(CupertinoTextField),
-      matchesGoldenFile(
-        'text_field_test.disabled.png',
-        version: 0,
-      ),
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_test.disabled.png'),
     );
   });
 
@@ -3761,5 +3860,91 @@ void main() {
         expect(find.text('Paste'), findsOneWidget);
       },
     );
+  });
+  testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
+    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller2 = TextEditingController();
+    final TextEditingController controller3 = TextEditingController();
+    final TextEditingController controller4 = TextEditingController();
+    final TextEditingController controller5 = TextEditingController();
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'Field 1');
+    final FocusNode focusNode2 = FocusNode(debugLabel: 'Field 2');
+    final FocusNode focusNode3 = FocusNode(debugLabel: 'Field 3');
+    final FocusNode focusNode4 = FocusNode(debugLabel: 'Field 4');
+    final FocusNode focusNode5 = FocusNode(debugLabel: 'Field 5');
+
+    // Lay out text fields in a "+" formation, and focus the center one.
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                width: 100.0,
+                child: CupertinoTextField(
+                  controller: controller1,
+                  focusNode: focusNode1,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    width: 100.0,
+                    child: CupertinoTextField(
+                      controller: controller2,
+                      focusNode: focusNode2,
+                    ),
+                  ),
+                  Container(
+                    width: 100.0,
+                    child: CupertinoTextField(
+                      controller: controller3,
+                      focusNode: focusNode3,
+                    ),
+                  ),
+                  Container(
+                    width: 100.0,
+                    child: CupertinoTextField(
+                      controller: controller4,
+                      focusNode: focusNode4,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                width: 100.0,
+                child: CupertinoTextField(
+                  controller: controller5,
+                  focusNode: focusNode5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    focusNode3.requestFocus();
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(focusNode3.hasPrimaryFocus, isTrue);
   });
 }

@@ -66,6 +66,9 @@ class FadeInImage extends StatelessWidget {
   /// Creates a widget that displays a [placeholder] while an [image] is loading,
   /// then fades-out the placeholder and fades-in the image.
   ///
+  /// The [placeholder] and [image] may be composed in a [ResizeImage] to provide
+  /// a custom decode/cache size.
+  ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
   /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
   /// [matchTextDirection] arguments must not be null.
@@ -108,6 +111,13 @@ class FadeInImage extends StatelessWidget {
   /// The `placeholderScale` and `imageScale` arguments are passed to their
   /// respective [ImageProvider]s (see also [ImageInfo.scale]).
   ///
+  /// If [placeholderCacheWidth], [placeholderCacheHeight], [imageCacheWidth],
+  /// or [imageCacheHeight] are provided, it indicates to the
+  /// engine that the respective image should be decoded at the specified size.
+  /// The image will be rendered to the constraints of the layout or [width]
+  /// and [height] regardless of these parameters. These parameters are primarily
+  /// intended to reduce the memory usage of [ImageCache].
+  ///
   /// The [placeholder], [image], [placeholderScale], [imageScale],
   /// [fadeOutDuration], [fadeOutCurve], [fadeInDuration], [fadeInCurve],
   /// [alignment], [repeat], and [matchTextDirection] arguments must not be
@@ -137,6 +147,10 @@ class FadeInImage extends StatelessWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
+    int placeholderCacheWidth,
+    int placeholderCacheHeight,
+    int imageCacheWidth,
+    int imageCacheHeight,
   }) : assert(placeholder != null),
        assert(image != null),
        assert(placeholderScale != null),
@@ -148,8 +162,8 @@ class FadeInImage extends StatelessWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       placeholder = MemoryImage(placeholder, scale: placeholderScale),
-       image = NetworkImage(image, scale: imageScale),
+       placeholder = ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
+       image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale)),
        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -165,6 +179,13 @@ class FadeInImage extends StatelessWidget {
   /// If `placeholderScale` is omitted or is null, pixel-density-aware asset
   /// resolution will be attempted for the [placeholder] image. Otherwise, the
   /// exact asset specified will be used.
+  ///
+  /// If [placeholderCacheWidth], [placeholderCacheHeight], [imageCacheWidth],
+  /// or [imageCacheHeight] are provided, it indicates to the
+  /// engine that the respective image should be decoded at the specified size.
+  /// The image will be rendered to the constraints of the layout or [width]
+  /// and [height] regardless of these parameters. These parameters are primarily
+  /// intended to reduce the memory usage of [ImageCache].
   ///
   /// The [placeholder], [image], [imageScale], [fadeOutDuration],
   /// [fadeOutCurve], [fadeInDuration], [fadeInCurve], [alignment], [repeat],
@@ -195,11 +216,15 @@ class FadeInImage extends StatelessWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
+    int placeholderCacheWidth,
+    int placeholderCacheHeight,
+    int imageCacheWidth,
+    int imageCacheHeight,
   }) : assert(placeholder != null),
        assert(image != null),
        placeholder = placeholderScale != null
-         ? ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale)
-         : AssetImage(placeholder, bundle: bundle),
+         ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale))
+         : ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle)),
        assert(imageScale != null),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
@@ -208,7 +233,7 @@ class FadeInImage extends StatelessWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       image = NetworkImage(image, scale: imageScale),
+       image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale)),
        super(key: key);
 
   /// Image displayed while the target [image] is loading.

@@ -30,6 +30,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   Future<bool> initialize({
     Directory projectDirectory,
     String testOutputDir,
+    List<String> testFiles,
     BuildMode mode,
     String projectName,
     bool initializePlatform,
@@ -46,8 +47,15 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       release: mode == BuildMode.release,
       profile: mode == BuildMode.profile,
       hasPlugins: hasWebPlugins,
-      includeTests: true,
       initializePlatform: initializePlatform,
+      testTargets: WebTestTargetManifest(
+        testFiles
+          .map<String>((String absolutePath) {
+            final String relativePath = path.relative(absolutePath, from: projectDirectory.path);
+            return '${path.withoutExtension(relativePath)}.*';
+          })
+          .toList(),
+      ),
     );
     client.startBuild();
     bool success = true;
@@ -125,9 +133,7 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   @override
   Stream<AssetId> findAssets(Glob glob, {String package}) async* {
     if (package == null || packageGraph.root.name == package) {
-      final String generatedRoot = fs.path.join(
-        generatedDirectory.path, packageGraph.root.name
-      );
+      final String generatedRoot = fs.path.join(generatedDirectory.path, packageGraph.root.name);
       await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
         if (entity is io.File && _isNotHidden(entity) && !fs.path.isWithin(generatedRoot, entity.path)) {
           yield _fileToAssetId(entity, packageGraph.root);

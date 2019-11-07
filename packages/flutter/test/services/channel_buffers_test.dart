@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(yjbanov): enable Web when https://github.com/flutter/engine/pull/12747 rolls into the framework.
+@TestOn('!chrome')
+
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -39,7 +42,7 @@ void main() {
     bool didDrainData = false;
     binding.defaultBinaryMessenger.setMessageHandler(channel, (ByteData message) async {
       expect(_getString(message), payload);
-      didDrainData= true;
+      didDrainData = true;
       return null;
     });
     // Flush the event queue.

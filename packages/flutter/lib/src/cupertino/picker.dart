@@ -30,6 +30,10 @@ const double _kOverAndUnderCenterOpacity = 0.447;
 /// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
 ///
+/// By default, the first child in [children] will be the initially selected child.
+/// The index of a different child can be specified in [scrollController], to make
+/// that child the initially selected child.
+///
 /// Can be used with [showCupertinoModalPopup] to display the picker modally at the
 /// bottom of the screen.
 ///
@@ -158,7 +162,8 @@ class CupertinoPicker extends StatefulWidget {
   /// {@macro flutter.rendering.wheelList.magnification}
   final double magnification;
 
-  /// A [FixedExtentScrollController] to read and control the current item.
+  /// A [FixedExtentScrollController] to read and control the current item, and
+  /// to set the initial item.
   ///
   /// If null, an implicit one will be created internally.
   final FixedExtentScrollController scrollController;

@@ -592,10 +592,7 @@ void main() {
 
       await expectLater(
         find.byKey(const Key('list_wheel_scroll_view')),
-        matchesGoldenFile(
-          'list_wheel_scroll_view.center_child.magnified.png',
-          version: 1,
-        ),
+        matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
       );
     }, skip: isBrowser);
 
@@ -649,10 +646,7 @@ void main() {
 
       await expectLater(
         find.byKey(const Key('list_wheel_scroll_view')),
-        matchesGoldenFile(
-          'list_wheel_scroll_view.curved_wheel.left.png',
-          version: 1,
-        ),
+        matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
       );
     }, skip: isBrowser);
 

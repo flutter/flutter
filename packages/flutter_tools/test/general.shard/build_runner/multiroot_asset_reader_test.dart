@@ -40,7 +40,7 @@ void main() {
       await IOOverrides.runWithIOOverrides(() async {
         final MultirootFileBasedAssetReader reader = MultirootFileBasedAssetReader(
           packageGraph,
-          fs.directory(fs.path.join('.dart_tool', 'build', 'generated'))
+          fs.directory(fs.path.join('.dart_tool', 'build', 'generated')),
         );
         expect(await reader.canRead(AssetId('foobar', 'lib/bar.dart')), true);
         expect(await reader.canRead(AssetId('foobar', 'lib/main.dart')), true);

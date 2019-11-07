@@ -432,12 +432,16 @@ void _tests() {
             thickness: 0.0,
             children: <TestSemantics>[
               TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: '2016',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isSelected,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'Fri, Jan 15',
                 textDirection: TextDirection.ltr,
@@ -636,25 +640,45 @@ void _tests() {
                 ],
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'Previous month December 2015',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'Next month February 2016',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'CANCEL',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'OK',
                 textDirection: TextDirection.ltr,
@@ -873,4 +897,90 @@ void _tests() {
     });
   });
 
+  testWidgets('uses root navigator by default', (WidgetTester tester) async {
+    final DatePickerObserver rootObserver = DatePickerObserver();
+    final DatePickerObserver nestedObserver = DatePickerObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2018),
+                    lastDate: DateTime(2030),
+                    builder: (BuildContext context, Widget child) {
+                      return const SizedBox();
+                    },
+                  );
+                },
+                child: const Text('Show Date Picker'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.datePickerCount, 1);
+    expect(nestedObserver.datePickerCount, 0);
+  });
+
+  testWidgets('uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+    final DatePickerObserver rootObserver = DatePickerObserver();
+    final DatePickerObserver nestedObserver = DatePickerObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showDatePicker(
+                    context: context,
+                    useRootNavigator: false,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2018),
+                    lastDate: DateTime(2030),
+                    builder: (BuildContext context, Widget child) => const SizedBox(),
+                  );
+                },
+                child: const Text('Show Date Picker'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.datePickerCount, 0);
+    expect(nestedObserver.datePickerCount, 1);
+  });
+}
+
+class DatePickerObserver extends NavigatorObserver {
+  int datePickerCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      datePickerCount++;
+    }
+    super.didPush(route, previousRoute);
+  }
 }

@@ -23,7 +23,7 @@ import '../../src/pubspec_schema.dart';
 const String xcodebuild = '/usr/bin/xcodebuild';
 
 void main() {
-  group('xcodebuild versioning', () {
+  group('xcodebuild commands', () {
     mocks.MockProcessManager mockProcessManager;
     XcodeProjectInterpreter xcodeProjectInterpreter;
     FakePlatform macOS;
@@ -39,9 +39,9 @@ void main() {
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -79,8 +79,8 @@ void main() {
 
     testUsingOsxContext('majorVersion returns major version', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.majorVersion, 8);
+          .thenReturn(ProcessResult(1, 0, 'Xcode 10.3.3\nBuild version 8E3004b', ''));
+      expect(xcodeProjectInterpreter.majorVersion, 10);
     });
 
     testUsingOsxContext('majorVersion is null when version has unexpected format', () {
@@ -172,6 +172,54 @@ void main() {
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingOsxContext('build settings contains Flutter Xcode environment variables', () async {
+      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
+        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+        'FLUTTER_XCODE_ARCHS': 'arm64'
+      });
+      when(mockProcessManager.runSync(<String>[
+        xcodebuild,
+        '-project',
+        macOS.pathSeparator,
+        '-target',
+        '',
+        '-showBuildSettings',
+        'CODE_SIGN_STYLE=Manual',
+        'ARCHS=arm64'
+      ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')))
+        .thenReturn(ProcessResult(1, 0, '', ''));
+      expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+    });
+
+    testUsingOsxContext('clean contains Flutter Xcode environment variables', () async {
+      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
+        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+        'FLUTTER_XCODE_ARCHS': 'arm64'
+      });
+      when(mockProcessManager.runSync(
+        any,
+        workingDirectory: anyNamed('workingDirectory')))
+        .thenReturn(ProcessResult(1, 0, '', ''));
+      xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Runner');
+      final List<dynamic> captured = verify(mockProcessManager.runSync(
+        captureAny,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'))).captured;
+      expect(captured.first, <String>[
+        xcodebuild,
+        '-workspace',
+        'workspace_path',
+        '-scheme',
+        'Runner',
+        '-quiet',
+        'clean',
+        'CODE_SIGN_STYLE=Manual',
+        'ARCHS=arm64'
+      ]);
+    });
   });
 
   group('xcodebuild -list', () {
@@ -188,9 +236,9 @@ void main() {
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -338,6 +386,27 @@ Information about project "Runner":
     });
   });
 
+  group('environmentVariablesAsXcodeBuildSettings', () {
+    FakePlatform platform;
+
+    setUp(() {
+      platform = fakePlatform('ignored');
+    });
+
+    testUsingContext('environment variables as Xcode build settings', () {
+      platform.environment = Map<String, String>.unmodifiable(<String, String>{
+        'Ignored': 'Bogus',
+        'FLUTTER_NOT_XCODE': 'Bogus',
+        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+        'FLUTTER_XCODE_ARCHS': 'arm64'
+      });
+      final List<String> environmentVariablesAsBuildSettings = environmentVariablesAsXcodeBuildSettings();
+      expect(environmentVariablesAsBuildSettings, <String>['CODE_SIGN_STYLE=Manual', 'ARCHS=arm64']);
+    }, overrides: <Type, Generator>{
+      Platform: () => platform
+    });
+  });
+
   group('updateGeneratedXcodeProperties', () {
     MockLocalEngineArtifacts mockArtifacts;
     MockProcessManager mockProcessManager;
@@ -355,9 +424,9 @@ Information about project "Runner":
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 

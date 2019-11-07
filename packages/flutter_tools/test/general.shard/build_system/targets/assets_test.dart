@@ -45,14 +45,14 @@ flutter:
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'AssetManifest.json')).existsSync(), true);
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'FontManifest.json')).existsSync(), true);
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'LICENSE')).existsSync(), true);
-    // See https://github.com/flutter/flutter/issues/35293
-    expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), true);
+    expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets', 'foo', 'bar.png')).existsSync(), true);
   }));
 
   test('Does not leave stale files in build directory', () => testbed.run(() async {
     await buildSystem.build(const CopyAssets(), environment);
+    final File assetFile = fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets', 'foo', 'bar.png'));
 
-    expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), true);
+    expect(assetFile.existsSync(), true);
     // Modify manifest to remove asset.
     fs.file('pubspec.yaml')
       ..createSync()
@@ -63,8 +63,7 @@ flutter:
 ''');
     await buildSystem.build(const CopyAssets(), environment);
 
-    // See https://github.com/flutter/flutter/issues/35293
-    expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), false);
+    expect(assetFile.existsSync(), false);
   }));
 
   test('FlutterPlugins updates required files as needed', () => testbed.run(() async {

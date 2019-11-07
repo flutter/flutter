@@ -8,13 +8,13 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -23,6 +23,7 @@ import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
+import '../vmservice.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
@@ -141,6 +142,12 @@ class IOSDevice extends Device {
   String _iproxyPath;
 
   final String _sdkVersion;
+
+  /// May be 0 if version cannot be parsed.
+  int get majorSdkVersion {
+    final String majorVersionString = _sdkVersion?.split('.')?.first?.trim();
+    return majorVersionString != null ? int.tryParse(majorVersionString) ?? 0 : 0;
+  }
 
   @override
   bool get supportsHotReload => true;
@@ -268,6 +275,9 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
+
+    String packageId;
+
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
       printTrace('Building ${package.name} for $id');
@@ -289,11 +299,14 @@ class IOSDevice extends Device {
         printError('');
         return LaunchResult.failed();
       }
+      packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
     } else {
       if (!await installApp(package)) {
         return LaunchResult.failed();
       }
     }
+
+    packageId ??= package.id;
 
     // Step 2: Check that the application exists at the specified path.
     final IOSApp iosApp = package;
@@ -325,6 +338,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.traceSkia) '--trace-skia',
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
+      if (debuggingOptions.cacheSkSL) '--cache-sksl',
       if (platformArgs['trace-startup'] ?? false) '--trace-startup',
     ];
 
@@ -367,7 +381,7 @@ class IOSDevice extends Device {
       try {
         printTrace('Application launched on the device. Waiting for observatory port.');
         localUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
-          package.id,
+          packageId,
           this,
           ipv6,
           debuggingOptions.observatoryPort,
@@ -417,7 +431,7 @@ class IOSDevice extends Device {
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) {
     _logReaders ??= <ApplicationPackage, DeviceLogReader>{};
-    return _logReaders.putIfAbsent(app, () => _IOSDeviceLogReader(this, app));
+    return _logReaders.putIfAbsent(app, () => IOSDeviceLogReader(this, app));
   }
 
   @visibleForTesting
@@ -427,7 +441,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder => _portForwarder ??= _IOSDevicePortForwarder(this);
+  DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(this);
 
   @visibleForTesting
   set portForwarder(DevicePortForwarder forwarder) {
@@ -448,6 +462,14 @@ class IOSDevice extends Device {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync();
+  }
+
+  @override
+  void dispose() {
+    _logReaders.forEach((ApplicationPackage application, DeviceLogReader logReader) {
+      logReader.dispose();
+    });
+    _portForwarder?.dispose();
   }
 }
 
@@ -511,11 +533,12 @@ String decodeSyslog(String line) {
   }
 }
 
-class _IOSDeviceLogReader extends DeviceLogReader {
-  _IOSDeviceLogReader(this.device, ApplicationPackage app) {
+@visibleForTesting
+class IOSDeviceLogReader extends DeviceLogReader {
+  IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
-      onListen: _start,
-      onCancel: _stop,
+      onListen: _listenToSysLog,
+      onCancel: dispose,
     );
 
     // Match for lines for the runner in syslog.
@@ -528,6 +551,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     // and "Flutter". The regex tries to strike a balance between not producing
     // false positives and not producing false negatives.
     _anyLineRegex = RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
+    _loggingSubscriptions = <StreamSubscription<ServiceEvent>>[];
   }
 
   final IOSDevice device;
@@ -538,7 +562,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   RegExp _anyLineRegex;
 
   StreamController<String> _linesController;
-  Process _process;
+  List<StreamSubscription<ServiceEvent>> _loggingSubscriptions;
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -546,18 +570,57 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
-  void _start() {
+  @override
+  List<VMService> get connectedVMServices => _connectedVMServices;
+  List<VMService> _connectedVMServices;
+
+  @override
+  set connectedVMServices(List<VMService> connectedVMServices) {
+    _listenToUnifiedLoggingEvents(connectedVMServices);
+    _connectedVMServices = connectedVMServices;
+  }
+
+  static const int _minimumUniversalLoggingSdkVersion = 13;
+
+  Future<void> _listenToUnifiedLoggingEvents(List<VMService> vmServices) async {
+    if (device.majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
+      return;
+    }
+    for (VMService vmService in vmServices) {
+      // The VM service will not publish logging events unless the debug stream is being listened to.
+      // onDebugEvent listens to this stream as a side effect.
+      unawaited(vmService.onDebugEvent);
+      _loggingSubscriptions.add((await vmService.onStdoutEvent).listen((ServiceEvent event) {
+        final String logMessage = event.message;
+        if (logMessage.isNotEmpty) {
+          _linesController.add(logMessage);
+        }
+      }));
+    }
+    _connectedVMServices = connectedVMServices;
+  }
+
+  void _listenToSysLog () {
+    // syslog is not written on iOS 13+.
+    if (device.majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
+      return;
+    }
     iMobileDevice.startLogger(device.id).then<void>((Process process) {
-      _process = process;
-      _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
-      _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
-      _process.exitCode.whenComplete(() {
+      process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
+      process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
+      process.exitCode.whenComplete(() {
         if (_linesController.hasListener) {
           _linesController.close();
         }
       });
+      assert(_idevicesyslogProcess == null);
+      _idevicesyslogProcess = process;
     });
   }
+
+  @visibleForTesting
+  set idevicesyslogProcess(Process process) => _idevicesyslogProcess = process;
+  Process _idevicesyslogProcess;
 
   // Returns a stateful line handler to properly capture multi-line output.
   //
@@ -565,7 +628,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   // any specific prefix. To properly capture those, we enter "printing" mode
   // after matching a log line from the runner. When in printing mode, we print
   // all lines until we find the start of another log message (from any app).
-  Function _newLineHandler() {
+  Function _newSyslogLineHandler() {
     bool printing = false;
 
     return (String line) {
@@ -590,13 +653,18 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     };
   }
 
-  void _stop() {
-    _process?.kill();
+  @override
+  void dispose() {
+    for (StreamSubscription<ServiceEvent> loggingSubscription in _loggingSubscriptions) {
+      loggingSubscription.cancel();
+    }
+    _idevicesyslogProcess?.kill();
   }
 }
 
-class _IOSDevicePortForwarder extends DevicePortForwarder {
-  _IOSDevicePortForwarder(this.device) : _forwardedPorts = <ForwardedPort>[];
+@visibleForTesting
+class IOSDevicePortForwarder extends DevicePortForwarder {
+  IOSDevicePortForwarder(this.device) : _forwardedPorts = <ForwardedPort>[];
 
   final IOSDevice device;
 
@@ -604,6 +672,11 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
   @override
   List<ForwardedPort> get forwardedPorts => _forwardedPorts;
+
+  @visibleForTesting
+  void addForwardedPorts(List<ForwardedPort> forwardedPorts) {
+    forwardedPorts.forEach(_forwardedPorts.add);
+  }
 
   static const Duration _kiProxyPortForwardTimeout = Duration(seconds: 1);
 
@@ -618,7 +691,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
     bool connected = false;
     while (!connected) {
-      printTrace('attempting to forward device port $devicePort to host port $hostPort');
+      printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
       process = await processUtils.start(
         <String>[
@@ -634,6 +707,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {
+        process.kill();
         if (autoselect) {
           hostPort += 1;
           if (hostPort > 65535) {
@@ -663,13 +737,13 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     }
 
     printTrace('Unforwarding port $forwardedPort');
+    forwardedPort.dispose();
+  }
 
-    final Process process = forwardedPort.context;
-
-    if (process != null) {
-      processManager.killPid(process.pid);
-    } else {
-      printError('Forwarded port did not have a valid process');
+  @override
+  Future<void> dispose() async {
+    for (ForwardedPort forwardedPort in _forwardedPorts) {
+      forwardedPort.dispose();
     }
   }
 }
