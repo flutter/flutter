@@ -153,7 +153,7 @@ This is sent when an operation starts and again when it stops. When an operation
 
 This is sent when an app is stopped or detached from. The `params` field will be a map with the field `appId`.
 
-#### app.url
+#### app.webLaunchUrl
 
 This is sent once a web application is being served and available for the user to access. The `params` field will be a map with a string `url` field and a boolean `launched` indicating whether the application has already been launched in a browser (this will generally be true for a browser device unless `--no-web-browser-launch` was used, and false for the headless `web-server` device).
 
