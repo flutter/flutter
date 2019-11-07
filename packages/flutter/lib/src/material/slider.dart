@@ -1159,12 +1159,11 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
             thumbCenter: thumbCenter,
             isEnabled: isInteractive,
           );
-        }
+        }git status
       }
     }
 
-    if (isInteractive && label != null &&
-        !_valueIndicatorAnimation.isDismissed) {
+    if (isInteractive && label != null && !_valueIndicatorAnimation.isDismissed) {
       if (showValueIndicator) {
         _sliderTheme.valueIndicatorShape.paint(
           context,
