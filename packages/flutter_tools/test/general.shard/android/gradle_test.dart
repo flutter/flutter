@@ -1501,7 +1501,7 @@ plugin2=${plugin2.path}
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('indicates how to consume an AAR', () async {
+    testUsingContext('indicates how to consume an AAR when printHowToConsumeAaar is true', () async {
       final File manifestFile = fs.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync('''
@@ -1533,6 +1533,7 @@ plugin2=${plugin2.path}
         project: FlutterProject.current(),
         outputDir: fs.directory('build/'),
         target: '',
+        printHowToConsumeAaar: true,
       );
 
       final BufferLogger logger = context.get<Logger>();
@@ -1563,6 +1564,60 @@ Consuming the Module
       }
 
 To learn more, visit https://flutter.dev/go/build-aar'''));
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('doesn\'t indicate how to consume an AAR when printHowToConsumeAaar is false', () async {
+      final File manifestFile = fs.file('pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('''
+        flutter:
+          module:
+            androidPackage: com.example.test
+        '''
+      );
+
+      fs.file('.android/gradlew').createSync(recursive: true);
+
+      fs.file('.android/gradle.properties')
+        .writeAsStringSync('irrelevant');
+
+      fs.file('.android/build.gradle')
+        .createSync(recursive: true);
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      fs.directory('build/outputs/repo').createSync(recursive: true);
+
+      await buildGradleAar(
+        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
+        project: FlutterProject.current(),
+        outputDir: fs.directory('build/'),
+        target: '',
+        printHowToConsumeAaar: false,
+      );
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(
+        logger.statusText,
+        contains('Built build/outputs/repo'),
+      );
+      expect(
+        logger.statusText.contains('Consuming the Module'),
+        isFalse,
+      );
 
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
@@ -1715,6 +1770,7 @@ To learn more, visit https://flutter.dev/go/build-aar'''));
         project: FlutterProject.current(),
         outputDir: fs.directory('build/'),
         target: '',
+        printHowToConsumeAaar: false,
       );
 
       final List<String> actualGradlewCall = verify(

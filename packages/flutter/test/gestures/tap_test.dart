@@ -380,6 +380,32 @@ void main() {
     tap.dispose();
   });
 
+  testGesture('onTapCancel should show reason in the proper format', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    tap.onTapCancel = () {
+      throw Exception(test);
+    };
+
+    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    bool gotError = false;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      expect(details.toString().contains('"spontaneous onTapCancel"') , isTrue);
+      gotError = true;
+    };
+
+    const int pointer = 1;
+    tap.addPointer(const PointerDownEvent(pointer: pointer));
+    tester.closeArena(pointer);
+    tester.async.elapse(const Duration(milliseconds: 500));
+    tester.route(const PointerCancelEvent(pointer: pointer));
+
+    expect(gotError, isTrue);
+
+    FlutterError.onError = previousErrorHandler;
+    tap.dispose();
+  });
+
   testGesture('No duplicate tap events', (GestureTester tester) {
     final TapGestureRecognizer tapA = TapGestureRecognizer();
     final TapGestureRecognizer tapB = TapGestureRecognizer();
