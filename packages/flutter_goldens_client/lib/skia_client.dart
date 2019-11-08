@@ -362,6 +362,22 @@ class SkiaGoldClient {
     }
   }
 
+  /// Returns the number of commits made on the current branch.
+  Future<String> getBranchCommitCount() async {
+    final String branch = platform.environment['CIRRUS_BRANCH'] ?? '';
+    final String masterBranch = platform.environment['CIRRUS_DEFAULT_BRANCH'] ?? '';
+    final io.ProcessResult revParse = await process.run(
+      <String>['git', 'rev-list', branch, '^$masterBranch', '--count'],
+      workingDirectory: _flutterRoot.path,
+    );
+    print('***');
+    print(branch);
+    print(masterBranch);
+    print(revParse.stdout);
+    print('***');
+    return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+  }
+
   /// Returns a JSON String with keys value pairs used to uniquely identify the
   /// configuration that generated the given golden file.
   ///
