@@ -73,8 +73,9 @@ class RecordingCanvas {
       print(debugBuf);
     } else {
       try {
-        for (int i = 0; i < _commands.length; i++) {
-          _commands[i].apply(engineCanvas);
+        for (int i = 0, len = _commands.length; i < len; i++) {
+          PaintCommand command = _commands[i];
+          command.apply(engineCanvas);
         }
       } catch (e) {
         // commands should never fail, but...
