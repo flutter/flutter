@@ -18,15 +18,13 @@ import '../../src/testbed.dart';
 void main() {
   Testbed testbed;
   MockBuildSystem mockBuildSystem;
-
-  setUpAll(() {
-    Cache.disableLocking();
-  });
+  Cache.disableLocking();
 
   setUp(() {
     mockBuildSystem = MockBuildSystem();
     testbed = Testbed(overrides: <Type, Generator>{
       BuildSystem: ()  => mockBuildSystem,
+      Cache: () => FakeCache(),
     });
   });
 
