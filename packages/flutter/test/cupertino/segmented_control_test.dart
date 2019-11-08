@@ -1384,6 +1384,47 @@ void main() {
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
   });
 
+  // Regression test: https://github.com/flutter/flutter/issues/43414.
+  testWidgets("Quick double tap doesn't break the internal state", (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
+    int sharedValue = 0;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              onValueChanged: (int newValue) {
+                setState(() { sharedValue = newValue; });
+              },
+              groupValue: sharedValue,
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('B'));
+    // sharedValue has been updated but widget.groupValue is not.
+    expect(sharedValue, 1);
+
+    // Land the second tap before the widget gets a chance to rebuild.
+    final TestGesture secondTap = await tester.startGesture(tester.getCenter(find.text('B')));
+    await tester.pump();
+
+    await secondTap.up();
+    expect(sharedValue, 1);
+
+    await tester.tap(find.text('C'));
+    expect(sharedValue, 2);
+  });
+
   testWidgets('Golden Test Placeholder Widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = Container();
