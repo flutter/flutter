@@ -480,7 +480,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       }
     }
     final List<Uri> invalidatedFiles =
-        await ProjectFileInvalidator.findInvalidated(
+        await projectFileInvalidator.findInvalidated(
       lastCompiled: device.devFS.lastCompiled,
       urisToMonitor: device.devFS.sources,
       packagesPath: packagesFilePath,
