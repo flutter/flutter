@@ -64,7 +64,8 @@ class Plugin {
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
       final int numKeys = pluginYaml.keys.toSet().length;
-      //TODO(cyanglaz): Remove this `if` check after we default our support to federated plugins.
+      // TODO(cyanglaz): Remove this `if` check after we default our support to federated plugins,
+      // https://github.com/flutter/flutter/issues/44397
       if (numKeys == 1) {
         return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
       }
@@ -156,7 +157,9 @@ class Plugin {
     if (yaml.containsKey('platforms')) {
       final int numKeys = yaml.keys.toSet().length;
       if (numKeys != 1) {
-        //TODO(cyanglaz): revert the return value to the code below after we default our support to federated plugins.
+        // TODO(cyanglaz): revert the return value to the code below after we default our support to federated plugins,
+        //                 https://github.com/flutter/flutter/issues/44397
+        //
         //                ```
         //                return <String>[
         //                  'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}',

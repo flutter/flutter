@@ -79,7 +79,8 @@ void main() {
       expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
     },);
 
-    //TODO(cyanglaz): remove this test after we default our support to federated plugins.
+    // TODO(cyanglaz): remove this test after we default our support to federated plugins,
+    // https://github.com/flutter/flutter/issues/44397
     test('Multi-platform Format is ignored', () {
       const String pluginYamlRaw =
           'androidPackage: com.flutter.dev\n'
