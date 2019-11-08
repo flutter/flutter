@@ -40,7 +40,7 @@ void main() {
 
     await const DebugAndroidApplication().build(environment);
 
-    expect(fs.file(fs.path.join('out', 'isolate_snapshot_data')).existsSync(), true);
+    expect(fs.file(fs.path.join('out', 'flutter_assets', 'isolate_snapshot_data')).existsSync(), true);
     expect(fs.file(fs.path.join('out', 'flutter_assets', 'vm_snapshot_data')).existsSync(), true);
     expect(fs.file(fs.path.join('out', 'flutter_assets', 'kernel_blob.bin')).existsSync(), true);
   });
