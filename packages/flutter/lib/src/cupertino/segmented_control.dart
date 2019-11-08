@@ -472,7 +472,6 @@ class _RenderSegmentedControl<T> extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedControl({
-    List<RenderBox> children,
     @required int selectedIndex,
     @required int pressedIndex,
     @required TextDirection textDirection,
@@ -483,9 +482,7 @@ class _RenderSegmentedControl<T> extends RenderBox
        _selectedIndex = selectedIndex,
        _pressedIndex = pressedIndex,
        _backgroundColors = backgroundColors,
-       _borderColor = borderColor {
-    addAll(children);
-  }
+       _borderColor = borderColor;
 
   int get selectedIndex => _selectedIndex;
   int _selectedIndex;
