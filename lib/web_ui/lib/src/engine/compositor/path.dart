@@ -156,7 +156,7 @@ class SkPath implements ui.Path {
 
   @override
   ui.PathMetrics computeMetrics({bool forceClosed = false}) {
-    throw 'computeMetrics';
+    return SkPathMetrics(this, forceClosed);
   }
 
   @override
