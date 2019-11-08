@@ -2343,11 +2343,11 @@ class PathMetricIterator implements Iterator<PathMetric> {
 /// contour. When the next contour's [PathMetric] is obtained, this object
 /// becomes invalid.
 class PathMetric {
-  final Path path;
-  final bool forceClosed;
+  final Path _path;
+  final bool _forceClosed;
 
   /// Create a new empty [Path] object.
-  PathMetric._(this.path, this.forceClosed);
+  PathMetric._(this._path, this._forceClosed);
 
   /// Return the total length of the current contour.
   double get length => throw UnimplementedError();

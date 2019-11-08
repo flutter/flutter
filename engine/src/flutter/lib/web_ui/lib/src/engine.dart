@@ -5,7 +5,7 @@
 library engine;
 
 import 'dart:async';
-import 'dart:collection' show ListBase;
+import 'dart:collection' show ListBase, IterableBase;
 import 'dart:convert' hide Codec;
 import 'dart:developer' as developer;
 import 'dart:html' as html;
@@ -34,6 +34,7 @@ part 'engine/compositor/layer.dart';
 part 'engine/compositor/layer_scene_builder.dart';
 part 'engine/compositor/layer_tree.dart';
 part 'engine/compositor/path.dart';
+part 'engine/compositor/path_metrics.dart';
 part 'engine/compositor/picture.dart';
 part 'engine/compositor/picture_recorder.dart';
 part 'engine/compositor/platform_message.dart';
