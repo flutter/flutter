@@ -27,8 +27,9 @@ bool IOSSurfaceSoftware::IsValid() const {
   return layer_;
 }
 
-bool IOSSurfaceSoftware::ResourceContextMakeCurrent() {
-  return false;
+std::unique_ptr<GLContextSwitchManager::GLContextSwitch>
+IOSSurfaceSoftware::ResourceContextMakeCurrent() {
+  return std::make_unique<GLContextSwitchManager::GLContextSwitchPureResult>(false);
 }
 
 void IOSSurfaceSoftware::UpdateStorageSizeIfNecessary() {
