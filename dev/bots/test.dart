@@ -742,6 +742,8 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   // seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     // Keep this in alphabetical order.
+    // TODO(jonahwilliams): enable APK invalidation in Windows shard.
+    if (!Platform.isWindows) () => _runDevicelabTest('apk_invalidation_test', environment: gradleEnvironment),
     () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment),
     if (Platform.isMacOS) () => _runDevicelabTest('flutter_create_offline_test_mac'),
     if (Platform.isLinux) () => _runDevicelabTest('flutter_create_offline_test_linux'),
