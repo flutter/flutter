@@ -14,6 +14,7 @@ function deploy {
 
   [[ "$remaining_tries" == 0 ]] && {
     echo "Command still failed after $total_tries tries: '$@'"
+    cat firebase-debug.log || echo "Unable to show contents of firebase-debug.log."
     return 1
   }
   return 0
