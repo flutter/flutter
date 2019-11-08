@@ -77,6 +77,44 @@ void main() {
       expect(webPlugin.pluginClass, 'WebSamplePlugin');
       expect(webPlugin.fileName, 'web_plugin.dart');
       expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
+    },);
+
+    //TODO(cyanglaz): remove this test after we default our support to federated plugins.
+    test('Multi-platform Format is ignored', () {
+      const String pluginYamlRaw =
+          'androidPackage: com.flutter.dev\n'
+          'iosPrefix: FLT\n'
+          'pluginClass: SamplePlugin\n'
+          'platforms:\n'
+          ' android:\n'
+          '  package: com.flutter.dev\n'
+          '  pluginClass: ASamplePlugin\n'
+          ' ios:\n'
+          '  pluginClass: ISamplePlugin\n'
+          ' linux:\n'
+          '  pluginClass: LSamplePlugin\n'
+          ' macos:\n'
+          '  pluginClass: MSamplePlugin\n'
+          ' web:\n'
+          '  pluginClass: WebSamplePlugin\n'
+          '  fileName: web_plugin.dart\n'
+          ' windows:\n'
+          '  pluginClass: WinSamplePlugin\n';
+
+      final dynamic pluginYaml = loadYaml(pluginYamlRaw);
+      final Plugin plugin =
+          Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
+
+      final AndroidPlugin androidPlugin =
+          plugin.platforms[AndroidPlugin.kConfigKey];
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
+      final String androidPluginClass = androidPlugin.pluginClass;
+      final String iosPluginClass = iosPlugin.pluginClass;
+
+      expect(iosPluginClass, 'SamplePlugin');
+      expect(androidPluginClass, 'SamplePlugin');
+      expect(iosPlugin.classPrefix, 'FLT');
+      expect(androidPlugin.package, 'com.flutter.dev');
     });
   });
 }

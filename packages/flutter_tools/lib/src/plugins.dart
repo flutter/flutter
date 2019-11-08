@@ -63,7 +63,11 @@ class Plugin {
       throwToolExit('Invalid plugin specification.\n${errors.join('\n')}');
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
-      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
+      final int numKeys = pluginYaml.keys.toSet().length;
+      //TODO(cyanglaz): Remove this `if` check after we default our support to federated plugins.
+      if (numKeys == 1) {
+        return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
+      }
     }
     return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
   }
