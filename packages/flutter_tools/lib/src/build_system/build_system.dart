@@ -123,6 +123,9 @@ abstract class Target {
   /// The output [Source]s which we attempt to verify are correctly produced.
   List<Source> get outputs;
 
+  /// A list of zero or more depfiles, located directly under {BUILD_DIR}.
+  List<String> get depfiles => const <String>[];
+
   /// The action which performs this build step.
   Future<void> build(Environment environment);
 
@@ -177,7 +180,7 @@ abstract class Target {
   /// Resolve the set of input patterns and functions into a concrete list of
   /// files.
   ResolvedFiles resolveInputs(Environment environment) {
-    return _resolveConfiguration(inputs, environment, implicit: true, inputs: true);
+    return _resolveConfiguration(inputs, depfiles, environment, implicit: true, inputs: true);
   }
 
   /// Find the current set of declared outputs, including wildcard directories.
@@ -185,7 +188,7 @@ abstract class Target {
   /// The [implicit] flag controls whether it is safe to evaluate [Source]s
   /// which uses functions, behaviors, or patterns.
   ResolvedFiles resolveOutputs(Environment environment) {
-    return _resolveConfiguration(outputs, environment, inputs: false);
+    return _resolveConfiguration(outputs, depfiles, environment, inputs: false);
   }
 
   /// Performs a fold across this target and its dependencies.
@@ -222,13 +225,14 @@ abstract class Target {
     return environment.buildDir.childFile(fileName);
   }
 
-  static ResolvedFiles _resolveConfiguration(List<Source> config, Environment environment, {
-    bool implicit = true, bool inputs = true,
+  static ResolvedFiles _resolveConfiguration(List<Source> config,
+    List<String> depfiles, Environment environment, { bool implicit = true, bool inputs = true,
   }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
     for (Source source in config) {
       source.accept(collector);
     }
+    depfiles.forEach(collector.visitDepfile);
     return collector;
   }
 }

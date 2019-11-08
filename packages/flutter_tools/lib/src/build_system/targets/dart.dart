@@ -71,7 +71,6 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
@@ -79,7 +78,11 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
-    Source.depfile('flutter_assets.d'),
+  ];
+
+  @override
+  List<String> get depfiles => <String>[
+    'flutter_assets.d'
   ];
 
   @override
@@ -119,13 +122,14 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   String get name => 'release_flutter_bundle';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
-  ];
+  List<Source> get inputs => const <Source>[];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
   ];
 
   @override
@@ -147,12 +151,14 @@ class KernelSnapshot extends Target {
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
-    Source.depfile('kernel_snapshot.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('kernel_snapshot.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => <String>[
+    'kernel_snapshot.d',
   ];
 
   @override

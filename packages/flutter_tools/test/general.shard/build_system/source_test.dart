@@ -160,45 +160,41 @@ void main() {
   }));
 
   test('can resolve a missing depfile', () => testbed.run(() {
-    const Source depfile = Source.depfile('foo.d');
+    visitor.visitDepfile('foo.d');
 
-    depfile.accept(visitor);
     expect(visitor.sources, isEmpty);
     expect(visitor.containsNewDepfile, true);
   }));
 
   test('can resolve a populated depfile', () => testbed.run(() {
-    const Source depfile = Source.depfile('foo.d');
     environment.buildDir.childFile('foo.d')
       .writeAsStringSync('a.dart : c.dart');
 
-    depfile.accept(visitor);
+    visitor.visitDepfile('foo.d');
     expect(visitor.sources.single.path, 'c.dart');
     expect(visitor.containsNewDepfile, false);
 
     final SourceVisitor outputVisitor = SourceVisitor(environment, false);
-    depfile.accept(outputVisitor);
+    outputVisitor.visitDepfile('foo.d');
 
     expect(outputVisitor.sources.single.path, 'a.dart');
     expect(outputVisitor.containsNewDepfile, false);
   }));
 
   test('does not crash on completely invalid depfile', () => testbed.run(() {
-    const Source depfile = Source.depfile('foo.d');
     environment.buildDir.childFile('foo.d')
         .writeAsStringSync('hello, world');
 
-    depfile.accept(visitor);
+    visitor.visitDepfile('foo.d');
     expect(visitor.sources, isEmpty);
     expect(visitor.containsNewDepfile, false);
   }));
 
   test('can parse depfile with windows paths', () => testbed.run(() {
-    const Source depfile = Source.depfile('foo.d');
     environment.buildDir.childFile('foo.d')
         .writeAsStringSync(r'a.dart: C:\\foo\\bar.txt');
 
-    depfile.accept(visitor);
+    visitor.visitDepfile('foo.d');
     expect(visitor.sources.single.path, r'C:\foo\bar.txt');
     expect(visitor.containsNewDepfile, false);
   }, overrides: <Type, Generator>{
@@ -206,11 +202,10 @@ void main() {
   }));
 
   test('can parse depfile with spaces in paths', () => testbed.run(() {
-    const Source depfile = Source.depfile('foo.d');
     environment.buildDir.childFile('foo.d')
         .writeAsStringSync(r'a.dart: foo\ bar.txt');
 
-    depfile.accept(visitor);
+    visitor.visitDepfile('foo.d');
     expect(visitor.sources.single.path, r'foo bar.txt');
     expect(visitor.containsNewDepfile, false);
   }));
