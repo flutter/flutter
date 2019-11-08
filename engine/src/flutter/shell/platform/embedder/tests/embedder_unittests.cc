@@ -2952,5 +2952,85 @@ TEST_F(EmbedderTest, VerifyB143464703) {
   ASSERT_TRUE(ImageMatchesFixture("verifyb143464703.png", renderered_scene));
 }
 
+TEST_F(EmbedderTest,
+       PushingMutlipleFramesSetsUpNewRecordingCanvasWithCustomCompositor) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("push_frames_over_and_over");
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
+
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 1024).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 1024;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  constexpr size_t frames_expected = 10;
+  fml::CountDownLatch frame_latch(frames_expected);
+  size_t frames_seen = 0;
+  context.AddNativeCallback("SignalNativeTest",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              frames_seen++;
+                              frame_latch.CountDown();
+                            }));
+  frame_latch.Wait();
+
+  ASSERT_EQ(frames_expected, frames_seen);
+}
+
+TEST_F(EmbedderTest,
+       PushingMutlipleFramesSetsUpNewRecordingCanvasWithoutCustomCompositor) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
+  builder.SetDartEntrypoint("push_frames_over_and_over");
+
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 1024).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 1024;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  constexpr size_t frames_expected = 10;
+  fml::CountDownLatch frame_latch(frames_expected);
+  size_t frames_seen = 0;
+  context.AddNativeCallback("SignalNativeTest",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              frames_seen++;
+                              frame_latch.CountDown();
+                            }));
+  frame_latch.Wait();
+
+  ASSERT_EQ(frames_expected, frames_seen);
+}
+
 }  // namespace testing
 }  // namespace flutter

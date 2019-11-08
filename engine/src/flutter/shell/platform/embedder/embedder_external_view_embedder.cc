@@ -100,10 +100,11 @@ void EmbedderExternalViewEmbedder::BeginFrame(SkISize frame_size,
   if (!root_render_target_) {
     root_render_target_ = create_render_target_callback_(
         context, MakeBackingStoreConfig(surface_size));
-    root_picture_recorder_ = std::make_unique<SkPictureRecorder>();
-    root_picture_recorder_->beginRecording(pending_frame_size_.width(),
-                                           pending_frame_size_.height());
   }
+
+  root_picture_recorder_ = std::make_unique<SkPictureRecorder>();
+  root_picture_recorder_->beginRecording(pending_frame_size_.width(),
+                                         pending_frame_size_.height());
 }
 
 // |ExternalViewEmbedder|
