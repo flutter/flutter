@@ -331,10 +331,12 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   }
 
   void _onTap(T currentKey) {
-    if (currentKey != widget.groupValue && currentKey == _pressedKey) {
+    if (currentKey != _pressedKey)
+      return;
+    if (currentKey != widget.groupValue) {
       widget.onValueChanged(currentKey);
-      _pressedKey = null;
     }
+    _pressedKey = null;
   }
 
   Color getTextColor(int index, T currentKey) {
