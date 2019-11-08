@@ -570,7 +570,6 @@ class RawKeyboard {
     LogicalKeyboardKey.capsLock,
     LogicalKeyboardKey.numLock,
     LogicalKeyboardKey.scrollLock,
-    LogicalKeyboardKey.fn,
   };
 
   void _synchronizeModifiers(RawKeyEvent event) {
@@ -589,6 +588,10 @@ class RawKeyboard {
     // pressed/released while the app doesn't have focus, to make sure that
     // _keysPressed reflects reality at all times.
     _keysPressed.removeAll(_allModifiers);
+    if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
+      // On Fuchsia and macOS, the Fn key is not considered a modifier key.
+      _keysPressed.remove(LogicalKeyboardKey.fn);
+    }
     _keysPressed.addAll(modifierKeys);
   }
 
