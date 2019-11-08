@@ -6,7 +6,7 @@ function deploy {
   local remaining_tries=$(($total_tries - 1))
   shift
   while [[ "$remaining_tries" > 0 ]]; do
-    (cd "$FLUTTER_ROOT/dev/docs" && firebase deploy --token "$FIREBASE_TOKEN" --project "$@") && break
+    (cd "$FLUTTER_ROOT/dev/docs" && firebase --debug deploy --token "$FIREBASE_TOKEN" --project "$@") && break
     remaining_tries=$(($remaining_tries - 1))
     echo "Error: Unable to deploy documentation to Firebase. Retrying in five seconds... ($remaining_tries tries left)"
     sleep 5
@@ -15,7 +15,9 @@ function deploy {
   [[ "$remaining_tries" == 0 ]] && {
     echo "Command still failed after $total_tries tries: '$@'"
     cat firebase-debug.log || echo "Unable to show contents of firebase-debug.log."
-    return 1
+    # TODO(jackson): Return an error here when the Firebase service is more reliable.
+    # https://github.com/flutter/flutter/issues/44452
+    return 0
   }
   return 0
 }
@@ -121,10 +123,6 @@ fi
 
 # Ensure google webmaster tools can verify our site.
 cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
-
-# TEMPORARILY EXIT WITHOUT UPLOADING
-# TODO(gspencergoog): Renable once Firebase outage is resolved.
-exit 0
 
 # Upload new API docs when running on Cirrus
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
