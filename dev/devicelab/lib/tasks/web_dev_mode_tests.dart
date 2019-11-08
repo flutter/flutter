@@ -20,21 +20,12 @@ const String kFirstRecompileTime  = 'FirstRecompileTime';
 const String kSecondStartupTime = 'SecondStartupTime';
 const String kSecondRestartTime = 'SecondRestartTime';
 
-
-abstract class WebDevice {
-  static const String chrome = 'chrome';
-  static const String webServer = 'web-server';
-}
-
-TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompiler) {
+TaskFunction createWebDevModeTest() {
   return () async {
     final List<String> options = <String>[
-      '--hot', '-d', webDevice, '--verbose', '--resident', '--target=lib/main.dart',
+      '--hot', '-d', 'web-server', '--verbose', '--resident', '--target=lib/main.dart',
     ];
     int hotRestartCount = 0;
-    final String expectedMessage = webDevice == WebDevice.webServer
-      ? 'Recompile complete'
-      : 'Reloaded application';
     final Map<String, int> measurements = <String, int>{};
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
@@ -47,8 +38,6 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
               <String>['packages', 'get'],
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
-                if (enableIncrementalCompiler)
-                  'WEB_INCREMENTAL_COMPILER': 'true',
               },
           );
           await packagesGet.exitCode;
@@ -57,26 +46,16 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
               flutterCommandArgs('run', options),
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
-                if (enableIncrementalCompiler)
-                  'WEB_INCREMENTAL_COMPILER': 'true',
               },
           );
 
           final Completer<void> stdoutDone = Completer<void>();
           final Completer<void> stderrDone = Completer<void>();
           final Stopwatch sw = Stopwatch()..start();
-          bool restarted = false;
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            // TODO(jonahwilliams): non-dwds builds do not know when the browser is loaded.
-            if (line.contains('Ignoring terminal input')) {
-              Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
-                process.stdin.write(restarted ? 'q' : 'r');
-              });
-              return;
-            }
             if (line.contains('To hot restart')) {
               // measure clean start-up time.
               sw.stop();
@@ -84,10 +63,9 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
               sw
                 ..reset()
                 ..start();
-              process.stdin.write('r');
-              return;
+              process.stdin.write('R');
             }
-            if (line.contains(expectedMessage)) {
+            if (line.contains('Recompile complete')) {
               if (hotRestartCount == 0) {
                 measurements[kFirstRestartTime] = sw.elapsedMilliseconds;
                 // Update the file and reload again.
@@ -102,10 +80,9 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
                 sw
                   ..reset()
                   ..start();
-                process.stdin.writeln('r');
+                process.stdin.writeln('R');
                 ++hotRestartCount;
               } else {
-                restarted = true;
                 measurements[kFirstRecompileTime] = sw.elapsedMilliseconds;
                 // Quit after second hot restart.
                 process.stdin.writeln('q');
@@ -142,35 +119,24 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
               flutterCommandArgs('run', options),
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
-                if (enableIncrementalCompiler)
-                  'WEB_INCREMENTAL_COMPILER': 'true',
               },
           );
           final Completer<void> stdoutDone = Completer<void>();
           final Completer<void> stderrDone = Completer<void>();
-          bool restarted = false;
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            // TODO(jonahwilliams): non-dwds builds do not know when the browser is loaded.
-            if (line.contains('Ignoring terminal input')) {
-              Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
-                process.stdin.write(restarted ? 'q' : 'r');
-              });
-              return;
-            }
+
             if (line.contains('To hot restart')) {
               measurements[kSecondStartupTime] = sw.elapsedMilliseconds;
               sw
                 ..reset()
                 ..start();
-              process.stdin.write('r');
-              return;
+              process.stdin.write('R');
             }
-            if (line.contains(expectedMessage)) {
-              restarted = true;
-              measurements[kSecondRestartTime] = sw.elapsedMilliseconds;
+            if (line.contains('Recompile complete')) {
+               measurements[kSecondRestartTime] = sw.elapsedMilliseconds;
               process.stdin.writeln('q');
             }
             print('stdout: $line');
