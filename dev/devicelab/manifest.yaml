@@ -112,13 +112,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  web_incremental_test:
-    description: >
-      Verify that the experimental frontend server support is functional.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
-
   flutter_gallery_ios__compile:
     description: >
       Collects various performance metrics of compiling the Flutter
@@ -141,6 +134,13 @@ tasks:
     flaky: true
 
   # Android on-device tests
+
+  web_incremental_test:
+    description: >
+      Verify that the experimental frontend server support is functional.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   complex_layout_scroll_perf__timeline_summary:
     description: >
