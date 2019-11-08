@@ -506,10 +506,11 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       }
       failureDiffs[expectation] = result;
     }
-    failureDiffs.forEach((String expectation, ComparisonResult result) async {
-      if (await skiaClient.isValidDigestForExpectation(expectation, golden.path))
-        generateFailureOutput(result, golden, basedir, key: expectation);
-    });
+
+    for (MapEntry<String, ComparisonResult> entry in failureDiffs.entries) {
+      if (await skiaClient.isValidDigestForExpectation(entry.key, golden.path))
+        generateFailureOutput(entry.value, golden, basedir, key: entry.key);
+    }
     return false;
   }
 }

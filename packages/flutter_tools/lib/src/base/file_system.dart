@@ -173,7 +173,7 @@ bool isOlderThanReference({ @required FileSystemEntity entity, @required File re
     return true;
   }
   return referenceFile.existsSync()
-      && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
+      && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
 }
 
 /// Exception indicating that a file that was expected to exist was not found.
@@ -184,4 +184,12 @@ class FileNotFoundException implements IOException {
 
   @override
   String toString() => 'File not found: $path';
+}
+
+/// Reads the process environment to find the current user's home directory.
+///
+/// If the searched environment variables are not set, '.' is returned instead.
+String userHomePath() {
+  final String envKey = platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+  return platform.environment[envKey] ?? '.';
 }

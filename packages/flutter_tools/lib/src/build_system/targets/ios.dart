@@ -4,10 +4,13 @@
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/process.dart';
 import '../../base/process_manager.dart';
 import '../../build_info.dart';
+import '../../macos/xcode.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
 import 'dart.dart';
@@ -22,7 +25,7 @@ abstract class AotAssemblyBase extends Target {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
-    final String outputPath = environment.buildDir.path;
+    final String buildOutputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_assembly');
     }
@@ -45,7 +48,7 @@ abstract class AotAssemblyBase extends Target {
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
-        outputPath: outputPath,
+        outputPath: environment.outputDir.path,
         darwinArch: iosArchs.single,
         bitcode: bitcode,
       );
@@ -62,7 +65,7 @@ abstract class AotAssemblyBase extends Target {
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
           packagesPath: environment.projectDir.childFile('.packages').path,
-          outputPath: fs.path.join(outputPath, getNameForDarwinArch(iosArch)),
+          outputPath: fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
           darwinArch: iosArch,
           bitcode: bitcode,
         ));
@@ -74,10 +77,10 @@ abstract class AotAssemblyBase extends Target {
       final ProcessResult result = await processManager.run(<String>[
         'lipo',
         ...iosArchs.map((DarwinArch iosArch) =>
-            fs.path.join(outputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
+            fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
         '-create',
         '-output',
-        fs.path.join(outputPath, 'App.framework', 'App'),
+        fs.path.join(environment.outputDir.path, 'App.framework', 'App'),
       ]);
       if (result.exitCode != 0) {
         throw Exception('lipo exited with code ${result.exitCode}');
@@ -108,7 +111,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/App'),
   ];
 
   @override
@@ -140,11 +143,55 @@ class AotAssemblyProfile extends AotAssemblyBase {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/App'),
   ];
 
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
   ];
+}
+
+/// Create an App.framework for debug iOS targets.
+///
+/// This framework needs to exist for the Xcode project to link/bundle,
+/// but it isn't actually executed. To generate something valid, we compile a trivial
+/// constant.
+Future<RunResult> createStubAppFramework(Directory appFrameworkDirectory) async {
+  File outputFile;
+  try {
+    if (!appFrameworkDirectory.existsSync()) {
+      appFrameworkDirectory.createSync(recursive: true);
+    }
+
+    outputFile = appFrameworkDirectory.childFile('App');
+    outputFile.createSync(recursive: true);
+  } catch (e) {
+    throwToolExit('Failed to create App.framework stub at ${appFrameworkDirectory.path}');
+  }
+
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
+  try {
+    final File stubSource = tempDir.childFile('debug_app.cc')
+      ..writeAsStringSync(r'''
+  static const int Moo = 88;
+  ''');
+
+    return await xcode.clang(<String>[
+      '-x',
+      'c',
+      stubSource.path,
+      '-dynamiclib',
+      '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+      '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-install_name', '@rpath/App.framework/App',
+      '-o', outputFile.path,
+    ]);
+  } finally {
+    try {
+      tempDir.deleteSync(recursive: true);
+    } on FileSystemException catch (_) {
+      // Best effort. Sometimes we can't delete things from system temp.
+    }
+  }
 }

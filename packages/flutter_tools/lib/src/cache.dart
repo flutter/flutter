@@ -106,6 +106,7 @@ class Cache {
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
       _artifacts.add(FlutterRunnerSDKArtifacts(this));
+      _artifacts.add(FlutterRunnerDebugSymbols(this));
       for (String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
@@ -1058,6 +1059,62 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
   }
 }
 
+/// Implementations of this class can resolve URLs for packages that are versioned.
+///
+/// See also [CipdArchiveResolver].
+abstract class VersionedPackageResolver {
+  const VersionedPackageResolver();
+
+  /// Returns the URL for the artifact.
+  String resolveUrl(String packageName, String version);
+}
+
+/// Resolves the CIPD archive URL for a given package and version.
+class CipdArchiveResolver extends VersionedPackageResolver {
+  const CipdArchiveResolver();
+
+  @override
+  String resolveUrl(String packageName, String version) {
+    return '$_cipdBaseUrl/flutter/$packageName/+/git_revision:$version';
+  }
+}
+
+/// The debug symbols for flutter runner for Fuchsia development.
+class FlutterRunnerDebugSymbols extends CachedArtifact {
+  FlutterRunnerDebugSymbols(Cache cache, {this.packageResolver = const CipdArchiveResolver(), this.dryRun = false})
+      : super('flutter_runner_debug_symbols', cache, DevelopmentArtifact.flutterRunner);
+
+  final VersionedPackageResolver packageResolver;
+
+  final bool dryRun;
+
+  @override
+  Directory get location => cache.getArtifactDirectory(name);
+
+  @override
+  String get version => cache.getVersionFor('engine');
+
+  Future<void> _downloadDebugSymbols(String targetArch) async {
+    final String packageName = 'fuchsia-debug-symbols-$targetArch';
+    final String url = packageResolver.resolveUrl(packageName, version);
+    if (!dryRun) {
+      await _downloadZipArchive(
+          'Downloading debug symbols for flutter runner - arch:$targetArch...',
+          Uri.parse(url),
+          location);
+    }
+  }
+
+  @override
+  Future<void> updateInner() async {
+    if (!platform.isLinux && !platform.isMacOS) {
+      return Future<void>.value();
+    }
+    await _downloadDebugSymbols('x64');
+    await _downloadDebugSymbols('arm64');
+  }
+}
+
 /// The Fuchsia core SDK for Linux.
 class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   LinuxFuchsiaSDKArtifacts(Cache cache) : super(cache, 'linux');
@@ -1185,8 +1242,7 @@ String flattenNameSubdirs(Uri url) {
 /// Download a file from the given [url] and write it to [location].
 Future<void> _downloadFile(Uri url, File location) async {
   _ensureExists(location.parent);
-  final List<int> fileBytes = await fetchUrl(url);
-  location.writeAsBytesSync(fileBytes, flush: true);
+  await fetchUrl(url, destFile: location);
 }
 
 Future<bool> _doesRemoteExist(String message, Uri url) async {
