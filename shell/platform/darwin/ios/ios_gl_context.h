@@ -26,16 +26,24 @@ class IOSGLContext {
   std::unique_ptr<IOSGLRenderTarget> CreateRenderTarget(
       fml::scoped_nsobject<CAEAGLLayer> layer);
 
-  bool MakeCurrent();
+  std::unique_ptr<GLContextSwitchManager::GLContextSwitch> MakeCurrent();
 
-  bool ResourceMakeCurrent();
+  std::unique_ptr<GLContextSwitchManager::GLContextSwitch>
+  ResourceMakeCurrent();
+
+  std::shared_ptr<IOSGLContextSwitchManager> GetIOSGLContextSwitchManager() {
+    return gl_context_switch_manager_;
+  }
 
   sk_sp<SkColorSpace> ColorSpace() const { return color_space_; }
 
+  fml::scoped_nsobject<EAGLContext> GetContext() const {
+    return gl_context_switch_manager_->GetContext();
+  }
+
  private:
-  fml::scoped_nsobject<EAGLContext> context_;
-  fml::scoped_nsobject<EAGLContext> resource_context_;
   sk_sp<SkColorSpace> color_space_;
+  std::shared_ptr<IOSGLContextSwitchManager> gl_context_switch_manager_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSGLContext);
 };

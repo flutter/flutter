@@ -28,7 +28,8 @@ bool IOSSurfaceGL::IsValid() const {
   return render_target_->IsValid();
 }
 
-bool IOSSurfaceGL::ResourceContextMakeCurrent() {
+std::unique_ptr<GLContextSwitchManager::GLContextSwitch>
+IOSSurfaceGL::ResourceContextMakeCurrent() {
   return context_->ResourceMakeCurrent();
 }
 
@@ -56,11 +57,13 @@ bool IOSSurfaceGL::UseOffscreenSurface() const {
   return true;
 }
 
-bool IOSSurfaceGL::GLContextMakeCurrent() {
+std::unique_ptr<GLContextSwitchManager::GLContextSwitch> IOSSurfaceGL::GLContextMakeCurrent() {
   if (!IsValid()) {
-    return false;
+    NSLog(@"not valid");
+    return std::make_unique<GLContextSwitchManager::GLContextSwitchPureResult>(false);
   }
-  return render_target_->UpdateStorageSizeIfNecessary() && context_->MakeCurrent();
+  NSLog(@"valid");
+  return render_target_->MakeCurrent();
 }
 
 bool IOSSurfaceGL::GLContextClearCurrent() {
@@ -71,6 +74,11 @@ bool IOSSurfaceGL::GLContextClearCurrent() {
 bool IOSSurfaceGL::GLContextPresent() {
   TRACE_EVENT0("flutter", "IOSSurfaceGL::GLContextPresent");
   return IsValid() && render_target_->PresentRenderBuffer();
+}
+
+// |GPUSurfaceGLDelegate|
+std::shared_ptr<GLContextSwitchManager> IOSSurfaceGL::GetGLContextSwitchManager() {
+  return context_->GetIOSGLContextSwitchManager();
 }
 
 // |ExternalViewEmbedder|
@@ -141,6 +149,7 @@ SkCanvas* IOSSurfaceGL::CompositeEmbeddedView(int view_id) {
 // |ExternalViewEmbedder|
 bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+  platform_views_controller->SetGLContextSwitchManager(context_->GetIOSGLContextSwitchManager());
   if (platform_views_controller == nullptr) {
     return true;
   }
