@@ -431,15 +431,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // in the widget after first build is ignored.
   DateTime initialDateTime;
 
-  // The difference in days between the initial date and the currently selected date.
-  int selectedDayFromInitial;
-
-  // The current selection of the hour picker.
-  //
-  // If [widget.use24hFormat] is true, values range from 1-24. Otherwise values
-  // range from 1-12.
-  int get selectedHour => hourController.selectedItem + 1;
-
   // The previous selection index of the hour column.
   //
   // This ranges from 0-23 even if [widget.use24hFormat] is false. As a result,
@@ -447,22 +438,29 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // versa.
   int previousHourIndex;
 
+  // The difference in days between the initial date and the currently selected date.
+  int get selectedDayFromInitial => dateController.selectedItem;
+  // The controller of the date column.
+  FixedExtentScrollController dateController;
+
+  // The current selection of the hour picker.
+  //
+  // If [widget.use24hFormat] is true, values range from 1-24. Otherwise values
+  // range from 1-12.
+  int get selectedHour => hourController.selectedItem + 1;
+  // The controller of the hour column.
+  FixedExtentScrollController hourController;
+
   // The current selection of the minute picker. Values range from 0 to 59.
   int get selectedMinute => minuteController.selectedItem;
+  // The controller of the minute column.
+  FixedExtentScrollController minuteController;
 
+  int get selectedAmPm => meridiemController.selectedItem;
   // The current selection of the AM/PM picker.
   //
   // - 0 means AM
   // - 1 means PM
-  int get selectedAmPm => meridiemController?.selectedItem ?? 0;
-
-  // The controller of the date column.
-  FixedExtentScrollController dateController;
-  // The controller of the hour column.
-  FixedExtentScrollController hourController;
-  // The controller of the minute column.
-  FixedExtentScrollController minuteController;
-  // The controller of the AM/PM column.
   FixedExtentScrollController meridiemController;
 
   bool isDatePickerScrolling = false;
@@ -484,7 +482,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   void initState() {
     super.initState();
     initialDateTime = widget.initialDateTime;
-    selectedDayFromInitial = 0;
 
     meridiemController = FixedExtentScrollController(
       initialItem: widget.use24hFormat ? 0 : initialDateTime.hour ~/ 12,
@@ -493,10 +490,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     hourController = FixedExtentScrollController(
       initialItem: widget.use24hFormat
         ? initialDateTime.hour
-        : initialDateTime.hour % 12
+        : (initialDateTime.hour + 11) % 12,
     );
 
     minuteController = FixedExtentScrollController(initialItem: initialDateTime.minute);
+
+    dateController = FixedExtentScrollController(initialItem: 0);
 
     previousHourIndex = selectedHour;
 
@@ -514,6 +513,11 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   @override
   void dispose() {
+    dateController.dispose();
+    hourController.dispose();
+    minuteController.dispose();
+    meridiemController.dispose();
+
     PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
     super.dispose();
   }
