@@ -218,9 +218,9 @@ void main() {
 
   testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          body: const ExpansionTile(
+          body: ExpansionTile(
             title: Text('Title'),
             subtitle: Text('Subtitle'),
             children: <Widget>[ListTile(title: Text('0'))],
