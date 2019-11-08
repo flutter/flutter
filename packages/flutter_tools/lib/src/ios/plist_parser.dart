@@ -45,7 +45,7 @@ class PlistParser {
         args,
         throwOnError: true,
       ).stdout.trim();
-      return json.decode(jsonContent);
+      return json.decode(jsonContent) as Map<String, dynamic>;
     } on ProcessException catch (error) {
       printTrace('$error');
       return const <String, dynamic>{};
@@ -64,6 +64,6 @@ class PlistParser {
   String getValueFromFile(String plistFilePath, String key) {
     assert(key != null);
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
-    return parsed[key];
+    return parsed[key] as String;
   }
 }

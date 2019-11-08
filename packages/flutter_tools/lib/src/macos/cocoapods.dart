@@ -309,13 +309,13 @@ class CocoaPods {
     );
     status.stop();
     if (logger.isVerbose || result.exitCode != 0) {
-      if (result.stdout.isNotEmpty) {
+      if ((result.stdout as String).isNotEmpty) {
         printStatus('CocoaPods\' output:\n↳');
-        printStatus(result.stdout, indent: 4);
+        printStatus(result.stdout as String, indent: 4);
       }
-      if (result.stderr.isNotEmpty) {
+      if ((result.stderr as String).isNotEmpty) {
         printStatus('Error output from CocoaPods:\n↳');
-        printStatus(result.stderr, indent: 4);
+        printStatus(result.stderr as String, indent: 4);
       }
     }
     if (result.exitCode != 0) {
@@ -326,7 +326,7 @@ class CocoaPods {
   }
 
   void _diagnosePodInstallFailure(ProcessResult result) {
-    if (result.stdout is String && result.stdout.contains('out-of-date source repos')) {
+    if (result.stdout is String && (result.stdout as String).contains('out-of-date source repos')) {
       printError(
         "Error: CocoaPods's specs repository is too out-of-date to satisfy dependencies.\n"
         'To update the CocoaPods specs, run:\n'

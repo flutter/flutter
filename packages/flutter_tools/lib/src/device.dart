@@ -582,17 +582,15 @@ class ForwardedPort {
 
   final int hostPort;
   final int devicePort;
-  final dynamic context;
+  final Process context;
 
   @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
 
   /// Kill subprocess (if present) used in forwarding.
   void dispose() {
-    final Process process = context;
-
-    if (process != null) {
-      process.kill();
+    if (context != null) {
+      context.kill();
     }
   }
 }

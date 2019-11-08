@@ -223,7 +223,7 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> installApp(ApplicationPackage app) async {
-    final IOSApp iosApp = app;
+    final IOSApp iosApp = app as IOSApp;
     final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
@@ -287,7 +287,7 @@ class IOSDevice extends Device {
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
-          app: package,
+          app: package as BuildableIOSApp,
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
           buildForDevice: true,
@@ -309,7 +309,7 @@ class IOSDevice extends Device {
     packageId ??= package.id;
 
     // Step 2: Check that the application exists at the specified path.
-    final IOSApp iosApp = package;
+    final IOSApp iosApp = package as IOSApp;
     final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
@@ -339,7 +339,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
-      if (platformArgs['trace-startup'] ?? false) '--trace-startup',
+      if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
     final Status installStatus = logger.startProgress(
@@ -629,7 +629,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // any specific prefix. To properly capture those, we enter "printing" mode
   // after matching a log line from the runner. When in printing mode, we print
   // all lines until we find the start of another log message (from any app).
-  Function _newSyslogLineHandler() {
+  void Function(String line) _newSyslogLineHandler() {
     bool printing = false;
 
     return (String line) {

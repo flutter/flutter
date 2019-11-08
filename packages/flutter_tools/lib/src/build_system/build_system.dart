@@ -460,7 +460,7 @@ class _BuildInstance {
 
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
-  final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
+  final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
   final Environment environment;
   final FileHashStore fileCache;
   final Map<String, File> inputFiles = <String, File>{};
@@ -662,7 +662,7 @@ class Node {
     }
     Map<String, Object> values;
     try {
-      values = json.decode(content);
+      values = json.decode(content) as Map<String, Object>;
     } on FormatException {
       // The json is malformed in some way.
       _dirty = true;

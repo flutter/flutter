@@ -105,10 +105,10 @@ class AndroidDevice extends Device {
           stderrEncoding: latin1,
         );
         if (result.exitCode == 0 || allowHeapCorruptionOnWindows(result.exitCode)) {
-          _properties = parseAdbDeviceProperties(result.stdout);
+          _properties = parseAdbDeviceProperties(result.stdout as String);
         } else {
           printError('Error ${result.exitCode} retrieving device properties for $name:');
-          printError(result.stderr);
+          printError(result.stderr as String);
         }
       } on ProcessException catch (error) {
         printError('Error retrieving device properties for $name: $error');
@@ -334,18 +334,17 @@ class AndroidDevice extends Device {
     }
   }
 
-  String _getDeviceSha1Path(ApplicationPackage app) {
-    return '/data/local/tmp/sky.${app.id}.sha1';
+  String _getDeviceSha1Path(AndroidApk apk) {
+    return '/data/local/tmp/sky.${apk.id}.sha1';
   }
 
-  Future<String> _getDeviceApkSha1(ApplicationPackage app) async {
+  Future<String> _getDeviceApkSha1(AndroidApk apk) async {
     final RunResult result = await processUtils.run(
-      adbCommandForDevice(<String>['shell', 'cat', _getDeviceSha1Path(app)]));
+      adbCommandForDevice(<String>['shell', 'cat', _getDeviceSha1Path(apk)]));
     return result.stdout;
   }
 
-  String _getSourceSha1(ApplicationPackage app) {
-    final AndroidApk apk = app;
+  String _getSourceSha1(AndroidApk apk) {
     final File shaFile = fs.file('${apk.file.path}.sha1');
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
@@ -367,13 +366,14 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async {
-    final String installedSha1 = await _getDeviceApkSha1(app);
-    return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
+    final AndroidApk apk = app as AndroidApk;
+    final String installedSha1 = await _getDeviceApkSha1(apk);
+    return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(apk);
   }
 
   @override
   Future<bool> installApp(ApplicationPackage app) async {
-    final AndroidApk apk = app;
+    final AndroidApk apk = app as AndroidApk;
     if (!apk.file.existsSync()) {
       printError('"${fs.path.relative(apk.file.path)}" does not exist.');
       return false;
@@ -403,7 +403,7 @@ class AndroidDevice extends Device {
     }
     try {
       await runAdbCheckedAsync(<String>[
-        'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
+        'shell', 'echo', '-n', _getSourceSha1(apk), '>', _getDeviceSha1Path(apk),
       ]);
     } on ProcessException catch (error) {
       printError('adb shell failed to write the SHA hash: $error.');
@@ -537,8 +537,8 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final bool traceStartup = platformArgs['trace-startup'] ?? false;
-    final AndroidApk apk = package;
+    final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
+    final AndroidApk apk = package as AndroidApk;
     printTrace('$this startApp');
 
     ProtocolDiscovery observatoryDiscovery;

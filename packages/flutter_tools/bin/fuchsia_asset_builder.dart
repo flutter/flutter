@@ -57,11 +57,11 @@ Future<void> run(List<String> args) async {
   }
   Cache.flutterRoot = platform.environment['FLUTTER_ROOT'];
 
-  final String assetDir = argResults[_kOptionAsset];
+  final String assetDir = argResults[_kOptionAsset] as String;
   final AssetBundle assets = await buildAssets(
-    manifestPath: argResults[_kOptionManifest] ?? defaultManifestPath,
+    manifestPath: argResults[_kOptionManifest] as String ?? defaultManifestPath,
     assetDirPath: assetDir,
-    packagesPath: argResults[_kOptionPackages],
+    packagesPath: argResults[_kOptionPackages] as String,
     includeDefaultFonts: false,
   );
 
@@ -77,8 +77,8 @@ Future<void> run(List<String> args) async {
   });
   await Future.wait<void>(calls);
 
-  final String outputMan = argResults[_kOptionAssetManifestOut];
-  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);
+  final String outputMan = argResults[_kOptionAssetManifestOut] as String;
+  await writeFuchsiaManifest(assets, argResults[_kOptionAsset] as String, outputMan, argResults[_kOptionComponentName] as String);
 }
 
 Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {

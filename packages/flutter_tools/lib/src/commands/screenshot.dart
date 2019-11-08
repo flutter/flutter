@@ -83,7 +83,7 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     device = await findTargetDevice();
-    validateOptions(argResults[_kType], device, argResults[_kObservatoryUri]);
+    validateOptions(argResults[_kType] as String, device, argResults[_kObservatoryUri] as String);
     return super.verifyThenRunCommand(commandPath);
   }
 
@@ -94,7 +94,7 @@ class ScreenshotCommand extends FlutterCommand {
       outputFile = fs.file(argResults[_kOut]);
     }
 
-    switch (argResults[_kType]) {
+    switch (argResults[_kType] as String) {
       case _kDeviceType:
         await runScreenshot(outputFile);
         return null;
@@ -123,7 +123,7 @@ class ScreenshotCommand extends FlutterCommand {
     final Map<String, dynamic> skp = await _invokeVmServiceRpc('_flutter.screenshotSkp');
     outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
     final IOSink sink = outputFile.openWrite();
-    sink.add(base64.decode(skp['skp']));
+    sink.add(base64.decode(skp['skp'] as String));
     await sink.close();
     _showOutputFileInfo(outputFile);
     _ensureOutputIsNotJsonRpcError(outputFile);
@@ -133,14 +133,14 @@ class ScreenshotCommand extends FlutterCommand {
     final Map<String, dynamic> response = await _invokeVmServiceRpc('_flutter.screenshot');
     outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     final IOSink sink = outputFile.openWrite();
-    sink.add(base64.decode(response['screenshot']));
+    sink.add(base64.decode(response['screenshot'] as String));
     await sink.close();
     _showOutputFileInfo(outputFile);
     _ensureOutputIsNotJsonRpcError(outputFile);
   }
 
   Future<Map<String, dynamic>> _invokeVmServiceRpc(String method) async {
-    final Uri observatoryUri = Uri.parse(argResults[_kObservatoryUri]);
+    final Uri observatoryUri = Uri.parse(argResults[_kObservatoryUri] as String);
     final VMService vmService = await VMService.connect(observatoryUri);
     return await vmService.vm.invokeRpcRaw(method);
   }

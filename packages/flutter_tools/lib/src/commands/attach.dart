@@ -113,7 +113,7 @@ class AttachCommand extends FlutterCommand {
       return null;
     }
     try {
-      return int.parse(argResults['debug-port']);
+      return int.parse(argResults['debug-port'] as String);
     } catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
@@ -124,7 +124,7 @@ class AttachCommand extends FlutterCommand {
     if (argResults['debug-uri'] == null) {
       return null;
     }
-    final Uri uri = Uri.parse(argResults['debug-uri']);
+    final Uri uri = Uri.parse(argResults['debug-uri'] as String);
     if (!uri.hasPort) {
       throwToolExit('Port not specified for `--debug-uri`: $uri');
     }
@@ -132,7 +132,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   String get appId {
-    return argResults['app-id'];
+    return argResults['app-id'] as String;
   }
 
   @override
@@ -166,7 +166,7 @@ class AttachCommand extends FlutterCommand {
 
     await _validateArguments();
 
-    writePidFile(argResults['pid-file']);
+    writePidFile(argResults['pid-file'] as String);
 
     final Device device = await findTargetDevice();
 
@@ -195,7 +195,7 @@ class AttachCommand extends FlutterCommand {
     }
     final int devicePort = await getDevicePort();
 
-    final Daemon daemon = argResults['machine']
+    final Daemon daemon = argResults['machine'] as bool
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
             notifyingLogger: NotifyingLogger(), logToStdout: true)
       : null;
@@ -210,7 +210,7 @@ class AttachCommand extends FlutterCommand {
     if (devicePort == null && debugUri == null) {
       if (device is FuchsiaDevice) {
         attachLogger = true;
-        final String module = argResults['module'];
+        final String module = argResults['module'] as String;
         if (module == null) {
           throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
         }
@@ -272,12 +272,12 @@ class AttachCommand extends FlutterCommand {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         flutterProject: flutterProject,
-        trackWidgetCreation: argResults['track-widget-creation'],
-        fileSystemRoots: argResults['filesystem-root'],
-        fileSystemScheme: argResults['filesystem-scheme'],
-        viewFilter: argResults['isolate-filter'],
-        target: argResults['target'],
-        targetModel: TargetModel(argResults['target-model']),
+        trackWidgetCreation: argResults['track-widget-creation'] as bool,
+        fileSystemRoots: argResults['filesystem-root'] as List<String>,
+        fileSystemScheme: argResults['filesystem-scheme'] as String,
+        viewFilter: argResults['isolate-filter'] as String,
+        target: argResults['target'] as String,
+        targetModel: TargetModel(argResults['target-model'] as String),
         buildMode: getBuildMode(),
         dartDefines: dartDefines,
       );
@@ -290,9 +290,9 @@ class AttachCommand extends FlutterCommand {
             flutterDevices,
             target: targetFile,
             debuggingOptions: debuggingOptions,
-            packagesFilePath: globalResults['packages'],
-            projectRootPath: argResults['project-root'],
-            dillOutputPath: argResults['output-dill'],
+            packagesFilePath: globalResults['packages'] as String,
+            projectRootPath: argResults['project-root'] as String,
+            dillOutputPath: argResults['output-dill'] as String,
             ipv6: usesIpv6,
             flutterProject: flutterProject,
           )

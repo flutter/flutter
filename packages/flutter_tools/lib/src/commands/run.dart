@@ -70,11 +70,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIsolateFilterOption(hide: !verboseHelp);
   }
 
-  bool get traceStartup => argResults['trace-startup'];
-  bool get cacheSkSL => argResults['cache-sksl'];
-  bool get dumpSkpOnShaderCompilation => argResults['dump-skp-on-shader-compilation'];
+  bool get traceStartup => argResults['trace-startup'] as bool;
+  bool get cacheSkSL => argResults['cache-sksl'] as bool;
+  bool get dumpSkpOnShaderCompilation => argResults['dump-skp-on-shader-compilation'] as bool;
 
-  String get route => argResults['route'];
+  String get route => argResults['route'] as String;
 }
 
 class RunCommand extends RunCommandBase {
@@ -266,7 +266,7 @@ class RunCommand extends RunCommandBase {
   }
 
   bool shouldUseHotMode() {
-    final bool hotArg = argResults['hot'] ?? false;
+    final bool hotArg = argResults['hot'] as bool ?? false;
     final bool shouldUseHotMode = hotArg && !traceStartup;
     return getBuildInfo().isDebug && shouldUseHotMode;
   }
@@ -274,8 +274,8 @@ class RunCommand extends RunCommandBase {
   bool get runningWithPrebuiltApplication =>
       argResults['use-application-binary'] != null;
 
-  bool get stayResident => argResults['resident'];
-  bool get awaitFirstFrameWhenTracing => argResults['await-first-frame-when-tracing'];
+  bool get stayResident => argResults['resident'] as bool;
+  bool get awaitFirstFrameWhenTracing => argResults['await-first-frame-when-tracing'] as bool;
 
   @override
   Future<void> validateCommand() async {
@@ -298,31 +298,31 @@ class RunCommand extends RunCommandBase {
     if (buildInfo.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
-        initializePlatform: argResults['web-initialize-platform'],
-        hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
-        port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
+        initializePlatform: argResults['web-initialize-platform'] as bool,
+        hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] as String : '',
+        port: featureFlags.isWebEnabled ? argResults['web-port'] as String : '',
       );
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
-        startPaused: argResults['start-paused'],
-        disableServiceAuthCodes: argResults['disable-service-auth-codes'],
-        dartFlags: argResults['dart-flags'] ?? '',
-        useTestFonts: argResults['use-test-fonts'],
-        enableSoftwareRendering: argResults['enable-software-rendering'],
-        skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
-        traceSkia: argResults['trace-skia'],
-        traceSystrace: argResults['trace-systrace'],
+        startPaused: argResults['start-paused'] as bool,
+        disableServiceAuthCodes: argResults['disable-service-auth-codes'] as bool,
+        dartFlags: argResults['dart-flags'] as String ?? '',
+        useTestFonts: argResults['use-test-fonts'] as bool,
+        enableSoftwareRendering: argResults['enable-software-rendering'] as bool,
+        skiaDeterministicRendering: argResults['skia-deterministic-rendering'] as bool,
+        traceSkia: argResults['trace-skia'] as bool,
+        traceSystrace: argResults['trace-systrace'] as bool,
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
         cacheSkSL: cacheSkSL,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
-        verboseSystemLogs: argResults['verbose-system-logs'],
-        initializePlatform: argResults['web-initialize-platform'],
-        hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
-        port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
-        browserLaunch: featureFlags.isWebEnabled ? argResults['web-browser-launch'] : null,
-        vmserviceOutFile: argResults['vmservice-out-file'],
+        verboseSystemLogs: argResults['verbose-system-logs'] as bool,
+        initializePlatform: argResults['web-initialize-platform'] as bool,
+        hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] as String : '',
+        port: featureFlags.isWebEnabled ? argResults['web-port'] as String : '',
+        browserLaunch: featureFlags.isWebEnabled ? argResults['web-browser-launch'] as bool : null,
+        vmserviceOutFile: argResults['vmservice-out-file'] as String,
       );
     }
   }
@@ -335,9 +335,9 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final bool hotMode = shouldUseHotMode();
 
-    writePidFile(argResults['pid-file']);
+    writePidFile(argResults['pid-file'] as String);
 
-    if (argResults['machine']) {
+    if (argResults['machine'] as bool) {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
       }
@@ -345,17 +345,17 @@ class RunCommand extends RunCommandBase {
           notifyingLogger: NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
-        final String applicationBinaryPath = argResults['use-application-binary'];
+        final String applicationBinaryPath = argResults['use-application-binary'] as String;
         app = await daemon.appDomain.startApp(
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
               : fs.file(applicationBinaryPath),
-          trackWidgetCreation: argResults['track-widget-creation'],
-          projectRootPath: argResults['project-root'],
-          packagesFilePath: globalResults['packages'],
-          dillOutputPath: argResults['output-dill'],
+          trackWidgetCreation: argResults['track-widget-creation'] as bool,
+          projectRootPath: argResults['project-root'] as String,
+          packagesFilePath: globalResults['packages'] as String,
+          dillOutputPath: argResults['output-dill'] as String,
           ipv6: ipv6,
         );
       } catch (error) {
@@ -412,8 +412,8 @@ class RunCommand extends RunCommandBase {
 
     List<String> expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
-      expFlags = argResults[FlutterOptions.kEnableExperiment];
+        (argResults[FlutterOptions.kEnableExperiment] as List<String>).isNotEmpty) {
+      expFlags = argResults[FlutterOptions.kEnableExperiment] as List<String>;
     }
     final FlutterProject flutterProject = FlutterProject.current();
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[
@@ -421,12 +421,12 @@ class RunCommand extends RunCommandBase {
         await FlutterDevice.create(
           device,
           flutterProject: flutterProject,
-          trackWidgetCreation: argResults['track-widget-creation'],
-          fileSystemRoots: argResults['filesystem-root'],
-          fileSystemScheme: argResults['filesystem-scheme'],
-          viewFilter: argResults['isolate-filter'],
+          trackWidgetCreation: argResults['track-widget-creation'] as bool,
+          fileSystemRoots: argResults['filesystem-root'] as List<String>,
+          fileSystemScheme: argResults['filesystem-scheme'] as String,
+          viewFilter: argResults['isolate-filter'] as String,
           experimentalFlags: expFlags,
-          target: argResults['target'],
+          target: argResults['target'] as String,
           buildMode: getBuildMode(),
           dartDefines: dartDefines,
         ),
@@ -438,19 +438,19 @@ class RunCommand extends RunCommandBase {
                          await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
     ResidentRunner runner;
-    final String applicationBinaryPath = argResults['use-application-binary'];
+    final String applicationBinaryPath = argResults['use-application-binary'] as String;
     if (hotMode && !webMode) {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
-        benchmarkMode: argResults['benchmark'],
+        benchmarkMode: argResults['benchmark'] as bool,
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        projectRootPath: argResults['project-root'],
-        packagesFilePath: globalResults['packages'],
-        dillOutputPath: argResults['output-dill'],
+        projectRootPath: argResults['project-root'] as String,
+        packagesFilePath: globalResults['packages'] as String,
+        dillOutputPath: argResults['output-dill'] as String,
         stayResident: stayResident,
         ipv6: ipv6,
       );

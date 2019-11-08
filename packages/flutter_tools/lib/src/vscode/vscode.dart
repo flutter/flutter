@@ -223,8 +223,8 @@ class VsCode {
       return null;
     }
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
-    final Map<String, dynamic> jsonObject = json.decode(jsonString);
-    return jsonObject['version'];
+    final Map<String, dynamic> jsonObject = json.decode(jsonString) as Map<String, dynamic>;
+    return jsonObject['version'] as String;
   }
 }
 

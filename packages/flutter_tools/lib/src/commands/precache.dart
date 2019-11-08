@@ -59,10 +59,10 @@ class PrecacheCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['all-platforms']) {
+    if (argResults['all-platforms'] as bool) {
       cache.includeAllPlatforms = true;
     }
-    if (argResults['use-unsigned-mac-binaries']) {
+    if (argResults['use-unsigned-mac-binaries'] as bool) {
       cache.useUnsignedMacBinaries = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
@@ -74,15 +74,15 @@ class PrecacheCommand extends FlutterCommand {
       if (artifact.feature != null && !featureFlags.isEnabled(artifact.feature)) {
         continue;
       }
-      if (argResults[artifact.name]) {
+      if (argResults[artifact.name] as bool) {
         requiredArtifacts.add(artifact);
       }
       // The `android` flag expands to android_gen_snapshot, android_maven, android_internal_build.
-      if (artifact.name.startsWith('android_') && argResults['android']) {
+      if (artifact.name.startsWith('android_') && argResults['android'] as bool) {
         requiredArtifacts.add(artifact);
       }
     }
-    final bool forceUpdate = argResults['force'];
+    final bool forceUpdate = argResults['force'] as bool;
     if (forceUpdate || !cache.isUpToDate()) {
       await cache.updateAll(requiredArtifacts);
     } else {

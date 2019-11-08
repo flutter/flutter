@@ -87,7 +87,7 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
-    final Iterable<AndroidArch> targetArchitectures = argResults['target-platform']
+    final Iterable<AndroidArch> targetArchitectures = (argResults['target-platform'] as List<String>)
       .map<AndroidArch>(getAndroidArchForName);
 
     for (String buildMode in const <String>['debug', 'profile', 'release']) {
@@ -107,7 +107,7 @@ class BuildAarCommand extends BuildSubCommand {
       project: _getProject(),
       target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,
-      outputDirectoryPath: argResults['output-dir'],
+      outputDirectoryPath: argResults['output-dir'] as String,
     );
     return null;
   }

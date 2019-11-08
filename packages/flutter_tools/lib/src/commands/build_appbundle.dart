@@ -55,11 +55,11 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usage[CustomDimensions.commandBuildAppBundleTargetPlatform] =
         (argResults['target-platform'] as List<String>).join(',');
 
-    if (argResults['release']) {
+    if (argResults['release'] as bool) {
       usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'release';
-    } else if (argResults['debug']) {
+    } else if (argResults['debug'] as bool) {
       usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'debug';
-    } else if (argResults['profile']) {
+    } else if (argResults['profile'] as bool) {
       usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'profile';
     } else {
       // The build defaults to release.
@@ -71,8 +71,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
-      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
-      shrink: argResults['shrink'],
+      targetArchs: (argResults['target-platform'] as List<String>).map<AndroidArch>(getAndroidArchForName),
+      shrink: argResults['shrink'] as bool,
     );
     await androidBuilder.buildAab(
       project: FlutterProject.current(),

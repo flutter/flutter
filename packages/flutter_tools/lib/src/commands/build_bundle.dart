@@ -88,14 +88,14 @@ class BuildBundleCommand extends BuildSubCommand {
       return const <CustomDimensions, String>{};
     }
     return <CustomDimensions, String>{
-      CustomDimensions.commandBuildBundleTargetPlatform: argResults['target-platform'],
+      CustomDimensions.commandBuildBundleTargetPlatform: argResults['target-platform'] as String,
       CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
     };
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = argResults['target-platform'];
+    final String targetPlatform = argResults['target-platform'] as String;
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
@@ -127,17 +127,17 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,
-      manifestPath: argResults['manifest'],
-      depfilePath: argResults['depfile'],
-      privateKeyPath: argResults['private-key'],
-      assetDirPath: argResults['asset-dir'],
-      precompiledSnapshot: argResults['precompiled'],
-      reportLicensedPackages: argResults['report-licensed-packages'],
-      trackWidgetCreation: argResults['track-widget-creation'],
-      extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
-      extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
-      fileSystemScheme: argResults['filesystem-scheme'],
-      fileSystemRoots: argResults['filesystem-root'],
+      manifestPath: argResults['manifest'] as String,
+      depfilePath: argResults['depfile'] as String,
+      privateKeyPath: argResults['private-key'] as String,
+      assetDirPath: argResults['asset-dir'] as String,
+      precompiledSnapshot: argResults['precompiled'] as bool,
+      reportLicensedPackages: argResults['report-licensed-packages'] as bool,
+      trackWidgetCreation: argResults['track-widget-creation'] as bool,
+      extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions] as List<String>,
+      extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>,
+      fileSystemScheme: argResults['filesystem-scheme'] as String,
+      fileSystemRoots: argResults['filesystem-root'] as List<String>,
     );
     return null;
   }

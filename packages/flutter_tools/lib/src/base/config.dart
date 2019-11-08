@@ -10,7 +10,7 @@ class Config {
   Config([File configFile]) {
     _configFile = configFile ?? fs.file(fs.path.join(userHomePath(), '.flutter_settings'));
     if (_configFile.existsSync()) {
-      _values = json.decode(_configFile.readAsStringSync());
+      _values = json.decode(_configFile.readAsStringSync()) as Map<String, dynamic>;
     }
   }
 

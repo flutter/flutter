@@ -98,7 +98,7 @@ class PackagesGetCommand extends FlutterCommand {
       await pub.get(context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade ,
-        offline: argResults['offline'],
+        offline: argResults['offline'] as bool,
         checkLastModified: false,
       );
       pubGetTimer.stop();
@@ -203,8 +203,8 @@ class PackagesPublishCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<String> args = <String>[
       ...argResults.rest,
-      if (argResults['dry-run']) '--dry-run',
-      if (argResults['force']) '--force',
+      if (argResults['dry-run'] as bool) '--dry-run',
+      if (argResults['force'] as bool) '--force',
     ];
     Cache.releaseLockEarly();
     await pub.interactively(<String>['publish', ...args]);

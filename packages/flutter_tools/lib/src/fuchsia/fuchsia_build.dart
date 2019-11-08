@@ -87,7 +87,7 @@ Future<void> _buildAssets(
 }
 
 void _rewriteCmx(BuildMode mode, String runnerPackageSource, File src, File dst) {
-  final Map<String, dynamic> cmx = json.decode(src.readAsStringSync());
+  final Map<String, dynamic> cmx = json.decode(src.readAsStringSync()) as Map<String, dynamic>;
   // If the app author has already specified the runner in the cmx file, then
   // do not override it with something else.
   if (cmx.containsKey('runner')) {

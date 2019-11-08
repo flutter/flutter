@@ -70,7 +70,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
       fuchsiaProject: flutterProject.fuchsia,
       target: targetFile,
       buildInfo: buildInfo,
-      runnerPackageSource: argResults['runner-source'],
+      runnerPackageSource: argResults['runner-source'] as String,
     );
     return null;
   }

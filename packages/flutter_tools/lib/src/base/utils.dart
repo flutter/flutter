@@ -251,7 +251,7 @@ class Uuid {
 /// Given a data structure which is a Map of String to dynamic values, return
 /// the same structure (`Map<String, dynamic>`) with the correct runtime types.
 Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
-  final Map<dynamic, dynamic> map = untyped;
+  final Map<dynamic, dynamic> map = untyped as Map<dynamic, dynamic>;
   return map.cast<String, dynamic>();
 }
 

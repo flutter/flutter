@@ -100,12 +100,12 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['machine']) {
+    if (argResults['machine'] as bool) {
       await handleMachine();
       return null;
     }
 
-    if (argResults['clear-features']) {
+    if (argResults['clear-features'] as bool) {
       for (Feature feature in allFeatures) {
         if (feature.configSetting != null) {
           config.removeValue(feature.configSetting);
@@ -115,18 +115,18 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults.wasParsed('analytics')) {
-      final bool value = argResults['analytics'];
+      final bool value = argResults['analytics'] as bool;
       flutterUsage.enabled = value;
       AnalyticsConfigEvent(enabled: value).send();
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
     if (argResults.wasParsed('android-sdk')) {
-      _updateConfig('android-sdk', argResults['android-sdk']);
+      _updateConfig('android-sdk', argResults['android-sdk'] as String);
     }
 
     if (argResults.wasParsed('android-studio-dir')) {
-      _updateConfig('android-studio-dir', argResults['android-studio-dir']);
+      _updateConfig('android-studio-dir', argResults['android-studio-dir'] as String);
     }
 
     if (argResults.wasParsed('clear-ios-signing-cert')) {
@@ -134,7 +134,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults.wasParsed('build-dir')) {
-      final String buildDir = argResults['build-dir'];
+      final String buildDir = argResults['build-dir'] as String;
       if (fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
       }
@@ -146,7 +146,7 @@ class ConfigCommand extends FlutterCommand {
         continue;
       }
       if (argResults.wasParsed(feature.configSetting)) {
-        final bool keyValue = argResults[feature.configSetting];
+        final bool keyValue = argResults[feature.configSetting] as bool;
         config.setValue(feature.configSetting, keyValue);
         printStatus('Setting "${feature.configSetting}" value to "$keyValue".');
       }

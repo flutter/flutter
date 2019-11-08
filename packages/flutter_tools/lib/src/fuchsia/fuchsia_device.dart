@@ -87,7 +87,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
         : RegExp('INFO: ${_app.name}(\.cmx)?\\(flutter\\): ');
     return Stream<String>.eventTransformed(
       lines,
-      (Sink<String> outout) => _FuchsiaLogSink(outout, matchRegExp, startTime),
+      (EventSink<String> output) => _FuchsiaLogSink(output, matchRegExp, startTime),
     );
   }
 
@@ -693,7 +693,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     ];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
-      throwToolExit(result.stderr);
+      throwToolExit(result.stderr as String);
     }
   }
 }
