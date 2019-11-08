@@ -1134,8 +1134,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (isDiscrete) {
-      final double tickMarkWidth = _sliderTheme.tickMarkShape
-          .getPreferredSize(
+      final double tickMarkWidth = _sliderTheme.tickMarkShape.getPreferredSize(
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
@@ -1159,7 +1158,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
             thumbCenter: thumbCenter,
             isEnabled: isInteractive,
           );
-        }git status
+        }
       }
     }
 

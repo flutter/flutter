@@ -2357,9 +2357,9 @@ class RoundSliderThumbShape extends SliderComponentShape {
     }
 
     canvas.drawCircle(
-        center,
-        radius,
-        Paint()..color = color,
+      center,
+      radius,
+      Paint()..color = color,
     );
   }
 }
@@ -2537,7 +2537,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
     @required TextDirection textDirection,
     @required double value,
     double canvasWidth,
-      MediaQueryData mediaQueryData,
+    MediaQueryData mediaQueryData,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2808,7 +2808,7 @@ class _RectangularSliderValueIndicatorPathPainter {
     canvas.translate(0, bottomTipToUpperRectTranslateY);
 
     // The label text is centered within the value indicator.
-//    canvas.translate(0, -_preferredHalfHeight / 2 - upperRect.height);
+    // canvas.translate(0, -_preferredHalfHeight / 2 - upperRect.height);
     final Offset boxCenter = Offset(horizontalShift, upperRect.height / 2);
     final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
     final Offset labelOffset = boxCenter - halfLabelPainterOffset;
@@ -2835,7 +2835,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     bool isEnabled,
     bool isDiscrete, {
     @required TextPainter labelPainter,
-    @required MediaQueryData mediaQueryData
+    @required MediaQueryData mediaQueryData,
   }) {
     assert(labelPainter != null);
     assert(mediaQueryData != null);
@@ -3154,8 +3154,8 @@ class _PaddleSliderValueIndicatorPathPainter {
     final double leftAmount = math.max(0.0, math.min(1.0, leftWidthNeeded / _neckTriangleBase));
     final double rightAmount = math.max(0.0, math.min(1.0, rightWidthNeeded / _neckTriangleBase));
     // The angle between the top neck arc's center and the top lobe's center
-    // and vertical. The base amount is chosen so that the neck is smooth, even when the lobe is
-    // shifted due to its size.
+    // and vertical. The base amount is chosen so that the neck is smooth,
+    // even when the lobe is shifted due to its size.
     final double leftTheta = (1.0 - leftAmount) * _thirtyDegrees;
     final double rightTheta = (1.0 - rightAmount) * _thirtyDegrees;
     // The center of the top left neck arc.
