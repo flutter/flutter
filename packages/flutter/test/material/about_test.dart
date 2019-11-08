@@ -450,24 +450,25 @@ void main() {
     expect(nestedObserver.dialogCount, 1);
   });
 
-  testWidgets(
-      "AboutListTile's child should not be offset when the icon is not specified.",
-          (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: Scaffold(
-              body: AboutListTile(
-                child: Text('About'),
-              ),
-            ),
+  testWidgets("AboutListTile's child should not be offset when the icon is not specified.", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: AboutListTile(
+            child: Text('About'),
           ),
-        );
+        ),
+      ),
+    );
 
-        expect(
-            find.descendant(
-                of: find.byType(AboutListTile), matching: find.byType(Icon)),
-            findsNothing);
-      });
+    expect(
+      find.descendant(
+        of: find.byType(AboutListTile),
+        matching: find.byType(Icon),
+      ),
+      findsNothing,
+    );
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {
