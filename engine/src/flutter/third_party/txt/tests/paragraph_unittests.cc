@@ -354,7 +354,7 @@ TEST_F(ParagraphTest, DISABLE_ON_MAC(LineMetricsParagraph2)) {
   ASSERT_EQ(paragraph->GetLineMetrics()[0].hard_break, false);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].ascent, 27.84);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].descent, 7.6799998);
-  ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].width, 349.26953);
+  ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].width, 348.61328);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].left, 0.0);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0].baseline, 28.32);
   ASSERT_EQ(paragraph->GetLineMetrics()[0].line_number, 0ull);
@@ -5811,6 +5811,37 @@ TEST_F(ParagraphTest, FontFeaturesParagraph) {
   // Alphabetic characters should be unaffected.
   EXPECT_FLOAT_EQ(tnum_line.positions[2].x_pos.width(),
                   pnum_line.positions[2].x_pos.width());
+
+  ASSERT_TRUE(Snapshot());
+}
+
+TEST_F(ParagraphTest, KhmerLineBreaker) {
+  const char* text = "និងក្មេងចង់ផ្ទៃសមុទ្រសែនខៀវស្រងាត់";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  txt::ParagraphBuilderTxt builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families = std::vector<std::string>(1, "Noto Sans Khmer");
+  text_style.font_size = 24;
+  text_style.color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = BuildParagraph(builder);
+  paragraph->Layout(200);
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_EQ(paragraph->glyph_lines_.size(), 3ull);
+  EXPECT_EQ(paragraph->glyph_lines_[0].positions.size(), 7ul);
+  EXPECT_EQ(paragraph->glyph_lines_[1].positions.size(), 12ul);
+  EXPECT_EQ(paragraph->glyph_lines_[2].positions.size(), 7ul);
 
   ASSERT_TRUE(Snapshot());
 }
