@@ -70,6 +70,7 @@ void main() {
       child: Container(
         color: Colors.amber,
         height: 150.0,
+        width: 150,
       ),
     );
     Widget boilerplate(
@@ -138,7 +139,7 @@ void main() {
 
       await tester.pumpWidget(boilerplate(slivers, scrollDirection: Axis.horizontal));
       box = tester.renderObject<RenderBox>(find.byType(Container).last);
-      expect(box.size.width, equals(800));
+      expect(box.size.width, equals(650));
     });
 
     testWidgets('child with size is sized by extent when false', (WidgetTester tester) async {
@@ -167,6 +168,9 @@ void main() {
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(600.0));
       expect(tester.getCenter(button).dx, equals(400.0));
+
+      await tester.pumpWidget(boilerplate(slivers, scrollDirection: Axis.horizontal));
+      expect(tester.renderObject<RenderBox>(find.byKey(key)).size.width, equals(650));
     });
 
     testWidgets('extent is overridden by child with larger size when false', (WidgetTester tester) async {
@@ -241,23 +245,13 @@ void main() {
         ),
       ];
       await tester.pumpWidget(boilerplate(slivers));
-      RenderBox box1 = tester.renderObject<RenderBox>(find.byType(Container).last);
+      final RenderBox box1 = tester.renderObject<RenderBox>(find.byType(Container).last);
       expect(box1.size.height, equals(450));
 
       await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
       await tester.pump();
-      RenderBox box2 = tester.renderObject<RenderBox>(find.byType(Container).last);
+      final RenderBox box2 = tester.renderObject<RenderBox>(find.byType(Container).last);
       expect(box2.size.height, greaterThan(450));
-      debugDefaultTargetPlatformOverride = null;
-
-      await tester.pumpWidget(boilerplate(slivers, scrollDirection: Axis.horizontal));
-      box1 = tester.renderObject<RenderBox>(find.byType(Container).last);
-      expect(box1.size.width, equals(800));
-
-      await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
-      await tester.pump();
-      box2 = tester.renderObject<RenderBox>(find.byType(Container).last);
-      expect(box2.size.width, greaterThan(800));
       debugDefaultTargetPlatformOverride = null;
     });
 
@@ -337,7 +331,6 @@ void main() {
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(550.0));
       expect(tester.getCenter(button).dx, equals(400.0));
-      debugDefaultTargetPlatformOverride = null;
 
       // Drag for overscroll
       await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
@@ -442,7 +435,6 @@ void main() {
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(550.0));
       expect(tester.getCenter(button).dx, equals(400.0));
-      debugDefaultTargetPlatformOverride = null;
 
       await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
       await tester.pump();
