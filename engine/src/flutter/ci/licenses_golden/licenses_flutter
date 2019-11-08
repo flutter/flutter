@@ -495,8 +495,6 @@ FILE: ../../../flutter/shell/common/canvas_spy_unittests.cc
 FILE: ../../../flutter/shell/common/engine.cc
 FILE: ../../../flutter/shell/common/engine.h
 FILE: ../../../flutter/shell/common/fixtures/shell_test.dart
-FILE: ../../../flutter/shell/common/gl_context_switch_manager.cc
-FILE: ../../../flutter/shell/common/gl_context_switch_manager.h
 FILE: ../../../flutter/shell/common/input_events_unittests.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.h
@@ -801,8 +799,6 @@ FILE: ../../../flutter/shell/platform/darwin/ios/ios_external_texture_gl.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_external_texture_gl.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_gl_context.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_gl_context.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/ios_gl_context_switch_manager.h
-FILE: ../../../flutter/shell/platform/darwin/ios/ios_gl_context_switch_manager.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_gl_render_target.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_gl_render_target.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface.h
