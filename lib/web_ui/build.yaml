@@ -8,4 +8,8 @@ targets:
             - --no-minify
             - --enable-asserts
         generate_for:
-          - test/**.dart
+          include:
+            - test/**.dart
+          exclude:
+            - test/**vm_test.dart
+
