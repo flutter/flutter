@@ -3383,7 +3383,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   //     of the `parentPaintClipRect` argument.
   ///  * [SemanticsNode.elevationAdjustment] for the source and definition
   //    of the `elevationAdjustment` argument.
-  Iterable<SemanticsNode> compileChildren({
+  List<SemanticsNode> compileChildren({
     @required Rect parentSemanticsClipRect,
     @required Rect parentPaintClipRect,
     @required double elevationAdjustment,
@@ -3416,8 +3416,8 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   bool get hasConfigForParent => config != null;
 
   @override
-  Iterable<_InterestingSemanticsFragment> get interestingFragments sync* {
-    yield this;
+  Iterable<_InterestingSemanticsFragment> get interestingFragments {
+    return <_InterestingSemanticsFragment>[this];
   }
 
   Set<SemanticsTag> _tagsForChildren;
@@ -3455,7 +3455,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }) : super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
   @override
-  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
+  List<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) {
     assert(_tagsForChildren == null || _tagsForChildren.isEmpty);
     assert(parentSemanticsClipRect == null);
     assert(parentPaintClipRect == null);
@@ -3491,7 +3491,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     // these would be invisible as well and are therefore excluded from the
     // tree).
     assert(!node.isInvisible || children.isEmpty);
-    yield node;
+    return <SemanticsNode>[node];
   }
 
   @override
@@ -3546,22 +3546,23 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   final List<_InterestingSemanticsFragment> _children = <_InterestingSemanticsFragment>[];
 
   @override
-  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
+  List<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) {
     if (!_isExplicit) {
       owner._semantics = null;
+      final List<SemanticsNode> result = <SemanticsNode>[];
       for (_InterestingSemanticsFragment fragment in _children) {
         assert(_ancestorChain.first == fragment._ancestorChain.last);
         fragment._ancestorChain.addAll(_ancestorChain.sublist(1));
-        yield* fragment.compileChildren(
+        result.addAll(fragment.compileChildren(
           parentSemanticsClipRect: parentSemanticsClipRect,
           parentPaintClipRect: parentPaintClipRect,
           // The fragment is not explicit, its elevation has been absorbed by
           // the parent config (as thickness). We still need to make sure that
           // its children are placed at the elevation dictated by this config.
           elevationAdjustment: elevationAdjustment + _config.elevation,
-        );
+        ));
       }
-      return;
+      return result;
     }
 
     final _SemanticsGeometry geometry = _needsGeometryUpdate
@@ -3569,7 +3570,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         : null;
 
     if (!_mergeIntoParent && (geometry?.dropFromTree == true))
-      return;  // Drop the node, it's not going to be visible.
+      return const <SemanticsNode>[];  // Drop the node, it's not going to be visible.
 
     owner._semantics ??= SemanticsNode(showOnScreen: owner.showOnScreen);
     final SemanticsNode node = owner._semantics
@@ -3609,7 +3610,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       node.updateWith(config: _config, childrenInInversePaintOrder: children);
     }
 
-    yield node;
+    return <SemanticsNode>[node];
   }
 
   @override
@@ -3668,8 +3669,8 @@ class _AbortingSemanticsFragment extends _InterestingSemanticsFragment {
   }
 
   @override
-  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
-    yield owner._semantics;
+  List<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) {
+    return <SemanticsNode>[owner._semantics];
   }
 
   @override
