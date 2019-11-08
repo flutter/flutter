@@ -39,7 +39,7 @@ void main() {
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
     final BufferLogger bufferLogger = logger;
 
-    expect(bufferLogger.statusText.trim(), 'build succeeded.');
+    expect(bufferLogger.traceText, contains('build succeeded.'));
   }));
 
   test('Throws ToolExit if not provided with output', () => testbed.run(() async {
