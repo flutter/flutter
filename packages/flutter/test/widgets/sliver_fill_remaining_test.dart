@@ -72,10 +72,15 @@ void main() {
         height: 150.0,
       ),
     );
-    Widget boilerplate(List<Widget> slivers, {ScrollController controller}) {
+    Widget boilerplate(
+      List<Widget> slivers, {
+      ScrollController controller,
+      Axis scrollDirection = Axis.vertical,
+    }) {
       return MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
+            scrollDirection: scrollDirection,
             slivers: slivers,
             controller: controller,
           ),
@@ -128,8 +133,12 @@ void main() {
         ),
       ];
       await tester.pumpWidget(boilerplate(slivers));
-      final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).last);
+      RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).last);
       expect(box.size.height, equals(450));
+
+      await tester.pumpWidget(boilerplate(slivers, scrollDirection: Axis.horizontal));
+      box = tester.renderObject<RenderBox>(find.byType(Container).last);
+      expect(box.size.width, equals(800));
     });
 
     testWidgets('child with size is sized by extent when false', (WidgetTester tester) async {
@@ -168,12 +177,17 @@ void main() {
           child: Container(
             color: Colors.blue,
             height: 600,
+            width: 1000,
           ),
         ),
       ];
       await tester.pumpWidget(boilerplate(slivers));
-      final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).last);
+      RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).last);
       expect(box.size.height, equals(600));
+
+      await tester.pumpWidget(boilerplate(slivers, scrollDirection: Axis.horizontal));
+      box = tester.renderObject<RenderBox>(find.byType(Container).last);
+      expect(box.size.width, equals(1000));
     });
 
     testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent when false', (WidgetTester tester) async {
@@ -227,13 +241,23 @@ void main() {
         ),
       ];
       await tester.pumpWidget(boilerplate(slivers));
-      final RenderBox box1 = tester.renderObject<RenderBox>(find.byType(Container).last);
+      RenderBox box1 = tester.renderObject<RenderBox>(find.byType(Container).last);
       expect(box1.size.height, equals(450));
 
       await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
       await tester.pump();
-      final RenderBox box2 = tester.renderObject<RenderBox>(find.byType(Container).last);
+      RenderBox box2 = tester.renderObject<RenderBox>(find.byType(Container).last);
       expect(box2.size.height, greaterThan(450));
+      debugDefaultTargetPlatformOverride = null;
+
+      await tester.pumpWidget(boilerplate(slivers, scrollDirection: Axis.horizontal));
+      box1 = tester.renderObject<RenderBox>(find.byType(Container).last);
+      expect(box1.size.width, equals(800));
+
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
+      await tester.pump();
+      box2 = tester.renderObject<RenderBox>(find.byType(Container).last);
+      expect(box2.size.width, greaterThan(800));
       debugDefaultTargetPlatformOverride = null;
     });
 
