@@ -1,4 +1,4 @@
-Signature: eb6c9ef1aad6e6b86a2077d692c5bb42
+Signature: 76b5c1ee75cb1ba1b7cf328576dc0703
 
 UNUSED LICENSES:
 
@@ -1724,9 +1724,9 @@ FILE: ../../../third_party/skia/modules/skparagraph/include/TextShadow.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/TextStyle.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/FontCollection.cpp
-FILE: ../../../third_party/skia/modules/skparagraph/src/FontResolver.cpp
-FILE: ../../../third_party/skia/modules/skparagraph/src/FontResolver.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/Iterators.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/OneLineShaper.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/OneLineShaper.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphBuilderImpl.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphBuilderImpl.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphCache.cpp
@@ -1742,6 +1742,7 @@ FILE: ../../../third_party/skia/modules/skparagraph/src/TextStyle.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/TextWrapper.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/TextWrapper.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/TypefaceFontProvider.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/modules/skparagraph/utils/TestFontCollection.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/utils/TestFontCollection.h
 FILE: ../../../third_party/skia/public.bzl
