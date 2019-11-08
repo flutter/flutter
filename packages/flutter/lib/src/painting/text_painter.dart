@@ -816,8 +816,15 @@ class TextPainter {
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   TextRange getWordBoundary(TextPosition position) {
     assert(!_needsLayout);
-    final List<int> indices = _paragraph.getWordBoundary(position.offset);
-    return TextRange(start: indices[0], end: indices[1]);
+    // TODO(gspencergoog): remove the List<int>-based code when the engine API
+    // returns a TextRange instead of a List<int>.
+    final dynamic boundary = _paragraph.getWordBoundary(position.offset);
+    if (boundary is List<int>) {
+      final List<int> indices = boundary;
+      return TextRange(start: indices[0], end: indices[1]);
+    }
+    final TextRange range = boundary;
+    return range;
   }
 
   /// Returns the full list of [LineMetrics] that describe in detail the various
