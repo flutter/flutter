@@ -201,7 +201,6 @@ class PackageUriMapper {
   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
-
     for (String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
       // Only perform a multi-root mapping if there are multiple roots.
