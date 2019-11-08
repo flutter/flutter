@@ -15,8 +15,8 @@ for more info.
 `messages_all.dart`, and `stock_strings.dart` with the following command:
 
 ```dart
-dart ${FLUTTER_PATH}/dev/tools/localization/gen_l10n.dart --arb-dir=lib/i18n
-  --template-arb-file=stocks_en_EN.arb --output-localization-file=stock_strings.dart
+dart ${FLUTTER_PATH}/dev/tools/localization/gen_l10n.dart --arb-dir=lib/i18n \
+  --template-arb-file=stocks_en_US.arb --output-localization-file=stock_strings.dart \
   --output-class=StockStrings
 ```
 

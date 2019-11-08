@@ -1625,7 +1625,7 @@ class _ColorMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     if (item is Color)
-      return item.value == targetColor.value;
+      return item == targetColor || item.value == targetColor.value;
     return false;
   }
 
