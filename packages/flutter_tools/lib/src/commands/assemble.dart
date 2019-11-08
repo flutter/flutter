@@ -83,8 +83,7 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
-    final String projectDir = fs.file(targetFile).parent.parent.path;
-    final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
+    final FlutterProject futterProject = FlutterProject.current();
     if (futterProject == null) {
       return const <CustomDimensions, String>{};
     }
