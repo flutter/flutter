@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
@@ -17,6 +19,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/mocks.dart';
 
 void main() {
@@ -184,6 +187,49 @@ void main() {
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
     });
+
+    group('full command', () {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          'git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags',
+        ]),
+      ]);
+
+      Directory tempDir;
+      File flutterToolState;
+
+      FlutterVersion mockFlutterVersion;
+
+      setUp(() {
+        Cache.disableLocking();
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_upgrade_test.');
+        flutterToolState = tempDir.childFile('.flutter_tool_state');
+        mockFlutterVersion = MockFlutterVersion(isStable: true);
+      });
+
+      tearDown(() {
+        Cache.enableLocking();
+        tryToDelete(tempDir);
+      });
+
+      testUsingContext('upgrade continue prints welcome message', () async {
+        final UpgradeCommand upgradeCommand = UpgradeCommand(fakeCommandRunner);
+        await runner.run(
+          <String>[
+            'upgrade',
+            '--continue',
+          ],
+          <FlutterCommand>[
+            upgradeCommand,
+          ],
+        );
+        expect(testLogger.statusText, contains('Welcome to Flutter!'));
+      }, overrides: <Type, Generator>{
+        FlutterVersion: () => mockFlutterVersion,
+        ProcessManager: () => fakeProcessManager,
+        PersistentToolState: () => PersistentToolState(flutterToolState),
+      });
+    });
   });
 
   group('matchesGitLine', () {
@@ -267,7 +313,6 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<void> runDoctor() async {}
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class FakeProcessResult implements ProcessResult {

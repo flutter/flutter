@@ -27,6 +27,10 @@ import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
+ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? const ProjectFileInvalidator();
+
+HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
+
 class HotRunnerConfig {
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
   bool stableDartDependencies = false;
@@ -45,8 +49,6 @@ class HotRunnerConfig {
     return;
   }
 }
-
-HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
 
 const bool kHotReloadDefault = true;
 
@@ -301,7 +303,7 @@ class HotRunner extends ResidentRunner {
 
     // Picking up first device's compiler as a source of truth - compilers
     // for all devices should be in sync.
-    final List<Uri> invalidatedFiles = await ProjectFileInvalidator.findInvalidated(
+    final List<Uri> invalidatedFiles = await projectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevices[0].devFS.lastCompiled,
       urisToMonitor: flutterDevices[0].devFS.sources,
       packagesPath: packagesFilePath,
@@ -1047,6 +1049,8 @@ class HotRunner extends ResidentRunner {
 }
 
 class ProjectFileInvalidator {
+  const ProjectFileInvalidator();
+
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
@@ -1058,7 +1062,7 @@ class ProjectFileInvalidator {
   // ~2000 files.
   static const int _kMaxPendingStats = 8;
 
-  static Future<List<Uri>> findInvalidated({
+  Future<List<Uri>> findInvalidated({
     @required DateTime lastCompiled,
     @required List<Uri> urisToMonitor,
     @required String packagesPath,

@@ -447,9 +447,8 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (flutterUsage.isFirstRun) {
-          flutterUsage.printWelcome();
-        }
+        // Prints the welcome message if needed.
+        flutterUsage.printWelcome();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult;
@@ -630,10 +629,6 @@ abstract class FlutterCommand extends Command<void> {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
         throw ToolExit(userMessages.flutterNoPubspec);
-      }
-
-      if (fs.isFileSync('flutter.yaml')) {
-        throw ToolExit(userMessages.flutterMergeYamlFiles);
       }
 
       // Validate the current package map only if we will not be running "pub get" later.
