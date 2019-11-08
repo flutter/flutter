@@ -34,10 +34,8 @@ bool EmbedderSurfaceGL::IsValid() const {
 }
 
 // |GPUSurfaceGLDelegate|
-std::unique_ptr<GLContextSwitchManager::GLContextSwitch>
-EmbedderSurfaceGL::GLContextMakeCurrent() {
-  return std::make_unique<GLContextSwitchManager::GLContextSwitchPureResult>(
-      gl_dispatch_table_.gl_make_current_callback());
+bool EmbedderSurfaceGL::GLContextMakeCurrent() {
+  return gl_dispatch_table_.gl_make_current_callback();
 }
 
 // |GPUSurfaceGLDelegate|
@@ -79,12 +77,6 @@ ExternalViewEmbedder* EmbedderSurfaceGL::GetExternalViewEmbedder() {
 // |GPUSurfaceGLDelegate|
 EmbedderSurfaceGL::GLProcResolver EmbedderSurfaceGL::GetGLProcResolver() const {
   return gl_dispatch_table_.gl_proc_resolver;
-}
-
-// |GPUSurfaceGLDelegate|
-std::shared_ptr<GLContextSwitchManager>
-EmbedderSurfaceGL::GetGLContextSwitchManager() {
-  return nullptr;
 }
 
 // |EmbedderSurface|

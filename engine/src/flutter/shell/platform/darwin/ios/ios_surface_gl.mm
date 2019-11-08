@@ -28,8 +28,7 @@ bool IOSSurfaceGL::IsValid() const {
   return render_target_->IsValid();
 }
 
-std::unique_ptr<GLContextSwitchManager::GLContextSwitch>
-IOSSurfaceGL::ResourceContextMakeCurrent() {
+bool IOSSurfaceGL::ResourceContextMakeCurrent() {
   return context_->ResourceMakeCurrent();
 }
 
@@ -57,11 +56,11 @@ bool IOSSurfaceGL::UseOffscreenSurface() const {
   return true;
 }
 
-std::unique_ptr<GLContextSwitchManager::GLContextSwitch> IOSSurfaceGL::GLContextMakeCurrent() {
+bool IOSSurfaceGL::GLContextMakeCurrent() {
   if (!IsValid()) {
-    return std::make_unique<GLContextSwitchManager::GLContextSwitchPureResult>(false);
+    return false;
   }
-  return render_target_->MakeCurrent();
+  return render_target_->UpdateStorageSizeIfNecessary() && context_->MakeCurrent();
 }
 
 bool IOSSurfaceGL::GLContextClearCurrent() {
@@ -72,11 +71,6 @@ bool IOSSurfaceGL::GLContextClearCurrent() {
 bool IOSSurfaceGL::GLContextPresent() {
   TRACE_EVENT0("flutter", "IOSSurfaceGL::GLContextPresent");
   return IsValid() && render_target_->PresentRenderBuffer();
-}
-
-// |GPUSurfaceGLDelegate|
-std::shared_ptr<GLContextSwitchManager> IOSSurfaceGL::GetGLContextSwitchManager() {
-  return context_->GetIOSGLContextSwitchManager();
 }
 
 // |ExternalViewEmbedder|
@@ -150,7 +144,7 @@ bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
   if (platform_views_controller == nullptr) {
     return true;
   }
-  platform_views_controller->SetGLContextSwitchManager(context_->GetIOSGLContextSwitchManager());
+
   bool submitted = platform_views_controller->SubmitFrame(std::move(context), context_);
   [CATransaction commit];
   return submitted;
