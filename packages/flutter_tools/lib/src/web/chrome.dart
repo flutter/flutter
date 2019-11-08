@@ -71,6 +71,11 @@ void resetChromeForTesting() {
   ChromeLauncher._currentCompleter = Completer<Chrome>();
 }
 
+@visibleForTesting
+void launchChromeInstance(Chrome chrome) {
+  ChromeLauncher._currentCompleter.complete(chrome);
+}
+
 /// Responsible for launching chrome with devtools configured.
 class ChromeLauncher {
   const ChromeLauncher();
