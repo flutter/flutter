@@ -112,7 +112,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Deprecated. Call [prepareInitialFrame] followed by a call to
   /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
-  @Deprecated('Call prepareInitialFrame followed by owner.requestVisualUpdate() instead.')
+  @Deprecated(
+    'Call prepareInitialFrame followed by owner.requestVisualUpdate() instead. '
+    'This feature was deprecated after v1.10.0.'
+  )
   void scheduleInitialFrame() {
     prepareInitialFrame();
     owner.requestVisualUpdate();

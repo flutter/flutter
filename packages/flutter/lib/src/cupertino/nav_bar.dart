@@ -332,7 +332,10 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   ///
   /// The default color for text in the [middle] slot is always black, as per
   /// iOS standard design.
-  @Deprecated('Use CupertinoTheme and primaryColor to propagate color')
+  @Deprecated(
+    'Use CupertinoTheme and primaryColor to propagate color. '
+    'This feature was deprecated after v1.1.2.'
+  )
   final Color actionsForegroundColor;
 
   /// {@template flutter.cupertino.navBar.transitionBetweenRoutes}
@@ -627,7 +630,10 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///
   /// The default color for text in the [largeTitle] slot is always black, as per
   /// iOS standard design.
-  @Deprecated('Use CupertinoTheme and primaryColor to propagate color')
+  @Deprecated(
+    'Use CupertinoTheme and primaryColor to propagate color. '
+    'This feature was deprecated after v1.1.2.'
+  )
   final Color actionsForegroundColor;
 
   /// {@macro flutter.cupertino.navBar.transitionBetweenRoutes}
