@@ -151,12 +151,7 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
 const Feature flutterWebIncrementalCompiler = Feature(
   name: 'Enable the incremental compiler for web builds',
   configSetting: 'enable-web-incremental-compiler',
-  environmentOverride: 'WEB_INCREMENTAL_COMPILER',
   master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
-  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),

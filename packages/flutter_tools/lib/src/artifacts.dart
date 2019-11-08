@@ -28,7 +28,7 @@ enum Artifact {
   platformLibrariesJson,
   flutterPatchedSdkPath,
   frontendServerSnapshotForEngineDartSdk,
-  /// The root directory of the dart SDK.
+  /// The root directory of the dartk SDK.
   engineDartSdkPath,
   /// The dart binary used to execute any of the required snapshots.
   engineDartBinary,
