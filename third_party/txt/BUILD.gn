@@ -218,6 +218,7 @@ test_fixtures("txt_fixtures") {
     "third_party/fonts/NotoColorEmoji.ttf",
     "third_party/fonts/NotoNaskhArabic-Regular.ttf",
     "third_party/fonts/NotoSansCJK-Regular.ttc",
+    "third_party/fonts/NotoSansKhmer-Regular.ttf",
     "third_party/fonts/Regular.ttf",
     "third_party/fonts/Regular.ttx",
     "third_party/fonts/Roboto-Black.ttf",
