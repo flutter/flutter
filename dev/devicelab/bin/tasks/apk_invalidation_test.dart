@@ -47,7 +47,6 @@ Future<void> main() async {
         '\nflutter:\n',
         '\nflutter:\n  assets:\n    - assets/\n',
       );
-      print(content);
       await pubspec.writeAsString(content, flush: true);
       File(path.join(projectDir.path, 'assets', 'a.txt'))
         ..createSync(recursive: true);
