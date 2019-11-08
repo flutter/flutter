@@ -38,7 +38,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.androidMaven,
     DevelopmentArtifact.universal,
   };
 
