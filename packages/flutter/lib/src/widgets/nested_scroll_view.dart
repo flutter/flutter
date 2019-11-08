@@ -1338,7 +1338,9 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
     Widget child,
     Widget sliver,
   }) : assert(handle != null),
+      // ignore: deprecated_member_use_from_same_package
       assert(child == null || sliver == null),
+      // ignore: deprecated_member_use_from_same_package
       super(key: key, child: sliver ?? child);
 
   /// The object in which the absorbed overlap is recorded.
@@ -1387,6 +1389,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
     RenderSliver child,
     RenderSliver sliver,
   }) : assert(handle != null),
+       // ignore: deprecated_member_use_from_same_package
        assert(child == null || sliver == null),
        _handle = handle {
     this.child = sliver ?? child;
@@ -1494,7 +1497,9 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
     Widget child,
     Widget sliver,
   }) : assert(handle != null),
+       // ignore: deprecated_member_use_from_same_package
        assert(child == null || sliver == null),
+       // ignore: deprecated_member_use_from_same_package
        super(key: key, child: sliver ?? child);
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
