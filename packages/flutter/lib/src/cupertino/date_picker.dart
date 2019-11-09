@@ -431,37 +431,57 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // in the widget after first build is ignored.
   DateTime initialDateTime;
 
-  // The previous selection index of the hour column.
-  //
-  // This ranges from 0-23 even if [widget.use24hFormat] is false. As a result,
-  // it can be used for determining if we just changed from AM -> PM or vice
-  // versa.
-  int previousHourIndex;
-
   // The difference in days between the initial date and the currently selected date.
-  int get selectedDayFromInitial => dateController.selectedItem;
+  // 0 if the current mode does not involve a date.
+  int get selectedDayFromInitial {
+    switch (widget.mode) {
+      case CupertinoDatePickerMode.dateAndTime:
+        return dateController.hasClients ? dateController.selectedItem : 0;
+      case CupertinoDatePickerMode.time:
+        return 0;
+      case CupertinoDatePickerMode.date:
+        break;
+    }
+    assert(false);
+    return 0;
+  }
   // The controller of the date column.
   FixedExtentScrollController dateController;
 
-  // The current selection of the hour picker.
-  //
-  // If [widget.use24hFormat] is true, values range from 1-24. Otherwise values
-  // range from 1-12.
-  int get selectedHour => hourController.selectedItem + 1;
+  // The current selection of the hour picker. Values range from 0 to 23.
+  int get selectedHour {
+    return widget.use24hFormat
+      ? hourController.selectedItem % 60
+      : hourController.selectedItem % 12 + selectedAmPm * 12;
+  }
+
   // The controller of the hour column.
   FixedExtentScrollController hourController;
 
   // The current selection of the minute picker. Values range from 0 to 59.
-  int get selectedMinute => minuteController.selectedItem;
+  int get selectedMinute => minuteController.selectedItem % 60;
   // The controller of the minute column.
   FixedExtentScrollController minuteController;
 
-  int get selectedAmPm => meridiemController.selectedItem;
+  // Whether the current meridiem selection is AM or PM.
+  //
+  // Returns 0 if widget.use24hFormat is true.
+  // We can't use the selectedItem of meridiemController as the source of truth
+  // because the meridiem picker can be scrolled animatedly by the hour picker
+  // (e.g. if you scroll from 12 to 1 in 12h format).
+  int selectedAmPm;
+
   // The current selection of the AM/PM picker.
   //
   // - 0 means AM
   // - 1 means PM
   FixedExtentScrollController meridiemController;
+
+  // Which 12-hour region is the hour picker currently in, when using the 12h format.
+  //
+  // The AM/PM meaning of the two regions changes when the meridiem picker scrolls.
+  // Used to determine whether the meridiemController should start animating.
+  int previousMeridiemRegion;
 
   bool isDatePickerScrolling = false;
   bool isHourPickerScrolling = false;
@@ -483,21 +503,13 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     super.initState();
     initialDateTime = widget.initialDateTime;
 
-    meridiemController = FixedExtentScrollController(
-      initialItem: widget.use24hFormat ? 0 : initialDateTime.hour ~/ 12,
-    );
-
-    hourController = FixedExtentScrollController(
-      initialItem: widget.use24hFormat
-        ? initialDateTime.hour
-        : (initialDateTime.hour + 11) % 12,
-    );
-
+    selectedAmPm = widget.use24hFormat ? 0 : initialDateTime.hour ~/ 12;
+    meridiemController = FixedExtentScrollController(initialItem: selectedAmPm);
+    hourController = FixedExtentScrollController(initialItem: initialDateTime.hour);
     minuteController = FixedExtentScrollController(initialItem: initialDateTime.minute);
-
     dateController = FixedExtentScrollController(initialItem: 0);
 
-    previousHourIndex = selectedHour;
+    previousMeridiemRegion = selectedAmPm;
 
     PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
   }
@@ -528,8 +540,26 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     assert(
       oldWidget.mode == widget.mode,
-      "The CupertinoDatePicker's mode cannot change once it's built",
+      "The $runtimeType's mode cannot change once it's built. "
+      'Attempting to change from ${oldWidget.mode} to ${widget.mode}',
     );
+
+    if (widget.use24hFormat == oldWidget.use24hFormat)
+      return;
+
+    if (widget.use24hFormat) {
+      // Conversion between 24h and 12h format comes at the cost of losing the
+      // current scrolling momentum.
+      hourController.jumpToItem(hourController.selectedItem % 12 + selectedAmPm * 12);
+      selectedAmPm = 0;
+    } else {
+      selectedAmPm = hourController.selectedItem ~/ 12;
+      assert(selectedAmPm == 0 || selectedAmPm == 1);
+      previousMeridiemRegion = selectedAmPm;
+      meridiemController.dispose();
+      meridiemController = FixedExtentScrollController(initialItem: selectedAmPm);
+    }
+
   }
 
   @override
@@ -556,14 +586,27 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   }
 
   // Gets the current date time of the picker.
-  DateTime _getDateTime() {
+  DateTime get selectedDateTime {
     return DateTime(
       initialDateTime.year,
       initialDateTime.month,
       initialDateTime.day + selectedDayFromInitial,
-      widget.use24hFormat ? selectedHour : selectedHour % 12 + selectedAmPm * 12,
+      selectedHour,
       selectedMinute,
     );
+  }
+
+  // Only reports datetime change when the date time is valid.
+  void _onSelectedItemChange(int index) {
+    final DateTime selected = selectedDateTime;
+
+    final bool isDateInvalid = widget.minimumDate?.isAfter(selected) == true
+                            || widget.maximumDate?.isBefore(selected) == true;
+
+    if (isDateInvalid)
+      return;
+
+    widget.onDateTimeChanged(selected);
   }
 
   // Builds the date column. The date is displayed in medium date format (e.g. Fri Aug 31).
@@ -580,7 +623,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         return false;
       },
       child: CupertinoPicker.builder(
-        scrollController: FixedExtentScrollController(initialItem: selectedDayFromInitial),
+        scrollController: dateController,
         offAxisFraction: offAxisFraction,
         itemExtent: _kItemExtent,
         useMagnifier: _kUseMagnifier,
@@ -588,36 +631,25 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
         onSelectedItemChanged: (int index) {
-          selectedDayFromInitial = index;
-          widget.onDateTimeChanged(_getDateTime());
+          _onSelectedItemChange(index);
         },
         itemBuilder: (BuildContext context, int index) {
-          final DateTime dateTime = DateTime(
-            initialDateTime.year,
-            initialDateTime.month,
-            initialDateTime.day + index,
-          );
+          final DateTime dateTime = initialDateTime.add(Duration(days: index));
 
           if (widget.minimumDate != null && dateTime.isBefore(widget.minimumDate))
-          return null;
+            return null;
           if (widget.maximumDate != null && dateTime.isAfter(widget.maximumDate))
-          return null;
+            return null;
 
           final DateTime now = DateTime.now();
-          String dateText;
 
-          if (dateTime == DateTime(now.year, now.month, now.day)) {
-            dateText = localizations.todayLabel;
-          } else {
-            dateText = localizations.datePickerMediumDate(dateTime);
-          }
+          final String dateText = dateTime == DateTime(now.year, now.month, now.day)
+            ? localizations.todayLabel
+            : localizations.datePickerMediumDate(dateTime);
 
           return itemPositioningBuilder(
             context,
-            Text(
-              dateText,
-              style: _themeTextStyle(context),
-            ),
+            Text(dateText, style: _themeTextStyle(context)),
           );
         },
       ),
@@ -625,111 +657,143 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   }
 
   Widget _buildHourPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
-    return CupertinoPicker(
-      scrollController: FixedExtentScrollController(initialItem: selectedHour),
-      offAxisFraction: offAxisFraction,
-      itemExtent: _kItemExtent,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      backgroundColor: widget.backgroundColor,
-      squeeze: _kSqueeze,
-      onSelectedItemChanged: (int index) {
-        if (widget.use24hFormat) {
-          selectedHour = index;
-          widget.onDateTimeChanged(_getDateTime());
-        } else {
-          selectedHour = index % 12;
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollStartNotification) {
+          isHourPickerScrolling = true;
+        } else if (notification is ScrollEndNotification) {
+          isHourPickerScrolling = false;
+          _pickerDidStopScrolling();
+        }
 
-          // Automatically scrolls the am/pm column when the hour column value
-          // goes far enough.
-
-          final bool wasAm = previousHourIndex >=0 && previousHourIndex <= 11;
-          final bool isAm = index >= 0 && index <= 11;
-
-          if (wasAm != isAm) {
+        return false;
+      },
+      child: CupertinoPicker(
+        scrollController: hourController,
+        offAxisFraction: offAxisFraction,
+        itemExtent: _kItemExtent,
+        useMagnifier: _kUseMagnifier,
+        magnification: _kMagnification,
+        backgroundColor: widget.backgroundColor,
+        squeeze: _kSqueeze,
+        onSelectedItemChanged: (int index) {
+          if (!widget.use24hFormat && previousMeridiemRegion != index ~/ 12) {
+            // Scroll the meridiem column to adjust AM/PM.
+            //
             // Animation values obtained by comparing with iOS version.
+            selectedAmPm = 1 - selectedAmPm;
             meridiemController.animateToItem(
-              1 - meridiemController.selectedItem,
+              selectedAmPm,
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
             );
           } else {
-            widget.onDateTimeChanged(_getDateTime());
+            _onSelectedItemChange(index);
           }
-        }
+          previousMeridiemRegion = index ~/ 12;
+        },
+        children: List<Widget>.generate(24, (int index) {
+          final int hour = widget.use24hFormat ? index : (index + 11) % 12 + 1;
 
-        previousHourIndex = index;
-      },
-      children: List<Widget>.generate(24, (int index) {
-        int hour = index;
-        if (!widget.use24hFormat)
-          hour = hour % 12 == 0 ? 12 : hour % 12;
+          final DateTime initialTime = DateTime(
+            initialDateTime.year,
+            initialDateTime.month,
+            initialDateTime.day + selectedDayFromInitial,
+            index % 12 + 12 * selectedAmPm,
+            0,
+          );
 
-        return itemPositioningBuilder(
-          context,
-          Text(
-            localizations.datePickerHour(hour),
-            semanticsLabel: localizations.datePickerHourSemanticsLabel(hour),
-            style: _themeTextStyle(context),
-          ),
-        );
-      }),
-      looping: true,
+          final bool isInvalidHour = (widget?.minimumDate?.isAfter(initialTime.add(const Duration(minutes: 59))) ?? false)
+                                  || (widget?.maximumDate?.isBefore(initialTime) ?? false);
+
+          return itemPositioningBuilder(
+            context,
+            Text(
+              localizations.datePickerHour(hour),
+              semanticsLabel: localizations.datePickerHourSemanticsLabel(hour),
+              style: _themeTextStyle(context, isValid: !isInvalidHour),
+            ),
+          );
+        }),
+        looping: true,
+      )
     );
   }
 
   Widget _buildMinutePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
-    return CupertinoPicker(
-      scrollController: FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval),
-      offAxisFraction: offAxisFraction,
-      itemExtent: _kItemExtent,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      backgroundColor: widget.backgroundColor,
-      squeeze: _kSqueeze,
-      onSelectedItemChanged: (int index) {
-        selectedMinute = index * widget.minuteInterval;
-        widget.onDateTimeChanged(_getDateTime());
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollStartNotification) {
+          isMinutePickerScrolling = true;
+        } else if (notification is ScrollEndNotification) {
+          isMinutePickerScrolling = false;
+          _pickerDidStopScrolling();
+        }
+
+        return false;
       },
-      children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
-        final int minute = index * widget.minuteInterval;
-        return itemPositioningBuilder(
-          context,
-          Text(
-            localizations.datePickerMinute(minute),
-            semanticsLabel: localizations.datePickerMinuteSemanticsLabel(minute),
-            style: _themeTextStyle(context),
-          ),
-        );
-      }),
-      looping: true,
+      child: CupertinoPicker(
+        scrollController: minuteController,
+        offAxisFraction: offAxisFraction,
+        itemExtent: _kItemExtent,
+        useMagnifier: _kUseMagnifier,
+        magnification: _kMagnification,
+        backgroundColor: widget.backgroundColor,
+        squeeze: _kSqueeze,
+        onSelectedItemChanged: _onSelectedItemChange,
+        children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
+          final int minute = index * widget.minuteInterval;
+          return itemPositioningBuilder(
+            context,
+            Text(
+              localizations.datePickerMinute(minute),
+              semanticsLabel: localizations.datePickerMinuteSemanticsLabel(minute),
+              style: _themeTextStyle(context),
+            ),
+          );
+        }),
+        looping: true,
+      ),
     );
   }
 
   Widget _buildAmPmPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
-    return CupertinoPicker(
-      scrollController: meridiemController,
-      offAxisFraction: offAxisFraction,
-      itemExtent: _kItemExtent,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      backgroundColor: widget.backgroundColor,
-      squeeze: _kSqueeze,
-      onSelectedItemChanged: (int index) {
-        selectedAmPm = index;
-        widget.onDateTimeChanged(_getDateTime());
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollStartNotification) {
+          isMeridiemPickerScrolling = true;
+        } else if (notification is ScrollEndNotification) {
+          isMeridiemPickerScrolling = false;
+          _pickerDidStopScrolling();
+        }
+
+        return false;
       },
-      children: List<Widget>.generate(2, (int index) {
-        return itemPositioningBuilder(
-          context,
-          Text(
-            index == 0
-              ? localizations.anteMeridiemAbbreviation
-              : localizations.postMeridiemAbbreviation,
-            style: _themeTextStyle(context),
-          ),
-        );
-      }),
+      child: CupertinoPicker(
+        scrollController: meridiemController,
+        offAxisFraction: offAxisFraction,
+        itemExtent: _kItemExtent,
+        useMagnifier: _kUseMagnifier,
+        magnification: _kMagnification,
+        backgroundColor: widget.backgroundColor,
+        squeeze: _kSqueeze,
+        onSelectedItemChanged: (int index) {
+          selectedAmPm = index;
+          assert(selectedAmPm == 0 || selectedAmPm == 1);
+          _onSelectedItemChange(index);
+        },
+        children: List<Widget>.generate(2, (int index) {
+          return itemPositioningBuilder(
+            context,
+            Text(
+              index == 0
+                ? localizations.anteMeridiemAbbreviation
+                : localizations.postMeridiemAbbreviation,
+              style: _themeTextStyle(context),
+            ),
+          );
+        }),
+      ),
     );
   }
 
@@ -739,35 +803,53 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     // selected year/month may have changed.
     setState(() { });
 
-    if (isScrolling) {
+    if (isScrolling)
       return;
-    }
 
-    /*
     // Whenever scrolling lands on an invalid entry, the picker
     // automatically scrolls to a valid one.
-    final DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+    final DateTime selectedDate = selectedDateTime;
+    print('${initialDateTime.day + selectedDayFromInitial}, $selectedHour, $selectedMinute');
 
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
     final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
 
+    print('scrolling stopped:${widget.minimumDate} is after $selectedDate? $minCheck, ${widget.maximumDate} is before $selectedDate $maxCheck');
     if (minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
       final DateTime targetDate = minCheck ? widget.minimumDate : widget.maximumDate;
-      _scrollToDate(targetDate);
-      return;
+      _scrollToDate(targetDate, selectedDate);
     }
-
-    // Some months have less days (e.g. February). Go to the last day of that month
-    // if the selectedDay exceeds the maximum.
-    if (selectedDate.day != selectedDay) {
-      final DateTime lastDay = _lastDayInMonth(selectedYear, selectedMonth);
-      _scrollToDate(lastDay);
-    }
-      */
   }
 
+  void _scrollToDate(DateTime newDate, DateTime fromDate) {
+    assert(newDate != null);
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      if (fromDate.year != newDate.year || fromDate.month != newDate.month || fromDate.day != newDate.day) {
+        dateController.animateToItem(
+          selectedDayFromInitial,
+          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 200) ,
+        );
+      }
 
+      if (fromDate.hour != newDate.hour) {
+        hourController.animateToItem(
+          hourController.selectedItem + newDate.hour - fromDate.hour,
+          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 200) ,
+        );
+      }
+
+      if (fromDate.minute != newDate.minute) {
+        minuteController.animateToItem(
+          newDate.minute,
+          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 200) ,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
