@@ -14,7 +14,6 @@ import 'keyboard_key.dart';
 /// Maps Android-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardKey>{
   0: LogicalKeyboardKey.none,
-  119: LogicalKeyboardKey.fn,
   223: LogicalKeyboardKey.sleep,
   224: LogicalKeyboardKey.wakeUp,
   29: LogicalKeyboardKey.keyA,
@@ -194,11 +193,11 @@ const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardK
   99: LogicalKeyboardKey.gameButtonX,
   100: LogicalKeyboardKey.gameButtonY,
   101: LogicalKeyboardKey.gameButtonZ,
+  119: LogicalKeyboardKey.fn,
 };
 
 /// Maps Android-specific scan codes to the matching [PhysicalKeyboardKey].
 const Map<int, PhysicalKeyboardKey> kAndroidToPhysicalKey = <int, PhysicalKeyboardKey>{
-  464: PhysicalKeyboardKey.fn,
   205: PhysicalKeyboardKey.suspend,
   142: PhysicalKeyboardKey.sleep,
   143: PhysicalKeyboardKey.wakeUp,
@@ -425,6 +424,7 @@ const Map<int, PhysicalKeyboardKey> kAndroidToPhysicalKey = <int, PhysicalKeyboa
   307: PhysicalKeyboardKey.gameButtonX,
   308: PhysicalKeyboardKey.gameButtonY,
   309: PhysicalKeyboardKey.gameButtonZ,
+  464: PhysicalKeyboardKey.fn,
 };
 
 /// A map of Android key codes which have printable representations, but appear
@@ -457,7 +457,6 @@ const Map<int, LogicalKeyboardKey> kFuchsiaToLogicalKey = <int, LogicalKeyboardK
   0x100000000: LogicalKeyboardKey.none,
   0x100000010: LogicalKeyboardKey.hyper,
   0x100000011: LogicalKeyboardKey.superKey,
-  0x100000012: LogicalKeyboardKey.fn,
   0x100000013: LogicalKeyboardKey.fnLock,
   0x100000014: LogicalKeyboardKey.suspend,
   0x100000015: LogicalKeyboardKey.resume,
@@ -719,6 +718,7 @@ const Map<int, LogicalKeyboardKey> kFuchsiaToLogicalKey = <int, LogicalKeyboardK
   0x10005ff1d: LogicalKeyboardKey.gameButtonX,
   0x10005ff1e: LogicalKeyboardKey.gameButtonY,
   0x10005ff1f: LogicalKeyboardKey.gameButtonZ,
+  0x100000012: LogicalKeyboardKey.fn,
 };
 
 /// Maps Fuchsia-specific USB HID Usage IDs to the matching
@@ -727,7 +727,6 @@ const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboa
   0x00000000: PhysicalKeyboardKey.none,
   0x00000010: PhysicalKeyboardKey.hyper,
   0x00000011: PhysicalKeyboardKey.superKey,
-  0x00000012: PhysicalKeyboardKey.fn,
   0x00000013: PhysicalKeyboardKey.fnLock,
   0x00000014: PhysicalKeyboardKey.suspend,
   0x00000015: PhysicalKeyboardKey.resume,
@@ -989,6 +988,7 @@ const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboa
   0x0005ff1d: PhysicalKeyboardKey.gameButtonX,
   0x0005ff1e: PhysicalKeyboardKey.gameButtonY,
   0x0005ff1f: PhysicalKeyboardKey.gameButtonZ,
+  0x00000012: PhysicalKeyboardKey.fn,
 };
 
 /// Maps macOS-specific key code values representing [PhysicalKeyboardKey].
@@ -1113,6 +1113,7 @@ const Map<int, PhysicalKeyboardKey> kMacOsToPhysicalKey = <int, PhysicalKeyboard
   0x0000003c: PhysicalKeyboardKey.shiftRight,
   0x0000003d: PhysicalKeyboardKey.altRight,
   0x00000036: PhysicalKeyboardKey.metaRight,
+  0x0000003f: PhysicalKeyboardKey.fn,
 };
 
 /// A map of macOS key codes which have printable representations, but appear
@@ -1136,6 +1137,31 @@ const Map<int, LogicalKeyboardKey> kMacOsNumPadMap = <int, LogicalKeyboardKey>{
   0x00000041: LogicalKeyboardKey.numpadDecimal,
   0x00000051: LogicalKeyboardKey.numpadEqual,
   0x0000005f: LogicalKeyboardKey.numpadComma,
+};
+
+/// A map of macOS key codes which are numbered function keys, so that they
+/// can be excluded when asking "is the Fn modifier down?".
+const Map<int, LogicalKeyboardKey> kMacOsFunctionKeyMap = <int, LogicalKeyboardKey>{
+  0x0000007a: LogicalKeyboardKey.f1,
+  0x00000078: LogicalKeyboardKey.f2,
+  0x00000063: LogicalKeyboardKey.f3,
+  0x00000076: LogicalKeyboardKey.f4,
+  0x00000060: LogicalKeyboardKey.f5,
+  0x00000061: LogicalKeyboardKey.f6,
+  0x00000062: LogicalKeyboardKey.f7,
+  0x00000064: LogicalKeyboardKey.f8,
+  0x00000065: LogicalKeyboardKey.f9,
+  0x0000006d: LogicalKeyboardKey.f10,
+  0x00000067: LogicalKeyboardKey.f11,
+  0x0000006f: LogicalKeyboardKey.f12,
+  0x00000069: LogicalKeyboardKey.f13,
+  0x0000006b: LogicalKeyboardKey.f14,
+  0x00000071: LogicalKeyboardKey.f15,
+  0x0000006a: LogicalKeyboardKey.f16,
+  0x00000040: LogicalKeyboardKey.f17,
+  0x0000004f: LogicalKeyboardKey.f18,
+  0x00000050: LogicalKeyboardKey.f19,
+  0x0000005a: LogicalKeyboardKey.f20,
 };
 
 /// Maps GLFW-specific key codes to the matching [LogicalKeyboardKey].
@@ -1498,7 +1524,6 @@ const Map<String, LogicalKeyboardKey> kWebToLogicalKey = <String, LogicalKeyboar
   'None': LogicalKeyboardKey.none,
   'Hyper': LogicalKeyboardKey.hyper,
   'Super': LogicalKeyboardKey.superKey,
-  'Fn': LogicalKeyboardKey.fn,
   'FnLock': LogicalKeyboardKey.fnLock,
   'Suspend': LogicalKeyboardKey.suspend,
   'Resume': LogicalKeyboardKey.resume,
@@ -1723,6 +1748,7 @@ const Map<String, LogicalKeyboardKey> kWebToLogicalKey = <String, LogicalKeyboar
   'GameButtonX': LogicalKeyboardKey.gameButtonX,
   'GameButtonY': LogicalKeyboardKey.gameButtonY,
   'GameButtonZ': LogicalKeyboardKey.gameButtonZ,
+  'Fn': LogicalKeyboardKey.fn,
 };
 
 /// Maps Web KeyboardEvent codes to the matching [PhysicalKeyboardKey].
@@ -1730,7 +1756,6 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'None': PhysicalKeyboardKey.none,
   'Hyper': PhysicalKeyboardKey.hyper,
   'Super': PhysicalKeyboardKey.superKey,
-  'Fn': PhysicalKeyboardKey.fn,
   'FnLock': PhysicalKeyboardKey.fnLock,
   'Suspend': PhysicalKeyboardKey.suspend,
   'Resume': PhysicalKeyboardKey.resume,
@@ -1955,6 +1980,7 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'GameButtonX': PhysicalKeyboardKey.gameButtonX,
   'GameButtonY': PhysicalKeyboardKey.gameButtonY,
   'GameButtonZ': PhysicalKeyboardKey.gameButtonZ,
+  'Fn': PhysicalKeyboardKey.fn,
 };
 
 /// A map of Web KeyboardEvent codes which have printable representations, but appear
