@@ -2019,7 +2019,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getErrorStyle(ThemeData themeData) {
-    final Color color = decoration.enabled ? themeData.errorColor : Colors.transparent;
+    final Color color = themeData.errorColor;
     return themeData.textTheme.caption.copyWith(color: color).merge(decoration.errorStyle);
   }
 
@@ -2029,18 +2029,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     Color borderColor;
-    if (decoration.enabled) {
       borderColor = decoration.errorText == null
         ? _getDefaultBorderColor(themeData)
         : themeData.errorColor;
-    } else {
-      borderColor = (decoration.filled == true && decoration.border?.isOutline != true)
-        ? Colors.transparent
-        : themeData.disabledColor;
-    }
+
 
     double borderWeight;
-    if (decoration.isCollapsed || decoration?.border == InputBorder.none || !decoration.enabled)
+    if (decoration.isCollapsed || decoration?.border == InputBorder.none)
       borderWeight = 0.0;
     else
       borderWeight = isFocused ? 2.0 : 1.0;
