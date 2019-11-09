@@ -50,7 +50,17 @@ import io.flutter.view.TextureRegistry;
  * be retrieved through a {@link Context}. Developers can access the application context via
  * {@link FlutterPluginBinding#getApplicationContext()}.
  * <p>
- * TODO(mattcarroll): explain ActivityAware when it's added to the new plugin API surface.
+ * Some plugins may require access to the {@code Activity} that is displaying a Flutter experience,
+ * or may need to react to {@code Activity} lifecycle events, e.g., {@code onCreate()},
+ * {@code onStart()}, {@code onResume()}, {@code onPause()}, {@code onStop()}, {@code onDestroy()}.
+ * Any such plugin should implement
+ * {@link io.flutter.embedding.engine.plugins.activity.ActivityAware} in addition to implementing
+ * {@code FlutterPlugin}. {@code ActivityAware} provides callback hooks that expose access to an
+ * associated {@code Activity} and its {@code Lifecycle}. All plugins must respect the possibility
+ * that a Flutter experience may never be associated with an {@code Activity}, e.g., when Flutter
+ * is used for background behavior. Additionally, all plugins must respect that a {@code Activity}s
+ * may come and go over time, thus requiring plugins to cleanup resources and recreate those
+ * resources as the {@code Activity} comes and goes.
  */
 public interface FlutterPlugin {
 
