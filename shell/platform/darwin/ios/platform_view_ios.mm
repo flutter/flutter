@@ -107,15 +107,18 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
 // |PlatformView|
 sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
   FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
-  if (!gl_context_ || !gl_context_->ResourceMakeCurrent()) {
-    FML_DLOG(INFO) << "Could not make resource context current on IO thread. "
-                      "Async texture uploads will be disabled. On Simulators, "
-                      "this is expected.";
-    return nullptr;
+  if (gl_context_ != nullptr) {
+    std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch> context_switch =
+        gl_context_->ResourceMakeCurrent();
+    if (context_switch->GetSwitchResult()) {
+      return ShellIOManager::CreateCompatibleResourceLoadingContext(
+          GrBackend::kOpenGL_GrBackend, GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
+    }
   }
-
-  return ShellIOManager::CreateCompatibleResourceLoadingContext(
-      GrBackend::kOpenGL_GrBackend, GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
+  FML_DLOG(INFO) << "Could not make resource context current on IO thread. "
+                    "Async texture uploads will be disabled. On Simulators, "
+                    "this is expected.";
+  return nullptr;
 }
 
 // |PlatformView|

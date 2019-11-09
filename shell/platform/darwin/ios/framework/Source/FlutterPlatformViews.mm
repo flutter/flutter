@@ -160,6 +160,11 @@ void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
   frame_size_ = frame_size;
 }
 
+void FlutterPlatformViewsController::SetRendererContextSwitchManager(
+    std::shared_ptr<IOSGLContextSwitchManager> gl_context_guard_manager) {
+  renderer_context_switch_manager_ = gl_context_guard_manager;
+}
+
 void FlutterPlatformViewsController::CancelFrame() {
   composition_order_.clear();
 }
@@ -368,7 +373,12 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
 
   bool did_submit = true;
   for (int64_t view_id : composition_order_) {
-    EnsureOverlayInitialized(view_id, gl_context, gr_context);
+    if (renderer_context_switch_manager_ != nullptr) {
+      std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch> contextSwitch =
+          renderer_context_switch_manager_->MakeCurrent();
+    }
+
+    EnsureOverlayInitialized(view_id, std::move(gl_context), gr_context);
     auto frame = overlays_[view_id]->surface->AcquireFrame(frame_size_);
     SkCanvas* canvas = frame->SkiaCanvas();
     canvas->drawPicture(picture_recorders_[view_id]->finishRecordingAsPicture());
@@ -455,6 +465,10 @@ void FlutterPlatformViewsController::EnsureOverlayInitialized(
     std::shared_ptr<IOSGLContext> gl_context,
     GrContext* gr_context) {
   FML_DCHECK(flutter_view_);
+  if (renderer_context_switch_manager_ != nullptr) {
+    std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch> contextSwitch =
+        renderer_context_switch_manager_->MakeCurrent();
+  }
 
   auto overlay_it = overlays_.find(overlay_id);
 

@@ -10,6 +10,7 @@
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
+#include "flutter/shell/common/renderer_context_switch_manager.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace flutter {
@@ -58,7 +59,8 @@ class Surface {
 
   virtual flutter::ExternalViewEmbedder* GetExternalViewEmbedder();
 
-  virtual bool MakeRenderContextCurrent();
+  virtual std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch>
+  MakeRenderContextCurrent();
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);
