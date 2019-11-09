@@ -274,7 +274,6 @@ flutter:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
       testUsingContext('Registrant uses new embedding if app uses new embedding', () async {
@@ -295,7 +294,6 @@ flutter:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
       testUsingContext('Registrant uses shim for plugins using old embedding if app uses new embedding', () async {
@@ -416,7 +414,6 @@ flutter:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
       testUsingContext('Module using old plugin shows warning', () async {
