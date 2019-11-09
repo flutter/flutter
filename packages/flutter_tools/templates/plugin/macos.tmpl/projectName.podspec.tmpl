@@ -18,8 +18,5 @@ Pod::Spec.new do |s|
 
   s.platform = :osx, '10.11'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
-
-  swift_versions = ['4.0', '4.2', '5.0', '5.1']
-  swift_versions << Pod::Validator::DEFAULT_SWIFT_VERSION if Pod::Validator.const_defined? "DEFAULT_SWIFT_VERSION"
-  s.swift_versions = swift_versions
+  s.swift_version = '5.0'
 end
