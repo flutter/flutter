@@ -8,7 +8,6 @@
       "fuchsia.fonts.Provider",
       "fuchsia.intl.PropertyProvider",
       "fuchsia.logger.LogSink",
-      "fuchsia.modular.Clipboard",
       "fuchsia.modular.ContextWriter",
       "fuchsia.modular.ModuleContext",
       "fuchsia.netstack.Netstack",
