@@ -22,8 +22,9 @@ bool IOSSurfaceMetal::IsValid() const {
 }
 
 // |IOSSurface|
-bool IOSSurfaceMetal::ResourceContextMakeCurrent() {
-  return false;
+std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch>
+IOSSurfaceMetal::ResourceContextMakeCurrent() {
+  return std::make_unique<RendererContextSwitchManager::RendererContextSwitchPureResult>(false);
 }
 
 // |IOSSurface|

@@ -78,6 +78,8 @@ source_set("common") {
     "pointer_data_dispatcher.h",
     "rasterizer.cc",
     "rasterizer.h",
+    "renderer_context_switch_manager.cc",
+    "renderer_context_switch_manager.h",
     "run_configuration.cc",
     "run_configuration.h",
     "shell.cc",
