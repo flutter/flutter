@@ -1871,7 +1871,17 @@ class Paragraph extends NativeFieldWrapperClass2 {
   /// on both sides. In such cases, this method will return [offset, offset+1].
   /// Word boundaries are defined more precisely in Unicode Standard Annex #29
   /// http://www.unicode.org/reports/tr29/#Word_Boundaries
-  List<int> getWordBoundary(int offset) native 'Paragraph_getWordBoundary';
+  List<int> getWordBoundary(dynamic position) {
+    // TODO(gspencergoog): have this take only a TextPosition once the framework
+    // code is calling it with that.
+    if (position is TextPosition) {
+      return _getWordBoundary(position.offset);
+    } else {
+      final int offset = position;
+      return _getWordBoundary(offset);
+    }
+  }
+  List<int> _getWordBoundary(int offset) native 'Paragraph_getWordBoundary';
 
   // Redirecting the paint function in this way solves some dependency problems
   // in the C++ code. If we straighten out the C++ dependencies, we can remove
