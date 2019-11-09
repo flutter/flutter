@@ -523,7 +523,7 @@ const TaskRunners& Shell::GetTaskRunners() const {
   return task_runners_;
 }
 
-fml::WeakPtr<Rasterizer> Shell::GetRasterizer() {
+fml::WeakPtr<Rasterizer> Shell::GetRasterizer() const {
   FML_DCHECK(is_setup_);
   return weak_rasterizer_;
 }

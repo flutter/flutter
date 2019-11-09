@@ -878,6 +878,7 @@ FILE: ../../../flutter/shell/platform/embedder/fixtures/main.dart
 FILE: ../../../flutter/shell/platform/embedder/fixtures/scene_without_custom_compositor.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/scene_without_custom_compositor_with_xform.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/verifyb143464703.png
+FILE: ../../../flutter/shell/platform/embedder/fixtures/verifyb143464703_soft_noxform.png
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.cc
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.h
 FILE: ../../../flutter/shell/platform/embedder/vsync_waiter_embedder.cc

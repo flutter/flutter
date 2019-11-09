@@ -7,6 +7,8 @@
 #include <string>
 
 #include "embedder.h"
+#include "embedder_engine.h"
+#include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
@@ -658,6 +660,180 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
   ASSERT_TRUE(engine.is_valid());
 
   latch.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// Layers in a hierarchy containing a platform view should not be cached. The
+/// other layers in the hierarchy should be, however.
+TEST_F(EmbedderTest, RasterCacheDisabledWithPlatformViews) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views_with_opacity");
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLFramebuffer);
+
+  fml::CountDownLatch setup(3);
+  fml::CountDownLatch verify(1);
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 3u);
+
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.struct_size = sizeof(backing_store);
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0, 0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        {
+          FlutterPlatformView platform_view = {};
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 42;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(123.0, 456.0);
+          layer.offset = FlutterPointMake(1.0, 2.0);
+
+          ASSERT_EQ(*layers[1], layer);
+        }
+
+        {
+          FlutterBackingStore backing_store = *layers[2]->backing_store;
+          backing_store.struct_size = sizeof(backing_store);
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[2], layer);
+        }
+
+        setup.CountDown();
+      });
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&setup](Dart_NativeArguments args) { setup.CountDown(); }));
+
+  UniqueEngine engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  setup.Wait();
+  const flutter::Shell& shell = ToEmbedderEngine(engine.get())->GetShell();
+  shell.GetTaskRunners().GetGPUTaskRunner()->PostTask([&] {
+    const flutter::RasterCache& raster_cache =
+        shell.GetRasterizer()->compositor_context()->raster_cache();
+    // 3 layers total, but one of them had the platform view. So the cache
+    // should only have 2 entries.
+    ASSERT_EQ(raster_cache.GetCachedEntriesCount(), 2u);
+    verify.CountDown();
+  });
+
+  verify.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// The RasterCache should normally be enabled.
+///
+TEST_F(EmbedderTest, RasterCacheEnabled) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_with_opacity");
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLFramebuffer);
+
+  fml::CountDownLatch setup(3);
+  fml::CountDownLatch verify(1);
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 1u);
+
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.struct_size = sizeof(backing_store);
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0, 0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        setup.CountDown();
+      });
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&setup](Dart_NativeArguments args) { setup.CountDown(); }));
+
+  UniqueEngine engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  setup.Wait();
+  const flutter::Shell& shell = ToEmbedderEngine(engine.get())->GetShell();
+  shell.GetTaskRunners().GetGPUTaskRunner()->PostTask([&] {
+    const flutter::RasterCache& raster_cache =
+        shell.GetRasterizer()->compositor_context()->raster_cache();
+    ASSERT_EQ(raster_cache.GetCachedEntriesCount(), 1u);
+    verify.CountDown();
+  });
+
+  verify.Wait();
 }
 
 //------------------------------------------------------------------------------
@@ -2831,21 +3007,16 @@ TEST_F(EmbedderTest, CanQueryDartAOTMode) {
             flutter::DartVM::IsRunningPrecompiledCode());
 }
 
-TEST_F(EmbedderTest, VerifyB143464703) {
+TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
   auto& context = GetEmbedderContext();
 
   EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
+  builder.SetSoftwareRendererConfig(SkISize::Make(1024, 600));
   builder.SetCompositor();
   builder.SetDartEntrypoint("verify_b143464703");
 
   context.GetCompositor().SetRenderTargetType(
-      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
-
-  const auto root_surface_transformation =
-      SkMatrix().preTranslate(0, 1024).preRotate(-90, 0, 0);
-
-  context.SetRootSurfaceTransformation(root_surface_transformation);
+      EmbedderTestCompositor::RenderTargetType::kSoftwareBuffer);
 
   fml::CountDownLatch latch(2);
   context.GetCompositor().SetNextPresentCallback(
@@ -2855,15 +3026,14 @@ TEST_F(EmbedderTest, VerifyB143464703) {
         // Layer 0 (Root)
         {
           FlutterBackingStore backing_store = *layers[0]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.type = kFlutterBackingStoreTypeSoftware;
           backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
 
           FlutterLayer layer = {};
           layer.struct_size = sizeof(layer);
           layer.type = kFlutterLayerContentTypeBackingStore;
           layer.backing_store = &backing_store;
-          layer.size = FlutterSizeMake(600.0, 1024.0);
+          layer.size = FlutterSizeMake(1024.0, 600.0);
           layer.offset = FlutterPointMake(0.0, 0.0);
 
           ASSERT_EQ(*layers[0], layer);
@@ -2879,8 +3049,8 @@ TEST_F(EmbedderTest, VerifyB143464703) {
           layer.struct_size = sizeof(layer);
           layer.type = kFlutterLayerContentTypePlatformView;
           layer.platform_view = &platform_view;
-          layer.size = FlutterSizeMake(540.0, 1024.0);
-          layer.offset = FlutterPointMake(60.0, -135.0);
+          layer.size = FlutterSizeMake(1024.0, 540.0);
+          layer.offset = FlutterPointMake(135.0, 60.0);
 
           ASSERT_EQ(*layers[1], layer);
         }
@@ -2888,15 +3058,14 @@ TEST_F(EmbedderTest, VerifyB143464703) {
         // Layer 2
         {
           FlutterBackingStore backing_store = *layers[2]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.type = kFlutterBackingStoreTypeSoftware;
           backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
 
           FlutterLayer layer = {};
           layer.struct_size = sizeof(layer);
           layer.type = kFlutterLayerContentTypeBackingStore;
           layer.backing_store = &backing_store;
-          layer.size = FlutterSizeMake(600.0, 1024.0);
+          layer.size = FlutterSizeMake(1024.0, 600.0);
           layer.offset = FlutterPointMake(0.0, 0.0);
 
           ASSERT_EQ(*layers[2], layer);
@@ -2907,7 +3076,8 @@ TEST_F(EmbedderTest, VerifyB143464703) {
 
   context.GetCompositor().SetPlatformViewRendererCallback(
       [](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
-        auto surface = CreateRenderSurface(layer, context);
+        auto surface = CreateRenderSurface(
+            layer, nullptr /* null because software compositor */);
         auto canvas = surface->getCanvas();
         FML_CHECK(canvas != nullptr);
 
@@ -2949,7 +3119,8 @@ TEST_F(EmbedderTest, VerifyB143464703) {
   });
 
   latch.Wait();
-  ASSERT_TRUE(ImageMatchesFixture("verifyb143464703.png", renderered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("verifyb143464703_soft_noxform.png",
+                                  renderered_scene));
 }
 
 TEST_F(EmbedderTest,
