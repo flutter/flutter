@@ -43,3 +43,10 @@
   USB_KEYMAP(0x05ff1d, 0x0000, 0x0000, 0x0000, 0xffff, "GameButtonX", BUTTON_X),
   USB_KEYMAP(0x05ff1e, 0x0000, 0x0000, 0x0000, 0xffff, "GameButtonY", BUTTON_Y),
   USB_KEYMAP(0x05ff1f, 0x0000, 0x0000, 0x0000, 0xffff, "GameButtonZ", BUTTON_Z),
+
+  // The Mac defines a key code for the Fn key on Mac keyboards, but it's not
+  // defined on other platforms. Chromium does define an "Fn" row, but doesn't
+  // give it a Mac keycode. This overrides their definition.
+  //        USB HID    evdev    XKB     Win    Mac  DOMKey         Code
+   USB_KEYMAP(0x000012, 0x0000, 0x0000, 0x0000, 0x003f, "Fn", FN),
+

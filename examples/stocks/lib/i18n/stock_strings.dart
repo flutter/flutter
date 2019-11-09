@@ -98,7 +98,7 @@ class StockStrings {
       r'Stocks',
       locale: _localeName,
       name: 'title',
-      desc: 'Title for the Stocks application'
+      desc: r'Title for the Stocks application'
     );
   }
 
@@ -107,7 +107,7 @@ class StockStrings {
       r'MARKET',
       locale: _localeName,
       name: 'market',
-      desc: 'Label for the Market tab'
+      desc: r'Label for the Market tab'
     );
   }
 
@@ -116,7 +116,7 @@ class StockStrings {
       r'PORTFOLIO',
       locale: _localeName,
       name: 'portfolio',
-      desc: 'Label for the Portfolio tab'
+      desc: r'Label for the Portfolio tab'
     );
   }
 

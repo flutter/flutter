@@ -22,7 +22,7 @@ void main() {
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
           ),
           reason: 'on $platform',
         );
@@ -64,12 +64,44 @@ void main() {
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
           ),
           reason: 'on $platform',
         );
         await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+        // The Fn key isn't mapped on linux.
+        if (platform != 'linux') {
+          await simulateKeyDownEvent(LogicalKeyboardKey.fn, platform: platform);
+          expect(RawKeyboard.instance.keysPressed,
+            equals(
+              <LogicalKeyboardKey>{
+                if (platform != 'macos') LogicalKeyboardKey.fn,
+              },
+            ),
+            reason: 'on $platform');
+          await simulateKeyDownEvent(LogicalKeyboardKey.f12, platform: platform);
+          expect(
+            RawKeyboard.instance.keysPressed,
+            equals(
+              <LogicalKeyboardKey>{
+                if (platform != 'macos') LogicalKeyboardKey.fn,
+                LogicalKeyboardKey.f12,
+              },
+            ),
+            reason: 'on $platform',
+          );
+          await simulateKeyUpEvent(LogicalKeyboardKey.fn, platform: platform);
+          expect(
+            RawKeyboard.instance.keysPressed,
+            equals(
+              <LogicalKeyboardKey>{ LogicalKeyboardKey.f12 },
+            ),
+            reason: 'on $platform',
+          );
+          await simulateKeyUpEvent(LogicalKeyboardKey.f12, platform: platform);
+          expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+        }
       }
     }, skip: kIsWeb);
 
