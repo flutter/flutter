@@ -21,6 +21,8 @@ typedef PointerEnterEventListener = void Function(PointerEnterEvent event);
 /// Used by [MouseTrackerAnnotation], [Listener] and [RenderPointerListener].
 typedef PointerExitEventListener = void Function(PointerExitEvent event);
 
+typedef PointerExitOrDisposeEventListener = void Function(bool disposed, PointerExitEvent event);
+
 /// Signature for listening to [PointerHoverEvent] events.
 ///
 /// Used by [MouseTrackerAnnotation], [Listener] and [RenderPointerListener].
@@ -33,7 +35,7 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 class MouseTrackerAnnotation {
   /// Creates an annotation that can be used to find layers interested in mouse
   /// movements.
-  const MouseTrackerAnnotation({this.onEnter, this.onHover, this.onExit});
+  const MouseTrackerAnnotation({this.onEnter, this.onHover, this.onExit, this.onExitOrDispose});
 
   /// Triggered when a pointer has entered the bounding box of the annotated
   /// layer.
@@ -47,6 +49,8 @@ class MouseTrackerAnnotation {
   /// layer.
   final PointerExitEventListener onExit;
 
+  final PointerExitOrDisposeEventListener onExitOrDispose;
+
   @override
   String toString() {
     final List<String> callbacks = <String>[];
@@ -56,6 +60,8 @@ class MouseTrackerAnnotation {
       callbacks.add('hover');
     if (onExit != null)
       callbacks.add('exit');
+    if (onExitOrDispose != null)
+      callbacks.add('exitOrDispose');
     final String describeCallbacks = callbacks.isEmpty
       ? '<none>'
       : callbacks.join(' ');
@@ -108,56 +114,7 @@ class _MouseState {
 }
 
 class _AnnotationTracker {
-    // The collection of annotations that are currently being tracked.
-  // It is operated on by [attachAnnotation] and [detachAnnotation].
-  final Set<MouseTrackerAnnotation> _trackedAnnotations = <MouseTrackerAnnotation>{};
 
-  /// Checks if the given [MouseTrackerAnnotation] is attached to this
-  /// [MouseTracker].
-  ///
-  /// This function is only public to allow for proper testing of the
-  /// MouseTracker. Do not call in other contexts.
-  @visibleForTesting
-  bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
-    return _trackedAnnotations.contains(annotation);
-  }
-
-  /// Notify [MouseTracker] that a new mouse tracker annotation has started to
-  /// take effect.
-  ///
-  /// This should be called as soon as the layer that owns this annotation is
-  /// added to the layer tree.
-  ///
-  /// This triggers [MouseTracker] to schedule a mouse position check during the
-  /// post frame to see if this new annotation might trigger enter events.
-  ///
-  /// The [MouseTracker] also uses this to track the number of attached
-  /// annotations, and will skip mouse position checks if there is no
-  /// annotations attached.
-  void attachAnnotation(MouseTrackerAnnotation annotation) {
-    // Schedule a check so that we test this new annotation to see if any mouse
-    // is currently inside its region. It has to happen after the frame is
-    // complete so that the annotation layer has been added before the check.
-    _trackedAnnotations.add(annotation);
-  }
-
-
-  /// Notify [MouseTracker] that a mouse tracker annotation that was previously
-  /// attached has stopped taking effect.
-  ///
-  /// This should be called as soon as the layer that owns this annotation is
-  /// removed from the layer tree. An assertion error will be thrown if the
-  /// associated layer is not removed and receives another mouse hit.
-  ///
-  /// This triggers [MouseTracker] to perform a mouse position check immediately
-  /// to see if this annotation removal triggers any exit events.
-  ///
-  /// The [MouseTracker] also uses this to track the number of attached
-  /// annotations, and will skip mouse position checks if there is no
-  /// annotations attached.
-  void detachAnnotation(MouseTrackerAnnotation annotation) {
-    _trackedAnnotations.remove(annotation);
-  }
 }
 
 /// Maintains the relationship between mouse devices and
@@ -206,6 +163,10 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
   // The pointer router that the mouse tracker listens to, and receives new
   // mouse events from.
   final PointerRouter _router;
+
+  // The collection of annotations that are currently being tracked.
+  // It is operated on by [attachAnnotation] and [detachAnnotation].
+  final Set<MouseTrackerAnnotation> _trackedAnnotations = <MouseTrackerAnnotation>{};
 
   // Tracks the state of connected mouse devices.
   //
@@ -322,7 +283,9 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
   }
 
   void _updateDevice(_MouseState mouseState, bool connected) {
-    final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = connected
+    print('_updateDevice empty ${_trackedAnnotations.isNotEmpty}');
+    final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = 
+        (connected && _trackedAnnotations.isNotEmpty)
         ? LinkedHashSet<MouseTrackerAnnotation>.from(
             annotationFinder(mouseState.mostRecentEvent.position)
           )
@@ -340,10 +303,7 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
 
   // Dispatch callbacks related to a device after all necessary information
   // has been collected.
-  //
-  // This function should not change the provided states, and should not access
-  // information that is not provided in parameters (hence being static).
-  static void _dispatchDeviceCallbacks({
+  void _dispatchDeviceCallbacks({
     @required LinkedHashSet<MouseTrackerAnnotation> lastAnnotations,
     @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
     @required PointerEvent mostRecentEvent,
@@ -357,9 +317,15 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
     // Send exit events in visual order.
     final Iterable<MouseTrackerAnnotation> exitingAnnotations =
       lastAnnotations.difference(nextAnnotations);
+    print('exiting $exitingAnnotations');
     for (final MouseTrackerAnnotation annotation in exitingAnnotations) {
-      if (annotation.onExit != null) {
+      final bool attached = isAnnotationAttached(annotation);
+      if (annotation.onExit != null && attached) {
         annotation.onExit(PointerExitEvent.fromMouseEvent(mostRecentEvent));
+      }
+      print('exit $annotation');
+      if (annotation.onExitOrDispose != null) {
+        annotation.onExitOrDispose(!attached, PointerExitEvent.fromMouseEvent(mostRecentEvent));
       }
     }
 
@@ -393,4 +359,51 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
 
   /// Whether or not a mouse is connected and has produced events.
   bool get mouseIsConnected => _mouseStates.isNotEmpty;
+
+  /// Checks if the given [MouseTrackerAnnotation] is attached to this
+  /// [MouseTracker].
+  ///
+  /// This function is only public to allow for proper testing of the
+  /// MouseTracker. Do not call in other contexts.
+  @visibleForTesting
+  bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
+    return _trackedAnnotations.contains(annotation);
+  }
+
+  /// Notify [MouseTracker] that a new mouse tracker annotation has started to
+  /// take effect.
+  ///
+  /// This should be called as soon as the layer that owns this annotation is
+  /// added to the layer tree.
+  ///
+  /// This triggers [MouseTracker] to schedule a mouse position check during the
+  /// post frame to see if this new annotation might trigger enter events.
+  ///
+  /// The [MouseTracker] also uses this to track the number of attached
+  /// annotations, and will skip mouse position checks if there is no
+  /// annotations attached.
+  void attachAnnotation(MouseTrackerAnnotation annotation) {
+    // Schedule a check so that we test this new annotation to see if any mouse
+    // is currently inside its region. It has to happen after the frame is
+    // complete so that the annotation layer has been added before the check.
+    _trackedAnnotations.add(annotation);
+  }
+
+
+  /// Notify [MouseTracker] that a mouse tracker annotation that was previously
+  /// attached has stopped taking effect.
+  ///
+  /// This should be called as soon as the layer that owns this annotation is
+  /// removed from the layer tree. An assertion error will be thrown if the
+  /// associated layer is not removed and receives another mouse hit.
+  ///
+  /// This triggers [MouseTracker] to perform a mouse position check immediately
+  /// to see if this annotation removal triggers any exit events.
+  ///
+  /// The [MouseTracker] also uses this to track the number of attached
+  /// annotations, and will skip mouse position checks if there is no
+  /// annotations attached.
+  void detachAnnotation(MouseTrackerAnnotation annotation) {
+    _trackedAnnotations.remove(annotation);
+  }
 }

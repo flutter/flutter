@@ -2615,18 +2615,21 @@ class RenderMouseRegion extends RenderProxyBox {
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
+    PointerExitOrDisposeEventListener onExitOrDispose,
     this.opaque = true,
     RenderBox child,
   }) : assert(opaque != null),
        _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
+       _onExitOrDispose = onExitOrDispose,
        _annotationIsActive = false,
        super(child) {
     _hoverAnnotation = MouseTrackerAnnotation(
       onEnter: _handleEnter,
       onHover: _handleHover,
       onExit: _handleExit,
+      onExitOrDispose: _handleExitOrDispose,
     );
   }
 
@@ -2676,7 +2679,8 @@ class RenderMouseRegion extends RenderProxyBox {
       _onHover(event);
   }
 
-  /// Called when a pointer leaves the region (with or without buttons pressed).
+  /// Called when a pointer leaves the region (with or without buttons pressed)
+  /// and the annotation is still attached.
   PointerExitEventListener get onExit => _onExit;
   set onExit(PointerExitEventListener value) {
     if (_onExit != value) {
@@ -2688,6 +2692,21 @@ class RenderMouseRegion extends RenderProxyBox {
   void _handleExit(PointerExitEvent event) {
     if (_onExit != null)
       _onExit(event);
+  }
+
+  /// Called when a pointer leaves the region (with or without buttons pressed),
+  /// or the annotation is detached under the pointer.
+  PointerExitOrDisposeEventListener get onExitOrDispose => _onExitOrDispose;
+  set onExitOrDispose(PointerExitOrDisposeEventListener value) {
+    if (_onExitOrDispose != value) {
+      _onExitOrDispose = value;
+      _updateAnnotations();
+    }
+  }
+  PointerExitOrDisposeEventListener _onExitOrDispose;
+  void _handleExitOrDispose(bool disposed, PointerExitEvent event) {
+    if (_onExitOrDispose != null)
+      _onExitOrDispose(disposed, event);
   }
 
   // Object used for annotation of the layer used for hover hit detection.
@@ -2705,7 +2724,8 @@ class RenderMouseRegion extends RenderProxyBox {
     final bool annotationWillBeActive = (
         _onEnter != null ||
         _onHover != null ||
-        _onExit != null
+        _onExit != null ||
+        _onExitOrDispose != null
       ) &&
       RendererBinding.instance.mouseTracker.mouseIsConnected;
     if (annotationWasActive != annotationWillBeActive) {

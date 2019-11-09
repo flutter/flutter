@@ -5815,6 +5815,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     Key key,
     this.onEnter,
     this.onExit,
+    this.onExitOrDispose,
     this.onHover,
     this.opaque = true,
     Widget child,
@@ -5834,6 +5835,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// region defined by this widget, or when the widget disappears from under
   /// the pointer.
   final PointerExitEventListener onExit;
+
+  final PointerExitOrDisposeEventListener onExitOrDispose;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it
   /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
@@ -5860,6 +5863,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       onEnter: onEnter,
       onHover: onHover,
       onExit: onExit,
+      onExitOrDispose: onExitOrDispose,
       opaque: opaque,
     );
   }
@@ -5870,6 +5874,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       ..onEnter = onEnter
       ..onHover = onHover
       ..onExit = onExit
+      ..onExitOrDispose = onExitOrDispose
       ..opaque = opaque;
   }
 
@@ -5881,6 +5886,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       listeners.add('enter');
     if (onExit != null)
       listeners.add('exit');
+    if (onExitOrDispose != null)
+      listeners.add('exitOrDispose');
     if (onHover != null)
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));

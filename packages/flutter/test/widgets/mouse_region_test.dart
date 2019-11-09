@@ -14,12 +14,14 @@ class HoverClient extends StatefulWidget {
     this.child,
     this.onEnter,
     this.onExit,
+    this.onExitOrDispose,
   }) : super(key: key);
 
   final ValueChanged<bool> onHover;
   final Widget child;
   final VoidCallback onEnter;
   final VoidCallback onExit;
+  final VoidCallback onExitOrDispose;
 
   @override
   HoverClientState createState() => HoverClientState();
@@ -44,21 +46,29 @@ class HoverClientState extends State<HoverClient> {
     }
   }
 
+  void _onExitOrDispose(bool disposed, PointerExitEvent details) {
+    if (widget.onExitOrDispose != null) {
+      widget.onExitOrDispose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: _onEnter,
       onExit: _onExit,
+      onExitOrDispose: _onExitOrDispose,
       child: widget.child,
     );
   }
 }
 
 class HoverFeedback extends StatefulWidget {
-  const HoverFeedback({Key key, this.onEnter, this.onExit}) : super(key: key);
+  const HoverFeedback({Key key, this.onEnter, this.onExit, this.onExitOrDispose}) : super(key: key);
 
   final VoidCallback onEnter;
   final VoidCallback onExit;
+  final VoidCallback onExitOrDispose;
 
   @override
   _HoverFeedbackState createState() => _HoverFeedbackState();
@@ -75,6 +85,7 @@ class _HoverFeedbackState extends State<HoverFeedback> {
         onHover: (bool hovering) => setState(() => _hovering = hovering),
         onEnter: widget.onEnter,
         onExit: widget.onExit,
+        onExitOrDispose: widget.onExitOrDispose,
         child: Text(_hovering ? 'HOVERING' : 'not hovering'),
       ),
     );
@@ -144,6 +155,8 @@ void main() {
     PointerEnterEvent enter;
     PointerHoverEvent move;
     PointerExitEvent exit;
+    PointerExitEvent exitOrDispose;
+    bool exitIsDisposed = false;
     await tester.pumpWidget(Center(
       child: MouseRegion(
         child: Container(
@@ -153,6 +166,10 @@ void main() {
         onEnter: (PointerEnterEvent details) => enter = details,
         onHover: (PointerHoverEvent details) => move = details,
         onExit: (PointerExitEvent details) => exit = details,
+        onExitOrDispose: (bool disposed, PointerExitEvent details) {
+          exitIsDisposed = disposed;
+          exitOrDispose = details;
+        },
       ),
     ));
     final RenderMouseRegion renderListener = tester.renderObject(find.byType(MouseRegion));
@@ -172,8 +189,10 @@ void main() {
         height: 100.0,
       ),
     ));
-    expect(exit, isNotNull);
-    expect(exit.position, equals(const Offset(400.0, 300.0)));
+    expect(exit, isNull);
+    expect(exitOrDispose, isNotNull);
+    expect(exitOrDispose.position, equals(const Offset(400.0, 300.0)));
+    expect(exitIsDisposed, isTrue);
     expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
   });
 
@@ -566,12 +585,14 @@ void main() {
 
     int numEntries = 0;
     int numExits = 0;
+    int numExitOrDisposes = 0;
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
         onEnter: () => numEntries++,
         onExit: () => numExits++,
+        onExitOrDispose: () => numExitOrDisposes++,
       )),
     );
 
@@ -586,18 +607,21 @@ void main() {
     );
     await tester.pump();
     expect(numEntries, equals(1));
-    expect(numExits, equals(1));
+    expect(numExits, equals(0));
+    expect(numExitOrDisposes, equals(1));
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
         onEnter: () => numEntries++,
         onExit: () => numExits++,
+        onExitOrDispose: () => numExitOrDisposes++,
       )),
     );
     await tester.pump();
     expect(numEntries, equals(2));
-    expect(numExits, equals(1));
+    expect(numExits, equals(0));
+    expect(numExitOrDisposes, equals(1));
   });
 
   testWidgets("MouseRegion activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
@@ -635,14 +659,14 @@ void main() {
       ))),
     );
     await tester.pump();
-    expect(numEntries, equals(2));
-    expect(numExits, equals(1));
+    expect(numEntries, equals(1));
+    expect(numExits, equals(0));
     await tester.pumpWidget(
       Container(),
     );
     await tester.pump();
-    expect(numEntries, equals(2));
-    expect(numExits, equals(2));
+    expect(numEntries, equals(1));
+    expect(numExits, equals(0));
   });
 
   testWidgets('Exit event when unplugging mouse should have a position', (WidgetTester tester) async {
