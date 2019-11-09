@@ -14,6 +14,10 @@ import io.flutter.plugin.common.PluginRegistry;
 /**
  * Binding that gives {@link ActivityAware} plugins access to an associated {@link Activity} and
  * the {@link Activity}'s lifecycle methods.
+ * <p>
+ * To obtain an instance of an {@code ActivityPluginBinding} in a Flutter plugin, implement the
+ * {@link ActivityAware} interface. A binding is provided in {@link ActivityAware#onAttachedToActivity(ActivityPluginBinding)}
+ * and {@link ActivityAware#onReattachedToActivityForConfigChanges(ActivityPluginBinding)}.
  */
 public interface ActivityPluginBinding {
 
