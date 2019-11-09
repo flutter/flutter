@@ -156,7 +156,7 @@ flutter:
         );
     }
 
-    createDualSupportJavaPlugin4() {
+    void createDualSupportJavaPlugin4() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
         fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
       pluginUsingJavaAndNewEmbeddingDir
