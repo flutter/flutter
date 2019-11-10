@@ -7,6 +7,7 @@ import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
+import '../../convert.dart';
 import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -49,6 +50,9 @@ const String kFileSystemScheme = 'FileSystemScheme';
 ///
 /// If provided, must be used along with [kFileSystemScheme].
 const String kFileSystemRoots = 'FileSystemRoots';
+
+/// Defines specified via the `--dart-define` command-line option.
+const String kDartDefines = 'DartDefines';
 
 /// The define to control what iOS architectures are built for.
 ///
@@ -208,6 +212,7 @@ class KernelSnapshot extends Target {
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
+      dartDefines: parseDartDefines(environment),
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
@@ -356,4 +361,23 @@ class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
   List<Target> get dependencies => const <Target>[
     AotElfRelease(),
   ];
+}
+
+/// Dart defines are encoded inside [Environment] as a JSON array.
+List<String> parseDartDefines(Environment environment) {
+  if (!environment.defines.containsKey(kDartDefines)) {
+    return const <String>[];
+  }
+
+  final String dartDefinesJson = environment.defines[kDartDefines];
+  try {
+    final List<Object> parsedDefines = jsonDecode(dartDefinesJson);
+    return parsedDefines.cast<String>();
+  } on FormatException catch (_) {
+    throw Exception(
+      'The value of -D$kDartDefines is not formatted correctly.\n'
+      'The value must be a JSON-encoded list of strings but was:\n'
+      '$dartDefinesJson'
+    );
+  }
 }
