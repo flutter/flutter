@@ -260,7 +260,8 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     }
     return tmpBuildName;
   }
-  if (targetPlatform == TargetPlatform.android_arm ||
+  if (targetPlatform == TargetPlatform.android ||
+      targetPlatform == TargetPlatform.android_arm ||
       targetPlatform == TargetPlatform.android_arm64 ||
       targetPlatform == TargetPlatform.android_x64 ||
       targetPlatform == TargetPlatform.android_x86) {
@@ -306,6 +307,7 @@ String getNameForHostPlatform(HostPlatform platform) {
 }
 
 enum TargetPlatform {
+  android,
   android_arm,
   android_arm64,
   android_x64,
@@ -329,6 +331,7 @@ enum DarwinArch {
   x86_64,
 }
 
+// TODO(jonahwilliams): replace all android TargetPlatform usage with AndroidArch.
 enum AndroidArch {
   armeabi_v7a,
   arm64_v8a,
@@ -391,6 +394,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'flutter-tester';
     case TargetPlatform.web_javascript:
       return 'web-javascript';
+    case TargetPlatform.android:
+      return 'android';
   }
   assert(false);
   return null;
@@ -398,6 +403,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
 
 TargetPlatform getTargetPlatformForName(String platform) {
   switch (platform) {
+    case 'android':
+      return TargetPlatform.android;
     case 'android-arm':
       return TargetPlatform.android_arm;
     case 'android-arm64':

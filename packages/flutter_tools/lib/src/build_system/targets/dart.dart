@@ -357,3 +357,4 @@ class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
     AotElfRelease(),
   ];
 }
+

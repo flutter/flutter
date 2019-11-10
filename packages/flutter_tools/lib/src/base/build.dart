@@ -158,11 +158,11 @@ class AOTSnapshotter {
 
     genSnapshotArgs.add(mainPath);
 
-    // Verify that all required inputs exist.
+    // TODO(jonahwilliams): fully remove input checks once all callers are
+    // using assemble.
     final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
     if (missingInputs.isNotEmpty) {
-      printError('Missing input files: $missingInputs from $inputPaths');
-      return 1;
+      printTrace('Missing input files: $missingInputs from $inputPaths');
     }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
@@ -197,6 +197,7 @@ class AOTSnapshotter {
 
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
+    // TODO(jonahwilliams): remove when all callers are using assemble.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
     outputDir.childFile('gen_snapshot.d').writeAsStringSync('gen_snapshot.d: $genSnapshotPath\n');
 

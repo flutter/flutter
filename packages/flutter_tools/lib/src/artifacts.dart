@@ -393,6 +393,9 @@ class CachedArtifacts extends Artifacts {
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
         return fs.path.join(engineDir, platformName + suffix);
+      case TargetPlatform.android:
+        assert(false, 'cannot use TargetPlatform.android to look up artifacts');
+        return null;
     }
     assert(false, 'Invalid platform $platform.');
     return null;
