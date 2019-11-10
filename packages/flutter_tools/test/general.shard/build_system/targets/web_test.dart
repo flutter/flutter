@@ -236,6 +236,80 @@ void main() {
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(),
   }));
+
+  test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
+    when(processManager.run(any)).thenAnswer((Invocation invocation) async {
+      return FakeProcessResult(exitCode: 0);
+    });
+    await const Dart2JSTarget().build(environment);
+
+    final List<String> expected = <String>[
+      fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
+      '--libraries-spec=' + fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
+      '-O4',
+      '-o',
+      environment.buildDir.childFile('main.dart.js').absolute.path,
+      '--packages=.packages',
+      '-Ddart.vm.product=true',
+      '-DFOO=bar',
+      '-DBAZ=qux',
+      environment.buildDir.childFile('main.dart').absolute.path,
+    ];
+    verify(processManager.run(expected)).called(1);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(),
+  }));
+
+  test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'profile';
+    environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
+    when(processManager.run(any)).thenAnswer((Invocation invocation) async {
+      return FakeProcessResult(exitCode: 0);
+    });
+    await const Dart2JSTarget().build(environment);
+
+    final List<String> expected = <String>[
+      fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
+      '--libraries-spec=' + fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
+      '-O4',
+      '--no-minify',
+      '-o',
+      environment.buildDir.childFile('main.dart.js').absolute.path,
+      '--packages=.packages',
+      '-Ddart.vm.profile=true',
+      '-DFOO=bar',
+      '-DBAZ=qux',
+      environment.buildDir.childFile('main.dart').absolute.path,
+    ];
+    verify(processManager.run(expected)).called(1);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(),
+  }));
+
+  test('Dart2JSTarget throws developer-friendly exception on misformatted DartDefines', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'profile';
+    environment.defines[kDartDefines] = '[misformatted json';
+    try {
+      await const Dart2JSTarget().build(environment);
+      fail('Call to build() must not have succeeded.');
+    } on Exception catch(exception) {
+      expect(
+        '$exception',
+        'Exception: The value of -D$kDartDefines is not formatted correctly.\n'
+        'The value must be a JSON-encoded list of strings but was:\n'
+        '[misformatted json',
+      );
+    }
+
+    // Should not attempt to run any processes.
+    verifyNever(processManager.run(any));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(),
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}

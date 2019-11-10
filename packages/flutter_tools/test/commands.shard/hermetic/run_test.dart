@@ -2,20 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
+import '../../src/testbed.dart';
 
 void main() {
   group('run', () {
@@ -178,6 +188,63 @@ void main() {
     }, overrides: <Type, Generator>{
       DeviceManager: () => mockDeviceManager,
     });
+
+    group('--dart-define option', () {
+      MemoryFileSystem fs;
+      MockProcessManager mockProcessManager;
+      MockWebRunnerFactory mockWebRunnerFactory;
+
+      setUpAll(() {
+        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+          return Stream<Device>.fromIterable(<Device>[
+            FakeDevice().._targetPlatform = TargetPlatform.web_javascript,
+          ]);
+        });
+      });
+
+      RunCommand command;
+      List<String> args;
+      setUp(() {
+        command = TestRunCommand();
+        args = <String> [
+          'run',
+          '--dart-define=FOO=bar',
+          '--no-hot',
+          '--no-pub',
+        ];
+        applyMocksToCommand(command);
+        fs = MemoryFileSystem();
+        mockProcessManager = MockProcessManager();
+        mockWebRunnerFactory = MockWebRunnerFactory();
+      });
+
+      testUsingContext('populates the environment', () async {
+        final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
+        fs.currentDirectory = tempDir;
+
+        final Directory libDir = tempDir.childDirectory('lib');
+        libDir.createSync();
+        final File mainFile = libDir.childFile('main.dart');
+        mainFile.writeAsStringSync('void main() {}');
+
+        final Directory webDir = tempDir.childDirectory('web');
+        webDir.createSync();
+        final File indexFile = libDir.childFile('index.html');
+        indexFile.writeAsStringSync('<h1>Hello</h1>');
+
+        await createTestCommandRunner(command).run(args);
+        expect(mockWebRunnerFactory._dartDefines, <String>['FOO=bar']);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(
+          isWebEnabled: true,
+        ),
+        FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
+        DeviceManager: () => mockDeviceManager,
+        FlutterVersion: () => mockStableFlutterVersion,
+        WebRunnerFactory: () => mockWebRunnerFactory,
+      });
+    });
   });
 }
 
@@ -207,7 +274,7 @@ class MockStableFlutterVersion extends MockFlutterVersion {
 class FakeDevice extends Fake implements Device {
   static const int kSuccess = 1;
   static const int kFailure = -1;
-  final TargetPlatform _targetPlatform = TargetPlatform.ios;
+  TargetPlatform _targetPlatform = TargetPlatform.ios;
 
   void _throwToolExit(int code) => throwToolExit(null, exitCode: code);
 
@@ -261,5 +328,34 @@ class FakeDevice extends Fake implements Device {
       _throwToolExit(kSuccess);
     }
     return null;
+  }
+}
+
+class MockWebRunnerFactory extends Mock implements WebRunnerFactory {
+  List<String> _dartDefines;
+
+  @override
+  ResidentRunner createWebRunner(
+    FlutterDevice device, {
+    String target,
+    bool stayResident,
+    FlutterProject flutterProject,
+    bool ipv6,
+    DebuggingOptions debuggingOptions,
+    List<String> dartDefines,
+  }) {
+    _dartDefines = dartDefines;
+    return MockWebRunner();
+  }
+}
+
+class MockWebRunner extends Mock implements ResidentRunner {
+  @override
+  Future<int> run({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+    String route,
+  }) async {
+    return 0;
   }
 }

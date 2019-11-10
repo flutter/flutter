@@ -41,6 +41,7 @@ void main() {
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           ipv6: true,
           stayResident: true,
+          dartDefines: const <String>[],
         );
       },
       overrides: <Type, Generator>{
@@ -52,6 +53,7 @@ void main() {
           @required bool initializePlatform,
           @required String hostname,
           @required String port,
+          @required List<String> dartDefines,
         }) async {
           return mockWebFs;
         },
