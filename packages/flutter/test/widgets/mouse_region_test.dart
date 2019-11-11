@@ -14,14 +14,14 @@ class HoverClient extends StatefulWidget {
     this.child,
     this.onEnter,
     this.onExit,
-    this.onExitOrDispose,
+    this.onDispose,
   }) : super(key: key);
 
   final ValueChanged<bool> onHover;
   final Widget child;
   final VoidCallback onEnter;
   final VoidCallback onExit;
-  final VoidCallback onExitOrDispose;
+  final VoidCallback onDispose;
 
   @override
   HoverClientState createState() => HoverClientState();
@@ -47,8 +47,8 @@ class HoverClientState extends State<HoverClient> {
   }
 
   void _onExitOrDispose(bool disposed, PointerExitEvent details) {
-    if (widget.onExitOrDispose != null) {
-      widget.onExitOrDispose();
+    if (disposed && widget.onDispose != null) {
+      widget.onDispose();
     }
   }
 
@@ -64,11 +64,11 @@ class HoverClientState extends State<HoverClient> {
 }
 
 class HoverFeedback extends StatefulWidget {
-  const HoverFeedback({Key key, this.onEnter, this.onExit, this.onExitOrDispose}) : super(key: key);
+  const HoverFeedback({Key key, this.onEnter, this.onExit, this.onDispose}) : super(key: key);
 
   final VoidCallback onEnter;
   final VoidCallback onExit;
-  final VoidCallback onExitOrDispose;
+  final VoidCallback onDispose;
 
   @override
   _HoverFeedbackState createState() => _HoverFeedbackState();
@@ -85,7 +85,7 @@ class _HoverFeedbackState extends State<HoverFeedback> {
         onHover: (bool hovering) => setState(() => _hovering = hovering),
         onEnter: widget.onEnter,
         onExit: widget.onExit,
-        onExitOrDispose: widget.onExitOrDispose,
+        onDispose: widget.onDispose,
         child: Text(_hovering ? 'HOVERING' : 'not hovering'),
       ),
     );
@@ -585,14 +585,14 @@ void main() {
 
     int numEntries = 0;
     int numExits = 0;
-    int numExitOrDisposes = 0;
+    int numDisposes = 0;
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
         onEnter: () => numEntries++,
         onExit: () => numExits++,
-        onExitOrDispose: () => numExitOrDisposes++,
+        onDispose: () => numDisposes++,
       )),
     );
 
@@ -608,20 +608,20 @@ void main() {
     await tester.pump();
     expect(numEntries, equals(1));
     expect(numExits, equals(0));
-    expect(numExitOrDisposes, equals(1));
+    expect(numDisposes, equals(1));
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
         onEnter: () => numEntries++,
         onExit: () => numExits++,
-        onExitOrDispose: () => numExitOrDisposes++,
+        onDispose: () => numDisposes++,
       )),
     );
     await tester.pump();
     expect(numEntries, equals(2));
     expect(numExits, equals(0));
-    expect(numExitOrDisposes, equals(1));
+    expect(numDisposes, equals(1));
   });
 
   testWidgets("MouseRegion activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
@@ -774,6 +774,156 @@ void main() {
     );
 
     expect(paintCount, 1);
+  });
+
+  testWidgets('Annotations mounted under the pointer should should take effect in the next postframe', (WidgetTester tester) async {
+    bool hovered = false;
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(5, 5));
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(
+      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return _ColumnContainer(
+          children: <Widget>[
+            Text(hovered ? 'hover outer' : 'unhover outer'),
+          ],
+        );
+      }),
+    );
+
+    expect(find.text('unhover outer'), findsOneWidget);
+
+    await tester.pumpWidget(
+      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return _ColumnContainer(
+          children: <Widget>[
+            HoverClient(
+              onHover: (bool value) { setState(() { hovered = value; }); },
+              child: Text(hovered ? 'hover inner' : 'unhover inner'),
+            ),
+            Text(hovered ? 'hover outer' : 'unhover outer'),
+          ],
+        );
+      }),
+    );
+
+    expect(find.text('unhover outer'), findsOneWidget);
+    expect(find.text('unhover inner'), findsOneWidget);
+
+    await tester.pump();
+
+    expect(find.text('hover outer'), findsOneWidget);
+    expect(find.text('hover inner'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
+  });
+
+  testWidgets('Annotations unmounted under the pointer should take effect in the next postframe', (WidgetTester tester) async {
+    bool hovered = true;
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(5, 5));
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(
+      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return _ColumnContainer(
+          children: <Widget>[
+            HoverClient(
+              onHover: (bool value) { setState(() { hovered = value; }); },
+              child: Text(hovered ? 'hover inner' : 'unhover inner'),
+              onDispose: () {  setState(() { hovered = false; }); },
+            ),
+            Text(hovered ? 'hover outer' : 'unhover outer'),
+          ],
+        );
+      }),
+    );
+
+    expect(find.text('hover outer'), findsOneWidget);
+    expect(find.text('hover inner'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isTrue);
+
+    await tester.pump();
+    expect(find.text('hover outer'), findsOneWidget);
+    expect(find.text('hover inner'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    await tester.pumpWidget(
+      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return _ColumnContainer(
+          children: <Widget> [
+            Text(hovered ? 'hover outer' : 'unhover outer'),
+          ],
+        );
+      }),
+    );
+
+    expect(find.text('hover outer'), findsOneWidget);
+
+    await tester.pump();
+
+    expect(find.text('unhover outer'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
+  });
+
+  testWidgets('Annotations moved into the mouse should take effect in the next postframe', (WidgetTester tester) async {
+    bool hovered = false;
+    final List<bool> logHovered = <bool>[];
+    bool moved = false;
+    StateSetter mySetState;
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(5, 5));
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(
+      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        mySetState = setState;
+        return _ColumnContainer(
+          children: <Widget>[
+            Container(
+              height: 100,
+              width: 10,
+              alignment: moved ? Alignment.topLeft : Alignment.bottomLeft,
+              child: Container(
+                height: 10,
+                width: 10,
+                child: HoverClient(
+                  onHover: (bool value) {
+                    setState(() { hovered = value; });
+                    logHovered.add(value);
+                  },
+                  child: Text(hovered ? 'hover inner' : 'unhover inner'),
+                ),
+              ),
+            ),
+            Text(hovered ? 'hover outer' : 'unhover outer'),
+          ],
+        );
+      }),
+    );
+
+    expect(find.text('unhover inner'), findsOneWidget);
+    expect(find.text('unhover outer'), findsOneWidget);
+    expect(logHovered, isEmpty);
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    mySetState(() { moved = true; });
+    // The first frame is for the widget movement to take effect
+    await tester.pump();
+    expect(find.text('unhover inner'), findsOneWidget);
+    expect(find.text('unhover outer'), findsOneWidget);
+    expect(logHovered, <bool>[true]);
+    logHovered.clear();
+
+    // The second frame is for the mouse hover to take effect
+    await tester.pump();
+    expect(find.text('hover inner'), findsOneWidget);
+    expect(find.text('hover outer'), findsOneWidget);
+    expect(logHovered, isEmpty);
+    expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
   group('MouseRegion respects opacity:', () {
@@ -1102,6 +1252,27 @@ class _HoverClientWithClosuresState extends State<_HoverClientWithClosures> {
           });
         },
         child: Text(_hovering ? 'HOVERING' : 'not hovering'),
+      ),
+    );
+  }
+}
+
+// A column that aligns to the top left.
+class _ColumnContainer extends StatelessWidget {
+  const _ColumnContainer({
+    @required this.children,
+  }) : assert(children != null);
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
       ),
     );
   }
