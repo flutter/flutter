@@ -35,6 +35,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
+    usesDartDefines();
     argParser
       ..addFlag('debug',
         negatable: true,
@@ -294,6 +295,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       quiet: true,
       reportTimings: false,
       iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
+      dartDefines: dartDefines,
     );
 
     const String appFrameworkName = 'App.framework';
