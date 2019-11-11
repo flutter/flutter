@@ -85,10 +85,11 @@ void main() {
       onEnter: (_) {},
       onExit: (_) {},
       onHover: (_) {},
+      onExitOrDispose: (_, __) {},
     );
     expect(
       annotation1.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: enter hover exit)'),
+      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: enter hover exit exitOrDispose)'),
     );
 
     const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();

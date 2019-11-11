@@ -45,36 +45,7 @@ void main() {
     return hovered ? const Text('hover outer') : const Text('unhover outer');
   }
 
-  testWidgets('startup', (WidgetTester tester) async {
-    bool hovered = false;
-
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: const Offset(5, 5));
-    addTearDown(gesture.removePointer);
-
-    await tester.pumpWidget(
-      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-        return scaffold(children: <Widget>[
-          mouseRegionInner(
-            hovered: hovered,
-            setHovered: (bool value) { setState(() { hovered = value; }); }
-          ),
-          outerText(hovered: hovered),
-        ]);
-      }),
-    );
-
-    expect(find.text('unhover outer'), findsOneWidget);
-    expect(find.text('unhover inner'), findsOneWidget);
-
-    await tester.pump();
-
-    expect(find.text('hover outer'), findsOneWidget);
-    expect(find.text('hover inner'), findsOneWidget);
-    expect(tester.binding.hasScheduledFrame, isFalse);
-  });
-
-  testWidgets('attach', (WidgetTester tester) async {
+  testWidgets('Annotations mounted under the pointer should should take effect in the next postframe', (WidgetTester tester) async {
     bool hovered = false;
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -113,7 +84,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('detaching widget should not throw', (WidgetTester tester) async {
+  testWidgets('Annotations unmounted under the pointer should take effect in the next postframe', (WidgetTester tester) async {
     bool hovered = true;
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -125,8 +96,8 @@ void main() {
         return scaffold(children: <Widget>[
           mouseRegionInner(
             hovered: hovered,
-            setHovered: (bool value) { print('setHovered $value'); setState(() { hovered = value; }); },
-            onDispose: () { print('onDispose'); setState(() { hovered = false; }); },
+            setHovered: (bool value) { setState(() { hovered = value; }); },
+            onDispose: () {  setState(() { hovered = false; }); },
           ),
           outerText(hovered: hovered),
         ]);
@@ -158,8 +129,9 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('move', (WidgetTester tester) async {
+  testWidgets('Annotations moved into the mouse should take effect in the next postframe', (WidgetTester tester) async {
     bool hovered = false;
+    final List<bool> logHovered = <bool>[];
     bool moved = false;
     StateSetter mySetState;
 
@@ -177,7 +149,10 @@ void main() {
             alignment: moved ? Alignment.topLeft : Alignment.bottomLeft,
             child: mouseRegionInner(
               hovered: hovered,
-              setHovered: (bool value) { setState(() { hovered = value; }); }
+              setHovered: (bool value) {
+                setState(() { hovered = value; });
+                logHovered.add(value);
+              }
             ),
           ),
           outerText(hovered: hovered),
@@ -187,16 +162,22 @@ void main() {
 
     expect(find.text('unhover inner'), findsOneWidget);
     expect(find.text('unhover outer'), findsOneWidget);
+    expect(logHovered, isEmpty);
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     mySetState(() { moved = true; });
+    // The first frame is for the widget movement to take effect
     await tester.pump();
     expect(find.text('unhover inner'), findsOneWidget);
     expect(find.text('unhover outer'), findsOneWidget);
+    expect(logHovered, <bool>[true]);
+    logHovered.clear();
 
+    // The second frame is for the mouse hover to take effect
     await tester.pump();
     expect(find.text('hover inner'), findsOneWidget);
     expect(find.text('hover outer'), findsOneWidget);
+    expect(logHovered, isEmpty);
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 }
