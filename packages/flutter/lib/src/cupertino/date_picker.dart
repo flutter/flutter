@@ -450,16 +450,17 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   // The current selection of the hour picker. Values range from 0 to 23.
   int get selectedHour {
-    return widget.use24hFormat
-      ? hourController.selectedItem % 60
-      : hourController.selectedItem % 12 + selectedAmPm * 12;
+    final int clampped = hourController.selectedItem % 24;
+    return isHourRegionFlipped
+      ? (clampped + 12) % 24
+      : clampped;
   }
 
   // The controller of the hour column.
   FixedExtentScrollController hourController;
 
   // The current selection of the minute picker. Values range from 0 to 59.
-  int get selectedMinute => minuteController.selectedItem % 60;
+  int get selectedMinute => minuteController.selectedItem * widget.minuteInterval % 60;
   // The controller of the minute column.
   FixedExtentScrollController minuteController;
 
@@ -471,17 +472,25 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // (e.g. if you scroll from 12 to 1 in 12h format).
   int selectedAmPm;
 
+  // Flips the physical-region-to-meridiem mapping.
+  bool get isHourRegionFlipped => selectedAmPm != meridiemRegion;
+
   // The current selection of the AM/PM picker.
   //
   // - 0 means AM
   // - 1 means PM
   FixedExtentScrollController meridiemController;
 
-  // Which 12-hour region is the hour picker currently in, when using the 12h format.
+  // Which of the two 12-hour regions is the hour picker currently in.
   //
-  // The AM/PM meaning of the two regions changes when the meridiem picker scrolls.
-  // Used to determine whether the meridiemController should start animating.
-  int previousMeridiemRegion;
+  // Valid values are 0 and 1. Used to determine whether the meridiemController
+  // should start animating (thus doesn't affect anything in 24h format).
+  //
+  // The AM/PM correspondence of the two regions swaps when the meridiem picker
+  // scrolls. This variable is to keep a record of the selected "physical"
+  // (meridiem picker invariant) region of the hour picker. The "physical" region
+  // of an item of index `i` is `i ~/ 12`.
+  int meridiemRegion;
 
   bool isDatePickerScrolling = false;
   bool isHourPickerScrolling = false;
@@ -503,13 +512,14 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     super.initState();
     initialDateTime = widget.initialDateTime;
 
-    selectedAmPm = widget.use24hFormat ? 0 : initialDateTime.hour ~/ 12;
+    // Initially the "physical" region maps to the meridiem region with the same number.
+    selectedAmPm = initialDateTime.hour ~/ 12;
+    meridiemRegion = selectedAmPm;
+
     meridiemController = FixedExtentScrollController(initialItem: selectedAmPm);
     hourController = FixedExtentScrollController(initialItem: initialDateTime.hour);
-    minuteController = FixedExtentScrollController(initialItem: initialDateTime.minute);
+    minuteController = FixedExtentScrollController(initialItem: initialDateTime.minute ~/ widget.minuteInterval);
     dateController = FixedExtentScrollController(initialItem: 0);
-
-    previousMeridiemRegion = selectedAmPm;
 
     PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
   }
@@ -540,26 +550,15 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     assert(
       oldWidget.mode == widget.mode,
-      "The $runtimeType's mode cannot change once it's built. "
-      'Attempting to change from ${oldWidget.mode} to ${widget.mode}',
+      "The $runtimeType's mode cannot change once it's built. ",
     );
 
-    if (widget.use24hFormat == oldWidget.use24hFormat)
-      return;
-
-    if (widget.use24hFormat) {
-      // Conversion between 24h and 12h format comes at the cost of losing the
-      // current scrolling momentum.
-      hourController.jumpToItem(hourController.selectedItem % 12 + selectedAmPm * 12);
-      selectedAmPm = 0;
-    } else {
-      selectedAmPm = hourController.selectedItem ~/ 12;
-      assert(selectedAmPm == 0 || selectedAmPm == 1);
-      previousMeridiemRegion = selectedAmPm;
+    if (!widget.use24hFormat && oldWidget.use24hFormat) {
+      // Thanks to the physical and meridiem region mapping, the only thing we
+      // need to update is the meridiem controller, if it's not previously attached.
       meridiemController.dispose();
       meridiemController = FixedExtentScrollController(initialItem: selectedAmPm);
     }
-
   }
 
   @override
@@ -677,11 +676,20 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
         onSelectedItemChanged: (int index) {
-          if (!widget.use24hFormat && previousMeridiemRegion != index ~/ 12) {
+          final bool regionChanged = meridiemRegion != index ~/ 12;
+          final bool debugIsFlipped = isHourRegionFlipped;
+
+          if (regionChanged) {
+            meridiemRegion = index ~/ 12;
+            selectedAmPm = 1 - selectedAmPm;
+          }
+
+          if (!widget.use24hFormat && regionChanged) {
             // Scroll the meridiem column to adjust AM/PM.
             //
+            // _onSelectedItemChanged will be called when the animation finishes.
+            //
             // Animation values obtained by comparing with iOS version.
-            selectedAmPm = 1 - selectedAmPm;
             meridiemController.animateToItem(
               selectedAmPm,
               duration: const Duration(milliseconds: 300),
@@ -690,16 +698,18 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           } else {
             _onSelectedItemChange(index);
           }
-          previousMeridiemRegion = index ~/ 12;
+
+          assert(debugIsFlipped == isHourRegionFlipped);
         },
         children: List<Widget>.generate(24, (int index) {
-          final int hour = widget.use24hFormat ? index : (index + 11) % 12 + 1;
+          final int realHour = isHourRegionFlipped ? (index + 12) % 24 : index;
+          final int hour = widget.use24hFormat ? realHour : (realHour + 11) % 12 + 1;
 
           final DateTime initialTime = DateTime(
             initialDateTime.year,
             initialDateTime.month,
             initialDateTime.day + selectedDayFromInitial,
-            index % 12 + 12 * selectedAmPm,
+            realHour,
             0,
           );
 
@@ -809,7 +819,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     // Whenever scrolling lands on an invalid entry, the picker
     // automatically scrolls to a valid one.
     final DateTime selectedDate = selectedDateTime;
-    print('${initialDateTime.day + selectedDayFromInitial}, $selectedHour, $selectedMinute');
 
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
     final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
