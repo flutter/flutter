@@ -169,7 +169,6 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
     if (attributesMap.containsKey('placeholders')) {
       final Map<String, dynamic> placeholders = attributesMap['placeholders'];
       if (placeholders.isNotEmpty) {
-        final Map<String, dynamic> placeholders = attributesMap['placeholders'];
         final String args = placeholders.keys.join(', ');
         attributes.add('args: <Object>[$args]');
       }
