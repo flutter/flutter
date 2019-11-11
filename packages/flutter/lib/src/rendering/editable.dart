@@ -637,7 +637,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_textPainter.textAlign == value)
       return;
     _textPainter.textAlign = value;
-    markNeedsPaint();
+    markNeedsTextLayout();
   }
 
   /// The directionality of the text.
