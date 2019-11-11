@@ -732,14 +732,18 @@ void main() {
 
   test('Sends launched app.webLaunchUrl event for Chrome device', () => testbed.run(() async {
     _setupMocks();
+    when(mockFlutterDevice.device).thenReturn(ChromeDevice());
+
     final DelegateLogger delegateLogger = logger;
     final MockStatus mockStatus = MockStatus();
     delegateLogger.status = mockStatus;
-    final ResidentWebRunner runner = ResidentWebRunner(
-      ChromeDevice(),
+    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
+      stayResident: true,
+      dartDefines: const <String>[],
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -763,14 +767,18 @@ void main() {
 
   test('Sends unlaunched app.webLaunchUrl event for Web Server device', () => testbed.run(() async {
     _setupMocks();
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+
     final DelegateLogger delegateLogger = logger;
     final MockStatus mockStatus = MockStatus();
     delegateLogger.status = mockStatus;
-    final ResidentWebRunner runner = ResidentWebRunner(
-      WebServerDevice(),
+    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
+      stayResident: true,
+      dartDefines: const <String>[],
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
