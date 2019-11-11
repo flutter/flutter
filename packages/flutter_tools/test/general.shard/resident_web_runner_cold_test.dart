@@ -26,17 +26,22 @@ void main() {
   Testbed testbed;
   MockFlutterWebFs mockWebFs;
   ResidentWebRunner residentWebRunner;
+  MockFlutterDevice mockFlutterDevice;
 
   setUp(() {
     mockWebFs = MockFlutterWebFs();
     final MockWebDevice mockWebDevice = MockWebDevice();
+    mockFlutterDevice = MockFlutterDevice();
+    when(mockFlutterDevice.device).thenReturn(mockWebDevice);
     testbed = Testbed(
       setup: () {
-        residentWebRunner = ResidentWebRunner(
-          mockWebDevice,
+        residentWebRunner =  residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+          mockFlutterDevice,
           flutterProject: FlutterProject.current(),
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           ipv6: true,
+          stayResident: true,
+          dartDefines: const <String>[],
         );
       },
       overrides: <Type, Generator>{
@@ -48,6 +53,7 @@ void main() {
           @required bool initializePlatform,
           @required String hostname,
           @required String port,
+          @required List<String> dartDefines,
         }) async {
           return mockWebFs;
         },
@@ -118,4 +124,4 @@ class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
-
+class MockFlutterDevice extends Mock implements FlutterDevice {}

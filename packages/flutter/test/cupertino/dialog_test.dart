@@ -60,7 +60,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255).value, CupertinoColors.destructiveRed.value);
+    expect(widget.style.color.withAlpha(255), CupertinoColors.systemRed.color);
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
@@ -183,7 +183,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255).value, CupertinoColors.destructiveRed.value);
+    expect(widget.style.color.withAlpha(255), CupertinoColors.systemRed.color);
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 

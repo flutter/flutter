@@ -7,6 +7,7 @@ import 'dart:async';
 import '../android/android_builder.dart';
 import '../base/os.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -34,15 +35,21 @@ class BuildAarCommand extends BuildSubCommand {
   final String name = 'aar';
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.androidGenSnapshot,
+    DevelopmentArtifact.universal,
+  };
+
+  @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
-    final FlutterProject futterProject = _getProject();
-    if (futterProject == null) {
+    final FlutterProject flutterProject = _getProject();
+    if (flutterProject == null) {
       return usage;
     }
-    if (futterProject.manifest.isModule) {
+    if (flutterProject.manifest.isModule) {
       usage[CustomDimensions.commandBuildAarProjectType] = 'module';
-    } else if (futterProject.manifest.isPlugin) {
+    } else if (flutterProject.manifest.isPlugin) {
       usage[CustomDimensions.commandBuildAarProjectType] = 'plugin';
     } else {
       usage[CustomDimensions.commandBuildAarProjectType] = 'app';

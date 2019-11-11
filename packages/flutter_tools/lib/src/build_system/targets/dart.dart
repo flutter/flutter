@@ -7,6 +7,7 @@ import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
+import '../../convert.dart';
 import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -28,6 +29,30 @@ const String kBitcodeFlag = 'EnableBitcode';
 
 /// Whether to enable or disable track widget creation.
 const String kTrackWidgetCreation = 'TrackWidgetCreation';
+
+/// Additional configuration passed to the dart front end.
+///
+/// This is expected to be a comma separated list of strings.
+const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
+
+/// Additional configuration passed to gen_snapshot.
+///
+/// This is expected to be a comma separated list of strings.
+const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
+
+/// Alternative scheme for file URIs.
+///
+/// May be used along with [kFileSystemRoots] to support a multiroot
+/// filesystem.
+const String kFileSystemScheme = 'FileSystemScheme';
+
+/// Additional filesystem roots.
+///
+/// If provided, must be used along with [kFileSystemScheme].
+const String kFileSystemRoots = 'FileSystemRoots';
+
+/// Defines specified via the `--dart-define` command-line option.
+const String kDartDefines = 'DartDefines';
 
 /// The define to control what iOS architectures are built for.
 ///
@@ -156,6 +181,13 @@ class KernelSnapshot extends Target {
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
+    // This configuration is all optional.
+    final List<String> extraFrontEndOptions = <String>[
+      ...?environment.defines[kExtraFrontEndOptions]?.split(',')
+    ];
+    final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
+    final String fileSystemScheme = environment.defines[kFileSystemScheme];
+
     TargetModel targetModel = TargetModel.flutter;
     if (targetPlatform == TargetPlatform.fuchsia_x64 ||
         targetPlatform == TargetPlatform.fuchsia_arm64) {
@@ -168,15 +200,19 @@ class KernelSnapshot extends Target {
         platform: targetPlatform,
         mode: buildMode,
       ),
-      aot: buildMode != BuildMode.debug,
+      aot: buildMode.isPrecompiled,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
-      linkPlatformKernelIn: buildMode == BuildMode.release,
+      linkPlatformKernelIn: buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
+      extraFrontEndOptions: extraFrontEndOptions,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
+      dartDefines: parseDartDefines(environment),
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
@@ -301,11 +337,12 @@ abstract class CopyFlutterAotBundle extends Target {
   }
 }
 
+// This is a one-off rule for implementing build aot in terms of assemble.
 class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
   const ProfileCopyFlutterAotBundle();
 
   @override
-  String get name => 'profile_copy_aot_flutter_bundle';
+  String get name => 'profile_android_flutter_bundle';
 
   @override
   List<Target> get dependencies => const <Target>[
@@ -313,14 +350,34 @@ class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
   ];
 }
 
+// This is a one-off rule for implementing build aot in terms of assemble.
 class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
   const ReleaseCopyFlutterAotBundle();
 
   @override
-  String get name => 'release_copy_aot_flutter_bundle';
+  String get name => 'release_android_flutter_bundle';
 
   @override
   List<Target> get dependencies => const <Target>[
     AotElfRelease(),
   ];
+}
+
+/// Dart defines are encoded inside [Environment] as a JSON array.
+List<String> parseDartDefines(Environment environment) {
+  if (!environment.defines.containsKey(kDartDefines)) {
+    return const <String>[];
+  }
+
+  final String dartDefinesJson = environment.defines[kDartDefines];
+  try {
+    final List<Object> parsedDefines = jsonDecode(dartDefinesJson);
+    return parsedDefines.cast<String>();
+  } on FormatException catch (_) {
+    throw Exception(
+      'The value of -D$kDartDefines is not formatted correctly.\n'
+      'The value must be a JSON-encoded list of strings but was:\n'
+      '$dartDefinesJson'
+    );
+  }
 }

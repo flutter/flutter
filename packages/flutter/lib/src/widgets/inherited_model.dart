@@ -119,12 +119,12 @@ abstract class InheritedModel<T> extends InheritedWidget {
 
   // The [result] will be a list of all of context's type T ancestors concluding
   // with the one that supports the specified model [aspect].
-  static Iterable<InheritedElement> _findModels<T extends InheritedModel<Object>>(BuildContext context, Object aspect) sync* {
+  static void _findModels<T extends InheritedModel<Object>>(BuildContext context, Object aspect, List<InheritedElement> results) {
     final InheritedElement model = context.ancestorInheritedElementForWidgetOfExactType(T);
     if (model == null)
       return;
 
-    yield model;
+    results.add(model);
 
     assert(model.widget is T);
     final T modelWidget = model.widget;
@@ -139,7 +139,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
     if (modelParent == null)
       return;
 
-    yield* _findModels<T>(modelParent, aspect);
+    _findModels<T>(modelParent, aspect, results);
   }
 
   /// Makes [context] dependent on the specified [aspect] of an [InheritedModel]
@@ -163,7 +163,8 @@ abstract class InheritedModel<T> extends InheritedWidget {
 
     // Create a dependency on all of the type T ancestor models up until
     // a model is found for which isSupportedAspect(aspect) is true.
-    final List<InheritedElement> models = _findModels<T>(context, aspect).toList();
+    final List<InheritedElement> models = <InheritedElement>[];
+    _findModels<T>(context, aspect, models);
     if (models.isEmpty) {
       return null;
     }
