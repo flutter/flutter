@@ -165,7 +165,7 @@ sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
   } else {
     std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch>
         context_switch = surface_->MakeRenderContextCurrent();
-    if (context_switch->GetSwitchResult()) {
+    if (!context_switch->GetSwitchResult()) {
       return nullptr;
     }
 
