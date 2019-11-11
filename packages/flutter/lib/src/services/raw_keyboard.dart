@@ -502,6 +502,15 @@ class RawKeyboard {
     if (event == null) {
       return;
     }
+    if (event.data is RawKeyEventDataMacOs && event.logicalKey == LogicalKeyboardKey.fn) {
+      // On macOS laptop keyboards, the fn key is used to generate home/end and
+      // f1-f12, but it ALSO generates a separate down/up event for the fn key
+      // itself. Other platforms hide the fn key, and just produce the key that
+      // it is combined with, so to keep it possible to write cross platform
+      // code that looks at which keys are pressed, the fn key is ignored on
+      // macOS.
+      return;
+    }
     if (event is RawKeyDownEvent) {
       _keysPressed.add(event.logicalKey);
     }
@@ -561,7 +570,6 @@ class RawKeyboard {
     LogicalKeyboardKey.capsLock,
     LogicalKeyboardKey.numLock,
     LogicalKeyboardKey.scrollLock,
-    LogicalKeyboardKey.fn,
   };
 
   void _synchronizeModifiers(RawKeyEvent event) {
@@ -580,6 +588,10 @@ class RawKeyboard {
     // pressed/released while the app doesn't have focus, to make sure that
     // _keysPressed reflects reality at all times.
     _keysPressed.removeAll(_allModifiers);
+    if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
+      // On Fuchsia and macOS, the Fn key is not considered a modifier key.
+      _keysPressed.remove(LogicalKeyboardKey.fn);
+    }
     _keysPressed.addAll(modifierKeys);
   }
 
