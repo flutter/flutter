@@ -63,7 +63,12 @@ class Plugin {
       throwToolExit('Invalid plugin specification.\n${errors.join('\n')}');
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
-      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
+      // TODO(cyanglaz): Default to use federated plugin format if 'platform' key exists after 1.10.
+      // https://github.com/flutter/flutter/issues/44397
+      final int numKeys = pluginYaml.keys.toSet().length;
+      if (numKeys == 1) {
+        return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
+      }
     }
     return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
   }
@@ -149,17 +154,15 @@ class Plugin {
   }
 
   static List<String> validatePluginYaml(YamlMap yaml) {
+    // TODO(cyanglaz): Return error when both 'platforms' and old keys exist after 1.10.
+    // https://github.com/flutter/flutter/issues/44397
     if (yaml.containsKey('platforms')) {
       final int numKeys = yaml.keys.toSet().length;
-      if (numKeys != 1) {
-        //TODO(cyanglaz): revert this to return an error once we default our support to federated plugins.
-        return _validateLegacyYaml(yaml);
-      } else {
+      if (numKeys == 1) {
         return _validateMultiPlatformYaml(yaml['platforms']);
       }
-    } else {
-      return _validateLegacyYaml(yaml);
     }
+    return _validateLegacyYaml(yaml);
   }
 
   static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
