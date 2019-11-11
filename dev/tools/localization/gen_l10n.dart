@@ -79,7 +79,7 @@ class @className {
 
   static Future<@className> load(Locale locale) {
     return initializeMessages(locale.toString())
-      .then<@className>((void _) => @className(locale));
+      .then<@className>((_) => @className(locale));
   }
 
   static @className of(BuildContext context) {
