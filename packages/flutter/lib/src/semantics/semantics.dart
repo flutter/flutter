@@ -2595,7 +2595,6 @@ class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
-  final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
 
   /// The root node of the semantics tree, if any.
   ///
