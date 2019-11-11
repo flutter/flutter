@@ -166,7 +166,6 @@ void main() {
       ]);
 
       expect(logger.statusText, contains('You may need to restart any open editors'));
-
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
     });
