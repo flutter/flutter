@@ -31,7 +31,7 @@ void main() async {
     try {
       sceneElement.append(engineCanvas.rootElement);
       html.document.body.append(sceneElement);
-      await matchGoldenFile('$fileName.png', region: region, maxDiffRate: 0.02);
+      await matchGoldenFile('$fileName.png', region: region, maxDiffRate: 0.2);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.
@@ -98,6 +98,19 @@ void main() async {
     rc.drawImageRect(testImage, Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
         Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
     await _checkScreenshot(rc, 'draw_image_rect_with_source');
+  });
+
+  test('Paints image with source and destination and round clip', () async {
+    final RecordingCanvas rc =
+    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    Image testImage = createTestImage();
+    double testWidth = testImage.width.toDouble();
+    double testHeight = testImage.height.toDouble();
+    rc.save();
+    rc.clipRRect(RRect.fromLTRBR(100, 30, 2 * testWidth, 2 * testHeight, Radius.circular(16)));
+    rc.drawImageRect(testImage, Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    await _checkScreenshot(rc, 'draw_image_rect_with_source_and_clip');
   });
 
   test('Paints image with transform using source and destination', () async {
