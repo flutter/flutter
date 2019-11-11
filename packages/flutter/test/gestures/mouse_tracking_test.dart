@@ -312,13 +312,18 @@ void main() {
     events.clear();
   });
 
-  test('should detect enter or exit when annotations are attached or detached on the pointer', () {
+  test('should detect enter or exit in the next frame after annotations are attached or detached on the pointer', () {
     bool isInHitRegion;
-    final List<PointerEvent> events = <PointerEvent>[];
+    final List<Object> events = <PointerEvent>[];
+    final List<bool> disposes = <bool>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
+      onExitOrDispose: (bool disposed, PointerExitEvent event) {
+        disposes.add(disposed);
+        events.add(event);
+      },
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
@@ -340,23 +345,42 @@ void main() {
     // Attach an annotation
     isInHitRegion = true;
     _mouseTracker.attachAnnotation(annotation);
-    // No callbacks are triggered immediately
+    // No callbacks are triggered or scheduled immediately
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
+    expect(_binding.postFrameCallbacks, hasLength(0));
+
+    // Mannually schedule a postframe check, which is usually done by the
+    // renderer binding
+    _mouseTracker.schedulePostFrameCheck();
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 100.0)),
     ]));
+    expect(disposes, isEmpty);
     events.clear();
 
     // Detach the annotation
     isInHitRegion = false;
     _mouseTracker.detachAnnotation(annotation);
+    // No callbacks are triggered or scheduled immediately
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+    expect(_binding.postFrameCallbacks, hasLength(0));
+
+    // Mannually schedule a postframe check, which is usually done by the
+    // renderer binding
+    _mouseTracker.schedulePostFrameCheck();
+    expect(disposes, isEmpty);
+    expect(_binding.postFrameCallbacks, hasLength(1));
+
+    _binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerExitEvent(position: Offset(0.0, 100.0)),
     ]));
+    expect(disposes, <bool>[true]);
     expect(_binding.postFrameCallbacks, hasLength(0));
   });
 
@@ -380,10 +404,13 @@ void main() {
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
-    // Attach an annotation out of region
+    // Attach an annotation out of region and schedule a frame
     _mouseTracker.attachAnnotation(annotation);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
+    expect(_binding.postFrameCallbacks, hasLength(0));
+
+    _mouseTracker.schedulePostFrameCheck();
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     _binding.flushPostFrameCallbacks(Duration.zero);
@@ -391,11 +418,14 @@ void main() {
     ]));
     events.clear();
 
-    // Detach the annotation
+    // Detach the annotation and schedule a frame
     _mouseTracker.detachAnnotation(annotation);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
+
+    _mouseTracker.schedulePostFrameCheck();
+    expect(_binding.postFrameCallbacks, hasLength(1));
 
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
@@ -451,13 +481,10 @@ void main() {
     ]));
     expect(finderCalled, 0);
 
-    // Attaching should call finder during the post frame.
+    // Attaching should call not finder
     _mouseTracker.attachAnnotation(annotation);
-    expect(finderCalled, 0);
-
     _binding.flushPostFrameCallbacks(Duration.zero);
-    expect(finderCalled, 1);
-    finderCalled = 0;
+    expect(finderCalled, 0);
 
     // When annotations are attached, hovering should call finder.
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -466,9 +493,9 @@ void main() {
     expect(finderCalled, 1);
     finderCalled = 0;
 
-    // Detaching an annotation should not call finder (because only history
-    // records are needed).
+    // Detaching an annotation should not call finder
     _mouseTracker.detachAnnotation(annotation);
+    _binding.flushPostFrameCallbacks(Duration.zero);
     expect(finderCalled, 0);
 
     // When all annotations are detached, hovering should not call finder.
