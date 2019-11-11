@@ -248,7 +248,6 @@ class MouseTracker extends ChangeNotifier {
 
   void _updateDirtyDevices() {
     final List<int> dirtyDevices = (_allDevicesAreDirty ? _mouseStates.keys : _dirtyDevices).toList();
-    print('_updateDirtyDevices $dirtyDevices $_mouseStates $_newMouseStates');
     _clearDirtyBit();
     final bool mouseWasConnected = mouseIsConnected;
     // Update mouseState to the latest devices that have not been removed so
