@@ -4055,7 +4055,12 @@ class StatefulElement extends ComponentElement {
     }());
     assert(_state._element == null);
     _state._element = this;
-    assert(_state._widget == null);
+    assert(
+      _state._widget == null,
+      'The createState function for $widget returned an old or invalid state '
+      'instance: ${_state._widget}, which is not null, violating the contract '
+      'for createState.',
+    );
     _state._widget = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
   }
