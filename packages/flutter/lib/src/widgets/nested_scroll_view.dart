@@ -1334,8 +1334,7 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
   const SliverOverlapAbsorber({
     Key key,
     @required this.handle,
-    @Deprecated('The child property is deprecated, use sliver instead')
-    Widget child,
+    @Deprecated('Use sliver instead') Widget child,
     Widget sliver,
   }) : assert(handle != null),
       // ignore: deprecated_member_use_from_same_package
@@ -1385,8 +1384,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   /// The [sliver] must be a [RenderSliver].
   RenderSliverOverlapAbsorber({
     @required SliverOverlapAbsorberHandle handle,
-    @Deprecated('The child property is deprecated, use sliver instead')
-    RenderSliver child,
+    @Deprecated('Use sliver instead') RenderSliver child,
     RenderSliver sliver,
   }) : assert(handle != null),
        // ignore: deprecated_member_use_from_same_package
@@ -1493,8 +1491,7 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
   const SliverOverlapInjector({
     Key key,
     @required this.handle,
-    @Deprecated('The child property is deprecated, use sliver instead')
-    Widget child,
+    @Deprecated('Use sliver instead') Widget child,
     Widget sliver,
   }) : assert(handle != null),
        // ignore: deprecated_member_use_from_same_package
