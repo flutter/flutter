@@ -430,7 +430,7 @@ task:
 # than just fetching the data in the first place.
 task:
   osx_instance:
-    image: mojave-xcode-10.2-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
+    image: mojave-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
     # cpu is always 2
     # memory is always 8G
   environment:
@@ -443,8 +443,8 @@ task:
   setup_script:
     - date
     - which flutter
-    - sudo gem install bundler -v 2.0.2 -N
-    - bundle install --system --gemfile=dev/ci/mac/Gemfile
+    - bundle --version
+    - sudo bundle install --system --gemfile=dev/ci/mac/Gemfile
     - git clean -xffd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
