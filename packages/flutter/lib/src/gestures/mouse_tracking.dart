@@ -210,7 +210,7 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
     final PointerEvent previousEvent = mouseState.mostRecentEvent;
     if (!isNewState)
       mouseState.mostRecentEvent = event;
-    if (event is PointerAddedEvent 
+    if (event is PointerAddedEvent
         || event is PointerRemovedEvent
         || previousEvent is PointerAddedEvent
         || event.position != previousEvent.position) {
@@ -284,7 +284,7 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
 
   void _updateDevice(_MouseState mouseState, bool connected) {
     print('_updateDevice empty ${_trackedAnnotations.isNotEmpty}');
-    final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = 
+    final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations =
         (connected && _trackedAnnotations.isNotEmpty)
         ? LinkedHashSet<MouseTrackerAnnotation>.from(
             annotationFinder(mouseState.mostRecentEvent.position)

@@ -21,7 +21,11 @@ void main() {
     );
   }
 
-  Widget mouseRegionInner({bool hovered, void Function(bool) setHovered}) {
+  Widget mouseRegionInner({
+    bool hovered,
+    @required void Function(bool) setHovered,
+    VoidCallback onDispose,
+  }) {
     return Container(
       width: 10,
       height: 10,
@@ -29,6 +33,10 @@ void main() {
         onEnter: (_) { setHovered(true); },
         onExit: (_) { setHovered(false); },
         child: hovered ? const Text('hover inner') : const Text('unhover inner'),
+        onExitOrDispose: (bool disposed, _) {
+          if (disposed && onDispose != null)
+            onDispose();
+        },
       ),
     );
   }
@@ -63,6 +71,7 @@ void main() {
 
     expect(find.text('hover outer'), findsOneWidget);
     expect(find.text('hover inner'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
   testWidgets('attach', (WidgetTester tester) async {
@@ -101,9 +110,10 @@ void main() {
 
     expect(find.text('hover outer'), findsOneWidget);
     expect(find.text('hover inner'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Failing: detach should not throw', (WidgetTester tester) async {
+  testWidgets('detaching widget should not throw', (WidgetTester tester) async {
     bool hovered = true;
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -115,7 +125,8 @@ void main() {
         return scaffold(children: <Widget>[
           mouseRegionInner(
             hovered: hovered,
-            setHovered: (bool value) { print(value); setState(() { hovered = value; }); }
+            setHovered: (bool value) { print('setHovered $value'); setState(() { hovered = value; }); },
+            onDispose: () { print('onDispose'); setState(() { hovered = false; }); },
           ),
           outerText(hovered: hovered),
         ]);
@@ -124,21 +135,27 @@ void main() {
 
     expect(find.text('hover outer'), findsOneWidget);
     expect(find.text('hover inner'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isTrue);
 
-    // Throws
-    // await tester.pumpWidget(
-    //   StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-    //     return scaffold(children: <Widget>[
-    //       outerText(hovered: hovered),
-    //     ]);
-    //   }),
-    // );
+    await tester.pump();
+    expect(find.text('hover outer'), findsOneWidget);
+    expect(find.text('hover inner'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
 
-    // expect(find.text('hover outer'), findsOneWidget);
+    await tester.pumpWidget(
+      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return scaffold(children: <Widget>[
+          outerText(hovered: hovered),
+        ]);
+      }),
+    );
 
-    // await tester.pump();
+    expect(find.text('hover outer'), findsOneWidget);
 
-    // expect(find.text('unhover outer'), findsOneWidget);
+    await tester.pump();
+
+    expect(find.text('unhover outer'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
   testWidgets('move', (WidgetTester tester) async {
@@ -170,17 +187,16 @@ void main() {
 
     expect(find.text('unhover inner'), findsOneWidget);
     expect(find.text('unhover outer'), findsOneWidget);
-     
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
     mySetState(() { moved = true; });
     await tester.pump();
-
-    // Shouldn't need to move`
-    await gesture.moveBy(const Offset(0.1, 0.1));
+    expect(find.text('unhover inner'), findsOneWidget);
+    expect(find.text('unhover outer'), findsOneWidget);
 
     await tester.pump();
-    await tester.pump();
-
-    expect(find.text('hover outer'), findsOneWidget);
     expect(find.text('hover inner'), findsOneWidget);
+    expect(find.text('hover outer'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
   });
 }
