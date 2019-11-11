@@ -93,33 +93,30 @@ class StockStrings {
     Locale('en', 'US'),
   ];
 
-  String title() {
+  String get title {
     return Intl.message(
       r'Stocks',
       locale: _localeName,
       name: 'title',
-      desc: r'Title for the Stocks application',
-      args: <Object>[]
+      desc: r'Title for the Stocks application'
     );
   }
 
-  String market() {
+  String get market {
     return Intl.message(
       r'MARKET',
       locale: _localeName,
       name: 'market',
-      desc: r'Label for the Market tab',
-      args: <Object>[]
+      desc: r'Label for the Market tab'
     );
   }
 
-  String portfolio() {
+  String get portfolio {
     return Intl.message(
       r'PORTFOLIO',
       locale: _localeName,
       name: 'portfolio',
-      desc: r'Label for the Portfolio tab',
-      args: <Object>[]
+      desc: r'Label for the Portfolio tab'
     );
   }
 
