@@ -191,7 +191,7 @@ class StockHomeState extends State<StockHome> {
   Widget buildAppBar() {
     return AppBar(
       elevation: 0.0,
-      title: Text(StockStrings.of(context).title()),
+      title: Text(StockStrings.of(context).title),
       actions: <Widget>[
         IconButton(
           icon: const Icon(Icons.search),
@@ -223,8 +223,8 @@ class StockHomeState extends State<StockHome> {
       ],
       bottom: TabBar(
         tabs: <Widget>[
-          Tab(text: StockStrings.of(context).market()),
-          Tab(text: StockStrings.of(context).portfolio()),
+          Tab(text: StockStrings.of(context).market),
+          Tab(text: StockStrings.of(context).portfolio),
         ],
       ),
     );
