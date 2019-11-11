@@ -96,9 +96,9 @@ void pathToSvg(ui.Path path, StringBuffer sb,
           final double blRadiusY = rrect.blRadiusY.abs();
           final double brRadiusY = rrect.brRadiusY.abs();
 
-          sb.write('L ${left + trRadiusX} $top ');
+          sb.write('M ${left + trRadiusX} $top ');
           // Top side and top-right corner
-          sb.write('M ${right - trRadiusX} $top ');
+          sb.write('L ${right - trRadiusX} $top ');
           _writeEllipse(sb, right - trRadiusX, top + trRadiusY, trRadiusX,
               trRadiusY, 0, 1.5 * math.pi, 2.0 * math.pi, false);
           // Right side and bottom-right corner
