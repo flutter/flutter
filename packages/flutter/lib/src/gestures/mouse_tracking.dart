@@ -113,10 +113,6 @@ class _MouseState {
   }
 }
 
-class _AnnotationTracker {
-
-}
-
 /// Maintains the relationship between mouse devices and
 /// [MouseTrackerAnnotation]s, and notifies interested callbacks of the changes
 /// thereof.
@@ -126,7 +122,7 @@ class _AnnotationTracker {
 ///
 /// An instance of [MouseTracker] is owned by the global singleton of
 /// [RendererBinding].
-class MouseTracker extends ChangeNotifier with _AnnotationTracker {
+class MouseTracker extends ChangeNotifier {
   /// Creates a mouse tracker to keep track of mouse locations.
   ///
   /// The first parameter is a [PointerRouter], which [MouseTracker] will
@@ -200,9 +196,10 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
 
   // Handler for events coming from the PointerRouter.
   void _handleEvent(PointerEvent event) {
-    if (event.kind != PointerDeviceKind.mouse) {
+    if (event.kind != PointerDeviceKind.mouse)
       return;
-    }
+    if (event is PointerSignalEvent)
+      return;
     final int device = event.device;
     final bool isNewState = _putMouseStateIfAbsent(device, event);
     final _MouseState mouseState = _getMouseState(device);
@@ -243,9 +240,7 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
   }
 
   void _schedulePostFrameCheck() {
-    print('_schedulePostFrameCheck');
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-      print('postFrameCallback');
       assert(_hasDirtyDevices);
       _updateDirtyDevices();
     });
@@ -253,11 +248,12 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
 
   void _updateDirtyDevices() {
     final List<int> dirtyDevices = (_allDevicesAreDirty ? _mouseStates.keys : _dirtyDevices).toList();
+    print('_updateDirtyDevices $dirtyDevices $_mouseStates $_newMouseStates');
     _clearDirtyBit();
     final bool mouseWasConnected = mouseIsConnected;
-    // Update mouseState so that [mouseIsConnected] is correct during the
-    // callbacks. Merge current states and new states, and put back states whose
-    // the most recent event is a Removed.
+    // Update mouseState to the latest devices that have not been removed so
+    // that [mouseIsConnected] is correct during the callbacks.
+    // Keep `mergedStates` for use in the callbacks later.
     final Map<int, _MouseState> mergedStates = Map<int, _MouseState>.fromEntries(
       _mouseStates.entries.followedBy(_newMouseStates.entries),
     );
@@ -272,7 +268,6 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
     for (int device in dirtyDevices) {
       final _MouseState mouseState = mergedStates[device];
       assert(mouseState != null);
-      print('d $device $mouseState');
       _updateDevice(mouseState, _mouseStates.containsKey(mouseState.device));
     }
 
@@ -283,7 +278,6 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
   }
 
   void _updateDevice(_MouseState mouseState, bool connected) {
-    print('_updateDevice empty ${_trackedAnnotations.isNotEmpty}');
     final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations =
         (connected && _trackedAnnotations.isNotEmpty)
         ? LinkedHashSet<MouseTrackerAnnotation>.from(
@@ -291,7 +285,6 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
           )
         : <MouseTrackerAnnotation>{};
 
-    print('last ${mouseState.lastAnnotations}\nnext $nextAnnotations\nevent ${mouseState.mostRecentEvent}');
     _dispatchDeviceCallbacks(
       lastAnnotations: mouseState.lastAnnotations,
       nextAnnotations: nextAnnotations,
@@ -317,13 +310,11 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
     // Send exit events in visual order.
     final Iterable<MouseTrackerAnnotation> exitingAnnotations =
       lastAnnotations.difference(nextAnnotations);
-    print('exiting $exitingAnnotations');
     for (final MouseTrackerAnnotation annotation in exitingAnnotations) {
       final bool attached = isAnnotationAttached(annotation);
       if (annotation.onExit != null && attached) {
         annotation.onExit(PointerExitEvent.fromMouseEvent(mostRecentEvent));
       }
-      print('exit $annotation');
       if (annotation.onExitOrDispose != null) {
         annotation.onExitOrDispose(!attached, PointerExitEvent.fromMouseEvent(mostRecentEvent));
       }
@@ -353,7 +344,6 @@ class MouseTracker extends ChangeNotifier with _AnnotationTracker {
   }
 
   void schedulePostFrameCheck() {
-    print('schedulePostFrameCheck');
     _markAllDevicesAsDirty();
   }
 
