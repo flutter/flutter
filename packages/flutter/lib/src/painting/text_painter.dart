@@ -818,7 +818,7 @@ class TextPainter {
     assert(!_needsLayout);
     // TODO(gspencergoog): remove the List<int>-based code when the engine API
     // returns a TextRange instead of a List<int>.
-    final dynamic boundary = _paragraph.getWordBoundary(position.offset);
+    final dynamic boundary = _paragraph.getWordBoundary(position);
     if (boundary is List<int>) {
       final List<int> indices = boundary;
       return TextRange(start: indices[0], end: indices[1]);
