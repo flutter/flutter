@@ -404,15 +404,21 @@ typedef struct {
   /// The size of this struct. Must be sizeof(FlutterPointerEvent).
   size_t struct_size;
   FlutterPointerPhase phase;
-  /// @attention     The timestamp must be specified in microseconds.
+  /// The timestamp at which the pointer event was generated. The timestamp
+  /// should be specified in microseconds and the clock should be the same as
+  /// that used by `FlutterEngineGetCurrentTime`.
   size_t timestamp;
+  /// The x coordinate of the pointer event in physical pixels.
   double x;
+  /// The y coordinate of the pointer event in physical pixels.
   double y;
   /// An optional device identifier. If this is not specified, it is assumed
   /// that the embedder has no multi-touch capability.
   int32_t device;
   FlutterPointerSignalKind signal_kind;
+  /// The x offset of the scroll in physical pixels.
   double scroll_delta_x;
+  /// The y offset of the scroll in physical pixels.
   double scroll_delta_y;
   /// The type of the device generating this event.
   /// Backwards compatibility note: If this is not set, the device will be
