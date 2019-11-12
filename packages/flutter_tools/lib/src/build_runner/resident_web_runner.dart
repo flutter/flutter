@@ -588,7 +588,6 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
         'Launching ${getDisplayPath(target)} on ${device.device.name} in $modeName mode...');
     Status buildStatus;
     bool statusActive = false;
-      print('');
     try {
       // dwds does not handle uncaught exceptions from its servers. To work
       // around this, we need to catch all uncaught exceptions and determine if
@@ -625,7 +624,6 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
             'uri': _webFs.uri,
           },
         );
-        print('1');
         if (supportsServiceProtocol) {
           _connectionResult = await _webFs.connect(debuggingOptions);
           unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
