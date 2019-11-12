@@ -108,6 +108,7 @@ class SkCanvas {
 
   void drawShadow(ui.Path path, ui.Color color, double elevation,
       bool transparentOccluder) {
-    drawSkShadow(skCanvas, path, color, elevation, transparentOccluder);
+    drawSkShadow(skCanvas, path, color, elevation, transparentOccluder,
+        ui.window.devicePixelRatio);
   }
 }
