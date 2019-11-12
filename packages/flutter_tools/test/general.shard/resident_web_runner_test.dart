@@ -144,7 +144,6 @@ void main() {
     expect(profileResidentWebRunner.debuggingEnabled, false);
 
     when(mockFlutterDevice.device).thenReturn(MockChromeDevice());
-
     expect(residentWebRunner.debuggingEnabled, true);
   }));
 
@@ -173,7 +172,6 @@ void main() {
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, true);
-    expect(residentWebRunner.debuggingEnabled, true);
   }));
 
   test('runner with web server device uses debug extension with --start-paused', () => testbed.run(() async {
@@ -1021,8 +1019,6 @@ void main() {
 class MockChromeLauncher extends Mock implements ChromeLauncher {}
 class MockFlutterUsage extends Mock implements Usage {}
 class MockChromeDevice extends Mock implements ChromeDevice {}
-class MockWebDevice extends Mock implements ChromeDevice {}
-class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
 class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}

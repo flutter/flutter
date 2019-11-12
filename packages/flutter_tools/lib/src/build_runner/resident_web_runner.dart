@@ -102,7 +102,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
 
   /// WebServer device is debuggable when running with --start-paused.
-  bool get deviceIsDebuggable => device is! WebServerDevice || debuggingOptions.startPaused;
+  bool get deviceIsDebuggable => device.device is! WebServerDevice || debuggingOptions.startPaused;
 
   WebFs _webFs;
   ConnectionResult _connectionResult;
@@ -626,7 +626,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           },
         );
         if (supportsServiceProtocol) {
-          final bool useDebugExtension = device is WebServerDevice && debuggingOptions.startPaused;
+          final bool useDebugExtension = device.device is WebServerDevice && debuggingOptions.startPaused;
           _connectionResult = await _webFs.connect(useDebugExtension);
           unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
         }
