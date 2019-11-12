@@ -561,12 +561,18 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ),
     );
 
+    // This size is used to as max bounds to paint the value indicators within.
+    // It must be kept in sync with the function with the same name in
+    // range_slider.dart.
+    Size _sizeWithOverflow() => Navigator.of(context)?.context?.size ?? MediaQuery.of(context).size;
+
     return _SliderRenderObjectWidget(
       value: _unlerp(widget.value),
       divisions: widget.divisions,
       label: widget.label,
       sliderTheme: sliderTheme,
-      mediaQueryData: MediaQuery.of(context),
+      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+      sizeWithOverflow: _sizeWithOverflow(),
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -602,7 +608,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.label,
     this.sliderTheme,
-    this.mediaQueryData,
+    this.textScaleFactor,
+    this.sizeWithOverflow,
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -614,7 +621,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final String label;
   final SliderThemeData sliderTheme;
-  final MediaQueryData mediaQueryData;
+  final double textScaleFactor;
+  final Size sizeWithOverflow;
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
@@ -628,7 +636,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       label: label,
       sliderTheme: sliderTheme,
-      mediaQueryData: mediaQueryData,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -647,7 +656,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..label = label
       ..sliderTheme = sliderTheme
       ..theme = Theme.of(context)
-      ..mediaQueryData = mediaQueryData
+      ..textScaleFactor = textScaleFactor
+      ..sizeWithOverflow = sizeWithOverflow
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -665,7 +675,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     int divisions,
     String label,
     SliderThemeData sliderTheme,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
     TargetPlatform platform,
     ValueChanged<double> onChanged,
     SemanticFormatterCallback semanticFormatterCallback,
@@ -682,7 +693,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _value = value,
        _divisions = divisions,
        _sliderTheme = sliderTheme,
-       _mediaQueryData = mediaQueryData,
+       _textScaleFactor = textScaleFactor,
+       _sizeWithOverflow = sizeWithOverflow,
        _onChanged = onChanged,
        _state = state,
        _textDirection = textDirection {
@@ -837,16 +849,26 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsPaint();
   }
 
-  MediaQueryData get mediaQueryData => _mediaQueryData;
-  MediaQueryData _mediaQueryData;
-  set mediaQueryData(MediaQueryData value) {
-    if (value == _mediaQueryData) {
+  double get textScaleFactor => _textScaleFactor;
+  double _textScaleFactor;
+  set textScaleFactor(double value) {
+    if (value == _textScaleFactor) {
       return;
     }
-    _mediaQueryData = value;
+    _textScaleFactor = value;
     // Media query data includes the textScaleFactor, so we need to update the
     // label painter.
     _updateLabelPainter();
+  }
+
+  Size get sizeWithOverflow => _sizeWithOverflow;
+  Size _sizeWithOverflow;
+  set sizeWithOverflow(Size value) {
+    if (value == _sizeWithOverflow) {
+      return;
+    }
+    _sizeWithOverflow = value;
+    markNeedsPaint();
   }
 
   ValueChanged<double> get onChanged => _onChanged;
@@ -922,7 +944,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           text: label,
         )
         ..textDirection = textDirection
-        ..textScaleFactor = _mediaQueryData.textScaleFactor
+        ..textScaleFactor = textScaleFactor
         ..layout();
     } else {
       _labelPainter.text = null;
@@ -1175,7 +1197,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           sliderTheme: _sliderTheme,
           textDirection: _textDirection,
           value: _value,
-          mediaQueryData: mediaQueryData,
+          textScaleFactor: textScaleFactor,
+          sizeWithOverflow: sizeWithOverflow,
         );
       }
     }

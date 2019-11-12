@@ -1004,7 +1004,8 @@ abstract class SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   });
 
   /// Special instance of [SliderComponentShape] to skip the thumb drawing.
@@ -1260,11 +1261,15 @@ abstract class RangeSliderValueIndicatorShape {
   ///
   /// [labelPainter] helps determine the width of the shape. It is variable
   /// width because it is derived from a formatted string.
+  ///
+  /// [textScaleFactor] can be used to determine the size of this shape, larger
+  /// when textScaleFactor is greater than  1, and smaller when textScaleFactor
+  /// is less than 1.
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
     TextPainter labelPainter,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
   });
 
   /// Determines the best offset to keep this shape on the screen.
@@ -1276,7 +1281,8 @@ abstract class RangeSliderValueIndicatorShape {
     Offset center,
     TextPainter labelPainter,
     Animation<double> activationAnimation,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     return 0;
   }
@@ -1315,7 +1321,8 @@ abstract class RangeSliderValueIndicatorShape {
     bool isDiscrete,
     bool isOnTop,
     TextPainter labelPainter,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
     RenderBox parentBox,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
@@ -2254,8 +2261,8 @@ class _EmptySliderComponentShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    double canvasWidth,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     // no-op.
   }
@@ -2316,8 +2323,8 @@ class RoundSliderThumbShape extends SliderComponentShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    double canvasWidth,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2536,8 +2543,8 @@ class RoundSliderOverlayShape extends SliderComponentShape {
     @required SliderThemeData sliderTheme,
     @required TextDirection textDirection,
     @required double value,
-    double canvasWidth,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2579,10 +2586,11 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete, {
     @required TextPainter labelPainter,
-    @required MediaQueryData mediaQueryData,
+    @required double textScaleFactor,
   }) {
-    assert(mediaQueryData != null);
-    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, mediaQueryData);
+    assert(labelPainter != null);
+    assert(textScaleFactor != null);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
   }
 
   @override
@@ -2597,7 +2605,8 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
     final double scale = activationAnimation.value;
@@ -2607,7 +2616,8 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
       center: center,
       scale: scale,
       labelPainter: labelPainter,
-      mediaQueryData: mediaQueryData,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
       backgroundPaintColor: sliderTheme.valueIndicatorColor
     );
   }
@@ -2631,11 +2641,11 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     bool isEnabled,
     bool isDiscrete, {
     @required TextPainter labelPainter,
-    @required MediaQueryData mediaQueryData,
+    @required double textScaleFactor,
   }) {
     assert(labelPainter != null);
-    assert(mediaQueryData != null);
-    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, mediaQueryData);
+    assert(textScaleFactor != null);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
   }
 
   @override
@@ -2644,13 +2654,15 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     Offset center,
     TextPainter labelPainter,
     Animation<double> activationAnimation,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     return _pathPainter.getHorizontalShift(
       parentBox: parentBox,
       center: center,
       labelPainter: labelPainter,
-      mediaQueryData: mediaQueryData,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
       scale: activationAnimation.value,
     );
   }
@@ -2665,12 +2677,12 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     bool isOnTop,
     TextPainter labelPainter,
     double textScaleFactor,
+    Size sizeWithOverflow,
     RenderBox parentBox,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
     Thumb thumb,
-    MediaQueryData mediaQueryData,
   }) {
     final Canvas canvas = context.canvas;
     final double scale = activationAnimation.value;
@@ -2680,7 +2692,8 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
       center: center,
       scale: scale,
       labelPainter: labelPainter,
-      mediaQueryData: mediaQueryData,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
       backgroundPaintColor: sliderTheme.valueIndicatorColor,
       strokePaintColor: isOnTop ? sliderTheme.overlappingShapeStrokeColor : null,
     );
@@ -2701,11 +2714,11 @@ class _RectangularSliderValueIndicatorPathPainter {
     bool isEnabled,
     bool isDiscrete,
     TextPainter labelPainter,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
   ) {
     assert(labelPainter != null);
     return Size(
-      _upperRectangleWidth(labelPainter, 1, mediaQueryData.textScaleFactor),
+      _upperRectangleWidth(labelPainter, 1, textScaleFactor),
       labelPainter.height + _labelPadding,
     );
   }
@@ -2714,12 +2727,11 @@ class _RectangularSliderValueIndicatorPathPainter {
     RenderBox parentBox,
     Offset center,
     TextPainter labelPainter,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
     double scale,
   }) {
     const double edgePadding = 8.0;
-    final double textScaleFactor = mediaQueryData.textScaleFactor;
-    final double screenWidth = mediaQueryData.size.width;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
 
     // The rectangle must be shifted towards the center so that it minimizes the
@@ -2727,7 +2739,7 @@ class _RectangularSliderValueIndicatorPathPainter {
     // is negative, then the lobe is shifted from right to left, and if it is
     // positive, then the lobe is shifted from left to right.
     final double overflowLeft = math.max(0, rectangleWidth / 2 - center.dx + edgePadding);
-    final double overflowRight = math.max(0, rectangleWidth / 2 - (screenWidth - center.dx - edgePadding));
+    final double overflowRight = math.max(0, rectangleWidth / 2 - (sizeWithOverflow.width - center.dx - edgePadding));
     return overflowLeft - overflowRight;
   }
 
@@ -2742,7 +2754,8 @@ class _RectangularSliderValueIndicatorPathPainter {
     Offset center,
     double scale,
     TextPainter labelPainter,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
     Color backgroundPaintColor,
     Color strokePaintColor,
   }) {
@@ -2751,12 +2764,13 @@ class _RectangularSliderValueIndicatorPathPainter {
       return;
     }
 
-    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, mediaQueryData.textScaleFactor);
+    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
     final double horizontalShift = getHorizontalShift(
       parentBox: parentBox,
       center: center,
       labelPainter: labelPainter,
-      mediaQueryData: mediaQueryData,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
       scale: scale,
     );
     final Rect upperRect = Rect.fromLTWH(
@@ -2835,11 +2849,11 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     bool isEnabled,
     bool isDiscrete, {
     @required TextPainter labelPainter,
-    @required MediaQueryData mediaQueryData,
+    @required double textScaleFactor,
   }) {
     assert(labelPainter != null);
-    assert(mediaQueryData != null);
-    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, mediaQueryData);
+    assert(textScaleFactor != null);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
   }
 
   @override
@@ -2854,7 +2868,8 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     @required SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2874,7 +2889,8 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
       Paint()..color = enableColor.evaluate(enableAnimation),
       activationAnimation.value,
       labelPainter,
-      mediaQueryData,
+      textScaleFactor,
+      sizeWithOverflow,
       null,
     );
   }
@@ -2898,11 +2914,11 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     bool isEnabled,
     bool isDiscrete, {
     @required TextPainter labelPainter,
-    @required MediaQueryData mediaQueryData,
+    @required double textScaleFactor,
   }) {
     assert(labelPainter != null);
-    assert(mediaQueryData != null);
-    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, mediaQueryData);
+    assert(textScaleFactor != null);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
   }
 
   @override
@@ -2911,14 +2927,16 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     Offset center,
     TextPainter labelPainter,
     Animation<double> activationAnimation,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     return _pathPainter.getHorizontalShift(
       parentBox: parentBox,
       center: center,
       labelPainter: labelPainter,
       scale: activationAnimation.value,
-      mediaQueryData: mediaQueryData,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
     );
   }
 
@@ -2936,7 +2954,8 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     TextDirection textDirection,
     Thumb thumb,
     double value,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2957,7 +2976,8 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
       Paint()..color = enableColor.evaluate(enableAnimation),
       activationAnimation.value,
       labelPainter,
-      mediaQueryData,
+      textScaleFactor,
+      sizeWithOverflow,
       isOnTop ? sliderTheme.overlappingShapeStrokeColor : null,
     );
   }
@@ -3007,11 +3027,10 @@ class _PaddleSliderValueIndicatorPathPainter {
     bool isEnabled,
     bool isDiscrete,
     TextPainter labelPainter,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
   ) {
     assert(labelPainter != null);
-    assert(mediaQueryData != null);
-    final double textScaleFactor = mediaQueryData.textScaleFactor;
+    assert(textScaleFactor != null);
     final double width = math.max(_minLabelWidth * textScaleFactor, labelPainter.width) + _labelPadding * 2 * textScaleFactor;
     return Size(width, _preferredHeight * textScaleFactor);
   }
@@ -3029,16 +3048,16 @@ class _PaddleSliderValueIndicatorPathPainter {
     Offset center,
     TextPainter labelPainter,
     double scale,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
-    final double textScaleFactor = mediaQueryData.textScaleFactor;
     final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
     final double labelHalfWidth = labelPainter.width / 2.0;
     final double halfWidthNeeded = math.max(
       0.0,
       inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
     );
-    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, textScaleFactor * scale, center, mediaQueryData.size.width);
+    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, textScaleFactor * scale, center, sizeWithOverflow.width);
     return shift * textScaleFactor;
   }
 
@@ -3049,7 +3068,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     double halfWidthNeeded,
     double scale,
     Offset center,
-    double canvasWidth,
+    double widthWithOverflow,
   ) {
     const double edgeMargin = 8.0;
     final Rect topLobeRect = Rect.fromLTWH(
@@ -3068,7 +3087,7 @@ class _PaddleSliderValueIndicatorPathPainter {
       shift = edgeMargin - topLeft.dx;
     }
 
-    final double endGlobal = canvasWidth;
+    final double endGlobal = widthWithOverflow;
     if (bottomRight.dx > endGlobal - edgeMargin) {
       shift = endGlobal - edgeMargin - bottomRight.dx;
     }
@@ -3091,7 +3110,8 @@ class _PaddleSliderValueIndicatorPathPainter {
     Paint paint,
     double scale,
     TextPainter labelPainter,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
     Color strokePaintColor,
   ) {
     if (scale == 0.0) {
@@ -3102,7 +3122,6 @@ class _PaddleSliderValueIndicatorPathPainter {
 
     // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.
-    final double textScaleFactor = mediaQueryData.textScaleFactor;
     final double overallScale = scale * textScaleFactor;
     final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
     final double labelHalfWidth = labelPainter.width / 2.0;
@@ -3144,8 +3163,7 @@ class _PaddleSliderValueIndicatorPathPainter {
       inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
     );
 
-    final double screenWidth = mediaQueryData.size.width;
-    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, overallScale, center, screenWidth);
+    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, overallScale, center, sizeWithOverflow.width);
     final double leftWidthNeeded = halfWidthNeeded - shift;
     final double rightWidthNeeded = halfWidthNeeded + shift;
 

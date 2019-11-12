@@ -586,12 +586,18 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       thumbSelector: sliderTheme.thumbSelector ?? _defaultRangeThumbSelector,
     );
 
+    // This size is used to as max bounds to paint the value indicators within.
+    // It must be kept in sync with the function with the same name in
+    // slider.dart.
+    Size _sizeWithOverflow() => Navigator.of(context)?.context?.size ?? MediaQuery.of(context).size;
+
     return _RangeSliderRenderObjectWidget(
       values: _unlerpRangeValues(widget.values),
       divisions: widget.divisions,
       labels: widget.labels,
       sliderTheme: sliderTheme,
-      mediaQueryData: MediaQuery.of(context),
+      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+      sizeWithOverflow: _sizeWithOverflow(),
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -608,7 +614,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.labels,
     this.sliderTheme,
-    this.mediaQueryData,
+    this.textScaleFactor,
+    this.sizeWithOverflow,
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -620,7 +627,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final RangeLabels labels;
   final SliderThemeData sliderTheme;
-  final MediaQueryData mediaQueryData;
+  final double textScaleFactor;
+  final Size sizeWithOverflow;
   final ValueChanged<RangeValues> onChanged;
   final ValueChanged<RangeValues> onChangeStart;
   final ValueChanged<RangeValues> onChangeEnd;
@@ -635,7 +643,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       labels: labels,
       sliderTheme: sliderTheme,
       theme: Theme.of(context),
-      mediaQueryData: mediaQueryData,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -654,7 +663,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..labels = labels
       ..sliderTheme = sliderTheme
       ..theme = Theme.of(context)
-      ..mediaQueryData = mediaQueryData
+      ..textScaleFactor = textScaleFactor
+      ..sizeWithOverflow = sizeWithOverflow
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -671,7 +681,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     RangeLabels labels,
     SliderThemeData sliderTheme,
     ThemeData theme,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
     TargetPlatform platform,
     ValueChanged<RangeValues> onChanged,
     RangeSemanticFormatterCallback semanticFormatterCallback,
@@ -691,7 +702,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         _divisions = divisions,
         _sliderTheme = sliderTheme,
         _theme = theme,
-        _mediaQueryData = mediaQueryData,
+        _textScaleFactor = textScaleFactor,
+        _sizeWithOverflow = sizeWithOverflow,
         _onChanged = onChanged,
         _state = state,
         _textDirection = textDirection {
@@ -855,13 +867,22 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     markNeedsPaint();
   }
 
-  MediaQueryData get mediaQueryData => _mediaQueryData;
-  MediaQueryData _mediaQueryData;
-  set mediaQueryData(MediaQueryData value) {
-    if (value == _mediaQueryData)
+  double get textScaleFactor => _textScaleFactor;
+  double _textScaleFactor;
+  set textScaleFactor(double value) {
+    if (value == _textScaleFactor)
       return;
-    _mediaQueryData = value;
+    _textScaleFactor = value;
     _updateLabelPainters();
+  }
+
+  Size get sizeWithOverflow => _sizeWithOverflow;
+  Size _sizeWithOverflow;
+  set sizeWithOverflow(Size value) {
+    if (value == sizeWithOverflow)
+      return;
+    _sizeWithOverflow = value;
+    markNeedsPaint();
   }
 
   ValueChanged<RangeValues> get onChanged => _onChanged;
@@ -953,7 +974,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           text: text,
         )
         ..textDirection = textDirection
-        ..textScaleFactor = mediaQueryData.textScaleFactor
+        ..textScaleFactor = textScaleFactor
         ..layout();
     } else {
       labelPainter.text = null;
@@ -1302,7 +1323,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         textDirection: _textDirection,
         thumb: bottomThumb,
         value: bottomValue,
-        mediaQueryData: mediaQueryData,
+        textScaleFactor: textScaleFactor,
+        sizeWithOverflow: sizeWithOverflow,
       );
     }
 
@@ -1325,26 +1347,28 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         center: startThumbCenter,
         labelPainter: _startLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
-        mediaQueryData: mediaQueryData,
+        textScaleFactor: textScaleFactor,
+        sizeWithOverflow: sizeWithOverflow,
       );
       final double endOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
         parentBox: this,
         center: endThumbCenter,
         labelPainter: _endLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
-        mediaQueryData: mediaQueryData,
+        textScaleFactor: textScaleFactor,
+        sizeWithOverflow: sizeWithOverflow,
       );
       final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(
         isEnabled,
         isDiscrete,
         labelPainter: _startLabelPainter,
-        mediaQueryData: mediaQueryData,
+        textScaleFactor: textScaleFactor,
       ).width / 2;
       final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(
         isEnabled,
         isDiscrete,
         labelPainter: _endLabelPainter,
-        mediaQueryData: mediaQueryData,
+        textScaleFactor: textScaleFactor,
       ).width / 2;
       double innerOverflow = startHalfWidth + endHalfWidth;
       switch (textDirection) {
@@ -1371,7 +1395,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         textDirection: _textDirection,
         thumb: topThumb,
         value: topValue,
-        mediaQueryData: mediaQueryData,
+        textScaleFactor: textScaleFactor,
+        sizeWithOverflow: sizeWithOverflow
       );
     }
 
