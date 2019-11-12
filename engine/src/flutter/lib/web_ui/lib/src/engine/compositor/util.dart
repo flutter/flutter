@@ -193,6 +193,28 @@ js.JsArray<double> makeSkMatrix(Float64List matrix4) {
   return skMatrix;
 }
 
+/// Color stops used when the framework specifies `null`.
+final js.JsArray<double> _kDefaultColorStops = () {
+  final js.JsArray<double> jsColorStops = js.JsArray<double>();
+  jsColorStops.length = 2;
+  jsColorStops[0] = 0;
+  jsColorStops[1] = 1;
+  return jsColorStops;
+}();
+
+/// Converts a list of color stops into a Skia-compatible JS array or color stops.
+///
+/// In Flutter `null` means two color stops `[0, 1]` that in Skia must be specified explicitly.
+js.JsArray<double> makeSkiaColorStops(List<double> colorStops) {
+  if (colorStops == null) {
+    return _kDefaultColorStops;
+  }
+
+  final js.JsArray<double> jsColorStops = js.JsArray<double>.from(colorStops);
+  jsColorStops.length = colorStops.length;
+  return jsColorStops;
+}
+
 // These must be kept in sync with `flow/layers/physical_shape_layer.cc`.
 const double kLightHeight = 600.0;
 const double kLightRadius = 800.0;
