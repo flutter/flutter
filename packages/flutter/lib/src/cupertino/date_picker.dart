@@ -641,18 +641,29 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           _onSelectedItemChange(index);
         },
         itemBuilder: (BuildContext context, int index) {
-          final DateTime dateTime = initialDateTime.add(Duration(days: index));
+          final DateTime rangeStart = DateTime(
+            initialDateTime.year,
+            initialDateTime.month,
+            initialDateTime.day + index,
+          );
 
-          if (widget.minimumDate != null && dateTime.isBefore(widget.minimumDate))
-            return null;
-          if (widget.maximumDate != null && dateTime.isAfter(widget.maximumDate))
-            return null;
+          // Exclusive.
+          final DateTime rangeEnd = DateTime(
+            initialDateTime.year,
+            initialDateTime.month,
+            initialDateTime.day + index + 1,
+          );
 
           final DateTime now = DateTime.now();
 
-          final String dateText = dateTime == DateTime(now.year, now.month, now.day)
+          if (widget?.minimumDate?.isAfter(rangeEnd) == true)
+            return null;
+          if (widget?.maximumDate?.isAfter(rangeStart) == false)
+            return null;
+
+          final String dateText = rangeStart == DateTime(now.year, now.month, now.day)
             ? localizations.todayLabel
-            : localizations.datePickerMediumDate(dateTime);
+            : localizations.datePickerMediumDate(rangeStart);
 
           return itemPositioningBuilder(
             context,
