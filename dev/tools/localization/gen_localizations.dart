@@ -99,7 +99,7 @@ String generateArbBasedLocalizationSubclasses({
     }
     languageToLocales[locale.languageCode] ??= <LocaleInfo>[];
     languageToLocales[locale.languageCode].add(locale);
-    allResourceIdentifiers.addAll(localeToResources[locale].keys);
+    allResourceIdentifiers.addAll(localeToResources[locale].keys.toList()..sort());
   }
 
   // We generate one class per supported language (e.g.
@@ -155,7 +155,7 @@ String generateArbBasedLocalizationSubclasses({
         ));
         output.writeln(generateConstructor(scriptBaseLocale));
         final Map<String, String> scriptResources = localeToResources[scriptBaseLocale];
-        for (String key in scriptResources.keys) {
+        for (String key in scriptResources.keys.toList()..sort()) {
           if (languageResources[key] == scriptResources[key])
             continue;
           final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
