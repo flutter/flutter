@@ -830,4 +830,31 @@ void main() {
     pageController.position.jumpTo(799.99999999999);
     expect(pageController.page, 1);
   });
+
+  testWidgets('PageView can participate in a11y scrolling', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final PageController controller = PageController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+          controller: controller,
+          children: List<Widget>.generate(3, (int i) {
+            return Semantics(
+              child: Text('Page #$i'),
+              container: true,
+            );
+          }),
+          allowImplicitScrolling: true,
+        ),
+    ));
+    expect(controller.page, 0);
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling]));
+    expect(semantics, includesNodeWith(label: 'Page #0'));
+    expect(semantics, includesNodeWith(label: 'Page #1'));
+    expect(semantics, includesNodeWith(label: 'Page #2'));
+
+    semantics.dispose();
+  });
 }

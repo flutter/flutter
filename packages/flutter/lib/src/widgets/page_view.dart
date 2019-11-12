@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'layout_builder.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_context.dart';
@@ -468,11 +469,22 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 ///  * [PageView.physics], which can override the physics used by a page view.
 class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
-  const PageScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  ///
+  /// The [allowImplicitScrolling] parameter must not be null. If true, the
+  /// physics will cause the scrollable to participate in accessibility
+  /// scrolling.
+  const PageScrollPhysics({
+    ScrollPhysics parent,
+    this.allowImplicitScrolling = false
+  }) : assert(allowImplicitScrolling != null),
+       super(parent: parent);
 
   @override
   PageScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return PageScrollPhysics(parent: buildParent(ancestor));
+    return PageScrollPhysics(
+      parent: buildParent(ancestor),
+      allowImplicitScrolling: allowImplicitScrolling,
+    );
   }
 
   double _getPage(ScrollPosition position) {
@@ -511,7 +523,7 @@ class PageScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  bool get allowImplicitScrolling => false;
+  final bool allowImplicitScrolling;
 }
 
 // Having this global (mutable) page controller is a bit of a hack. We need it
@@ -519,7 +531,6 @@ class PageScrollPhysics extends ScrollPhysics {
 // a large list of scroll positions. As long as you don't try to actually
 // control the scroll positions, everything should be fine.
 final PageController _defaultPageController = PageController();
-const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 
 /// A scrollable list that works page by page.
 ///
@@ -553,6 +564,13 @@ class PageView extends StatefulWidget {
   /// children because constructing the [List] requires doing work for every
   /// child that could possibly be displayed in the page view, instead of just
   /// those children that are actually visible.
+  ///
+  /// {@template flutter.widgets.pageView.allowImplicitScrolling}
+  /// The [allowImplicitScrolling] parameter must not be null. If true, the
+  /// [PageView] will participate in accessibility scrolling more like a,
+  /// [ListView], where each scroll action will move to the next page rather
+  /// than into the contents of the [PageView].
+  /// {@endtemplate}
   PageView({
     Key key,
     this.scrollDirection = Axis.horizontal,
@@ -563,7 +581,9 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : controller = controller ?? _defaultPageController,
+    this.allowImplicitScrolling = false,
+  }) : assert(allowImplicitScrolling != null),
+       controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
        super(key: key);
 
@@ -583,6 +603,8 @@ class PageView extends StatefulWidget {
   /// [PageView.builder] by default does not support child reordering. If
   /// you are planning to change child order at a later time, consider using
   /// [PageView] or [PageView.custom].
+  ///
+  /// {@macro flutter.widgets.pageView.allowImplicitScrolling}
   PageView.builder({
     Key key,
     this.scrollDirection = Axis.horizontal,
@@ -594,12 +616,16 @@ class PageView extends StatefulWidget {
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : controller = controller ?? _defaultPageController,
+    this.allowImplicitScrolling = false,
+  }) : assert(allowImplicitScrolling != null),
+       controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
        super(key: key);
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
+  ///
+  /// {@macro flutter.widgets.pageView.allowImplicitScrolling}
   ///
   /// {@tool sample}
   ///
@@ -688,7 +714,9 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.allowImplicitScrolling = false,
   }) : assert(childrenDelegate != null),
+       assert(allowImplicitScrolling != null),
        controller = controller ?? _defaultPageController,
        super(key: key);
 
@@ -743,6 +771,15 @@ class PageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// Controls how scrolling navigation is handled for accessibility services.
+  ///
+  /// By default, accessibility traversal should navigate into the contents of
+  /// of the current page view, rather than showing the next page. Setting this
+  /// value to true will cause the [PageView] to behave more like a list, and
+  /// have accessibility traversal move to the next page rather than into the
+  /// contents of the view.
+  final bool allowImplicitScrolling;
+
   @override
   _PageViewState createState() => _PageViewState();
 }
@@ -769,11 +806,28 @@ class _PageViewState extends State<PageView> {
     return null;
   }
 
+  double _getCacheExtent(AxisDirection direction, BoxConstraints constraints) {
+    // Use the actual child count if we can, otherwise use three for leading/active/trailing.
+    final int childCount = widget.childrenDelegate.estimatedChildCount ?? 3;
+    switch (direction) {
+      case AxisDirection.up:
+      case AxisDirection.down:
+        return constraints.maxHeight * childCount;
+      case AxisDirection.left:
+      case AxisDirection.right:
+        return constraints.maxWidth * childCount;
+    }
+    assert(false);
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
     final ScrollPhysics physics = widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics)
+        ? PageScrollPhysics(
+            allowImplicitScrolling: widget.allowImplicitScrolling,
+          ).applyTo(widget.physics)
         : widget.physics;
 
     return NotificationListener<ScrollNotification>(
@@ -793,17 +847,23 @@ class _PageViewState extends State<PageView> {
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: physics,
-        viewportBuilder: (BuildContext context, ViewportOffset position) {
-          return Viewport(
-            cacheExtent: 0.0,
-            axisDirection: axisDirection,
-            offset: position,
-            slivers: <Widget>[
-              SliverFillViewport(
-                viewportFraction: widget.controller.viewportFraction,
-                delegate: widget.childrenDelegate,
-              ),
-            ],
+        viewportBuilder: (_, ViewportOffset position) {
+          return LayoutBuilder(
+            builder: (_, BoxConstraints constraints) {
+              return Viewport(
+                cacheExtent: widget.allowImplicitScrolling
+                  ? _getCacheExtent(axisDirection, constraints)
+                  : 0,
+                axisDirection: axisDirection,
+                offset: position,
+                slivers: <Widget>[
+                  SliverFillViewport(
+                    viewportFraction: widget.controller.viewportFraction,
+                    delegate: widget.childrenDelegate,
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
@@ -818,5 +878,6 @@ class _PageViewState extends State<PageView> {
     description.add(DiagnosticsProperty<PageController>('controller', widget.controller, showName: false));
     description.add(DiagnosticsProperty<ScrollPhysics>('physics', widget.physics, showName: false));
     description.add(FlagProperty('pageSnapping', value: widget.pageSnapping, ifFalse: 'snapping disabled'));
+    description.add(FlagProperty('allowImplicitScrolling', value: widget.allowImplicitScrolling, ifTrue: 'implicit scrolling enabled'));
   }
 }
