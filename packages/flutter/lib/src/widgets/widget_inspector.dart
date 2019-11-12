@@ -2823,9 +2823,8 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
     }
     return true;
   }
-  if (processElement(element) && element.isActive) {
+  if (processElement(element) && element.isActive)
     element.visitAncestorElements(processElement);
-  }
   return nodes;
 }
 
