@@ -100,7 +100,8 @@ class MouseTrackerAnnotation {
   /// crash. Therefore, before you call a `setState` you __must__ check if the
   /// owner widget of the `setState` is still mounted.
   /// {@endtemplate}
-  /// You can find an example at [MouseRegion.onExitOrDispose].
+  ///
+  /// More details on the use is explained in [MouseRegion.onExitOrDispose].
   ///
   /// See also:
   ///

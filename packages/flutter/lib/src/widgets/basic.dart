@@ -5845,15 +5845,22 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///
   /// {@macro flutter.mouseTrackerAnnotation.onExitOrDispose}
   ///
+  /// More specifically, if a widget `A` contains a MouseRegion `M` (directly
+  /// or indirectly), and `M.onExitOrDispose` calls `A`'s `setState` without
+  /// checking whether `A` is mounted, your app __will__ crash if `A` is
+  /// unmounted while the pointer is on `M`.
+  ///
   /// {@tool snippet --template=stateful_widget_scaffold_center}
   ///
-  /// This sample shows a region that disappears 1 second after pointer enter.
+  /// This sample demonstrates how `onExitOrDispose` crashes an app.
+  /// The app contains a region that disappears 1 second after pointer enter.
   /// However, because it uses [onExitOrDispose] without checking the mounting
   /// state, the app will crash if the region disappears while being hovered.
-  /// Either of the following two ways can fix the crash:
+  /// Use either of the following two ways to fix the crash:
   ///
   ///  * Uncomment the if-clause in [onExitOrDispose]
   ///  * Use [onExit] instead of [onExitOrDispose]
+  ///
   /// ```dart imports
   /// import 'package:flutter/gestures.dart';
   /// ```
