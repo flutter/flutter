@@ -1,4 +1,4 @@
-Signature: b2816ba7c238ea19879731426c08b7d3
+Signature: e2fba7540b7c9a199110c06d578872b8
 
 UNUSED LICENSES:
 
@@ -3390,6 +3390,7 @@ FILE: ../../../third_party/skia/gm/crbug_913349.cpp
 FILE: ../../../third_party/skia/gm/crbug_938592.cpp
 FILE: ../../../third_party/skia/gm/crbug_947055.cpp
 FILE: ../../../third_party/skia/gm/crbug_996140.cpp
+FILE: ../../../third_party/skia/gm/ducky_yuv_blend.cpp
 FILE: ../../../third_party/skia/gm/fiddle.cpp
 FILE: ../../../third_party/skia/gm/mac_aa_explorer.cpp
 FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
