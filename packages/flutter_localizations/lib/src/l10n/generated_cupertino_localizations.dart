@@ -12592,13 +12592,16 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get datePickerHourSemanticsLabelOther => r'$hour 點';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => r'1 分';
+  String get datePickerMinuteSemanticsLabelOne => r'1 分鐘';
 
   @override
-  String get datePickerMinuteSemanticsLabelOther => r'$minute 分';
+  String get datePickerMinuteSemanticsLabelOther => r'$minute 分鐘';
 
   @override
-  String get alertDialogLabel => r'快訊';
+  String get datePickerDateTimeOrderString => r'date_dayPeriod_time';
+
+  @override
+  String get alertDialogLabel => r'通知';
 
   @override
   String get timerPickerHourLabelOne => r'小時';
@@ -12607,10 +12610,10 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get timerPickerHourLabelOther => r'小時';
 
   @override
-  String get timerPickerMinuteLabelOne => r'分';
+  String get timerPickerMinuteLabelOne => r'分鐘';
 
   @override
-  String get timerPickerMinuteLabelOther => r'分';
+  String get timerPickerMinuteLabelOther => r'分鐘';
 
   @override
   String get cutButtonLabel => r'剪下';
@@ -12651,24 +12654,6 @@ class CupertinoLocalizationZhHantHk extends CupertinoLocalizationZhHant {
     singleDigitSecondFormat: singleDigitSecondFormat,
     decimalFormat: decimalFormat,
   );
-
-  @override
-  String get datePickerMinuteSemanticsLabelOne => r'1 分鐘';
-
-  @override
-  String get datePickerMinuteSemanticsLabelOther => r'$minute 分鐘';
-
-  @override
-  String get datePickerDateTimeOrderString => r'date_dayPeriod_time';
-
-  @override
-  String get alertDialogLabel => r'通知';
-
-  @override
-  String get timerPickerMinuteLabelOne => r'分鐘';
-
-  @override
-  String get timerPickerMinuteLabelOther => r'分鐘';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -12697,6 +12682,24 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
     singleDigitSecondFormat: singleDigitSecondFormat,
     decimalFormat: decimalFormat,
   );
+
+  @override
+  String get datePickerMinuteSemanticsLabelOne => r'1 分';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute 分';
+
+  @override
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
+
+  @override
+  String get alertDialogLabel => r'快訊';
+
+  @override
+  String get timerPickerMinuteLabelOne => r'分';
+
+  @override
+  String get timerPickerMinuteLabelOther => r'分';
 }
 
 /// The translations for Zulu (`zu`).
