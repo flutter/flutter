@@ -5822,20 +5822,110 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   }) : assert(opaque != null),
        super(key: key, child: child);
 
-  /// Called when a mouse pointer (with or without buttons pressed) enters the
-  /// region defined by this widget, or when the widget appears under the
-  /// pointer.
+  /// Called when a mouse pointer, with or without buttons pressed, has
+  /// entered this widget.
+  ///
+  /// {@macro flutter.mouseTrackerAnnotation.onEnter}
   final PointerEnterEventListener onEnter;
 
-  /// Called when a mouse pointer (with or without buttons pressed) changes
-  /// position, and the new position is within the region defined by this widget.
+  /// Called when a mouse pointer changes position without buttons pressed, and
+  /// the new position is within the region defined by this widget.
+  ///
+  /// {@macro flutter.mouseTrackerAnnotation.onHover}
   final PointerHoverEventListener onHover;
 
-  /// Called when a mouse pointer (with or without buttons pressed) leaves the
-  /// region defined by this widget, or when the widget disappears from under
-  /// the pointer.
+  /// Called when a mouse pointer, with or without buttons pressed, has stopped
+  /// exited this widget when the widget is still mounted.
+  ///
+  /// {@macro flutter.mouseTrackerAnnotation.onExit}
   final PointerExitEventListener onExit;
 
+  /// Triggered when a mouse pointer, with or without buttons pressed, has
+  /// exited this widget.
+  ///
+  /// {@tool snippet --template=stateful_widget_scaffold_center}
+  ///
+  /// This sample shows a region that disappears 1 second after pointer enter.
+  /// However, because it uses [onExitOrDispose] without checking the mounting
+  /// state, the app will crash if the region disappears while being hovered.
+  /// Either of the following two ways can fix the crash:
+  ///
+  ///  * Uncomment the if-clause in [onExitOrDispose]
+  ///  * Use [onExit] instead of [onExitOrDispose]
+  /// ```dart code-imports
+  /// import 'package:flutter/gestures.dart';
+  /// ```
+  ///
+  /// ```dart code-preamble
+  ///// `HoverableRegion` is a yellow rectangle that becomes blue when hovered.
+  ///// Additionally, it passes an `onEnter` to its inner MouseRegion.
+  /// class HoverableRegion extends StatefulWidget {
+  ///   HoverableRegion({Key key, this.onEnter}) : super(key: key);
+  ///
+  ///   final VoidCallback onEnter;
+  ///
+  ///   @override
+  ///   _HoverableRegionState createState() => _HoverableRegionState();
+  /// }
+  ///
+  /// class _HoverableRegionState extends State<HoverableRegion> {
+  ///   bool hovered = false;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Container(
+  ///       height: 100,
+  ///       width: 100,
+  ///       decoration: BoxDecoration(color: hovered ? Colors.yellow : Colors.blue),
+  ///       child: MouseRegion(
+  ///         onEnter: (PointerEnterEvent event) {
+  ///           if (widget.onEnter != null)
+  ///             widget.onEnter();
+  ///           setState(() { hovered = true; });
+  ///         },
+  ///         onExitOrDispose: (bool disposed, PointerExitEvent event) {
+  ///           // Uncomment the following check to fix the crash
+  ///
+  ///           // if (!mounted)
+  ///           //   return;
+  ///           setState(() { hovered = false; });
+  ///         },
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ```dart code
+  ///  bool hidden = false;
+  ///  // Whether a hiding task has been scheduled. Used to avoid duplicate calls.
+  ///  bool toBeRemoved = false;
+  ///
+  ///  // When _onEnter is called, hide the region after 1 second, then unhide it
+  ///  // after another 1 second.
+  ///  void _onEnter() async {
+  ///    if (toBeRemoved)
+  ///      return;
+  ///    toBeRemoved = true;
+  ///    await Future.delayed(const Duration(seconds: 1));
+  ///    setState(() { hidden = true; });
+  ///    await Future.delayed(const Duration(seconds: 1));
+  ///    toBeRemoved = false;
+  ///    setState(() { hidden = false; });
+  ///  }
+  ///
+  ///  @override
+  ///  Widget build(BuildContext context) {
+  ///    return Column(
+  ///      mainAxisAlignment: MainAxisAlignment.start,
+  ///      children: <Widget>[
+  ///        Text('This region disappears 1 second after mouse enter'),
+  ///        if (!hidden) HoverableRegion(onEnter: _onEnter),
+  ///      ],
+  ///    );
+  ///  }
+  /// ```
+  /// {@end-tool}
   final PointerExitOrDisposeEventListener onExitOrDispose;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it
