@@ -47,8 +47,7 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
   bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
   // |GPUSurfaceGLDelegate|
-  std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch>
-  GLContextMakeCurrent() override;
+  bool GLContextMakeCurrent() override;
 
   // |GPUSurfaceGLDelegate|
   bool GLContextClearCurrent() override;
@@ -61,10 +60,6 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
 
   // |GPUSurfaceGLDelegate|
   ExternalViewEmbedder* GetExternalViewEmbedder() override;
-
-  // |GPUSurfaceGLDelegate|
-  std::shared_ptr<RendererContextSwitchManager>
-  GetRendererContextSwitchManager() override;
 
  private:
   fml::RefPtr<AndroidContextGL> onscreen_context_;
