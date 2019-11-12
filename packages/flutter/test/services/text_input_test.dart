@@ -175,7 +175,7 @@ void main() {
   });
 
   test('TextEditingValue handles JSON affinity', () async {
-    Map<String, dynamic> json = Map<String, dynamic>();
+    final Map<String, dynamic> json = {};
     json['text'] = 'Xiaomuqiao';
 
     TextEditingValue val = TextEditingValue.fromJSON(json);
