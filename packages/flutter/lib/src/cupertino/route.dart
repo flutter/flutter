@@ -108,12 +108,13 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     @required this.builder,
     this.title,
     RouteSettings settings,
+    this.opaque = false,
     this.maintainState = true,
     bool fullscreenDialog = false,
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       assert(opaque),
+       assert(opaque != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   /// Builds the primary contents of the route.
@@ -172,6 +173,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   @override
   Color get barrierColor => null;
+  
+  @override
+  final bool opaque;
 
   @override
   String get barrierLabel => null;
