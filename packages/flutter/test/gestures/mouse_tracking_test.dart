@@ -493,7 +493,7 @@ void main() {
     ]));
     expect(finderCalled, 0);
 
-    // Attaching should call not finder
+    // Attaching should not call finder
     _mouseTracker.attachAnnotation(annotation);
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(finderCalled, 0);

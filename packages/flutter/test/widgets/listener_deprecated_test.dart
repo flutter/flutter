@@ -145,7 +145,7 @@ void main() {
       expect(exit, isNotNull);
       expect(exit.position, equals(const Offset(1.0, 1.0)));
     });
-    testWidgets('doesnt detect pointer exit when widget disappears', (WidgetTester tester) async {
+    testWidgets('doesn not detect pointer exit when widget disappears', (WidgetTester tester) async {
       PointerEnterEvent enter;
       PointerHoverEvent move;
       PointerExitEvent exit;
