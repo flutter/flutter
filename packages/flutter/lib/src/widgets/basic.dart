@@ -5852,11 +5852,11 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///
   ///  * Uncomment the if-clause in [onExitOrDispose]
   ///  * Use [onExit] instead of [onExitOrDispose]
-  /// ```dart code-imports
+  /// ```dart imports
   /// import 'package:flutter/gestures.dart';
   /// ```
   ///
-  /// ```dart code-preamble
+  /// ```dart preamble
   ///// `HoverableRegion` is a yellow rectangle that becomes blue when hovered.
   ///// Additionally, it passes an `onEnter` to its inner MouseRegion.
   /// class HoverableRegion extends StatefulWidget {
@@ -5896,7 +5896,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// }
   /// ```
   ///
-  /// ```dart code
+  /// ```dart
   ///  bool hidden = false;
   ///  // Whether a hiding task has been scheduled. Used to avoid duplicate calls.
   ///  bool toBeRemoved = false;

@@ -306,6 +306,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   void _updateDirtyDevices() {
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
     final List<int> dirtyDevices = (_allDevicesAreDirty ? _mouseStates.keys : _dirtyDevices).toList();
     _clearDirtyBit();
     final bool mouseWasConnected = mouseIsConnected;
