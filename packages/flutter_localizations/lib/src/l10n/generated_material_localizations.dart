@@ -17907,19 +17907,19 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   );
 
   @override
-  String get tabLabelRaw => r'第 $tabIndex 個標籤，總共 $tabCount 個';
+  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
 
   @override
   String get showAccountsLabel => r'顯示帳戶';
 
   @override
-  String get modalBarrierDismissLabel => r'拒絕';
+  String get modalBarrierDismissLabel => r'關閉';
 
   @override
   String get hideAccountsLabel => r'隱藏帳戶';
 
   @override
-  String get signedInLabel => r'已登入';
+  String get signedInLabel => r'已登入帳戶';
 
   @override
   String get openAppDrawerTooltip => r'開啟導覽選單';
@@ -17946,16 +17946,16 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get showMenuTooltip => r'顯示選單';
 
   @override
-  String get aboutListTileTitleRaw => r'關於$applicationName';
+  String get aboutListTileTitleRaw => r'關於「$applicationName」';
 
   @override
   String get licensesPageTitle => r'授權';
 
   @override
-  String get pageRowsInfoTitleRaw => r'第 $firstRow 至 $lastRow 列，共 $rowCount 列';
+  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
 
   @override
   String get rowsPerPageTitle => r'每頁列數：';
@@ -17991,10 +17991,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get viewLicensesButtonLabel => r'查看授權';
 
   @override
-  String get timePickerHourModeAnnouncement => r'揀選小時';
+  String get timePickerHourModeAnnouncement => r'選取小時數';
 
   @override
-  String get timePickerMinuteModeAnnouncement => r'揀選分鐘';
+  String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
 
   @override
   String get drawerLabel => r'導覽選單';
@@ -18006,16 +18006,16 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get dialogLabel => r'對話方塊';
 
   @override
-  String get alertDialogLabel => r'通知';
+  String get alertDialogLabel => r'快訊';
 
   @override
   String get searchFieldLabel => r'搜尋';
 
   @override
-  String get reorderItemToStart => r'移到開頭';
+  String get reorderItemToStart => r'移至開頭';
 
   @override
-  String get reorderItemToEnd => r'移到最後';
+  String get reorderItemToEnd => r'移至結尾';
 
   @override
   String get reorderItemUp => r'向上移';
@@ -18036,10 +18036,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get collapsedIconTapHint => r'展開';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'尚餘 1 個字元';
+  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'尚餘 $remainingCount 個字元';
+  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 
   @override
   String get refreshIndicatorSemanticLabel => r'重新整理';
@@ -18067,6 +18067,45 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
+
+  @override
+  String get tabLabelRaw => r'第 $tabIndex 個標籤，總共 $tabCount 個';
+
+  @override
+  String get modalBarrierDismissLabel => r'拒絕';
+
+  @override
+  String get signedInLabel => r'已登入';
+
+  @override
+  String get aboutListTileTitleRaw => r'關於$applicationName';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'第 $firstRow 至 $lastRow 列，共 $rowCount 列';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
+
+  @override
+  String get timePickerHourModeAnnouncement => r'揀選小時';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'揀選分鐘';
+
+  @override
+  String get alertDialogLabel => r'通知';
+
+  @override
+  String get reorderItemToStart => r'移到開頭';
+
+  @override
+  String get reorderItemToEnd => r'移到最後';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'尚餘 1 個字元';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'尚餘 $remainingCount 個字元';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -18091,45 +18130,6 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
-
-  @override
-  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
-
-  @override
-  String get modalBarrierDismissLabel => r'關閉';
-
-  @override
-  String get signedInLabel => r'已登入帳戶';
-
-  @override
-  String get aboutListTileTitleRaw => r'關於「$applicationName」';
-
-  @override
-  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
-
-  @override
-  String get timePickerHourModeAnnouncement => r'選取小時數';
-
-  @override
-  String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
-
-  @override
-  String get alertDialogLabel => r'快訊';
-
-  @override
-  String get reorderItemToStart => r'移至開頭';
-
-  @override
-  String get reorderItemToEnd => r'移至結尾';
-
-  @override
-  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
-
-  @override
-  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
 /// The translations for Zulu (`zu`).
