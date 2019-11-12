@@ -43,12 +43,13 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   MaterialPageRoute({
     @required this.builder,
     RouteSettings settings,
+    this.opaque = false,
     this.maintainState = true,
     bool fullscreenDialog = false,
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       assert(opaque),
+       assert(opaque != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   /// Builds the primary contents of the route.
@@ -56,6 +57,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   final bool maintainState;
+  
+  @override
+  final bool opaque;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
