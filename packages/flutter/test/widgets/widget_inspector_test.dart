@@ -917,6 +917,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     testWidgets('test transformDebugCreator can transform unmounted element', (WidgetTester tester) async {
+      final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
       // Clears any mocked pub root.
       service.setPubRootDirectories(<Object>[]);
       final Element elementA = const Text('a').createElement();
@@ -930,9 +931,16 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         // Transforms unmounted element should not raise any exception.
         expect(false, isTrue);
       }
-      expect(nodes.length, 1);
-      expect(nodes[0].runtimeType, StringProperty);
-      expect(nodes[0].name, 'dummy1');
+      if (widgetTracked) {
+        expect(nodes.length, 1);
+        expect(nodes[0].runtimeType, StringProperty);
+        expect(nodes[0].name, 'dummy1');
+      } else {
+        expect(nodes.length, 3);
+        expect(nodes[1].runtimeType, ErrorDescription);
+        final ErrorDescription node = nodes[1];
+        expect(node.valueToString().startsWith('Widget creation tracking is currently disabled.'), true);
+      }
     });
 
     testWidgets('test transformDebugCreator will not re-order if before stack trace', (WidgetTester tester) async {
