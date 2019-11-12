@@ -149,10 +149,6 @@ const String pluralMethodTemplate = '''
   }
 ''';
 
-int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
-  return a.path.compareTo(b.path);
-}
-
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
   final Map<String, dynamic> attributesMap = bundle['@$key'];
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
@@ -238,7 +234,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     ...genIntlMethodArgs(bundle, key),
   ];
 
-  for (String pluralKey in pluralIds.keys.toList()..sort()) {
+  for(String pluralKey in pluralIds.keys) {
     final RegExp expRE = RegExp('($pluralKey){([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(message);
     if (match.groupCount == 2) {
@@ -261,7 +257,7 @@ String genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
   const String suffix = '),\n  ];';
 
   String resultingProperty = prefix;
-  for (LocaleInfo locale in supportedLocales.toList()..sort()) {
+  for (LocaleInfo locale in supportedLocales) {
     final String languageCode = locale.languageCode;
     final String countryCode = locale.countryCode;
 
@@ -388,7 +384,7 @@ Future<void> main(List<String> arguments) async {
   final Set<String> supportedLanguageCodes = <String>{};
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
-  for (FileSystemEntity entity in l10nDirectory.listSync().toList()..sort(sortFilesByPath)) {
+  for (FileSystemEntity entity in l10nDirectory.listSync()) {
     final String entityPath = entity.path;
 
     if (FileSystemEntity.isFileSync(entityPath)) {
@@ -439,7 +435,7 @@ Future<void> main(List<String> arguments) async {
 
   final RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
 
-  for (String key in bundle.keys.toList()..sort()) {
+  for (String key in bundle.keys) {
     if (key.startsWith('@'))
       continue;
     if (!_isValidGetterAndMethodName(key))
