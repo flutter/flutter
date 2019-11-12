@@ -34,14 +34,14 @@ void main() {
             Tab(text: 'Main'),
           ],
         );
-      }
+      },
     );
     final OverlayEntry entry2 = OverlayEntry(
-        maintainState: true,
-        opaque: true,
-        builder: (BuildContext context) {
-          return const Text('number2');
-        }
+      maintainState: true,
+      opaque: true,
+      builder: (BuildContext context) {
+        return const Text('number2');
+      },
     );
 
     await tester.pumpWidget(
