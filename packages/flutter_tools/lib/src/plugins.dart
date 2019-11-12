@@ -402,6 +402,16 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       for (Map<String, dynamic> plugin in androidPlugins) {
         if (plugin['supportsEmbeddingV1'] && !plugin['supportsEmbeddingV2']) {
           templateContext['needsShim'] = true;
+          if (project.isModule) {
+            printStatus(
+              'The plugin `${plugin['name']}` is built using an older version '
+              "of the Android plugin API which assumes that it's running in a "
+              'full-Flutter environment. It may have undefined behaviors when '
+              'Flutter is integrated into an existing app as a module.\n'
+              'The plugin can be updated to the v2 Android Plugin APIs by '
+              'following https://flutter.dev/go/android-plugin-migration.'
+            );
+          }
           break;
         }
       }
