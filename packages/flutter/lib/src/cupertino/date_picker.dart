@@ -449,48 +449,50 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   FixedExtentScrollController dateController;
 
   // The current selection of the hour picker. Values range from 0 to 23.
-  int get selectedHour {
-    final int clampped = hourController.selectedItem % 24;
-    return isHourRegionFlipped
-      ? (clampped + 12) % 24
-      : clampped;
+  int get selectedHour => _selectedHour(selectedAmPm, _selectedHourIndex);
+  int get _selectedHourIndex => hourController.hasClients ? hourController.selectedItem % 24 : initialDateTime.hour;
+  // Calculates the selected hour given the selected indices of the hour picker
+  // and the meridiem picker.
+  int _selectedHour(int selectedAmPm, int selectedHour) {
+    return _isHourRegionFlipped(selectedAmPm) ? (selectedHour + 12) % 24 : selectedHour;
   }
-
   // The controller of the hour column.
   FixedExtentScrollController hourController;
 
   // The current selection of the minute picker. Values range from 0 to 59.
-  int get selectedMinute => minuteController.selectedItem * widget.minuteInterval % 60;
+  int get selectedMinute {
+    return minuteController.hasClients
+      ? minuteController.selectedItem * widget.minuteInterval % 60
+      : initialDateTime.minute;
+  }
   // The controller of the minute column.
   FixedExtentScrollController minuteController;
 
   // Whether the current meridiem selection is AM or PM.
   //
-  // Returns 0 if widget.use24hFormat is true.
   // We can't use the selectedItem of meridiemController as the source of truth
-  // because the meridiem picker can be scrolled animatedly by the hour picker
-  // (e.g. if you scroll from 12 to 1 in 12h format).
+  // because the meridiem picker can be scrolled **animatedly** by the hour picker
+  // (e.g. if you scroll from 12 to 1 in 12h format), but the meridiem change
+  // should take effect **before** the animation finishes.
   int selectedAmPm;
-
-  // Flips the physical-region-to-meridiem mapping.
-  bool get isHourRegionFlipped => selectedAmPm != meridiemRegion;
-
+  // Whether the physical-region-to-meridiem mapping is flipped .
+  bool get isHourRegionFlipped => _isHourRegionFlipped(selectedAmPm);
+  bool _isHourRegionFlipped(int selectedAmPm) => selectedAmPm != meridiemRegion;
+  // Which of the two 12-hour regions is the hour picker currently in.
+  //
+  // Used to determine whether the meridiemController should start animating.
+  // Valid values are 0 and 1.
+  //
+  // The AM/PM correspondence of the two regions flips when the meridiem picker
+  // scrolls. This variable is to keep track of the selected "physical"
+  // (meridiem picker invariant) region of the hour picker. The "physical" region
+  // of an item of index `i` is `i ~/ 12`.
+  int meridiemRegion;
   // The current selection of the AM/PM picker.
   //
   // - 0 means AM
   // - 1 means PM
   FixedExtentScrollController meridiemController;
-
-  // Which of the two 12-hour regions is the hour picker currently in.
-  //
-  // Valid values are 0 and 1. Used to determine whether the meridiemController
-  // should start animating (thus doesn't affect anything in 24h format).
-  //
-  // The AM/PM correspondence of the two regions swaps when the meridiem picker
-  // scrolls. This variable is to keep a record of the selected "physical"
-  // (meridiem picker invariant) region of the hour picker. The "physical" region
-  // of an item of index `i` is `i ~/ 12`.
-  int meridiemRegion;
 
   bool isDatePickerScrolling = false;
   bool isHourPickerScrolling = false;
@@ -512,7 +514,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     super.initState();
     initialDateTime = widget.initialDateTime;
 
-    // Initially the "physical" region maps to the meridiem region with the same number.
+    // Initially each of the "physical" regions is mapped to the meridiem region
+    // with the same number, e.g., the first 12 items are mapped to the first 12
+    // hours of a day. Such mapping is flipped when the meridiem picker scrolls,
+    // the first 12 items are mapped to the last 12 hours of a day.
     selectedAmPm = initialDateTime.hour ~/ 12;
     meridiemRegion = selectedAmPm;
 
@@ -655,6 +660,25 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
+  // With the meridem picker set to `meridiemIndex`, and the hour picker set to
+  // `hourIndex`, is it possible to change the value of the minute picker, so
+  // that the resulting date stays in the valid range.
+  bool _isValidHour(int meridiemIndex, int hourIndex) {
+    final DateTime rangeStart = DateTime(
+      initialDateTime.year,
+      initialDateTime.month,
+      initialDateTime.day + selectedDayFromInitial,
+      _selectedHour(meridiemIndex, hourIndex),
+      0,
+    );
+
+    // The end value of the range is exclusive, i.e. [rangeStart, rangeEnd).
+    final DateTime rangeEnd = rangeStart.add(const Duration(hours: 1));
+
+    return (widget?.minimumDate?.isBefore(rangeEnd) ?? true)
+        && !(widget?.maximumDate?.isBefore(rangeStart) ?? false);
+  }
+
   Widget _buildHourPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
@@ -702,26 +726,15 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           assert(debugIsFlipped == isHourRegionFlipped);
         },
         children: List<Widget>.generate(24, (int index) {
-          final int realHour = isHourRegionFlipped ? (index + 12) % 24 : index;
-          final int hour = widget.use24hFormat ? realHour : (realHour + 11) % 12 + 1;
-
-          final DateTime initialTime = DateTime(
-            initialDateTime.year,
-            initialDateTime.month,
-            initialDateTime.day + selectedDayFromInitial,
-            realHour,
-            0,
-          );
-
-          final bool isInvalidHour = (widget?.minimumDate?.isAfter(initialTime.add(const Duration(minutes: 59))) ?? false)
-                                  || (widget?.maximumDate?.isBefore(initialTime) ?? false);
+          final int hour = isHourRegionFlipped ? (index + 12) % 24 : index;
+          final int displayHour = widget.use24hFormat ? hour : (hour + 11) % 12 + 1;
 
           return itemPositioningBuilder(
             context,
             Text(
-              localizations.datePickerHour(hour),
-              semanticsLabel: localizations.datePickerHourSemanticsLabel(hour),
-              style: _themeTextStyle(context, isValid: !isInvalidHour),
+              localizations.datePickerHour(displayHour),
+              semanticsLabel: localizations.datePickerHourSemanticsLabel(displayHour),
+              style: _themeTextStyle(context, isValid: _isValidHour(selectedAmPm, index)),
             ),
           );
         }),
@@ -753,12 +766,24 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         onSelectedItemChanged: _onSelectedItemChange,
         children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
           final int minute = index * widget.minuteInterval;
+
+          final DateTime date = DateTime(
+            initialDateTime.year,
+            initialDateTime.month,
+            initialDateTime.day + selectedDayFromInitial,
+            selectedHour,
+            minute,
+          );
+
+          final bool isInvalidMinute = (widget?.minimumDate?.isAfter(date) ?? false)
+                                    || (widget?.maximumDate?.isBefore(date) ?? false);
+
           return itemPositioningBuilder(
             context,
             Text(
               localizations.datePickerMinute(minute),
               semanticsLabel: localizations.datePickerMinuteSemanticsLabel(minute),
-              style: _themeTextStyle(context),
+              style: _themeTextStyle(context, isValid: !isInvalidMinute),
             ),
           );
         }),
@@ -799,7 +824,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
               index == 0
                 ? localizations.anteMeridiemAbbreviation
                 : localizations.postMeridiemAbbreviation,
-              style: _themeTextStyle(context),
+              style: _themeTextStyle(context, isValid: _isValidHour(index, _selectedHourIndex)),
             ),
           );
         }),
@@ -823,7 +848,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
     final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
 
-    print('scrolling stopped:${widget.minimumDate} is after $selectedDate? $minCheck, ${widget.maximumDate} is before $selectedDate $maxCheck');
     if (minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
       final DateTime targetDate = minCheck ? widget.minimumDate : widget.maximumDate;
@@ -843,11 +867,27 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       }
 
       if (fromDate.hour != newDate.hour) {
-        hourController.animateToItem(
-          hourController.selectedItem + newDate.hour - fromDate.hour,
-          curve: Curves.easeInOut,
-          duration: const Duration(milliseconds: 200) ,
-        );
+        final bool needsMeridiemChange = !widget.use24hFormat && fromDate.hour ~/ 12 != newDate.hour ~/ 12;
+        if (needsMeridiemChange) {
+          meridiemController.animateToItem(
+            1 - meridiemController.selectedItem,
+            curve: Curves.easeInOut,
+            duration: const Duration(milliseconds: 200) ,
+          );
+
+          // Keep the target item index in the current 12-h region.
+          hourController.animateToItem(
+            (hourController.selectedItem + newDate.hour - fromDate.hour) % 12,
+            curve: Curves.easeInOut,
+            duration: const Duration(milliseconds: 200) ,
+          );
+        } else {
+          hourController.animateToItem(
+            hourController.selectedItem + newDate.hour - fromDate.hour,
+            curve: Curves.easeInOut,
+            duration: const Duration(milliseconds: 200) ,
+          );
+        }
       }
 
       if (fromDate.minute != newDate.minute) {
