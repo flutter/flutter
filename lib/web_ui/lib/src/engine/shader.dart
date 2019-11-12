@@ -231,3 +231,13 @@ class GradientConical extends EngineGradient {
     throw UnimplementedError();
   }
 }
+
+/// Backend implementation of [ui.ImageFilter].
+///
+/// Currently only `blur` is supported.
+class EngineImageFilter implements ui.ImageFilter {
+  EngineImageFilter.blur({this.sigmaX = 0.0, this.sigmaY = 0.0});
+
+  final double sigmaX;
+  final double sigmaY;
+}

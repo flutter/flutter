@@ -92,7 +92,8 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   @override
   ui.BackdropFilterEngineLayer pushBackdropFilter(ui.ImageFilter filter,
       {ui.EngineLayer oldLayer}) {
-    throw UnimplementedError();
+    pushLayer(BackdropFilterLayer(filter));
+    return null;
   }
 
   @override

@@ -33,6 +33,19 @@ class SkCanvas {
         'saveLayer', <js.JsObject>[makeSkRect(bounds), makeSkPaint(paint)]);
   }
 
+  int saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
+    final SkImageFilter skImageFilter = filter;
+    return skCanvas.callMethod(
+      'saveLayer',
+      <dynamic>[
+        null,
+        skImageFilter.skImageFilter,
+        0,
+        makeSkRect(bounds),
+      ],
+    );
+  }
+
   void restore() {
     skCanvas.callMethod('restore');
   }

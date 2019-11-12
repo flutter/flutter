@@ -156,6 +156,12 @@ js.JsObject makeSkPaint(ui.Paint paint) {
     skPaint.callMethod('setMaskFilter', <js.JsObject>[skMaskFilter]);
   }
 
+  if (paint.imageFilter != null) {
+    final SkImageFilter skImageFilter = paint.imageFilter;
+    skPaint.callMethod(
+        'setImageFilter', <js.JsObject>[skImageFilter.skImageFilter]);
+  }
+
   if (paint.colorFilter != null) {
     EngineColorFilter engineFilter = paint.colorFilter;
     SkColorFilter skFilter = engineFilter._toSkColorFilter();

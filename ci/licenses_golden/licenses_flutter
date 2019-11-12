@@ -361,6 +361,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/engine_delegate.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/fonts.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/image.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/image_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/initialization.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/layer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/layer_scene_builder.dart
