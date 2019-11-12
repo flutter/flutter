@@ -258,10 +258,20 @@ const Set<String> _genericFontFamilies = <String>{
   'fangsong',
 };
 
-/// Wraps a font family in quotes unless it is a generic font family.
-String quoteFontFamily(String fontFamily) {
+/// A default fallback font family in case an unloaded font has been requested.
+///
+/// For iOS, default to Helvetica, where it should be available, otherwise
+/// default to Arial.
+final String _fallbackFontFamily =
+    operatingSystem == OperatingSystem.iOs ? 'Helvetica' : 'Arial';
+
+/// Create a font-family string appropriate for CSS.
+///
+/// If the given [fontFamily] is a generic font-family, then just return it.
+/// Otherwise, wrap the family name in quotes and add a fallback font family.
+String canonicalizeFontFamily(String fontFamily) {
   if (_genericFontFamilies.contains(fontFamily)) {
     return fontFamily;
   }
-  return '"$fontFamily"';
+  return '"$fontFamily", $_fallbackFontFamily, sans-serif';
 }

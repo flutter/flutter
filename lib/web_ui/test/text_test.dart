@@ -241,9 +241,43 @@ void main() async {
     expect(paragraph.plainText, isNull);
     final List<SpanElement> spans =
         paragraph.paragraphElement.querySelectorAll('span');
-    expect(spans[0].style.fontFamily, 'Ahem');
+    expect(spans[0].style.fontFamily, 'Ahem, Arial, sans-serif');
     // The nested span here should not set it's family to default sans-serif.
-    expect(spans[1].style.fontFamily, 'Ahem');
+    expect(spans[1].style.fontFamily, 'Ahem, Arial, sans-serif');
+  });
+
+  test('adds Arial and sans-serif as fallback fonts', () {
+    // Set this to false so it doesn't default to 'Ahem' font.
+    debugEmulateFlutterTesterEnvironment = false;
+
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'SomeFont',
+      fontSize: 12.0,
+    ));
+
+    builder.addText('Hello');
+
+    final EngineParagraph paragraph = builder.build();
+    expect(paragraph.paragraphElement.style.fontFamily, 'SomeFont, Arial, sans-serif');
+
+    debugEmulateFlutterTesterEnvironment = true;
+  });
+
+  test('does not add fallback fonts to generic families', () {
+    // Set this to false so it doesn't default to 'Ahem' font.
+    debugEmulateFlutterTesterEnvironment = false;
+
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'serif',
+      fontSize: 12.0,
+    ));
+
+    builder.addText('Hello');
+
+    final EngineParagraph paragraph = builder.build();
+    expect(paragraph.paragraphElement.style.fontFamily, 'serif');
+
+    debugEmulateFlutterTesterEnvironment = true;
   });
 
   test('can set font families that need to be quoted', () {
@@ -258,10 +292,11 @@ void main() async {
     builder.addText('Hello');
 
     final EngineParagraph paragraph = builder.build();
-    expect(paragraph.paragraphElement.style.fontFamily, '"MyFont 2000"');
+    expect(paragraph.paragraphElement.style.fontFamily, '"MyFont 2000", Arial, sans-serif');
 
     debugEmulateFlutterTesterEnvironment = true;
   });
+
   group('TextRange', () {
     test('empty ranges are correct', () {
       const TextRange range = TextRange(start: -1, end: -1);
