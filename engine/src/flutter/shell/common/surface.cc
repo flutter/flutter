@@ -60,10 +60,8 @@ flutter::ExternalViewEmbedder* Surface::GetExternalViewEmbedder() {
   return nullptr;
 }
 
-std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch>
-Surface::MakeRenderContextCurrent() {
-  return std::make_unique<
-      RendererContextSwitchManager::RendererContextSwitchPureResult>(true);
+bool Surface::MakeRenderContextCurrent() {
+  return true;
 }
 
 }  // namespace flutter
