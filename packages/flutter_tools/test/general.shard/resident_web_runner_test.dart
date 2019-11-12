@@ -39,8 +39,6 @@ void main() {
   MockDebugConnection mockDebugConnection;
   MockVmService mockVmService;
   MockChromeDevice mockChromeDevice;
-  MockWebDevice mockWebDevice;
-  MockWebServerDevice mockWebServerDevice;
   MockAppConnection mockAppConnection;
   MockFlutterDevice mockFlutterDevice;
   MockWebDevFS mockWebDevFS;
@@ -58,8 +56,6 @@ void main() {
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
     mockChromeDevice = MockChromeDevice();
-    mockWebDevice = MockWebDevice();
-    mockWebServerDevice = MockWebServerDevice();
     mockAppConnection = MockAppConnection();
     mockFlutterDevice = MockFlutterDevice();
     mockWebDevFS = MockWebDevFS();
@@ -166,11 +162,14 @@ void main() {
   }));
 
   test('runner with web server device supports debugging with --start-paused', () => testbed.run(() {
-    final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
-      WebServerDevice(),
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+    final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
+      stayResident: true,
+      dartDefines: <String>[],
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, true);
@@ -179,13 +178,16 @@ void main() {
 
   test('runner with web server device uses debug extension with --start-paused', () => testbed.run(() async {
     _setupMocks();
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
     final BufferLogger bufferLogger = logger;
 
-    final ResidentWebRunner runner = ResidentWebRunner(
-      mockWebServerDevice,
+    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
+      stayResident: true,
+      dartDefines: <String>[],
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
