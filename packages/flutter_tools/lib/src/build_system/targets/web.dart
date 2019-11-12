@@ -130,6 +130,7 @@ class Dart2JSTarget extends Target {
       ? PackageMap.globalGeneratedPackagesPath
       : PackageMap.globalPackagesPath;
     final File outputFile = environment.buildDir.childFile('main.dart.js');
+
     final ProcessResult result = await processManager.run(<String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
@@ -147,6 +148,8 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
+      for (String dartDefine in parseDartDefines(environment))
+        '-D$dartDefine',
       environment.buildDir.childFile('main.dart').path,
     ]);
     if (result.exitCode != 0) {

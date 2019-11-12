@@ -238,6 +238,21 @@ class LogicalKeyboardKey extends KeyboardKey {
     return result == null ? <LogicalKeyboardKey>{} : <LogicalKeyboardKey>{result};
   }
 
+  /// Takes a set of keys, and returns the same set, but with any keys that have
+  /// synonyms replaced.
+  ///
+  /// It is used, for example, to make sets of keys with members like
+  /// [controlRight] and [controlLeft] and convert that set to contain just
+  /// [control], so that the question "is any control key down?" can be asked.
+  static Set<LogicalKeyboardKey> collapseSynonyms(Set<LogicalKeyboardKey> input) {
+    final Set<LogicalKeyboardKey> result = <LogicalKeyboardKey>{};
+    for (LogicalKeyboardKey key in input) {
+      final LogicalKeyboardKey synonym = _synonyms[key];
+      result.add(synonym ?? key);
+    }
+    return result;
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);

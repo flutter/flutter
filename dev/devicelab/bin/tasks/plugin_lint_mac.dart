@@ -13,10 +13,11 @@ import 'package:path/path.dart' as path;
 /// to confirm the plugin module can be imported into an app.
 Future<void> main() async {
   await task(() async {
-    section('Create Objective-C iOS plugin');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin_test.');
     try {
+      section('Create Objective-C plugin');
+
       const String objcPluginName = 'test_plugin_objc';
       await inDirectory(tempDir, () async {
         await flutter(
@@ -31,8 +32,10 @@ Future<void> main() async {
         );
       });
 
-      final String objcPodspecPath = path.join(tempDir.path, objcPluginName, 'ios', '$objcPluginName.podspec');
-      section('Lint Objective-C iOS plugin as framework');
+      section('Lint Objective-C iOS podspec plugin as framework');
+
+      final String objcPluginPath = path.join(tempDir.path, objcPluginName);
+      final String objcPodspecPath = path.join(objcPluginPath, 'ios', '$objcPluginName.podspec');
       await inDirectory(tempDir, () async {
         await exec(
           'pod',
@@ -45,7 +48,8 @@ Future<void> main() async {
         );
       });
 
-      section('Lint Objective-C iOS plugin as library');
+      section('Lint Objective-C iOS podspec plugin as library');
+
       await inDirectory(tempDir, () async {
         await exec(
           'pod',
@@ -55,6 +59,136 @@ Future<void> main() async {
             objcPodspecPath,
             '--allow-warnings',
             '--use-libraries',
+          ],
+        );
+      });
+
+      section('Create Swift plugin');
+
+      const String swiftPluginName = 'test_plugin_swift';
+      await inDirectory(tempDir, () async {
+        await flutter(
+          'create',
+          options: <String>[
+            '--org',
+            'io.flutter.devicelab',
+            '--template=plugin',
+            '--ios-language=swift',
+            swiftPluginName,
+          ],
+        );
+      });
+
+      section('Create Objective-C application');
+
+      const String objcAppName = 'test_app_objc';
+      await inDirectory(tempDir, () async {
+        await flutter(
+          'create',
+          options: <String>[
+            '--org',
+            'io.flutter.devicelab',
+            '--ios-language=objc',
+            objcAppName,
+          ],
+        );
+      });
+
+      section('Build Objective-C application with Swift and Objective-C plugins as libraries');
+
+      final String objcAppPath = path.join(tempDir.path, objcAppName);
+
+      final String swiftPluginPath = path.join(tempDir.path, swiftPluginName);
+      final File objcPubspec = File(path.join(objcAppPath, 'pubspec.yaml'));
+      String podspecContent = objcPubspec.readAsStringSync();
+      podspecContent = podspecContent.replaceFirst(
+        '\ndependencies:\n',
+        '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n',
+      );
+      objcPubspec.writeAsStringSync(podspecContent, flush: true);
+
+      await inDirectory(objcAppPath, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios',
+            '--no-codesign'
+          ],
+          // TODO(jmagman): Make Objective-C applications handle Swift libraries https://github.com/flutter/flutter/issues/16049
+          canFail: true
+        );
+      });
+
+      final File objcPodfile = File(path.join(objcAppPath, 'ios', 'Podfile'));
+      String objcPodfileContent = objcPodfile.readAsStringSync();
+      if (objcPodfileContent.contains('use_frameworks!')) {
+        return TaskResult.failure('Expected default Objective-C Podfile to not contain use_frameworks');
+      }
+
+      section('Build Objective-C application with Swift and Objective-C plugins as frameworks');
+
+      objcPodfileContent = 'use_frameworks!\n' + objcPodfileContent;
+      objcPodfile.writeAsStringSync(objcPodfileContent, flush: true);
+
+      await inDirectory(objcAppPath, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios',
+            '--no-codesign'
+          ],
+        );
+      });
+
+      section('Create Swift application');
+
+      const String swiftAppName = 'test_app_swift';
+      await inDirectory(tempDir, () async {
+        await flutter(
+          'create',
+          options: <String>[
+            '--org',
+            'io.flutter.devicelab',
+            '--ios-language=swift',
+            swiftAppName,
+          ],
+        );
+      });
+
+      section('Build Swift application with Swift and Objective-C plugins as frameworks');
+
+      final String swiftAppPath = path.join(tempDir.path, swiftAppName);
+
+      final File swiftPubspec = File(path.join(swiftAppPath, 'pubspec.yaml'));
+      swiftPubspec.writeAsStringSync(podspecContent, flush: true);
+
+      await inDirectory(swiftAppPath, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios',
+            '--no-codesign'
+          ],
+        );
+      });
+
+      final File swiftPodfile = File(path.join(swiftAppPath, 'ios', 'Podfile'));
+      String swiftPodfileContent = swiftPodfile.readAsStringSync();
+      if (!swiftPodfileContent.contains('use_frameworks!')) {
+        return TaskResult.failure('Expected default Swift Podfile to contain use_frameworks');
+      }
+
+      section('Build Swift application with Swift and Objective-C plugins as libraries');
+
+      swiftPodfileContent = swiftPodfileContent.replaceAll('use_frameworks!', '');
+      swiftPodfile.writeAsStringSync(swiftPodfileContent, flush: true);
+
+      await inDirectory(swiftAppPath, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios',
+            '--no-codesign'
           ],
         );
       });

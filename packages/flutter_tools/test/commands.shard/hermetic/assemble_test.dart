@@ -18,15 +18,13 @@ import '../../src/testbed.dart';
 void main() {
   Testbed testbed;
   MockBuildSystem mockBuildSystem;
-
-  setUpAll(() {
-    Cache.disableLocking();
-  });
+  Cache.disableLocking();
 
   setUp(() {
     mockBuildSystem = MockBuildSystem();
     testbed = Testbed(overrides: <Type, Generator>{
       BuildSystem: ()  => mockBuildSystem,
+      Cache: () => FakeCache(),
     });
   });
 
@@ -39,7 +37,7 @@ void main() {
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
     final BufferLogger bufferLogger = logger;
 
-    expect(bufferLogger.statusText.trim(), 'build succeeded.');
+    expect(bufferLogger.traceText, contains('build succeeded.'));
   }));
 
   test('Throws ToolExit if not provided with output', () => testbed.run(() async {

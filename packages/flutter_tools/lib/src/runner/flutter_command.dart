@@ -269,6 +269,20 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
+  void usesDartDefines() {
+    argParser.addMultiOption(
+      'dart-define',
+      help: 'Passed to the Dart compiler building this application as a -D flag.\n'
+            'Values supported by this option are compiler implementation specific.\n'
+            'Multiple defines can be passed by repeating --dart-define multiple times.',
+      valueHelp: 'FOO=bar',
+      hide: true,
+    );
+  }
+
+  /// The values passed via the `--dart-define` option.
+  List<String> get dartDefines => argResults['dart-define'];
+
   void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
       defaultsTo: null,
