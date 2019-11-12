@@ -4,8 +4,10 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' hide exit;
+import 'dart:core' as core_internals show print;
+import 'dart:core' hide print;
 import 'dart:io' as io_internals show exit;
+import 'dart:io' hide exit;
 
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
@@ -32,6 +34,11 @@ class ExitException implements Exception {
 void exit(int exitCode) {
   throw ExitException(exitCode);
 }
+
+typedef PrintCallback = void Function(Object line);
+
+// Allow print() to be overridden, for tests.
+PrintCallback print = core_internals.print;
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter analyze. For example, you might want to call this
