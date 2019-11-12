@@ -24,6 +24,18 @@ class _TestGestureFlutterBinding extends BindingBase
     postFrameCallbacks = <void Function(Duration)>[];
   }
 
+  SchedulerPhase _overridePhase;
+  @override
+  SchedulerPhase get schedulerPhase => _overridePhase ?? super.schedulerPhase;
+
+  // Bypass the phase assert of [MouseTracker.schedulePostFrameCheck]
+  void scheduleMouseTrackerPostFrameCheck() {
+    final SchedulerPhase lastPhase = _overridePhase;
+    _overridePhase = SchedulerPhase.persistentCallbacks;
+    mouseTracker.schedulePostFrameCheck();
+    _overridePhase = lastPhase;
+  }
+
   List<void Function(Duration)> postFrameCallbacks;
 
   // Proxy post-frame callbacks
@@ -352,7 +364,7 @@ void main() {
 
     // Mannually schedule a postframe check, which is usually done by the
     // renderer binding
-    _mouseTracker.schedulePostFrameCheck();
+    _binding.scheduleMouseTrackerPostFrameCheck();
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     _binding.flushPostFrameCallbacks(Duration.zero);
@@ -372,7 +384,7 @@ void main() {
 
     // Mannually schedule a postframe check, which is usually done by the
     // renderer binding
-    _mouseTracker.schedulePostFrameCheck();
+    _binding.scheduleMouseTrackerPostFrameCheck();
     expect(disposes, isEmpty);
     expect(_binding.postFrameCallbacks, hasLength(1));
 
@@ -410,7 +422,7 @@ void main() {
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
 
-    _mouseTracker.schedulePostFrameCheck();
+    _binding.scheduleMouseTrackerPostFrameCheck();
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     _binding.flushPostFrameCallbacks(Duration.zero);
@@ -424,7 +436,7 @@ void main() {
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
 
-    _mouseTracker.schedulePostFrameCheck();
+    _binding.scheduleMouseTrackerPostFrameCheck();
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[

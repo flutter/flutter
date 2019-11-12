@@ -237,18 +237,23 @@ class MouseTracker extends ChangeNotifier {
     return state ?? newState;
   }
 
-  // Returns the mouse state of a device. If it doesn't exist, create one using
-  // `mostRecentEvent`, and store it in `_newMouseStates`.
+  // Returns the mouse state of a device.
   //
-  // Returns true if it is newly created.
-  bool _putMouseStateIfAbsent(int device, PointerEvent mostRecentEvent) {
-    _MouseState result = _getMouseState(device);
-    if (result == null) {
-      result = _MouseState(mostRecentEvent: mostRecentEvent);
-      _newMouseStates[device] = result;
-      return true;
+  // If it doesn't exist, create one using `mostRecentEvent`, store it in
+  // `_newMouseStates`, and returns this event.
+  // If it exists, update its `mostRecentEvent`, and return the previous
+  // `mostRecentEvent`.
+  PointerEvent _putMouseStateIfAbsent(int device, PointerEvent mostRecentEvent) {
+    final _MouseState state = _getMouseState(device);
+    if (state == null) {
+      final _MouseState newState = _MouseState(mostRecentEvent: mostRecentEvent);
+      _newMouseStates[device] = newState;
+      return mostRecentEvent;
+    } else {
+      final PointerEvent previousEvent = state.mostRecentEvent;
+      state.mostRecentEvent = mostRecentEvent;
+      return previousEvent;
     }
-    return false;
   }
 
   // Handler for events coming from the PointerRouter.
@@ -258,12 +263,9 @@ class MouseTracker extends ChangeNotifier {
     if (event is PointerSignalEvent)
       return;
     final int device = event.device;
-    final bool isNewState = _putMouseStateIfAbsent(device, event);
+    final PointerEvent previousEvent = _putMouseStateIfAbsent(device, event);
     final _MouseState mouseState = _getMouseState(device);
     assert(mouseState != null);
-    final PointerEvent previousEvent = mouseState.mostRecentEvent;
-    if (!isNewState)
-      mouseState.mostRecentEvent = event;
     if (event is PointerAddedEvent
         || event is PointerRemovedEvent
         || previousEvent is PointerAddedEvent
@@ -382,6 +384,7 @@ class MouseTracker extends ChangeNotifier {
     final Iterable<MouseTrackerAnnotation> enteringAnnotations =
       nextAnnotations.difference(lastAnnotations).toList().reversed;
     for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
+      assert(isAnnotationAttached(annotation));
       if (annotation.onEnter != null) {
         annotation.onEnter(PointerEnterEvent.fromMouseEvent(mostRecentEvent));
       }
@@ -401,7 +404,17 @@ class MouseTracker extends ChangeNotifier {
     }
   }
 
+  /// Mark all devices as dirty, and schedule a callback that is executed in the
+  /// upcoming post-frame phase to check their updates.
+  ///
+  /// Checking a device means to collect the annotations that the pointer
+  /// hovers, and triggers necessary callbacks accordingly.
+  ///
+  /// This callback must be called in scheduler's persistent callback phase,
+  /// and is typically called by [RendererBinding]'s drawing method. This is
+  /// because every new frame can change the position of annotations.
   void schedulePostFrameCheck() {
+    assert(SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks);
     _markAllDevicesAsDirty();
   }
 
@@ -418,18 +431,28 @@ class MouseTracker extends ChangeNotifier {
     return _trackedAnnotations.contains(annotation);
   }
 
-  /// Notify [MouseTracker] that a new mouse tracker annotation has started to
+  /// Notify [MouseTracker] that a new [MouseTrackerAnnotation] has started to
   /// take effect.
   ///
-  /// This should be called as soon as the layer that owns this annotation is
-  /// added to the layer tree.
+  /// This method should be called as soon as the render object that owns this
+  /// annotation is added to the render tree, so that whether the annotation is
+  /// attached is kept in sync with whether its owner object is mounted.
   ///
-  /// This triggers [MouseTracker] to schedule a mouse position check during the
-  /// post frame to see if this new annotation might trigger enter events.
+  /// {@template flutter.mouseTracker.attachAnnotation}
+  /// This method does not cause any immediate effect, since the state it
+  /// changes is used during a post-frame callback or while handling certain
+  /// pointer events. Therefore it's safe to call this method at any point
+  /// during the rendering pipeline.
+  ///
+  /// The state of annotation attachment determines whether an exit event is
+  /// caused by movement or by the disposal of its owner render object,
+  /// preventing some common patterns causing crashes. This is discussed in
+  /// detail in [MouseRegion.onExitOrDispose].
   ///
   /// The [MouseTracker] also uses this to track the number of attached
   /// annotations, and will skip mouse position checks if there is no
   /// annotations attached.
+  /// {@endtemplate}
   void attachAnnotation(MouseTrackerAnnotation annotation) {
     // Schedule a check so that we test this new annotation to see if any mouse
     // is currently inside its region. It has to happen after the frame is
@@ -441,16 +464,11 @@ class MouseTracker extends ChangeNotifier {
   /// Notify [MouseTracker] that a mouse tracker annotation that was previously
   /// attached has stopped taking effect.
   ///
-  /// This should be called as soon as the layer that owns this annotation is
-  /// removed from the layer tree. An assertion error will be thrown if the
-  /// associated layer is not removed and receives another mouse hit.
+  /// This method should be called as soon as the render object that owns this
+  /// annotation is removed from the render tree, so that whether the annotation
+  /// is attached is kept in sync with whether its owner object is mounted.
   ///
-  /// This triggers [MouseTracker] to perform a mouse position check immediately
-  /// to see if this annotation removal triggers any exit events.
-  ///
-  /// The [MouseTracker] also uses this to track the number of attached
-  /// annotations, and will skip mouse position checks if there is no
-  /// annotations attached.
+  /// {@macro flutter.mouseTracker.attachAnnotation}
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     _trackedAnnotations.remove(annotation);
   }
