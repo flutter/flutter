@@ -5843,6 +5843,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// exited this widget.
   ///
+  /// {@macro flutter.mouseTrackerAnnotation.onExitOrDispose}
+  ///
   /// {@tool snippet --template=stateful_widget_scaffold_center}
   ///
   /// This sample shows a region that disappears 1 second after pointer enter.
