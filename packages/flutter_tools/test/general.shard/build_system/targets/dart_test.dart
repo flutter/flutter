@@ -214,7 +214,7 @@ flutter_tools:lib/''');
       sdkRoot: anyNamed('sdkRoot'),
       aot: anyNamed('aot'),
       buildMode: anyNamed('buildMode'),
-      trackWidgetCreation: false,
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
       targetModel: anyNamed('targetModel'),
       outputFilePath: anyNamed('outputFilePath'),
       depFilePath: anyNamed('depFilePath'),
