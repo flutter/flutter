@@ -204,6 +204,7 @@ class KernelSnapshot extends Target {
         forceLinkPlatform = true;
         break;
       default:
+        forceLinkPlatform = false;
     }
 
     final CompilerOutput output = await compiler.compile(
@@ -218,7 +219,7 @@ class KernelSnapshot extends Target {
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
-      linkPlatformKernelIn: forceLinkPlatform ?? buildMode.isPrecompiled,
+      linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
       extraFrontEndOptions: extraFrontEndOptions,
