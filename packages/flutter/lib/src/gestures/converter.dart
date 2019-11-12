@@ -99,7 +99,7 @@ class PointerEventConverter {
           case ui.PointerChange.down:
             yield PointerDownEvent(
               timeStamp: timeStamp,
-              pointer: datum.pointer,
+              pointer: datum.pointerIdentifier,
               kind: kind,
               device: datum.device,
               position: position,
@@ -121,7 +121,7 @@ class PointerEventConverter {
           case ui.PointerChange.move:
             yield PointerMoveEvent(
               timeStamp: timeStamp,
-              pointer: datum.pointer,
+              pointer: datum.pointerIdentifier,
               kind: kind,
               device: datum.device,
               position: position,
@@ -146,7 +146,7 @@ class PointerEventConverter {
           case ui.PointerChange.up:
             yield PointerUpEvent(
               timeStamp: timeStamp,
-              pointer: datum.pointer,
+              pointer: datum.pointerIdentifier,
               kind: kind,
               device: datum.device,
               position: position,
@@ -169,7 +169,7 @@ class PointerEventConverter {
           case ui.PointerChange.cancel:
             yield PointerCancelEvent(
               timeStamp: timeStamp,
-              pointer: datum.pointer,
+              pointer: datum.pointerIdentifier,
               kind: kind,
               device: datum.device,
               position: position,
