@@ -54,12 +54,32 @@ class ProtocolDiscovery {
   StreamSubscription<String> _deviceLogSubscription;
 
   /// The discovered service URI.
-  ///
-  /// Port forwarding is only attempted when this is invoked, in case we never
-  /// need to port forward.
+  /// Use [uris] instead.
+  // TODO(egarciad): replace usages.
   Future<Uri> get uri async {
     final Uri rawUri = await _completer.future;
     return await _forwardPort(rawUri);
+  }
+
+  /// The discovered service URI stream.
+  ///
+  /// Port forwarding is only attempted when this is invoked, in case we never
+  /// need to port forward.
+  ///
+  /// Dependending on the lifespan of the app running the observatory,
+  /// a new observatory URI may be assigned to the app.
+  Stream<Uri> get uris {
+    return logReader.logLines
+      .where((String line) => _getObservatoryUri(line) != null)
+      // Throttle the logs, so the stream forwards the most recent logs.
+      .transform(throttle<String>(
+        timeInMilliseconds: 200,
+      ))
+      .asyncMap<Uri>((String line) async {
+        final Uri deviceUri = _getObservatoryUri(line);
+        assert(deviceUri != null);
+        return await _forwardPort(deviceUri);
+      });
   }
 
   Future<void> cancel() => _stopScrapingLogs();
@@ -69,18 +89,24 @@ class ProtocolDiscovery {
     _deviceLogSubscription = null;
   }
 
-  void _handleLine(String line) {
+  Uri _getObservatoryUri(String line) {
     Uri uri;
     final RegExp r = RegExp('${RegExp.escape(serviceName)} listening on ((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)');
     final Match match = r.firstMatch(line);
 
     if (match != null) {
-      try {
-        uri = Uri.parse(match[1]);
-      } on FormatException catch (error, stackTrace) {
-        _stopScrapingLogs();
-        _completer.completeError(error, stackTrace);
-      }
+      return Uri.parse(match[1]);
+    }
+    return uri;
+  }
+
+  void _handleLine(String line) {
+    Uri uri;
+    try {
+      uri = _getObservatoryUri(line);
+    } on FormatException catch (error, stackTrace) {
+      _stopScrapingLogs();
+      _completer.completeError(error, stackTrace);
     }
     if (uri == null) {
       return;
@@ -113,4 +139,36 @@ class ProtocolDiscovery {
 
     return hostUri;
   }
+}
+
+/// Throttles a stream by [timeInMilliseconds].
+@visibleForTesting
+StreamTransformer<S, S> throttle<S>({
+  @required int timeInMilliseconds,
+}) {
+  assert(timeInMilliseconds != null);
+  S latestLine;
+  Future<void> throttleFuture;
+  // Assume it just executed, so it skips the oldest entry.
+  int lastExecution = DateTime.now().millisecondsSinceEpoch;
+
+  return StreamTransformer<S, S>
+    .fromHandlers(
+      handleData: (S value, EventSink<S> sink) {
+        latestLine = value;
+
+        final int currentTime = DateTime.now().millisecondsSinceEpoch;
+        final int remainingTime = currentTime - lastExecution;
+        final int nextExecutionTime = remainingTime > timeInMilliseconds
+          ? 0
+          : remainingTime;
+        throttleFuture ??= Future<void>
+          .delayed(Duration(milliseconds: nextExecutionTime))
+          .whenComplete(() {
+            sink.add(latestLine);
+            throttleFuture = null;
+            lastExecution = DateTime.now().millisecondsSinceEpoch;
+          });
+      }
+    );
 }
