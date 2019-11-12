@@ -50,6 +50,14 @@ TextStyle _themeTextStyle(BuildContext context, { bool isValid = true }) {
   return isValid ? style : style.copyWith(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context));
 }
 
+void _animateColumnControllerToItem(FixedExtentScrollController controller, int targetItem) {
+  controller.animateToItem(
+    targetItem,
+    curve: Curves.easeInOut,
+    duration: const Duration(milliseconds: 200),
+  );
+}
+
 // Lays out the date picker based on how much space each single column needs.
 //
 // Each column is a child of this delegate, indexed from 0 to number of columns - 1.
@@ -445,7 +453,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       case CupertinoDatePickerMode.date:
         break;
     }
-    assert(false);
+    assert(
+      false,
+      '$runtimeType is only meant for dateAndTime mode or time mode',
+    );
     return 0;
   }
   // The controller of the date column.
@@ -481,7 +492,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // Whether the physical-region-to-meridiem mapping is flipped.
   bool get isHourRegionFlipped => _isHourRegionFlipped(selectedAmPm);
   bool _isHourRegionFlipped(int selectedAmPm) => selectedAmPm != meridiemRegion;
-  // Which of the two 12-hour regions is the hour picker currently in.
+  // The index of the 12-hour region the hour picker is currently in.
   //
   // Used to determine whether the meridiemController should start animating.
   // Valid values are 0 and 1.
@@ -656,9 +667,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
           final DateTime now = DateTime.now();
 
-          if (widget?.minimumDate?.isAfter(rangeEnd) == true)
+          if (widget.minimumDate?.isAfter(rangeEnd) == true)
             return null;
-          if (widget?.maximumDate?.isAfter(rangeStart) == false)
+          if (widget.maximumDate?.isAfter(rangeStart) == false)
             return null;
 
           final String dateText = rangeStart == DateTime(now.year, now.month, now.day)
@@ -689,8 +700,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     // The end value of the range is exclusive, i.e. [rangeStart, rangeEnd).
     final DateTime rangeEnd = rangeStart.add(const Duration(hours: 1));
 
-    return (widget?.minimumDate?.isBefore(rangeEnd) ?? true)
-        && !(widget?.maximumDate?.isBefore(rangeStart) ?? false);
+    return (widget.minimumDate?.isBefore(rangeEnd) ?? true)
+        && !(widget.maximumDate?.isBefore(rangeStart) ?? false);
   }
 
   Widget _buildHourPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
@@ -789,8 +800,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             minute,
           );
 
-          final bool isInvalidMinute = (widget?.minimumDate?.isAfter(date) ?? false)
-                                    || (widget?.maximumDate?.isBefore(date) ?? false);
+          final bool isInvalidMinute = (widget.minimumDate?.isAfter(date) ?? false)
+                                    || (widget.maximumDate?.isBefore(date) ?? false);
 
           return itemPositioningBuilder(
             context,
@@ -872,11 +883,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     assert(newDate != null);
     SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
       if (fromDate.year != newDate.year || fromDate.month != newDate.month || fromDate.day != newDate.day) {
-        dateController.animateToItem(
-          selectedDayFromInitial,
-          curve: Curves.easeInOut,
-          duration: const Duration(milliseconds: 200) ,
-        );
+        _animateColumnControllerToItem(dateController, selectedDayFromInitial);
       }
 
       if (fromDate.hour != newDate.hour) {
@@ -884,35 +891,22 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
                                       && fromDate.hour ~/ 12 != newDate.hour ~/ 12;
         // In AM/PM mode, the pickers should not scroll all the way to the other hour region.
         if (needsMeridiemChange) {
-          meridiemController.animateToItem(
-            1 - meridiemController.selectedItem,
-            curve: Curves.easeInOut,
-            duration: const Duration(milliseconds: 200) ,
-          );
+          _animateColumnControllerToItem(meridiemController, 1 - meridiemController.selectedItem);
 
           // Keep the target item index in the current 12-h region.
           final int newItem = (hourController.selectedItem ~/ 12) * 12
                             + (hourController.selectedItem + newDate.hour - fromDate.hour) % 12;
-          hourController.animateToItem(
-            newItem,
-            curve: Curves.easeInOut,
-            duration: const Duration(milliseconds: 200) ,
-          );
+          _animateColumnControllerToItem(hourController, newItem);
         } else {
-          hourController.animateToItem(
+          _animateColumnControllerToItem(
+            hourController,
             hourController.selectedItem + newDate.hour - fromDate.hour,
-            curve: Curves.easeInOut,
-            duration: const Duration(milliseconds: 200) ,
           );
         }
       }
 
       if (fromDate.minute != newDate.minute) {
-        minuteController.animateToItem(
-          newDate.minute,
-          curve: Curves.easeInOut,
-          duration: const Duration(milliseconds: 200) ,
-        );
+        _animateColumnControllerToItem(minuteController, newDate.minute);
       }
     });
   }
@@ -1159,8 +1153,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         },
         children: List<Widget>.generate(12, (int index) {
           final int month = index + 1;
-          final bool isInvalidMonth = (widget?.minimumDate?.year == selectedYear && widget.minimumDate.month > month)
-                                   || (widget?.maximumDate?.year == selectedYear && widget.maximumDate.month < month);
+          final bool isInvalidMonth = (widget.minimumDate?.year == selectedYear && widget.minimumDate.month > month)
+                                   || (widget.maximumDate?.year == selectedYear && widget.maximumDate.month < month);
 
           return itemPositioningBuilder(
             context,
@@ -1206,8 +1200,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           if (widget.maximumYear != null && year > widget.maximumYear)
             return null;
 
-          final bool isValidYear = (widget?.minimumDate == null || widget.minimumDate.year <= year)
-                                && (widget?.maximumDate == null || widget.maximumDate.year >= year);
+          final bool isValidYear = (widget.minimumDate == null || widget.minimumDate.year <= year)
+                                && (widget.maximumDate == null || widget.maximumDate.year >= year);
 
           return itemPositioningBuilder(
             context,
@@ -1266,27 +1260,15 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     assert(newDate != null);
     SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
       if (selectedYear != newDate.year) {
-        yearController.animateToItem(
-          newDate.year,
-          curve: Curves.easeInOut,
-          duration: const Duration(milliseconds: 200) ,
-        );
+        _animateColumnControllerToItem(yearController, newDate.year);
       }
 
       if (selectedMonth != newDate.month) {
-        monthController.animateToItem(
-          newDate.month - 1,
-          curve: Curves.easeInOut,
-          duration: const Duration(milliseconds: 200) ,
-        );
+        _animateColumnControllerToItem(monthController, newDate.month - 1);
       }
 
       if (selectedDay != newDate.day) {
-        dayController.animateToItem(
-          newDate.day - 1,
-          curve: Curves.easeInOut,
-          duration: const Duration(milliseconds: 200) ,
-        );
+        _animateColumnControllerToItem(dayController, newDate.day - 1);
       }
     });
   }
