@@ -446,6 +446,8 @@ FILE: ../../../flutter/lib/web_ui/lib/src/ui/initialization.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/lerp.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/natives.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/painting.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/ui/path.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/ui/path_metrics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/pointer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/semantics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/test_embedding.dart
