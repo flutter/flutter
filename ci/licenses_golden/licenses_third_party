@@ -1,4 +1,4 @@
-Signature: 03d479e89fa6c0abff5498a9980dfd24
+Signature: 0711148b858bd9d47c7b0cc7bcf967e7
 
 UNUSED LICENSES:
 
@@ -8597,8 +8597,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_flow_graph
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_scope_builder.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_reader.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_reader.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_fingerprints.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_translation_helper.cc
