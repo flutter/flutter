@@ -17,6 +17,7 @@ class ParagraphGeometricStyle {
     this.wordSpacing,
     this.decoration,
     this.ellipsis,
+    this.shadows,
   });
 
   final ui.FontWeight fontWeight;
@@ -29,6 +30,7 @@ class ParagraphGeometricStyle {
   final double wordSpacing;
   final String decoration;
   final String ellipsis;
+  final List<ui.Shadow> shadows;
 
   // Since all fields above are primitives, cache hashcode since ruler lookups
   // use this style as key.
@@ -109,7 +111,8 @@ class ParagraphGeometricStyle {
         letterSpacing == typedOther.letterSpacing &&
         wordSpacing == typedOther.wordSpacing &&
         decoration == typedOther.decoration &&
-        ellipsis == typedOther.ellipsis;
+        ellipsis == typedOther.ellipsis &&
+        shadows == typedOther.shadows;
   }
 
   @override
@@ -124,7 +127,11 @@ class ParagraphGeometricStyle {
         wordSpacing,
         decoration,
         ellipsis,
+        _hashShadows(shadows),
       );
+
+  int _hashShadows(List<ui.Shadow> shadows) =>
+      (shadows == null ? '' : _shadowListToCss(shadows)).hashCode;
 
   @override
   String toString() {
@@ -137,6 +144,7 @@ class ParagraphGeometricStyle {
           ' wordSpacing: $wordSpacing,'
           ' decoration: $decoration,'
           ' ellipsis: $ellipsis,'
+          ' shadows: $shadows,'
           ')';
     } else {
       return super.toString();
@@ -240,6 +248,10 @@ class TextDimensions {
       ..textDecoration = style.decoration;
     if (style.lineHeight != null) {
       _element.style.lineHeight = style.lineHeight.toString();
+    }
+    final List<ui.Shadow> shadowList = style.shadows;
+    if (shadowList != null) {
+      _element.style.textShadow = _shadowListToCss(shadowList);
     }
     _invalidateBoundsCache();
   }
@@ -765,7 +777,7 @@ class ParagraphRuler {
       return null;
     }
     final List<MeasurementResult> constraintCache =
-    _measurementCache[plainText];
+        _measurementCache[plainText];
     if (constraintCache == null) {
       return null;
     }

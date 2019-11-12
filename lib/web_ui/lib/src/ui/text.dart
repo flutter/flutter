@@ -918,7 +918,7 @@ class TextRange {
   const TextRange({
     this.start,
     this.end,
-  }) : assert(start != null && start >= -1),
+  })  : assert(start != null && start >= -1),
         assert(end != null && end >= -1);
 
   /// A text range that starts and ends at offset.
@@ -971,20 +971,17 @@ class TextRange {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! TextRange)
-      return false;
+    if (identical(this, other)) return true;
+    if (other is! TextRange) return false;
     final TextRange typedOther = other;
-    return typedOther.start == start
-        && typedOther.end == end;
+    return typedOther.start == start && typedOther.end == end;
   }
 
   @override
   int get hashCode => hashValues(
-    start.hashCode,
-    end.hashCode,
-  );
+        start.hashCode,
+        end.hashCode,
+      );
 
   @override
   String toString() => 'TextRange(start: $start, end: $end)';
