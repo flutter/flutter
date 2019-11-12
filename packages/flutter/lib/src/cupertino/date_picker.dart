@@ -195,20 +195,23 @@ class CupertinoDatePicker extends StatefulWidget {
   /// to [CupertinoDatePickerMode.dateAndTime].
   ///
   /// [onDateTimeChanged] is the callback called when the selected date or time
-  /// changes and must not be null.
+  /// changes and must not be null. When in [CupertinoDatePickerMode.time] mode,
+  /// the year, month and day will be the same as [initialDateTime].
   ///
   /// [initialDateTime] is the initial date time of the picker. Defaults to the
   /// present date and time and must not be null. The present must conform to
   /// the intervals set in [minimumDate], [maximumDate], [minimumYear], and
   /// [maximumYear].
   ///
-  /// [minimumDate] is the minimum date that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.dateAndTime]
-  /// mode. Null if there's no limit.
+  /// [minimumDate] is the minimum [DateTime] that the picker can be scrolled to.
+  /// Null if there's no limit. In [CupertinoDatePickerMode.time] mode, if the
+  /// date part of [initialDateTime] is after that of the [minimumDate], [minimumDate]
+  /// has no effect.
   ///
-  /// [maximumDate] is the maximum date that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.dateAndTime]
-  /// mode. Null if there's no limit.
+  /// [maximumDate] is the maximum [DateTime] that the picker can be scrolled to.
+  /// Null if there's no limit. In [CupertinoDatePickerMode.time] mode, if the
+  /// date part of [initialDateTime] is before that of the [maximumDate], [maximumDate]
+  /// has no effect.
   ///
   /// [minimumYear] is the minimum year that the picker can be scrolled to in
   /// [CupertinoDatePickerMode.date] mode. Defaults to 1 and must not be null.
@@ -473,9 +476,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // We can't use the selectedItem of meridiemController as the source of truth
   // because the meridiem picker can be scrolled **animatedly** by the hour picker
   // (e.g. if you scroll from 12 to 1 in 12h format), but the meridiem change
-  // should take effect **before** the animation finishes.
+  // should take effect immediately, **before** the animation finishes.
   int selectedAmPm;
-  // Whether the physical-region-to-meridiem mapping is flipped .
+  // Whether the physical-region-to-meridiem mapping is flipped.
   bool get isHourRegionFlipped => _isHourRegionFlipped(selectedAmPm);
   bool _isHourRegionFlipped(int selectedAmPm) => selectedAmPm != meridiemRegion;
   // Which of the two 12-hour regions is the hour picker currently in.
@@ -516,8 +519,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     // Initially each of the "physical" regions is mapped to the meridiem region
     // with the same number, e.g., the first 12 items are mapped to the first 12
-    // hours of a day. Such mapping is flipped when the meridiem picker scrolls,
-    // the first 12 items are mapped to the last 12 hours of a day.
+    // hours of a day. Such mapping is flipped when the meridiem picker is scrolled
+    // by the user, the first 12 items are mapped to the last 12 hours of a day.
     selectedAmPm = initialDateTime.hour ~/ 12;
     meridiemRegion = selectedAmPm;
 
@@ -555,7 +558,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     assert(
       oldWidget.mode == widget.mode,
-      "The $runtimeType's mode cannot change once it's built. ",
+      "The $runtimeType's mode cannot change once it's built.",
     );
 
     if (!widget.use24hFormat && oldWidget.use24hFormat) {
@@ -834,8 +837,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   // One or more pickers have just stopped scrolling.
   void _pickerDidStopScrolling() {
-    // Call setState to update the greyed out days/months/years, as the currently
-    // selected year/month may have changed.
+    // Call setState to update the greyed out date/hour/minute/meridiem.
     setState(() { });
 
     if (isScrolling)
@@ -867,7 +869,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       }
 
       if (fromDate.hour != newDate.hour) {
-        final bool needsMeridiemChange = !widget.use24hFormat && fromDate.hour ~/ 12 != newDate.hour ~/ 12;
+        final bool needsMeridiemChange = !widget.use24hFormat
+                                      && fromDate.hour ~/ 12 != newDate.hour ~/ 12;
+        // In AM/PM mode, the pickers should not scroll all the way to the other hour region.
         if (needsMeridiemChange) {
           meridiemController.animateToItem(
             1 - meridiemController.selectedItem,
@@ -876,8 +880,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           );
 
           // Keep the target item index in the current 12-h region.
+          final int newItem = (hourController.selectedItem ~/ 12) * 12
+                            + (hourController.selectedItem + newDate.hour - fromDate.hour) % 12;
           hourController.animateToItem(
-            (hourController.selectedItem + newDate.hour - fromDate.hour) % 12,
+            newItem,
             curve: Curves.easeInOut,
             duration: const Duration(milliseconds: 200) ,
           );
