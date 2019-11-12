@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
@@ -13,6 +14,9 @@ import '../ios/mac.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
+/// Builds an .app for an iOS app to be used for local testing on an iOS device
+/// or simulator. Can only be run on a macOS host. For producing deployment
+/// .ipas, see https://flutter.dev/docs/deployment/ios.
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
     usesTargetOption();
@@ -59,7 +63,7 @@ class BuildIOSCommand extends BuildSubCommand {
     final bool forSimulator = argResults['simulator'];
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
-    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
+    if (!platform.isMacOS) {
       throwToolExit('Building for iOS is only supported on the Mac.');
     }
 

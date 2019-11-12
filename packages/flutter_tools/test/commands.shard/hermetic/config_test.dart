@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
@@ -24,6 +25,7 @@ void main() {
   MockAndroidStudio mockAndroidStudio;
   MockAndroidSdk mockAndroidSdk;
   MockFlutterVersion mockFlutterVersion;
+  MockUsage mockUsage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -33,7 +35,30 @@ void main() {
     mockAndroidStudio = MockAndroidStudio();
     mockAndroidSdk = MockAndroidSdk();
     mockFlutterVersion = MockFlutterVersion();
+    mockUsage = MockUsage();
+
+    when(mockUsage.isFirstRun).thenReturn(false);
   });
+
+  void verifyNoAnalytics() {
+    verifyNever(mockUsage.sendCommand(
+      any,
+      parameters: anyNamed('parameters'),
+    ));
+    verifyNever(mockUsage.sendEvent(
+      any,
+      any,
+      label: anyNamed('label'),
+      value: anyNamed('value'),
+      parameters: anyNamed('parameters'),
+    ));
+    verifyNever(mockUsage.sendTiming(
+      any,
+      any,
+      any,
+      label: anyNamed('label'),
+    ));
+  }
 
   group('config', () {
     testUsingContext('machine flag', () async {
@@ -50,9 +75,11 @@ void main() {
 
       expect(jsonObject.containsKey('android-sdk'), true);
       expect(jsonObject['android-sdk'], isNotNull);
+      verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => mockAndroidStudio,
       AndroidSdk: () => mockAndroidSdk,
+      Usage: () => mockUsage,
     });
 
     testUsingContext('Can set build-dir', () async {
@@ -65,6 +92,9 @@ void main() {
       ]);
 
       expect(getBuildDirectory(), 'foo');
+      verifyNoAnalytics();
+    }, overrides: <Type, Generator>{
+      Usage: () => mockUsage,
     });
 
     testUsingContext('throws error on absolute path to build-dir', () async {
@@ -75,6 +105,9 @@ void main() {
         'config',
         '--build-dir=/foo',
       ]), throwsA(isInstanceOf<ToolExit>()));
+      verifyNoAnalytics();
+    }, overrides: <Type, Generator>{
+      Usage: () => mockUsage,
     });
 
     testUsingContext('allows setting and removing feature flags', () async {
@@ -115,9 +148,11 @@ void main() {
       expect(Config.instance.getValue('enable-linux-desktop'), false);
       expect(Config.instance.getValue('enable-windows-desktop'), false);
       expect(Config.instance.getValue('enable-macos-desktop'), false);
+      verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => mockAndroidStudio,
       AndroidSdk: () => mockAndroidSdk,
+      Usage: () => mockUsage,
     });
 
     testUsingContext('displays which config settings are available on stable', () async {
@@ -142,10 +177,86 @@ void main() {
       expect(logger.statusText, contains('enable-linux-desktop: true (Unavailable)'));
       expect(logger.statusText, contains('enable-windows-desktop: true (Unavailable)'));
       expect(logger.statusText, contains('enable-macos-desktop: true (Unavailable)'));
+      verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => mockAndroidStudio,
       AndroidSdk: () => mockAndroidSdk,
       FlutterVersion: () => mockFlutterVersion,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('no-analytics flag flips usage flag and sends event', () async {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      await commandRunner.run(<String>[
+        'config',
+        '--no-analytics',
+      ]);
+
+      expect(mockUsage.enabled, false);
+
+      // Verify that we only send the analytics disable event, and no other
+      // info.
+      verifyNever(mockUsage.sendCommand(
+        any,
+        parameters: anyNamed('parameters'),
+      ));
+      verifyNever(mockUsage.sendTiming(
+        any,
+        any,
+        any,
+        label: anyNamed('label'),
+      ));
+
+      expect(verify(mockUsage.sendEvent(
+        captureAny,
+        captureAny,
+        label: captureAnyNamed('label'),
+        value: anyNamed('value'),
+        parameters: anyNamed('parameters'),
+      )).captured,
+        <dynamic>['analytics', 'enabled', 'false'],
+      );
+    }, overrides: <Type, Generator>{
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('analytics flag flips usage flag and sends event', () async {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      await commandRunner.run(<String>[
+        'config',
+        '--analytics',
+      ]);
+
+      expect(mockUsage.enabled, true);
+
+      // Verify that we only send the analytics disable event, and no other
+      // info.
+      verifyNever(mockUsage.sendCommand(
+        any,
+        parameters: anyNamed('parameters'),
+      ));
+      verifyNever(mockUsage.sendTiming(
+        any,
+        any,
+        any,
+        label: anyNamed('label'),
+      ));
+
+      expect(verify(mockUsage.sendEvent(
+        captureAny,
+        captureAny,
+        label: captureAnyNamed('label'),
+        value: anyNamed('value'),
+        parameters: anyNamed('parameters'),
+      )).captured,
+        <dynamic>['analytics', 'enabled', 'true'],
+      );
+    }, overrides: <Type, Generator>{
+      Usage: () => mockUsage,
     });
   });
 }
@@ -161,3 +272,8 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
+
+class MockUsage extends Mock implements Usage {
+  @override
+  bool enabled = true;
+}

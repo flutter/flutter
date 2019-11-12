@@ -3391,7 +3391,7 @@ void main() {
                 children: <Widget>[
                   Container(
                     height: 100,
-                    color: CupertinoColors.activeOrange,
+                    color: CupertinoColors.black,
                   ),
                   Expanded(
                     child: Navigator(
