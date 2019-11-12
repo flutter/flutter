@@ -133,7 +133,7 @@ void main() {
     final File stampFile = fs.file(fs.path.join(environment.buildDir.path, 'foo.stamp'));
     expect(stampFile.existsSync(), true);
 
-    final Map<String, Object> stampContents = json.decode(stampFile.readAsStringSync());
+    final Map<String, dynamic> stampContents = json.decode(stampFile.readAsStringSync()) as Map<String, dynamic>;
     expect(stampContents['inputs'], <Object>['/foo.dart']);
   }));
 

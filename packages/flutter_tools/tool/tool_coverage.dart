@@ -89,7 +89,7 @@ class VMPlatform extends PlatformPlugin {
       _pending.remove(codePath);
     }));
     final ServiceProtocolInfo info = await Service.controlWebServer(enable: true);
-    final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
+    final StreamChannel<Object> channel = IsolateChannel<Object>.connectReceive(receivePort)
       .transformStream(StreamTransformer<Object, Object>.fromHandlers(
         handleDone: (EventSink<Object> sink) async {
           try {

@@ -552,7 +552,7 @@ include ':app'
       fs = MemoryFileSystem();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
-      android = fakePlatform('android');
+      android = fakePlatform('android') as FakePlatform;
     });
 
     void testUsingAndroidContext(String description, dynamic testMethod()) {
@@ -1083,7 +1083,7 @@ plugin2=${plugin2.path}
       mockAndroidStudio = MockAndroidStudio();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
-      android = fakePlatform('android');
+      android = fakePlatform('android') as FakePlatform;
 
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_artifacts_test.');
       cache = Cache(rootOverride: tempDir);
@@ -1604,9 +1604,8 @@ plugin2=${plugin2.path}
         localGradleErrors: const <GradleHandledError>[],
       );
 
-      final BufferLogger logger = context.get<Logger>();
       expect(
-        logger.statusText,
+        testLogger.statusText,
         contains('Built build/app/outputs/apk/release/app-release.apk (0.0MB)'),
       );
 
@@ -1652,13 +1651,12 @@ plugin2=${plugin2.path}
         target: '',
       );
 
-      final BufferLogger logger = context.get<Logger>();
       expect(
-        logger.statusText,
+        testLogger.statusText,
         contains('Built build/outputs/repo'),
       );
       expect(
-        logger.statusText.contains('Consuming the Module'),
+        testLogger.statusText.contains('Consuming the Module'),
         isFalse,
       );
 
@@ -1745,7 +1743,7 @@ plugin2=${plugin2.path}
           environment: anyNamed('environment'),
           workingDirectory: anyNamed('workingDirectory')
         ),
-      ).captured.last;
+      ).captured.last as List<String>;
 
       expect(actualGradlewCall, contains('/android/gradlew'));
       expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_arm'));
@@ -1821,7 +1819,7 @@ plugin2=${plugin2.path}
           environment: anyNamed('environment'),
           workingDirectory: anyNamed('workingDirectory'),
         ),
-      ).captured.last;
+      ).captured.last as List<String>;
 
       expect(actualGradlewCall, contains('/.android/gradlew'));
       expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_arm'));
@@ -1847,9 +1845,8 @@ plugin2=${plugin2.path}
         repoDirectory: fs.directory('build/'),
       );
 
-      final BufferLogger logger = context.get<Logger>();
       expect(
-        logger.statusText,
+        testLogger.statusText,
         contains(
           '\n'
           'Consuming the Module\n'
@@ -1900,9 +1897,8 @@ plugin2=${plugin2.path}
         repoDirectory: fs.directory('build/'),
       );
 
-      final BufferLogger logger = context.get<Logger>();
       expect(
-        logger.statusText,
+        testLogger.statusText,
         contains(
           '\n'
           'Consuming the Module\n'
@@ -1940,9 +1936,8 @@ plugin2=${plugin2.path}
         repoDirectory: fs.directory('build/'),
       );
 
-      final BufferLogger logger = context.get<Logger>();
       expect(
-        logger.statusText,
+        testLogger.statusText,
         contains(
           '\n'
           'Consuming the Module\n'
@@ -1980,9 +1975,8 @@ plugin2=${plugin2.path}
         repoDirectory: fs.directory('build/'),
       );
 
-      final BufferLogger logger = context.get<Logger>();
       expect(
-        logger.statusText,
+        testLogger.statusText,
         contains(
           '\n'
           'Consuming the Module\n'

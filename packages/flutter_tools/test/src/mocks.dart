@@ -177,14 +177,15 @@ class MockProcessManager extends Mock implements ProcessManager {
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
+    final List<String> commands = command.cast<String>();
     if (!runSucceeds) {
-      final String executable = command[0];
-      final List<String> arguments = command.length > 1 ? command.sublist(1) : <String>[];
+      final String executable = commands[0];
+      final List<String> arguments = commands.length > 1 ? commands.sublist(1) : <String>[];
       throw ProcessException(executable, arguments);
     }
 
-    commands = command;
-    return Future<Process>.value(processFactory(command));
+    this.commands = commands;
+    return Future<Process>.value(processFactory(commands));
   }
 }
 
@@ -254,7 +255,7 @@ class MockProcess extends Mock implements Process {
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin ?? MemoryIOSink();
+       stdin = stdin as IOSink ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -281,7 +282,7 @@ class FakeProcess implements Process {
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin ?? MemoryIOSink();
+       stdin = stdin as IOSink ?? MemoryIOSink();
 
   @override
   final int pid;

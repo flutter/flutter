@@ -65,7 +65,7 @@ void main() {
       });
       expect(response['id'], isNull);
       expect(response['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = response['params'].cast<String, String>();
+      final Map<String, String> logMessage = (response['params'] as Map<String, dynamic>).cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
       await responses.close();
@@ -232,7 +232,7 @@ void main() {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 
-        final Map<String, dynamic> params = response['params'];
+        final Map<String, dynamic> params = response['params'] as Map<String, dynamic>;
         expect(params['platform'], isNotEmpty); // the mock device has a platform of 'android-arm'
 
         await responses.close();

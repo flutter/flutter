@@ -135,4 +135,4 @@ void main() {
 
 bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');
 
-File _asFile(FileSystemEntity entity) => entity;
+File _asFile(FileSystemEntity entity) => entity as File;
