@@ -4,7 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' hide exit;
+import 'dart:io' as io_internals show exit;
 
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
@@ -17,34 +18,52 @@ final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Pl
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 
+class ExitException implements Exception {
+  ExitException(this.exitCode);
+
+  final int exitCode;
+
+  @alwaysThrows
+  void apply() {
+    io_internals.exit(exitCode);
+  }
+}
+
+void exit(int exitCode) {
+  throw ExitException(exitCode);
+}
+
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter analyze. For example, you might want to call this
 /// script with the parameter --dart-sdk to use custom dart sdk.
 ///
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
-Future<void> main(List<String> args) async {
+Future<void> main(List<String> arguments) async {
+  try {
+    await run(arguments);
+  } on ExitException catch (error) {
+    error.apply();
+  }
+  print('${bold}DONE: Analysis successful.$reset');
+}
+
+Future<void> run(List<String> arguments) async {
   bool assertsEnabled = false;
   assert(() { assertsEnabled = true; return true; }());
   if (!assertsEnabled) {
     print('The analyze.dart script must be run with --enable-asserts.');
     exit(1);
   }
-  await _verifyNoMissingLicense(flutterRoot);
-  await _verifyNoTestImports(flutterRoot);
-  await _verifyNoTestPackageImports(flutterRoot);
-  await _verifyGeneratedPluginRegistrants(flutterRoot);
-  await _verifyNoBadImportsInFlutter(flutterRoot);
-  await _verifyNoBadImportsInFlutterTools(flutterRoot);
-  await _verifyInternationalizations();
 
-  {
-    // Analyze all the Dart code in the repo.
-    await _runFlutterAnalyze(flutterRoot, options: <String>[
-      '--flutter-repo',
-      ...args,
-    ]);
-  }
+  await verifyNoMissingLicense(flutterRoot);
+  await verifyNoTestImports(flutterRoot);
+  await verifyNoTestPackageImports(flutterRoot);
+  await verifyGeneratedPluginRegistrants(flutterRoot);
+  await verifyNoBadImportsInFlutter(flutterRoot);
+  await verifyNoBadImportsInFlutterTools(flutterRoot);
+  await verifyInternationalizations();
+  await verifyNoTrailingSpaces();
 
   // Ensure that all package dependencies are in sync.
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
@@ -57,18 +76,20 @@ Future<void> main(List<String> args) async {
     workingDirectory: flutterRoot,
   );
 
+  // Analyze all the Dart code in the repo.
+  await _runFlutterAnalyze(flutterRoot, options: <String>[
+    '--flutter-repo',
+    ...arguments,
+  ]);
+
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
-  {
-    await _runFlutterAnalyze(flutterRoot, options: <String>[
-      '--flutter-repo',
-      '--watch',
-      '--benchmark',
-      ...args,
-    ]);
-  }
-
-  await _checkForTrailingSpaces();
+  await _runFlutterAnalyze(flutterRoot, options: <String>[
+    '--flutter-repo',
+    '--watch',
+    '--benchmark',
+    ...arguments,
+  ]);
 
   // Try analysis against a big version of the gallery; generate into a temporary directory.
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
@@ -86,17 +107,15 @@ Future<void> main(List<String> args) async {
       await _runFlutterAnalyze(outDir.path, options: <String>[
         '--watch',
         '--benchmark',
-        ...args,
+        ...arguments,
       ]);
     }
   } finally {
     outDir.deleteSync(recursive: true);
   }
-
-  print('${bold}DONE: Analysis successful.$reset');
 }
 
-Future<void> _verifyInternationalizations() async {
+Future<void> verifyInternationalizations() async {
   final EvalResult materialGenResult = await _evalCommand(
     dart,
     <String>[
@@ -168,7 +187,7 @@ Future<String> _getCommitRange() async {
 }
 
 
-Future<void> _checkForTrailingSpaces() async {
+Future<void> verifyNoTrailingSpaces() async {
   if (!Platform.isWindows) {
     final String commitRange = Platform.environment.containsKey('TEST_COMMIT_RANGE')
         ? Platform.environment['TEST_COMMIT_RANGE']
@@ -274,7 +293,7 @@ Future<void> _runFlutterAnalyze(String workingDirectory, {
   );
 }
 
-Future<void> _verifyNoTestPackageImports(String workingDirectory) async {
+Future<void> verifyNoTestPackageImports(String workingDirectory) async {
   // TODO(ianh): Remove this whole test once https://github.com/dart-lang/matcher/issues/98 is fixed.
   final List<String> shims = <String>[];
   final List<String> errors = Directory(workingDirectory)
@@ -353,7 +372,7 @@ Future<void> _verifyNoTestPackageImports(String workingDirectory) async {
   }
 }
 
-Future<void> _verifyNoBadImportsInFlutter(String workingDirectory) async {
+Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   final List<String> errors = <String>[];
   final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
   final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
@@ -483,7 +502,7 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
   return null;
 }
 
-Future<void> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
+Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   final List<String> errors = <String>[];
   for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
     .listSync(recursive: true)
@@ -507,7 +526,7 @@ Future<void> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   }
 }
 
-Future<void> _verifyNoMissingLicense(String workingDirectory) async {
+Future<void> verifyNoMissingLicense(String workingDirectory) async {
   final List<String> errors = <String>[];
   for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
       .listSync(recursive: true)
@@ -538,7 +557,7 @@ const Set<String> _exemptTestImports = <String>{
   'package:test_api/src/backend/live_test.dart',
 };
 
-Future<void> _verifyNoTestImports(String workingDirectory) async {
+Future<void> verifyNoTestImports(String workingDirectory) async {
   final List<String> errors = <String>[];
   assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
   for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
@@ -562,7 +581,7 @@ Future<void> _verifyNoTestImports(String workingDirectory) async {
   }
 }
 
-Future<void> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
+Future<void> verifyGeneratedPluginRegistrants(String flutterRoot) async {
   final Directory flutterRootDir = Directory(flutterRoot);
 
   final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
