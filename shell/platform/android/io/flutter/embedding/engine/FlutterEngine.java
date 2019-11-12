@@ -207,7 +207,8 @@ public class FlutterEngine {
 
     this.pluginRegistry = new FlutterEnginePluginRegistry(
       context.getApplicationContext(),
-      this
+      this,
+      flutterLoader
     );
 
     if (automaticallyRegisterPlugins) {

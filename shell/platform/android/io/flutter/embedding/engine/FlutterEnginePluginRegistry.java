@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import io.flutter.Log;
+import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -90,7 +91,8 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
   FlutterEnginePluginRegistry(
       @NonNull Context appContext,
-      @NonNull FlutterEngine flutterEngine
+      @NonNull FlutterEngine flutterEngine,
+      @NonNull FlutterLoader flutterLoader
   ) {
     this.flutterEngine = flutterEngine;
     pluginBinding = new FlutterPlugin.FlutterPluginBinding(
@@ -98,7 +100,8 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
         flutterEngine,
         flutterEngine.getDartExecutor(),
         flutterEngine.getRenderer(),
-        flutterEngine.getPlatformViewsController().getRegistry()
+        flutterEngine.getPlatformViewsController().getRegistry(),
+        new DefaultFlutterAssets(flutterLoader)
     );
   }
 
@@ -531,6 +534,30 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     }
   }
   //----- End ContentProviderControlSurface -----
+
+  private static class DefaultFlutterAssets implements FlutterPlugin.FlutterAssets {
+    final FlutterLoader flutterLoader;
+
+    private DefaultFlutterAssets(@NonNull FlutterLoader flutterLoader) {
+      this.flutterLoader = flutterLoader;
+    }
+
+    public String getAssetFilePathByName(@NonNull String assetFileName) {
+      return flutterLoader.getLookupKeyForAsset(assetFileName);
+    }
+
+    public String getAssetFilePathByName(@NonNull String assetFileName, @NonNull String packageName) {
+      return flutterLoader.getLookupKeyForAsset(assetFileName, packageName);
+    }
+
+    public String getAssetFilePathBySubpath(@NonNull String assetSubpath) {
+      return flutterLoader.getLookupKeyForAsset(assetSubpath);
+    }
+
+    public String getAssetFilePathBySubpath(@NonNull String assetSubpath, @NonNull String packageName) {
+      return flutterLoader.getLookupKeyForAsset(assetSubpath, packageName);
+    }
+  }
 
   private static class FlutterEngineActivityPluginBinding implements ActivityPluginBinding {
     @NonNull
