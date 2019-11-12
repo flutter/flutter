@@ -482,9 +482,12 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     }
     assert(_childKey.currentContext != null);
     final RenderBox renderBoxContainer = _childKey.currentContext.findRenderObject();
-    // TODO(justinmc): I'm getting the error about needing to set
-    // parentCanUseSize here...
-    final Size childSize = renderBoxContainer.paintBounds.size;
+    final Size childSize = Size(
+      renderBoxContainer.getMaxIntrinsicWidth(double.infinity),
+      renderBoxContainer.getMaxIntrinsicHeight(double.infinity),
+    );
+    // TODO(justinmc): Document. Child must have intrinsic size.
+    // Issue. Why doesn't RenderProxyBox return a valid size?
     _boundaryRectCached = Rect.fromLTRB(
       -widget.boundaryMargin.left,
       -widget.boundaryMargin.top,
@@ -615,7 +618,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
             alignment: Alignment.topLeft,
             maxWidth: double.infinity,
             maxHeight: double.infinity,
-            child: Container(
+            child: KeyedSubtree(
               key: _childKey,
               child: widget.child,
             ),

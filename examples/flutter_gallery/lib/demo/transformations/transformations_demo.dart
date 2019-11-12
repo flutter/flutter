@@ -79,7 +79,6 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
                 _reset = false;
               });
             },
-            child: _child,
             // The board is drawn centered at the origin, which is the top left
             // corner in InteractiveViewer, so set boundaryMargin to accommodate
             // that, and shift it to the center of the viewport
@@ -95,6 +94,11 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
               viewportSize.height / 2,
             ),
             onTapUp: _onTapUp,
+            child: SizedBox(
+              width: _board.size.width,
+              height: _board.size.height,
+              child: _child,
+            ),
           );
         },
       ),

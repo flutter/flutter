@@ -1695,6 +1695,7 @@ abstract class RenderBox extends RenderObject {
           // allowed to read our size is our parent, if they've said they will.
           // If you hit this assert trying to access a child's size, pass
           // "parentUsesSize: true" to that child's layout().
+          //print('justin why u break? $debugDoingThisResize || $debugDoingThisLayout || (${RenderObject.debugActiveLayout == parent} && ${_size._canBeUsedByParent})');
           assert(debugDoingThisResize || debugDoingThisLayout ||
                  (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
         }
