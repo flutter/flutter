@@ -142,21 +142,11 @@ class GradientLinear extends EngineGradient {
       jsColors[i] = colors[i].value;
     }
 
-    js.JsArray<double> jsColorStops;
-    if (colorStops == null) {
-      jsColorStops = js.JsArray<double>();
-      jsColorStops.length = 2;
-      jsColorStops[0] = 0;
-      jsColorStops[1] = 1;
-    } else {
-      jsColorStops = js.JsArray<double>.from(colorStops);
-      jsColorStops.length = colorStops.length;
-    }
     return canvasKit.callMethod('MakeLinearGradientShader', <dynamic>[
       makeSkPoint(from),
       makeSkPoint(to),
       jsColors,
-      jsColorStops,
+      makeSkiaColorStops(colorStops),
       tileMode.index,
     ]);
   }
@@ -178,13 +168,16 @@ class GradientRadial extends EngineGradient {
 
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
-    if (matrix4 != null && !Matrix4.fromFloat64List(matrix4).isIdentity()) {
-      throw UnimplementedError(
-          'matrix4 not supported in GradientRadial shader');
-    }
-    if (tileMode != ui.TileMode.clamp) {
-      throw UnimplementedError(
-          'TileMode not supported in GradientRadial shader');
+    if (!experimentalUseSkia) {
+      // The DOM backend does not (yet) support all parameters.
+      if (matrix4 != null && !Matrix4.fromFloat64List(matrix4).isIdentity()) {
+        throw UnimplementedError(
+            'matrix4 not supported in GradientRadial shader');
+      }
+      if (tileMode != ui.TileMode.clamp) {
+        throw UnimplementedError(
+            'TileMode not supported in GradientRadial shader');
+      }
     }
     final html.CanvasGradient gradient = ctx.createRadialGradient(
         center.dx, center.dy, 0, center.dx, center.dy, radius);
@@ -203,7 +196,23 @@ class GradientRadial extends EngineGradient {
 
   @override
   js.JsObject createSkiaShader() {
-    throw UnimplementedError();
+    assert(experimentalUseSkia);
+
+    final js.JsArray<num> jsColors = js.JsArray<num>();
+    jsColors.length = colors.length;
+    for (int i = 0; i < colors.length; i++) {
+      jsColors[i] = colors[i].value;
+    }
+
+    return canvasKit.callMethod('MakeRadialGradientShader', <dynamic>[
+      makeSkPoint(center),
+      radius,
+      jsColors,
+      makeSkiaColorStops(colorStops),
+      tileMode.index,
+      matrix4 != null ? makeSkMatrix(matrix4) : null,
+      0,
+    ]);
   }
 }
 
