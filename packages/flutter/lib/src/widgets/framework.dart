@@ -2660,6 +2660,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   BuildOwner get owner => _owner;
   BuildOwner _owner;
 
+  /// Whether the element is active.
+  ///
+  /// A element will be active if it is mounted and attached to the element
+  /// tree.
+  bool get isActive => _active;
   bool _active = false;
 
   /// {@template flutter.widgets.reassemble}

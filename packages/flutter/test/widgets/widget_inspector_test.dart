@@ -916,6 +916,25 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(nodes[4].runtimeType, DiagnosticsStackTrace);
     });
 
+    testWidgets('test transformDebugCreator can transform unmounted element', (WidgetTester tester) async {
+      // Clears any mocked pub root.
+      service.setPubRootDirectories(<Object>[]);
+      final Element elementA = const Text('a').createElement();
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      builder.add(StringProperty('dummy1', 'value'));
+      builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
+      List<DiagnosticsNode> nodes;
+      try {
+        nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      } catch(_) {
+        // Transforms unmounted element should not raise any exception.
+        expect(false, isTrue);
+      }
+      expect(nodes.length, 1);
+      expect(nodes[0].runtimeType, StringProperty);
+      expect(nodes[0].name, 'dummy1');
+    });
+
     testWidgets('test transformDebugCreator will not re-order if before stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
       await tester.pumpWidget(
@@ -977,7 +996,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(nodes[3].runtimeType, StringProperty);
       expect(nodes[3].name, 'dummy2');
       expect(nodes[4].runtimeType, DiagnosticsStackTrace);
-    }, skip: WidgetInspectorService.instance.isWidgetCreationTracked());
+    });
 
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
