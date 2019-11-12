@@ -106,10 +106,10 @@ task:
     - name: tool_tests-general-linux
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
       environment:
-        # As of October 2019, the tool_tests-general-linux shard got faster with more CPUs up to 4
-        # CPUs, and needed at least 8G of RAM to not run out of memory.
+        # As of November 2019, the tool_tests-general-linux shard got faster with more CPUs up to 4
+        # CPUs, and needed at least 10G of RAM to not run out of memory.
         CPU: 4
-        MEMORY: 8G
+        MEMORY: 10G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
