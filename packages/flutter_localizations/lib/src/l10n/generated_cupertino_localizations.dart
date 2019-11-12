@@ -10685,19 +10685,19 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   );
 
   @override
+  String get alertDialogLabel => r'Obaveštenje';
+
+  @override
+  String get anteMeridiemAbbreviation => r'pre podne';
+
+  @override
+  String get copyButtonLabel => r'Kopiraj';
+
+  @override
+  String get cutButtonLabel => r'Iseci';
+
+  @override
   String get datePickerHourSemanticsLabelFew => r'$hour sata';
-
-  @override
-  String get datePickerMinuteSemanticsLabelFew => r'$minute minuta';
-
-  @override
-  String get timerPickerHourLabelFew => r'sata';
-
-  @override
-  String get timerPickerMinuteLabelFew => r'min';
-
-  @override
-  String get timerPickerSecondLabelFew => r'sek';
 
   @override
   String get datePickerHourSemanticsLabelOne => r'$hour sat';
@@ -10706,22 +10706,25 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get datePickerHourSemanticsLabelOther => r'$hour sati';
 
   @override
+  String get datePickerMinuteSemanticsLabelFew => r'$minute minuta';
+
+  @override
   String get datePickerMinuteSemanticsLabelOne => r'1 minut';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuta';
 
   @override
-  String get anteMeridiemAbbreviation => r'pre podne';
+  String get pasteButtonLabel => r'Nalepi';
 
   @override
   String get postMeridiemAbbreviation => r'po podne';
 
   @override
-  String get todayLabel => r'Danas';
+  String get selectAllButtonLabel => r'Izaberi sve';
 
   @override
-  String get alertDialogLabel => r'Obaveštenje';
+  String get timerPickerHourLabelFew => r'sata';
 
   @override
   String get timerPickerHourLabelOne => r'sat';
@@ -10730,10 +10733,16 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get timerPickerHourLabelOther => r'sati';
 
   @override
+  String get timerPickerMinuteLabelFew => r'min';
+
+  @override
   String get timerPickerMinuteLabelOne => r'min';
 
   @override
   String get timerPickerMinuteLabelOther => r'min';
+
+  @override
+  String get timerPickerSecondLabelFew => r'sek';
 
   @override
   String get timerPickerSecondLabelOne => r'sek';
@@ -10742,16 +10751,7 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get timerPickerSecondLabelOther => r'sek';
 
   @override
-  String get cutButtonLabel => r'Iseci';
-
-  @override
-  String get copyButtonLabel => r'Kopiraj';
-
-  @override
-  String get pasteButtonLabel => r'Nalepi';
-
-  @override
-  String get selectAllButtonLabel => r'Izaberi sve';
+  String get todayLabel => r'Danas';
 }
 
 /// The translations for Swedish (`sv`).
@@ -12586,6 +12586,18 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   );
 
   @override
+  String get alertDialogLabel => r'通知';
+
+  @override
+  String get copyButtonLabel => r'複製';
+
+  @override
+  String get cutButtonLabel => r'剪下';
+
+  @override
+  String get datePickerDateTimeOrderString => r'date_dayPeriod_time';
+
+  @override
   String get datePickerHourSemanticsLabelOne => r'$hour 點';
 
   @override
@@ -12598,10 +12610,10 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get datePickerMinuteSemanticsLabelOther => r'$minute 分鐘';
 
   @override
-  String get datePickerDateTimeOrderString => r'date_dayPeriod_time';
+  String get pasteButtonLabel => r'貼上';
 
   @override
-  String get alertDialogLabel => r'通知';
+  String get selectAllButtonLabel => r'全選';
 
   @override
   String get timerPickerHourLabelOne => r'小時';
@@ -12614,18 +12626,6 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
 
   @override
   String get timerPickerMinuteLabelOther => r'分鐘';
-
-  @override
-  String get cutButtonLabel => r'剪下';
-
-  @override
-  String get copyButtonLabel => r'複製';
-
-  @override
-  String get pasteButtonLabel => r'貼上';
-
-  @override
-  String get selectAllButtonLabel => r'全選';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).

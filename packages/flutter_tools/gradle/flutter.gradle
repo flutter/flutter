@@ -520,22 +520,6 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
-        String compilationTraceFilePathValue = null
-        if (project.hasProperty('compilation-trace-file')) {
-            compilationTraceFilePathValue = project.property('compilation-trace-file')
-        }
-        Boolean createPatchValue = false
-        if (project.hasProperty('patch')) {
-            createPatchValue = project.property('patch').toBoolean()
-        }
-        Integer buildNumberValue = null
-        if (project.hasProperty('build-number')) {
-            buildNumberValue = project.property('build-number').toInteger()
-        }
-        String baselineDirValue = null
-        if (project.hasProperty('baseline-dir')) {
-            baselineDirValue = project.property('baseline-dir')
-        }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
             extraFrontEndOptionsValue = project.property('extra-front-end-options')
@@ -574,10 +558,6 @@ class FlutterPlugin implements Plugin<Project> {
                     fileSystemRoots fileSystemRootsValue
                     fileSystemScheme fileSystemSchemeValue
                     trackWidgetCreation trackWidgetCreationValue
-                    compilationTraceFilePath compilationTraceFilePathValue
-                    createPatch createPatchValue
-                    buildNumber buildNumberValue
-                    baselineDir baselineDirValue
                     targetPlatform targetArch
                     sourceDir project.file(project.flutter.source)
                     intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${targetArch}")
@@ -698,7 +678,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     String localEngineSrcPath
     @Input
     String targetPath
-    @Optional @Input
+    @Optional
     Boolean verbose
     @Optional @Input
     String[] fileSystemRoots
@@ -706,14 +686,6 @@ abstract class BaseFlutterTask extends DefaultTask {
     String fileSystemScheme
     @Input
     Boolean trackWidgetCreation
-    @Optional @Input
-    String compilationTraceFilePath
-    @Optional @Input
-    Boolean createPatch
-    @Optional @Input
-    Integer buildNumber
-    @Optional @Input
-    String baselineDir
     @Optional @Input
     String targetPlatform
     @Input
@@ -729,15 +701,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     FileCollection getDependenciesFiles() {
         FileCollection depfiles = project.files()
 
-        // Include the kernel compiler depfile, since kernel compile is the
-        // first stage of AOT build in this mode, and it includes all the Dart
-        // sources.
-        depfiles += project.files("${intermediateDir}/kernel_compile.d")
-
-        // Include Core JIT kernel compiler depfile, since kernel compile is
-        // the first stage of JIT builds in this mode, and it includes all the
-        // Dart sources.
-        depfiles += project.files("${intermediateDir}/snapshot_blob.bin.d")
+        // Includes all sources used in the flutter compilation.
+        depfiles += project.files("${intermediateDir}/flutter_build.d")
         return depfiles
     }
 
@@ -748,88 +713,38 @@ abstract class BaseFlutterTask extends DefaultTask {
 
         intermediateDir.mkdirs()
 
-        if (buildMode == "profile" || buildMode == "release") {
-            project.exec {
-                executable flutterExecutable.absolutePath
-                workingDir sourceDir
-                if (localEngine != null) {
-                    args "--local-engine", localEngine
-                    args "--local-engine-src-path", localEngineSrcPath
-                }
-                args "build", "aot"
-                args "--suppress-analytics"
-                args "--quiet"
-                args "--target", targetPath
-                args "--output-dir", "${intermediateDir}"
-                args "--target-platform", "${targetPlatform}"
-                if (extraFrontEndOptions != null) {
-                    args "--extra-front-end-options", "${extraFrontEndOptions}"
-                }
-                if (extraGenSnapshotOptions != null) {
-                    args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
-                }
-                args "--${buildMode}"
-            }
-        }
-
         project.exec {
             executable flutterExecutable.absolutePath
             workingDir sourceDir
-
             if (localEngine != null) {
                 args "--local-engine", localEngine
                 args "--local-engine-src-path", localEngineSrcPath
             }
-            args "build", "bundle"
-            args "--target", targetPath
-            args "--target-platform", "${targetPlatform}"
             if (verbose) {
                 args "--verbose"
+            } else {
+                args "--quiet"
             }
-            if (fileSystemRoots != null) {
-                for (root in fileSystemRoots) {
-                    args "--filesystem-root", root
-                }
-            }
-            if (fileSystemScheme != null) {
-                args "--filesystem-scheme", fileSystemScheme
-            }
-            if (trackWidgetCreation) {
-                args "--track-widget-creation"
-            }
-            if (compilationTraceFilePath != null) {
-                args "--compilation-trace-file", compilationTraceFilePath
-            }
-            if (createPatch) {
-                args "--patch"
-                args "--build-number", project.android.defaultConfig.versionCode
-                if (buildNumber != null) {
-                    assert buildNumber == project.android.defaultConfig.versionCode
-                }
-            }
-            if (baselineDir != null) {
-                args "--baseline-dir", baselineDir
-            }
+            args "assemble"
+            args "--depfile", "${intermediateDir}/flutter_build.d"
+            args "--output", "${intermediateDir}"
+            args "-dTargetFile=${targetPath}"
+            args "-dTargetPlatform=${targetPlatform}"
+            args "-dBuildMode=${buildMode}"
             if (extraFrontEndOptions != null) {
-                args "--extra-front-end-options", "${extraFrontEndOptions}"
+                args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
             if (extraGenSnapshotOptions != null) {
-                args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
-            }
-            if (buildMode == "release" || buildMode == "profile") {
-                args "--precompiled"
-            } else {
-                args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
-            }
-            args "--asset-dir", "${intermediateDir}/flutter_assets"
-            if (buildMode == "debug") {
-                args "--debug"
+                args "-dExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
             if (buildMode == "profile") {
-                args "--profile"
+                args "profile_android_application"
             }
             if (buildMode == "release") {
-                args "--release"
+                args "release_android_application"
+            }
+            if (buildMode == "debug") {
+                args "debug_android_application"
             }
         }
     }
@@ -859,21 +774,17 @@ class FlutterTask extends BaseFlutterTask {
     }
 
     FileCollection readDependencies(File dependenciesFile) {
-        if (dependenciesFile.exists()) {
-            try {
-                // Dependencies file has Makefile syntax:
-                //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
-                String depText = dependenciesFile.text
-                // So we split list of files by non-escaped(by backslash) space,
-                def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
-                // then we replace all escaped spaces with regular spaces
-                def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
-                return project.files(depList)
-            } catch (Exception e) {
-                logger.error("Error reading dependency file ${dependenciesFile}: ${e}")
-            }
-        }
-        return project.files()
+      if (dependenciesFile.exists()) {
+        // Dependencies file has Makefile syntax:
+        //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
+        String depText = dependenciesFile.text
+        // So we split list of files by non-escaped(by backslash) space,
+        def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
+        // then we replace all escaped spaces with regular spaces
+        def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
+        return project.files(depList)
+      }
+      return project.files();
     }
 
     @InputFiles
@@ -882,23 +793,7 @@ class FlutterTask extends BaseFlutterTask {
         for (File depfile in getDependenciesFiles()) {
           sources += readDependencies(depfile)
         }
-        if (!sources.isEmpty()) {
-            // We have a dependencies file. Add a dependency on gen_snapshot as well, since the
-            // snapshots have to be rebuilt if it changes.
-            sources += readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
-            sources += readDependencies(project.file("${intermediateDir}/frontend_server.d"))
-            if (localEngineSrcPath != null) {
-                sources += project.files("$localEngineSrcPath/$localEngine")
-            }
-            // Finally, add a dependency on pubspec.yaml as well.
-            return sources + project.files('pubspec.yaml')
-        }
-        // No dependencies file (or problems parsing it). Fall back to source files.
-        return project.fileTree(
-                dir: sourceDir,
-                exclude: ['android', 'ios'],
-                include: ['**/*.dart', 'pubspec.yaml']
-        )
+        return sources + project.files('pubspec.yaml')
     }
 
     @TaskAction

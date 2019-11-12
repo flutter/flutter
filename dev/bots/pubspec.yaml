@@ -8,7 +8,7 @@ environment:
 dependencies:
   path: 1.6.4
   args: 1.5.2
-  meta: 1.1.7
+  meta: 1.1.8
   process: 3.0.12
   platform: 2.2.1
   http: 0.12.0+2
@@ -69,4 +69,4 @@ dev_dependencies:
   mockito: 4.1.1
   test_api: 0.2.5
 
-# PUBSPEC CHECKSUM: 015f
+# PUBSPEC CHECKSUM: bc60
