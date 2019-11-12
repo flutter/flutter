@@ -158,8 +158,64 @@ void main() async {
     );
   }
 
+  void drawTextWithShadow(EngineCanvas canvas) {
+    // Single-line text.
+    canvas.drawParagraph(
+      paragraph(
+        'Hello World',
+        maxWidth: 600,
+        textStyle: TextStyle(
+          color: const Color.fromRGBO(0, 0, 0, 1.0),
+          background: Paint()..color = const Color.fromRGBO(255, 50, 50, 1.0),
+          fontFamily: 'Arial',
+          fontSize: 30,
+          shadows: <Shadow>[
+            Shadow(
+              blurRadius: 0,
+              color: const Color.fromRGBO(255, 0, 255, 1.0),
+              offset: Offset(10, 5),
+            ),
+          ],
+        ),
+      ),
+      Offset.zero,
+    );
+
+    // Multi-line text.
+    canvas.drawParagraph(
+      paragraph(
+        'Multi line Hello World paragraph',
+        maxWidth: 200,
+        textStyle: TextStyle(
+          color: const Color.fromRGBO(0, 0, 0, 1.0),
+          background: Paint()..color = const Color.fromRGBO(50, 50, 255, 1.0),
+          fontFamily: 'Arial',
+          fontSize: 30,
+          shadows: <Shadow>[
+            Shadow(
+              blurRadius: 0,
+              color: const Color.fromRGBO(255, 0, 255, 1.0),
+              offset: Offset(10, 5),
+            ),
+            Shadow(
+              blurRadius: 0,
+              color: const Color.fromRGBO(0, 255, 255, 1.0),
+              offset: Offset(-10, -5),
+            ),
+          ],
+        ),
+      ),
+      const Offset(0, 40),
+    );
+  }
+
   testEachCanvas('draws text with a background', (EngineCanvas canvas) {
     drawTextWithBackground(canvas);
     return scuba.diffCanvasScreenshot(canvas, 'text_background');
   });
+
+  testEachCanvas('draws text with a shadow', (EngineCanvas canvas) {
+    drawTextWithShadow(canvas);
+    return scuba.diffCanvasScreenshot(canvas, 'text_shadow', maxDiffRate: 0.2);
+  }, bSkipHoudini: true);
 }
