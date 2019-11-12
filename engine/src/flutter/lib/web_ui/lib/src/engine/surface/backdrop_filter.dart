@@ -85,11 +85,12 @@ class PersistedBackdropFilter extends PersistedContainerSurface
         ..backgroundColor = '#000'
         ..opacity = '0.2';
     } else {
+      final EngineImageFilter engineFilter = filter;
       // CSS uses pixel radius for blur. Flutter & SVG use sigma parameters. For
       // Gaussian blur with standard deviation (normal distribution),
       // the blur will fall within 2 * sigma pixels.
       domRenderer.setElementStyle(_filterElement, 'backdrop-filter',
-          'blur(${math.max(filter.sigmaX, filter.sigmaY) * 2}px)');
+          'blur(${math.max(engineFilter.sigmaX, engineFilter.sigmaY) * 2}px)');
     }
   }
 

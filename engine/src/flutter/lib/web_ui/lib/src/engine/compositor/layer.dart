@@ -93,6 +93,19 @@ abstract class ContainerLayer extends Layer {
   }
 }
 
+class BackdropFilterLayer extends ContainerLayer {
+  final ui.ImageFilter _filter;
+
+  BackdropFilterLayer(this._filter);
+
+  @override
+  void paint(PaintContext context) {
+    context.canvas.saveLayerWithFilter(paintBounds, _filter);
+    paintChildren(context);
+    context.canvas.restore();
+  }
+}
+
 /// A layer that clips its child layers by a given [Path].
 class ClipPathLayer extends ContainerLayer {
   /// The path used to clip child layers.
