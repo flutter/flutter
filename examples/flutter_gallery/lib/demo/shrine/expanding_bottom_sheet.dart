@@ -50,7 +50,7 @@ class ExpandingBottomSheet extends StatefulWidget {
   static _ExpandingBottomSheetState of(BuildContext context, {bool isNullOk = false}) {
     assert(isNullOk != null);
     assert(context != null);
-    final _ExpandingBottomSheetState result = context.ancestorStateOfType<_ExpandingBottomSheetState>();
+    final _ExpandingBottomSheetState result = context.findAncestorStateOfType<_ExpandingBottomSheetState>();
     if (isNullOk || result != null) {
       return result;
     }

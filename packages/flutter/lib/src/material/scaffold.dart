@@ -1307,7 +1307,7 @@ class Scaffold extends StatefulWidget {
   static ScaffoldState of(BuildContext context, { bool nullOk = false }) {
     assert(nullOk != null);
     assert(context != null);
-    final ScaffoldState result = context.ancestorStateOfType<ScaffoldState>();
+    final ScaffoldState result = context.findAncestorStateOfType<ScaffoldState>();
     if (nullOk || result != null)
       return result;
     throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1359,7 +1359,7 @@ class Scaffold extends StatefulWidget {
   /// the listener, and register a listener to the new [ScaffoldGeometry]
   /// listenable.
   static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
-    final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType<_ScaffoldScope>();
+    final _ScaffoldScope scaffoldScope = context.dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
     if (scaffoldScope == null)
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
@@ -1403,10 +1403,10 @@ class Scaffold extends StatefulWidget {
     assert(registerForUpdates != null);
     assert(context != null);
     if (registerForUpdates) {
-      final _ScaffoldScope scaffold = context.inheritFromWidgetOfExactType<_ScaffoldScope>();
+      final _ScaffoldScope scaffold = context.dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
       return scaffold?.hasDrawer ?? false;
     } else {
-      final ScaffoldState scaffold = context.ancestorStateOfType<ScaffoldState>();
+      final ScaffoldState scaffold = context.findAncestorStateOfType<ScaffoldState>();
       return scaffold?.hasDrawer ?? false;
     }
   }
