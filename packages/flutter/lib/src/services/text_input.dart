@@ -533,7 +533,7 @@ class TextEditingValue {
       selection: TextSelection(
         baseOffset: encoded['selectionBase'] ?? -1,
         extentOffset: encoded['selectionExtent'] ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
+        affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.ambiguous,
         isDirectional: encoded['selectionIsDirectional'] ?? false,
       ),
       composing: TextRange(

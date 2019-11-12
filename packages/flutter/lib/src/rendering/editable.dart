@@ -402,6 +402,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // down in a multi-line text field when selecting using the keyboard.
   bool _wasSelectingVerticallyWithKeyboard = false;
 
+  // This is the affinity we use when a platform-supplied value has ambiguous
+  // affinity.
+  //
+  // This affinity should never be [TextAffinity.ambiguous].
+  TextAffinity _fallbackAffinity = TextAffinity.downstream;
+
   // Call through to onSelectionChanged.
   void _handleSelectionChange(
     TextSelection nextSelection,
@@ -416,6 +422,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (onSelectionChanged != null) {
       onSelectionChanged(nextSelection, this, cause);
     }
+    // Engine-computed selections will always compute affinity when necessary.
+    // We cache this affinity in the case we use a platform supplied selection
+    // that does not provide an affinity ([TextAffinity.ambiguous]).
+    _fallbackAffinity = nextSelection.affinity;
   }
 
   static final Set<LogicalKeyboardKey> _movementKeys = <LogicalKeyboardKey>{
@@ -963,7 +973,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   set selection(TextSelection value) {
     if (_selection == value)
       return;
-    _selection = value;
+    // We use the _backupAffinity when the set selection has an ambiguous
+    // affinity. This happense when the platform does not supply affinity,
+    // in which case using the backup affinity computed from dart:ui will
+    // be superior to simply defaulting to TextAffinity.downstream.
+    if (value.affinity == TextAffinity.ambiguous) {
+      _selection = TextSelection(
+        baseOffset: value.baseOffset,
+        extentOffset: value.extentOffset,
+        affinity: _fallbackAffinity,
+      );
+    } else {
+      _selection = value;
+    }
     _selectionRects = null;
     markNeedsPaint();
     markNeedsSemanticsUpdate();

@@ -776,6 +776,7 @@ class TextPainter {
         rect = _getRectFromUpstream(offset, caretPrototype) ?? _getRectFromDownstream(offset, caretPrototype);
         break;
       }
+      case TextAffinity.ambiguous: // Treat ambiguous affinity as downstream.
       case TextAffinity.downstream: {
         rect = _getRectFromDownstream(offset, caretPrototype) ??  _getRectFromUpstream(offset, caretPrototype);
         break;
