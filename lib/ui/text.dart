@@ -1866,22 +1866,31 @@ class Paragraph extends NativeFieldWrapperClass2 {
   }
   List<int> _getPositionForOffset(double dx, double dy) native 'Paragraph_getPositionForOffset';
 
-  /// Returns the [start, end] of the word at the given offset. Characters not
-  /// part of a word, such as spaces, symbols, and punctuation, have word breaks
-  /// on both sides. In such cases, this method will return [offset, offset+1].
-  /// Word boundaries are defined more precisely in Unicode Standard Annex #29
-  /// http://www.unicode.org/reports/tr29/#Word_Boundaries
-  List<int> getWordBoundary(dynamic position) {
-    // TODO(gspencergoog): have this take only a TextPosition once the framework
-    // code is calling it with that.
-    if (position is TextPosition) {
-      return _getWordBoundary(position.offset);
-    } else {
-      final int offset = position;
-      return _getWordBoundary(offset);
-    }
+  /// Returns the [TextRange] of the word at the given [TextPosition].
+  ///
+  /// Characters not part of a word, such as spaces, symbols, and punctuation,
+  /// have word breaks on both sides. In such cases, this method will return
+  /// [offset, offset+1]. Word boundaries are defined more precisely in Unicode
+  /// Standard Annex #29 http://www.unicode.org/reports/tr29/#Word_Boundaries
+  TextRange getWordBoundary(TextPosition position) {
+    final List<int> boundary = _getWordBoundary(position.offset);
+    return TextRange(start: boundary[0], end: boundary[1]);
   }
   List<int> _getWordBoundary(int offset) native 'Paragraph_getWordBoundary';
+
+  /// Returns the [TextRange] of the line at the given [TextPosition].
+  ///
+  /// The newline (if any) is returned as part of the range.
+  ///
+  /// Not valid until after layout.
+  ///
+  /// This can potentially be expensive, since it needs to compute the line
+  /// metrics, so use it sparingly.
+  TextRange getLineBoundary(TextPosition position) {
+    final List<int> boundary = _getLineBoundary(position.offset);
+    return TextRange(start: boundary[0], end: boundary[1]);
+  }
+  List<int> _getLineBoundary(int offset) native 'Paragraph_getLineBoundary';
 
   // Redirecting the paint function in this way solves some dependency problems
   // in the C++ code. If we straighten out the C++ dependencies, we can remove
