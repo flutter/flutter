@@ -73,7 +73,7 @@ import 'messages_all.dart';
 /// be consistent with the languages listed in the @className.supportedLocales
 /// property.
 class @className {
-  @className(Locale locale) : _localeName = locale.toString();
+  @className(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
   final String _localeName;
 
@@ -148,6 +148,10 @@ const String pluralMethodTemplate = '''
     );
   }
 ''';
+
+int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
+  return a.path.compareTo(b.path);
+}
 
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
   final Map<String, dynamic> attributesMap = bundle['@$key'];
@@ -234,7 +238,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     ...genIntlMethodArgs(bundle, key),
   ];
 
-  for(String pluralKey in pluralIds.keys) {
+  for (String pluralKey in pluralIds.keys.toList()..sort()) {
     final RegExp expRE = RegExp('($pluralKey){([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(message);
     if (match.groupCount == 2) {
@@ -257,7 +261,7 @@ String genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
   const String suffix = '),\n  ];';
 
   String resultingProperty = prefix;
-  for (LocaleInfo locale in supportedLocales) {
+  for (LocaleInfo locale in supportedLocales.toList()..sort()) {
     final String languageCode = locale.languageCode;
     final String countryCode = locale.countryCode;
 
@@ -384,7 +388,7 @@ Future<void> main(List<String> arguments) async {
   final Set<String> supportedLanguageCodes = <String>{};
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
-  for (FileSystemEntity entity in l10nDirectory.listSync()) {
+  for (FileSystemEntity entity in l10nDirectory.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
 
     if (FileSystemEntity.isFileSync(entityPath)) {
@@ -435,7 +439,7 @@ Future<void> main(List<String> arguments) async {
 
   final RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
 
-  for (String key in bundle.keys) {
+  for (String key in bundle.keys.toList()..sort()) {
     if (key.startsWith('@'))
       continue;
     if (!_isValidGetterAndMethodName(key))
