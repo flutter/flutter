@@ -897,6 +897,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // Matches Android implementation of material slider.
         return 0.05;
     }
+    return 0.0;
   }
 
   void _updateLabelPainter() {

@@ -2307,8 +2307,8 @@ void main() {
 
   testWidgets('tap moves cursor to the edge of the word it tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
           ),

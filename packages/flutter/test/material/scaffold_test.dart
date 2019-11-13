@@ -536,7 +536,7 @@ void main() {
 
   group('close button', () {
     Future<void> expectCloseIcon(WidgetTester tester, PageRoute<void> routeBuilder(), String type) async {
-      final IconData expectedIcon = Icons.close;
+      const IconData expectedIcon = Icons.close;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(appBar: AppBar(), body: const Text('Page 1')),

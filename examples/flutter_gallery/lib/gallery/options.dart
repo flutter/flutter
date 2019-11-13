@@ -360,6 +360,8 @@ class _PlatformItem extends StatelessWidget {
         return 'Fuchsia';
       case TargetPlatform.iOS:
         return 'Cupertino';
+      case TargetPlatform.macOS:
+        return 'Cupertino Desktop';
     }
     assert(false);
     return null;

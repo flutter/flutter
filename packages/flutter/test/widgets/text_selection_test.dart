@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride;
 
 void main() {
   int tapCount;
