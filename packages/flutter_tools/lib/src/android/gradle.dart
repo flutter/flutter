@@ -334,39 +334,48 @@ Future<void> buildGradleApp({
   }
   command.add(assembleTask);
 
-  final Stopwatch sw = Stopwatch()..start();
-  int exitCode = 1;
   GradleHandledError detectedGradleError;
   String detectedGradleErrorLine;
+  String consumeLog(String line) {
+    // This message was removed from first-party plugins,
+    // but older plugin versions still display this message.
+    if (androidXPluginWarningRegex.hasMatch(line)) {
+      // Don't pipe.
+      return null;
+    }
+    if (detectedGradleError != null) {
+      // Pipe stdout/stderr from Gradle.
+      return line;
+    }
+    for (final GradleHandledError gradleError in localGradleErrors) {
+      if (gradleError.test(line)) {
+        detectedGradleErrorLine = line;
+        detectedGradleError = gradleError;
+        // The first error match wins.
+        break;
+      }
+    }
+    // Pipe stdout/stderr from Gradle.
+    return line;
+  }
+
+  final Stopwatch sw = Stopwatch()..start();
+  int exitCode = 1;
   try {
     exitCode = await processUtils.stream(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
       environment: gradleEnvironment,
-      mapFunction: (String line) {
-        // This message was removed from first-party plugins,
-        // but older plugin versions still display this message.
-        if (androidXPluginWarningRegex.hasMatch(line)) {
-          // Don't pipe.
-          return null;
-        }
-        if (detectedGradleError != null) {
-          // Pipe stdout/stderr from Gradle.
-          return line;
-        }
-        for (final GradleHandledError gradleError in localGradleErrors) {
-          if (gradleError.test(line)) {
-            detectedGradleErrorLine = line;
-            detectedGradleError = gradleError;
-            // The first error match wins.
-            break;
-          }
-        }
-        // Pipe stdout/stderr from Gradle.
-        return line;
-      },
+      mapFunction: consumeLog,
     );
+  } on ProcessException catch(exception) {
+    consumeLog(exception.toString());
+    // Rethrow the exception if the error isn't handled by any of the
+    // `localGradleErrors`.
+    if (detectedGradleError == null) {
+      rethrow;
+    }
   } finally {
     status.stop();
   }

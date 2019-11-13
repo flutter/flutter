@@ -135,13 +135,6 @@ tasks:
 
   # Android on-device tests
 
-  web_incremental_test:
-    description: >
-      Verify that the experimental frontend server support is functional.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-    flaky: true
-
   complex_layout_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of the Complex Layout sample app on
