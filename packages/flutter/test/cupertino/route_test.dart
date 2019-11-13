@@ -254,6 +254,7 @@ void main() {
       },
     );
 
+    
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
 
     await tester.pump();
