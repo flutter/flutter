@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -396,7 +396,7 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 String validateSnapshotDependency(FlutterProject project, String expectedTarget) {
   final File snapshotBlob = File(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
-          'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
+          'flutter', 'debug', 'android-arm', 'flutter_build.d'));
 
   assert(snapshotBlob.existsSync());
   final String contentSnapshot = snapshotBlob.readAsStringSync();

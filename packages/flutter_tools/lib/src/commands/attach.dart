@@ -61,6 +61,7 @@ class AttachCommand extends FlutterCommand {
     usesIpv6Flag();
     usesFilesystemOptions(hide: !verboseHelp);
     usesFuchsiaOptions(hide: !verboseHelp);
+    usesDartDefines();
     argParser
       ..addOption(
         'debug-port',
@@ -274,6 +275,7 @@ class AttachCommand extends FlutterCommand {
         target: argResults['target'],
         targetModel: TargetModel(argResults['target-model']),
         buildMode: getBuildMode(),
+        dartDefines: dartDefines,
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
