@@ -334,11 +334,8 @@ Future<void> buildGradleApp({
   }
   command.add(assembleTask);
 
-  final Stopwatch sw = Stopwatch()..start();
-  int exitCode = 1;
   GradleHandledError detectedGradleError;
   String detectedGradleErrorLine;
-
   final StringConverter consumeLog = (String line) {
     // This message was removed from first-party plugins,
     // but older plugin versions still display this message.
@@ -362,6 +359,8 @@ Future<void> buildGradleApp({
     return line;
   };
 
+  final Stopwatch sw = Stopwatch()..start();
+  int exitCode = 1;
   try {
     exitCode = await processUtils.stream(
       command,
@@ -372,6 +371,11 @@ Future<void> buildGradleApp({
     );
   } on ProcessException catch(exception) {
     consumeLog(exception.toString());
+    // Rethrow the exception if the error isn't handled by any of the
+    // `localGradleErrors`.
+    if (detectedGradleError == null) {
+      rethrow;
+    }
   } finally {
     status.stop();
   }
