@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../android/android_builder.dart';
+import '../base/common.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -14,18 +15,35 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand({bool verboseHelp = false}) {
-    addBuildModeFlags(verboseHelp: verboseHelp);
+  BuildAarCommand() {
+    argParser
+      ..addFlag(
+        'debug',
+        defaultsTo: true,
+        help: 'Build a debug version of the current project.',
+      )
+      ..addFlag(
+        'profile',
+        defaultsTo: true,
+        help: 'Build a version of the current project specialized for performance profiling.',
+      )
+      ..addFlag(
+        'release',
+        defaultsTo: true,
+        help: 'Build a release version of the current project.',
+      );
     usesFlavorOption();
     usesPubOption();
     argParser
-      ..addMultiOption('target-platform',
+      ..addMultiOption(
+        'target-platform',
         splitCommas: true,
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the project is compiled.',
       )
-      ..addOption('output-dir',
+      ..addOption(
+        'output-dir',
         help: 'The absolute path to the directory where the repository is generated.'
               'By default, this is \'<current-directory>android/build\'. ',
       );
@@ -71,9 +89,8 @@ class BuildAarCommand extends BuildSubCommand {
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
     final Iterable<AndroidArch> targetArchitectures = argResults['target-platform']
       .map<AndroidArch>(getAndroidArchForName);
-    final List<String> buildModes = <String>['release', 'debug', 'profile'];
 
-    for (String buildMode in buildModes) {
+    for (String buildMode in const <String>['debug', 'profile', 'release']) {
       if (argResults[buildMode]) {
         androidBuildInfo.add(
           AndroidBuildInfo(
@@ -83,19 +100,12 @@ class BuildAarCommand extends BuildSubCommand {
         );
       }
     }
-    // Default to all the build types.
     if (androidBuildInfo.isEmpty) {
-      for (String buildMode in buildModes) {
-        androidBuildInfo.add(
-          AndroidBuildInfo(
-            BuildInfo(BuildMode.fromName(buildMode), argResults['flavor']),
-            targetArchs: targetArchitectures,
-          )
-        );
-      }
+      throwToolExit('Please specify a build mode and try again.');
     }
     await androidBuilder.buildAar(
       project: _getProject(),
+      target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,
       outputDirectoryPath: argResults['output-dir'],
     );

@@ -468,9 +468,11 @@ Future<void> buildGradleApp({
 Future<void> buildGradleAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
+  @required String target,
   @required Directory outputDirectory,
 }) async {
   assert(project != null);
+  assert(target != null);
   assert(androidBuildInfo != null);
   assert(outputDirectory != null);
 
@@ -504,6 +506,10 @@ Future<void> buildGradleAar({
     '-Poutput-dir=${outputDirectory.path}',
     '-Pis-plugin=${manifest.isPlugin}',
   ];
+
+  if (target != null && target.isNotEmpty) {
+    command.add('-Ptarget=$target');
+  }
 
   if (androidBuildInfo.targetArchs.isNotEmpty) {
     final String targetPlatforms = androidBuildInfo.targetArchs
@@ -701,6 +707,7 @@ Future<void> buildPluginsAsAar(
             null, // Plugins don't define flavors.
           ),
         ),
+        target: '',
         outputDirectory: buildDirectory,
       );
     } on ToolExit {

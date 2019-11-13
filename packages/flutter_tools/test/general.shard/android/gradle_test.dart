@@ -1532,6 +1532,7 @@ plugin2=${plugin2.path}
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
         project: FlutterProject.current(),
         outputDirectory: fs.directory('build/'),
+        target: '',
       );
 
       final BufferLogger logger = context.get<Logger>();
@@ -1694,6 +1695,7 @@ plugin2=${plugin2.path}
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
         project: FlutterProject.current(),
         outputDirectory: fs.directory('build/'),
+        target: '',
       );
 
       final List<String> actualGradlewCall = verify(
@@ -1769,7 +1771,9 @@ plugin2=${plugin2.path}
         )
       );
     }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
       Platform: () => fakePlatform('android'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('stdout contains release', () async {
@@ -1807,7 +1811,9 @@ plugin2=${plugin2.path}
         )
       );
     }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
       Platform: () => fakePlatform('android'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('stdout contains debug', () async {
@@ -1845,7 +1851,9 @@ plugin2=${plugin2.path}
         )
       );
     }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
       Platform: () => fakePlatform('android'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('stdout contains profile', () async {
@@ -1894,7 +1902,9 @@ plugin2=${plugin2.path}
         )
       );
     }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
       Platform: () => fakePlatform('android'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }

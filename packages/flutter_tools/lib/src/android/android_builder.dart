@@ -27,6 +27,7 @@ abstract class AndroidBuilder {
   Future<void> buildAar({
     @required FlutterProject project,
     @required Set<AndroidBuildInfo> androidBuildInfo,
+    @required String target,
     @required String outputDirectoryPath,
   });
 
@@ -54,6 +55,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
   Future<void> buildAar({
     @required FlutterProject project,
     @required Set<AndroidBuildInfo> androidBuildInfo,
+    @required String target,
     @required String outputDirectoryPath,
   }) async {
     try {
@@ -67,6 +69,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         await buildGradleAar(
           project: project,
           androidBuildInfo: androidBuildInfo,
+          target: target,
           outputDirectory: outputDirectory,
         );
       }
