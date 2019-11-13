@@ -138,8 +138,12 @@ class FlutterDevice {
   List<String> fileSystemRoots;
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
+  bool _isStreamingNewObservatoryUri;
   final String viewFilter;
   final bool trackWidgetCreation;
+
+  /// Whether the stream [observatoryUris] is still open.
+  bool get isStreamingNewObservatoryUri => _isStreamingNewObservatoryUri ?? false;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
@@ -155,7 +159,11 @@ class FlutterDevice {
     Restart restart,
     CompileExpression compileExpression,
   }) {
+    _isStreamingNewObservatoryUri = true;
+
     final Completer<void> completer = Completer<void>();
+
+    Uri lastInvalidObservatoryUri;
     StreamSubscription<void> subscription;
     subscription = observatoryUris.listen((Uri observatoryUri) async {
       try {
@@ -175,8 +183,14 @@ class FlutterDevice {
         completer.complete();
         await subscription.cancel();
       } catch (exception) {
+        lastInvalidObservatoryUri = observatoryUri;
         printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
       }
+    }, onDone: () {
+      if (!completer.isCompleted && lastInvalidObservatoryUri != null) {
+        completer.completeError('fail to connect to $lastInvalidObservatoryUri');
+      }
+      _isStreamingNewObservatoryUri = false;
     });
     return completer.future;
   }
@@ -637,6 +651,13 @@ abstract class ResidentRunner {
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   bool hotMode;
+
+  /// Returns true if every device is streaming observatory URIs.
+  bool get isStreamingNewObservatoryUris {
+    return flutterDevices.every((FlutterDevice device) {
+      return device.isStreamingNewObservatoryUri;
+    });
+  }
 
   String get dillOutputPath => _dillOutputPath ?? fs.path.join(artifactDirectory.path, 'app.dill');
   String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';

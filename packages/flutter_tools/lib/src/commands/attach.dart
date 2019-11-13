@@ -344,7 +344,7 @@ class AttachCommand extends FlutterCommand {
           );
           terminalHandler?.stop();
           assert(result != null);
-          if (runner.exited) {
+          if (runner.exited || !runner.isStreamingNewObservatoryUris) {
             break;
           }
           printStatus('Waiting for a new connection from Flutter on ${device.name}...');
