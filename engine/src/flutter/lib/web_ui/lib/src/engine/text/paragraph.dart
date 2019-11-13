@@ -18,7 +18,6 @@ class EngineParagraph implements ui.Paragraph {
     @required ui.TextAlign textAlign,
     @required ui.TextDirection textDirection,
     @required ui.Paint background,
-    @required List<ui.Shadow> shadows,
   })  : assert((plainText == null && paint == null) ||
             (plainText != null && paint != null)),
         _paragraphElement = paragraphElement,
@@ -27,8 +26,7 @@ class EngineParagraph implements ui.Paragraph {
         _textAlign = textAlign,
         _textDirection = textDirection,
         _paint = paint,
-        _background = background,
-        _shadows = shadows;
+        _background = background;
 
   final html.HtmlElement _paragraphElement;
   final ParagraphGeometricStyle _geometricStyle;
@@ -37,7 +35,6 @@ class EngineParagraph implements ui.Paragraph {
   final ui.TextAlign _textAlign;
   final ui.TextDirection _textDirection;
   final ui.Paint _background;
-  final List<ui.Shadow> _shadows;
 
   @visibleForTesting
   String get plainText => _plainText;
@@ -325,7 +322,6 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle strutStyle,
     String ellipsis,
     ui.Locale locale,
-    List<ui.Shadow> shadows,
   })  : _textAlign = textAlign,
         _textDirection = textDirection,
         _fontWeight = fontWeight,
@@ -337,8 +333,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
         // TODO(b/128317744): add support for strut style.
         _strutStyle = strutStyle,
         _ellipsis = ellipsis,
-        _locale = locale,
-        _shadows = shadows;
+        _locale = locale;
 
   final ui.TextAlign _textAlign;
   final ui.TextDirection _textDirection;
@@ -351,7 +346,6 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   final EngineStrutStyle _strutStyle;
   final String _ellipsis;
   final ui.Locale _locale;
-  final List<ui.Shadow> _shadows;
 
   String get _effectiveFontFamily {
     if (assertionsEnabled) {
@@ -419,8 +413,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
           'fontSize: ${_fontSize != null ? _fontSize.toStringAsFixed(1) : "unspecified"}, '
           'height: ${_height != null ? "${_height.toStringAsFixed(1)}x" : "unspecified"}, '
           'ellipsis: ${_ellipsis != null ? "\"$_ellipsis\"" : "unspecified"}, '
-          'locale: ${_locale ?? "unspecified"}, '
-          'shadows: ${_shadows ?? "unspecified"}'
+          'locale: ${_locale ?? "unspecified"}'
           ')';
     } else {
       return super.toString();
@@ -913,7 +906,6 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
           wordSpacing: wordSpacing,
           decoration: _textDecorationToCssString(decoration, decorationStyle),
           ellipsis: _paragraphStyle._ellipsis,
-          shadows: shadows,
         ),
         plainText: '',
         paint: paint,
@@ -967,7 +959,6 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
         wordSpacing: wordSpacing,
         decoration: _textDecorationToCssString(decoration, decorationStyle),
         ellipsis: _paragraphStyle._ellipsis,
-        shadows: shadows,
       ),
       plainText: plainText,
       paint: paint,
@@ -1011,7 +1002,6 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
         lineHeight: _paragraphStyle._height,
         maxLines: _paragraphStyle._maxLines,
         ellipsis: _paragraphStyle._ellipsis,
-        shadows: _paragraphStyle._shadows,
       ),
       plainText: null,
       paint: null,
@@ -1098,9 +1088,6 @@ void _applyParagraphStyleToElement({
     if (style._effectiveFontFamily != null) {
       cssStyle.fontFamily = canonicalizeFontFamily(style._effectiveFontFamily);
     }
-    if (style._shadows != null) {
-      cssStyle.textShadow = _shadowListToCss(style._shadows);
-    }
   } else {
     if (style._textAlign != previousStyle._textAlign) {
       cssStyle.textAlign = textAlignToCssValue(
@@ -1126,9 +1113,6 @@ void _applyParagraphStyleToElement({
     }
     if (style._fontFamily != previousStyle._fontFamily) {
       cssStyle.fontFamily = canonicalizeFontFamily(style._fontFamily);
-    }
-    if (style._shadows != previousStyle._shadows) {
-      cssStyle.textShadow = _shadowListToCss(style._shadows);
     }
   }
 }
