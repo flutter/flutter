@@ -189,7 +189,7 @@ void main() {
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+     unawaited(runner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
