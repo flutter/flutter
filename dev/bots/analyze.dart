@@ -25,12 +25,14 @@ class ExitException implements Exception {
 
   final int exitCode;
 
-  @alwaysThrows
   void apply() {
     io_internals.exit(exitCode);
   }
 }
 
+// We actually reimplement exit() so that it uses exceptions rather
+// than truly immediately terminating the application, so that we can
+// test the exit code in unit tests (see test/analyze_test.dart).
 void exit(int exitCode) {
   throw ExitException(exitCode);
 }
