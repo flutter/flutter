@@ -59,13 +59,13 @@ import 'messages_all.dart';
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
 class StockStrings {
-  StockStrings(Locale locale) : _localeName = locale.toString();
+  StockStrings(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
   final String _localeName;
 
   static Future<StockStrings> load(Locale locale) {
     return initializeMessages(locale.toString())
-      .then<StockStrings>((void _) => StockStrings(locale));
+      .then<StockStrings>((_) => StockStrings(locale));
   }
 
   static StockStrings of(BuildContext context) {
