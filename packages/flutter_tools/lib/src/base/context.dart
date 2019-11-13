@@ -117,17 +117,6 @@ class AppContext {
     return _unboxNull(value ?? _generateIfNecessary(T, _fallbacks)) as T;
   }
 
-  /// Gets the value associated with the specified [type], or `null` if no
-  /// such value has been associated.
-  @Deprecated('use get<T> instead for type safety.')
-  Object operator [](Type type) {
-    dynamic value = _generateIfNecessary(type, _overrides);
-    if (value == null && _parent != null) {
-      value = _parent[type];
-    }
-    return _unboxNull(value ?? _generateIfNecessary(type, _fallbacks));
-  }
-
   /// Runs [body] in a child context and returns the value returned by [body].
   ///
   /// If [overrides] is specified, the child context will return corresponding

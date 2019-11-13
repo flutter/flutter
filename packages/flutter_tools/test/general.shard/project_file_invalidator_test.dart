@@ -23,9 +23,11 @@ void main() {
 }
 
 void _testProjectFileInvalidator({@required bool asyncScanning}) {
+  const ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator();
+
   testUsingContext('No last compile', () async {
     expect(
-      await ProjectFileInvalidator.findInvalidated(
+      await projectFileInvalidator.findInvalidated(
         lastCompiled: null,
         urisToMonitor: <Uri>[],
         packagesPath: '',
@@ -37,7 +39,7 @@ void _testProjectFileInvalidator({@required bool asyncScanning}) {
 
   testUsingContext('Empty project', () async {
     expect(
-      await ProjectFileInvalidator.findInvalidated(
+      await projectFileInvalidator.findInvalidated(
         lastCompiled: inFuture,
         urisToMonitor: <Uri>[],
         packagesPath: '',
@@ -52,7 +54,7 @@ void _testProjectFileInvalidator({@required bool asyncScanning}) {
 
   testUsingContext('Non-existent files are ignored', () async {
     expect(
-      await ProjectFileInvalidator.findInvalidated(
+      await projectFileInvalidator.findInvalidated(
         lastCompiled: inFuture,
         urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
         packagesPath: '',

@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:mustache/mustache.dart' as mustache;
-import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -36,28 +35,31 @@ class Plugin {
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
   /// This currently supports two formats. Legacy and Multi-platform.
+  ///
   /// Example of the deprecated Legacy format.
-  /// flutter:
-  ///  plugin:
-  ///    androidPackage: io.flutter.plugins.sample
-  ///    iosPrefix: FLT
-  ///    pluginClass: SamplePlugin
+  ///
+  ///     flutter:
+  ///      plugin:
+  ///        androidPackage: io.flutter.plugins.sample
+  ///        iosPrefix: FLT
+  ///        pluginClass: SamplePlugin
   ///
   /// Example Multi-platform format.
-  /// flutter:
-  ///  plugin:
-  ///    platforms:
-  ///      android:
-  ///        package: io.flutter.plugins.sample
-  ///        pluginClass: SamplePlugin
-  ///      ios:
-  ///        pluginClass: SamplePlugin
-  ///      linux:
-  ///        pluginClass: SamplePlugin
-  ///      macos:
-  ///        pluginClass: SamplePlugin
-  ///      windows:
-  ///        pluginClass: SamplePlugin
+  ///
+  ///     flutter:
+  ///      plugin:
+  ///        platforms:
+  ///          android:
+  ///            package: io.flutter.plugins.sample
+  ///            pluginClass: SamplePlugin
+  ///          ios:
+  ///            pluginClass: SamplePlugin
+  ///          linux:
+  ///            pluginClass: SamplePlugin
+  ///          macos:
+  ///            pluginClass: SamplePlugin
+  ///          windows:
+  ///            pluginClass: SamplePlugin
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
@@ -66,7 +68,7 @@ class Plugin {
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
       return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
     }
-    return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
+    return Plugin._fromLegacyYaml(name, path, pluginYaml);
   }
 
   factory Plugin._fromMultiPlatformYaml(String name, String path, dynamic pluginYaml) {
@@ -119,7 +121,6 @@ class Plugin {
     );
   }
 
-  @deprecated
   factory Plugin._fromLegacyYaml(String name, String path, dynamic pluginYaml) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String pluginClass = pluginYaml['pluginClass'];
@@ -364,30 +365,10 @@ List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String typ
 
 /// Returns the version of the Android embedding that the current
 /// [project] is using.
-String _getAndroidEmbeddingVersion(FlutterProject project) {
+AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
   assert(project.android != null);
 
-  final File androidManifest = project.android.appManifestFile;
-  if (androidManifest == null || !androidManifest.existsSync()) {
-    return '1';
-  }
-  xml.XmlDocument document;
-  try {
-    document = xml.parse(androidManifest.readAsStringSync());
-  } on xml.XmlParserException {
-    throwToolExit('Error parsing ${project.android.appManifestFile} '
-                  'Please ensure that the android manifest is a valid XML document and try again.');
-  } on FileSystemException {
-    throwToolExit('Error reading ${project.android.appManifestFile} even though it exists. '
-                  'Please ensure that you have read permission to this file and try again.');
-  }
-  for (xml.XmlElement metaData in document.findAllElements('meta-data')) {
-    final String name = metaData.getAttribute('android:name');
-    if (name == 'flutterEmbedding') {
-      return metaData.getAttribute('android:value');
-    }
-  }
-  return '1';
+  return project.android.getEmbeddingVersion();
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -412,21 +393,32 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     'GeneratedPluginRegistrant.java',
   );
   String templateContent;
-  final String appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
+  final AndroidEmbeddingVersion appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
   switch (appEmbeddingVersion) {
-    case '2':
+    case AndroidEmbeddingVersion.v2:
       templateContext['needsShim'] = false;
       // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
-      // then add  shim for the old plugins.
+      // then add shim for the old plugins.
       for (Map<String, dynamic> plugin in androidPlugins) {
         if (plugin['supportsEmbeddingV1'] && !plugin['supportsEmbeddingV2']) {
           templateContext['needsShim'] = true;
+          if (project.isModule) {
+            printStatus(
+              'The plugin `${plugin['name']}` is built using an older version '
+              "of the Android plugin API which assumes that it's running in a "
+              'full-Flutter environment. It may have undefined behaviors when '
+              'Flutter is integrated into an existing app as a module.\n'
+              'The plugin can be updated to the v2 Android Plugin APIs by '
+              'following https://flutter.dev/go/android-plugin-migration.'
+            );
+          }
           break;
         }
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
-    break;
-    case '1':
+      break;
+    case AndroidEmbeddingVersion.v1:
+    default:
       for (Map<String, dynamic> plugin in androidPlugins) {
         if (!plugin['supportsEmbeddingV1'] && plugin['supportsEmbeddingV2']) {
           throwToolExit(
@@ -437,9 +429,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         }
       }
       templateContent = _androidPluginRegistryTemplateOldEmbedding;
-    break;
-    default:
-      throwToolExit('Unsupported Android embedding');
+      break;
   }
   printTrace('Generating $registryPath');
   _renderTemplateToFile(

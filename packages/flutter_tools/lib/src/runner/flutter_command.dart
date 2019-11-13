@@ -269,6 +269,20 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
+  void usesDartDefines() {
+    argParser.addMultiOption(
+      'dart-define',
+      help: 'Passed to the Dart compiler building this application as a -D flag.\n'
+            'Values supported by this option are compiler implementation specific.\n'
+            'Multiple defines can be passed by repeating --dart-define multiple times.',
+      valueHelp: 'FOO=bar',
+      hide: true,
+    );
+  }
+
+  /// The values passed via the `--dart-define` option.
+  List<String> get dartDefines => argResults['dart-define'];
+
   void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
       defaultsTo: null,
@@ -629,10 +643,6 @@ abstract class FlutterCommand extends Command<void> {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
         throw ToolExit(userMessages.flutterNoPubspec);
-      }
-
-      if (fs.isFileSync('flutter.yaml')) {
-        throw ToolExit(userMessages.flutterMergeYamlFiles);
       }
 
       // Validate the current package map only if we will not be running "pub get" later.

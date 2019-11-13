@@ -120,8 +120,8 @@ class AndroidPlugin extends PluginPlatform {
     } else {
       supportedEmbeddings.add('1');
     }
-    if (mainClassContent.contains('registerWith(Registrar registrar)') ||
-        mainClassContent.contains('registerWith(registrar: Registrar)')) {
+    if (mainClassContent.contains('PluginRegistry')
+        && mainClassContent.contains('registerWith')) {
       supportedEmbeddings.add('1');
     }
     return supportedEmbeddings;
