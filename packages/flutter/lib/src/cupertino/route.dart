@@ -108,7 +108,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     @required this.builder,
     this.title,
     RouteSettings settings,
-    this.opaque = false,
+    this.opaque = true,
     this.maintainState = true,
     bool fullscreenDialog = false,
   }) : assert(builder != null),
@@ -174,6 +174,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   @override
   Color get barrierColor => null;
   
+  /// Allows you to set opaque to false to prevent route reconstruction. 
+  /// The default behavior is true, and declaring false can have side effects. 
+  /// Use caution and awareness that rebuilding is necessary to properly display the back button.
   @override
   final bool opaque;
 
