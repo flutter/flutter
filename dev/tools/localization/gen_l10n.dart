@@ -491,6 +491,7 @@ class LocalizationsGenerator {
   File outputFile;
 
   void setL10nDirectory(String arbPathString) {
+    // TODO: add error that input string cannot be null
     final Directory l10nDirectory = _fs.directory(arbPathString);
     if (!l10nDirectory.existsSync())
       exitWithError(
