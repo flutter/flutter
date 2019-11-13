@@ -14,14 +14,12 @@ class HoverClient extends StatefulWidget {
     this.child,
     this.onEnter,
     this.onExit,
-    this.onDispose,
   }) : super(key: key);
 
   final ValueChanged<bool> onHover;
   final Widget child;
   final VoidCallback onEnter;
   final VoidCallback onExit;
-  final VoidCallback onDispose;
 
   @override
   HoverClientState createState() => HoverClientState();
@@ -46,29 +44,21 @@ class HoverClientState extends State<HoverClient> {
     }
   }
 
-  void _onExitOrDispose(bool disposed, PointerExitEvent details) {
-    if (disposed && widget.onDispose != null) {
-      widget.onDispose();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: _onEnter,
       onExit: _onExit,
-      onExitOrDispose: _onExitOrDispose,
       child: widget.child,
     );
   }
 }
 
 class HoverFeedback extends StatefulWidget {
-  const HoverFeedback({Key key, this.onEnter, this.onExit, this.onDispose}) : super(key: key);
+  const HoverFeedback({Key key, this.onEnter, this.onExit}) : super(key: key);
 
   final VoidCallback onEnter;
   final VoidCallback onExit;
-  final VoidCallback onDispose;
 
   @override
   _HoverFeedbackState createState() => _HoverFeedbackState();
@@ -85,7 +75,6 @@ class _HoverFeedbackState extends State<HoverFeedback> {
         onHover: (bool hovering) => setState(() => _hovering = hovering),
         onEnter: widget.onEnter,
         onExit: widget.onExit,
-        onDispose: widget.onDispose,
         child: Text(_hovering ? 'HOVERING' : 'not hovering'),
       ),
     );
@@ -155,8 +144,6 @@ void main() {
     PointerEnterEvent enter;
     PointerHoverEvent move;
     PointerExitEvent exit;
-    PointerExitEvent exitOrDispose;
-    bool exitIsDisposed = false;
     await tester.pumpWidget(Center(
       child: MouseRegion(
         child: Container(
@@ -166,10 +153,6 @@ void main() {
         onEnter: (PointerEnterEvent details) => enter = details,
         onHover: (PointerHoverEvent details) => move = details,
         onExit: (PointerExitEvent details) => exit = details,
-        onExitOrDispose: (bool disposed, PointerExitEvent details) {
-          exitIsDisposed = disposed;
-          exitOrDispose = details;
-        },
       ),
     ));
     final RenderMouseRegion renderListener = tester.renderObject(find.byType(MouseRegion));
@@ -190,9 +173,6 @@ void main() {
       ),
     ));
     expect(exit, isNull);
-    expect(exitOrDispose, isNotNull);
-    expect(exitOrDispose.position, equals(const Offset(400.0, 300.0)));
-    expect(exitIsDisposed, isTrue);
     expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
   });
 
@@ -585,14 +565,12 @@ void main() {
 
     int numEntries = 0;
     int numExits = 0;
-    int numDisposes = 0;
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
         onEnter: () => numEntries++,
         onExit: () => numExits++,
-        onDispose: () => numDisposes++,
       )),
     );
 
@@ -608,20 +586,17 @@ void main() {
     await tester.pump();
     expect(numEntries, equals(1));
     expect(numExits, equals(0));
-    expect(numDisposes, equals(1));
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
         onEnter: () => numEntries++,
         onExit: () => numExits++,
-        onDispose: () => numDisposes++,
       )),
     );
     await tester.pump();
     expect(numEntries, equals(2));
     expect(numExits, equals(0));
-    expect(numDisposes, equals(1));
   });
 
   testWidgets("MouseRegion activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
@@ -819,7 +794,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Annotations unmounted under the pointer should take effect in the next postframe', (WidgetTester tester) async {
+  testWidgets('Annotations unmounted under the pointer should not trigger state change', (WidgetTester tester) async {
     bool hovered = true;
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -833,7 +808,6 @@ void main() {
             HoverClient(
               onHover: (bool value) { setState(() { hovered = value; }); },
               child: Text(hovered ? 'hover inner' : 'unhover inner'),
-              onDispose: () {  setState(() { hovered = false; }); },
             ),
             Text(hovered ? 'hover outer' : 'unhover outer'),
           ],
@@ -861,10 +835,6 @@ void main() {
     );
 
     expect(find.text('hover outer'), findsOneWidget);
-
-    await tester.pump();
-
-    expect(find.text('unhover outer'), findsOneWidget);
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 

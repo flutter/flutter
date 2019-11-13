@@ -97,11 +97,10 @@ void main() {
       onEnter: (_) {},
       onExit: (_) {},
       onHover: (_) {},
-      onExitOrDispose: (_, __) {},
     );
     expect(
       annotation1.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: enter hover exit exitOrDispose)'),
+      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: enter hover exit)'),
     );
 
     const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();
@@ -324,18 +323,13 @@ void main() {
     events.clear();
   });
 
-  test('should detect enter or exit in the next frame after annotations are attached or detached on the pointer', () {
+  test('should detect enter in the next frame after annotations are attached on the pointer, but keep quiet on detaching', () {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
-    final List<bool> disposes = <bool>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
-      onExitOrDispose: (bool disposed, PointerExitEvent event) {
-        disposes.add(disposed);
-        events.add(event);
-      },
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
@@ -371,7 +365,6 @@ void main() {
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 100.0)),
     ]));
-    expect(disposes, isEmpty);
     events.clear();
 
     // Detach the annotation
@@ -385,14 +378,11 @@ void main() {
     // Mannually schedule a postframe check, which is usually done by the
     // renderer binding
     _binding.scheduleMouseTrackerPostFrameCheck();
-    expect(disposes, isEmpty);
     expect(_binding.postFrameCallbacks, hasLength(1));
 
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(0.0, 100.0)),
     ]));
-    expect(disposes, <bool>[true]);
     expect(_binding.postFrameCallbacks, hasLength(0));
   });
 
