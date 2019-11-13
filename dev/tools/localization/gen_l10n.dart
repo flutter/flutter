@@ -506,7 +506,9 @@ class LocalizationsGenerator {
   }
 
   void setTemplateArbFile(String templateArbFileName) {
-    assert (l10nDirectory != null);
+    // TODO: add error that input string cannot be null
+    // TODO: add error if attempting to add templateArbFile when l10nDirectory
+    // is null
     final File templateArbFile = _fs.file(path.join(l10nDirectory.path, templateArbFileName));
     final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
     if (templateArbFileStatModeString[0] == '-')
@@ -517,10 +519,12 @@ class LocalizationsGenerator {
   }
 
   void setOutputFile(String outputFileString) {
+    // TODO: add error that input string cannot be null
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
   void setClassName(String classNameString) {
+    // TODO: add error that input string cannot be null
     if (!_isValidClassName(classNameString))
       exitWithError(
         "The 'output-class', $classNameString, is not valid Dart class name.\n"
