@@ -335,7 +335,9 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   }
 }
 
-/// This class is a work-around for the "is" operator not accepting a variable value as its right operand
+/// This class is a work-around for the "is" operator not accepting a variable value as its right operand.
+///
+/// This class is deprecated. It will be deleted soon.
 @Deprecated('This class is no longer used in framework and will be deleted soon.')
 @optionalTypeArgs
 class TypeMatcher<T> {
@@ -878,7 +880,7 @@ typedef StateSetter = void Function(VoidCallback fn);
 ///    called.
 ///  * The framework calls [didChangeDependencies]. Subclasses of [State] should
 ///    override [didChangeDependencies] to perform initialization involving
-///    [InheritedWidget]s. If [BuildContext.inheritFromWidgetOfExactType] is
+///    [InheritedWidget]s. If [BuildContext.dependOnInheritedWidgetOfExactType] is
 ///    called, the [didChangeDependencies] method will be called again if the
 ///    inherited widgets subsequently change or if the widget moves in the tree.
 ///  * At this point, the [State] object is fully initialized and the framework
@@ -1921,6 +1923,13 @@ abstract class BuildContext {
   /// Registers this build context with [ancestor] such that when
   /// [ancestor]'s widget changes this build context is rebuilt.
   ///
+  /// This method is deprecated. Please use [dependOnInheritedElement] instead.
+  @Deprecated('Use dependOnInheritedElement instead.')
+  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
+
+  /// Registers this build context with [ancestor] such that when
+  /// [ancestor]'s widget changes this build context is rebuilt.
+  ///
   /// Returns `ancestor.widget`.
   ///
   /// This method is rarely called directly. Most applications should use
@@ -1929,7 +1938,7 @@ abstract class BuildContext {
   ///
   /// All of the qualifications about when [dependOnInheritedWidgetOfExactType] can
   /// be called apply to this method as well.
-  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object aspect });
 
   /// Obtains the nearest widget of the given type, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
@@ -2653,7 +2662,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   // Custom implementation of hash code optimized for the ".of" pattern used
   // with `InheritedWidgets`.
   //
-  // `Element.inheritFromWidgetOfExactType` relies heavily on hash-based
+  // `Element.dependOnInheritedWidgetOfExactType` relies heavily on hash-based
   // `Set` look-ups, putting this getter on the performance critical path.
   //
   // The value is designed to fit within the SMI representation. This makes
@@ -3472,7 +3481,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           ),
           ErrorHint(
             'To safely refer to a widget\'s ancestor in its dispose() method, '
-            'save a reference to the ancestor by calling inheritFromWidgetOfExactType() '
+            'save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() '
             'in the widget\'s didChangeDependencies() method.'
           ),
         ]);
@@ -3482,8 +3491,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return true;
   }
 
+  @deprecated
   @override
   InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect }) {
+    return dependOnInheritedElement(ancestor, aspect: aspect);
+  }
+
+  @override
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object aspect }) {
     assert(ancestor != null);
     _dependencies ??= HashSet<InheritedElement>();
     _dependencies.add(ancestor);
@@ -3491,6 +3506,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor.widget;
   }
 
+  @deprecated
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3509,7 +3525,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[T];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
-      return inheritFromElement(ancestor, aspect: aspect);
+      return dependOnInheritedElement(ancestor, aspect: aspect);
     }
     _hadUnsatisfiedDependencies = true;
     return null;
@@ -4294,12 +4310,17 @@ class StatefulElement extends ComponentElement {
 
   @override
   InheritedWidget inheritFromElement(Element ancestor, { Object aspect }) {
+    return dependOnInheritedElement(ancestor, aspect: aspect);
+  }
+
+  @override
+  InheritedWidget dependOnInheritedElement(Element ancestor, { Object aspect }) {
     assert(ancestor != null);
     assert(() {
       final Type targetType = ancestor.widget.runtimeType;
       if (state._debugLifecycleState == _StateLifecycle.created) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('inheritFromWidgetOfExactType($targetType) or inheritFromElement() was called before ${_state.runtimeType}.initState() completed.'),
+          ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called before ${_state.runtimeType}.initState() completed.'),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
             'its dependent widgets are rebuilt. If the dependent widget\'s reference to '
@@ -4316,24 +4337,24 @@ class StatefulElement extends ComponentElement {
       }
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('inheritFromWidgetOfExactType($targetType) or inheritFromElement() was called after dispose(): $this'),
+          ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called after dispose(): $this'),
           ErrorDescription(
-            'This error happens if you call inheritFromWidgetOfExactType() on the '
+            'This error happens if you call dependOnInheritedWidgetOfExactType() on the '
             'BuildContext for a widget that no longer appears in the widget tree '
             '(e.g., whose parent widget no longer includes the widget in its '
             'build). This error can occur when code calls '
-            'inheritFromWidgetOfExactType() from a timer or an animation callback.'
+            'dependOnInheritedWidgetOfExactType() from a timer or an animation callback.'
           ),
           ErrorHint(
             'The preferred solution is to cancel the timer or stop listening to the '
             'animation in the dispose() callback. Another solution is to check the '
             '"mounted" property of this object before calling '
-            'inheritFromWidgetOfExactType() to ensure the object is still in the '
+            'dependOnInheritedWidgetOfExactType() to ensure the object is still in the '
             'tree.'
           ),
           ErrorHint(
             'This error might indicate a memory leak if '
-            'inheritFromWidgetOfExactType() is being called because another object '
+            'dependOnInheritedWidgetOfExactType() is being called because another object '
             'is retaining a reference to this State object after it has been '
             'removed from the tree. To avoid memory leaks, consider breaking the '
             'reference to this object during dispose().'
@@ -4342,7 +4363,7 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.inheritFromElement(ancestor, aspect: aspect);
+    return super.dependOnInheritedElement(ancestor, aspect: aspect);
   }
 
   @override

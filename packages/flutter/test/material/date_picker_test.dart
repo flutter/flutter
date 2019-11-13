@@ -735,8 +735,10 @@ void _tests() {
     );
 
     final Finder chevronFinder = find.byType(IconButton);
-    final List<RenderAnimatedOpacity> chevronRenderers = chevronFinder.evaluate().map(
-      (Element element) => element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()).cast<RenderAnimatedOpacity>().toList();
+    final List<RenderAnimatedOpacity> chevronRenderers = chevronFinder
+      .evaluate()
+      .map((Element element) => element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>())
+      .toList();
 
     // Initial chevron animation state should be dismissed
     // An AlwaysStoppedAnimation is also found and is ignored
