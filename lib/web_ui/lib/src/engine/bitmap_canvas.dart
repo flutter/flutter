@@ -579,7 +579,9 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   void drawImage(ui.Image image, ui.Offset p, ui.PaintData paint) {
     _applyPaint(paint);
     final HtmlImage htmlImage = image;
-    final html.Element imgElement = htmlImage.cloneImageElement();
+    final html.ImageElement imgElement = htmlImage.cloneImageElement();
+    String blendMode = ctx.globalCompositeOperation;
+    imgElement.style.mixBlendMode = blendMode;
     _drawImage(imgElement, p);
     _childOverdraw = true;
   }
@@ -618,6 +620,8 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     } else {
       _applyPaint(paint);
       final html.Element imgElement = htmlImage.cloneImageElement();
+      final ui.BlendMode blendMode = paint.blendMode;
+      imgElement.style.mixBlendMode = _stringForBlendMode(blendMode);
       if (requiresClipping) {
         save();
         clipRect(dst);
