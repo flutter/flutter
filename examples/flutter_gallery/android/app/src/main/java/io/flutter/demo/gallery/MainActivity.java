@@ -14,4 +14,9 @@ public class MainActivity extends FlutterActivity {
     public FlutterGalleryInstrumentation getInstrumentation() {
         return instrumentation;
     }
+
+    @Override
+    public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+        instrumentation = new FlutterGalleryInstrumentation(flutterEngine.getDartExecutor());
+    }
 }
