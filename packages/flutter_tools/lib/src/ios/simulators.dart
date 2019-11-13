@@ -374,18 +374,14 @@ class IOSSimulator extends Device {
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
-        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
+        '--observatory-port=${debuggingOptions.observatoryPort ?? 0}',
       ],
     ];
 
     ProtocolDiscovery observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled) {
       observatoryDiscovery = ProtocolDiscovery.observatory(
-        getLogReader(app: package),
-        ipv6: ipv6,
-        hostPort: debuggingOptions.hostVmServicePort,
-        devicePort: debuggingOptions.deviceVmServicePort,
-      );
+          getLogReader(app: package), ipv6: ipv6);
     }
 
     // Launch the updated application in the simulator.

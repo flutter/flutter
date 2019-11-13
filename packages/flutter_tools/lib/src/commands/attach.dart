@@ -232,8 +232,7 @@ class AttachCommand extends FlutterCommand {
         observatoryUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
           appId,
           device,
-          usesIpv6: usesIpv6,
-          deviceVmservicePort: deviceVmservicePort,
+          usesIpv6,
         );
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
@@ -243,9 +242,6 @@ class AttachCommand extends FlutterCommand {
           observatoryDiscovery = ProtocolDiscovery.observatory(
             device.getLogReader(),
             portForwarder: device.portForwarder,
-            ipv6: ipv6,
-            devicePort: deviceVmservicePort,
-            hostPort: hostVmservicePort,
           );
           printStatus('Waiting for a connection from Flutter on ${device.name}...');
           observatoryUri = await observatoryDiscovery.uri;
@@ -263,7 +259,7 @@ class AttachCommand extends FlutterCommand {
         device,
         debugUri?.host ?? hostname,
         devicePort ?? debugUri.port,
-        hostVmservicePort,
+        observatoryPort,
         debugUri?.path,
       );
     }
