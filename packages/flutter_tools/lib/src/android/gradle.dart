@@ -336,7 +336,7 @@ Future<void> buildGradleApp({
 
   GradleHandledError detectedGradleError;
   String detectedGradleErrorLine;
-  final StringConverter consumeLog = (String line) {
+  String consumeLog(String line) {
     // This message was removed from first-party plugins,
     // but older plugin versions still display this message.
     if (androidXPluginWarningRegex.hasMatch(line)) {
