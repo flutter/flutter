@@ -149,6 +149,10 @@ const String pluralMethodTemplate = '''
   }
 ''';
 
+int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
+  return a.path.compareTo(b.path);
+}
+
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
   final Map<String, dynamic> attributesMap = bundle['@$key'];
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
@@ -384,7 +388,7 @@ Future<void> main(List<String> arguments) async {
   final Set<String> supportedLanguageCodes = <String>{};
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
-  for (FileSystemEntity entity in l10nDirectory.listSync()) {
+  for (FileSystemEntity entity in l10nDirectory.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
 
     if (FileSystemEntity.isFileSync(entityPath)) {
@@ -435,7 +439,7 @@ Future<void> main(List<String> arguments) async {
 
   final RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
 
-  for (String key in bundle.keys) {
+  for (String key in bundle.keys.toList()..sort()) {
     if (key.startsWith('@'))
       continue;
     if (!_isValidGetterAndMethodName(key))

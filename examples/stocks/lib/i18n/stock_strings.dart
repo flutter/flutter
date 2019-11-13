@@ -65,7 +65,7 @@ class StockStrings {
 
   static Future<StockStrings> load(Locale locale) {
     return initializeMessages(locale.toString())
-      .then<StockStrings>((void _) => StockStrings(locale));
+      .then<StockStrings>((_) => StockStrings(locale));
   }
 
   static StockStrings of(BuildContext context) {
@@ -89,18 +89,9 @@ class StockStrings {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('es', 'ES'),
     Locale('en', 'US'),
+    Locale('es', 'ES'),
   ];
-
-  String get title {
-    return Intl.message(
-      r'Stocks',
-      locale: _localeName,
-      name: 'title',
-      desc: r'Title for the Stocks application'
-    );
-  }
 
   String get market {
     return Intl.message(
@@ -120,6 +111,15 @@ class StockStrings {
     );
   }
 
+  String get title {
+    return Intl.message(
+      r'Stocks',
+      locale: _localeName,
+      name: 'title',
+      desc: r'Title for the Stocks application'
+    );
+  }
+
 }
 
 class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
@@ -129,7 +129,7 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
   Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
 
   @override
-  bool isSupported(Locale locale) => <String>['es', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'es'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_StockStringsDelegate old) => false;
