@@ -12,6 +12,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/dart.dart';
 import '../build_system/targets/web.dart';
+import '../convert.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -21,7 +22,13 @@ import '../reporting/reporting.dart';
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
-Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo, bool initializePlatform) async {
+Future<void> buildWeb(
+  FlutterProject flutterProject,
+  String target,
+  BuildInfo buildInfo,
+  bool initializePlatform,
+  List<String> dartDefines,
+) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
@@ -42,6 +49,7 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
         kTargetFile: target,
         kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
+        kDartDefines: jsonEncode(dartDefines),
       },
     ));
     if (!result.success) {

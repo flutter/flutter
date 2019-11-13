@@ -81,6 +81,7 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required bool initializePlatform,
   @required String hostname,
   @required String port,
+  @required List<String> dartDefines,
 });
 
 /// The dev filesystem responsible for building and serving  web applications.
@@ -97,6 +98,7 @@ class WebFs {
     this._target,
     this._buildInfo,
     this._initializePlatform,
+    this._dartDefines,
   );
 
   /// The server uri.
@@ -111,6 +113,7 @@ class WebFs {
   final String _target;
   final BuildInfo _buildInfo;
   final bool _initializePlatform;
+  final List<String> _dartDefines;
   StreamSubscription<void> _connectedApps;
 
   static const String _kHostName = 'localhost';
@@ -146,7 +149,7 @@ class WebFs {
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
     if (!_useBuildRunner) {
-      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform);
+      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform, _dartDefines);
       return true;
     }
     _client.startBuild();
@@ -173,6 +176,7 @@ class WebFs {
     @required bool initializePlatform,
     @required String hostname,
     @required String port,
+    @required List<String> dartDefines,
   }) async {
     // workaround for https://github.com/flutter/flutter/issues/38290
     if (!flutterProject.dartTool.existsSync()) {
@@ -302,7 +306,7 @@ class WebFs {
         handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
       }
     } else {
-      await buildWeb(flutterProject, target, buildInfo, initializePlatform);
+      await buildWeb(flutterProject, target, buildInfo, initializePlatform, dartDefines);
       firstBuildCompleter.complete(true);
     }
 
@@ -325,6 +329,7 @@ class WebFs {
       target,
       buildInfo,
       initializePlatform,
+      dartDefines,
     );
     if (!await firstBuildCompleter.future) {
       throw const BuildException();

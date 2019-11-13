@@ -48,6 +48,7 @@ void main() {
   MockChromeTab mockChromeTab;
   MockWipConnection mockWipConnection;
   MockWipDebugger mockWipDebugger;
+  bool didSkipDwds;
 
   setUp(() {
     resetChromeForTesting();
@@ -73,6 +74,7 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           ipv6: true,
           stayResident: true,
+          dartDefines: const <String>[],
         );
       },
       overrides: <Type, Generator>{
@@ -84,7 +86,9 @@ void main() {
           @required bool initializePlatform,
           @required String hostname,
           @required String port,
+          @required List<String> dartDefines,
         }) async {
+          didSkipDwds = skipDwds;
           return mockWebFs;
         },
       },
@@ -125,14 +129,15 @@ void main() {
     when(mockWipConnection.debugger).thenReturn(mockWipDebugger);
   }
 
-  test('runner with web server device does not support debugging', () => testbed.run(() {
+  test('runner with web server device does not support debugging', () => testbed.run(() async {
     when(mockFlutterDevice.device).thenReturn(WebServerDevice());
-    final ResidentRunner profileResidentWebRunner =  residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+    final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
+      dartDefines: const <String>[],
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -142,6 +147,20 @@ void main() {
     expect(residentWebRunner.debuggingEnabled, true);
   }));
 
+  test('runner with web server device does not initialize dwds', () => testbed.run(() async {
+    _setupMocks();
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    expect(didSkipDwds, true);
+  }));
+
+
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
      when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
@@ -150,6 +169,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
       stayResident: true,
+      dartDefines: const <String>[],
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -204,6 +224,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
+      dartDefines: const <String>[],
     );
 
     expect(await residentWebRunner.run(), 0);
@@ -240,6 +261,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
+      dartDefines: const <String>[],
     );
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
