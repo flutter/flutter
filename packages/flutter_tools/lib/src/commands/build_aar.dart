@@ -61,21 +61,43 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   final String description = 'Build a repository containing an AAR and a POM file.\n\n'
-      'The POM file is used to include the dependencies that the AAR was compiled against.\n\n'
+      'By default, AARs are built for `release`, `debug` and `profile`.\n'
+      'The POM file is used to include the dependencies that the AAR was compiled against.\n'
       'To learn more about how to use these artifacts, see '
-      'https://docs.gradle.org/current/userguide/repository_types.html#sub:maven_local';
+      'https://flutter.dev/go/build-aar';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildInfo buildInfo = getBuildInfo();
-    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(buildInfo,
-        targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName));
+    final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
+    final Iterable<AndroidArch> targetArchitectures = argResults['target-platform']
+      .map<AndroidArch>(getAndroidArchForName);
+    final List<String> buildModes = <String>['release', 'debug', 'profile'];
 
+    for (String buildMode in buildModes) {
+      if (argResults[buildMode]) {
+        androidBuildInfo.add(
+          AndroidBuildInfo(
+            BuildInfo(BuildMode.fromName(buildMode), argResults['flavor']),
+            targetArchs: targetArchitectures,
+          )
+        );
+      }
+    }
+    // Default to all the build types.
+    if (androidBuildInfo.isEmpty) {
+      for (String buildMode in buildModes) {
+        androidBuildInfo.add(
+          AndroidBuildInfo(
+            BuildInfo(BuildMode.fromName(buildMode), argResults['flavor']),
+            targetArchs: targetArchitectures,
+          )
+        );
+      }
+    }
     await androidBuilder.buildAar(
       project: _getProject(),
-      target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,
-      outputDir: argResults['output-dir'],
+      outputDirectoryPath: argResults['output-dir'],
     );
     return null;
   }
