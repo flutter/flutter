@@ -7,9 +7,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
+import 'package:file/local.dart' as local;
 import 'package:path/path.dart' as path;
 
 import 'localizations_utils.dart';
+
+const local.LocalFileSystem fs = local.LocalFileSystem();
 
 const String defaultFileTemplate = '''
 import 'dart:async';
@@ -356,45 +359,34 @@ Future<void> main(List<String> arguments) async {
 
   final String arbPathString = results['arb-dir'];
   final String outputFileString = results['output-localization-file'];
+  final String templateArbFileName = results['template-arb-file'];
+  final String classNameString = results['output-class'];
 
-  final Directory l10nDirectory = Directory(arbPathString);
-  final File templateArbFile = File(path.join(l10nDirectory.path, results['template-arb-file']));
-  final File outputFile = File(path.join(l10nDirectory.path, outputFileString));
-  final String stringsClassName = results['output-class'];
-
-  if (!l10nDirectory.existsSync())
-    exitWithError(
-      "The 'arb-dir' directory, $l10nDirectory, does not exist.\n"
-      'Make sure that the correct path was provided.'
-    );
-  final String l10nDirectoryStatModeString = l10nDirectory.statSync().modeString();
-  if (!_isDirectoryReadableAndWritable(l10nDirectoryStatModeString))
-    exitWithError(
-      "The 'arb-dir' directory, $l10nDirectory, doesn't allow reading and writing.\n"
-      'Please ensure that the user has read and write permissions.'
-    );
-  final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
-  if (templateArbFileStatModeString[0] == '-')
-    exitWithError(
-      "The 'template-arb-file', $templateArbFile, is not readable.\n"
-      'Please ensure that the user has read permissions.'
-    );
-  if (!_isValidClassName(stringsClassName))
-    exitWithError(
-      "The 'output-class', $stringsClassName, is not valid Dart class name.\n"
-    );
+  final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(
+    fs,
+    arbPathString,
+    templateArbFileName,
+    outputFileString,
+    classNameString,
+  );
 
   final List<String> arbFilenames = <String>[];
   final Set<String> supportedLanguageCodes = <String>{};
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
-  for (FileSystemEntity entity in l10nDirectory.listSync().toList()..sort(sortFilesByPath)) {
+  final List<FileSystemEntity> sortedFileSystemEntityList = localizationsGenerator
+    .l10nDirectory
+    .listSync()
+    .toList()
+    ..sort(sortFilesByPath);
+
+  for (FileSystemEntity entity in sortedFileSystemEntityList) {
     final String entityPath = entity.path;
 
-    if (FileSystemEntity.isFileSync(entityPath)) {
+    if (fs.isFileSync(entityPath)) {
       final RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
       if (arbFilenameRE.hasMatch(entityPath)) {
-        final File arbFile = File(entityPath);
+        final File arbFile = fs.file(entityPath);
         final Map<String, dynamic> arbContents = json.decode(arbFile.readAsStringSync());
         String localeString = arbContents['@@locale'];
 
@@ -430,7 +422,7 @@ Future<void> main(List<String> arguments) async {
 
   Map<String, dynamic> bundle;
   try {
-    bundle = json.decode(templateArbFile.readAsStringSync());
+    bundle = json.decode(localizationsGenerator.templateArbFile.readAsStringSync());
   } on FileSystemException catch (e) {
     exitWithError('Unable to read input arb file: $e');
   } on FormatException catch (e) {
@@ -453,9 +445,9 @@ Future<void> main(List<String> arguments) async {
       classMethods.add(genSimpleMethod(bundle, key));
   }
 
-  outputFile.writeAsStringSync(
+  localizationsGenerator.outputFile.writeAsStringSync(
     defaultFileTemplate
-      .replaceAll('@className', stringsClassName)
+      .replaceAll('@className', classNameString)
       .replaceAll('@classMethods', classMethods.join('\n'))
       .replaceAll('@importFile', _importFilePath(arbPathString, outputFileString))
       .replaceAll('@supportedLocales', genSupportedLocaleProperty(supportedLocales))
@@ -473,13 +465,77 @@ Future<void> main(List<String> arguments) async {
     'pub',
     'run',
     'intl_translation:generate_from_arb',
-    '--output-dir=${l10nDirectory.path}',
+    '--output-dir=${localizationsGenerator.l10nDirectory.path}',
     '--no-use-deferred-loading',
-    outputFile.path,
+    localizationsGenerator.outputFile.path,
     ...arbFilenames,
   ]);
   if (generateFromArbResult.exitCode != 0) {
     stderr.write(generateFromArbResult.stderr);
     exit(1);
+  }
+}
+
+class LocalizationsGenerator {
+  LocalizationsGenerator(
+    this.fs,
+    String arbPathString,
+    String templateArbFileName,
+    String outputFileString,
+    String classNameString,
+  ) {
+    _setL10nDirectory(arbPathString);
+    _setTemplateArbFile(templateArbFileName);
+    _setOutputFile(outputFileString);
+    _setClassName(classNameString);
+  }
+
+  /// TODO: documentation
+  local.LocalFileSystem fs;
+
+  /// TODO: documentation
+  Directory l10nDirectory;
+
+  /// TODO: documentation
+  File templateArbFile;
+
+  /// TODO: documentation
+  File outputFile;
+
+  void _setL10nDirectory(String arbPathString) {
+    final Directory l10nDirectory = fs.directory(arbPathString);
+    if (!l10nDirectory.existsSync())
+      exitWithError(
+        "The 'arb-dir' directory, $l10nDirectory, does not exist.\n"
+        'Make sure that the correct path was provided.'
+      );
+    final String l10nDirectoryStatModeString = l10nDirectory.statSync().modeString();
+    if (!_isDirectoryReadableAndWritable(l10nDirectoryStatModeString))
+      exitWithError(
+        "The 'arb-dir' directory, $l10nDirectory, doesn't allow reading and writing.\n"
+        'Please ensure that the user has read and write permissions.'
+      );
+  }
+
+  void _setTemplateArbFile(String templateArbFileName) {
+    assert (l10nDirectory != null);
+    final File templateArbFile = fs.file(path.join(l10nDirectory.path, templateArbFileName));
+    final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
+    if (templateArbFileStatModeString[0] == '-')
+      exitWithError(
+        "The 'template-arb-file', $templateArbFile, is not readable.\n"
+        'Please ensure that the user has read permissions.'
+      );
+  }
+
+  void _setOutputFile(String outputFileString) {
+    outputFile = fs.file(path.join(l10nDirectory.path, outputFileString));
+  }
+
+  void _setClassName(String classNameString) {
+    if (!_isValidClassName(classNameString))
+      exitWithError(
+        "The 'output-class', $classNameString, is not valid Dart class name.\n"
+      );
   }
 }
