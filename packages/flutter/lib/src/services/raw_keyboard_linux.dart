@@ -174,8 +174,6 @@ class GLFWKeyHelper with KeyHelper {
   /// modifier is pressed. This is especially true on GLFW, since its modifiers
   /// don't include the effects of the current key event.
   /// {@endtemplate}
-  ///
-  /// This especially true for
   static const int modifierCapsLock = 0x0010;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
@@ -214,62 +212,36 @@ class GLFWKeyHelper with KeyHelper {
     // happened, not AFTER, like every other platform. Consequently, if this is
     // a key down, then we need to add the correct modifier mask, and if it's a
     // key up, we need to remove it.
-    if (isDown) {
-      switch (keyCode) {
-        case 341: // controlLeft
-        case 345: // controlRight
-          modifiers |= modifierControl;
-          break;
-        case 342: // altLeft
-        case 346: // altRight
-          modifiers |= modifierAlt;
-          break;
-        case 340: // shiftLeft
-        case 344: // shiftRight
-          modifiers |= modifierShift;
-          break;
-        case 343: // metaLeft
-        case 347: // metaRight
-          modifiers |= modifierMeta;
-          break;
-        case 280: // capsLock
-          modifiers |= modifierCapsLock;
-          break;
-        case 282: // numLock
-          modifiers |= modifierNumericPad;
-          break;
-        default:
-          break;
-      }
-    } else {
-      switch (keyCode) {
-        case 341: // controlLeft
-        case 345: // controlRight
-          modifiers &= ~modifierControl;
-          break;
-        case 342: // altLeft
-        case 346: // altRight
-          modifiers &= ~modifierAlt;
-          break;
-        case 340: // shiftLeft
-        case 344: // shiftRight
-          modifiers &= ~modifierShift;
-          break;
-        case 343: // metaLeft
-        case 347: // metaRight
-          modifiers &= ~modifierMeta;
-          break;
-        case 280: // capsLock
-          modifiers &= ~modifierCapsLock;
-          break;
-        case 282: // numLock
-          modifiers &= ~modifierNumericPad;
-          break;
-        default:
-          break;
-      }
+
+    int modifierChange = 0;
+    switch (keyCode) {
+      case 341: // controlLeft
+      case 345: // controlRight
+        modifierChange = modifierControl;
+        break;
+      case 342: // altLeft
+      case 346: // altRight
+        modifierChange = modifierAlt;
+        break;
+      case 340: // shiftLeft
+      case 344: // shiftRight
+        modifierChange = modifierShift;
+        break;
+      case 343: // metaLeft
+      case 347: // metaRight
+        modifierChange = modifierMeta;
+        break;
+      case 280: // capsLock
+        modifierChange = modifierCapsLock;
+        break;
+      case 282: // numLock
+        modifierChange = modifierNumericPad;
+        break;
+      default:
+        break;
     }
-    return modifiers;
+
+    return isDown ? modifiers | modifierChange : modifiers & ~modifierChange;
   }
 
   @override
