@@ -338,35 +338,40 @@ Future<void> buildGradleApp({
   int exitCode = 1;
   GradleHandledError detectedGradleError;
   String detectedGradleErrorLine;
+
+  final StringConverter consumeLog = (String line) {
+    // This message was removed from first-party plugins,
+    // but older plugin versions still display this message.
+    if (androidXPluginWarningRegex.hasMatch(line)) {
+      // Don't pipe.
+      return null;
+    }
+    if (detectedGradleError != null) {
+      // Pipe stdout/stderr from Gradle.
+      return line;
+    }
+    for (final GradleHandledError gradleError in localGradleErrors) {
+      if (gradleError.test(line)) {
+        detectedGradleErrorLine = line;
+        detectedGradleError = gradleError;
+        // The first error match wins.
+        break;
+      }
+    }
+    // Pipe stdout/stderr from Gradle.
+    return line;
+  };
+
   try {
     exitCode = await processUtils.stream(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
       environment: gradleEnvironment,
-      mapFunction: (String line) {
-        // This message was removed from first-party plugins,
-        // but older plugin versions still display this message.
-        if (androidXPluginWarningRegex.hasMatch(line)) {
-          // Don't pipe.
-          return null;
-        }
-        if (detectedGradleError != null) {
-          // Pipe stdout/stderr from Gradle.
-          return line;
-        }
-        for (final GradleHandledError gradleError in localGradleErrors) {
-          if (gradleError.test(line)) {
-            detectedGradleErrorLine = line;
-            detectedGradleError = gradleError;
-            // The first error match wins.
-            break;
-          }
-        }
-        // Pipe stdout/stderr from Gradle.
-        return line;
-      },
+      mapFunction: consumeLog,
     );
+  } on ProcessException catch(exception) {
+    consumeLog(exception.toString());
   } finally {
     status.stop();
   }
