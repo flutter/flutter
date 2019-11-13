@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material.dart';
