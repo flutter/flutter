@@ -587,7 +587,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
     // in slider.dart.
-//    Size _sizeWithOverflow() => Navigator.of(context)?.context?.size ?? MediaQuery.of(context).size;
     Size _sizeWithOverflow() => MediaQuery.of(context).size;
 
     return _RangeSliderRenderObjectWidget(
