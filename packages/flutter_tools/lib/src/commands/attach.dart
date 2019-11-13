@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -206,10 +208,8 @@ class AttachCommand extends FlutterCommand {
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
 
-    bool attachLogger = false;
     if (devicePort == null && debugUri == null) {
       if (device is FuchsiaDevice) {
-        attachLogger = true;
         final String module = stringArg('module');
         if (module == null) {
           throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
@@ -272,47 +272,18 @@ class AttachCommand extends FlutterCommand {
           )
         ).asBroadcastStream();
     }
-    try {
-      final bool useHot = getBuildInfo().isDebug;
-      final FlutterDevice flutterDevice = await FlutterDevice.create(
-        device,
-        flutterProject: flutterProject,
-        trackWidgetCreation: boolArg('track-widget-creation'),
-        fileSystemRoots: stringsArg('filesystem-root'),
-        fileSystemScheme: stringArg('filesystem-scheme'),
-        viewFilter: stringArg('isolate-filter'),
-        target: stringArg('target'),
-        targetModel: TargetModel(stringArg('target-model')),
-        buildMode: getBuildMode(),
-        dartDefines: dartDefines,
-      );
-      flutterDevice.observatoryUris = observatoryUri;
-      final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
-      final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
-      terminal.usesTerminalUi = daemon == null;
-      final ResidentRunner runner = useHot ?
-          hotRunnerFactory.build(
-            flutterDevices,
-            target: targetFile,
-            debuggingOptions: debuggingOptions,
-            packagesFilePath: globalResults['packages'] as String,
-            projectRootPath: stringArg('project-root'),
-            dillOutputPath: stringArg('output-dill'),
-            ipv6: usesIpv6,
-            flutterProject: flutterProject,
-          )
-        : ColdRunner(
-            flutterDevices,
-            target: targetFile,
-            debuggingOptions: debuggingOptions,
-            ipv6: usesIpv6,
-          );
-      if (attachLogger) {
-        flutterDevice.startEchoingDeviceLog();
-      }
 
+    terminal.usesTerminalUi = daemon == null;
+
+    try {
       int result;
       if (daemon != null) {
+        final ResidentRunner runner = await createResidentRunner(
+          observatoryUris: observatoryUri,
+          device: device,
+          flutterProject: flutterProject,
+          usesIpv6: usesIpv6,
+        );
         AppInstance app;
         try {
           app = await daemon.appDomain.launch(
@@ -331,6 +302,12 @@ class AttachCommand extends FlutterCommand {
         assert(result != null);
       } else {
         while (true) {
+          final ResidentRunner runner = await createResidentRunner(
+            observatoryUris: observatoryUri,
+            device: device,
+            flutterProject: flutterProject,
+            usesIpv6: usesIpv6,
+          );
           final Completer<void> onAppStart = Completer<void>.sync();
           TerminalHandler terminalHandler;
           unawaited(onAppStart.future.whenComplete(() {
@@ -359,6 +336,52 @@ class AttachCommand extends FlutterCommand {
         await device.portForwarder.unforward(port);
       }
     }
+  }
+
+  Future<ResidentRunner> createResidentRunner({
+    @required Stream<Uri> observatoryUris,
+    @required Device device,
+    @required FlutterProject flutterProject,
+    @required bool usesIpv6,
+  }) async {
+    assert(observatoryUris != null);
+    assert(device != null);
+    assert(flutterProject != null);
+    assert(usesIpv6 != null);
+
+    final FlutterDevice flutterDevice = await FlutterDevice.create(
+      device,
+      flutterProject: flutterProject,
+      trackWidgetCreation: boolArg('track-widget-creation'),
+      fileSystemRoots: stringsArg('filesystem-root'),
+      fileSystemScheme: stringArg('filesystem-scheme'),
+      viewFilter: stringArg('isolate-filter'),
+      target: stringArg('target'),
+      targetModel: TargetModel(stringArg('target-model')),
+      buildMode: getBuildMode(),
+      dartDefines: dartDefines,
+    );
+    flutterDevice.observatoryUris = observatoryUris;
+    final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
+
+    return getBuildInfo().isDebug
+      ? hotRunnerFactory.build(
+          flutterDevices,
+          target: targetFile,
+          debuggingOptions: debuggingOptions,
+          packagesFilePath: globalResults['packages'] as String,
+          projectRootPath: stringArg('project-root'),
+          dillOutputPath: stringArg('output-dill'),
+          ipv6: usesIpv6,
+          flutterProject: flutterProject,
+        )
+      : ColdRunner(
+          flutterDevices,
+          target: targetFile,
+          debuggingOptions: debuggingOptions,
+          ipv6: usesIpv6,
+        );
   }
 
   Future<void> _validateArguments() async { }
