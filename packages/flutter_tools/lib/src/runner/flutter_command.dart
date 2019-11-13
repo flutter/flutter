@@ -216,23 +216,60 @@ abstract class FlutterCommand extends Command<void> {
   /// Adds options for connecting to the Dart VM observatory port.
   void usesPortOptions() {
     argParser.addOption(observatoryPortOption,
-        help: 'Listen to the given port for an observatory debugger connection.\n'
+        help: '(deprecated use host-vmservice-port instead)'
+              'Listen to the given port for an observatory debugger connection.\n'
               'Specifying port 0 (the default) will find a random free port.',
+    );
+    argParser.addOption('device-vmservice-port',
+      help: 'Look for vmservice connections only from the specified port.\n'
+            'Specifying port 0 (the default) will accept the first vmservice '
+            'discovered.',
+    );
+    argParser.addOption('host-vmservice-port',
+      help: 'When a device-side vmservice port is forwarded to a host-side '
+            'port, use this value as the host port.\nSpecifying port 0 '
+            '(the default) will find a random free host port.'
     );
     _usesPortOption = true;
   }
 
-  /// Gets the observatory port provided to in the 'observatory-port' option.
+  /// Gets the vmservice port provided to in the 'observatory-port' or
+  /// 'host-vmservice-port option.
+  ///
+  /// Only one of "host-vmservice-port" and "observatory-port" may be
+  /// specified.
   ///
   /// If no port is set, returns null.
-  int get observatoryPort {
-    if (!_usesPortOption || argResults['observatory-port'] == null) {
+  int get hostVmservicePort {
+    if (!_usesPortOption ||
+        argResults['observatory-port'] == null ||
+        argResults['host-vmservice-port'] == null) {
+      return null;
+    }
+    if (argResults.wasParsed('observatory-port') &&
+        argResults.wasParsed('host-vmservice-port')) {
+      throwToolExit('Only one of "--observatory-port" and '
+        '"--host-vmservice-port" may be specified.');
+    }
+    try {
+      return int.parse(argResults['observatory-port'] ?? argResults['host-vmservice-port']);
+    } on FormatException catch (error) {
+      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
+    }
+    return null;
+  }
+
+  /// Gets the vmservice port provided to in the 'device-vmservice-port' option.
+  ///
+  /// If no port is set, returns null.
+  int get deviceVmservicePort {
+    if (!_usesPortOption || argResults['device-vmservice-port'] == null) {
       return null;
     }
     try {
-      return int.parse(argResults['observatory-port']);
-    } catch (error) {
-      throwToolExit('Invalid port for `--observatory-port`: $error');
+      return int.parse(argResults['device-vmservice-port']);
+    } on FormatException catch (error) {
+      throwToolExit('Invalid port for `--device-vmservice-port`: $error');
     }
     return null;
   }
