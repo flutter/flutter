@@ -59,7 +59,7 @@ import 'messages_all.dart';
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
 class StockStrings {
-  StockStrings(Locale locale) : _localeName = locale.toString();
+  StockStrings(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
   final String _localeName;
 

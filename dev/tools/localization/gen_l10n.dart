@@ -73,7 +73,7 @@ import 'messages_all.dart';
 /// be consistent with the languages listed in the @className.supportedLocales
 /// property.
 class @className {
-  @className(Locale locale) : _localeName = locale.toString();
+  @className(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
   final String _localeName;
 
