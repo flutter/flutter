@@ -287,7 +287,8 @@ abstract class RawKeyEvent extends Diagnosticable {
             unicodeScalarValues: message['unicodeScalarValues'] ?? 0,
             keyCode: message['keyCode'] ?? 0,
             scanCode: message['scanCode'] ?? 0,
-            modifiers: message['modifiers'] ?? 0);
+            modifiers: message['modifiers'] ?? 0,
+            isDown: message['type'] == 'keydown');
         break;
       case 'web':
         data = RawKeyEventDataWeb(
@@ -574,6 +575,8 @@ class RawKeyboard {
 
   void _synchronizeModifiers(RawKeyEvent event) {
     final Map<ModifierKey, KeyboardSide> modifiersPressed = event.data.modifiersPressed;
+    print('Event: $event (${event.data})');
+    print('Modifiers pressed: $modifiersPressed');
     final Set<LogicalKeyboardKey> modifierKeys = <LogicalKeyboardKey>{};
     for (ModifierKey key in modifiersPressed.keys) {
       final Set<LogicalKeyboardKey> mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
@@ -582,17 +585,20 @@ class RawKeyboard {
         'producing unsupported modifier combinations.');
       modifierKeys.addAll(mappedKeys);
     }
+    print('Modifier keys: $modifierKeys');
     // Don't send any key events for these changes, since there *should* be
     // separate events for each modifier key down/up that occurs while the app
     // has focus. This is just to synchronize the modifier keys when they are
     // pressed/released while the app doesn't have focus, to make sure that
     // _keysPressed reflects reality at all times.
+    print('Keys pressed before: $_keysPressed');
     _keysPressed.removeAll(_allModifiers);
     if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
       // On Fuchsia and macOS, the Fn key is not considered a modifier key.
       _keysPressed.remove(LogicalKeyboardKey.fn);
     }
     _keysPressed.addAll(modifierKeys);
+    print('Keys now pressed: $_keysPressed');
   }
 
   final Set<LogicalKeyboardKey> _keysPressed = <LogicalKeyboardKey>{};
