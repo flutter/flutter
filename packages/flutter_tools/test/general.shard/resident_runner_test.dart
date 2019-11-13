@@ -32,7 +32,6 @@ import '../src/testbed.dart';
 
 void main() {
   final Uri testUri = Uri.parse('foo://bar');
-  Testbed testbed;
   MockFlutterDevice mockFlutterDevice;
   MockVMService mockVMService;
   MockDevFS mockDevFS;
@@ -41,19 +40,10 @@ void main() {
   MockDevice mockDevice;
   MockIsolate mockIsolate;
 
-  setUp(() {
-    testbed = Testbed(setup: () {
-      fs.file(fs.path.join('build', 'app.dill'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('ABC');
-      residentRunner = HotRunner(
-        <FlutterDevice>[
-          mockFlutterDevice,
-        ],
-        stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      );
-    });
+  final Testbed testbed = Testbed(setup: () {
+    fs.file(fs.path.join('build', 'app.dill'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('ABC');
     mockFlutterDevice = MockFlutterDevice();
     mockDevice = MockDevice();
     mockVMService = MockVMService();
@@ -139,9 +129,16 @@ void main() {
     when(mockIsolate.reload()).thenAnswer((Invocation invocation) {
       return Future<ServiceObject>.value(null);
     });
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
   });
 
-  test('ResidentRunner can attach to device successfully', () => testbed.run(() async {
+  testbed.test('ResidentRunner can attach to device successfully', () async {
     final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> onAppStart = Completer<void>.sync();
     final Future<int> result = residentRunner.attach(
@@ -157,9 +154,9 @@ void main() {
     expect(onConnectionInfo.isCompleted, true);
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(onAppStart.isCompleted, true);
-  }));
+  });
 
-  test('ResidentRunner can handle an RPC exception from hot reload', () => testbed.run(() async {
+  testbed.test('ResidentRunner can handle an RPC exception from hot reload', () async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
     });
@@ -202,13 +199,13 @@ void main() {
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
-  }));
+  });
 
-  test('ResidentRunner copies dill file from build output into temp directory', () => testbed.run(() async {
+  testbed.test('ResidentRunner copies dill file from build output into temp directory', () async {
     expect(residentRunner.artifactDirectory.childFile('app.dill').readAsStringSync(), 'ABC');
-  }));
+  });
 
-  test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
+  testbed.test('ResidentRunner can send target platform to analytics from hot reload', () async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
     });
@@ -235,9 +232,9 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
-  }));
+  });
 
-  test('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
+  testbed.test('ResidentRunner can send target platform to analytics from full restart', () async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
     });
@@ -265,9 +262,9 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
-  }));
+  });
 
-  test('ResidentRunner Can handle an RPC exception from hot restart', () => testbed.run(() async {
+  testbed.test('ResidentRunner Can handle an RPC exception from hot restart', () async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
     });
@@ -311,9 +308,9 @@ void main() {
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
-  }));
+  });
 
-  test('ResidentRunner uses temp directory when there is no output dill path', () => testbed.run(() {
+  testbed.test('ResidentRunner uses temp directory when there is no output dill path', () {
     expect(residentRunner.artifactDirectory.path, contains('flutter_tool.'));
 
     final ResidentRunner otherRunner = HotRunner(
@@ -325,9 +322,9 @@ void main() {
       dillOutputPath: fs.path.join('foobar', 'app.dill'),
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
-  }));
+  });
 
-  test('ResidentRunner printHelpDetails', () => testbed.run(() {
+  testbed.test('ResidentRunner printHelpDetails', () {
     when(mockDevice.supportsHotRestart).thenReturn(true);
     when(mockDevice.supportsScreenshot).thenReturn(true);
 
@@ -351,9 +348,9 @@ void main() {
     expect(bufferLogger.statusText, contains('"z"'));
     // screenshot
     expect(bufferLogger.statusText, contains('"s"'));
-  }));
+  });
 
-  test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
+  testbed.test('ResidentRunner can take screenshot on debug device', () async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
       .thenAnswer((Invocation invocation) async {
@@ -369,9 +366,9 @@ void main() {
     // Enables debug banner.
     verify(mockIsolate.flutterDebugAllowBanner(true)).called(1);
     expect(bufferLogger.statusText, contains('1kB'));
-  }));
+  });
 
-  test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws pre', () => testbed.run(() async {
+  testbed.test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws pre', () async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockIsolate.flutterDebugAllowBanner(false)).thenThrow(Exception());
     final BufferLogger bufferLogger = context.get<Logger>();
@@ -379,9 +376,9 @@ void main() {
     await residentRunner.screenshot(mockFlutterDevice);
 
     expect(bufferLogger.errorText, contains('Error'));
-  }));
+  });
 
-  test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws post', () => testbed.run(() async {
+  testbed.test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws post', () async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockIsolate.flutterDebugAllowBanner(true)).thenThrow(Exception());
     final BufferLogger bufferLogger = context.get<Logger>();
@@ -389,9 +386,9 @@ void main() {
     await residentRunner.screenshot(mockFlutterDevice);
 
     expect(bufferLogger.errorText, contains('Error'));
-  }));
+  });
 
-  test('ResidentRunner bails taking screenshot on debug device if takeScreenshot throws', () => testbed.run(() async {
+  testbed.test('ResidentRunner bails taking screenshot on debug device if takeScreenshot throws', () async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any)).thenThrow(Exception());
     final BufferLogger bufferLogger = context.get<Logger>();
@@ -399,16 +396,16 @@ void main() {
     await residentRunner.screenshot(mockFlutterDevice);
 
     expect(bufferLogger.errorText, contains('Error'));
-  }));
+  });
 
-  test('ResidentRunner can\'t take screenshot on device without support', () => testbed.run(() {
+  testbed.test('ResidentRunner can\'t take screenshot on device without support', () {
     when(mockDevice.supportsScreenshot).thenReturn(false);
 
     expect(() => residentRunner.screenshot(mockFlutterDevice),
         throwsA(isInstanceOf<AssertionError>()));
-  }));
+  });
 
-  test('ResidentRunner does not toggle banner in non-debug mode', () => testbed.run(() async {
+  testbed.test('ResidentRunner does not toggle banner in non-debug mode', () async {
     residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -431,9 +428,9 @@ void main() {
     // doesn't enable debug banner.
     verifyNever(mockIsolate.flutterDebugAllowBanner(true));
     expect(bufferLogger.statusText, contains('1kB'));
-  }));
+  });
 
-  test('FlutterDevice will not exit a paused isolate', () => testbed.run(() async {
+  testbed.test('FlutterDevice will not exit a paused isolate', () async {
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
       <FlutterView>[ mockFlutterView ],
@@ -447,9 +444,9 @@ void main() {
 
     verifyNever(mockIsolate.flutterExit());
     verify(mockDevice.stopApp(any)).called(1);
-  }));
+  });
 
-  test('FlutterDevice will exit an un-paused isolate', () => testbed.run(() async {
+  test('FlutterDevice will exit an un-paused isolate', () async {
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
       <FlutterView> [mockFlutterView ],
@@ -463,85 +460,85 @@ void main() {
     await flutterDevice.exitApps();
 
     verify(mockIsolate.flutterExit()).called(1);
-  }));
+  });
 
-  test('ResidentRunner refreshViews calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner refreshViews calls flutter device', () async {
     await residentRunner.refreshViews();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugDumpApp calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner debugDumpApp calls flutter device', () async {
     await residentRunner.debugDumpApp();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.debugDumpApp()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugDumpRenderTree calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner debugDumpRenderTree calls flutter device', () async {
     await residentRunner.debugDumpRenderTree();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.debugDumpRenderTree()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugDumpLayerTree calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner debugDumpLayerTree calls flutter device', () async {
     await residentRunner.debugDumpLayerTree();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.debugDumpLayerTree()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugDumpSemanticsTreeInTraversalOrder calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner debugDumpSemanticsTreeInTraversalOrder calls flutter device', () async {
     await residentRunner.debugDumpSemanticsTreeInTraversalOrder();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.debugDumpSemanticsTreeInTraversalOrder()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugDumpSemanticsTreeInInverseHitTestOrder calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner debugDumpSemanticsTreeInInverseHitTestOrder calls flutter device', () async {
     await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.debugDumpSemanticsTreeInInverseHitTestOrder()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugToggleDebugPaintSizeEnabled calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner debugToggleDebugPaintSizeEnabled calls flutter device', () async {
     await residentRunner.debugToggleDebugPaintSizeEnabled();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.toggleDebugPaintSizeEnabled()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugToggleDebugCheckElevationsEnabled calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner debugToggleDebugCheckElevationsEnabled calls flutter device', () async {
     await residentRunner.debugToggleDebugCheckElevationsEnabled();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.toggleDebugCheckElevationsEnabled()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugTogglePerformanceOverlayOverride calls flutter device', () => testbed.run(()async {
+  testbed.test('ResidentRunner debugTogglePerformanceOverlayOverride calls flutter device', ()async {
     await residentRunner.debugTogglePerformanceOverlayOverride();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.debugTogglePerformanceOverlayOverride()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugToggleWidgetInspector calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner debugToggleWidgetInspector calls flutter device', () async {
     await residentRunner.debugToggleWidgetInspector();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.toggleWidgetInspector()).called(1);
-  }));
+  });
 
-  test('ResidentRunner debugToggleProfileWidgetBuilds calls flutter device', () => testbed.run(() async {
+  testbed.test('ResidentRunner debugToggleProfileWidgetBuilds calls flutter device', () async {
     await residentRunner.debugToggleProfileWidgetBuilds();
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.toggleProfileWidgetBuilds()).called(1);
-  }));
+  });
 
-  test('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
+  testbed.test('HotRunner writes vm service file when providing debugging option', () async {
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -559,9 +556,9 @@ void main() {
     await residentRunner.run();
 
     expect(await fs.file('foo').readAsString(), testUri.toString());
-  }));
+  });
 
-  test('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
+  testbed.test('HotRunner handles failure to write vmservice file', () async {
     final BufferLogger bufferLogger = logger;
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
@@ -582,10 +579,10 @@ void main() {
     expect(bufferLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
   }, overrides: <Type, Generator>{
     FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem()),
-  }));
+  });
 
 
-  test('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
+  testbed.test('ColdRunner writes vm service file when providing debugging option', () async {
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = ColdRunner(
       <FlutterDevice>[
@@ -603,9 +600,9 @@ void main() {
     await residentRunner.run();
 
     expect(await fs.file('foo').readAsString(), testUri.toString());
-  }));
+  });
 
-  test('FlutterDevice uses dartdevc configuration when targeting web', () => testbed.run(() async {
+  testbed.test('FlutterDevice uses dartdevc configuration when targeting web', () async {
     final MockDevice mockDevice = MockDevice();
     when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
       return TargetPlatform.web_javascript;
@@ -626,9 +623,9 @@ void main() {
       artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
-  }));
+  });
 
-  test('connect sets up log reader', () => testbed.run(() async {
+  testbed.test('connect sets up log reader', () async {
     final MockDevice mockDevice = MockDevice();
     final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
@@ -643,7 +640,7 @@ void main() {
     verify(mockLogReader.connectedVMServices = <VMService>[ mockVMService ]);
   }, overrides: <Type, Generator>{
     VMServiceConnector: () => (Uri httpUri, { ReloadSources reloadSources, Restart restart, CompileExpression compileExpression, io.CompressionOptions compression }) async => mockVMService,
-  }));
+  });
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
@@ -656,9 +653,10 @@ class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}
+class MockResidentCompiler extends Mock implements ResidentCompiler {}
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, this.views, { List<Uri> observatoryUris })
-    : super(device, buildMode: BuildMode.debug, trackWidgetCreation: false) {
+    : super(device, buildMode: BuildMode.debug, trackWidgetCreation: false, generator: MockResidentCompiler()) {
     _observatoryUris = observatoryUris;
   }
 
