@@ -242,8 +242,8 @@ abstract class FlutterCommand extends Command<void> {
   /// If no port is set, returns null.
   int get hostVmservicePort {
     if (!_usesPortOption ||
-        argResults['observatory-port'] == null ||
-        argResults['host-vmservice-port'] == null) {
+        (argResults['observatory-port'] == null &&
+      argResults['host-vmservice-port'] == null)) {
       return null;
     }
     if (argResults.wasParsed('observatory-port') &&
