@@ -357,7 +357,7 @@ Future<void> buildGradleApp({
     }
     // Pipe stdout/stderr from Gradle.
     return line;
-  };
+  }
 
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
