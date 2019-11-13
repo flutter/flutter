@@ -529,8 +529,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape;
     Color valueIndicatorColor;
     if (valueIndicatorShape is RectangularSliderValueIndicatorShape) {
-      valueIndicatorColor = sliderTheme.valueIndicatorColor
-          ?? Color.alphaBlend(Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90)), Colors.white);
+      valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(
+        Color.alphaBlend(
+          theme.colorScheme.onSurface.withOpacity(0.60),
+          theme.colorScheme.surface.withOpacity(0.90)),
+        theme.brightness == Brightness.dark ? Colors.black : Colors.white,
+      );
     } else {
       valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
     }
@@ -564,7 +568,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
     // in range_slider.dart.
-    Size _sizeWithOverflow() => Navigator.of(context)?.context?.size ?? MediaQuery.of(context).size;
+//    Size _sizeWithOverflow() => Navigator.of(context)?.context?.size ?? MediaQuery.of(context).size;
+    Size _sizeWithOverflow() => MediaQuery.of(context).size;
 
     return _SliderRenderObjectWidget(
       value: _unlerp(widget.value),
