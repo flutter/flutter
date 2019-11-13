@@ -207,8 +207,10 @@ def BuildTarget(runtime_mode, arch, product, enable_lto):
       runtime_mode,
   ]
 
-  if not enable_lto:
-    flags.append('--no-lto')
+  # Always disable lto until https://github.com/flutter/flutter/issues/44841
+  # gets fixed.
+  # if not enable_lto:
+  flags.append('--no-lto')
 
   RunGN(out_dir, flags)
   BuildNinjaTargets(out_dir, GetTargetsToBuild(product))
