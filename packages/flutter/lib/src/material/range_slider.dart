@@ -586,9 +586,9 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       thumbSelector: sliderTheme.thumbSelector ?? _defaultRangeThumbSelector,
     );
 
-    // This size is used to as max bounds to paint the value indicators within.
-    // It must be kept in sync with the function with the same name in
-    // slider.dart.
+    // This size is used as the max bounds for the painting of the value
+    // indicators It must be kept in sync with the function with the same name
+    // in slider.dart.
     Size _sizeWithOverflow() => Navigator.of(context)?.context?.size ?? MediaQuery.of(context).size;
 
     return _RangeSliderRenderObjectWidget(

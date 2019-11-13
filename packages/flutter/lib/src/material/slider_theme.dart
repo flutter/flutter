@@ -993,6 +993,13 @@ abstract class SliderComponentShape {
   /// [labelPainter] already has the [textDirection] set.
   ///
   /// [value] is the current parametric value (from 0.0 to 1.0) of the slider.
+  ///
+  /// [textScaleFactor] can be used to determine whether the component should
+  /// paint larger or smaller, depending on whether [textScaleFactor] is greater
+  /// than or less than 1.
+  ///
+  /// [sizeWithOverflow] can be used to determine the absolute bounds when the
+  /// component is painted outside of the slider's bounds.
   void paint(
     PaintingContext context,
     Offset center, {
@@ -1262,9 +1269,9 @@ abstract class RangeSliderValueIndicatorShape {
   /// [labelPainter] helps determine the width of the shape. It is variable
   /// width because it is derived from a formatted string.
   ///
-  /// [textScaleFactor] can be used to determine the size of this shape, larger
-  /// when textScaleFactor is greater than  1, and smaller when textScaleFactor
-  /// is less than 1.
+  /// [textScaleFactor] can be used to determine whether this shape should
+  /// paint larger or smaller, depending on whether [textScaleFactor] is greater
+  /// than or less than 1.
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
@@ -1303,6 +1310,15 @@ abstract class RangeSliderValueIndicatorShape {
   /// indicators, which is always the indicator for the most recently selected thumb. In
   /// the default case, this is used to paint a stroke around the top indicator
   /// for better visibility between the two indicators.
+  ///
+  /// [textScaleFactor] can be used to determine whether this shape should
+  /// paint larger or smaller, depending on whether [textScaleFactor] is greater
+  /// than or less than 1.
+  ///
+  /// [sizeWithOverflow] can be used to determine the absolute bounds when the
+  /// component is painted outside of the slider's bounds.
+  ///
+  /// {@macro flutter.material.rangeSlider.shape.parentBox}
   ///
   /// {@macro flutter.material.rangeSlider.shape.sliderTheme}
   ///
