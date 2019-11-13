@@ -9,12 +9,14 @@ import '../../gallery/demo.dart';
 class CupertinoButtonsDemo extends StatefulWidget {
   static const String routeName = '/cupertino/buttons';
 
+  @override
   _CupertinoButtonDemoState createState() => _CupertinoButtonDemoState();
 }
 
 class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
   int _pressedCount = 0;
 
+  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(

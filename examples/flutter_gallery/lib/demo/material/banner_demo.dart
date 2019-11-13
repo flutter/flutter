@@ -17,6 +17,7 @@ class BannerDemo extends StatefulWidget {
 
   static const String routeName = '/material/banner';
 
+  @override
   _BannerDemoState createState() => _BannerDemoState();
 }
 
@@ -44,6 +45,7 @@ class _BannerDemoState extends State<BannerDemo> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     final Widget banner = MaterialBanner(
       content: const Text('Your password was updated on your other device. Please sign in again.'),

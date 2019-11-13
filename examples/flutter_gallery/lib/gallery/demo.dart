@@ -27,6 +27,7 @@ class ComponentDemoTabData {
   final String tabName;
   final String documentationUrl;
 
+  @override
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
@@ -36,6 +37,7 @@ class ComponentDemoTabData {
         && typedOther.documentationUrl == documentationUrl;
   }
 
+  @override
   int get hashCode => hashValues(tabName, description, documentationUrl);
 }
 
@@ -88,6 +90,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: demos.length,
@@ -149,6 +152,7 @@ class FullScreenCodeDialog extends StatefulWidget {
 
   final String exampleCodeTag;
 
+  @override
   FullScreenCodeDialogState createState() => FullScreenCodeDialogState();
 }
 
@@ -156,6 +160,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
   String _exampleCode;
 
+  @override
   void didChangeDependencies() {
     getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<void>((String code) {
       if (mounted) {
@@ -167,6 +172,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     super.didChangeDependencies();
   }
 
+  @override
   Widget build(BuildContext context) {
     final SyntaxHighlighterStyle style = Theme.of(context).brightness == Brightness.dark
       ? SyntaxHighlighterStyle.darkThemeStyle()
@@ -220,6 +226,7 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
 
   final String documentationUrl;
 
+  @override
   Widget build(BuildContext context) {
     return IconButton(
       icon: const Icon(Icons.library_books),
@@ -240,6 +247,7 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
 
   final String documentationUrl;
 
+  @override
   Widget build(BuildContext context) {
     return CupertinoButton(
       padding: EdgeInsets.zero,

@@ -15,6 +15,7 @@ class StockList extends StatelessWidget {
   final StockRowActionCallback onShow;
   final StockRowActionCallback onAction;
 
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
       key: const ValueKey<String>('stock-list'),

@@ -84,6 +84,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
   List<_HighlightSpan> _spans;
 
+  @override
   TextSpan format(String src) {
     _src = src;
     _scanner = StringScanner(_src);

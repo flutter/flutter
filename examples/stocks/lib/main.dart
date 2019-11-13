@@ -23,14 +23,18 @@ import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
 class _StocksLocalizationsDelegate extends LocalizationsDelegate<StockStrings> {
+  @override
   Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
 
+  @override
   bool isSupported(Locale locale) => locale.languageCode == 'es' || locale.languageCode == 'en';
 
+  @override
   bool shouldReload(_StocksLocalizationsDelegate old) => false;
 }
 
 class StocksApp extends StatefulWidget {
+  @override
   StocksAppState createState() => StocksAppState();
 }
 
@@ -50,6 +54,7 @@ class StocksAppState extends State<StocksApp> {
     showSemanticsDebugger: false,
   );
 
+  @override
   void initState() {
     super.initState();
     stocks = StockData();
@@ -90,6 +95,7 @@ class StocksAppState extends State<StocksApp> {
     return null;
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(() {
       debugPaintSizeEnabled = _configuration.debugShowSizes;

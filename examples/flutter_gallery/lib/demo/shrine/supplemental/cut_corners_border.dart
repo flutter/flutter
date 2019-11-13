@@ -29,6 +29,7 @@ class CutCornersBorder extends OutlineInputBorder {
     gapPadding: gapPadding,
   );
 
+  @override
   CutCornersBorder copyWith({
     BorderSide borderSide,
     BorderRadius borderRadius,
@@ -45,6 +46,7 @@ class CutCornersBorder extends OutlineInputBorder {
 
   final double cut;
 
+  @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     if (a is CutCornersBorder) {
       final CutCornersBorder outline = a;
@@ -58,6 +60,7 @@ class CutCornersBorder extends OutlineInputBorder {
     return super.lerpFrom(a, t);
   }
 
+  @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     if (b is CutCornersBorder) {
       final CutCornersBorder outline = b;
@@ -96,6 +99,7 @@ class CutCornersBorder extends OutlineInputBorder {
       ..lineTo(center.left, center.top + cut);
   }
 
+  @override
   void paint(
     Canvas canvas,
     Rect rect, {

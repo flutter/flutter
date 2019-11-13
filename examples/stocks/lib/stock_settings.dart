@@ -12,6 +12,7 @@ class StockSettings extends StatefulWidget {
   final StockConfiguration configuration;
   final ValueChanged<StockConfiguration> updater;
 
+  @override
   StockSettingsState createState() => StockSettingsState();
 }
 
@@ -207,6 +208,7 @@ class StockSettingsState extends State<StockSettings> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(context),

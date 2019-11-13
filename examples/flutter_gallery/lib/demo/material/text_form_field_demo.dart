@@ -15,6 +15,7 @@ class TextFormFieldDemo extends StatefulWidget {
 
   static const String routeName = '/material/text-form-field';
 
+  @override
   TextFormFieldDemoState createState() => TextFormFieldDemoState();
 }
 
@@ -44,12 +45,14 @@ class PasswordField extends StatefulWidget {
   final FormFieldValidator<String> validator;
   final ValueChanged<String> onFieldSubmitted;
 
+  @override
   _PasswordFieldState createState() => _PasswordFieldState();
 }
 
 class _PasswordFieldState extends State<PasswordField> {
   bool _obscureText = true;
 
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
       key: widget.fieldKey,
@@ -163,6 +166,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     ) ?? false;
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawerDragStartBehavior: DragStartBehavior.down,
@@ -300,6 +304,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
 /// Format incoming numeric text to fit the format of (###) ###-#### ##...
 class _UsNumberTextInputFormatter extends TextInputFormatter {
+  @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,

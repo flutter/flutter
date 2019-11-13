@@ -38,6 +38,7 @@ class GalleryApp extends StatefulWidget {
   final VoidCallback onSendFeedback;
   final bool testMode;
 
+  @override
   _GalleryAppState createState() => _GalleryAppState();
 }
 
@@ -57,6 +58,7 @@ class _GalleryAppState extends State<GalleryApp> {
     );
   }
 
+  @override
   void initState() {
     super.initState();
     _options = GalleryOptions(
@@ -68,6 +70,7 @@ class _GalleryAppState extends State<GalleryApp> {
     model = AppStateModel()..loadProducts();
   }
 
+  @override
   void dispose() {
     _timeDilationTimer?.cancel();
     _timeDilationTimer = null;
@@ -108,6 +111,7 @@ class _GalleryAppState extends State<GalleryApp> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget home = GalleryHome(
       testMode: widget.testMode,

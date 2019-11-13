@@ -24,6 +24,7 @@ import 'package:flutter_gallery/demo/shrine/model/product.dart';
 const double _leftColumnWidth = 60.0;
 
 class ShoppingCartPage extends StatefulWidget {
+  @override
   _ShoppingCartPageState createState() => _ShoppingCartPageState();
 }
 
@@ -41,6 +42,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
         .toList();
   }
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData localTheme = Theme.of(context);
 
@@ -114,6 +116,7 @@ class ShoppingCartSummary extends StatelessWidget {
 
   final AppStateModel model;
 
+  @override
   Widget build(BuildContext context) {
     final TextStyle smallAmountStyle = Theme.of(context).textTheme.body1.copyWith(color: kShrineBrown600);
     final TextStyle largeAmountStyle = Theme.of(context).textTheme.display1;
@@ -198,6 +201,7 @@ class ShoppingCartRow extends StatelessWidget {
   final int quantity;
   final VoidCallback onPressed;
 
+  @override
   Widget build(BuildContext context) {
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 0,

@@ -12,6 +12,7 @@ import 'package:path/path.dart';
 class SampleError extends Error {
   SampleError(this.message);
   final String message;
+  @override
   String toString() => 'SampleError($message)';
 }
 

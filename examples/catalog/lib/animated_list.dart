@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AnimatedListSample extends StatefulWidget {
+  @override
   _AnimatedListSampleState createState() => _AnimatedListSampleState();
 }
 
@@ -15,6 +16,7 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
   int _selectedItem;
   int _nextItem; // The next item inserted when the user presses the '+' button.
 
+  @override
   void initState() {
     super.initState();
     _list = ListModel<int>(
@@ -69,6 +71,7 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
@@ -165,6 +168,7 @@ class CardItem extends StatelessWidget {
   final int item;
   final bool selected;
 
+  @override
   Widget build(BuildContext context) {
     TextStyle textStyle = Theme.of(context).textTheme.display1;
     if (selected)

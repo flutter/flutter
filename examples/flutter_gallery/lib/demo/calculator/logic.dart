@@ -11,6 +11,7 @@ class ExpressionToken {
 
   final String stringRep;
 
+  @override
   String toString() => stringRep;
 }
 
@@ -135,6 +136,7 @@ class CalcExpression {
 
   /// The string representation of the expression. This will be displayed
   /// in the calculator's display panel.
+  @override
   String toString() {
     final StringBuffer buffer = StringBuffer('');
     buffer.writeAll(_list);

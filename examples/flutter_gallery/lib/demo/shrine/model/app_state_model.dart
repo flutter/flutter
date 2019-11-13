@@ -116,6 +116,7 @@ class AppStateModel extends Model {
     notifyListeners();
   }
 
+  @override
   String toString() {
     return 'AppStateModel(totalCost: $totalCost)';
   }

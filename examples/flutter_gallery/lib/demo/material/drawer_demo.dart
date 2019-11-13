@@ -15,6 +15,7 @@ const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 class DrawerDemo extends StatefulWidget {
   static const String routeName = '/material/drawer';
 
+  @override
   _DrawerDemoState createState() => _DrawerDemoState();
 }
 
@@ -37,6 +38,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   Animation<Offset> _drawerDetailsPosition;
   bool _showDrawerContents = true;
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -50,6 +52,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
     _drawerDetailsPosition = _controller.drive(_drawerDetailsTween);
   }
 
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -74,6 +77,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
     ));
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawerDragStartBehavior: DragStartBehavior.down,

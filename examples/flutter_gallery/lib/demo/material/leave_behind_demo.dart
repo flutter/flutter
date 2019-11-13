@@ -28,6 +28,7 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
   final String subject;
   final String body;
 
+  @override
   int compareTo(LeaveBehindItem other) => index.compareTo(other.index);
 }
 
@@ -36,6 +37,7 @@ class LeaveBehindDemo extends StatefulWidget {
 
   static const String routeName = '/material/leave-behind';
 
+  @override
   LeaveBehindDemoState createState() => LeaveBehindDemoState();
 }
 
@@ -56,6 +58,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     });
   }
 
+  @override
   void initState() {
     super.initState();
     initListItems();
@@ -116,6 +119,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     ));
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget body;
     if (leaveBehindItems.isEmpty) {
@@ -208,6 +212,7 @@ class _LeaveBehindListItem extends StatelessWidget {
     onDelete(item);
   }
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Semantics(

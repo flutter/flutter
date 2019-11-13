@@ -28,6 +28,7 @@ class ProductCard extends StatelessWidget {
 
   static const double kTextBoxHeight = 65.0;
 
+  @override
   Widget build(BuildContext context) {
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 0,

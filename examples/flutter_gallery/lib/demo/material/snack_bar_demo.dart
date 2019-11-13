@@ -23,6 +23,7 @@ class SnackBarDemo extends StatefulWidget {
 
   static const String routeName = '/material/snack-bar';
 
+  @override
   _SnackBarDemoState createState() => _SnackBarDemoState();
 }
 
@@ -70,6 +71,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

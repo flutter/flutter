@@ -35,6 +35,7 @@ void main() {
 }
 
 class _DummyHitTestTarget implements HitTestTarget {
+  @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     // Nothing to do.
   }

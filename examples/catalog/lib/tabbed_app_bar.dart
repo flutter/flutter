@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 class TabbedAppBarSample extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: DefaultTabController(
@@ -56,6 +57,7 @@ class ChoiceCard extends StatelessWidget {
 
   final Choice choice;
 
+  @override
   Widget build(BuildContext context) {
     final TextStyle textStyle = Theme.of(context).textTheme.display1;
     return Card(

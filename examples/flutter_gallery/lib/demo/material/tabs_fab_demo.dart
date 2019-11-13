@@ -37,6 +37,7 @@ final List<_Page> _allPages = <_Page>[
 class TabsFabDemo extends StatefulWidget {
   static const String routeName = '/material/tabs-fab';
 
+  @override
   _TabsFabDemoState createState() => _TabsFabDemoState();
 }
 
@@ -47,6 +48,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   _Page _selectedPage;
   bool _extendedButtons = false;
 
+  @override
   void initState() {
     super.initState();
     _controller = TabController(vsync: this, length: _allPages.length);
@@ -54,6 +56,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     _selectedPage = _allPages[0];
   }
 
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -125,6 +128,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,

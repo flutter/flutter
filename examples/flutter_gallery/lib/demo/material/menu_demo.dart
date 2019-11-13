@@ -11,6 +11,7 @@ class MenuDemo extends StatefulWidget {
 
   static const String routeName = '/material/menu';
 
+  @override
   MenuDemoState createState() => MenuDemoState();
 }
 
@@ -28,6 +29,7 @@ class MenuDemoState extends State<MenuDemo> {
   final String _checkedValue4 = 'Four';
   List<String> _checkedValues;
 
+  @override
   void initState() {
     super.initState();
     _simpleValue = _simpleValue2;
@@ -57,6 +59,7 @@ class MenuDemoState extends State<MenuDemo> {
 
   bool isChecked(String value) => _checkedValues.contains(value);
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,

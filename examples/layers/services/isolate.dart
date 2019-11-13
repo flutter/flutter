@@ -198,6 +198,7 @@ class CalculationManager {
 // This is a StatefulWidget in order to hold the CalculationManager and
 // the AnimationController for the running animation.
 class IsolateExampleWidget extends StatefulWidget {
+  @override
   IsolateExampleState createState() => IsolateExampleState();
 }
 
@@ -211,6 +212,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   AnimationController _animation;
   CalculationManager _calculationManager;
 
+  @override
   void initState() {
     super.initState();
     _animation = AnimationController(
@@ -223,11 +225,13 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
     );
   }
 
+  @override
   void dispose() {
     _animation.dispose();
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Material(
       child: Column(

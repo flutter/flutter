@@ -48,6 +48,7 @@ class VideoCard extends StatelessWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget fullScreenRoutePageBuilder(
       BuildContext context,
@@ -94,12 +95,14 @@ class VideoPlayerLoading extends StatefulWidget {
 
   final VideoPlayerController controller;
 
+  @override
   _VideoPlayerLoadingState createState() => _VideoPlayerLoadingState();
 }
 
 class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
   bool _initialized;
 
+  @override
   void initState() {
     super.initState();
     _initialized = widget.controller.value.initialized;
@@ -116,6 +119,7 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     if (_initialized) {
       return VideoPlayer(widget.controller);
@@ -135,6 +139,7 @@ class VideoPlayPause extends StatefulWidget {
 
   final VideoPlayerController controller;
 
+  @override
   State createState() => _VideoPlayPauseState();
 }
 
@@ -151,16 +156,19 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 
   VideoPlayerController get controller => widget.controller;
 
+  @override
   void initState() {
     super.initState();
     controller.addListener(listener);
   }
 
+  @override
   void deactivate() {
     controller.removeListener(listener);
     super.deactivate();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -200,12 +208,14 @@ class FadeAnimation extends StatefulWidget {
   final Widget child;
   final Duration duration;
 
+  @override
   _FadeAnimationState createState() => _FadeAnimationState();
 }
 
 class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProviderStateMixin {
   AnimationController animationController;
 
+  @override
   void initState() {
     super.initState();
     animationController = AnimationController(
@@ -220,11 +230,13 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
     animationController.forward(from: 0.0);
   }
 
+  @override
   void deactivate() {
     animationController.stop();
     super.deactivate();
   }
 
+  @override
   void didUpdateWidget(FadeAnimation oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.child != widget.child) {
@@ -232,11 +244,13 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
     }
   }
 
+  @override
   void dispose() {
     animationController.dispose();
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return animationController.isAnimating
         ? Opacity(
@@ -258,6 +272,7 @@ class ConnectivityOverlay extends StatefulWidget {
   final Completer<void> connectedCompleter;
   final GlobalKey<ScaffoldState> scaffoldKey;
 
+  @override
   _ConnectivityOverlayState createState() => _ConnectivityOverlayState();
 }
 
@@ -288,6 +303,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
     }
   }
 
+  @override
   void initState() {
     super.initState();
     connectivitySubscription = connectivityStream().listen(
@@ -306,11 +322,13 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
     );
   }
 
+  @override
   void dispose() {
     connectivitySubscription.cancel();
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) => widget.child;
 }
 
@@ -319,6 +337,7 @@ class VideoDemo extends StatefulWidget {
 
   static const String routeName = '/video';
 
+  @override
   _VideoDemoState createState() => _VideoDemoState();
 }
 
@@ -343,6 +362,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   bool isSupported = true;
   bool isDisposed = false;
 
+  @override
   void initState() {
     super.initState();
 
@@ -366,6 +386,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
     });
   }
 
+  @override
   void dispose() {
     print('> VideoDemo dispose');
     isDisposed  = true;
@@ -375,6 +396,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,

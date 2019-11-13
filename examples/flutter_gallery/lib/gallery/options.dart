@@ -50,6 +50,7 @@ class GalleryOptions {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
@@ -63,6 +64,7 @@ class GalleryOptions {
         && showOffscreenLayersCheckerboard == typedOther.showRasterCacheImagesCheckerboard;
   }
 
+  @override
   int get hashCode => hashValues(
     themeMode,
     textScaleFactor,
@@ -74,6 +76,7 @@ class GalleryOptions {
     showOffscreenLayersCheckerboard,
   );
 
+  @override
   String toString() {
     return '$runtimeType($themeMode)';
   }
@@ -87,6 +90,7 @@ class _OptionsItem extends StatelessWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
 
@@ -118,6 +122,7 @@ class _BooleanItem extends StatelessWidget {
   // [switchKey] is used for accessing the switch from driver tests.
   final Key switchKey;
 
+  @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return _OptionsItem(
@@ -143,6 +148,7 @@ class _ActionItem extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
+  @override
   Widget build(BuildContext context) {
     return _OptionsItem(
       child: _FlatButton(
@@ -159,6 +165,7 @@ class _FlatButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return FlatButton(
       padding: EdgeInsets.zero,
@@ -176,6 +183,7 @@ class _Heading extends StatelessWidget {
 
   final String text;
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return _OptionsItem(
@@ -205,6 +213,7 @@ class _ThemeModeItem extends StatelessWidget {
     ThemeMode.dark: 'Dark',
   };
 
+  @override
   Widget build(BuildContext context) {
     return _OptionsItem(
       child: Row(
@@ -251,6 +260,7 @@ class _TextScaleFactorItem extends StatelessWidget {
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
+  @override
   Widget build(BuildContext context) {
     return _OptionsItem(
       child: Row(
@@ -296,6 +306,7 @@ class _TextDirectionItem extends StatelessWidget {
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
+  @override
   Widget build(BuildContext context) {
     return _BooleanItem(
       'Force RTL',
@@ -318,6 +329,7 @@ class _TimeDilationItem extends StatelessWidget {
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
+  @override
   Widget build(BuildContext context) {
     return _BooleanItem(
       'Slow motion',
@@ -353,6 +365,7 @@ class _PlatformItem extends StatelessWidget {
     return null;
   }
 
+  @override
   Widget build(BuildContext context) {
     return _OptionsItem(
       child: Row(
@@ -442,6 +455,7 @@ class GalleryOptionsPage extends StatelessWidget {
     ];
   }
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 

@@ -9,6 +9,7 @@ import '../../gallery/demo.dart';
 class CupertinoAlertDemo extends StatefulWidget {
   static const String routeName = '/cupertino/alert';
 
+  @override
   _CupertinoAlertDemoState createState() => _CupertinoAlertDemoState();
 }
 
@@ -37,6 +38,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -199,6 +201,7 @@ class CupertinoDessertDialog extends StatelessWidget {
   final Widget title;
   final Widget content;
 
+  @override
   Widget build(BuildContext context) {
     return CupertinoAlertDialog(
       title: title,

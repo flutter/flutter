@@ -9,6 +9,7 @@ import 'logic.dart';
 class Calculator extends StatefulWidget {
   const Calculator({Key key}) : super(key: key);
 
+  @override
   _CalculatorState createState() => _CalculatorState();
 }
 
@@ -110,6 +111,7 @@ class _CalculatorState extends State<Calculator> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -140,6 +142,7 @@ class CalcDisplay extends StatelessWidget {
 
   final String content;
 
+  @override
   Widget build(BuildContext context) {
     return Center(
       child: Text(
@@ -155,6 +158,7 @@ class KeyPad extends StatelessWidget {
 
   final _CalculatorState calcState;
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData themeData = ThemeData(
       primarySwatch: Colors.purple,
@@ -222,6 +226,7 @@ class KeyRow extends StatelessWidget {
 
   final List<Widget> keys;
 
+  @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Row(
@@ -238,6 +243,7 @@ class CalcKey extends StatelessWidget {
   final String text;
   final GestureTapCallback onTap;
 
+  @override
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return Expanded(

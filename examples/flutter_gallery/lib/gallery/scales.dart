@@ -10,6 +10,7 @@ class GalleryTextScaleValue {
   final double scale;
   final String label;
 
+  @override
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
@@ -17,8 +18,10 @@ class GalleryTextScaleValue {
     return scale == typedOther.scale && label == typedOther.label;
   }
 
+  @override
   int get hashCode => hashValues(scale, label);
 
+  @override
   String toString() {
     return '$runtimeType($label)';
   }

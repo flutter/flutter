@@ -42,6 +42,7 @@ class Section {
   final Color rightColor;
   final List<SectionDetail> details;
 
+  @override
   bool operator==(Object other) {
     if (other is! Section)
       return false;
@@ -49,6 +50,7 @@ class Section {
     return title == otherSection.title;
   }
 
+  @override
   int get hashCode => title.hashCode;
 }
 

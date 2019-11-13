@@ -44,6 +44,7 @@ class RowColumnTraversal extends StatelessWidget {
   /// Builds a widget hierarchy that wraps [child].
   ///
   /// This function expresses the sort keys as a hierarchy.
+  @override
   Widget build(BuildContext context) {
     return Semantics(
       sortKey: OrdinalSortKey(columnOrder.toDouble()),
@@ -77,6 +78,7 @@ class SpinnerButton extends StatelessWidget {
   final Field field;
   final bool increment;
 
+  @override
   Widget build(BuildContext context) {
     final String label = '${increment ? 'Increment' : 'Decrement'} ${_fieldToName(field)}';
 
@@ -114,6 +116,7 @@ class FieldWidget extends StatelessWidget {
   final int value;
   final Field field;
 
+  @override
   Widget build(BuildContext context) {
     final String stringValue = '${_fieldToName(field)} $value';
     final String increasedValue = '${_fieldToName(field)} ${value + 1}';
@@ -157,6 +160,7 @@ String _fieldToName(Field field) {
 
 /// The top-level example widget that serves as the body of the app.
 class CustomTraversalExample extends StatefulWidget {
+  @override
   CustomTraversalExampleState createState() => CustomTraversalExampleState();
 }
 
@@ -202,6 +206,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(

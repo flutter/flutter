@@ -9,6 +9,7 @@ import '../../gallery/demo.dart';
 class BottomAppBarDemo extends StatefulWidget {
   static const String routeName = '/material/bottom_app_bar';
 
+  @override
   State createState() => _BottomAppBarDemoState();
 }
 
@@ -136,6 +137,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
@@ -213,6 +215,7 @@ class _ChoiceValue<T> {
   final String title;
   final String label; // For the Semantics widget that contains title
 
+  @override
   String toString() => '$runtimeType("$title")';
 }
 
@@ -223,6 +226,7 @@ class _RadioItem<T> extends StatelessWidget {
   final _ChoiceValue<T> groupValue;
   final ValueChanged<_ChoiceValue<T>> onChanged;
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Container(
@@ -275,6 +279,7 @@ class _ColorsItem extends StatelessWidget {
   final Color selectedColor;
   final ValueChanged<Color> onChanged;
 
+  @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -309,6 +314,7 @@ class _Heading extends StatelessWidget {
 
   final String text;
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Container(
@@ -341,6 +347,7 @@ class _DemoBottomAppBar extends StatelessWidget {
     FloatingActionButtonLocation.centerFloat,
   ];
 
+  @override
   Widget build(BuildContext context) {
     return BottomAppBar(
       color: color,
@@ -386,6 +393,7 @@ class _DemoBottomAppBar extends StatelessWidget {
 class _DemoDrawer extends StatelessWidget {
   const _DemoDrawer();
 
+  @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Column(
@@ -414,6 +422,7 @@ class _DiamondFab extends StatelessWidget {
   final Widget child;
   final VoidCallback onPressed;
 
+  @override
   Widget build(BuildContext context) {
     return Material(
       shape: const _DiamondBorder(),
@@ -437,6 +446,7 @@ class _DiamondFab extends StatelessWidget {
 class _DiamondNotchedRectangle implements NotchedShape {
   const _DiamondNotchedRectangle();
 
+  @override
   Path getOuterPath(Rect host, Rect guest) {
     if (!host.overlaps(guest))
       return Path()..addRect(host);
@@ -474,14 +484,17 @@ class _DiamondNotchedRectangle implements NotchedShape {
 class _DiamondBorder extends ShapeBorder {
   const _DiamondBorder();
 
+  @override
   EdgeInsetsGeometry get dimensions {
     return const EdgeInsets.only();
   }
 
+  @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
     return getOuterPath(rect, textDirection: textDirection);
   }
 
+  @override
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
     return Path()
       ..moveTo(rect.left + rect.width / 2.0, rect.top)
@@ -491,9 +504,11 @@ class _DiamondBorder extends ShapeBorder {
       ..close();
   }
 
+  @override
   void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) { }
 
   // This border doesn't support scaling.
+  @override
   ShapeBorder scale(double t) {
     return null;
   }

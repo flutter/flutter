@@ -35,18 +35,21 @@ class _TappableWhileStatusIs extends StatefulWidget {
   final AnimationStatus status;
   final Widget child;
 
+  @override
   _TappableWhileStatusIsState createState() => _TappableWhileStatusIsState();
 }
 
 class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
   bool _active;
 
+  @override
   void initState() {
     super.initState();
     widget.controller.addStatusListener(_handleStatusChange);
     _active = widget.controller.status == widget.status;
   }
 
+  @override
   void dispose() {
     widget.controller.removeStatusListener(_handleStatusChange);
     super.dispose();
@@ -61,6 +64,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return AbsorbPointer(
       absorbing: !_active,
@@ -82,6 +86,7 @@ class _CrossFadeTransition extends AnimatedWidget {
   final Widget child0;
   final Widget child1;
 
+  @override
   Widget build(BuildContext context) {
     final Animation<double> progress = listenable;
 
@@ -131,6 +136,7 @@ class _BackAppBar extends StatelessWidget {
   final Widget title;
   final Widget trailing;
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return IconTheme.merge(
@@ -180,6 +186,7 @@ class Backdrop extends StatefulWidget {
   final Widget backTitle;
   final Widget backLayer;
 
+  @override
   _BackdropState createState() => _BackdropState();
 }
 
@@ -191,6 +198,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   static final Animatable<double> _frontOpacityTween = Tween<double>(begin: 0.2, end: 1.0)
     .chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -201,6 +209,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     _frontOpacity = _controller.drive(_frontOpacityTween);
   }
 
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -326,6 +335,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: _buildStack);
   }

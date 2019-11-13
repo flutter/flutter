@@ -12,6 +12,7 @@ void main() {
 }
 
 class PlatformView extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Platform View',
@@ -28,6 +29,7 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
 
+  @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
@@ -51,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(widget.title),

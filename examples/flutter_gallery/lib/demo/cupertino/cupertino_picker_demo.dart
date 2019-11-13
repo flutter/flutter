@@ -13,6 +13,7 @@ const double _kPickerItemHeight = 32.0;
 class CupertinoPickerDemo extends StatefulWidget {
   static const String routeName = '/cupertino/picker';
 
+  @override
   _CupertinoPickerDemoState createState() => _CupertinoPickerDemoState();
 }
 
@@ -238,6 +239,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(

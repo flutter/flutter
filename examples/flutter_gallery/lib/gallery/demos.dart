@@ -16,6 +16,7 @@ class GalleryDemoCategory {
   final String name;
   final IconData icon;
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -25,8 +26,10 @@ class GalleryDemoCategory {
     return typedOther.name == name && typedOther.icon == icon;
   }
 
+  @override
   int get hashCode => hashValues(name, icon);
 
+  @override
   String toString() {
     return '$runtimeType($name)';
   }
@@ -79,6 +82,7 @@ class GalleryDemo {
   final WidgetBuilder buildRoute;
   final String documentationUrl;
 
+  @override
   String toString() {
     return '$runtimeType($title $routeName)';
   }

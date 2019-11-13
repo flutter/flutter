@@ -41,6 +41,7 @@ class DualHeaderWithHint extends StatelessWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
@@ -90,6 +91,7 @@ class CollapsibleBody extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onCancel;
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
@@ -176,12 +178,14 @@ class DemoItem<T> {
 class ExpansionPanelsDemo extends StatefulWidget {
   static const String routeName = '/material/expansion_panels';
 
+  @override
   _ExpansionPanelsDemoState createState() => _ExpansionPanelsDemoState();
 }
 
 class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   List<DemoItem<dynamic>> _demoItems;
 
+  @override
   void initState() {
     super.initState();
 
@@ -321,6 +325,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
     ];
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

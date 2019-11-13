@@ -32,6 +32,7 @@ class _FrontLayer extends StatelessWidget {
   final VoidCallback onTap;
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return Material(
       elevation: 16.0,
@@ -73,6 +74,7 @@ class _BackdropTitle extends AnimatedWidget {
   final Widget frontTitle;
   final Widget backTitle;
 
+  @override
   Widget build(BuildContext context) {
     final Animation<double> animation = CurvedAnimation(
       parent: listenable,
@@ -167,6 +169,7 @@ class Backdrop extends StatefulWidget {
   final Widget backTitle;
   final AnimationController controller;
 
+  @override
   _BackdropState createState() => _BackdropState();
 }
 
@@ -175,11 +178,13 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   AnimationController _controller;
   Animation<RelativeRect> _layerAnimation;
 
+  @override
   void initState() {
     super.initState();
     _controller = widget.controller;
   }
 
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -282,6 +287,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     final AppBar appBar = AppBar(
       brightness: Brightness.light,

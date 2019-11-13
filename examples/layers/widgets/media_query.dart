@@ -9,6 +9,7 @@ class AdaptedListItem extends StatelessWidget {
 
   final String name;
 
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
@@ -29,6 +30,7 @@ class AdaptedGridItem extends StatelessWidget {
 
   final String name;
 
+  @override
   Widget build(BuildContext context) {
     return Card(
       child: Column(
@@ -67,6 +69,7 @@ class AdaptiveContainer extends StatelessWidget {
 
   final List<String> names;
 
+  @override
   Widget build(BuildContext context) {
     if (MediaQuery.of(context).size.width < _kGridViewBreakpoint) {
       return ListView(

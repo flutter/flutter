@@ -5,6 +5,7 @@ import '../../gallery/demo.dart';
 class ElevationDemo extends StatefulWidget {
   static const String routeName = '/material/elevation';
 
+  @override
   State<StatefulWidget> createState() => _ElevationDemoState();
 }
 
@@ -41,6 +42,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
     }).toList();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

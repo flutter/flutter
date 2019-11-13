@@ -24,6 +24,7 @@ class ReorderableListDemo extends StatefulWidget {
 
   static const String routeName = '/material/reorderable-list';
 
+  @override
   _ListDemoState createState() => _ListDemoState();
 }
 
@@ -172,6 +173,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
   }
 
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,

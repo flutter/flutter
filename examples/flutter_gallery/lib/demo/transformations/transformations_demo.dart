@@ -26,6 +26,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     hexagonMargin: _kHexagonMargin,
   );
 
+  @override
   Widget build (BuildContext context) {
     final BoardPainter painter = BoardPainter(
       board: _board,
@@ -168,6 +169,7 @@ class BoardPainter extends CustomPainter {
 
   final Board board;
 
+  @override
   void paint(Canvas canvas, Size size) {
     void drawBoardPoint(BoardPoint boardPoint) {
       final Color color = boardPoint.color.withOpacity(
@@ -181,6 +183,7 @@ class BoardPainter extends CustomPainter {
   }
 
   // We should repaint whenever the board changes, such as board.selected.
+  @override
   bool shouldRepaint(BoardPainter oldDelegate) {
     return oldDelegate.board != board;
   }

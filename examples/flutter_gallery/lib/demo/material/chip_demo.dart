@@ -81,6 +81,7 @@ class _ChipsTile extends StatelessWidget {
   final List<Widget> children;
 
   // Wraps a list of chips into a ListTile for display as a section in the demo.
+  @override
   Widget build(BuildContext context) {
     return Card(
       semanticContainer: false,
@@ -120,6 +121,7 @@ class _ChipsTile extends StatelessWidget {
 class ChipDemo extends StatefulWidget {
   static const String routeName = '/material/chip';
 
+  @override
   _ChipDemoState createState() => _ChipDemoState();
 }
 
@@ -194,6 +196,7 @@ class _ChipDemoState extends State<ChipDemo> {
     return _capitalize(_results[_selectedAction]) + '!';
   }
 
+  @override
   Widget build(BuildContext context) {
     final List<Widget> chips = _materials.map<Widget>((String name) {
       return Chip(

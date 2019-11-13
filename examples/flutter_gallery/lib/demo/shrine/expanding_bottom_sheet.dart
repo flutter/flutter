@@ -44,6 +44,7 @@ class ExpandingBottomSheet extends StatefulWidget {
 
   final AnimationController hideController;
 
+  @override
   _ExpandingBottomSheetState createState() => _ExpandingBottomSheetState();
 
   static _ExpandingBottomSheetState of(BuildContext context, {bool isNullOk = false}) {
@@ -134,6 +135,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
   Animation<double> _shapeAnimation;
   Animation<Offset> _slideAnimation;
 
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -142,6 +144,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
     );
   }
 
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -387,6 +390,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
     return true;
   }
 
+  @override
   Widget build(BuildContext context) {
     return AnimatedSize(
       key: _expandingBottomSheetKey,
@@ -418,6 +422,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
 }
 
 class ProductThumbnailRow extends StatefulWidget {
+  @override
   _ProductThumbnailRowState createState() => _ProductThumbnailRowState();
 }
 
@@ -431,6 +436,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
   // _internalList represents the list as it is updated by the AppStateModel.
   List<int> _internalList;
 
+  @override
   void initState() {
     super.initState();
     _list = _ListModel(
@@ -514,6 +520,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     _updateLists();
     return ScopedModelDescendant<AppStateModel>(
@@ -557,6 +564,7 @@ class ExtraProductsNumber extends StatelessWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<AppStateModel>(
       builder: (BuildContext builder, Widget child, AppStateModel model) => _buildOverflow(model, context),
@@ -571,6 +579,7 @@ class ProductThumbnail extends StatelessWidget {
   final Animation<double> opacityAnimation;
   final Product product;
 
+  @override
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: opacityAnimation,

@@ -25,6 +25,7 @@ class TwoProductCardColumn extends StatelessWidget {
 
   final Product bottom, top;
 
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       const double spacerHeight = 44.0;
@@ -70,6 +71,7 @@ class OneProductCardColumn extends StatelessWidget {
 
   final Product product;
 
+  @override
   Widget build(BuildContext context) {
     return ListView(
       physics: const ClampingScrollPhysics(),

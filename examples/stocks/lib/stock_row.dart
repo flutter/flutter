@@ -28,6 +28,7 @@ class StockRow extends StatelessWidget {
     return callback == null ? null : () => callback(stock);
   }
 
+  @override
   Widget build(BuildContext context) {
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';

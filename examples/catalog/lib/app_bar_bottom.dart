@@ -5,17 +5,20 @@
 import 'package:flutter/material.dart';
 
 class AppBarBottomSample extends StatefulWidget {
+  @override
   _AppBarBottomSampleState createState() => _AppBarBottomSampleState();
 }
 
 class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTickerProviderStateMixin {
   TabController _tabController;
 
+  @override
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: choices.length);
   }
 
+  @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
@@ -28,6 +31,7 @@ class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTick
     _tabController.animateTo(newIndex);
   }
 
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
@@ -91,6 +95,7 @@ class ChoiceCard extends StatelessWidget {
 
   final Choice choice;
 
+  @override
   Widget build(BuildContext context) {
     final TextStyle textStyle = Theme.of(context).textTheme.display1;
     return Card(

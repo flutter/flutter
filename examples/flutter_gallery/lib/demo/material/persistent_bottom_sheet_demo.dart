@@ -9,6 +9,7 @@ import '../../gallery/demo.dart';
 class PersistentBottomSheetDemo extends StatefulWidget {
   static const String routeName = '/material/persistent-bottom-sheet';
 
+  @override
   _PersistentBottomSheetDemoState createState() => _PersistentBottomSheetDemoState();
 }
 
@@ -17,6 +18,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
 
   VoidCallback _showBottomSheetCallback;
 
+  @override
   void initState() {
     super.initState();
     _showBottomSheetCallback = _showBottomSheet;
@@ -72,6 +74,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
