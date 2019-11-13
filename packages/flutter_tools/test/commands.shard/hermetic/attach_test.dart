@@ -400,7 +400,7 @@ void main() {
           ],
         );
         await completer.future;
-        verifyNever(portForwarder.forward(devicePort));
+        verifyNever(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')));
 
         await expectLoggerInterruptEndsTask(task, logger);
         await loggerSubscription.cancel();
@@ -432,7 +432,7 @@ void main() {
           ],
         );
         await completer.future;
-        verifyNever(portForwarder.forward(devicePort));
+        verifyNever(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')));
 
         await expectLoggerInterruptEndsTask(task, logger);
         await loggerSubscription.cancel();
