@@ -285,8 +285,14 @@ class MouseTracker extends ChangeNotifier {
     });
   }
 
+  bool get _duringBuildPhase {
+    return SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks;
+  }
+
+  bool _updatingDevices = false;
   void _updateDirtyDevices() {
     assert(!_duringBuildPhase);
+    _updatingDevices = true;
     final List<int> dirtyDevices = (_allDevicesAreDirty ? _mouseStates.keys : _dirtyDevices).toList();
     _clearDirtyBit();
     final bool mouseWasConnected = mouseIsConnected;
@@ -312,10 +318,11 @@ class MouseTracker extends ChangeNotifier {
       _updateDevice(mouseState, _mouseStates.containsKey(mouseState.device));
     }
 
+    _updatingDevices = false;
+    assert(!_hasDirtyDevices);
+
     if (mouseWasConnected != mouseIsConnected)
       notifyListeners();
-
-    assert(!_hasDirtyDevices);
   }
 
   void _updateDevice(_MouseState mouseState, bool connected) {
@@ -333,10 +340,6 @@ class MouseTracker extends ChangeNotifier {
     );
 
     mouseState.lastAnnotations = nextAnnotations;
-  }
-
-  bool get _duringBuildPhase {
-    return SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks;
   }
 
   // Dispatch callbacks related to a device after all necessary information
@@ -437,6 +440,7 @@ class MouseTracker extends ChangeNotifier {
   /// annotations attached.
   /// {@endtemplate}
   void attachAnnotation(MouseTrackerAnnotation annotation) {
+    assert(!_updatingDevices);
     _trackedAnnotations.add(annotation);
   }
 
@@ -449,6 +453,7 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// {@macro flutter.mouseTracker.attachAnnotation}
   void detachAnnotation(MouseTrackerAnnotation annotation) {
+    assert(!_updatingDevices);
     _trackedAnnotations.remove(annotation);
   }
 }
