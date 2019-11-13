@@ -364,13 +364,11 @@ Future<void> main(List<String> arguments) async {
   final String templateArbFileName = results['template-arb-file'];
   final String classNameString = results['output-class'];
 
-  final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(
-    fs,
-    arbPathString,
-    templateArbFileName,
-    outputFileString,
-    classNameString,
-  );
+  final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
+  localizationsGenerator.setL10nDirectory(arbPathString);
+  localizationsGenerator.setTemplateArbFile(templateArbFileName);
+  localizationsGenerator.setOutputFile(outputFileString);
+  localizationsGenerator.setClassName(classNameString);
 
   final List<String> arbFilenames = <String>[];
   final Set<String> supportedLanguageCodes = <String>{};
@@ -479,18 +477,7 @@ Future<void> main(List<String> arguments) async {
 }
 
 class LocalizationsGenerator {
-  LocalizationsGenerator(
-    this._fs,
-    String arbPathString,
-    String templateArbFileName,
-    String outputFileString,
-    String classNameString,
-  ) {
-    _setL10nDirectory(arbPathString);
-    _setTemplateArbFile(templateArbFileName);
-    _setOutputFile(outputFileString);
-    _setClassName(classNameString);
-  }
+  LocalizationsGenerator(this._fs);
 
   final local.LocalFileSystem _fs;
 
@@ -503,7 +490,7 @@ class LocalizationsGenerator {
   /// TODO: documentation
   File outputFile;
 
-  void _setL10nDirectory(String arbPathString) {
+  void setL10nDirectory(String arbPathString) {
     final Directory l10nDirectory = _fs.directory(arbPathString);
     if (!l10nDirectory.existsSync())
       exitWithError(
@@ -518,7 +505,7 @@ class LocalizationsGenerator {
       );
   }
 
-  void _setTemplateArbFile(String templateArbFileName) {
+  void setTemplateArbFile(String templateArbFileName) {
     assert (l10nDirectory != null);
     final File templateArbFile = _fs.file(path.join(l10nDirectory.path, templateArbFileName));
     final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
@@ -529,11 +516,11 @@ class LocalizationsGenerator {
       );
   }
 
-  void _setOutputFile(String outputFileString) {
+  void setOutputFile(String outputFileString) {
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
-  void _setClassName(String classNameString) {
+  void setClassName(String classNameString) {
     if (!_isValidClassName(classNameString))
       exitWithError(
         "The 'output-class', $classNameString, is not valid Dart class name.\n"
