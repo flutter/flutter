@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
 import 'base/io.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -18,7 +16,6 @@ class ProtocolDiscovery {
     this.serviceName, {
     this.portForwarder,
     this.hostPort,
-    this.devicePort,
     this.ipv6,
   }) : assert(logReader != null) {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
@@ -27,9 +24,8 @@ class ProtocolDiscovery {
   factory ProtocolDiscovery.observatory(
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
-    @required int hostPort,
-    @required int devicePort,
-    @required bool ipv6,
+    int hostPort,
+    bool ipv6 = false,
   }) {
     const String kObservatoryService = 'Observatory';
     return ProtocolDiscovery._(
@@ -37,7 +33,6 @@ class ProtocolDiscovery {
       kObservatoryService,
       portForwarder: portForwarder,
       hostPort: hostPort,
-      devicePort: devicePort,
       ipv6: ipv6,
     );
   }
@@ -46,7 +41,6 @@ class ProtocolDiscovery {
   final String serviceName;
   final DevicePortForwarder portForwarder;
   final int hostPort;
-  final int devicePort;
   final bool ipv6;
 
   final Completer<Uri> _completer = Completer<Uri>();
@@ -77,22 +71,17 @@ class ProtocolDiscovery {
     if (match != null) {
       try {
         uri = Uri.parse(match[1]);
-      } on FormatException catch (error, stackTrace) {
+      } catch (error, stackTrace) {
         _stopScrapingLogs();
         _completer.completeError(error, stackTrace);
       }
     }
-    if (uri == null) {
-      return;
-    }
-    if (devicePort != null  &&  uri.port != devicePort) {
-      printTrace('skipping potential observatory $uri due to device port mismatch');
-      return;
-    }
 
-    assert(!_completer.isCompleted);
-    _stopScrapingLogs();
-    _completer.complete(uri);
+    if (uri != null) {
+      assert(!_completer.isCompleted);
+      _stopScrapingLogs();
+      _completer.complete(uri);
+    }
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
