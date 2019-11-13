@@ -110,8 +110,8 @@ abstract class DesktopDevice extends Device {
     }
     _deviceLogReader.initializeProcess(process);
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
-      devicePort: debuggingOptions?.deviceVmservicePort,
-      hostPort: debuggingOptions?.hostVmservicePort,
+      devicePort: debuggingOptions?.deviceVmServicePort,
+      hostPort: debuggingOptions?.hostVmServicePort,
       ipv6: ipv6,
     );
     try {

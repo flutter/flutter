@@ -502,8 +502,8 @@ class DebuggingOptions {
     this.cacheSkSL = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
-    this.hostVmservicePort,
-    this.deviceVmservicePort,
+    this.hostVmServicePort,
+    this.deviceVmServicePort,
     this.initializePlatform = true,
     this.hostname,
     this.port,
@@ -523,8 +523,8 @@ class DebuggingOptions {
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
-      hostVmservicePort = null,
-      deviceVmservicePort = null,
+      hostVmServicePort = null,
+      deviceVmServicePort = null,
       browserLaunch = true,
       vmserviceOutFile = null;
 
@@ -544,15 +544,15 @@ class DebuggingOptions {
   final bool verboseSystemLogs;
   /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
   final bool initializePlatform;
-  final int hostVmservicePort;
-  final int deviceVmservicePort;
+  final int hostVmServicePort;
+  final int deviceVmServicePort;
   final String port;
   final String hostname;
   final bool browserLaunch;
   /// A file where the vmservice uri should be written after the application is started.
   final String vmserviceOutFile;
 
-  bool get hasObservatoryPort => hostVmservicePort != null;
+  bool get hasObservatoryPort => hostVmServicePort != null;
 }
 
 class LaunchResult {

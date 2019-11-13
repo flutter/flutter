@@ -374,7 +374,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
-        '--observatory-port=${debuggingOptions.hostVmservicePort ?? 0}',
+        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
       ],
     ];
 
@@ -383,8 +383,8 @@ class IOSSimulator extends Device {
       observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(app: package),
         ipv6: ipv6,
-        hostPort: debuggingOptions.hostVmservicePort,
-        devicePort: debuggingOptions.deviceVmservicePort,
+        hostPort: debuggingOptions.hostVmServicePort,
+        devicePort: debuggingOptions.deviceVmServicePort,
       );
     }
 

@@ -356,8 +356,8 @@ class IOSDevice extends Device {
         observatoryDiscovery = ProtocolDiscovery.observatory(
           getLogReader(app: package),
           portForwarder: portForwarder,
-          hostPort: debuggingOptions.hostVmservicePort,
-          devicePort: debuggingOptions.deviceVmservicePort,
+          hostPort: debuggingOptions.hostVmServicePort,
+          devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
         );
       }
@@ -385,7 +385,7 @@ class IOSDevice extends Device {
           packageId,
           this,
           usesIpv6: ipv6,
-          hostVmservicePort: debuggingOptions.hostVmservicePort,
+          hostVmservicePort: debuggingOptions.hostVmServicePort,
         );
         if (localUri != null) {
           UsageEvent('ios-mdns', 'success').send();
