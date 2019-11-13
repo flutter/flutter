@@ -41,12 +41,12 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('ancestorElementForInheritedWidgetOfExactType() called from dispose() throws error', (WidgetTester tester) async {
+  testWidgets('getElementForInheritedWidgetOfExactType() called from dispose() throws error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
       TestWidget((BuildContext context) {
         disposeCalled = true;
-        context.ancestorElementForInheritedWidgetOfExactType<InheritedWidget>();
+        context.getElementForInheritedWidgetOfExactType<InheritedWidget>();
       }),
     );
     await tester.pumpWidget(Container());

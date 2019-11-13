@@ -336,6 +336,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
+@Deprecated('This class is no longer used in framework and will be deleted soon.')
 @optionalTypeArgs
 class TypeMatcher<T> {
   /// Creates a type matcher for the given type parameter.
@@ -1936,40 +1937,8 @@ abstract class BuildContext {
   /// type is introduced, or the widget goes away), this build context is
   /// rebuilt so that it can obtain new values from that widget.
   ///
-  /// This is typically called implicitly from `of()` static methods, e.g.
-  /// [Theme.of].
-  ///
-  /// This method should not be called from widget constructors or from
-  /// [State.initState] methods, because those methods would not get called
-  /// again if the inherited value were to change. To ensure that the widget
-  /// correctly updates itself when the inherited value changes, only call this
-  /// (directly or indirectly) from build methods, layout and paint callbacks, or
-  /// from [State.didChangeDependencies].
-  ///
-  /// This method should not be called from [State.dispose] because the element
-  /// tree is no longer stable at that time. To refer to an ancestor from that
-  /// method, save a reference to the ancestor in [State.didChangeDependencies].
-  /// It is safe to use this method from [State.deactivate], which is called
-  /// whenever the widget is removed from the tree.
-  ///
-  /// It is also possible to call this method from interaction event handlers
-  /// (e.g. gesture callbacks) or timers, to obtain a value once, if that value
-  /// is not going to be cached and reused later.
-  ///
-  /// Calling this method is O(1) with a small constant factor, but will lead to
-  /// the widget being rebuilt more often.
-  ///
-  /// Once a widget registers a dependency on a particular type by calling this
-  /// method, it will be rebuilt, and [State.didChangeDependencies] will be
-  /// called, whenever changes occur relating to that widget until the next time
-  /// the widget or one of its ancestors is moved (for example, because an
-  /// ancestor is added or removed).
-  ///
-  /// The [aspect] parameter is only used when [targetType] is an
-  /// [InheritedWidget] subclasses that supports partial updates, like
-  /// [InheritedModel]. It specifies what "aspect" of the inherited
-  /// widget this context depends on.
-  @Deprecated('Use dependOnInheritedWidgetOfExactType insead')
+  /// This method is deprecated. Please use [dependOnInheritedWidgetOfExactType] instead.
+  @Deprecated('Use dependOnInheritedWidgetOfExactType instead.')
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
 
   /// Obtains the nearest widget of the given type [T], which must be the type of a
@@ -2016,18 +1985,8 @@ abstract class BuildContext {
   /// Obtains the element corresponding to the nearest widget of the given type,
   /// which must be the type of a concrete [InheritedWidget] subclass.
   ///
-  /// Calling this method is O(1) with a small constant factor.
-  ///
-  /// This method does not establish a relationship with the target in the way
-  /// that [dependOnInheritedWidgetOfExactType] does.
-  ///
-  /// This method should not be called from [State.dispose] because the element
-  /// tree is no longer stable at that time. To refer to an ancestor from that
-  /// method, save a reference to the ancestor by calling
-  /// [dependOnInheritedWidgetOfExactType] in [State.didChangeDependencies]. It is
-  /// safe to use this method from [State.deactivate], which is called whenever
-  /// the widget is removed from the tree.
-  @Deprecated('Use ancestorElementForInheritedWidgetOfExactType instead')
+  /// This method is deprecated. Please use [getElementForInheritedWidgetOfExactType] instead.
+  @Deprecated('Use getElementForInheritedWidgetOfExactType instead.')
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
   /// Obtains the element corresponding to the nearest widget of the given type [T],
@@ -2044,30 +2003,13 @@ abstract class BuildContext {
   /// [dependOnInheritedWidgetOfExactType] in [State.didChangeDependencies]. It is
   /// safe to use this method from [State.deactivate], which is called whenever
   /// the widget is removed from the tree.
-  InheritedElement ancestorElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
+  InheritedElement getElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
 
   /// Returns the nearest ancestor widget of the given type, which must be the
   /// type of a concrete [Widget] subclass.
   ///
-  /// In general, [dependOnInheritedWidgetOfExactType] is more useful, since inherited
-  /// widgets will trigger consumers to rebuild when they change. This method is
-  /// appropriate when used in interaction event handlers (e.g. gesture
-  /// callbacks) or for performing one-off tasks such as asserting that you have
-  /// or don't have a widget of a specific type as an ancestor. The return value
-  /// of a Widget's build method should not depend on the value returned by this
-  /// method, because the build context will not rebuild if the return value of
-  /// this method changes. This could lead to a situation where data used in the
-  /// build method changes, but the widget is not rebuilt.
-  ///
-  /// Calling this method is relatively expensive (O(N) in the depth of the
-  /// tree). Only call this method if the distance from this widget to the
-  /// desired ancestor is known to be small and bounded.
-  ///
-  /// This method should not be called from [State.deactivate] or [State.dispose]
-  /// because the widget tree is no longer stable at that time. To refer to
-  /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [ancestorWidgetOfExactType] in [State.didChangeDependencies].
-  @Deprecated('use findAncestorWidgetOfExactType instead')
+  /// This method is deprecated. Please use [findAncestorWidgetOfExactType] instead.
+  @Deprecated('use findAncestorWidgetOfExactType instead.')
   Widget ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type [T], which must be the
@@ -2096,37 +2038,8 @@ abstract class BuildContext {
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
   /// that matches the given [TypeMatcher].
   ///
-  /// This should not be used from build methods, because the build context will
-  /// not be rebuilt if the value that would be returned by this method changes.
-  /// In general, [dependOnInheritedWidgetOfExactType] is more appropriate for such
-  /// cases. This method is useful for changing the state of an ancestor widget in
-  /// a one-off manner, for example, to cause an ancestor scrolling list to
-  /// scroll this build context's widget into view, or to move the focus in
-  /// response to user interaction.
-  ///
-  /// In general, though, consider using a callback that triggers a stateful
-  /// change in the ancestor rather than using the imperative style implied by
-  /// this method. This will usually lead to more maintainable and reusable code
-  /// since it decouples widgets from each other.
-  ///
-  /// Calling this method is relatively expensive (O(N) in the depth of the
-  /// tree). Only call this method if the distance from this widget to the
-  /// desired ancestor is known to be small and bounded.
-  ///
-  /// This method should not be called from [State.deactivate] or [State.dispose]
-  /// because the widget tree is no longer stable at that time. To refer to
-  /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [ancestorStateOfType] in [State.didChangeDependencies].
-  ///
-  /// {@tool sample}
-  ///
-  /// ```dart
-  /// ScrollableState scrollable = context.ancestorStateOfType(
-  ///   const TypeMatcher<ScrollableState>(),
-  /// );
-  /// ```
-  /// {@end-tool}
-  @Deprecated('Use findAncestorStateOfType instead')
+  /// This method is deprecated. Please use [findAncestorStateOfType] instead.
+  @Deprecated('Use findAncestorStateOfType instead.')
   State ancestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
@@ -2165,13 +2078,8 @@ abstract class BuildContext {
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
   /// that matches the given [TypeMatcher].
   ///
-  /// Functions the same way as [ancestorStateOfType] but keeps visiting subsequent
-  /// ancestors until there are none of the type matching [TypeMatcher] remaining.
-  /// Then returns the last one found.
-  ///
-  /// This operation is O(N) as well though N is the entire widget tree rather than
-  /// a subtree.
-  @Deprecated('Use findRootAncestorStateOfType instead')
+  /// This method is deprecated. Please use [findRootAncestorStateOfType] instead.
+  @Deprecated('Use findRootAncestorStateOfType instead.')
   State rootAncestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
@@ -2188,23 +2096,8 @@ abstract class BuildContext {
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
   /// that matches the given [TypeMatcher].
   ///
-  /// This should not be used from build methods, because the build context will
-  /// not be rebuilt if the value that would be returned by this method changes.
-  /// In general, [dependOnInheritedWidgetOfExactType] is more appropriate for such
-  /// cases. This method is useful only in esoteric cases where a widget needs
-  /// to cause an ancestor to change its layout or paint behavior. For example,
-  /// it is used by [Material] so that [InkWell] widgets can trigger the ink
-  /// splash on the [Material]'s actual render object.
-  ///
-  /// Calling this method is relatively expensive (O(N) in the depth of the
-  /// tree). Only call this method if the distance from this widget to the
-  /// desired ancestor is known to be small and bounded.
-  ///
-  /// This method should not be called from [State.deactivate] or [State.dispose]
-  /// because the widget tree is no longer stable at that time. To refer to
-  /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [ancestorRenderObjectOfType] in [State.didChangeDependencies].
-  @Deprecated('Use findAncestorRenderObjectOfType instead')
+  /// This method is deprecated. Please use [findAncestorRenderObjectOfType] instead.
+  @Deprecated('Use findAncestorRenderObjectOfType instead.')
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
@@ -3630,7 +3523,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedElement ancestorElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
+  InheritedElement getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[T];
     return ancestor;
@@ -3659,6 +3552,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor?.widget;
   }
 
+  @deprecated
   @override
   State ancestorStateOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3685,6 +3579,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return statefulAncestor?.state;
   }
 
+  @deprecated
   @override
   State rootAncestorStateOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3711,6 +3606,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return statefulAncestor?.state;
   }
 
+  @deprecated
   @override
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
