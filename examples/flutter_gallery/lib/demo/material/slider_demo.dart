@@ -131,7 +131,8 @@ class _CustomThumbShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -171,7 +172,8 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween enableColor = ColorTween(
