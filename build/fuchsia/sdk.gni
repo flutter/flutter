@@ -14,6 +14,12 @@ declare_args() {
   fuchsia_toolchain_path = "//fuchsia/toolchain/$host_os"
 }
 
+declare_args() {
+  # The Skia buildroot uses this flag to decide if it should be using the
+  # Fuchsia SDK to build its translation units.
+  skia_using_fuchsia_sdk = using_fuchsia_sdk
+}
+
 _fuchsia_sdk_path = "//fuchsia/sdk/$host_os"
 
 template("_fuchsia_sysroot") {
