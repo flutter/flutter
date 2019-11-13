@@ -12,6 +12,8 @@ import 'package:path/path.dart' as path;
 
 import 'localizations_utils.dart';
 
+// TODO: remove and pass directly to [LocalizationsGenerator] once it's fully
+// fleshed out.
 const local.LocalFileSystem fs = local.LocalFileSystem();
 
 const String defaultFileTemplate = '''
@@ -478,7 +480,7 @@ Future<void> main(List<String> arguments) async {
 
 class LocalizationsGenerator {
   LocalizationsGenerator(
-    this.fs,
+    this._fs,
     String arbPathString,
     String templateArbFileName,
     String outputFileString,
@@ -490,8 +492,7 @@ class LocalizationsGenerator {
     _setClassName(classNameString);
   }
 
-  /// TODO: documentation
-  local.LocalFileSystem fs;
+  final local.LocalFileSystem _fs;
 
   /// TODO: documentation
   Directory l10nDirectory;
@@ -503,7 +504,7 @@ class LocalizationsGenerator {
   File outputFile;
 
   void _setL10nDirectory(String arbPathString) {
-    final Directory l10nDirectory = fs.directory(arbPathString);
+    final Directory l10nDirectory = _fs.directory(arbPathString);
     if (!l10nDirectory.existsSync())
       exitWithError(
         "The 'arb-dir' directory, $l10nDirectory, does not exist.\n"
@@ -519,7 +520,7 @@ class LocalizationsGenerator {
 
   void _setTemplateArbFile(String templateArbFileName) {
     assert (l10nDirectory != null);
-    final File templateArbFile = fs.file(path.join(l10nDirectory.path, templateArbFileName));
+    final File templateArbFile = _fs.file(path.join(l10nDirectory.path, templateArbFileName));
     final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
     if (templateArbFileStatModeString[0] == '-')
       exitWithError(
@@ -529,7 +530,7 @@ class LocalizationsGenerator {
   }
 
   void _setOutputFile(String outputFileString) {
-    outputFile = fs.file(path.join(l10nDirectory.path, outputFileString));
+    outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
   void _setClassName(String classNameString) {
