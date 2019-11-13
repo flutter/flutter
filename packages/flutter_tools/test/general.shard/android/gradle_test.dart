@@ -1339,6 +1339,50 @@ plugin2=${plugin2.path}
       Usage: () => mockUsage,
     });
 
+    testUsingContext('rethrows unrecognized ProcessException', () async {
+      when(mockProcessManager.start(any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')))
+      .thenThrow(const ProcessException('', <String>[], 'Unrecognized'));
+
+      fs.directory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fs.directory('android')
+        .childFile('gradle.properties')
+        .createSync(recursive: true);
+
+      fs.directory('android')
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      await expectLater(() async {
+       await buildGradleApp(
+          project: FlutterProject.current(),
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release,
+              null,
+            ),
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          localGradleErrors: const <GradleHandledError>[],
+        );
+      },
+      throwsA(isInstanceOf<ProcessException>()));
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('logs success event after a sucessful retry', () async {
       int testFnCalled = 0;
       when(mockProcessManager.start(any,
