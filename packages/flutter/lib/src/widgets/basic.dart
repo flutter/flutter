@@ -5824,19 +5824,54 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// Called when a mouse pointer, with or without buttons pressed, has
   /// entered this widget.
   ///
-  /// {@macro flutter.mouseTrackerAnnotation.onEnter}
+  /// This callback is triggered when the pointer has started to be contained
+  /// by the region of this widget. More specifically, the callback is triggered
+  /// by the following cases:
+  ///
+  ///  * This widget has appeared under a pointer.
+  ///  * This widget has moved to under a pointer.
+  ///  * A new pointer has been added to somewhere within this widget.
+  ///  * An existing pointer has moved into this widget.
+  ///
+  /// This callback is not always matched by an [onExit].
+  ///
+  /// See also:
+  ///
+  ///  * [MouseRegion.onEnter], which uses this callback.
+  ///  * [onExit], which is triggered when a mouse pointer exits the region.
   final PointerEnterEventListener onEnter;
 
   /// Called when a mouse pointer changes position without buttons pressed, and
   /// the new position is within the region defined by this widget.
   ///
-  /// {@macro flutter.mouseTrackerAnnotation.onHover}
+  /// This is not triggered if the widget, while under the pointer, moves
+  /// without the pointer moving.
   final PointerHoverEventListener onHover;
 
   /// Called when a mouse pointer, with or without buttons pressed, has exited
   /// this widget when the widget is still mounted.
   ///
-  /// {@macro flutter.mouseTrackerAnnotation.onExit}
+  /// This callback is triggered when the pointer has stopped to be contained
+  /// by the region of this widget, except when it's caused by the removal of
+  /// this widget. More specifically, the callback is triggered by
+  /// the following cases:
+  ///
+  ///  * This widget, which used to contain a pointer, has moved away.
+  ///  * A pointer that used to be within this widget has been removed.
+  ///  * A pointer that used to be within this widget has moved away.
+  ///
+  /// And is __not__ triggered by the following case,
+  ///
+  ///  * This widget, which used to contain a pointer, has disappeared.
+  ///
+  /// The last case is when [onExit] does not match an earlier [onEnter].
+  /// This design is because the last case is very likely to be handled
+  /// improperly and crash the app (such as calling `setState` of the disposed
+  /// widget). Also, the last case can already be achieved by using the event
+  /// that causes the removal, or simply overriding [Widget.dispose].
+  ///
+  /// Technically, whether [onExit] will be called is controlled by
+  /// [MouseTracker.attachAnnotation] and [MouseTracker.detachAnnotation].
   final PointerExitEventListener onExit;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it

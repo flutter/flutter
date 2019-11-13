@@ -38,56 +38,61 @@ class MouseTrackerAnnotation {
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// entered the annotated region.
   ///
-  /// {@template flutter.mouseTrackerAnnotation.onEnter}
   /// This callback is triggered when the pointer has started to be contained
-  /// by the annotationed region for any reason. More specifically, the callback
-  /// is triggered by the following cases:
+  /// by the annotationed region for any reason.
   ///
-  ///  * A new annotated region has appeared under a pointer
-  ///  * An existing annotated region has moved to under a pointer
-  ///  * A new pointer has been added to somewhere within an annotated region
-  ///  * An existing pointer has moved into an annotated region
+  /// More specifically, the callback is triggered by the following cases:
+  ///
+  ///  * A new annotated region has appeared under a pointer.
+  ///  * An existing annotated region has moved to under a pointer.
+  ///  * A new pointer has been added to somewhere within an annotated region.
+  ///  * An existing pointer has moved into an annotated region.
   ///
   /// This callback is not always matched by an [onExit].
-  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [MouseRegion.onEnter], which uses this callback.
+  ///  * [onExit], which is triggered when a mouse pointer exits the region.
   final PointerEnterEventListener onEnter;
 
   /// Triggered when a pointer has moved within the annotated region without
   /// buttons pressed.
   ///
-  /// {@template flutter.mouseTrackerAnnotation.onHover}
   /// This is not triggered if the region under the pointer moves without
   /// the pointer moving.
-  /// {@endtemplate}
   final PointerHoverEventListener onHover;
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// exited the annotated region when the annotated region still exists.
   ///
-  /// {@template flutter.mouseTrackerAnnotation.onExit}
   /// This callback is triggered when the pointer has stopped to be contained
   /// by the region, except when it's caused by the removal of the render object
-  /// that owns the annotation.
+  /// that owns the annotation. More specifically, the callback is triggered by
+  /// the following cases:
   ///
-  /// More specifically, the callback is triggered by the following cases:
-  ///
-  ///  * An annotated region that used to contain a pointer has moved away
-  ///  * A pointer that used to be within an annotated region has been removed
-  ///  * A pointer that used to be within an annotated region has moved away
+  ///  * An annotated region that used to contain a pointer has moved away.
+  ///  * A pointer that used to be within an annotated region has been removed.
+  ///  * A pointer that used to be within an annotated region has moved away.
   ///
   /// And is __not__ triggered by the following case,
   ///
-  ///  * An annotated region that used to contain a pointer has disappeared
+  ///  * An annotated region that used to contain a pointer has disappeared.
   ///
   /// The last case is when [onExit] does not match an earlier [onEnter].
-  /// This design is because the last case can be achieved by overriding
-  /// [Widget.dispose] or [RenderObject.detach], and also because it's very
-  /// likely to be handled improperly and crash the app (such as calling
-  /// `setState` of the disposed widget).
-  /// {@endtemplate}
+  /// This design is because the last case is very likely to be handled
+  /// improperly and crash the app (such as calling `setState` of the disposed
+  /// widget). Also, the last case can already be achieved by using the event
+  /// that causes the removal, or simply overriding [Widget.dispose] or
+  /// [RenderObject.detach].
   ///
   /// Technically, whether [onExit] will be called is controlled by
-  /// [attachAnnotation].
+  /// [MouseTracker.attachAnnotation] and [MouseTracker.detachAnnotation].
+  ///
+  /// See also:
+  ///
+  ///  * [MouseRegion.onExit], which uses this callback.
+  ///  * [onEnter], which is triggered when a mouse pointer enters the region.
   final PointerExitEventListener onExit;
 
   @override
@@ -424,16 +429,14 @@ class MouseTracker extends ChangeNotifier {
   /// attached is kept in sync with whether its owner object is mounted.
   ///
   /// {@template flutter.mouseTracker.attachAnnotation}
-  /// This method must be called during the rendering pipeline.
   /// This method does not cause any immediate effect, since the state it
   /// changes is used during a post-frame callback or while handling certain
-  /// pointer events. Therefore it's safe to call this method at any point
-  /// during the rendering pipeline.
+  /// pointer events.
   ///
   /// The state of annotation attachment determines whether an exit event is
   /// caused by movement or by the disposal of its owner render object,
-  /// preventing some common patterns causing crashes. This is discussed in
-  /// detail in [MouseRegion.onExitOrDispose].
+  /// preventing some common patterns causing crashes. See [MouseTracker.onExit]
+  /// for its application.
   ///
   /// The [MouseTracker] also uses this to track the number of attached
   /// annotations, and will skip mouse position checks if there is no
