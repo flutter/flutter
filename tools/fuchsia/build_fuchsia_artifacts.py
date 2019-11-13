@@ -229,7 +229,7 @@ def main():
 
   parser.add_argument(
       '--engine-version',
-      required=True,
+      required=False,
       help='Specifies the flutter engine SHA.')
 
   parser.add_argument(
@@ -272,8 +272,13 @@ def main():
           BuildTarget(runtime_mode, arch, product, enable_lto)
         BuildBucket(runtime_mode, arch, product)
 
-  ProcessCIPDPakcage(args.upload, args.engine_version)
+  if args.upload:
+    if args.engine_version is None:
+      print('--upload requires --engine-version to be specified.')
+      return 1
+    ProcessCIPDPakcage(args.upload, args.engine_version)
+  return 0
 
 
 if __name__ == '__main__':
-  main()
+  sys.exit(main())
