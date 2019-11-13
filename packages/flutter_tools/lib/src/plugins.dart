@@ -166,25 +166,24 @@ class Plugin {
   }
 
   static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
+    bool isInvalid(String key, bool Function(YamlMap) validate) {
+      final dynamic value = yaml[key];
+      return value is YamlMap && !validate(value);
+    }
     final List<String> errors = <String>[];
-    if (yaml.containsKey(AndroidPlugin.kConfigKey) &&
-        !AndroidPlugin.validate(yaml[AndroidPlugin.kConfigKey] as YamlMap)) {
+    if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {
       errors.add('Invalid "android" plugin specification.');
     }
-    if (yaml.containsKey(IOSPlugin.kConfigKey) &&
-        !IOSPlugin.validate(yaml[IOSPlugin.kConfigKey] as YamlMap)) {
+    if (isInvalid(IOSPlugin.kConfigKey, IOSPlugin.validate)) {
       errors.add('Invalid "ios" plugin specification.');
     }
-    if (yaml.containsKey(LinuxPlugin.kConfigKey) &&
-        !LinuxPlugin.validate(yaml[LinuxPlugin.kConfigKey] as YamlMap)) {
+    if (isInvalid(LinuxPlugin.kConfigKey, LinuxPlugin.validate)) {
       errors.add('Invalid "linux" plugin specification.');
     }
-    if (yaml.containsKey(MacOSPlugin.kConfigKey) &&
-        !MacOSPlugin.validate(yaml[MacOSPlugin.kConfigKey] as YamlMap)) {
+    if (isInvalid(MacOSPlugin.kConfigKey, MacOSPlugin.validate)) {
       errors.add('Invalid "macos" plugin specification.');
     }
-    if (yaml.containsKey(WindowsPlugin.kConfigKey) &&
-        !WindowsPlugin.validate(yaml[WindowsPlugin.kConfigKey] as YamlMap)) {
+    if (isInvalid(WindowsPlugin.kConfigKey, WindowsPlugin.validate)) {
       errors.add('Invalid "windows" plugin specification.');
     }
     return errors;

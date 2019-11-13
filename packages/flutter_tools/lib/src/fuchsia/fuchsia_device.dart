@@ -693,7 +693,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     ];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
-      throwToolExit(result.stderr as String);
+      throwToolExit('Unforward command failed: $result');
     }
   }
 }

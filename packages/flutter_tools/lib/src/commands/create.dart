@@ -195,7 +195,13 @@ class CreateCommand extends FlutterCommand {
       if (!metadataFile.existsSync()) {
         return null;
       }
-      return yaml.loadYaml(metadataFile.readAsStringSync()) as yaml.YamlMap;
+      final dynamic metadataYaml = yaml.loadYaml(metadataFile.readAsStringSync());
+      if (metadataYaml is yaml.YamlMap) {
+        return metadataYaml;
+      } else {
+        throwToolExit('pubspec.yaml is malformed.');
+        return null;
+      }
     }
 
     bool exists(List<String> path) {
@@ -205,7 +211,13 @@ class CreateCommand extends FlutterCommand {
     // If it exists, the project type in the metadata is definitive.
     final yaml.YamlMap metadata = loadMetadata(projectDir);
     if (metadata != null && metadata['project_type'] != null) {
-      return _stringToProjectType(metadata['project_type'] as String);
+      final dynamic projectType = metadata['project_type'];
+      if (projectType is String) {
+        return _stringToProjectType(projectType);
+      } else {
+        throwToolExit('.metadata is malformed.');
+        return null;
+      }
     }
 
     // There either wasn't any metadata, or it didn't contain the project type,

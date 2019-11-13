@@ -91,8 +91,8 @@ void main() {
 
     group('.dispose()', () {
       IOSDevice device;
-      MockApplicationPackage appPackage1;
-      MockApplicationPackage appPackage2;
+      MockIOSApp appPackage1;
+      MockIOSApp appPackage2;
       IOSDeviceLogReader logReader1;
       IOSDeviceLogReader logReader2;
       MockProcess mockProcess1;
@@ -119,8 +119,8 @@ void main() {
       }
 
       setUp(() {
-        appPackage1 = MockApplicationPackage();
-        appPackage2 = MockApplicationPackage();
+        appPackage1 = MockIOSApp();
+        appPackage2 = MockIOSApp();
         when(appPackage1.name).thenReturn('flutterApp1');
         when(appPackage2.name).thenReturn('flutterApp2');
         mockProcess1 = MockProcess();

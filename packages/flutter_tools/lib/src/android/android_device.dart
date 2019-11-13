@@ -353,7 +353,7 @@ class AndroidDevice extends Device {
   String get name => modelID;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async {
+  Future<bool> isAppInstalled(AndroidApk app) async {
     // This call takes 400ms - 600ms.
     try {
       final RunResult listOut = await runAdbCheckedAsync(<String>['shell', 'pm', 'list', 'packages', app.id]);
@@ -365,17 +365,15 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async {
-    final AndroidApk apk = app as AndroidApk;
-    final String installedSha1 = await _getDeviceApkSha1(apk);
-    return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(apk);
+  Future<bool> isLatestBuildInstalled(AndroidApk app) async {
+    final String installedSha1 = await _getDeviceApkSha1(app);
+    return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
   }
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async {
-    final AndroidApk apk = app as AndroidApk;
-    if (!apk.file.existsSync()) {
-      printError('"${fs.path.relative(apk.file.path)}" does not exist.');
+  Future<bool> installApp(AndroidApk app) async {
+    if (!app.file.existsSync()) {
+      printError('"${fs.path.relative(app.file.path)}" does not exist.');
       return false;
     }
 
@@ -384,9 +382,9 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    final Status status = logger.startProgress('Installing ${fs.path.relative(apk.file.path)}...', timeout: timeoutConfiguration.slowOperation);
+    final Status status = logger.startProgress('Installing ${fs.path.relative(app.file.path)}...', timeout: timeoutConfiguration.slowOperation);
     final RunResult installResult = await processUtils.run(
-      adbCommandForDevice(<String>['install', '-t', '-r', apk.file.path]));
+      adbCommandForDevice(<String>['install', '-t', '-r', app.file.path]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
     // Parsing the output to check for failures.
@@ -403,7 +401,7 @@ class AndroidDevice extends Device {
     }
     try {
       await runAdbCheckedAsync(<String>[
-        'shell', 'echo', '-n', _getSourceSha1(apk), '>', _getDeviceSha1Path(apk),
+        'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
       ]);
     } on ProcessException catch (error) {
       printError('adb shell failed to write the SHA hash: $error.');
@@ -413,7 +411,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async {
+  Future<bool> uninstallApp(AndroidApk app) async {
     if (!await _checkForSupportedAdbVersion() ||
         !await _checkForSupportedAndroidVersion()) {
       return false;
@@ -440,7 +438,7 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<bool> _installLatestApp(ApplicationPackage package) async {
+  Future<bool> _installLatestApp(AndroidApk package) async {
     final bool wasInstalled = await isAppInstalled(package);
     if (wasInstalled) {
       if (await isLatestBuildInstalled(package)) {
@@ -470,7 +468,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    AndroidApk package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -538,7 +536,6 @@ class AndroidDevice extends Device {
     }
 
     final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
-    final AndroidApk apk = package as AndroidApk;
     printTrace('$this startApp');
 
     ProtocolDiscovery observatoryDiscovery;
@@ -595,7 +592,7 @@ class AndroidDevice extends Device {
         if (debuggingOptions.verboseSystemLogs)
           ...<String>['--ez', 'verbose-logging', 'true'],
       ],
-      apk.launchActivity,
+      package.launchActivity,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
@@ -636,7 +633,7 @@ class AndroidDevice extends Device {
   bool get supportsHotRestart => true;
 
   @override
-  Future<bool> stopApp(ApplicationPackage app) {
+  Future<bool> stopApp(AndroidApk app) {
     final List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return processUtils.stream(command).then<bool>(
         (int exitCode) => exitCode == 0 || allowHeapCorruptionOnWindows(exitCode));
@@ -648,7 +645,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+  DeviceLogReader getLogReader({ AndroidApk app }) {
     // The Android log reader isn't app-specific.
     _logReader ??= _AdbLogReader(this);
     return _logReader;

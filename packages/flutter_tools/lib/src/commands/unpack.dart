@@ -203,8 +203,8 @@ class ArtifactUnpacker {
 
       printTrace('Copied artifacts from $sourceDirectory.');
     } catch (e, stackTrace) {
-      printError(stackTrace.toString());
       printError(e.message as String);
+      printError(stackTrace.toString());
       return false;
     }
     return true;
