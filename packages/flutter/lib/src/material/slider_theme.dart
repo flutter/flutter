@@ -2719,6 +2719,7 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
 class _RectangularSliderValueIndicatorPathPainter {
   const _RectangularSliderValueIndicatorPathPainter();
 
+  static const double _triangleHeight = 8.0;
   static const double _labelPadding = 16.0;
   static const double _preferredHeight = 32.0;
   static const double _minLabelWidth = 16.0;
@@ -2789,24 +2790,26 @@ class _RectangularSliderValueIndicatorPathPainter {
       sizeWithOverflow: sizeWithOverflow,
       scale: scale,
     );
+
+    final double rectHeight = labelPainter.height + _labelPadding;
     final Rect upperRect = Rect.fromLTWH(
       -rectangleWidth / 2 + horizontalShift,
-      0,
+      -_triangleHeight - rectHeight,
       rectangleWidth,
-      labelPainter.height + _labelPadding,
+      rectHeight,
     );
 
-    final double triangleHeight = _preferredHalfHeight / math.sqrt(2);
     final Path trianglePath = Path()
-      ..lineTo(-triangleHeight, -triangleHeight)
-      ..lineTo(triangleHeight, -triangleHeight)
+      ..lineTo(-_triangleHeight, -_triangleHeight)
+      ..lineTo(_triangleHeight, -_triangleHeight)
       ..close();
     final Paint fillPaint = Paint()..color = backgroundPaintColor;
     final RRect upperRRect = RRect.fromRectAndRadius(upperRect, const Radius.circular(_upperRectRadius));
+    trianglePath.addRRect(upperRRect);
 
     canvas.save();
-    // Prepare the canvas for the triangle, which is relative to the center of
-    // the thumb.
+    // Prepare the canvas for the base of the tooltip, which is relative to the
+    // center of the thumb.
     canvas.translate(center.dx, center.dy - _bottomTipYOffset);
     canvas.scale(scale, scale);
     if (strokePaintColor != null) {
@@ -2816,29 +2819,11 @@ class _RectangularSliderValueIndicatorPathPainter {
         ..style = PaintingStyle.stroke;
       canvas.drawPath(trianglePath, strokePaint);
     }
-
-    // Prepare the canvas for the lobe by positioning it to the top of the lobe,
-    // so that the lobe can be as close as it can to the triangle without
-    // protruding the sides of the triangle.
-    final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
-    canvas.translate(0, bottomTipToUpperRectTranslateY);
-    if (strokePaintColor != null) {
-      final Paint strokePaint = Paint()
-        ..color = strokePaintColor
-        ..strokeWidth = 1.0
-        ..style = PaintingStyle.stroke;
-      canvas.drawRRect(upperRRect, strokePaint);
-    }
-    canvas.drawRRect(upperRRect, fillPaint);
-
-    // Draw the triangle last to cover the stroke of the upper rectangle for
-    // the portion that it overlaps.
-    canvas.translate(0,-bottomTipToUpperRectTranslateY);
     canvas.drawPath(trianglePath, fillPaint);
-    canvas.translate(0, bottomTipToUpperRectTranslateY);
 
     // The label text is centered within the value indicator.
-    // canvas.translate(0, -_preferredHalfHeight / 2 - upperRect.height);
+    final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
+    canvas.translate(0, bottomTipToUpperRectTranslateY);
     final Offset boxCenter = Offset(horizontalShift, upperRect.height / 2);
     final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
     final Offset labelOffset = boxCenter - halfLabelPainterOffset;

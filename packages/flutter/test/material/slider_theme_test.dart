@@ -407,11 +407,14 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect(
-          rrect: RRect.fromLTRBR(-24.0, 0.0, 24.0, 30.0, const Radius.circular(4)),
-          color: const Color(0xff656565),
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(-20.0, -12.0),
+            Offset(20.0, -34.0),
+            Offset(0.0, -38.0),
+          ],
+          color: const Color(0xf55f5f5f),
         ),
     );
 
@@ -428,9 +431,14 @@ void main() {
       paints
         ..rrect()
         ..rrect()
-        ..rrect(
-          rrect: RRect.fromLTRBR(-44.0, 0.0, 44.0, 30.0, const Radius.circular(4)),
-          color: const Color(0xff656565),
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(-30.0, -12.0),
+            Offset(30.0, -34.0),
+            Offset(0.0, -38.0),
+          ],
+          color: const Color(0xf55f5f5f),
         ),
     );
     await gesture.up();
@@ -446,10 +454,15 @@ void main() {
       paints
         ..rrect()
         ..rrect()
-        ..rrect(
-          rrect: RRect.fromLTRBR(-16.0, 0.0, 114.0, 30.0, const Radius.circular(4)),
-          color: const Color(0xff656565),
-        ),
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(-12.0, -12.0),
+            Offset(110.0, -34.0),
+            Offset(0.0, -38.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        )
     );
     await gesture.up();
 
@@ -464,10 +477,15 @@ void main() {
       paints
         ..rrect()
         ..rrect()
-        ..rrect(
-          rrect: RRect.fromLTRBR(-114.0, 0.0, 16.0, 30.0, const Radius.circular(4)),
-          color: const Color(0xff656565),
-        ),
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(-110.0, -12.0),
+            Offset(12.0, -34.0),
+            Offset(0.0, -38.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        )
     );
     await gesture.up();
 
@@ -482,10 +500,18 @@ void main() {
       paints
         ..rrect()
         ..rrect()
-        ..rrect(
-          rrect: RRect.fromLTRBR(-16.0, 0.0, 65.0, 23.0, const Radius.circular(4)),
-          color: const Color(0xff656565),
-        ),
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(-12.0, -12.0),
+            Offset(61.0, -16.0),
+            Offset(0.0, -20.0),
+          ],
+          excludes: const <Offset>[
+            Offset(0.0, -38.0)
+          ],
+          color: const Color(0xf55f5f5f),
+        )
     );
     await gesture.up();
 
@@ -500,10 +526,15 @@ void main() {
       paints
         ..rrect()
         ..rrect()
-        ..rrect(
-          rrect: RRect.fromLTRBR(-16.0, 0.0, 212.0, 44.0, const Radius.circular(4)),
-          color: const Color(0xff656565),
-        ),
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(-12.0, -16.0),
+            Offset(208.0, -40.0),
+            Offset(0.0, -50.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        )
     );
     await gesture.up();
   }, skip: isBrowser);

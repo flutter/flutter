@@ -39,7 +39,8 @@ class LoggingThumbShape extends SliderComponentShape {
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
