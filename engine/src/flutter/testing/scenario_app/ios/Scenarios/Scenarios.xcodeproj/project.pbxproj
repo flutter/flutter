@@ -40,6 +40,8 @@
 		6816DBAC2318696600A51400 /* golden_platform_view_opacity_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 6816DBA72318696600A51400 /* golden_platform_view_opacity_iPhone SE_simulator.png */; };
 		6816DBAD2318696600A51400 /* golden_platform_view_cliprect_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 6816DBA82318696600A51400 /* golden_platform_view_cliprect_iPhone SE_simulator.png */; };
 		6816DBAE2318696600A51400 /* golden_platform_view_cliprrect_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 6816DBA92318696600A51400 /* golden_platform_view_cliprrect_iPhone SE_simulator.png */; };
+		68396B28235FA0D700D5E655 /* GLTestPlatformView.m in Sources */ = {isa = PBXBuildFile; fileRef = 68396B27235FA0D700D5E655 /* GLTestPlatformView.m */; };
+		68396B2A235FBEA600D5E655 /* PlatformViewGLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 68396B29235FBEA600D5E655 /* PlatformViewGLTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -136,6 +138,9 @@
 		6816DBA72318696600A51400 /* golden_platform_view_opacity_iPhone SE_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_opacity_iPhone SE_simulator.png"; sourceTree = "<group>"; };
 		6816DBA82318696600A51400 /* golden_platform_view_cliprect_iPhone SE_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprect_iPhone SE_simulator.png"; sourceTree = "<group>"; };
 		6816DBA92318696600A51400 /* golden_platform_view_cliprrect_iPhone SE_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprrect_iPhone SE_simulator.png"; sourceTree = "<group>"; };
+		68396B26235FA0D700D5E655 /* GLTestPlatformView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTestPlatformView.h; sourceTree = "<group>"; };
+		68396B27235FA0D700D5E655 /* GLTestPlatformView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GLTestPlatformView.m; sourceTree = "<group>"; };
+		68396B29235FBEA600D5E655 /* PlatformViewGLTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlatformViewGLTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,6 +207,8 @@
 				0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */,
 				0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */,
 				0A57B3C02323C74D00DD9521 /* FlutterEngine+ScenariosTest.h */,
+				68396B26235FA0D700D5E655 /* GLTestPlatformView.h */,
+				68396B27235FA0D700D5E655 /* GLTestPlatformView.m */,
 			);
 			path = Scenarios;
 			sourceTree = "<group>";
@@ -239,6 +246,7 @@
 				6816DBA02317573300A51400 /* GoldenImage.m */,
 				6816DBA22318358200A51400 /* PlatformViewGoldenTestManager.h */,
 				6816DBA32318358200A51400 /* PlatformViewGoldenTestManager.m */,
+				68396B29235FBEA600D5E655 /* PlatformViewGLTests.m */,
 			);
 			path = ScenariosUITests;
 			sourceTree = "<group>";
@@ -398,6 +406,7 @@
 			files = (
 				248D76DA22E388380012F0C1 /* main.m in Sources */,
 				24F1FB89230B4579005ACE7C /* TextPlatformView.m in Sources */,
+				68396B28235FA0D700D5E655 /* GLTestPlatformView.m in Sources */,
 				248D76CC22E388370012F0C1 /* AppDelegate.m in Sources */,
 				0A57B3BF2323C74200DD9521 /* FlutterEngine+ScenariosTest.m in Sources */,
 				0A57B3BD2323C4BD00DD9521 /* ScreenBeforeFlutter.m in Sources */,
@@ -418,6 +427,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68396B2A235FBEA600D5E655 /* PlatformViewGLTests.m in Sources */,
 				6816DBA12317573300A51400 /* GoldenImage.m in Sources */,
 				6816DB9E231750ED00A51400 /* GoldenPlatformViewTests.m in Sources */,
 				6816DBA42318358200A51400 /* PlatformViewGoldenTestManager.m in Sources */,
@@ -492,7 +502,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -545,7 +555,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -561,6 +571,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = S8QB4VV633;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -584,6 +595,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = S8QB4VV633;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",

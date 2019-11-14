@@ -4,6 +4,7 @@
 
 #include "AppDelegate.h"
 #import "FlutterEngine+ScenariosTest.h"
+#import "GLTestPlatformView.h"
 #import "ScreenBeforeFlutter.h"
 #import "TextPlatformView.h"
 
@@ -50,6 +51,8 @@
     [self readyContextForPlatformViewTests:goldenTestName];
   } else if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--screen-before-flutter"]) {
     self.window.rootViewController = [[ScreenBeforeFlutter alloc] initWithEngineRunCompletion:nil];
+  } else if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--platform-view-gl"]) {
+    [self readyContextForGLPlatformViewTests:@"platform_view_eaglcontext"];
   } else {
     self.window.rootViewController = [[UIViewController alloc] init];
   }
@@ -76,6 +79,27 @@
   NSObject<FlutterPluginRegistrar>* registrar =
       [flutterViewController.engine registrarForPlugin:@"scenarios/TextPlatformViewPlugin"];
   [registrar registerViewFactory:textPlatformViewFactory withId:@"scenarios/textPlatformView"];
+  self.window.rootViewController = flutterViewController;
+}
+
+- (void)readyContextForGLPlatformViewTests:(NSString*)scenarioIdentifier {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"PlatformViewTest" project:nil];
+  [engine runWithEntrypoint:nil];
+
+  FlutterViewController* flutterViewController =
+      [[NoStatusBarFlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [engine.binaryMessenger
+      setMessageHandlerOnChannel:@"scenario_status"
+            binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
+              [engine.binaryMessenger
+                  sendOnChannel:@"set_scenario"
+                        message:[scenarioIdentifier dataUsingEncoding:NSUTF8StringEncoding]];
+            }];
+  GLTestPlatformViewFactory* platformViewFactory =
+      [[GLTestPlatformViewFactory alloc] initWithMessenger:flutterViewController.binaryMessenger];
+  NSObject<FlutterPluginRegistrar>* registrar =
+      [flutterViewController.engine registrarForPlugin:@"scenarios/glTestPlatformViewPlugin"];
+  [registrar registerViewFactory:platformViewFactory withId:@"scenarios/glTestPlatformView"];
   self.window.rootViewController = flutterViewController;
 }
 
