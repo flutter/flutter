@@ -218,4 +218,24 @@ void main() async {
     drawTextWithShadow(canvas);
     return scuba.diffCanvasScreenshot(canvas, 'text_shadow', maxDiffRate: 0.2);
   }, bSkipHoudini: true);
+
+  testEachCanvas('Handles disabled strut style', (EngineCanvas canvas) {
+    // Flutter uses [StrutStyle.disabled] for the [SelectableText] widget. This
+    // translates into a strut style with a [height] of 0, which wasn't being
+    // handled correctly by the web engine.
+    final StrutStyle disabled = StrutStyle(height: 0, leading: 0);
+    canvas.drawParagraph(
+      paragraph(
+        'Hello\nWorld',
+        paragraphStyle: ParagraphStyle(strutStyle: disabled),
+      ),
+      Offset.zero,
+    );
+    return scuba.diffCanvasScreenshot(
+      canvas,
+      'text_strut_style_disabled',
+      region: Rect.fromLTRB(0, 0, 100, 100),
+      maxDiffRate: 0.9 / 100, // 0.9%
+    );
+  });
 }

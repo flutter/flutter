@@ -362,7 +362,9 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   }
 
   double get _lineHeight {
-    if (_strutStyle == null || _strutStyle._height == null) {
+    // TODO(mdebbar): Implement proper support for strut styles.
+    // https://github.com/flutter/flutter/issues/32243
+    if (_strutStyle == null || _strutStyle._height == null || _strutStyle._height == 0) {
       // When there's no strut height, always use paragraph style height.
       return _height;
     }
@@ -1093,7 +1095,7 @@ void _applyParagraphStyleToElement({
       cssStyle.textAlign = textAlignToCssValue(
           style._textAlign, style._textDirection ?? ui.TextDirection.ltr);
     }
-    if (style._lineHeight != style._lineHeight) {
+    if (style._lineHeight != previousStyle._lineHeight) {
       cssStyle.lineHeight = '${style._lineHeight}';
     }
     if (style._textDirection != previousStyle._textDirection) {

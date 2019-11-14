@@ -39,18 +39,31 @@ class EngineScubaTester {
     return EngineScubaTester(viewportSize);
   }
 
-  Future<void> diffScreenshot(String fileName, {double maxDiffRate}) async {
-    await matchGoldenFile('$fileName.png',
-        region: ui.Rect.fromLTWH(0, 0, viewportSize.width, viewportSize.height),
-        maxDiffRate: maxDiffRate);
+  ui.Rect get viewportRegion =>
+      ui.Rect.fromLTWH(0, 0, viewportSize.width, viewportSize.height);
+
+  Future<void> diffScreenshot(
+    String fileName, {
+    ui.Rect region,
+    double maxDiffRate,
+  }) async {
+    await matchGoldenFile(
+      '$fileName.png',
+      region: region ?? viewportRegion,
+      maxDiffRate: maxDiffRate,
+    );
   }
 
   /// Prepares the DOM and inserts all the necessary nodes, then invokes scuba's
   /// screenshot diffing.
   ///
   /// It also cleans up the DOM after itself.
-  Future<void> diffCanvasScreenshot(EngineCanvas canvas, String fileName,
-      {double maxDiffRate}) async {
+  Future<void> diffCanvasScreenshot(
+    EngineCanvas canvas,
+    String fileName, {
+    ui.Rect region,
+    double maxDiffRate,
+  }) async {
     // Wrap in <flt-scene> so that our CSS selectors kick in.
     final html.Element sceneElement = html.Element.tag('flt-scene');
     try {
@@ -60,7 +73,11 @@ class EngineScubaTester {
       if (TextMeasurementService.enableExperimentalCanvasImplementation) {
         screenshotName += '+canvas_measurement';
       }
-      await diffScreenshot(screenshotName, maxDiffRate: maxDiffRate);
+      await diffScreenshot(
+        screenshotName,
+        region: region,
+        maxDiffRate: maxDiffRate,
+      );
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.
