@@ -304,6 +304,11 @@ class Hero extends StatefulWidget {
             inviteHero(hero, tag);
           }
         }
+      } else if (element.widget is Offstage) {
+        final Offstage offstageWidget = element.widget;
+        if (offstageWidget.offstage) {
+          return;
+        }
       }
       element.visitChildren(visitor);
     }
