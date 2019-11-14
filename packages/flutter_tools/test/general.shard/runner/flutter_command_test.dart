@@ -58,6 +58,17 @@ void main() {
       Cache: () => cache,
     });
 
+    testUsingContext('deprecated command should warn', () async {
+      final FakeDeprecatedCommand flutterCommand = FakeDeprecatedCommand();
+      await flutterCommand.run();
+
+      expect(testLogger.statusText, contains('is deprecated and will be removed'));
+      verify(cache.updateAll(any)).called(1);
+    },
+    overrides: <Type, Generator>{
+      Cache: () => cache,
+    });
+
     void testUsingCommandContext(String testName, Function testBody) {
       testUsingContext(testName, testBody, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
@@ -359,13 +370,15 @@ void main() {
   });
 }
 
-
-class FakeCommand extends FlutterCommand {
+class FakeDeprecatedCommand extends FlutterCommand {
   @override
   String get description => null;
 
   @override
-  String get name => 'fake';
+  String get name => 'deprecated';
+
+  @override
+  bool get deprecated => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
