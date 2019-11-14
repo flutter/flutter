@@ -163,32 +163,42 @@ class FlutterDevice {
 
     final Completer<void> completer = Completer<void>();
 
-    Uri lastInvalidObservatoryUri;
     StreamSubscription<void> subscription;
+    bool isStreamDone = false;
+    bool isWaitingForVm = false;
+
     subscription = observatoryUris.listen((Uri observatoryUri) async {
+      printTrace('Connecting to service protocol: $observatoryUri');
+      isWaitingForVm = true;
+      VMService service;
+
       try {
-        final VMService service = await VMService.connect(
+        service = await VMService.connect(
           observatoryUri,
           reloadSources: reloadSources,
           restart: restart,
           compileExpression: compileExpression,
         );
-        if (completer.isCompleted) {
-          return;
-        }
-        printTrace('Successfully connected to service protocol: $observatoryUri');
-
-        vmServices = <VMService>[service];
-        device.getLogReader(app: package).connectedVMServices = vmServices;
-        completer.complete();
-        await subscription.cancel();
       } catch (exception) {
-        lastInvalidObservatoryUri = observatoryUri;
         printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
+        if (!completer.isCompleted && isStreamDone) {
+          completer.completeError('failed to connect to $observatoryUri');
+        }
+        return;
       }
+      if (completer.isCompleted) {
+        return;
+      }
+      printTrace('Successfully connected to service protocol: $observatoryUri');
+
+      vmServices = <VMService>[service];
+      device.getLogReader(app: package).connectedVMServices = vmServices;
+      completer.complete();
+      await subscription.cancel();
     }, onDone: () {
-      if (!completer.isCompleted && lastInvalidObservatoryUri != null) {
-        completer.completeError('fail to connect to $lastInvalidObservatoryUri');
+      isStreamDone = true;
+      if (!completer.isCompleted && !isWaitingForVm) {
+        completer.completeError('connection to device ended too early');
       }
       _isStreamingNewObservatoryUri = false;
     });
@@ -243,6 +253,7 @@ class FlutterDevice {
     if (flutterViews.any((FlutterView view) {
       return view != null &&
              view.uiIsolate != null &&
+             view.uiIsolate.pauseEvent != null &&
              view.uiIsolate.pauseEvent.isPauseEvent;
       }
     )) {

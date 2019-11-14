@@ -219,7 +219,6 @@ class AttachCommand extends FlutterCommand {
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
           observatoryUri = Stream<Uri>.fromFuture(isolateDiscoveryProtocol.uri).asBroadcastStream();
-          printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
         } catch (_) {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
@@ -241,24 +240,18 @@ class AttachCommand extends FlutterCommand {
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
       if (observatoryUri == null) {
-        ProtocolDiscovery observatoryDiscovery;
-        try {
-          observatoryDiscovery = ProtocolDiscovery.observatory(
+        final ProtocolDiscovery observatoryDiscovery =
+          ProtocolDiscovery.observatory(
             device.getLogReader(),
             portForwarder: device.portForwarder,
             ipv6: ipv6,
             devicePort: deviceVmservicePort,
             hostPort: hostVmservicePort,
           );
-          printStatus('Waiting for a connection from Flutter on ${device.name}...');
-          observatoryUri = observatoryDiscovery.uris;
-          // Determine ipv6 status from the scanned logs.
-          usesIpv6 = observatoryDiscovery.ipv6;
-        } catch (error) {
-          throwToolExit('Failed to establish a debug connection with ${device.name}: $error');
-        } finally {
-          await observatoryDiscovery?.cancel();
-        }
+        printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        observatoryUri = observatoryDiscovery.uris;
+        // Determine ipv6 status from the scanned logs.
+        usesIpv6 = observatoryDiscovery.ipv6;
       }
     } else {
       observatoryUri = Stream<Uri>
@@ -311,7 +304,6 @@ class AttachCommand extends FlutterCommand {
           final Completer<void> onAppStart = Completer<void>.sync();
           TerminalHandler terminalHandler;
           unawaited(onAppStart.future.whenComplete(() {
-            printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
             terminalHandler = TerminalHandler(runner)
               ..setupTerminal()
               ..registerSignalHandlers();
@@ -319,6 +311,9 @@ class AttachCommand extends FlutterCommand {
           result = await runner.attach(
             appStartedCompleter: onAppStart,
           );
+          if (result != 0) {
+            throwToolExit(null, exitCode: result);
+          }
           terminalHandler?.stop();
           assert(result != null);
           if (runner.exited || !runner.isStreamingNewObservatoryUris) {
@@ -326,9 +321,6 @@ class AttachCommand extends FlutterCommand {
           }
           printStatus('Waiting for a new connection from Flutter on ${device.name}...');
         }
-      }
-      if (result != 0) {
-        throwToolExit(null, exitCode: result);
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
