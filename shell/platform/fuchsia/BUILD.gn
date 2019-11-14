@@ -45,8 +45,11 @@ if (using_fuchsia_sdk) {
     }
 
     _kernel_compiler_label = "dart:kernel_compiler($host_toolchain)"
+    _frontend_server_label =
+        "$flutter_root/flutter_frontend_server:frontend_server($host_toolchain)"
 
     deps = [
+      _frontend_server_label,
       _gen_snapshot_to_use,
       _kernel_compiler_label,
     ]
@@ -59,7 +62,12 @@ if (using_fuchsia_sdk) {
         rebase_path(get_label_info(_kernel_compiler_label, "root_gen_dir") +
                     "/kernel_compiler.dart.snapshot")
 
+    _frontend_server_path =
+        rebase_path(get_label_info(_frontend_server_label, "root_gen_dir") +
+                    "/frontend_server.dart.snapshot")
+
     sources = [
+      _frontend_server_path,
       _gen_snapshot_bin_path,
       _kernel_compiler_path,
     ]

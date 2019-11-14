@@ -110,6 +110,8 @@ def CopyGenSnapshotIfExists(source, destination):
   FindFileAndCopyTo('gen_snapshot_product', source_root, destination_base)
   FindFileAndCopyTo('kernel_compiler.dart.snapshot', source_root,
                     destination_base, 'kernel_compiler.snapshot')
+  FindFileAndCopyTo('frontend_server.dart.snapshot', source_root,
+                    destination_base, 'flutter_frontend_server.snapshot')
 
 
 def CopyFlutterTesterBinIfExists(source, destination):
