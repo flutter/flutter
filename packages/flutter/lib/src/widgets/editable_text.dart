@@ -342,7 +342,8 @@ class EditableText extends StatefulWidget {
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
-  /// [enableSuggestions], [paintCursorAboveText], [textAlign], [dragStartBehavior],
+  /// [enableSmartDashes], [enableSmartQuotes], [enableSuggestions],
+  /// [paintCursorAboveText], [textAlign], [dragStartBehavior],
   /// [scrollPadding], [dragStartBehavior], [toolbarOptions],
   /// [rendererIgnoresPointer], and [readOnly] arguments must not be null.
   EditableText({
@@ -352,6 +353,9 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
+    // TODO(justinmc): When obscured, default to false.
+    this.enableSmartDashes = true,
+    this.enableSmartQuotes = true,
     this.enableSuggestions = true,
     @required this.style,
     StrutStyle strutStyle,
@@ -402,6 +406,8 @@ class EditableText extends StatefulWidget {
        assert(focusNode != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSmartDashes != null),
+       assert(enableSmartQuotes != null),
        assert(enableSuggestions != null),
        assert(showSelectionHandles != null),
        assert(enableInteractiveSelection != null),
@@ -516,6 +522,12 @@ class EditableText extends StatefulWidget {
   /// Defaults to true. Cannot be null.
   /// {@endtemplate}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.enableSmartDashes}
+  final bool enableSmartDashes;
+
+  /// {@macro flutter.services.textInput.enableSmartQuotes}
+  final bool enableSmartQuotes;
 
   /// {@macro flutter.services.textInput.enableSuggestions}
   final bool enableSuggestions;
@@ -1042,6 +1054,8 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableSmartDashes', enableSmartDashes, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableSmartQuotes', enableSmartQuotes, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     style?.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
@@ -1401,6 +1415,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           inputType: widget.keyboardType,
           obscureText: widget.obscureText,
           autocorrect: widget.autocorrect,
+          enableSmartDashes: widget.enableSmartDashes,
+          enableSmartQuotes: widget.enableSmartQuotes,
           enableSuggestions: widget.enableSuggestions,
           inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
               ? TextInputAction.newline
@@ -1862,6 +1878,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textWidthBasis: widget.textWidthBasis,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
+              enableSmartDashes: widget.enableSmartDashes,
+              enableSmartQuotes: widget.enableSmartQuotes,
               enableSuggestions: widget.enableSuggestions,
               offset: offset,
               onSelectionChanged: _handleSelectionChanged,
@@ -1928,6 +1946,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.locale,
     this.obscureText,
     this.autocorrect,
+    this.enableSmartDashes,
+    this.enableSmartQuotes,
     this.enableSuggestions,
     this.offset,
     this.onSelectionChanged,
@@ -1966,6 +1986,8 @@ class _Editable extends LeafRenderObjectWidget {
   final bool obscureText;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
+  final bool enableSmartDashes;
+  final bool enableSmartQuotes;
   final bool enableSuggestions;
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;

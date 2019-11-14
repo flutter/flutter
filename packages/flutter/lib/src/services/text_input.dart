@@ -387,6 +387,9 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.obscureText = false,
     this.autocorrect = true,
+    // TODO(justinmc): Maybe no default here
+    this.enableSmartDashes = true,
+    this.enableSmartQuotes = true,
     this.enableSuggestions = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
@@ -395,6 +398,8 @@ class TextInputConfiguration {
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSmartDashes != null),
+       assert(enableSmartQuotes != null),
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
        assert(inputAction != null),
@@ -412,6 +417,10 @@ class TextInputConfiguration {
   ///
   /// Defaults to true.
   final bool autocorrect;
+
+  // TODO(justinmc): Document
+  final bool enableSmartDashes;
+  final bool enableSmartQuotes;
 
   /// {@template flutter.services.textInput.enableSuggestions}
   /// Whether to show input suggestions as the user types.
@@ -456,6 +465,8 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
+      'enableSmartDashes': false,//enableSmartDashes,
+      'enableSmartQuotes': false,//enableSmartQuotes,
       'enableSuggestions': enableSuggestions,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
