@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
 import 'package:file/local.dart' as local;
+import 'package:file/file.dart' as file;
 import 'package:path/path.dart' as path;
 
 import 'localizations_utils.dart';
@@ -308,7 +309,7 @@ bool _isValidGetterAndMethodName(String name) {
 }
 
 bool _isDirectoryReadableAndWritable(String statString) {
-  if (statString[0] == '-' || statString[1] == '-')
+  if ((statString[0] == '-' || statString[3] == '-') && (statString[1] == '-' || statString[4] == '-'))
     return false;
   return true;
 }
@@ -365,10 +366,14 @@ Future<void> main(List<String> arguments) async {
   final String classNameString = results['output-class'];
 
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
-  localizationsGenerator.setL10nDirectory(arbPathString);
-  localizationsGenerator.setTemplateArbFile(templateArbFileName);
-  localizationsGenerator.setOutputFile(outputFileString);
-  localizationsGenerator.setClassName(classNameString);
+  try {
+    localizationsGenerator.setL10nDirectory(arbPathString);
+    localizationsGenerator.setTemplateArbFile(templateArbFileName);
+    localizationsGenerator.setOutputFile(outputFileString);
+    localizationsGenerator.setClassName(classNameString);
+  } on FileSystemException catch (e) {
+    exitWithError(e.message);
+  }
 
   final List<String> arbFilenames = <String>[];
   final Set<String> supportedLanguageCodes = <String>{};
@@ -479,7 +484,7 @@ Future<void> main(List<String> arguments) async {
 class LocalizationsGenerator {
   LocalizationsGenerator(this._fs);
 
-  final local.LocalFileSystem _fs;
+  final file.FileSystem _fs;
 
   /// TODO: documentation
   Directory l10nDirectory;
@@ -490,17 +495,20 @@ class LocalizationsGenerator {
   /// TODO: documentation
   File outputFile;
 
+  /// TODO: documentation
+  String className;
+
   void setL10nDirectory(String arbPathString) {
     // TODO: add error that input string cannot be null
-    final Directory l10nDirectory = _fs.directory(arbPathString);
+    l10nDirectory = _fs.directory(arbPathString);
     if (!l10nDirectory.existsSync())
-      exitWithError(
+      throw FileSystemException(
         "The 'arb-dir' directory, $l10nDirectory, does not exist.\n"
         'Make sure that the correct path was provided.'
       );
     final String l10nDirectoryStatModeString = l10nDirectory.statSync().modeString();
     if (!_isDirectoryReadableAndWritable(l10nDirectoryStatModeString))
-      exitWithError(
+      throw FileSystemException(
         "The 'arb-dir' directory, $l10nDirectory, doesn't allow reading and writing.\n"
         'Please ensure that the user has read and write permissions.'
       );
@@ -510,10 +518,10 @@ class LocalizationsGenerator {
     // TODO: add error that input string cannot be null
     // TODO: add error if attempting to add templateArbFile when l10nDirectory
     // is null
-    final File templateArbFile = _fs.file(path.join(l10nDirectory.path, templateArbFileName));
+    templateArbFile = _fs.file(path.join(l10nDirectory.path, templateArbFileName));
     final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
-    if (templateArbFileStatModeString[0] == '-')
-      exitWithError(
+    if (templateArbFileStatModeString[0] == '-' && templateArbFileStatModeString[3] == '-')
+      throw FileSystemException(
         "The 'template-arb-file', $templateArbFile, is not readable.\n"
         'Please ensure that the user has read permissions.'
       );
@@ -526,8 +534,9 @@ class LocalizationsGenerator {
 
   void setClassName(String classNameString) {
     // TODO: add error that input string cannot be null
-    if (!_isValidClassName(classNameString))
-      exitWithError(
+    className = classNameString;
+    if (!_isValidClassName(className))
+      throw FileSystemException(
         "The 'output-class', $classNameString, is not valid Dart class name.\n"
       );
   }
