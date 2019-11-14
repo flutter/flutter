@@ -444,11 +444,11 @@ class Container extends StatelessWidget {
       current = Transform(transform: transform, child: current);
 
     if (clipBehaviour != null &&
-        clipBehaviour != Clip.none &&
-        decoration is BoxDecoration) {
-      final BoxDecoration _decoration = decoration;
+        clipBehaviour != Clip.none) {
+      final BorderRadius _borderRadius = decoration.getBorderRadius();
+      assert(_borderRadius != null);
       current = ClipRRect(
-        borderRadius: _decoration.borderRadius,
+        borderRadius: _borderRadius,
         clipBehavior: clipBehaviour,
         child: current,
       );

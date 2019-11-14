@@ -213,6 +213,9 @@ class BoxDecoration extends Decoration {
   @override
   EdgeInsetsGeometry get padding => border?.dimensions;
 
+  @override
+  BorderRadius getBorderRadius() => borderRadius;
+
   /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {
     return BoxDecoration(
