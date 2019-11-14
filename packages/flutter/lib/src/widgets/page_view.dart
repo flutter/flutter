@@ -333,29 +333,6 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   final int initialPage;
   double _pageToUseOnStartup;
 
-  /// If [pixels] isn't set by [applyViewportDimension] before [dispose] is
-  /// called, this could throw an assert as [pixels] will be set to null.
-  ///
-  /// With [Tab]s, this happens when there are nested [TabBarView]s and there
-  /// is an attempt to warp over the nested tab to a tab adjacent to it.
-  ///
-  /// This flag will be set to true once the dimensions have been established
-  /// and [pixels] is set.
-  bool isInitialPixelsValueSet = false;
-
-  @override
-  void dispose() {
-    // TODO(shihaohong): remove workaround once these issues have been
-    // resolved, https://github.com/flutter/flutter/issues/32054,
-    // https://github.com/flutter/flutter/issues/32056
-    // Sets `pixels` to a non-null value before `ScrollPosition.dispose` is
-    // invoked if it was never set by `applyViewportDimension`.
-    if (pixels == null && !isInitialPixelsValueSet) {
-      correctPixels(0);
-    }
-    super.dispose();
-  }
-
   @override
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
@@ -422,7 +399,6 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
-      isInitialPixelsValueSet = true;
       return false;
     }
     return result;
