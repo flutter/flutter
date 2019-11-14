@@ -1018,6 +1018,9 @@ class Path {
   static Path combine(PathOperation operation, Path path1, Path path2) {
     assert(path1 != null);
     assert(path2 != null);
+    if (engine.experimentalUseSkia) {
+      return engine.SkPath.combine(operation, path1, path2);
+    }
     throw UnimplementedError();
   }
 
