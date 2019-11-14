@@ -486,7 +486,6 @@ void main() {
     expect(bottomLeft.dy - topLeft.dy, scaleFactor * localHeight);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
     await gesture.moveTo(topLeft - const Offset(1, 1));
@@ -515,7 +514,6 @@ void main() {
   testWidgets('needsCompositing updates correctly and is respected', (WidgetTester tester) async {
     // Pretend that we have a mouse connected.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
 
@@ -618,7 +616,6 @@ void main() {
   testWidgets("MouseRegion activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
     final GlobalKey feedbackKey = GlobalKey();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
 
