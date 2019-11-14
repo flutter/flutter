@@ -34,6 +34,7 @@ void OpacityLayer::EnsureSingleChild() {
 }
 
 void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  TRACE_EVENT0("flutter", "OpacityLayer::Preroll");
   EnsureSingleChild();
   SkMatrix child_matrix = matrix;
   child_matrix.postTranslate(offset_.fX, offset_.fY);

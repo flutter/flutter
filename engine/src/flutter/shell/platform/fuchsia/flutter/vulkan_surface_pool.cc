@@ -49,6 +49,7 @@ std::unique_ptr<VulkanSurface> VulkanSurfacePool::AcquireSurface(
 
 std::unique_ptr<VulkanSurface> VulkanSurfacePool::GetCachedOrCreateSurface(
     const SkISize& size) {
+  TRACE_EVENT0("flutter", "VulkanSurfacePool::GetCachedOrCreateSurface");
   // First try to find a surface that exactly matches |size|.
   {
     auto exact_match_it =
@@ -59,6 +60,7 @@ std::unique_ptr<VulkanSurface> VulkanSurfacePool::GetCachedOrCreateSurface(
     if (exact_match_it != available_surfaces_.end()) {
       auto acquired_surface = std::move(*exact_match_it);
       available_surfaces_.erase(exact_match_it);
+      TRACE_EVENT_INSTANT0("flutter", "Exact match found");
       return acquired_surface;
     }
   }
@@ -88,6 +90,7 @@ std::unique_ptr<VulkanSurface> VulkanSurfacePool::GetCachedOrCreateSurface(
 
   // If no such surface exists, then create a new one.
   if (best_it == available_surfaces_.end()) {
+    TRACE_EVENT_INSTANT0("flutter", "No available surfaces");
     return CreateSurface(size);
   }
 
@@ -98,8 +101,10 @@ std::unique_ptr<VulkanSurface> VulkanSurfacePool::GetCachedOrCreateSurface(
   if (!swap_succeeded) {
     FML_DLOG(ERROR) << "Failed to swap VulkanSurface to new VkImage of size: "
                     << ToString(size);
+    TRACE_EVENT_INSTANT0("flutter", "failed to swap, making new");
     return CreateSurface(size);
   }
+  TRACE_EVENT_INSTANT0("flutter", "Using differently sized image");
   FML_DCHECK(acquired_surface->IsValid());
   trace_surfaces_reused_++;
   return acquired_surface;
@@ -122,6 +127,7 @@ void VulkanSurfacePool::SubmitSurface(
 
   const flutter::LayerRasterCacheKey& retained_key =
       vulkan_surface->GetRetainedKey();
+
   if (retained_key.id() != 0) {
     // Add the surface to |retained_surfaces_| if its retained key has a valid
     // layer id (|retained_key.id()|).
@@ -190,11 +196,15 @@ void VulkanSurfacePool::RecycleSurface(std::unique_ptr<VulkanSurface> surface) {
     return;
   }
 
+  TRACE_EVENT0("flutter", "VulkanSurfacePool::RecycleSurface");
   // Recycle the buffer by putting it in the list of available surfaces if we
   // have not reached the maximum amount of cached surfaces.
   if (available_surfaces_.size() < kMaxSurfaces) {
     available_surfaces_.push_back(std::move(surface));
+  } else {
+    TRACE_EVENT_INSTANT0("flutter", "Too many surfaces in pool, dropping");
   }
+  TraceStats();
 }
 
 void VulkanSurfacePool::RecycleRetainedSurface(
@@ -220,6 +230,7 @@ void VulkanSurfacePool::AgeAndCollectOldBuffers() {
   TRACE_EVENT0("flutter", "VulkanSurfacePool::AgeAndCollectOldBuffers");
 
   // Remove all surfaces that are no longer valid or are too old.
+  size_t size_before = available_surfaces_.size();
   available_surfaces_.erase(
       std::remove_if(available_surfaces_.begin(), available_surfaces_.end(),
                      [&](auto& surface) {
@@ -227,6 +238,8 @@ void VulkanSurfacePool::AgeAndCollectOldBuffers() {
                               surface->AdvanceAndGetAge() >= kMaxSurfaceAge;
                      }),
       available_surfaces_.end());
+  TRACE_EVENT1("flutter", "AgeAndCollect", "aged surfaces",
+               (size_before - available_surfaces_.size()));
 
   // Look for a surface that has both a larger |VkDeviceMemory| allocation
   // than is necessary for its |VkImage|, and has a stable size history.
@@ -238,6 +251,7 @@ void VulkanSurfacePool::AgeAndCollectOldBuffers() {
   // If we found such a surface, then destroy it and cache a new one that only
   // uses a necessary amount of memory.
   if (surface_to_remove_it != available_surfaces_.end()) {
+    TRACE_EVENT_INSTANT0("flutter", "replacing surface with smaller one");
     auto size = (*surface_to_remove_it)->GetSize();
     available_surfaces_.erase(surface_to_remove_it);
     auto new_surface = CreateSurface(size);
@@ -271,6 +285,7 @@ void VulkanSurfacePool::AgeAndCollectOldBuffers() {
 }
 
 void VulkanSurfacePool::ShrinkToFit() {
+  TRACE_EVENT0("flutter", "VulkanSurfacePool::ShrinkToFit");
   // Reset all oversized surfaces in |available_surfaces_| so that the old
   // surfaces and new surfaces don't exist at the same time at any point,
   // reducing our peak memory footprint.
@@ -298,12 +313,15 @@ void VulkanSurfacePool::ShrinkToFit() {
 
 void VulkanSurfacePool::TraceStats() {
   // Resources held in cached buffers.
-  size_t cached_surfaces = 0;
   size_t cached_surfaces_bytes = 0;
+  size_t retained_surfaces_bytes = 0;
 
   for (const auto& surface : available_surfaces_) {
-    cached_surfaces++;
     cached_surfaces_bytes += surface->GetAllocationSize();
+  }
+  for (const auto& retained_entry : retained_surfaces_) {
+    retained_surfaces_bytes +=
+        retained_entry.second.vk_surface->GetAllocationSize();
   }
 
   // Resources held by Skia.
@@ -313,16 +331,20 @@ void VulkanSurfacePool::TraceStats() {
   const size_t skia_cache_purgeable =
       context_->getResourceCachePurgeableBytes();
 
-  TRACE_COUNTER("flutter", "SurfacePool", 0u,                     //
-                "CachedCount", cached_surfaces,                   //
-                "CachedBytes", cached_surfaces_bytes,             //
+  TRACE_COUNTER("flutter", "SurfacePoolCounts", 0u, "CachedCount",
+                available_surfaces_.size(),                       //
                 "Created", trace_surfaces_created_,               //
                 "Reused", trace_surfaces_reused_,                 //
                 "PendingInCompositor", pending_surfaces_.size(),  //
                 "Retained", retained_surfaces_.size(),            //
-                "SkiaCacheResources", skia_resources,             //
-                "SkiaCacheBytes", skia_bytes,                     //
-                "SkiaCachePurgeable", skia_cache_purgeable        //
+                "SkiaCacheResources", skia_resources              //
+  );
+
+  TRACE_COUNTER("flutter", "SurfacePoolBytes", 0u,          //
+                "CachedBytes", cached_surfaces_bytes,       //
+                "RetainedBytes", retained_surfaces_bytes,   //
+                "SkiaCacheBytes", skia_bytes,               //
+                "SkiaCachePurgeable", skia_cache_purgeable  //
   );
 
   // Reset per present/frame stats.

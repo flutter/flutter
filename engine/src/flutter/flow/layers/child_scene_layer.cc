@@ -18,6 +18,7 @@ ChildSceneLayer::ChildSceneLayer(zx_koid_t layer_id,
       hit_testable_(hit_testable) {}
 
 void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  TRACE_EVENT0("flutter", "ChildSceneLayer::Preroll");
   set_needs_system_composite(true);
 }
 
