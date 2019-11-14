@@ -3491,7 +3491,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return true;
   }
 
-  @deprecated
+  @Deprecated('Use dependOnInheritedElement instead.')
   @override
   InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect }) {
     return dependOnInheritedElement(ancestor, aspect: aspect);
@@ -3506,7 +3506,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor.widget;
   }
 
-  @deprecated
+  @Deprecated('Use dependOnInheritedWidgetOfExactType instead.')
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3531,6 +3531,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
+  @Deprecated('Use getElementForInheritedWidgetOfExactType instead.')
   @override
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3550,6 +3551,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
+  @Deprecated('use findAncestorWidgetOfExactType instead.')
   @override
   Widget ancestorWidgetOfExactType(Type targetType) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3568,7 +3570,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor?.widget;
   }
 
-  @deprecated
+  @Deprecated('Use findAncestorStateOfType instead.')
   @override
   State ancestorStateOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3595,7 +3597,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return statefulAncestor?.state;
   }
 
-  @deprecated
+  @Deprecated('Use findRootAncestorStateOfType instead.')
   @override
   State rootAncestorStateOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3622,7 +3624,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return statefulAncestor?.state;
   }
 
-  @deprecated
+  @Deprecated('Use findAncestorRenderObjectOfType instead.')
   @override
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
