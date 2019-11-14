@@ -52,6 +52,7 @@ PhysicalShapeLayer::~PhysicalShapeLayer() = default;
 
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
+  TRACE_EVENT0("flutter", "PhysicalShapeLayer::Preroll");
   context->total_elevation += elevation_;
   total_elevation_ = context->total_elevation;
   SkRect child_paint_bounds;
@@ -115,12 +116,14 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
 
 void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
   FML_DCHECK(needs_system_composite());
+  TRACE_EVENT0("flutter", "PhysicalShapeLayer::UpdateScene");
 
   // Retained rendering: speedup by reusing a retained entity node if possible.
   // When an entity node is reused, no paint layer is added to the frame so we
   // won't call PhysicalShapeLayer::Paint.
   LayerRasterCacheKey key(unique_id(), context.Matrix());
   if (context.HasRetainedNode(key)) {
+    TRACE_EVENT_INSTANT0("flutter", "retained layer cache hit");
     const scenic::EntityNode& retained_node = context.GetRetainedNode(key);
     FML_DCHECK(context.top_entity());
     FML_DCHECK(retained_node.session() == context.session());
@@ -128,6 +131,7 @@ void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
     return;
   }
 
+  TRACE_EVENT_INSTANT0("flutter", "cache miss, creating");
   // If we can't find an existing retained surface, create one.
   SceneUpdateContext::Frame frame(context, frameRRect_, color_, elevation_,
                                   total_elevation_, viewport_depth_, this);
