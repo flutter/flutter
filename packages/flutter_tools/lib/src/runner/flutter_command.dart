@@ -130,6 +130,8 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldUpdateCache => true;
 
+  bool get deprecated => false;
+
   bool _excludeDebug = false;
 
   BuildMode _defaultBuildMode;
@@ -500,6 +502,7 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         // Prints the welcome message if needed.
         flutterUsage.printWelcome();
+        _printDeprecationWarning();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult;
@@ -515,6 +518,13 @@ abstract class FlutterCommand extends Command<void> {
         }
       },
     );
+  }
+
+  void _printDeprecationWarning() {
+    if (deprecated) {
+      printStatus('$warningMark The "$name" command will be deprecated in a future version of Flutter.');
+      printStatus('');
+    }
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {

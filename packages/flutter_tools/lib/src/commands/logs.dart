@@ -24,6 +24,9 @@ class LogsCommand extends FlutterCommand {
   final String name = 'logs';
 
   @override
+  final bool deprecated = true;
+
+  @override
   final String description = 'Show log output for running Flutter apps.';
 
   @override
