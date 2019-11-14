@@ -117,28 +117,42 @@ class MouseTrackerAnnotation {
 /// position.
 typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
 
+// Signature for testing if an annotation is attached.
 typedef _IsAnnotationAttached = bool Function(MouseTrackerAnnotation annotation);
 
 // Various states of each connected mouse device.
 //
-// It is used by [MouseTracker] to compute which callbacks should be triggered
-// by each event.
+// It is used by [MouseTracker] to record the current state, as well as the
+// unresolved data to be used in the upcoming collection. For more details on
+// collection, see [MouseTracker].
 class _MouseState {
   _MouseState({
     @required PointerAddedEvent initialEvent,
   }) : assert(initialEvent != null),
        _unhandledEvent = initialEvent;
 
-  // The list of annotations that contains this device during the current frame.
+  // The list of annotations that contains this device during the last completed
+  // collection.
+  //
+  // It is updated at the end of every collection, right before dispatching
+  // callbacks.
   //
   // It uses [LinkedHashSet] to keep the insertion order.
   LinkedHashSet<MouseTrackerAnnotation> annotations = LinkedHashSet<MouseTrackerAnnotation>();
 
   // The most recent unprocessed mouse event observed from this device.
+  //
+  // It is cleared and moved to handledEvent at the end of every collection,
+  // right before dispatching callbacks.
   PointerEvent get unhandledEvent => _unhandledEvent;
   PointerEvent _unhandledEvent;
 
-  bool get dirty => _unhandledEvent != null;
+  // The most recent processed mouse event observed from this device.
+  //
+  // It is cleared and moved to handledEvent at the end of every collection,
+  // right before dispatching callbacks.
+  PointerEvent get handledEvent => _handledEvent;
+  PointerEvent _handledEvent;
 
   // Determine if the subject event should mark the state as dirty, and update
   // the state with it accordingly.
@@ -164,17 +178,6 @@ class _MouseState {
     }
   }
 
-  // The most recent mouse event observed from this device.
-  PointerEvent get handledEvent => _handledEvent;
-  PointerEvent _handledEvent;
-
-  void markEventAsHandled() {
-    if (_unhandledEvent != null) {
-      _handledEvent = _unhandledEvent;
-      _unhandledEvent = null;
-    }
-  }
-
   // Returns the last unhandled event, if there is any, or the last handled
   // event otherwise.
   // The `_latestEvent` is never null.
@@ -182,6 +185,15 @@ class _MouseState {
     final PointerEvent event = _unhandledEvent ?? _handledEvent;
     assert(event != null);
     return event;
+  }
+
+  bool get dirty => _unhandledEvent != null;
+
+  void markEventAsHandled() {
+    if (_unhandledEvent != null) {
+      _handledEvent = _unhandledEvent;
+      _unhandledEvent = null;
+    }
   }
 
   int get device => latestEvent.device;
@@ -207,6 +219,11 @@ class _MouseState {
 ///
 /// An instance of [MouseTracker] is owned by the global singleton of
 /// [RendererBinding].
+///
+/// ### Details
+/// TODO
+/// where the "collection" stands for the process of collecting the annotations of the
+// device, dispatch callbacks and update states accordingly, which is done
 class MouseTracker extends ChangeNotifier {
   /// Creates a mouse tracker to keep track of mouse locations.
   ///
@@ -356,18 +373,20 @@ class MouseTracker extends ChangeNotifier {
           )
         : <MouseTrackerAnnotation>{};
 
-    _dispatchDeviceCallbacks(
-      lastAnnotations: mouseState.annotations,
-      nextAnnotations: nextAnnotations,
-      handledEvent: mouseState.handledEvent,
-      latestEvent: mouseState.latestEvent,
-      isAnnotationAttached: (MouseTrackerAnnotation annotation) {
-        return _trackedAnnotations.contains(annotation);
-      },
-    );
+    final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = mouseState.annotations;
+    final PointerEvent handledEvent = mouseState.handledEvent;
+    final PointerEvent latestEvent = mouseState.latestEvent;
 
     mouseState.markEventAsHandled();
     mouseState.annotations = nextAnnotations;
+
+    _dispatchDeviceCallbacks(
+      lastAnnotations: lastAnnotations,
+      nextAnnotations: nextAnnotations,
+      handledEvent: handledEvent,
+      latestEvent: latestEvent,
+      isAnnotationAttached: _trackedAnnotations.contains,
+    );
   }
 
   // Dispatch callbacks related to a device after all necessary information
