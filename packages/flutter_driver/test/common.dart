@@ -4,10 +4,10 @@
 
 import 'dart:io';
 
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher; // ignore: deprecated_member_use
 
-export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 
 // Defines a 'package:test' shim.
 // TODO(ianh): Clean this up once https://github.com/dart-lang/matcher/issues/98 is fixed
