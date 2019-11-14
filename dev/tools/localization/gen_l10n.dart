@@ -485,6 +485,9 @@ Future<void> main(List<String> arguments) async {
 /// classes, as well as all pertinent Dart files required to internationalize a
 /// Flutter application.
 class LocalizationsGenerator {
+  /// Creates an instance of the localizations generator class.
+  ///
+  /// It takes in a [FileSystem] representation that the class will act upon.
   LocalizationsGenerator(this._fs);
 
   final file.FileSystem _fs;
