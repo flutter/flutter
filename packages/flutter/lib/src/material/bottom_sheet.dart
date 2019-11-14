@@ -343,6 +343,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.modalBarrierColor,
     this.isDismissible = true,
     @required this.isScrollControlled,
     RouteSettings settings,
@@ -357,6 +358,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final Color modalBarrierColor;
   final bool isDismissible;
 
   @override
@@ -369,7 +371,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final String barrierLabel;
 
   @override
-  Color get barrierColor => Colors.black54;
+  Color get barrierColor => modalBarrierColor ?? Colors.black54;
 
   AnimationController _animationController;
 
@@ -457,6 +459,7 @@ Future<T> showModalBottomSheet<T>({
   double elevation,
   ShapeBorder shape,
   Clip clipBehavior,
+  Color barrierColor,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
   bool isDismissible = true,
@@ -479,6 +482,7 @@ Future<T> showModalBottomSheet<T>({
     shape: shape,
     clipBehavior: clipBehavior,
     isDismissible: isDismissible,
+    modalBarrierColor: barrierColor
   ));
 }
 
