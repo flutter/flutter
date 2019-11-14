@@ -47,10 +47,24 @@ class AccessibilityBridge;
 
 /**
  * The accessibility bridge that this semantics object is attached to. This
- * object may use the bridge to access contextual application information. A weak pointer is used
- * because the platform view owns the accessibility bridge.
+ * object may use the bridge to access contextual application information. A weak
+ * pointer is used because the platform view owns the accessibility bridge.
+ * If you are referencing this property from an iOS callback, be sure to
+ * use `isAccessibilityBridgeActive` to protect against the case where this
+ * node may be orphaned.
  */
 @property(nonatomic, readonly) fml::WeakPtr<flutter::AccessibilityBridge> bridge;
+
+/**
+ * Due to the fact that VoiceOver may hold onto SemanticObjects even after it shuts down,
+ * there can be situations where the AccessibilityBridge is shutdown, but the SemanticObject
+ * will still be alive. If VoiceOver is turned on again, it may try to access this orphaned
+ * SemanticObject. Methods that are called from the accessiblity framework should use
+ * this to guard against this case by just returning early if its bridge has been shutdown.
+ *
+ * See https://github.com/flutter/flutter/issues/43795 for more information.
+ */
+- (BOOL)isAccessibilityBridgeAlive;
 
 /**
  * The semantics node used to produce this semantics object.
