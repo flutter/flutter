@@ -13,14 +13,15 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/platform/darwin/ios/ios_gl_context_switch_manager.h"
 
 namespace flutter {
 
 class IOSGLRenderTarget {
  public:
-  IOSGLRenderTarget(fml::scoped_nsobject<CAEAGLLayer> layer,
-                    EAGLContext* context,
-                    EAGLContext* resource_context);
+  IOSGLRenderTarget(
+      fml::scoped_nsobject<CAEAGLLayer> layer,
+      std::shared_ptr<IOSGLContextSwitchManager> gl_context_guard_manager);
 
   ~IOSGLRenderTarget();
 
@@ -32,16 +33,17 @@ class IOSGLRenderTarget {
 
   bool UpdateStorageSizeIfNecessary();
 
-  bool MakeCurrent();
+  std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch>
+  MakeCurrent();
 
-  bool ResourceMakeCurrent();
+  std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch>
+  ResourceMakeCurrent();
 
   sk_sp<SkColorSpace> ColorSpace() const { return color_space_; }
 
  private:
   fml::scoped_nsobject<CAEAGLLayer> layer_;
-  fml::scoped_nsobject<EAGLContext> context_;
-  fml::scoped_nsobject<EAGLContext> resource_context_;
+  std::shared_ptr<IOSGLContextSwitchManager> renderer_context_switch_manager_;
   GLuint framebuffer_;
   GLuint colorbuffer_;
   GLint storage_size_width_;

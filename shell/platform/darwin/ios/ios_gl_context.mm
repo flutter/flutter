@@ -13,15 +13,7 @@
 namespace flutter {
 
 IOSGLContext::IOSGLContext() {
-  resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3]);
-  if (resource_context_ != nullptr) {
-    context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3
-                                         sharegroup:resource_context_.get().sharegroup]);
-  } else {
-    resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2]);
-    context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
-                                         sharegroup:resource_context_.get().sharegroup]);
-  }
+  renderer_context_switch_manager_ = std::make_shared<IOSGLContextSwitchManager>();
 
   // TODO:
   // iOS displays are more variable than just P3 or sRGB.  Reading the display
@@ -48,16 +40,16 @@ IOSGLContext::~IOSGLContext() = default;
 
 std::unique_ptr<IOSGLRenderTarget> IOSGLContext::CreateRenderTarget(
     fml::scoped_nsobject<CAEAGLLayer> layer) {
-  return std::make_unique<IOSGLRenderTarget>(std::move(layer), context_.get(),
-                                             resource_context_.get());
+  return std::make_unique<IOSGLRenderTarget>(std::move(layer), renderer_context_switch_manager_);
 }
 
-bool IOSGLContext::MakeCurrent() {
-  return [EAGLContext setCurrentContext:context_.get()];
+std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch> IOSGLContext::MakeCurrent() {
+  return renderer_context_switch_manager_->MakeCurrent();
 }
 
-bool IOSGLContext::ResourceMakeCurrent() {
-  return [EAGLContext setCurrentContext:resource_context_.get()];
+std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch>
+IOSGLContext::ResourceMakeCurrent() {
+  return renderer_context_switch_manager_->ResourceMakeCurrent();
 }
 
 }  // namespace flutter
