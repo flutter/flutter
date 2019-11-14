@@ -58,7 +58,9 @@ class FuchsiaKernelCompiler {
       '--filesystem-root', fsRoot,
       '--packages', '$multiRootScheme:///$relativePackagesFile',
       '--output', fs.path.join(outDir, '$appName.dil'),
-      '--no-link-platform',
+      // TODO(zra): Add back when this is supported again.
+      // See: https://github.com/flutter/flutter/issues/44925
+      // '--no-link-platform',
       '--split-output-by-packages',
       '--manifest', manifestPath,
       '--component-name', appName,
