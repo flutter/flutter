@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 import 'package:test_api/src/frontend/async_matcher.dart' show AsyncMatcher;
 
