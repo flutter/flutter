@@ -364,8 +364,8 @@ class Actions extends InheritedWidget {
 
 /// A widget that combines the functionality of [Actions], [Shortcuts],
 /// [MouseRegion] and a [Focus] widget to create a detector that defines actions
-/// and key bindings, and will notify that the focus or hover highlights should
-/// be shown or not.
+/// and key bindings, and provides callbacks for handling focus and hover
+/// highlights.
 ///
 /// This widget can be used to give a control the required detection modes for
 /// focus and hover handling.
@@ -527,7 +527,9 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     if (widget.enabled && widget.actions != null && widget.actions.isNotEmpty) {
       child = Actions(actions: widget.actions, child: child);
     }
-    child = Shortcuts(shortcuts: widget.enabled && widget.shortcuts != null ? widget.shortcuts : const <LogicalKeySet, Intent>{}, child: child);
+    if (widget.enabled && widget.shortcuts != null && widget.shortcuts.isNotEmpty) {
+      child = Shortcuts(shortcuts: widget.shortcuts, child: child);
+    }
     return child;
   }
 }

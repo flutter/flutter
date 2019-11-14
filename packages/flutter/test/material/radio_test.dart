@@ -180,11 +180,11 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           flags: <SemanticsFlag>[
-            SemanticsFlag.isInMutuallyExclusiveGroup,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
         ),
       ],
@@ -201,12 +201,12 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           flags: <SemanticsFlag>[
-            SemanticsFlag.isInMutuallyExclusiveGroup,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.isChecked,
             SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
         ),
       ],
