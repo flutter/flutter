@@ -2803,7 +2803,7 @@ TEST_F(EmbedderTest,
           layer.type = kFlutterLayerContentTypePlatformView;
           layer.platform_view = &platform_view;
           layer.size = FlutterSizeMake(800.0, 560.0);
-          layer.offset = FlutterPointMake(0.0, 40.0);
+          layer.offset = FlutterPointMake(0.0, 80.0);
 
           ASSERT_EQ(*layers[1], layer);
         }
@@ -2902,7 +2902,7 @@ TEST_F(
           layer.type = kFlutterLayerContentTypePlatformView;
           layer.platform_view = &platform_view;
           layer.size = FlutterSizeMake(560.0, 800.0);
-          layer.offset = FlutterPointMake(40.0, 0.0);
+          layer.offset = FlutterPointMake(80.0, 0.0);
 
           ASSERT_EQ(*layers[1], layer);
         }

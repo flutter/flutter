@@ -211,6 +211,33 @@ static FlutterLayer MakePlatformViewLayer(
   return layer;
 }
 
+bool EmbedderExternalViewEmbedder::RenderPictureToRenderTarget(
+    sk_sp<SkPicture> picture,
+    const EmbedderRenderTarget* render_target) const {
+  if (!picture || render_target == nullptr) {
+    return false;
+  }
+
+  auto render_surface = render_target->GetRenderSurface();
+
+  if (!render_surface) {
+    return false;
+  }
+
+  auto render_canvas = render_surface->getCanvas();
+
+  if (render_canvas == nullptr) {
+    return false;
+  }
+
+  render_canvas->setMatrix(pending_surface_transformation_);
+  render_canvas->clear(SK_ColorTRANSPARENT);
+  render_canvas->drawPicture(picture);
+  render_canvas->flush();
+
+  return true;
+}
+
 // |ExternalViewEmbedder|
 bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
   std::map<FlutterPlatformViewIdentifier, FlutterPlatformView>
@@ -225,18 +252,15 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
     return false;
   }
 
-  // Copy the contents of the root picture recorder onto the root surface
-  // while making sure to take into account any surface transformations.
-  if (auto root_canvas = root_render_target_->GetRenderSurface()->getCanvas()) {
-    root_canvas->setMatrix(pending_surface_transformation_);
-    root_canvas->scale(pending_device_pixel_ratio_,
-                       pending_device_pixel_ratio_);
-    root_canvas->clear(SK_ColorTRANSPARENT);
-    root_canvas->drawPicture(
-        root_picture_recorder_->finishRecordingAsPicture());
-    root_canvas->flush();
-    root_picture_recorder_.reset();
+  // Copy the contents of the root picture recorder onto the root surface.
+  if (!RenderPictureToRenderTarget(
+          root_picture_recorder_->finishRecordingAsPicture(),
+          root_render_target_.get())) {
+    FML_LOG(ERROR) << "Could not render into the the root render target.";
+    return false;
   }
+  // The root picture recorder will be reset when a new frame begins.
+  root_picture_recorder_.reset();
 
   {
     // The root surface is expressed as a layer.
@@ -307,21 +331,13 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
 
     render_targets_used[registry_key] = render_target;
 
-    auto render_surface = render_target->GetRenderSurface();
-    auto render_canvas = render_surface ? render_surface->getCanvas() : nullptr;
-
-    if (!render_canvas) {
-      FML_LOG(ERROR)
-          << "Could not acquire render canvas for on-screen rendering.";
+    if (!RenderPictureToRenderTarget(picture, render_target.get())) {
+      FML_LOG(ERROR) << "Could not render into the render target for platform "
+                        "view of identifier "
+                     << view_id;
       return false;
     }
 
-    render_canvas->setMatrix(pending_surface_transformation_);
-    render_canvas->scale(pending_device_pixel_ratio_,
-                         pending_device_pixel_ratio_);
-    render_canvas->clear(SK_ColorTRANSPARENT);
-    render_canvas->drawPicture(picture);
-    render_canvas->flush();
     // Indicate a layer for the backing store containing contents rendered by
     // Flutter.
     presented_layers.push_back(MakeBackingStoreLayer(
