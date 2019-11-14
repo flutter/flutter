@@ -144,6 +144,10 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
 
   SkMatrix GetSurfaceTransformation() const;
 
+  bool RenderPictureToRenderTarget(
+      sk_sp<SkPicture> picture,
+      const EmbedderRenderTarget* render_target) const;
+
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalViewEmbedder);
 };
 

@@ -30,7 +30,7 @@ const FlutterBackingStore* EmbedderRenderTarget::GetBackingStore() const {
   return &backing_store_;
 }
 
-sk_sp<SkSurface> EmbedderRenderTarget::GetRenderSurface() {
+sk_sp<SkSurface> EmbedderRenderTarget::GetRenderSurface() const {
   return render_surface_;
 }
 

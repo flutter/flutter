@@ -51,7 +51,7 @@ class EmbedderRenderTarget {
   ///
   /// @return     The render surface.
   ///
-  sk_sp<SkSurface> GetRenderSurface();
+  sk_sp<SkSurface> GetRenderSurface() const;
 
   //----------------------------------------------------------------------------
   /// @brief      The embedder backing store descriptor. This is the descriptor
