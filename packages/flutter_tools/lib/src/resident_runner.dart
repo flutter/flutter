@@ -162,12 +162,11 @@ class FlutterDevice {
     _isStreamingNewObservatoryUri = true;
 
     final Completer<void> completer = Completer<void>();
-
     StreamSubscription<void> subscription;
-    bool isStreamDone = false;
     bool isWaitingForVm = false;
 
     subscription = observatoryUris.listen((Uri observatoryUri) async {
+      // FYI, this message is used as a sentinel in tests.
       printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
       VMService service;
@@ -181,7 +180,7 @@ class FlutterDevice {
         );
       } catch (exception) {
         printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
-        if (!completer.isCompleted && isStreamDone) {
+        if (!completer.isCompleted && !_isStreamingNewObservatoryUri) {
           completer.completeError('failed to connect to $observatoryUri');
         }
         return;
@@ -196,11 +195,10 @@ class FlutterDevice {
       completer.complete();
       await subscription.cancel();
     }, onDone: () {
-      isStreamDone = true;
+      _isStreamingNewObservatoryUri = false;
       if (!completer.isCompleted && !isWaitingForVm) {
         completer.completeError('connection to device ended too early');
       }
-      _isStreamingNewObservatoryUri = false;
     });
     return completer.future;
   }

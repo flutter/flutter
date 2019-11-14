@@ -155,6 +155,7 @@ StreamTransformer<S, S> _throttle<S>({
   @required int timeInMilliseconds,
 }) {
   assert(timeInMilliseconds != null);
+
   S latestLine;
   int lastExecution;
   Future<void> throttleFuture;
