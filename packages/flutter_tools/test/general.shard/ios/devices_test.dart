@@ -259,7 +259,7 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -329,7 +329,7 @@ void main() {
           mockLogReader.addLine('Foo');
           mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
         });
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(null));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -362,7 +362,7 @@ void main() {
           mockLogReader.addLine('Foo');
           mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
         });
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(null));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -411,7 +411,7 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
             .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
         List<String> args;

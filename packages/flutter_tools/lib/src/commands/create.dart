@@ -85,6 +85,8 @@ class CreateCommand extends FlutterCommand {
         getEnumName(_ProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
+        getEnumName(_ProjectType.module): 'Generate a project to add a Flutter module to an '
+            'existing Android or iOS application.',
       },
       defaultsTo: null,
     );
