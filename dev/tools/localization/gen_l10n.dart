@@ -13,8 +13,8 @@ import 'package:path/path.dart' as path;
 
 import 'localizations_utils.dart';
 
-// TODO: remove and pass directly to [LocalizationsGenerator] once it's fully
-// fleshed out.
+// TODO(shihaohong): Remove and pass directly to [LocalizationsGenerator]
+// once all references to [fs] has been properly migrated.
 const local.LocalFileSystem fs = local.LocalFileSystem();
 
 const String defaultFileTemplate = '''
@@ -486,20 +486,30 @@ class LocalizationsGenerator {
 
   final file.FileSystem _fs;
 
-  /// TODO: documentation
+  /// The reference to the project's l10n directory.
+  ///
+  /// It is assumed that all input files (ie. [templateArbFile], arb files
+  /// for translated messages) and output files (ie. The localizations
+  /// [outputFile], `messages_<locale>.dart` and `messages_all.dart`)
+  /// will reside here.
   Directory l10nDirectory;
 
-  /// TODO: documentation
+  /// The reference to the template arb file.
+  ///
+  /// The messages and its metadata will be used to generate the
+  /// `messages_<locale>.dart` and `messages_all.dart` files.
   File templateArbFile;
 
-  /// TODO: documentation
+  /// The reference to the Dart file will contain the localizations and
+  /// localizations delegate classes.
   File outputFile;
 
-  /// TODO: documentation
+  /// The class name to be used for the localizations class in [outputFile].
   String className;
 
   void setL10nDirectory(String arbPathString) {
-    // TODO: add error that input string cannot be null
+    if (arbPathString == null)
+      throw L10nException('Input string cannot be null');
     l10nDirectory = _fs.directory(arbPathString);
     if (!l10nDirectory.existsSync())
       throw FileSystemException(
@@ -515,9 +525,11 @@ class LocalizationsGenerator {
   }
 
   void setTemplateArbFile(String templateArbFileName) {
-    // TODO: add error that input string cannot be null
-    // TODO: add error if attempting to add templateArbFile when l10nDirectory
-    // is null
+    if (templateArbFileName == null)
+      throw L10nException('Input string cannot be null');
+    if (l10nDirectory == null)
+      throw L10nException('l10nDirectory cannot be null when setting template arb file');
+
     templateArbFile = _fs.file(path.join(l10nDirectory.path, templateArbFileName));
     final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
     if (templateArbFileStatModeString[0] == '-' && templateArbFileStatModeString[3] == '-')
@@ -528,16 +540,24 @@ class LocalizationsGenerator {
   }
 
   void setOutputFile(String outputFileString) {
-    // TODO: add error that input string cannot be null
+    if (outputFileString == null)
+      throw L10nException('Input string cannot be null');
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
   void setClassName(String classNameString) {
-    // TODO: add error that input string cannot be null
-    className = classNameString;
-    if (!_isValidClassName(className))
-      throw FileSystemException(
-        "The 'output-class', $classNameString, is not valid Dart class name.\n"
+    if (classNameString == null)
+      throw L10nException('Input string cannot be null');
+    if (!_isValidClassName(classNameString))
+      throw L10nException(
+        "The 'output-class', $classNameString, is not a valid Dart class name.\n"
       );
+    className = classNameString;
   }
+}
+
+class L10nException implements Exception {
+  L10nException(this.message);
+
+  final String message;
 }
