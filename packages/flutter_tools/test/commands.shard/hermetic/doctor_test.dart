@@ -29,7 +29,10 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/testbed.dart';
 
-final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())
+  ..localeName = 'en_US.UTF-8'
+  ..stdoutSupportsAnsi = false;
+
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorOutputPlatform,
 };
@@ -528,7 +531,7 @@ void main() {
 
       expect(testLogger.statusText, equals(
         'Doctor summary (to see all details, run flutter doctor -v):\n'
-          '[!] Flutter (Channel unknown, v0.0.0, on fake OS name and version, locale en-US)\n'
+          '[!] Flutter (Channel unknown, v0.0.0, on fake OS name and version, locale en_US.UTF-8)\n'
           '    ✗ version error\n\n'
           '! Doctor found issues in 1 category.\n'
       ));
