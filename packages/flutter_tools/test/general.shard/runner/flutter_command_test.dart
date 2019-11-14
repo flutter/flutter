@@ -63,7 +63,6 @@ void main() {
       await flutterCommand.run();
 
       expect(testLogger.statusText, contains('is deprecated and will be removed'));
-      verify(cache.updateAll(any)).called(1);
     },
     overrides: <Type, Generator>{
       Cache: () => cache,
