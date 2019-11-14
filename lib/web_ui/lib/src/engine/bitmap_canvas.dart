@@ -596,7 +596,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
       }
     } else {
       final String cssTransform =
-          matrix4ToCssTransform(transformWithOffset(currentTransform, p));
+          matrix4ToCssTransform3d(transformWithOffset(currentTransform, p));
       imgElement.style
         ..transformOrigin = '0 0 0'
         ..transform = cssTransform;
@@ -732,7 +732,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
       }
     } else {
       final String cssTransform =
-          matrix4ToCssTransform(transformWithOffset(currentTransform, offset));
+          matrix4ToCssTransform3d(transformWithOffset(currentTransform, offset));
       paragraphElement.style
         ..transformOrigin = '0 0 0'
         ..transform = cssTransform;
@@ -966,7 +966,7 @@ List<html.Element> _clipContent(List<_SaveClipEntry> clipStack,
         ..translate(clipOffsetX, clipOffsetY);
       curElement.style
         ..overflow = 'hidden'
-        ..transform = matrix4ToCssTransform(newClipTransform)
+        ..transform = matrix4ToCssTransform3d(newClipTransform)
         ..transformOrigin = '0 0 0'
         ..width = '${rect.right - clipOffsetX}px'
         ..height = '${rect.bottom - clipOffsetY}px';
@@ -982,7 +982,7 @@ List<html.Element> _clipContent(List<_SaveClipEntry> clipStack,
       curElement.style
         ..borderRadius = borderRadius
         ..overflow = 'hidden'
-        ..transform = matrix4ToCssTransform(newClipTransform)
+        ..transform = matrix4ToCssTransform3d(newClipTransform)
         ..transformOrigin = '0 0 0'
         ..width = '${roundRect.right - clipOffsetX}px'
         ..height = '${roundRect.bottom - clipOffsetY}px';
@@ -1020,6 +1020,6 @@ List<html.Element> _clipContent(List<_SaveClipEntry> clipStack,
 
 String _cssTransformAtOffset(
     Matrix4 transform, double offsetX, double offsetY) {
-  return matrix4ToCssTransform(
+  return matrix4ToCssTransform3d(
       transformWithOffset(transform, ui.Offset(offsetX, offsetY)));
 }
