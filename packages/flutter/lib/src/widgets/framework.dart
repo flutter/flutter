@@ -2018,7 +2018,7 @@ abstract class BuildContext {
   /// type of a concrete [Widget] subclass.
   ///
   /// This method is deprecated. Please use [findAncestorWidgetOfExactType] instead.
-  @Deprecated('use findAncestorWidgetOfExactType instead.')
+  @Deprecated('Use findAncestorWidgetOfExactType instead.')
   Widget ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type [T], which must be the
@@ -3551,7 +3551,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
-  @Deprecated('use findAncestorWidgetOfExactType instead.')
+  @Deprecated('Use findAncestorWidgetOfExactType instead.')
   @override
   Widget ancestorWidgetOfExactType(Type targetType) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
