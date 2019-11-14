@@ -17,16 +17,23 @@ class ProtocolDiscovery {
     this.logReader,
     this.serviceName, {
     this.portForwarder,
+    this.throttleTimeInMilliseconds,
     this.hostPort,
     this.devicePort,
     this.ipv6,
-  }) : assert(logReader != null) {
-    _deviceLogSubscription = logReader.logLines.listen(_handleLine);
+  }) : assert(logReader != null)
+  {
+    _deviceLogSubscription = logReader.logLines.listen(
+      _handleLine,
+      onDone: _stopScrapingLogs,
+    );
+    _uriStreamController = StreamController<Uri>.broadcast();
   }
 
   factory ProtocolDiscovery.observatory(
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
+    int throttleTimeInMilliseconds = 200,
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
@@ -36,6 +43,7 @@ class ProtocolDiscovery {
       logReader,
       kObservatoryService,
       portForwarder: portForwarder,
+      throttleTimeInMilliseconds: throttleTimeInMilliseconds,
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
@@ -49,16 +57,23 @@ class ProtocolDiscovery {
   final int devicePort;
   final bool ipv6;
 
-  final Completer<Uri> _completer = Completer<Uri>();
+  /// The time to wait before forwarding observatory URIs from [logReader].
+  final int throttleTimeInMilliseconds;
 
   StreamSubscription<String> _deviceLogSubscription;
 
+  StreamController<Uri> _uriStreamController;
+
   /// The discovered service URI.
   /// Use [uris] instead.
-  // TODO(egarciad): replace usages.
+  // TODO(egarciad): replace `uri` for `uris`.
   Future<Uri> get uri async {
-    final Uri rawUri = await _completer.future;
-    return await _forwardPort(rawUri);
+    try {
+      return await uris.first;
+    } on StateError {
+      // If the stream is closed and empty.
+      return null;
+    }
   }
 
   /// The discovered service URI stream.
@@ -69,22 +84,19 @@ class ProtocolDiscovery {
   /// Dependending on the lifespan of the app running the observatory,
   /// a new observatory URI may be assigned to the app.
   Stream<Uri> get uris {
-    return logReader.logLines
-      .where((String line) => _getPatternMatch(line) != null)
-      // Throttle the logs, so the stream forwards the most recent logs.
-      .transform(throttle<String>(
-        timeInMilliseconds: 200,
+    return _uriStreamController.stream
+      .transform(_throttle<Uri>(
+        timeInMilliseconds: throttleTimeInMilliseconds,
       ))
-      .asyncMap<Uri>((String line) async {
-        final Uri deviceUri = _getObservatoryUri(line);
-        assert(deviceUri != null);
-        return await _forwardPort(deviceUri);
+      .asyncMap<Uri>((Uri observatoryUri) async {
+        return await _forwardPort(observatoryUri);
       });
   }
 
   Future<void> cancel() => _stopScrapingLogs();
 
   Future<void> _stopScrapingLogs() async {
+    await _uriStreamController?.close();
     await _deviceLogSubscription?.cancel();
     _deviceLogSubscription = null;
   }
@@ -106,21 +118,17 @@ class ProtocolDiscovery {
     Uri uri;
     try {
       uri = _getObservatoryUri(line);
-    } on FormatException catch (error, stackTrace) {
-      _stopScrapingLogs();
-      _completer.completeError(error, stackTrace);
+    } on FormatException catch(error, stackTrace) {
+      _uriStreamController.addError(error, stackTrace);
     }
     if (uri == null) {
       return;
     }
-    if (devicePort != null  &&  uri.port != devicePort) {
+    if (devicePort != null && uri.port != devicePort) {
       printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
-
-    assert(!_completer.isCompleted);
-    _stopScrapingLogs();
-    _completer.complete(uri);
+    _uriStreamController.add(uri);
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
@@ -138,21 +146,18 @@ class ProtocolDiscovery {
     if (ipv6) {
       hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }
-
     return hostUri;
   }
 }
 
 /// Throttles a stream by [timeInMilliseconds].
-@visibleForTesting
-StreamTransformer<S, S> throttle<S>({
+StreamTransformer<S, S> _throttle<S>({
   @required int timeInMilliseconds,
 }) {
   assert(timeInMilliseconds != null);
   S latestLine;
+  int lastExecution;
   Future<void> throttleFuture;
-  // Assume it just executed, so it skips the oldest entry.
-  int lastExecution = DateTime.now().millisecondsSinceEpoch;
 
   return StreamTransformer<S, S>
     .fromHandlers(
@@ -160,10 +165,11 @@ StreamTransformer<S, S> throttle<S>({
         latestLine = value;
 
         final int currentTime = DateTime.now().millisecondsSinceEpoch;
+        lastExecution ??= currentTime;
         final int remainingTime = currentTime - lastExecution;
         final int nextExecutionTime = remainingTime > timeInMilliseconds
           ? 0
-          : remainingTime;
+          : timeInMilliseconds - remainingTime;
         throttleFuture ??= Future<void>
           .delayed(Duration(milliseconds: nextExecutionTime))
           .whenComplete(() {

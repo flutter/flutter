@@ -563,16 +563,33 @@ class MockDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'MockLogReader';
 
-  final StreamController<String> _linesController = StreamController<String>.broadcast();
+  StreamController<String> _cachedLinesController;
+
+  final List<String> _lineQueue = <String>[];
+  StreamController<String> get _linesController {
+    _cachedLinesController ??= StreamController<String>
+      .broadcast(onListen: () {
+        _lineQueue.forEach(_linesController.add);
+        _lineQueue.clear();
+     });
+    return _cachedLinesController;
+  }
 
   @override
   Stream<String> get logLines => _linesController.stream;
 
-  void addLine(String line) => _linesController.add(line);
+  void addLine(String line) {
+    if (_linesController.hasListener) {
+      _linesController.add(line);
+    } else {
+      _lineQueue.add(line);
+    }
+  }
 
   @override
-  void dispose() {
-    _linesController.close();
+  Future<void> dispose() async {
+    _lineQueue.clear();
+    await _linesController.close();
   }
 }
 
