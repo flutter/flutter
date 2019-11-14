@@ -70,7 +70,7 @@ class ProtocolDiscovery {
   /// a new observatory URI may be assigned to the app.
   Stream<Uri> get uris {
     return logReader.logLines
-      .where((String line) => _getObservatoryUri(line) != null)
+      .where((String line) => _getPatternMatch(line) != null)
       // Throttle the logs, so the stream forwards the most recent logs.
       .transform(throttle<String>(
         timeInMilliseconds: 200,
@@ -89,15 +89,17 @@ class ProtocolDiscovery {
     _deviceLogSubscription = null;
   }
 
-  Uri _getObservatoryUri(String line) {
-    Uri uri;
+  Match _getPatternMatch(String line) {
     final RegExp r = RegExp('${RegExp.escape(serviceName)} listening on ((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)');
-    final Match match = r.firstMatch(line);
+    return r.firstMatch(line);
+  }
 
+  Uri _getObservatoryUri(String line) {
+    final Match match = _getPatternMatch(line);
     if (match != null) {
       return Uri.parse(match[1]);
     }
-    return uri;
+    return null;
   }
 
   void _handleLine(String line) {
