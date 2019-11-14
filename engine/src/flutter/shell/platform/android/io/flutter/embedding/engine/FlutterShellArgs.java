@@ -44,6 +44,8 @@ public class FlutterShellArgs {
   public static final String ARG_VERBOSE_LOGGING = "--verbose-logging";
   public static final String ARG_KEY_OBSERVATORY_PORT = "observatory-port";
   public static final String ARG_OBSERVATORY_PORT = "--observatory-port=";
+  public static final String ARG_KEY_DART_FLAGS = "dart-flags";
+  public static final String ARG_DART_FLAGS = "--dart-flags";
 
   @NonNull
   public static FlutterShellArgs fromIntent(@NonNull Intent intent) {
@@ -89,6 +91,14 @@ public class FlutterShellArgs {
     }
     if (intent.getBooleanExtra(ARG_KEY_VERBOSE_LOGGING, false)) {
       args.add(ARG_VERBOSE_LOGGING);
+    }
+
+    // NOTE: all flags provided with this argument are subject to filtering
+    // based on a whitelist in shell/common/switches.cc. If any flag provided
+    // is not present in the whitelist, the process will immediately
+    // terminate.
+    if (intent.hasExtra(ARG_KEY_DART_FLAGS)) {
+      args.add(ARG_DART_FLAGS + "=" + intent.getStringExtra(ARG_KEY_DART_FLAGS));
     }
 
     return new FlutterShellArgs(args);
