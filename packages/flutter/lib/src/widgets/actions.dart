@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -478,25 +479,27 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   void _handleMouseEnter(PointerEnterEvent event) {
     assert(widget.onShowHoverHighlight != null);
     if (!_hovering) {
-      _hovering = true;
-      _handleShowHoverHighlight();
+      // TODO(gspencergoog): remove scheduleMicrotask once MouseRegion event timing has changed.
+      scheduleMicrotask(() { setState(() { _hovering = true; _handleShowHoverHighlight(); }); });
     }
   }
 
   void _handleMouseExit(PointerExitEvent event) {
     assert(widget.onShowHoverHighlight != null);
     if (_hovering) {
-      _hovering = false;
-      _handleShowHoverHighlight();
+      // TODO(gspencergoog): remove scheduleMicrotask once MouseRegion event timing has changed.
+      scheduleMicrotask(() { setState(() { _hovering = false; _handleShowHoverHighlight(); }); });
     }
   }
 
   bool _focused = false;
   void _handleFocusChange(bool focused) {
     if (_focused != focused) {
-      _focused = focused;
-      _handleShowFocusHighlight();
-      widget.onFocusChange?.call(_focused);
+      setState(() {
+        _focused = focused;
+        _handleShowFocusHighlight();
+        widget.onFocusChange?.call(_focused);
+      });
     }
   }
 
@@ -506,15 +509,6 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
   void _handleShowFocusHighlight() {
     widget.onShowFocusHighlight?.call(_focused && widget.enabled && _canShowHighlight);
-  }
-
-  @override
-  void didUpdateWidget(FocusableActionDetector oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.enabled != oldWidget.enabled) {
-      _handleShowFocusHighlight();
-      _handleShowHoverHighlight();
-    }
   }
 
   @override

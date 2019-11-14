@@ -212,11 +212,19 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     );
   }
 
-  bool _showHighlight = false;
-  void _handleHighlightChanged(bool show) => setState(() { _showHighlight = show; });
+  bool _focused = false;
+  void _handleHighlightChanged(bool focused) {
+    if (_focused != focused) {
+      setState(() { _focused = focused; });
+    }
+  }
 
-  bool hovering = false;
-  void _handleHoverChanged(bool show) => setState(() { hovering = show; });
+  bool _hovering = false;
+  void _handleHoverChanged(bool hovering) {
+    if (_hovering != hovering) {
+      setState(() { _hovering = hovering; });
+    }
+  }
 
   Color _getInactiveColor(ThemeData themeData) {
     return enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
@@ -259,8 +267,8 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
             onChanged: enabled ? _handleChanged : null,
             additionalConstraints: additionalConstraints,
             vsync: this,
-            hasFocus: enabled && _showHighlight && Focus.of(context).hasFocus,
-            hovering: enabled && _showHighlight && hovering,
+            hasFocus: _focused,
+            hovering: _hovering,
           );
         },
       ),

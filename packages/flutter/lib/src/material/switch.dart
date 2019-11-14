@@ -239,11 +239,19 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     );
   }
 
-  bool _showHighlight = false;
-  void _handleHighlightChanged(bool show) => setState(() { _showHighlight = show; });
+  bool _focused = false;
+  void _handleFocusHighlightChanged(bool focused) {
+    if (focused != _focused) {
+      setState(() { _focused = focused; });
+    }
+  }
 
-  bool hovering = false;
-  void _handleHoverChanged(bool show) => setState(() { hovering = show; });
+  bool _hovering = false;
+  void _handleHoverChanged(bool hovering) {
+    if (hovering != _hovering) {
+      setState(() { _hovering = hovering; });
+    }
+  }
 
   Size getSwitchSize(ThemeData theme) {
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
@@ -286,11 +294,10 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       enabled: enabled,
-      onShowFocusHighlight: _handleHighlightChanged,
+      onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
       child: Builder(
         builder: (BuildContext context) {
-          final bool hasFocus = Focus.of(context).hasFocus;
           return _SwitchRenderObjectWidget(
             dragStartBehavior: widget.dragStartBehavior,
             value: widget.value,
@@ -305,8 +312,8 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             configuration: createLocalImageConfiguration(context),
             onChanged: widget.onChanged,
             additionalConstraints: BoxConstraints.tight(getSwitchSize(theme)),
-            hasFocus: enabled && _showHighlight && hasFocus,
-            hovering: enabled && _showHighlight && hovering,
+            hasFocus: _focused,
+            hovering: _hovering,
             vsync: this,
           );
         },

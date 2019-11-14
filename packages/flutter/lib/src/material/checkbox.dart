@@ -194,11 +194,19 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     );
   }
 
-  bool _showHighlight = false;
-  void _handleHighlightChanged(bool show) => setState(() { _showHighlight = show; });
+  bool _focused = false;
+  void _handleFocusHighlightChanged(bool focused) {
+    if (focused != _focused) {
+      setState(() { _focused = focused; });
+    }
+  }
 
-  bool hovering = false;
-  void _handleHoverChanged(bool show) => setState(() { hovering = show; });
+  bool _hovering = false;
+  void _handleHoverChanged(bool hovering) {
+    if (hovering != _hovering) {
+      setState(() { _hovering = hovering; });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +227,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       enabled: enabled,
-      onShowFocusHighlight: _handleHighlightChanged,
+      onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
       child: Builder(
         builder: (BuildContext context) {
@@ -234,8 +242,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             onChanged: widget.onChanged,
             additionalConstraints: additionalConstraints,
             vsync: this,
-            hasFocus: enabled && _showHighlight && Focus.of(context).hasFocus,
-            hovering: enabled && _showHighlight && hovering,
+            hasFocus: _focused,
+            hovering: _hovering,
           );
         },
       ),

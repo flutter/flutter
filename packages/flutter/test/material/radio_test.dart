@@ -185,7 +185,6 @@ void main() {
             SemanticsFlag.isInMutuallyExclusiveGroup,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isFocusable,
           ],
         ),
       ],
@@ -396,6 +395,7 @@ void main() {
     }
     await tester.pumpWidget(buildApp());
 
+    await tester.pump();
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byKey(radioKey))),
@@ -415,6 +415,7 @@ void main() {
     // Check when the radio isn't selected.
     groupValue = 1;
     await tester.pumpWidget(buildApp());
+    await tester.pump();
     await tester.pumpAndSettle();
     expect(
         Material.of(tester.element(find.byKey(radioKey))),
@@ -429,6 +430,7 @@ void main() {
     // Check when the radio is selected, but disabled.
     groupValue = 0;
     await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pump();
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byKey(radioKey))),
