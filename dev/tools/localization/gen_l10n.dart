@@ -481,6 +481,9 @@ Future<void> main(List<String> arguments) async {
   }
 }
 
+/// The localizations generation class used to generate the localizations
+/// classes, as well as all pertinent Dart files required to internationalize a
+/// Flutter application.
 class LocalizationsGenerator {
   LocalizationsGenerator(this._fs);
 
@@ -505,8 +508,13 @@ class LocalizationsGenerator {
   File outputFile;
 
   /// The class name to be used for the localizations class in [outputFile].
+  ///
+  /// For example, if 'AppLocalizations' is passed in, the AppLocalizations
+  /// class will be created with a [LocalizationsDelegate] named
+  /// _AppLocalizationsDelegate.
   String className;
 
+  /// Sets the reference [Directory] for [l10nDirectory].
   void setL10nDirectory(String arbPathString) {
     if (arbPathString == null)
       throw L10nException('Input string cannot be null');
@@ -524,6 +532,7 @@ class LocalizationsGenerator {
       );
   }
 
+  /// Sets the reference [File] for [templateArbFile].
   void setTemplateArbFile(String templateArbFileName) {
     if (templateArbFileName == null)
       throw L10nException('Input string cannot be null');
@@ -539,12 +548,15 @@ class LocalizationsGenerator {
       );
   }
 
+  /// Sets the reference [File] for the localizations delegate [outputFile].
   void setOutputFile(String outputFileString) {
     if (outputFileString == null)
       throw L10nException('Input string cannot be null');
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
+  /// Sets the [className] for the localizations and localizations delegate
+  /// classes.
   void setClassName(String classNameString) {
     if (classNameString == null)
       throw L10nException('Input string cannot be null');
