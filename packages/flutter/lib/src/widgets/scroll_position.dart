@@ -693,6 +693,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   @override
   void dispose() {
+    assert(pixels != null);
     activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
     _activity = null;
     super.dispose();
