@@ -48,7 +48,6 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'macos/xcode_validator.dart';
 import 'mdns_discovery.dart';
-import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'run_hot.dart';
 import 'version.dart';
@@ -107,10 +106,9 @@ Future<T> runInContext<T>(
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
-      PersistentToolState: () => PersistentToolState(),
+      Pub: () => const Pub(),
       ProcessInfo: () => ProcessInfo(),
       ProcessUtils: () => ProcessUtils(),
-      Pub: () => const Pub(),
       Signals: () => Signals(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),
@@ -123,8 +121,8 @@ Future<T> runInContext<T>(
       WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(),
-      XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
       XcodeValidator: () => const XcodeValidator(),
+      XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },
   );
 }

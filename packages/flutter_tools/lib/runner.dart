@@ -215,8 +215,9 @@ Future<String> _doctorText() async {
 }
 
 Future<int> _exit(int code) async {
-  // Prints the welcome message if needed.
-  flutterUsage.printWelcome();
+  if (flutterUsage.isFirstRun) {
+    flutterUsage.printWelcome();
+  }
 
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
