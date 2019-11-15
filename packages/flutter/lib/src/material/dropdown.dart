@@ -537,15 +537,17 @@ class _RenderMenuItem extends RenderProxyBox {
   }
 }
 
-// The container widget for a menu item created by a [DropdownButton]. It
-// provides the default configuration for [DropdownMenuItem]s, as well as a
-// [DropdownButton]'s hint and disabledHint widgets.
-class _DropdownMenuItemContainer extends StatelessWidget {
+/// An item in a menu created by a [DropdownButton].
+///
+/// The type `T` is the type of the value the entry represents. All the entries
+/// in a given menu must represent values with consistent types.
+class DropdownMenuItem<T> extends StatelessWidget {
   /// Creates an item for a dropdown menu.
   ///
   /// The [child] argument is required.
-  const _DropdownMenuItemContainer({
+  const DropdownMenuItem({
     Key key,
+    this.value,
     @required this.child,
   }) : assert(child != null),
        super(key: key);
@@ -555,6 +557,11 @@ class _DropdownMenuItemContainer extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
+  /// The value to return if the user selects this menu item.
+  ///
+  /// Eventually returned in a call to [DropdownButton.onChanged].
+  final T value;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -563,27 +570,6 @@ class _DropdownMenuItemContainer extends StatelessWidget {
       child: child,
     );
   }
-}
-
-/// An item in a menu created by a [DropdownButton].
-///
-/// The type `T` is the type of the value the entry represents. All the entries
-/// in a given menu must represent values with consistent types.
-class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
-  /// Creates an item for a dropdown menu.
-  ///
-  /// The [child] argument is required.
-  const DropdownMenuItem({
-    Key key,
-    this.value,
-    @required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
-
-  /// The value to return if the user selects this menu item.
-  ///
-  /// Eventually returned in a call to [DropdownButton.onChanged].
-  final T value;
 }
 
 /// An inherited widget that causes any descendant [DropdownButton]
@@ -672,9 +658,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// If the [onChanged] callback is null or the list of [items] is null
 /// then the dropdown button will be disabled, i.e. its arrow will be
 /// displayed in grey and it will not respond to input. A disabled button
-/// will display the [disabledHint] widget if it is non-null. However, if
-/// [disabledHint] is null and [hint] is non-null, the [hint] widget will
-/// instead be displayed.
+/// will display the [disabledHint] widget if it is non-null.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -692,8 +676,6 @@ class DropdownButton<T> extends StatefulWidget {
   /// must be equal to one of the [DropDownMenuItem] values. If [items] or
   /// [onChanged] is null, the button will be disabled, the down arrow
   /// will be greyed out, and the [disabledHint] will be shown (if provided).
-  /// If [disabledHint] is null and [hint] is non-null, [hint] will instead be
-  /// shown.
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified). The boolean [isDense] and
@@ -733,28 +715,20 @@ class DropdownButton<T> extends StatefulWidget {
   /// If the [onChanged] callback is null or the list of items is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non-null. If
-  /// [disabledHint] is also null but [hint] is non-null, [hint] will instead
-  /// be displayed.
+  /// will display the [disabledHint] widget if it is non-null.
   final List<DropdownMenuItem<T>> items;
 
-  /// The value of the currently selected [DropdownMenuItem].
-  ///
-  /// If [value] is null and [hint] is non-null, the [hint] widget is
-  /// displayed as a placeholder for the dropdown button's value.
+  /// The value of the currently selected [DropdownMenuItem], or null if no
+  /// item has been selected. If `value` is null then the menu is popped up as
+  /// if the first item were selected.
   final T value;
 
-  /// A placeholder widget that is displayed by the dropdown button.
-  ///
-  /// If [value] is null, this widget is displayed as a placeholder for
-  /// the dropdown button's value. This widget is also displayed if the button
-  /// is disabled ([items] or [onChanged] is null) and [disabledHint] is null.
+  /// A placeholder widget that is displayed if no item is selected, i.e. if [value] is null.
   final Widget hint;
 
   /// A message to show when the dropdown is disabled.
   ///
-  /// Displayed if [items] or [onChanged] is null. If [hint] is non-null and
-  /// [disabledHint] is null, the [hint] widget will be displayed instead.
+  /// Displayed if [items] or [onChanged] is null.
   final Widget disabledHint;
 
   /// {@template flutter.material.dropdownButton.onChanged}
@@ -763,9 +737,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// If the [onChanged] callback is null or the list of [items] is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
-  /// will display the [disabledHint] widget if it is non-null. If
-  /// [disabledHint] is also null but [hint] is non-null, [hint] will instead
-  /// be displayed.
+  /// will display the [disabledHint] widget if it is non-null.
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
 
@@ -1141,25 +1113,28 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (_enabled) {
       items = widget.selectedItemBuilder == null
         ? List<Widget>.from(widget.items)
-        : widget.selectedItemBuilder(context);
+        : widget.selectedItemBuilder(context).map<Widget>((Widget item) {
+            return Container(
+              constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
+              alignment: AlignmentDirectional.centerStart,
+              child: item,
+            );
+          }).toList();
     } else {
-      items = widget.selectedItemBuilder == null
-        ? <Widget>[]
-        : widget.selectedItemBuilder(context);
+      items = <Widget>[];
     }
 
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
-      Widget displayedHint = _enabled ? widget.hint : widget.disabledHint ?? widget.hint;
-      if (widget.selectedItemBuilder == null)
-        displayedHint = _DropdownMenuItemContainer(child: displayedHint);
-
+      final Widget emplacedHint = _enabled
+        ? widget.hint
+        : DropdownMenuItem<Widget>(child: widget.disabledHint ?? widget.hint);
       hintIndex = items.length;
       items.add(DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
+          child: emplacedHint,
           ignoringSemantics: false,
-          child: displayedHint,
         ),
       ));
     }
