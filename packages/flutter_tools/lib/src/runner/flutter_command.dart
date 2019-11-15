@@ -734,8 +734,7 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.fuchsia:
     case TargetPlatform.tester:
       // No artifacts currently supported.
       return null;
