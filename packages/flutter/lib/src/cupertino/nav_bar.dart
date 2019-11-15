@@ -289,8 +289,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Widget trailing;
 
-  // TODO(xster): https://github.com/flutter/flutter/issues/10469 implement
-  // support for double row navigation bars.
+  // TODO(xster): implement support for double row navigation bars.
 
   /// {@template flutter.cupertino.navBar.backgroundColor}
   /// The background color of the navigation bar. If it contains transparency, the
