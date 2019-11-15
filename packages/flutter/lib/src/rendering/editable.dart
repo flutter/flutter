@@ -986,11 +986,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // in which case using the fallback affinity computed from dart:ui will
     // be superior to simply defaulting to TextAffinity.downstream.
     if (value.affinity == null) {
-      _selection = TextSelection(
-        baseOffset: value.baseOffset,
-        extentOffset: value.extentOffset,
-        affinity: _fallbackAffinity,
-      );
+      _selection = value.copyWith(affinity: _fallbackAffinity);
     } else {
       _selection = value;
     }
