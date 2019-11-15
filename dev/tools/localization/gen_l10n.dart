@@ -79,7 +79,7 @@ class @className {
 
   static Future<@className> load(Locale locale) {
     return initializeMessages(locale.toString())
-      .then<@className>((_) => @className(locale));
+      .then<@className>((void _) => @className(locale));
   }
 
   static @className of(BuildContext context) {
@@ -168,10 +168,8 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
     }
     if (attributesMap.containsKey('placeholders')) {
       final Map<String, dynamic> placeholders = attributesMap['placeholders'];
-      if (placeholders.isNotEmpty) {
-        final String args = placeholders.keys.join(', ');
-        attributes.add('args: <Object>[$args]');
-      }
+      final String args = placeholders.keys.join(', ');
+      attributes.add('args: <Object>[$args]');
     }
   }
   return attributes;
