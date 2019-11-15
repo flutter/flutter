@@ -43,11 +43,10 @@ typedef GestureMultiTapCancelCallback = void Function(int pointer);
 class _CountdownZoned {
   _CountdownZoned({ @required Duration duration })
        : assert(duration != null) {
-    _timer = Timer(duration, _onTimeout);
+    Timer(duration, _onTimeout);
   }
 
   bool _timeout = false;
-  Timer _timer;
 
   bool get timeout => _timeout;
 

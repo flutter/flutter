@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test_api/test_api.dart' show TypeMatcher;
+import 'package:test_api/test_api.dart' show TypeMatcher; // ignore: deprecated_member_use
 
 import '../rendering/rendering_tester.dart';
 import 'image_data.dart';

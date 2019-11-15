@@ -18,6 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/targets/ios.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
@@ -35,6 +36,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
+    usesDartDefines();
     argParser
       ..addFlag('debug',
         negatable: true,
@@ -130,6 +132,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    Cache.releaseLockEarly();
+
     final String outputArgument = argResults['output']
         ?? fs.path.join(fs.currentDirectory.path, 'build', 'ios', 'framework');
 
@@ -294,6 +298,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       quiet: true,
       reportTimings: false,
       iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
+      dartDefines: dartDefines,
     );
 
     const String appFrameworkName = 'App.framework';

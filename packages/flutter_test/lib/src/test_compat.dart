@@ -18,6 +18,7 @@ import 'package:test_api/src/backend/message.dart'; // ignore: implementation_im
 import 'package:test_api/src/backend/invoker.dart';  // ignore: implementation_imports
 import 'package:test_api/src/backend/state.dart'; // ignore: implementation_imports
 
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart';
 
 Declarer _localDeclarer;

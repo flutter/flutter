@@ -73,13 +73,13 @@ import 'messages_all.dart';
 /// be consistent with the languages listed in the @className.supportedLocales
 /// property.
 class @className {
-  @className(Locale locale) : _localeName = locale.toString();
+  @className(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
   final String _localeName;
 
   static Future<@className> load(Locale locale) {
     return initializeMessages(locale.toString())
-      .then<@className>((void _) => @className(locale));
+      .then<@className>((_) => @className(locale));
   }
 
   static @className of(BuildContext context) {
@@ -149,6 +149,10 @@ const String pluralMethodTemplate = '''
   }
 ''';
 
+int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
+  return a.path.compareTo(b.path);
+}
+
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
   final Map<String, dynamic> attributesMap = bundle['@$key'];
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
@@ -164,12 +168,14 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
   if (attributesMap != null) {
     if (attributesMap.containsKey('description')) {
       final String description = attributesMap['description'];
-      attributes.add('desc: \'$description\'');
+      attributes.add('desc: ${generateString(description)}');
     }
     if (attributesMap.containsKey('placeholders')) {
       final Map<String, dynamic> placeholders = attributesMap['placeholders'];
-      final String args = placeholders.keys.join(', ');
-      attributes.add('args: <Object>[$args]');
+      if (placeholders.isNotEmpty) {
+        final String args = placeholders.keys.join(', ');
+        attributes.add('args: <Object>[$args]');
+      }
     }
   }
   return attributes;
@@ -382,7 +388,7 @@ Future<void> main(List<String> arguments) async {
   final Set<String> supportedLanguageCodes = <String>{};
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
-  for (FileSystemEntity entity in l10nDirectory.listSync()) {
+  for (FileSystemEntity entity in l10nDirectory.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
 
     if (FileSystemEntity.isFileSync(entityPath)) {
@@ -433,7 +439,7 @@ Future<void> main(List<String> arguments) async {
 
   final RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
 
-  for (String key in bundle.keys) {
+  for (String key in bundle.keys.toList()..sort()) {
     if (key.startsWith('@'))
       continue;
     if (!_isValidGetterAndMethodName(key))
