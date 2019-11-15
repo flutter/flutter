@@ -171,15 +171,10 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     String outputPath,
     String initializeFromDill,
     bool runCold = false,
-    TargetPlatform targetPlatform,
   }) async {
     codeGenerator.updatePackages(flutterProject);
     final ResidentCompiler residentCompiler = ResidentCompiler(
-      artifacts.getArtifactPath(
-        Artifact.flutterPatchedSdkPath,
-        platform: targetPlatform,
-        mode: buildMode,
-      ),
+      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
       packagesPath: PackageMap.globalGeneratedPackagesPath,

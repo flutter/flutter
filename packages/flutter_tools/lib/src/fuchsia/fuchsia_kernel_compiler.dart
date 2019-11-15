@@ -38,13 +38,13 @@ class FuchsiaKernelCompiler {
     final String kernelCompiler = artifacts.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
       platform: TargetPlatform.fuchsia_x64,  // This file is not arch-specific.
-      mode: buildInfo.mode,
+      mode: BuildMode.debug,
     );
     if (!fs.isFileSync(kernelCompiler)) {
       throwToolExit('Fuchisa kernel compiler not found at "$kernelCompiler"');
     }
     final String platformDill = artifacts.getArtifactPath(
-      Artifact.platformKernelDill,
+      Artifact.fuchsiaPlatformDill,
       platform: TargetPlatform.fuchsia_x64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
@@ -92,7 +92,7 @@ class FuchsiaKernelCompiler {
 
     final List<String> command = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
-      kernelCompiler,
+      artifacts.getArtifactPath(Artifact.fuchsiaKernelCompiler),
       ...flags,
     ];
     final Process process = await processUtils.start(command);
