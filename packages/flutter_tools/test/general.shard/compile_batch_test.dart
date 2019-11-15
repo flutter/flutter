@@ -85,6 +85,7 @@ void main() {
       buildMode: BuildMode.profile,
       trackWidgetCreation: false,
       aot: true,
+      dartDefines: const <String>[],
     );
 
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
