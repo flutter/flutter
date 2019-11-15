@@ -315,6 +315,7 @@ class KernelCompiler {
       frontendServer,
       '--sdk-root',
       sdkRoot,
+      '--strong',
       '--target=$targetModel',
       '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
       ..._buildModeOptions(buildMode),
@@ -647,6 +648,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       '--sdk-root',
       sdkRoot,
       '--incremental',
+      '--strong',
       '--target=$targetModel',
       '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
       if (outputPath != null) ...<String>[
