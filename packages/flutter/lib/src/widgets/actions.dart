@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
@@ -152,7 +153,7 @@ class ActionDispatcher extends Diagnosticable {
   bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
     assert(action != null);
     assert(intent != null);
-    focusNode ??= primaryFocus;
+    focusNode ??= WidgetsBinding.instance.focusManager.primaryFocus;
     if (action != null && intent.isEnabled(focusNode.context)) {
       action.invoke(focusNode, intent);
       return true;
