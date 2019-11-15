@@ -232,6 +232,7 @@ flutter_tools:lib/''');
     await const KernelSnapshot().build(androidEnvironment
       ..defines[kTargetPlatform]  = 'darwin-x64'
       ..defines[kBuildMode] = 'debug'
+      ..defines[kTrackWidgetCreation] = 'false'
     );
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
