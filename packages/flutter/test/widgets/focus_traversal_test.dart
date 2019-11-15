@@ -1006,6 +1006,200 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
     }, skip: kIsWeb);
+    testWidgets('Focus traversal inside a vertical scrollable scrolls to stay visible.', (WidgetTester tester) async {
+      final List<int> items = List<int>.generate(11, (int index) => index).toList();
+      final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+      final FocusNode topNode = FocusNode(debugLabel: 'Header');
+      final FocusNode bottomNode = FocusNode(debugLabel: 'Footer');
+      final ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            children: <Widget>[
+              Focus(focusNode: topNode, child: Container(height: 100)),
+              Expanded(
+                child: ListView(
+                  scrollDirection: Axis.vertical,
+                  controller: controller,
+                  children: items.map<Widget>((int item) {
+                    return Focus(
+                      focusNode: nodes[item],
+                      child: Container(height: 100),
+                    );
+                  }).toList(),
+                ),
+              ),
+              Focus(focusNode: bottomNode, child: Container(height: 100)),
+            ],
+          ),
+        ),
+      );
+
+      // Start at the top
+      expect(controller.offset, equals(0.0));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(topNode.hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+
+      // Enter the list.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(nodes[0].hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+
+      // Go down until we hit the bottom of the visible area.
+      for (int i = 1; i <= 4; ++i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(controller.offset, equals(0.0), reason: 'Focusing item $i caused a scroll');
+      }
+
+      // Now keep going down, and the scrollable should scroll automatically.
+      for (int i = 5; i <= 10; ++i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        final double expectedOffset = 100.0 * (i - 5) + 200.0;
+        expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll to $expectedOffset");
+      }
+
+      // Now go one more, and see that the footer gets focused.
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(bottomNode.hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(100.0 * (10 - 5) + 200.0));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(nodes[10].hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(100.0 * (10 - 5) + 200.0));
+
+      // Now reverse directions and go back to the top.
+
+      // These should not cause a scroll.
+      final double lowestOffset = controller.offset;
+      for (int i = 10; i >= 8; --i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(controller.offset, equals(lowestOffset), reason: 'Focusing item $i caused a scroll');
+      }
+
+      // These should all cause a scroll.
+      for (int i = 7; i >= 1; --i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        final double expectedOffset = 100.0 * (i - 1);
+        expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll");
+      }
+
+      // Back at the top.
+      expect(nodes[0].hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+
+      // Now we jump to the header.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(topNode.hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+    }, skip: kIsWeb);
+    testWidgets('Focus traversal inside a horizontal scrollable scrolls to stay visible.', (WidgetTester tester) async {
+      final List<int> items = List<int>.generate(11, (int index) => index).toList();
+      final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+      final FocusNode leftNode = FocusNode(debugLabel: 'Left Side');
+      final FocusNode rightNode = FocusNode(debugLabel: 'Right Side');
+      final ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Row(
+            children: <Widget>[
+              Focus(focusNode: leftNode, child: Container(width: 100)),
+              Expanded(
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  controller: controller,
+                  children: items.map<Widget>((int item) {
+                    return Focus(
+                      focusNode: nodes[item],
+                      child: Container(width: 100),
+                    );
+                  }).toList(),
+                ),
+              ),
+              Focus(focusNode: rightNode, child: Container(width: 100)),
+            ],
+          ),
+        ),
+      );
+
+      // Start at the top
+      expect(controller.offset, equals(0.0));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(leftNode.hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+
+      // Enter the list.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(nodes[0].hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+
+      // Go down until we hit the bottom of the visible area.
+      for (int i = 1; i <= 6; ++i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(controller.offset, equals(0.0), reason: 'Focusing item $i caused a scroll');
+      }
+
+      // Now keep going down, and the scrollable should scroll automatically.
+      for (int i = 7; i <= 10; ++i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        final double expectedOffset = 100.0 * (i - 5);
+        expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll to $expectedOffset");
+      }
+
+      // Now go one more, and see that the footer gets focused.
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(rightNode.hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(100.0 * 5));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(nodes[10].hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(100.0 * 5));
+
+      // Now reverse directions and go back to the top.
+
+      // These should not cause a scroll.
+      final double lowestOffset = controller.offset;
+      for (int i = 10; i >= 7; --i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(controller.offset, equals(lowestOffset), reason: 'Focusing item $i caused a scroll');
+      }
+
+      // These should all cause a scroll.
+      for (int i = 6; i >= 1; --i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        final double expectedOffset = 100.0 * (i - 1);
+        expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll");
+      }
+
+      // Back at the top.
+      expect(nodes[0].hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+
+      // Now we jump to the header.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(leftNode.hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+    }, skip: kIsWeb);
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
       final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
@@ -1128,14 +1322,10 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
     });
-    testWidgets('Focus traversal does not break when no focusable is available on a MaterialApp',   (WidgetTester tester) async {
+    testWidgets('Focus traversal does not break when no focusable is available on a MaterialApp', (WidgetTester tester) async {
       final List<RawKeyEvent> events = <RawKeyEvent>[];
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Container()
-        )
-      );
+      await tester.pumpWidget(MaterialApp(home: Container()));
 
       RawKeyboard.instance.addListener((RawKeyEvent event) {
         events.add(event);
