@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -50,11 +51,6 @@ void main() {
       tearDown(() {
         discoverer.cancel();
         logReader.dispose();
-      });
-
-      testUsingContext('returns non-null uri future', () async {
-        initialize();
-        expect(discoverer.uri, isNotNull);
       });
 
       testUsingContext('discovers uri if logs already produced output', () async {
@@ -171,59 +167,62 @@ void main() {
       testUsingContext('uris in the stream are throttled', () async {
         const int kThrottleTimeInMilliseconds = 10;
 
-        initialize(throttleTimeInMilliseconds: kThrottleTimeInMilliseconds);
+        FakeAsync().run((FakeAsync time) {
+          initialize(throttleTimeInMilliseconds: kThrottleTimeInMilliseconds);
 
-        final List<Uri> discoveredUris = <Uri>[];
-        discoverer.uris.listen((Uri uri) {
-          discoveredUris.add(uri);
+          final List<Uri> discoveredUris = <Uri>[];
+          discoverer.uris.listen((Uri uri) {
+            discoveredUris.add(uri);
+          });
+
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+
+          time.elapse(const Duration(milliseconds: kThrottleTimeInMilliseconds));
+
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12344/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12343/PTwjm8Ii8qg=/');
+
+          time.elapse(const Duration(milliseconds: kThrottleTimeInMilliseconds));
+
+          expect(discoveredUris.length, 2);
+          expect(discoveredUris[0].port, 12345);
+          expect('${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+          expect(discoveredUris[1].port, 12343);
+          expect('${discoveredUris[1]}', 'http://127.0.0.1:12343/PTwjm8Ii8qg=/');
         });
-
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
-
-        await Future<void>.delayed(const Duration(milliseconds: kThrottleTimeInMilliseconds * 2));
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12344/PTwjm8Ii8qg=/');
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12343/PTwjm8Ii8qg=/');
-
-        await Future<void>.delayed(const Duration(milliseconds: kThrottleTimeInMilliseconds * 2));
-        expect(discoveredUris.length, 2);
-
-        expect(discoveredUris[0].port, 12345);
-        expect('${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
-
-        expect(discoveredUris[1].port, 12343);
-        expect('${discoveredUris[1]}', 'http://127.0.0.1:12343/PTwjm8Ii8qg=/');
       });
 
       testUsingContext('uris in the stream are throttled when they match the port', () async {
         const int kThrottleTimeInMilliseconds = 10;
 
-        initialize(
-          devicePort: 12345,
-          throttleTimeInMilliseconds: kThrottleTimeInMilliseconds,
-        );
+        FakeAsync().run((FakeAsync time) {
+          initialize(
+            devicePort: 12345,
+            throttleTimeInMilliseconds: kThrottleTimeInMilliseconds,
+          );
 
-        final List<Uri> discoveredUris = <Uri>[];
-        discoverer.uris.listen((Uri uri) {
-          discoveredUris.add(uri);
+          final List<Uri> discoveredUris = <Uri>[];
+          discoverer.uris.listen((Uri uri) {
+            discoveredUris.add(uri);
+          });
+
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+
+          time.elapse(const Duration(milliseconds: kThrottleTimeInMilliseconds));
+
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qc=/');
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12344/PTwjm8Ii8qf=/');
+
+          time.elapse(const Duration(milliseconds: kThrottleTimeInMilliseconds));
+
+          expect(discoveredUris.length, 2);
+          expect(discoveredUris[0].port, 12345);
+          expect('${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+          expect(discoveredUris[1].port, 12345);
+          expect('${discoveredUris[1]}', 'http://127.0.0.1:12345/PTwjm8Ii8qc=/');
         });
-
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
-
-        await Future<void>.delayed(const Duration(milliseconds: kThrottleTimeInMilliseconds * 2));
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qc=/');
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12344/PTwjm8Ii8qf=/');
-
-        await Future<void>.delayed(const Duration(milliseconds: kThrottleTimeInMilliseconds * 2));
-
-        expect(discoveredUris.length, 2);
-
-        expect(discoveredUris[0].port, 12345);
-        expect('${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
-
-        expect(discoveredUris[1].port, 12345);
-        expect('${discoveredUris[1]}', 'http://127.0.0.1:12345/PTwjm8Ii8qc=/');
       });
     });
 
