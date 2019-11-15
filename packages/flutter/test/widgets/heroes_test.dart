@@ -186,7 +186,6 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
-  assert(testImage != null);
 
   setUp(() {
     transitionFromUserGestures = false;
