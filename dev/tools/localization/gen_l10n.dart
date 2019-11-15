@@ -37,22 +37,6 @@ import 'messages_all.dart';
 /// );
 /// ```
 ///
-/// ## Update pubspec.yaml
-///
-/// Please make sure to update your pubspec.yaml to include the following
-/// packages:
-///
-/// ```
-/// dependencies:
-///   # Internationalization support.
-///   flutter_localizations:
-///     sdk: flutter
-///   intl: 0.16.0
-///   intl_translation: 0.17.7
-///
-///   # rest of dependencies
-/// ```
-///
 /// ## iOS Applications
 ///
 /// iOS applications define key application metadata, including supported
@@ -72,6 +56,7 @@ import 'messages_all.dart';
 /// you wish to add from the pop-up menu in the Value field. This list should
 /// be consistent with the languages listed in the @className.supportedLocales
 /// property.
+
 class @className {
   @className(Locale locale) : _localeName = locale.toString();
 
@@ -307,46 +292,13 @@ String _importFilePath(String path, String fileName) {
   return '$replaceLib/$fileName';
 }
 
-Future<void> main(List<String> arguments) async {
+Future<void> main(List<String> args) async {
   final argslib.ArgParser parser = argslib.ArgParser();
-  parser.addFlag(
-    'help',
-    defaultsTo: false,
-    negatable: false,
-    help: 'Print this help message.',
-  );
-  parser.addOption(
-    'arb-dir',
-    defaultsTo: path.join('lib', 'l10n'),
-    help: 'The directory where all localization files should reside. For '
-      'example, the template and translated arb files should be located here. '
-      'Also, the generated output messages Dart files for each locale and the '
-      'generated localizations classes will be created here.',
-  );
-  parser.addOption(
-    'template-arb-file',
-    defaultsTo: 'app_en.arb',
-    help: 'The template arb file that will be used as the basis for '
-      'generating the Dart localization and messages files.',
-  );
-  parser.addOption(
-    'output-localization-file',
-    defaultsTo: 'app_localizations.dart',
-    help: 'The filename for the output localization and localizations '
-      'delegate classes.',
-  );
-  parser.addOption(
-    'output-class',
-    defaultsTo: 'AppLocalizations',
-    help: 'The Dart class name to use for the output localization and '
-      'localizations delegate classes.',
-  );
-
-  final argslib.ArgResults results = parser.parse(arguments);
-  if (results['help'] == true) {
-    print(parser.usage);
-    exit(0);
-  }
+  parser.addOption('arb-dir', defaultsTo: path.join('lib', 'l10n'));
+  parser.addOption('template-arb-file', defaultsTo: 'app_en.arb');
+  parser.addOption('output-localization-file', defaultsTo: 'app_localizations.dart');
+  parser.addOption('output-class', defaultsTo: 'AppLocalizations');
+  final argslib.ArgResults results = parser.parse(args);
 
   final String arbPathString = results['arb-dir'];
   final String outputFileString = results['output-localization-file'];
