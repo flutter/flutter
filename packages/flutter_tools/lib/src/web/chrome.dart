@@ -69,8 +69,6 @@ String findChromeExecutable() {
 class ChromeLauncher {
   const ChromeLauncher();
 
-  static bool get hasChromeInstance => _currentCompleter.isCompleted;
-
   static final Completer<Chrome> _currentCompleter = Completer<Chrome>();
 
   /// Whether we can locate the chrome executable.

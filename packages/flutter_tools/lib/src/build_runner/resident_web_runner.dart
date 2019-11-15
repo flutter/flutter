@@ -113,16 +113,7 @@ class ResidentWebRunner extends ResidentRunner {
     await _stdOutSub?.cancel();
     await _webFs?.stop();
     await device.stopApp(null);
-    if (ChromeLauncher.hasChromeInstance) {
-      final Chrome chrome = await ChromeLauncher.connectedInstance;
-      await chrome.close();
-    }
     _exited = true;
-  }
-
-  Future<void> _cleanupAndExit() async {
-    await _cleanup();
-    appFinished();
   }
 
   @override
@@ -210,7 +201,7 @@ class ResidentWebRunner extends ResidentRunner {
         );
         if (supportsServiceProtocol) {
           _connectionResult = await _webFs.connect(debuggingOptions);
-          unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
+          unawaited(_connectionResult.debugConnection.onDone.whenComplete(() => exit(0)));
         }
         if (statusActive) {
           buildStatus.stop();
