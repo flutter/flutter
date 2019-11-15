@@ -20,6 +20,7 @@ import 'media_query.dart';
 import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
+import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
 import 'text.dart';
@@ -1043,10 +1044,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   final Map<LogicalKeySet, Intent> _keyMap = <LogicalKeySet, Intent>{
     LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ScrollIntent(AxisDirection.up),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const ScrollIntent(AxisDirection.down),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ScrollIntent(AxisDirection.left),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ScrollIntent(AxisDirection.right),
     LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
     LogicalKeySet(LogicalKeyboardKey.space): const Intent(SelectAction.key),
   };

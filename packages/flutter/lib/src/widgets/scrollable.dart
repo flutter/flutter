@@ -24,7 +24,6 @@ import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
-import 'shortcuts.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
@@ -569,11 +568,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     }
   }
 
-  final Map<LogicalKeySet, Intent> _shortcutKeys = <LogicalKeySet, Intent> {
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(ScrollDirection.reverse),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(ScrollDirection.forward),
-  };
-
   final Map<LocalKey, ActionFactory> _actionMap = <LocalKey, ActionFactory>{
     ScrollAction.key: () => ScrollAction(),
   };
@@ -594,26 +588,23 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     Widget result = _ScrollableScope(
       scrollable: this,
       position: position,
-      child: Shortcuts(
-        shortcuts: _shortcutKeys,
-        child: Actions(
-          actions: _actionMap,
-          child: Listener(
-            onPointerSignal: _receivedPointerSignal,
-            // TODO(ianh): Having all these global keys is sad.
-            child: RawGestureDetector(
-              key: _gestureDetectorKey,
-              gestures: _gestureRecognizers,
-              behavior: HitTestBehavior.opaque,
-              excludeFromSemantics: widget.excludeFromSemantics,
-              child: Semantics(
-                explicitChildNodes: !widget.excludeFromSemantics,
-                child: IgnorePointer(
-                  key: _ignorePointerKey,
-                  ignoring: _shouldIgnorePointer,
-                  ignoringSemantics: false,
-                  child: widget.viewportBuilder(context, position),
-                ),
+      child: Actions(
+        actions: _actionMap,
+        child: Listener(
+          onPointerSignal: _receivedPointerSignal,
+          // TODO(ianh): Having all these global keys is sad.
+          child: RawGestureDetector(
+            key: _gestureDetectorKey,
+            gestures: _gestureRecognizers,
+            behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: widget.excludeFromSemantics,
+            child: Semantics(
+              explicitChildNodes: !widget.excludeFromSemantics,
+              child: IgnorePointer(
+                key: _ignorePointerKey,
+                ignoring: _shouldIgnorePointer,
+                ignoringSemantics: false,
+                child: widget.viewportBuilder(context, position),
               ),
             ),
           ),
@@ -797,15 +788,12 @@ class _RenderScrollSemantics extends RenderProxyBox {
 class ScrollIntent extends Intent {
   /// Creates a [ScrollIntent] with a fixed [key], and the given
   /// [direction].
-  const ScrollIntent(this.direction, {this.increment = 50})
-      : assert(increment != null), assert(direction != null), super(ScrollAction.key);
+  const ScrollIntent(this.direction)
+      : assert(direction != null), super(ScrollAction.key);
 
-  /// The direction in which to look for the next focusable node when the
-  /// associated [ScrollAction] is invoked.
-  final ScrollDirection direction;
-
-  /// The amount to scroll the scrollable in the [direction], in logical pixels.
-  final double increment;
+  /// The direction in which to scroll the scrollable containing the focused
+  /// widget.
+  final AxisDirection direction;
 }
 
 /// An [Action] that moves the focus to the focusable node in the given
@@ -826,17 +814,65 @@ class ScrollAction extends Action {
   void invoke(FocusNode node, ScrollIntent intent) {
     final ScrollableState state = Scrollable.of(node.context);
     double newPosition = state.position.pixels;
+    final double increment = ScrollConfiguration.of(node.context).getScrollActionIncrement(node.context, intent.direction);
     switch (intent.direction) {
-      case ScrollDirection.idle:
-        // Idle does nothing.
+      case AxisDirection.down:
+        switch (state.axisDirection) {
+          case AxisDirection.up:
+            newPosition -= increment;
+            break;
+          case AxisDirection.down:
+            newPosition += increment;
+            break;
+          case AxisDirection.right:
+          case AxisDirection.left:
+            break;
+        }
         break;
-      case ScrollDirection.forward:
-        newPosition += intent.increment;
+      case AxisDirection.up:
+        switch (state.axisDirection) {
+          case AxisDirection.up:
+            newPosition += increment;
+            break;
+          case AxisDirection.down:
+            newPosition -= increment;
+            break;
+          case AxisDirection.right:
+          case AxisDirection.left:
+            break;
+        }
         break;
-      case ScrollDirection.reverse:
-        newPosition -= intent.increment;
+      case AxisDirection.right:
+        switch (state.axisDirection) {
+          case AxisDirection.right:
+            newPosition += increment;
+            break;
+          case AxisDirection.left:
+            newPosition -= increment;
+            break;
+          case AxisDirection.up:
+          case AxisDirection.down:
+            break;
+        }
+        break;
+      case AxisDirection.left:
+        switch (state.axisDirection) {
+          case AxisDirection.right:
+            newPosition -= increment;
+            break;
+          case AxisDirection.left:
+            newPosition += increment;
+            break;
+          case AxisDirection.up:
+          case AxisDirection.down:
+            break;
+        }
         break;
     }
-    state.position.animateTo(newPosition.clamp(0.0, state.position.maxScrollExtent.toDouble()), duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    state.position.animateTo(
+      newPosition.clamp(state.position.minScrollExtent, state.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeInOut,
+    );
   }
 }
