@@ -755,17 +755,25 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
     if (_needToReportFirstFrame && _reportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
-
-      TimingsCallback firstFrameCallback;
-      firstFrameCallback = (List<FrameTiming> timings) {
+      // TODO(liyuqian): use a broadcast stream approach
+      // use frameTimings. https://github.com/flutter/flutter/issues/38838
+      // ignore: deprecated_member_use
+      final TimingsCallback oldCallback = WidgetsBinding.instance.window.onReportTimings;
+      // use frameTimings. https://github.com/flutter/flutter/issues/38838
+      // ignore: deprecated_member_use
+      WidgetsBinding.instance.window.onReportTimings = (List<FrameTiming> timings) {
         if (!kReleaseMode) {
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
-        SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
+        if (oldCallback != null) {
+          oldCallback(timings);
+        }
+        // use frameTimings. https://github.com/flutter/flutter/issues/38838
+        // ignore: deprecated_member_use
+        WidgetsBinding.instance.window.onReportTimings = oldCallback;
         _firstFrameCompleter.complete();
       };
-      SchedulerBinding.instance.addTimingsCallback(firstFrameCallback);
     }
 
     try {
