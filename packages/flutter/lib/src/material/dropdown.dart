@@ -719,15 +719,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.focusColor,
     this.focusNode,
     this.autofocus = false,
-  }) : assert(items == null || items.isEmpty || value == null ||
-              items.where((DropdownMenuItem<T> item) {
-                return item.value == value;
-              }).length == 1,
-                'There should be exactly one item with [DropdownButton]\'s value: '
-                '$value. \n'
-                'Either zero or 2 or more [DropdownMenuItem]s were detected '
-                'with the same value',
-              ),
+  }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
        assert(elevation != null),
        assert(iconSize != null),
        assert(isDense != null),
@@ -1295,15 +1287,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool isDense = false,
     bool isExpanded = false,
     double itemHeight,
-  }) : assert(items == null || items.isEmpty || value == null ||
-              items.where((DropdownMenuItem<T> item) {
-                return item.value == value;
-              }).length == 1,
-                'There should be exactly one item with [DropdownButton]\'s value: '
-                '$value. \n'
-                'Either zero or 2 or more [DropdownMenuItem]s were detected '
-                'with the same value',
-              ),
+  }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
        assert(decoration != null),
        assert(elevation != null),
        assert(iconSize != null),
