@@ -2,34 +2,28 @@
 // This is a library that looks up messages for specific locales by
 // delegating to the appropriate library.
 
-// Ignore issues from commonly used lints in this file.
-// ignore_for_file:implementation_imports, file_names, unnecessary_new
-// ignore_for_file:unnecessary_brace_in_string_interps, directives_ordering
-// ignore_for_file:argument_type_not_assignable, invalid_assignment
-// ignore_for_file:prefer_single_quotes, prefer_generic_function_type_aliases
-// ignore_for_file:comment_references
-
 import 'dart:async';
 
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
+// ignore: implementation_imports
 import 'package:intl/src/intl_helpers.dart';
 
-import 'messages_en_US.dart' as messages_en_us;
-import 'messages_es_ES.dart' as messages_es_es;
+import 'stock_messages_en.dart' as messages_en;
+import 'stock_messages_es.dart' as messages_es;
 
 typedef Future<dynamic> LibraryLoader();
 Map<String, LibraryLoader> _deferredLibraries = {
-  'en_US': () => new Future.value(null),
-  'es_ES': () => new Future.value(null),
+  'en': () => new Future.value(null),
+  'es': () => new Future.value(null),
 };
 
-MessageLookupByLibrary _findExact(String localeName) {
+MessageLookupByLibrary _findExact(localeName) {
   switch (localeName) {
-    case 'en_US':
-      return messages_en_us.messages;
-    case 'es_ES':
-      return messages_es_es.messages;
+    case 'en':
+      return messages_en.messages;
+    case 'es':
+      return messages_es.messages;
     default:
       return null;
   }
@@ -59,7 +53,7 @@ bool _messagesExistFor(String locale) {
   }
 }
 
-MessageLookupByLibrary _findGeneratedMessagesFor(String locale) {
+MessageLookupByLibrary _findGeneratedMessagesFor(locale) {
   var actualLocale = Intl.verifiedLocale(locale, _messagesExistFor,
       onFailure: (_) => null);
   if (actualLocale == null) return null;
