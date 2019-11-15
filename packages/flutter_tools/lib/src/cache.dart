@@ -1242,7 +1242,8 @@ String flattenNameSubdirs(Uri url) {
 /// Download a file from the given [url] and write it to [location].
 Future<void> _downloadFile(Uri url, File location) async {
   _ensureExists(location.parent);
-  await fetchUrl(url, destFile: location);
+  final List<int> fileBytes = await fetchUrl(url);
+  location.writeAsBytesSync(fileBytes, flush: true);
 }
 
 Future<bool> _doesRemoteExist(String message, Uri url) async {
