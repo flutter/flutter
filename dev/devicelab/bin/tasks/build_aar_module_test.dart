@@ -152,7 +152,7 @@ Future<void> main() async {
 
       section('Check assets in release AAR');
 
-      checkCollectionContains<String>(
+      checkItContains<String>(
         <String>[
           ...flutterAssets,
           // AOT snapshots
@@ -278,7 +278,7 @@ Future<void> main() async {
         'flutter_debug-1.0.aar',
       ));
 
-      checkCollectionContains<String>(<String>[
+      checkItContains<String>(<String>[
         ...flutterAssets,
         ...debugAssets,
       ], debugAar);

@@ -198,7 +198,7 @@ Future<void> main() async {
 
       section('Check files in debug APK');
 
-      checkCollectionContains<String>(<String>[
+      checkItContains<String>(<String>[
         ...flutterAssets,
         ...debugAssets,
         ...baseApkFiles,
@@ -253,7 +253,7 @@ Future<void> main() async {
 
       section('Check files in release APK');
 
-      checkCollectionContains<String>(<String>[
+      checkItContains<String>(<String>[
         ...flutterAssets,
         ...baseApkFiles,
         'lib/arm64-v8a/libapp.so',
