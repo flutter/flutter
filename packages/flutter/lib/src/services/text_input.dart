@@ -417,8 +417,38 @@ class TextInputConfiguration {
   /// Defaults to true.
   final bool autocorrect;
 
-  // TODO(justinmc): Document
+  /// {@template flutter.services.textInput.enableSmartDashes}
+  /// Whether to allow the platform to automatically format dashes.
+  ///
+  /// This flag only affects iOS. It sets UITextSmartDashesType in the engine.
+  /// When true, it passes UITextSmartDashesTypeYes, and when false, it passes
+  /// UITextSmartDashesTypeNo.
+  ///
+  /// Defaults to true, unless obscureText is true, when it defaults to false.
+  /// This is to avoid the problem where password fields receive autoformatted
+  /// characters.
+  ///
+  /// See also:
+  ///  * [enableSmartQuotes]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  /// {@endtemplate}
   final bool enableSmartDashes;
+
+  /// {@template flutter.services.textInput.enableSmartQuotes}
+  /// Whether to allow the platform to automatically format quotes.
+  ///
+  /// This flag only affects iOS. It sets UITextSmartQuotesType in the engine.
+  /// When true, it passes UITextSmartQuotesTypeYes, and when false, it passes
+  /// UITextSmartQuotesTypeNo.
+  ///
+  /// Defaults to true, unless obscureText is true, when it defaults to false.
+  /// This is to avoid the problem where password fields receive autoformatted
+  /// characters.
+  ///
+  /// See also:
+  ///  * [enableSmartDashes]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  /// {@endtemplate}
   final bool enableSmartQuotes;
 
   /// {@template flutter.services.textInput.enableSuggestions}
