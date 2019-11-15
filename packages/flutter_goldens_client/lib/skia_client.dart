@@ -371,9 +371,9 @@ class SkiaGoldClient {
       workingDirectory: _flutterRoot.path,
     );
     print('***');
-    print(branch);
-    print(masterBranch);
-    print(revParse.stdout);
+    print('branch: $branch');
+    print('masterBranch: $masterBranch');
+    print('stdout: ${revParse?.stdout ?? ' '}');
     print('***');
     return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
   }

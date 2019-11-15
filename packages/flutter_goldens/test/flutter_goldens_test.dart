@@ -80,9 +80,11 @@ void main() {
             workingDirectory: captureAnyNamed('workingDirectory'),
         ));
       });
-      test('Gets commit count for pre-submit tryjobs', () async {
-        skiaClient.getBranchCommitCount();
-      });
+    });
+
+    test('Gets commit count for pre-submit tryjobs', () async {
+      skiaClient.getBranchCommitCount();
+      expect(false, isTrue);
     });
 
     group('Request Handling', () {
