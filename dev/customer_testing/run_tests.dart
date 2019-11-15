@@ -210,18 +210,6 @@ class TestFile {
         update.add(Directory(line.substring(7)));
       } else if (line.startsWith('test=')) {
         test.add(line.substring(5));
-      } else if (line.startsWith('test.windows=')) {
-        if (Platform.isWindows)
-          test.add(line.substring(5));
-      } else if (line.startsWith('test.macos=')) {
-        if (Platform.isMacOS)
-          test.add(line.substring(5));
-      } else if (line.startsWith('test.linux=')) {
-        if (Platform.isLinux)
-          test.add(line.substring(5));
-      } else if (line.startsWith('test.posix=')) {
-        if (Platform.isLinux || Platform.isMacOS)
-          test.add(line.substring(5));
       } else {
         throw FormatException('${errorPrefix}Unexpected directive:\n$line');
       }
@@ -243,7 +231,7 @@ class TestFile {
     if (update.isEmpty)
       throw FormatException('${errorPrefix}No "update" directives specified. At least one directory must be specified. (It can be "." to just upgrade the root of the repository.)');
     if (test.isEmpty)
-      throw FormatException('${errorPrefix}No "test" directives specified for this platform. At least one command must be specified to run tests on each of Windows, MacOS, and Linux.');
+      throw FormatException('${errorPrefix}No "test" directives specified. At least one command must be specified to run tests.');
     return TestFile._(
       List<String>.unmodifiable(contacts),
       List<String>.unmodifiable(fetch),
