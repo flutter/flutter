@@ -73,7 +73,7 @@ Future<void> main(List<String> args) async {
     CreateCommand(),
     DaemonCommand(hidden: !verboseHelp),
     DevicesCommand(),
-    DoctorCommand(verbose: verbose),
+    DoctorCommand(verboseHelp: verboseHelp),
     DriveCommand(),
     EmulatorsCommand(),
     FormatCommand(),

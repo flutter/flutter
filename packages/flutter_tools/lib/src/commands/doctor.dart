@@ -9,20 +9,23 @@ import '../doctor.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
-  DoctorCommand({this.verbose = false}) {
+  DoctorCommand({ bool verboseHelp = false }) {
+    argParser.addFlag('summary',
+      defaultsTo: false,
+      negatable: false,
+      help: 'Summarize doctor diagnosis.',
+    );
     argParser.addFlag('android-licenses',
       defaultsTo: false,
       negatable: false,
       help: 'Run the Android SDK manager tool to accept the SDK\'s licenses.',
     );
     argParser.addOption('check-for-remote-artifacts',
-      hide: !verbose,
+      hide: !verboseHelp,
       help: 'Used to determine if Flutter engine artifacts for all platforms '
             'are available for download.',
       valueHelp: 'engine revision git hash',);
   }
-
-  final bool verbose;
 
   @override
   final String name = 'doctor';
@@ -56,6 +59,7 @@ class DoctorCommand extends FlutterCommand {
             'git hash.');
       }
     }
+    final bool verbose = !argResults['summary'];
     final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses'], verbose: verbose);
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }

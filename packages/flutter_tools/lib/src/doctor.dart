@@ -244,7 +244,7 @@ class Doctor {
     }
 
     if (!verbose) {
-      printStatus('Doctor summary (to see all details, run flutter doctor -v):');
+      printStatus('Doctor summary:');
     }
     bool doctorResult = true;
     int issues = 0;

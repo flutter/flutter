@@ -206,7 +206,7 @@ void main() {
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await doctor.diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
-              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              'Doctor summary:\n'
               '[✓] Passing Validator (with statusInfo)\n'
               '[✓] Another Passing Validator (with statusInfo)\n'
               '[✓] Providing validators is fun (with statusInfo)\n'
@@ -353,7 +353,7 @@ void main() {
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
-              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              'Doctor summary:\n'
               '[✓] Passing Validator (with statusInfo)\n'
               '[✓] Another Passing Validator (with statusInfo)\n'
               '[✓] Validators are fun (with statusInfo)\n'
@@ -366,7 +366,7 @@ void main() {
     testUsingContext('validate non-verbose output format for run with crash', () async {
       expect(await FakeCrashingDoctor().diagnose(verbose: false), isFalse);
       expect(testLogger.statusText, equals(
-              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              'Doctor summary:\n'
               '[✓] Passing Validator (with statusInfo)\n'
               '[✓] Another Passing Validator (with statusInfo)\n'
               '[☠] Crashing validator (the doctor check crashed)\n'
@@ -398,7 +398,7 @@ void main() {
         return completer.future;
       });
       expect(testLogger.statusText, equals(
-              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              'Doctor summary:\n'
               '[✓] Passing Validator (with statusInfo)\n'
               '[✓] Another Passing Validator (with statusInfo)\n'
               '[☠] Async crashing validator (the doctor check crashed)\n'
@@ -416,7 +416,7 @@ void main() {
     testUsingContext('validate non-verbose output format when only one category fails', () async {
       expect(await FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
-              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              'Doctor summary:\n'
               '[!] Partial Validator with only a Hint\n'
               '    ! There is a hint here\n'
               '\n'
@@ -427,7 +427,7 @@ void main() {
     testUsingContext('validate non-verbose output format for a passing run', () async {
       expect(await FakePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
-              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              'Doctor summary:\n'
               '[✓] Passing Validator (with statusInfo)\n'
               '[!] Partial Validator with only a Hint\n'
               '    ! There is a hint here\n'
@@ -443,7 +443,7 @@ void main() {
     testUsingContext('validate non-verbose output format', () async {
       expect(await FakeDoctor().diagnose(verbose: false), isFalse);
       expect(testLogger.statusText, equals(
-              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              'Doctor summary:\n'
               '[✓] Passing Validator (with statusInfo)\n'
               '[✗] Missing Validator\n'
               '    ✗ A useful error message\n'
@@ -530,7 +530,7 @@ void main() {
       expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
 
       expect(testLogger.statusText, equals(
-        'Doctor summary (to see all details, run flutter doctor -v):\n'
+        'Doctor summary:\n'
           '[!] Flutter (Channel unknown, v0.0.0, on fake OS name and version, locale en_US.UTF-8)\n'
           '    ✗ version error\n\n'
           '! Doctor found issues in 1 category.\n'
