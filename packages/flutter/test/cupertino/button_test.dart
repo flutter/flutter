@@ -63,44 +63,6 @@ void main() {
     );
   });
 
-  // TODO(LongCatIsLoong): Uncomment once https://github.com/flutter/flutter/issues/44115
-  // is fixed.
-  /*
-  testWidgets(
-    'CupertinoButton.filled default color contrast meets guideline',
-    (WidgetTester tester) async {
-      // The native color combination systemBlue text over white background fails
-      // to pass the color contrast guideline.
-      //await tester.pumpWidget(
-      //  CupertinoTheme(
-      //    data: const CupertinoThemeData(),
-      //    child: Directionality(
-      //      textDirection: TextDirection.ltr,
-      //      child: CupertinoButton.filled(
-      //        child: const Text('Button'),
-      //        onPressed: () {},
-      //      ),
-      //    ),
-      //  ),
-      //);
-      //await expectLater(tester, meetsGuideline(textContrastGuideline));
-
-      await tester.pumpWidget(
-        CupertinoApp(
-          theme: const CupertinoThemeData(brightness: Brightness.dark),
-          home: CupertinoPageScaffold(
-            child: CupertinoButton.filled(
-              child: const Text('Button'),
-              onPressed: () {},
-            ),
-          ),
-        ),
-      );
-
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-  });
-  */
-
   testWidgets('Button with background is wider', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       child: Text('X', style: testStyle),
@@ -183,7 +145,7 @@ void main() {
       of: find.byType(CupertinoButton),
       matching: find.byType(FadeTransition),
     ));
-    expect(opacity.opacity.value, 0.4);
+    expect(opacity.opacity.value, 0.1);
   });
 
   testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
@@ -344,7 +306,7 @@ void main() {
       ),
     );
 
-    expect(textStyle.color, isSameColorAs(CupertinoColors.white));
+    expect(textStyle.color, CupertinoColors.white);
     BoxDecoration decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
@@ -365,7 +327,7 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+    expect(textStyle.color.value, CupertinoColors.activeOrange.darkColor.value);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -379,14 +341,14 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color, isSameColorAs(CupertinoColors.black));
+    expect(textStyle.color, CupertinoColors.black);
     decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
       ),
     ).decoration;
-    expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+    expect(decoration.color.value, CupertinoColors.activeOrange.darkColor.value);
   });
 }
 

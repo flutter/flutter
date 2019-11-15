@@ -432,6 +432,7 @@ void _defineTests() {
       ),
     ));
     List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    print('flags: $flags');
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
     flags.remove(SemanticsFlag.hasImplicitScrolling);

@@ -1,0 +1,22 @@
+{
+  "title": "Acciones",
+  "@title": {
+    "description": "Title for the Stocks application",
+    "type": "text",
+    "placeholders": {}
+  },
+
+  "market": "MERCADO",
+  "@market": {
+    "description": "Label for the Market tab",
+    "type": "text",
+    "placeholders": {}
+  },
+
+  "portfolio": "CARTERA",
+  "@portfolio": {
+    "description": "Label for the Portfolio tab",
+    "type": "text",
+    "placeholders": {}
+  }
+}

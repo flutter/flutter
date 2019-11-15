@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/tests/controls_page.dart';
-import 'src/tests/headings_page.dart';
 import 'src/tests/popup_constants.dart';
 import 'src/tests/popup_page.dart';
 import 'src/tests/text_field_page.dart';
@@ -47,7 +46,6 @@ Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   selectionControlsRoute : (BuildContext context) => SelectionControlsPage(),
   popupControlsRoute : (BuildContext context) => PopupControlsPage(),
   textFieldRoute : (BuildContext context) => TextFieldPage(),
-  headingsRoute: (BuildContext context) => HeadingsPage(),
 };
 
 class TestApp extends StatelessWidget {

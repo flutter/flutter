@@ -94,7 +94,6 @@ class AOTSnapshotter {
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
-    bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
       printError('Bitcode is only supported for iOS.');
@@ -209,7 +208,6 @@ class AOTSnapshotter {
         assemblyPath: stripSymbols ? '$assembly.stripped.S' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
-        quiet: quiet,
       );
       if (result.exitCode != 0) {
         return result.exitCode;
@@ -226,12 +224,9 @@ class AOTSnapshotter {
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
-    @required bool quiet
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
-    if (!quiet) {
-      printStatus('Building App.framework for $targetArch...');
-    }
+    printStatus('Building App.framework for $targetArch...');
 
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
@@ -285,7 +280,6 @@ class AOTSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required bool trackWidgetCreation,
-    @required List<String> dartDefines,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final FlutterProject flutterProject = FlutterProject.current();
@@ -316,7 +310,6 @@ class AOTSnapshotter {
       aot: true,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
-      dartDefines: dartDefines,
     ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.

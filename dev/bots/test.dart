@@ -61,8 +61,9 @@ const int kWebBatchSize = 20;
 //
 // TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileBlacklist = <String>[
-  // This test doesn't compile because it depends on code outside the flutter package.
   'test/examples/sector_layout_test.dart',
+  'test/widgets/heroes_test.dart',
+  'test/widgets/text_test.dart',
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
@@ -73,6 +74,10 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/shortcuts_test.dart',
   'test/material/text_form_field_test.dart',
   'test/material/data_table_test.dart',
+
+  // TODO(yjbanov): CupertinoDynamicColor breaks the web engine. The fix
+  //                is on the engine side: https://github.com/flutter/engine/pull/13359
+  'test/cupertino/colors_test.dart',
   'test/cupertino/dialog_test.dart',
   'test/cupertino/nav_bar_test.dart',
   'test/cupertino/nav_bar_transition_test.dart',
@@ -83,6 +88,8 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/cupertino/slider_test.dart',
   'test/cupertino/text_field_test.dart',
   'test/cupertino/segmented_control_test.dart',
+  'test/cupertino/scaffold_test.dart',
+  'test/cupertino/route_test.dart',
   'test/cupertino/route_test.dart',
   'test/cupertino/activity_indicator_test.dart',
 ];
@@ -754,12 +761,13 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment),
 
+    () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: false),
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    if (!Platform.isMacOS) () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: false),
+    if (!Platform.isMacOS) () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
 
     // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
     // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
-    if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
   ]..shuffle(math.Random(0));

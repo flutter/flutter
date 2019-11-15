@@ -880,7 +880,6 @@ class ListTile extends StatelessWidget {
     return InkWell(
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
-      canRequestFocus: enabled,
       child: Semantics(
         selected: selected,
         enabled: enabled,

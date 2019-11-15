@@ -468,13 +468,7 @@ void main() {
         ));
     await tester.pumpAndSettle();
     // An exception should've been thrown because the `builder` returned null.
-    final dynamic exception = tester.takeException();
-    expect(exception, isInstanceOf<FlutterError>());
-    expect(exception.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   The builder for route "broken" returned null.\n'
-      '   Route builders must never return null.\n'
-    ));
+    expect(tester.takeException(), isInstanceOf<FlutterError>());
   });
 
   testWidgets('test iOS edge swipe then drop back at starting point works', (WidgetTester tester) async {

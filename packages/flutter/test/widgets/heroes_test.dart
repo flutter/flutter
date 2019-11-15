@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
@@ -186,7 +185,6 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
-  assert(testImage != null);
 
   setUp(() {
     transitionFromUserGestures = false;
@@ -479,6 +477,11 @@ Future<void> main() async {
 
     Navigator.pop(heroes.evaluate().first);
     await tester.pump(); // ...and removes it straight away (since it's already at 0.0)
+
+    // this is verifying that there's no crash
+
+    // TODO(ianh): once https://github.com/flutter/flutter/issues/5631 is fixed, remove this line:
+    await tester.pump(const Duration(hours: 1));
   });
 
   testWidgets('Overlapping starting and ending a hero transition works ok', (WidgetTester tester) async {
@@ -508,6 +511,11 @@ Future<void> main() async {
     Navigator.pop(heroes.evaluate().first);
     await tester.pump(const Duration(hours: 1)); // so the first transition is finished, but the second hasn't started
     await tester.pump();
+
+    // this is verifying that there's no crash
+
+    // TODO(ianh): once https://github.com/flutter/flutter/issues/5631 is fixed, remove this line:
+    await tester.pump(const Duration(hours: 1));
   });
 
   testWidgets('One route, two heroes, same tag, throws', (WidgetTester tester) async {
@@ -538,31 +546,7 @@ Future<void> main() async {
 
     await tester.tap(find.text('push'));
     await tester.pump();
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    final FlutterError error = exception;
-    expect(error.diagnostics.length, 3);
-    final DiagnosticsNode last = error.diagnostics.last;
-    expect(last, isInstanceOf<DiagnosticsProperty<StatefulElement>>());
-    expect(
-      last.toStringDeep(),
-      equalsIgnoringHashCodes(
-        '# Here is the subtree for one of the offending heroes: Hero\n',
-      ),
-    );
-    expect(last.style, DiagnosticsTreeStyle.dense);
-    expect(
-      error.toStringDeep(),
-      equalsIgnoringHashCodes(
-        'FlutterError\n'
-        '   There are multiple heroes that share the same tag within a\n'
-        '   subtree.\n'
-        '   Within each subtree for which heroes are to be animated (i.e. a\n'
-        '   PageRoute subtree), each Hero must have a unique non-null tag.\n'
-        '   In this case, multiple heroes had the following tag: a\n'
-        '   ├# Here is the subtree for one of the offending heroes: Hero\n',
-      ),
-    );
+    expect(tester.takeException(), isFlutterError);
   });
 
   testWidgets('Hero push transition interrupted by a pop', (WidgetTester tester) async {
@@ -1744,9 +1728,7 @@ Future<void> main() async {
       routes: routes,
       initialRoute: '/two',
     ));
-    expect(tester.takeException(), isNull);
-    expect(find.text('two'), findsNothing);
-    expect(find.text('three'), findsOneWidget);
+    expect(find.text('two'), findsOneWidget);
   });
 
   testWidgets('Can push/pop on outer Navigator if nested Navigator contains Heroes', (WidgetTester tester) async {

@@ -216,60 +216,23 @@ abstract class FlutterCommand extends Command<void> {
   /// Adds options for connecting to the Dart VM observatory port.
   void usesPortOptions() {
     argParser.addOption(observatoryPortOption,
-        help: '(deprecated use host-vmservice-port instead)'
-              'Listen to the given port for an observatory debugger connection.\n'
+        help: 'Listen to the given port for an observatory debugger connection.\n'
               'Specifying port 0 (the default) will find a random free port.',
-    );
-    argParser.addOption('device-vmservice-port',
-      help: 'Look for vmservice connections only from the specified port.\n'
-            'Specifying port 0 (the default) will accept the first vmservice '
-            'discovered.',
-    );
-    argParser.addOption('host-vmservice-port',
-      help: 'When a device-side vmservice port is forwarded to a host-side '
-            'port, use this value as the host port.\nSpecifying port 0 '
-            '(the default) will find a random free host port.'
     );
     _usesPortOption = true;
   }
 
-  /// Gets the vmservice port provided to in the 'observatory-port' or
-  /// 'host-vmservice-port option.
-  ///
-  /// Only one of "host-vmservice-port" and "observatory-port" may be
-  /// specified.
+  /// Gets the observatory port provided to in the 'observatory-port' option.
   ///
   /// If no port is set, returns null.
-  int get hostVmservicePort {
-    if (!_usesPortOption ||
-        (argResults['observatory-port'] == null &&
-      argResults['host-vmservice-port'] == null)) {
-      return null;
-    }
-    if (argResults.wasParsed('observatory-port') &&
-        argResults.wasParsed('host-vmservice-port')) {
-      throwToolExit('Only one of "--observatory-port" and '
-        '"--host-vmservice-port" may be specified.');
-    }
-    try {
-      return int.parse(argResults['observatory-port'] ?? argResults['host-vmservice-port']);
-    } on FormatException catch (error) {
-      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
-    }
-    return null;
-  }
-
-  /// Gets the vmservice port provided to in the 'device-vmservice-port' option.
-  ///
-  /// If no port is set, returns null.
-  int get deviceVmservicePort {
-    if (!_usesPortOption || argResults['device-vmservice-port'] == null) {
+  int get observatoryPort {
+    if (!_usesPortOption || argResults['observatory-port'] == null) {
       return null;
     }
     try {
-      return int.parse(argResults['device-vmservice-port']);
-    } on FormatException catch (error) {
-      throwToolExit('Invalid port for `--device-vmservice-port`: $error');
+      return int.parse(argResults['observatory-port']);
+    } catch (error) {
+      throwToolExit('Invalid port for `--observatory-port`: $error');
     }
     return null;
   }
@@ -305,20 +268,6 @@ abstract class FlutterCommand extends Command<void> {
               'On Xcode builds it is used as \'CFBundleShortVersionString\'',
         valueHelp: 'x.y.z');
   }
-
-  void usesDartDefines() {
-    argParser.addMultiOption(
-      'dart-define',
-      help: 'Passed to the Dart compiler building this application as a -D flag.\n'
-            'Values supported by this option are compiler implementation specific.\n'
-            'Multiple defines can be passed by repeating --dart-define multiple times.',
-      valueHelp: 'FOO=bar',
-      hide: true,
-    );
-  }
-
-  /// The values passed via the `--dart-define` option.
-  List<String> get dartDefines => argResults['dart-define'];
 
   void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
@@ -498,8 +447,9 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        // Prints the welcome message if needed.
-        flutterUsage.printWelcome();
+        if (flutterUsage.isFirstRun) {
+          flutterUsage.printWelcome();
+        }
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult;
@@ -682,6 +632,10 @@ abstract class FlutterCommand extends Command<void> {
         throw ToolExit(userMessages.flutterNoPubspec);
       }
 
+      if (fs.isFileSync('flutter.yaml')) {
+        throw ToolExit(userMessages.flutterMergeYamlFiles);
+      }
+
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'pub' && !(_usesPubOption && argResults['pub'])) {
         final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
@@ -780,8 +734,7 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.fuchsia:
     case TargetPlatform.tester:
       // No artifacts currently supported.
       return null;

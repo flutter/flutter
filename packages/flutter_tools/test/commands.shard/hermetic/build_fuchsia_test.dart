@@ -27,18 +27,23 @@ void main() {
   MockPlatform linuxPlatform;
   MockPlatform windowsPlatform;
   MockFuchsiaSdk fuchsiaSdk;
+  MockFuchsiaArtifacts fuchsiaArtifacts;
+  MockFuchsiaArtifacts fuchsiaArtifactsNoCompiler;
 
   setUp(() {
     linuxPlatform = MockPlatform();
     windowsPlatform = MockPlatform();
     fuchsiaSdk = MockFuchsiaSdk();
+    fuchsiaArtifacts = MockFuchsiaArtifacts();
+    fuchsiaArtifactsNoCompiler = MockFuchsiaArtifacts();
 
     when(linuxPlatform.isLinux).thenReturn(true);
     when(linuxPlatform.isWindows).thenReturn(false);
-    when(linuxPlatform.isMacOS).thenReturn(false);
     when(windowsPlatform.isWindows).thenReturn(true);
     when(windowsPlatform.isLinux).thenReturn(false);
     when(windowsPlatform.isMacOS).thenReturn(false);
+    when(fuchsiaArtifacts.kernelCompiler).thenReturn(MockFile());
+    when(fuchsiaArtifactsNoCompiler.kernelCompiler).thenReturn(null);
   });
 
   group('Fuchsia build fails gracefully when', () {
@@ -53,6 +58,7 @@ void main() {
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
+      FuchsiaArtifacts: () => fuchsiaArtifacts,
     });
 
     testUsingContext('there is no cmx file', () async {
@@ -70,6 +76,7 @@ void main() {
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
+      FuchsiaArtifacts: () => fuchsiaArtifacts,
     });
 
     testUsingContext('on Windows platform', () async {
@@ -92,6 +99,7 @@ void main() {
       Platform: () => windowsPlatform,
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
+      FuchsiaArtifacts: () => fuchsiaArtifacts,
     });
 
     testUsingContext('there is no Fuchsia kernel compiler', () async {
@@ -114,6 +122,7 @@ void main() {
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
+      FuchsiaArtifacts: () => fuchsiaArtifactsNoCompiler,
     });
   });
 
@@ -224,3 +233,7 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
   final FuchsiaKernelCompiler fuchsiaKernelCompiler =
       MockFuchsiaKernelCompiler();
 }
+
+class MockFile extends Mock implements File {}
+
+class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}

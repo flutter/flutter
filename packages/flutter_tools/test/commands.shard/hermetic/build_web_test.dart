@@ -57,20 +57,17 @@ void main() {
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
-      const <String>[],
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 
   test('Refuses to build using runner when missing index.html', () => testbed.run(() async {
     fs.file(fs.path.join('web', 'index.html')).deleteSync();
 
-    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
+    final ResidentWebRunner runner = ResidentWebRunner(
       null,
       flutterProject: FlutterProject.current(),
       ipv6: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      stayResident: true,
-      dartDefines: const <String>[],
     );
     expect(await runner.run(), 1);
   }));

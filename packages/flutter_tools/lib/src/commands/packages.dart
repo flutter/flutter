@@ -87,8 +87,6 @@ class PackagesGetCommand extends FlutterCommand {
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
     }
     usageValues[CustomDimensions.commandPackagesProjectModule] = '${rootProject.isModule}';
-    usageValues[CustomDimensions.commandPackagesAndroidEmbeddingVersion] =
-        rootProject.android.getEmbeddingVersion().toString().split('.').last;
     return usageValues;
   }
 

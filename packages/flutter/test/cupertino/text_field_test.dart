@@ -2749,7 +2749,7 @@ void main() {
         tester.renderObject<RenderEditable>(
           find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
         ).text.style.color,
-        isSameColorAs(CupertinoColors.white),
+        CupertinoColors.white,
       );
     },
   );
@@ -2899,7 +2899,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(renderEditable.cursorColor, CupertinoColors.activeBlue.darkColor);
+    expect(renderEditable.cursorColor, CupertinoColors.activeOrange.darkColor);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -3391,7 +3391,7 @@ void main() {
                 children: <Widget>[
                   Container(
                     height: 100,
-                    color: CupertinoColors.black,
+                    color: CupertinoColors.activeOrange,
                   ),
                   Expanded(
                     child: Navigator(

@@ -200,7 +200,6 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
         response = await handler(data);
       } else {
         ui.channelBuffers.push(channel, data, callback);
-        callback = null;
       }
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -210,9 +209,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
         context: ErrorDescription('during a platform message callback'),
       ));
     } finally {
-      if (callback != null) {
-        callback(response);
-      }
+      callback(response);
     }
   }
 

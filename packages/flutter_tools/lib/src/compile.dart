@@ -201,6 +201,7 @@ class PackageUriMapper {
   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
+
     for (String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
       // Only perform a multi-root mapping if there are multiple roots.
@@ -288,7 +289,6 @@ class KernelCompiler {
     String fileSystemScheme,
     String initializeFromDill,
     String platformDill,
-    @required List<String> dartDefines,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -315,18 +315,15 @@ class KernelCompiler {
       frontendServer,
       '--sdk-root',
       sdkRoot,
+      '--strong',
       '--target=$targetModel',
       '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
-      for (Object dartDefine in dartDefines)
-        '-D$dartDefine',
       ..._buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
         '--aot',
         '--tfa',
-        // TODO(jonahwilliams): remove when https://github.com/flutter/flutter/issues/43751 is resolved.
-        '--no-gen-bytecode',
       ],
       if (packagesPath != null) ...<String>[
         '--packages',
@@ -467,7 +464,6 @@ abstract class ResidentCompiler {
     bool unsafePackageSerialization,
     List<String> experimentalFlags,
     String platformDill,
-    List<String> dartDefines,
   }) = DefaultResidentCompiler;
 
 
@@ -528,10 +524,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.unsafePackageSerialization,
     this.experimentalFlags,
     this.platformDill,
-    List<String> dartDefines,
   }) : assert(sdkRoot != null),
        _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
-       dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
 
@@ -545,7 +539,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final String initializeFromDill;
   final bool unsafePackageSerialization;
   final List<String> experimentalFlags;
-  final List<String> dartDefines;
 
   /// The path to the root of the Dart SDK used to compile.
   ///
@@ -601,9 +594,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
     if (_server == null) {
       return _compile(
-        _mapFilename(request.mainPath, packageUriMapper),
-        request.outputPath,
-        _mapFilename(request.packagesFilePath ?? packagesPath, /* packageUriMapper= */ null),
+          _mapFilename(request.mainPath, packageUriMapper),
+          request.outputPath,
+          _mapFilename(request.packagesFilePath ?? packagesPath, /* packageUriMapper= */ null),
       );
     }
 
@@ -653,10 +646,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
       '--sdk-root',
       sdkRoot,
       '--incremental',
+      '--strong',
       '--target=$targetModel',
       '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
-      for (Object dartDefine in dartDefines)
-        '-D$dartDefine',
       if (outputPath != null) ...<String>[
         '--output-dill',
         outputPath,

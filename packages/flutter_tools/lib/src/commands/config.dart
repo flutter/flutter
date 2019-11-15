@@ -117,7 +117,6 @@ class ConfigCommand extends FlutterCommand {
     if (argResults.wasParsed('analytics')) {
       final bool value = argResults['analytics'];
       flutterUsage.enabled = value;
-      AnalyticsConfigEvent(enabled: value).send();
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
@@ -154,8 +153,6 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.arguments.isEmpty) {
       printStatus(usage);
-    } else {
-      printStatus('\nYou may need to restart any open editors for them to read new settings.');
     }
 
     return null;

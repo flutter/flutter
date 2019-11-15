@@ -24,11 +24,6 @@ void main() {
   final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
   group('AppContext', () {
-    FakeStopwatch fakeStopWatch;
-
-    setUp(() {
-      fakeStopWatch = FakeStopwatch();
-    });
     testUsingContext('error', () async {
       final BufferLogger mockLogger = BufferLogger();
       final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
@@ -44,7 +39,6 @@ void main() {
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: false),
       Platform: _kNoAnsiPlatform,
-      Stopwatch: () => fakeStopWatch,
     });
 
     testUsingContext('ANSI colored errors', () async {
@@ -66,7 +60,6 @@ void main() {
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
-      Stopwatch: () => fakeStopWatch,
     });
   });
 
@@ -97,7 +90,6 @@ void main() {
 
     void doWhileAsync(FakeAsync time, bool doThis()) {
       do {
-        mockStopwatch.elapsed += const Duration(milliseconds: 1);
         time.elapse(const Duration(milliseconds: 1));
       } while (doThis());
     }
@@ -105,7 +97,6 @@ void main() {
     for (String testOs in testPlatforms) {
       testUsingContext('AnsiSpinner works for $testOs (1)', () async {
         bool done = false;
-        mockStopwatch = FakeStopwatch();
         FakeAsync().run((FakeAsync time) {
           final AnsiSpinner ansiSpinner = AnsiSpinner(
             timeout: const Duration(hours: 10),
@@ -138,7 +129,6 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
         Stdio: () => mockStdio,
-        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('AnsiSpinner works for $testOs (2)', () async {
@@ -224,7 +214,7 @@ void main() {
             '\b\b\b\b\b\b\b\b       $b' // second tick
             '\b\b\b\b\b\b\b\b        ' // clearing the spinner to put the time
             '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
-            '    5.0s\n', // replacing it with the time
+            '    0.0s\n', // replacing it with the time
           );
           done = true;
         });
@@ -234,7 +224,6 @@ void main() {
         OutputPreferences: () => OutputPreferences(showColor: true),
         Platform: () => FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
         Stdio: () => mockStdio,
-        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('AnsiStatus works for $testOs', () {

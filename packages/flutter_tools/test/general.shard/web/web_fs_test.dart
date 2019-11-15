@@ -126,7 +126,6 @@ void main() {
       initializePlatform: true,
       hostname: null,
       port: null,
-      dartDefines: const <String>[],
     );
     // Since the .packages file is missing in the memory filesystem, this should
     // be called.
@@ -156,7 +155,6 @@ void main() {
       initializePlatform: false,
       hostname: null,
       port: null,
-      dartDefines: const <String>[],
     );
 
     // The build daemon is told to build once.
@@ -177,7 +175,6 @@ void main() {
       initializePlatform: false,
       hostname: 'foo',
       port: '1234',
-      dartDefines: const <String>[],
     );
 
     expect(webFs.uri, contains('foo:1234'));
@@ -210,7 +207,6 @@ void main() {
       initializePlatform: false,
       hostname: 'foo',
       port: '1234',
-      dartDefines: const <String>[],
     ), throwsA(isInstanceOf<Exception>()));
   }));
 }

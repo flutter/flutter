@@ -406,7 +406,7 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment, fs)
+    final FileHashStore fileCache = FileHashStore(environment)
       ..initialize();
 
     // Perform sanity checks on build.
@@ -526,20 +526,17 @@ class _BuildInstance {
       await node.target.build(environment);
       printTrace('${node.target.name}: Complete');
 
-      node.inputs
-        ..clear()
-        ..addAll(node.target.resolveInputs(environment).sources);
-      node.outputs
-        ..clear()
-        ..addAll(node.target.resolveOutputs(environment).sources);
-
-      // If we were missing the depfile, resolve  input files after executing the
+      // If we were missing the depfile, resolve files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
+        node.inputs.clear();
+        node.outputs.clear();
+        node.inputs.addAll(node.target.resolveInputs(environment).sources);
+        node.outputs.addAll(node.target.resolveOutputs(environment).sources);
         await fileCache.hashFiles(node.inputs);
       }
 
-      // Always update hashes for output files.
+      // Update hashes for output files.
       await fileCache.hashFiles(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
@@ -578,9 +575,6 @@ class ExceptionMeasurement {
   final String target;
   final dynamic exception;
   final StackTrace stackTrace;
-
-  @override
-  String toString() => 'target: $target\nexception:$exception\n$stackTrace';
 }
 
 /// Helper class to collect measurement data.

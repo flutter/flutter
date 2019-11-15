@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright (c) 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,12 +26,10 @@ TaskFunction combine(List<TaskFunction> tasks) {
 /// Defines task that creates new Flutter project, adds a local and remote
 /// plugin, and then builds the specified [buildTarget].
 class PluginTest {
-  PluginTest(this.buildTarget, this.options, { this.pluginCreateEnvironment, this.appCreateEnvironment });
+  PluginTest(this.buildTarget, this.options);
 
   final String buildTarget;
   final List<String> options;
-  final Map<String, String> pluginCreateEnvironment;
-  final Map<String, String> appCreateEnvironment;
 
   Future<TaskResult> call() async {
     final Directory tempDir =
@@ -40,12 +38,12 @@ class PluginTest {
       section('Create plugin');
       final _FlutterProject plugin = await _FlutterProject.create(
           tempDir, options,
-          name: 'plugintest', template: 'plugin', environment: pluginCreateEnvironment);
+          name: 'plugintest', template: 'plugin');
       section('Test plugin');
       await plugin.test();
       section('Create Flutter app');
       final _FlutterProject app = await _FlutterProject.create(tempDir, options,
-          name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
+          name: 'plugintestapp', template: 'app');
       try {
         if (buildTarget == 'ios')
           await prepareProvisioningCertificates(app.rootPath);
@@ -97,13 +95,8 @@ class _FlutterProject {
   }
 
   static Future<_FlutterProject> create(
-      Directory directory,
-      List<String> options,
-      {
-        String name,
-        String template,
-        Map<String, String> environment,
-      }) async {
+      Directory directory, List<String> options,
+      {String name, String template}) async {
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -114,7 +107,6 @@ class _FlutterProject {
           ...options,
           name,
         ],
-        environment: environment,
       );
     });
     return _FlutterProject(directory, name);

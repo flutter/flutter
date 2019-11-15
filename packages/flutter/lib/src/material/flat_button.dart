@@ -29,7 +29,7 @@ import 'theme_data.dart';
 /// interactive, with ink splashes, without also committing to these stylistic
 /// choices, consider using [InkWell] instead.
 ///
-/// If the [onPressed] and [onLongPress] callbacks are null, then this button will be disabled,
+/// If the [onPressed] callback is null, then the button will be disabled,
 /// will not react to touch, and will be colored as specified by
 /// the [disabledColor] property instead of the [color] property. If you are
 /// trying to change the button's [color] and it is not having any effect, check
@@ -102,7 +102,6 @@ class FlatButton extends MaterialButton {
   const FlatButton({
     Key key,
     @required VoidCallback onPressed,
-    VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     ButtonTextTheme textTheme,
     Color textColor,
@@ -126,7 +125,6 @@ class FlatButton extends MaterialButton {
        super(
          key: key,
          onPressed: onPressed,
-         onLongPress: onLongPress,
          onHighlightChanged: onHighlightChanged,
          textTheme: textTheme,
          textColor: textColor,
@@ -157,7 +155,6 @@ class FlatButton extends MaterialButton {
   factory FlatButton.icon({
     Key key,
     @required VoidCallback onPressed,
-    VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     ButtonTextTheme textTheme,
     Color textColor,
@@ -185,7 +182,6 @@ class FlatButton extends MaterialButton {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return RawMaterialButton(
       onPressed: onPressed,
-      onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
@@ -219,7 +215,6 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
   _FlatButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,
-    VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     ButtonTextTheme textTheme,
     Color textColor,
@@ -246,7 +241,6 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
        super(
          key: key,
          onPressed: onPressed,
-         onLongPress: onLongPress,
          onHighlightChanged: onHighlightChanged,
          textTheme: textTheme,
          textColor: textColor,

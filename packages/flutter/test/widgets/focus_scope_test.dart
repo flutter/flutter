@@ -229,29 +229,34 @@ void main() {
         parentFocusScope.toStringDeep(),
         equalsIgnoringHashCodes('FocusScopeNode#00000(Parent Scope Node)\n'
             ' │ context: FocusScope\n'
-            ' │ IN FOCUS PATH\n'
+            ' │ FOCUSED\n'
+            ' │ debugLabel: "Parent Scope Node"\n'
             ' │ focusedChildren: FocusNode#00000(Child)\n'
             ' │\n'
             ' └─Child 1: FocusNode#00000(Child)\n'
             '     context: Focus\n'
-            '     PRIMARY FOCUS\n'),
+            '     FOCUSED\n'
+            '     debugLabel: "Child"\n'),
       );
 
-      expect(FocusManager.instance.rootScope, hasAGoodToStringDeep);
+      expect(WidgetsBinding.instance.focusManager.rootScope, hasAGoodToStringDeep);
       expect(
-        FocusManager.instance.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
+        WidgetsBinding.instance.focusManager.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
         equalsIgnoringHashCodes('FocusScopeNode#00000(Root Focus Scope)\n'
-            ' │ IN FOCUS PATH\n'
+            ' │ FOCUSED\n'
+            ' │ debugLabel: "Root Focus Scope"\n'
             ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node)\n'
             ' │\n'
             ' └─Child 1: FocusScopeNode#00000(Parent Scope Node)\n'
             '   │ context: FocusScope\n'
-            '   │ IN FOCUS PATH\n'
+            '   │ FOCUSED\n'
+            '   │ debugLabel: "Parent Scope Node"\n'
             '   │ focusedChildren: FocusNode#00000(Child)\n'
             '   │\n'
             '   └─Child 1: FocusNode#00000(Child)\n'
             '       context: Focus\n'
-            '       PRIMARY FOCUS\n'),
+            '       FOCUSED\n'
+            '       debugLabel: "Child"\n'),
       );
 
       // Add the child focus scope to the focus tree.
@@ -500,7 +505,7 @@ void main() {
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
       expect(FocusScope.of(keyA.currentContext), equals(childFocusScope));
       expect(Focus.of(keyA.currentContext, scopeOk: true), equals(childFocusScope));
-      FocusManager.instance.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
       await tester.pumpAndSettle();
 
@@ -558,7 +563,7 @@ void main() {
 
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
       final FocusScopeNode scope = FocusScope.of(keyA.currentContext);
-      FocusManager.instance.rootScope.setFirstFocus(scope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(scope);
 
       await tester.pumpAndSettle();
 
@@ -634,8 +639,8 @@ void main() {
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
       final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
       final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
-      FocusManager.instance.rootScope.setFirstFocus(bScope);
-      FocusManager.instance.rootScope.setFirstFocus(aScope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
 
       await tester.pumpAndSettle();
 
@@ -647,7 +652,7 @@ void main() {
 
       await tester.pumpWidget(Container());
 
-      expect(FocusManager.instance.rootScope.children, isEmpty);
+      expect(WidgetsBinding.instance.focusManager.rootScope.children, isEmpty);
     });
 
     // By "pinned", it means kept in the tree by a GlobalKey.
@@ -698,8 +703,8 @@ void main() {
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
       final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
       final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
-      FocusManager.instance.rootScope.setFirstFocus(bScope);
-      FocusManager.instance.rootScope.setFirstFocus(aScope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
 
       await tester.pumpAndSettle();
 
@@ -781,8 +786,8 @@ void main() {
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
       final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
       final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
-      FocusManager.instance.rootScope.setFirstFocus(bScope);
-      FocusManager.instance.rootScope.setFirstFocus(aScope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
 
       await tester.pumpAndSettle();
 
@@ -856,7 +861,7 @@ void main() {
 
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
       final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
-      FocusManager.instance.rootScope.setFirstFocus(aScope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
 
       await tester.pumpAndSettle();
 
@@ -941,7 +946,7 @@ void main() {
 
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
       final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
-      FocusManager.instance.rootScope.setFirstFocus(aScope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
 
       await tester.pumpAndSettle();
 
@@ -1289,7 +1294,7 @@ void main() {
 
     await tester.pumpWidget(Container());
 
-    expect(FocusManager.instance.rootScope.descendants, isEmpty);
+    expect(WidgetsBinding.instance.focusManager.rootScope.descendants, isEmpty);
   });
   testWidgets('Focus widgets set Semantics information about focus', (WidgetTester tester) async {
     final GlobalKey<TestFocusState> key = GlobalKey();

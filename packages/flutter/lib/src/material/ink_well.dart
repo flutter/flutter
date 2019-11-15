@@ -489,26 +489,21 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
 
-  void _handleAction(FocusNode node, Intent intent) {
-    _startSplash(context: node.context);
-    _handleTap(node.context);
-  }
-
   Action _createAction() {
     return CallbackAction(
       ActivateAction.key,
-      onInvoke:  _handleAction,
+      onInvoke: (FocusNode node, Intent intent) {
+        _startSplash(context: node.context);
+        _handleTap(node.context);
+      },
     );
   }
 
   @override
   void initState() {
     super.initState();
-    _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
-    };
-    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
+    _actionMap = <LocalKey, ActionFactory>{ ActivateAction.key: _createAction };
+    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   @override
@@ -522,7 +517,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   @override
   void dispose() {
-    FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
+    WidgetsBinding.instance.focusManager.removeHighlightModeListener(_handleFocusHighlightModeChange);
     super.dispose();
   }
 
@@ -650,7 +645,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   void _updateFocusHighlights() {
     bool showFocus;
-    switch (FocusManager.instance.highlightMode) {
+    switch (WidgetsBinding.instance.focusManager.highlightMode) {
       case FocusHighlightMode.touch:
         showFocus = false;
         break;
@@ -773,12 +768,11 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
-    final bool canRequestFocus = enabled && widget.canRequestFocus;
     return Actions(
       actions: _actionMap,
       child: Focus(
         focusNode: widget.focusNode,
-        canRequestFocus: canRequestFocus,
+        canRequestFocus: widget.canRequestFocus,
         onFocusChange: _handleFocusUpdate,
         autofocus: widget.autofocus,
         child: MouseRegion(

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright (c) 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -198,7 +198,7 @@ Future<void> main() async {
 
       section('Check files in debug APK');
 
-      checkCollectionContains<String>(<String>[
+      checkItContains<String>(<String>[
         ...flutterAssets,
         ...debugAssets,
         ...baseApkFiles,
@@ -218,11 +218,11 @@ Future<void> main() async {
       final String analyticsOutput = analyticsOutputFile.readAsStringSync();
       if (!analyticsOutput.contains('cd24: android-arm64')
           || !analyticsOutput.contains('cd25: true')
-          || !analyticsOutput.contains('viewName: assemble')) {
+          || !analyticsOutput.contains('viewName: build/bundle')) {
         return TaskResult.failure(
           'Building outer app produced the following analytics: "$analyticsOutput"'
           'but not the expected strings: "cd24: android-arm64", "cd25: true" and '
-          '"viewName: assemble"'
+          '"viewName: build/bundle"'
         );
       }
 
@@ -253,7 +253,7 @@ Future<void> main() async {
 
       section('Check files in release APK');
 
-      checkCollectionContains<String>(<String>[
+      checkItContains<String>(<String>[
         ...flutterAssets,
         ...baseApkFiles,
         'lib/arm64-v8a/libapp.so',

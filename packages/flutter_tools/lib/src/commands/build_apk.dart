@@ -7,7 +7,6 @@ import 'dart:async';
 import '../android/android_builder.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -41,12 +40,6 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   final String name = 'apk';
-
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.universal,
-  };
 
   @override
   final String description = 'Build an Android APK file from your app.\n\n'

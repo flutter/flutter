@@ -34,11 +34,10 @@ void main() {
 
     final RenderParagraph paragraph = tester.renderObject(find.text('1'));
 
-    expect(paragraph.text.style.color, isSameColorAs(CupertinoColors.black));
-    expect(paragraph.text.style.copyWith(color: CupertinoColors.black), const TextStyle(
+    expect(paragraph.text.style, const TextStyle(
       inherit: false,
       fontFamily: '.SF Pro Display',
-      fontSize: 21.0,
+      fontSize: 25.0,
       fontWeight: FontWeight.w400,
       letterSpacing: -0.41,
       color: CupertinoColors.black,

@@ -17,12 +17,10 @@ abstract class WebRunnerFactory {
 
   /// Create a [ResidentRunner] for the web.
   ResidentRunner createWebRunner(
-    FlutterDevice device, {
+    Device device, {
     String target,
-    @required bool stayResident,
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
-    @required List<String> dartDefines,
   });
 }

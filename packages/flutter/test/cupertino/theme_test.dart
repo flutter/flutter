@@ -4,9 +4,6 @@
 
 import 'dart:async';
 
-import 'package:collection/collection.dart' show SetEquality;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -59,10 +56,10 @@ void main() {
 
   testWidgets('Theme attributes cascade', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
-      primaryColor: CupertinoColors.systemRed,
+      primaryColor: CupertinoColors.destructiveRed,
     ));
 
-    expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemRed.color));
+    expect(theme.textTheme.actionTextStyle.color, CupertinoColors.destructiveRed);
   });
 
   testWidgets('Dependent attribute can be overridden from cascaded value', (WidgetTester tester) async {
@@ -74,9 +71,9 @@ void main() {
     ));
 
     // The brightness still cascaded down to the background color.
-    expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
+    expect(theme.scaffoldBackgroundColor, CupertinoColors.black);
     // But not to the font color which we overrode.
-    expect(theme.textTheme.textStyle.color, isSameColorAs(CupertinoColors.black));
+    expect(theme.textTheme.textStyle.color, CupertinoColors.black);
   });
 
   testWidgets(
@@ -128,32 +125,24 @@ void main() {
       );
 
       final CupertinoThemeData theme = await testTheme(tester, originalTheme.copyWith(
-        primaryColor: CupertinoColors.systemGreen,
+        primaryColor: CupertinoColors.activeGreen,
       ));
 
       expect(theme.brightness, Brightness.dark);
-      expect(theme.primaryColor, isSameColorAs(CupertinoColors.systemGreen.darkColor));
+      expect(theme.primaryColor.value, CupertinoColors.systemGreen.darkColor.value);
       // Now check calculated derivatives.
-      expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemGreen.darkColor));
-      expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
+      expect(theme.textTheme.actionTextStyle.color.value, CupertinoColors.systemGreen.darkColor.value);
+      expect(theme.scaffoldBackgroundColor.value, CupertinoColors.black.value);
     },
   );
 
   testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
-    const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
+    const Color primaryColor = CupertinoColors.destructiveRed;
     const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
     final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
 
-    expect(resultingIconTheme.color, isSameColorAs(primaryColor));
-
-    // Works in dark mode if primaryColor is a CupertinoDynamicColor.
-    final Color darkColor = (await testIconTheme(
-      tester,
-      themeData.copyWith(brightness: Brightness.dark),
-    )).color;
-
-    expect(darkColor, isSameColorAs(primaryColor.darkColor));
+    expect(resultingIconTheme.color, themeData.primaryColor);
   });
 
   testWidgets('IconTheme.of creates a dependency on iconTheme', (WidgetTester tester) async {
@@ -166,86 +155,4 @@ void main() {
     expect(buildCount, 2);
     expect(iconTheme.color, CupertinoColors.activeOrange);
   });
-
-  testWidgets('CupertinoTheme diagnostics', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const CupertinoThemeData().debugFillProperties(builder);
-
-    final Set<String> description = builder.properties
-      .map((DiagnosticsNode node) => node.name.toString())
-      .toSet();
-
-    expect(
-      const SetEquality<String>().equals(
-        description,
-        <String>{ 'brightness',
-          'primaryColor',
-          'primaryContrastingColor',
-          'barBackgroundColor',
-          'scaffoldBackgroundColor',
-          'textStyle',
-          'actionTextStyle',
-          'tabLabelTextStyle',
-          'navTitleTextStyle',
-          'navLargeTitleTextStyle',
-          'navActionTextStyle',
-          'pickerTextStyle',
-          'dateTimePickerTextStyle'
-        }
-      ),
-      isTrue,
-    );
-  });
-
-  Brightness currentBrightness;
-  void colorMatches(Color componentColor, CupertinoDynamicColor expectedDynamicColor) {
-    switch (currentBrightness) {
-      case Brightness.light:
-        expect(componentColor, isSameColorAs(expectedDynamicColor.color));
-        break;
-      case Brightness.dark:
-        expect(componentColor, isSameColorAs(expectedDynamicColor.darkColor));
-        break;
-    }
-  }
-
-  final Function dynamicColorsTestGroup = () {
-    testWidgets('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
-      final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
-      final CupertinoThemeData theme = await testTheme(tester, data);
-
-      expect(data.primaryColor, isSameColorAs(CupertinoColors.systemRed));
-      colorMatches(theme.primaryColor, CupertinoColors.systemRed);
-    });
-
-    testWidgets('CupertinoTheme.of resolves default values', (WidgetTester tester) async {
-      const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
-      final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: primaryColor);
-
-      const CupertinoDynamicColor barBackgroundColor = CupertinoDynamicColor.withBrightness(
-        color: Color(0xF0F9F9F9),
-        darkColor: Color(0xF01D1D1D),
-      );
-
-      final CupertinoThemeData theme = await testTheme(tester, data);
-
-      colorMatches(theme.primaryContrastingColor, CupertinoColors.systemBackground);
-      colorMatches(theme.barBackgroundColor, barBackgroundColor);
-      colorMatches(theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
-      colorMatches(theme.textTheme.textStyle.color, CupertinoColors.label);
-      colorMatches(theme.textTheme.actionTextStyle.color, primaryColor);
-      colorMatches(theme.textTheme.tabLabelTextStyle.color, CupertinoColors.inactiveGray);
-      colorMatches(theme.textTheme.navTitleTextStyle.color, CupertinoColors.label);
-      colorMatches(theme.textTheme.navLargeTitleTextStyle.color, CupertinoColors.label);
-      colorMatches(theme.textTheme.navActionTextStyle.color, primaryColor);
-      colorMatches(theme.textTheme.pickerTextStyle.color, CupertinoColors.label);
-      colorMatches(theme.textTheme.dateTimePickerTextStyle.color, CupertinoColors.label);
-    });
-  };
-
-  currentBrightness = Brightness.light;
-  group('light colors', dynamicColorsTestGroup);
-
-  currentBrightness = Brightness.dark;
-  group('dark colors', dynamicColorsTestGroup);
 }

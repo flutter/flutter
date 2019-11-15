@@ -411,7 +411,7 @@ void main() {
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration;
-    expect(decoration.color, isSameColorAs(CupertinoColors.white));
+    expect(decoration.color, CupertinoColors.white);
   });
 
   testWidgets('Overrides background color', (WidgetTester tester) async {

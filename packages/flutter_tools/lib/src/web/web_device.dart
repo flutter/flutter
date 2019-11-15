@@ -132,10 +132,7 @@ class ChromeDevice extends Device {
     // for the web initialization and server logic.
     final String url = platformArgs['uri'];
     if (debuggingOptions.browserLaunch) {
-      _chrome = await chromeLauncher.launch(url,
-        dataDir: fs.currentDirectory
-          .childDirectory('.dart_tool')
-          .childDirectory('chrome-device'));
+      _chrome = await chromeLauncher.launch(url);
     } else {
       printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
       logger.sendNotification(url, progressId: 'debugExtension');

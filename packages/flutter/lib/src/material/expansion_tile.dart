@@ -35,7 +35,6 @@ class ExpansionTile extends StatefulWidget {
     Key key,
     this.leading,
     @required this.title,
-    this.subtitle,
     this.backgroundColor,
     this.onExpansionChanged,
     this.children = const <Widget>[],
@@ -53,11 +52,6 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// Typically a [Text] widget.
   final Widget title;
-
-  /// Additional content displayed below the title.
-  ///
-  /// Typically a [Text] widget.
-  final Widget subtitle;
 
   /// Called when the tile expands or collapses.
   ///
@@ -167,7 +161,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               onTap: _handleTap,
               leading: widget.leading,
               title: widget.title,
-              subtitle: widget.subtitle,
               trailing: widget.trailing ?? RotationTransition(
                 turns: _iconTurns,
                 child: const Icon(Icons.expand_more),

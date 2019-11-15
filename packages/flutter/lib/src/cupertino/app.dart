@@ -289,7 +289,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
                 builder: widget.builder,
                 title: widget.title,
                 onGenerateTitle: widget.onGenerateTitle,
-                textStyle: CupertinoTheme.of(context).textTheme.textStyle,
+                textStyle: effectiveThemeData.textTheme.textStyle,
                 color: CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context),
                 locale: widget.locale,
                 localizationsDelegates: _localizationsDelegates,

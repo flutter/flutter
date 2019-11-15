@@ -61,8 +61,6 @@ void main() {
     group('TextField', () {
       setUpAll(() async {
         await driver.tap(find.text(textFieldRoute));
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
-        await Future<void>.delayed(const Duration(milliseconds: 500));
       });
 
       test('TextField has correct Android semantics', () async {
@@ -87,7 +85,6 @@ void main() {
         );
 
         await driver.tap(normalTextField);
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
@@ -108,7 +105,6 @@ void main() {
         );
 
         await driver.enterText('hello world');
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
@@ -152,8 +148,6 @@ void main() {
         );
 
         await driver.tap(passwordTextField);
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
-        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
           await getSemantics(passwordTextField),
@@ -173,8 +167,6 @@ void main() {
         );
 
         await driver.enterText('hello world');
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
-        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
           await getSemantics(passwordTextField),
@@ -206,16 +198,8 @@ void main() {
       });
 
       test('Checkbox has correct Android semantics', () async {
-        Future<AndroidSemanticsNode> getCheckboxSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_CheckboxRenderObjectWidget'),
-            ),
-          );
-        }
         expect(
-          await getCheckboxSemantics(checkboxKeyValue),
+          await getSemantics(find.byValueKey(checkboxKeyValue)),
           hasAndroidSemantics(
             className: AndroidClassName.checkBox,
             isChecked: false,
@@ -232,7 +216,7 @@ void main() {
         await driver.tap(find.byValueKey(checkboxKeyValue));
 
         expect(
-          await getCheckboxSemantics(checkboxKeyValue),
+          await getSemantics(find.byValueKey(checkboxKeyValue)),
           hasAndroidSemantics(
             className: AndroidClassName.checkBox,
             isChecked: true,
@@ -246,7 +230,7 @@ void main() {
           ),
         );
         expect(
-          await getCheckboxSemantics(disabledCheckboxKeyValue),
+          await getSemantics(find.byValueKey(disabledCheckboxKeyValue)),
           hasAndroidSemantics(
             className: AndroidClassName.checkBox,
             isCheckable: true,
@@ -258,16 +242,8 @@ void main() {
         );
       });
       test('Radio has correct Android semantics', () async {
-        Future<AndroidSemanticsNode> getRadioSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_RadioRenderObjectWidget'),
-            ),
-          );
-        }
         expect(
-          await getRadioSemantics(radio2KeyValue),
+          await getSemantics(find.byValueKey(radio2KeyValue)),
           hasAndroidSemantics(
             className: AndroidClassName.radio,
             isChecked: false,
@@ -284,7 +260,7 @@ void main() {
         await driver.tap(find.byValueKey(radio2KeyValue));
 
         expect(
-          await getRadioSemantics(radio2KeyValue),
+          await getSemantics(find.byValueKey(radio2KeyValue)),
           hasAndroidSemantics(
             className: AndroidClassName.radio,
             isChecked: true,
@@ -299,16 +275,8 @@ void main() {
         );
       });
       test('Switch has correct Android semantics', () async {
-        Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_SwitchRenderObjectWidget'),
-            ),
-          );
-        }
         expect(
-          await getSwitchSemantics(switchKeyValue),
+          await getSemantics(find.byValueKey(switchKeyValue)),
           hasAndroidSemantics(
             className: AndroidClassName.toggleSwitch,
             isChecked: false,
@@ -325,7 +293,7 @@ void main() {
         await driver.tap(find.byValueKey(switchKeyValue));
 
         expect(
-          await getSwitchSemantics(switchKeyValue),
+          await getSemantics(find.byValueKey(switchKeyValue)),
           hasAndroidSemantics(
             className: AndroidClassName.toggleSwitch,
             isChecked: true,
@@ -342,16 +310,8 @@ void main() {
 
       // Regression test for https://github.com/flutter/flutter/issues/20820.
       test('Switch can be labeled', () async {
-        Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
-          return getSemantics(
-            find.descendant(
-              of: find.byValueKey(key),
-              matching: find.byType('_SwitchRenderObjectWidget'),
-            ),
-          );
-        }
         expect(
-          await getSwitchSemantics(labeledSwitchKeyValue),
+          await getSemantics(find.byValueKey(labeledSwitchKeyValue)),
           hasAndroidSemantics(
             className: AndroidClassName.toggleSwitch,
             isChecked: false,
@@ -638,30 +598,5 @@ void main() {
         await driver.tap(find.byValueKey('back'));
       });
     });
-
-    group('Headings', () {
-      setUpAll(() async {
-        await driver.tap(find.text(headingsRoute));
-      });
-
-      test('AppBar title has correct Android heading semantics', () async {
-        expect(
-          await getSemantics(find.byValueKey(appBarTitleKeyValue)),
-          hasAndroidSemantics(isHeading: true),
-        );
-      });
-
-      test('body text does not have Android heading semantics', () async {
-        expect(
-          await getSemantics(find.byValueKey(bodyTextKeyValue)),
-          hasAndroidSemantics(isHeading: false),
-        );
-      });
-
-      tearDownAll(() async {
-        await driver.tap(find.byValueKey('back'));
-      });
-    });
-
   });
 }

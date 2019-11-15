@@ -69,8 +69,7 @@ class ApplicationPackageFactory {
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.fuchsia:
         return applicationBinary == null
             ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
             : FuchsiaApp.fromPrebuiltApp(applicationBinary);
@@ -425,8 +424,7 @@ class ApplicationPackageStore {
       case TargetPlatform.ios:
         iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.fuchsia:
         fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
         return fuchsia;
       case TargetPlatform.darwin_x64:

@@ -132,21 +132,19 @@ void main() {
   test('CupertinoDynamicColor.toString() works', () {
     expect(
       dynamicColor.toString(),
-      contains(
-        'CupertinoDynamicColor(*color = Color(0xff000000)*, '
-        'darkColor = Color(0xff000001), '
-        'highContrastColor = Color(0xff000003), '
-        'darkHighContrastColor = Color(0xff000005), '
-        'elevatedColor = Color(0xff000002), '
-        'darkElevatedColor = Color(0xff000004), '
-        'highContrastElevatedColor = Color(0xff000006), '
-        'darkHighContrastElevatedColor = Color(0xff000007)',
-      ),
+      'CupertinoDynamicColor(*color = Color(0xff000000)*, '
+      'darkColor = Color(0xff000001), '
+      'highContrastColor = Color(0xff000003), '
+      'darkHighContrastColor = Color(0xff000005), '
+      'elevatedColor = Color(0xff000002), '
+      'darkElevatedColor = Color(0xff000004), '
+      'highContrastElevatedColor = Color(0xff000006), '
+      'darkHighContrastElevatedColor = Color(0xff000007))',
     );
-    expect(notSoDynamicColor1.toString(), contains('CupertinoDynamicColor(*color = Color(0xff000000)*'));
-    expect(vibrancyDependentColor1.toString(), contains('CupertinoDynamicColor(*color = Color(0xff000001)*, darkColor = Color(0xff000000)'));
-    expect(contrastDependentColor1.toString(), contains('CupertinoDynamicColor(*color = Color(0xff000001)*, highContrastColor = Color(0xff000000)'));
-    expect(elevationDependentColor1.toString(), contains('CupertinoDynamicColor(*color = Color(0xff000001)*, elevatedColor = Color(0xff000000)'));
+    expect(notSoDynamicColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000000)*)');
+    expect(vibrancyDependentColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000001)*, darkColor = Color(0xff000000))');
+    expect(contrastDependentColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000001)*, highContrastColor = Color(0xff000000))');
+    expect(elevationDependentColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000001)*, elevatedColor = Color(0xff000000))');
 
     expect(
       const CupertinoDynamicColor.withBrightnessAndContrast(
@@ -155,12 +153,10 @@ void main() {
         highContrastColor: color2,
         darkHighContrastColor: color3,
       ).toString(),
-      contains(
-        'CupertinoDynamicColor(*color = Color(0xff000000)*, '
-        'darkColor = Color(0xff000001), '
-        'highContrastColor = Color(0xff000002), '
-        'darkHighContrastColor = Color(0xff000003)',
-      ),
+      'CupertinoDynamicColor(*color = Color(0xff000000)*, '
+      'darkColor = Color(0xff000001), '
+      'highContrastColor = Color(0xff000002), '
+      'darkHighContrastColor = Color(0xff000003))',
     );
   });
 

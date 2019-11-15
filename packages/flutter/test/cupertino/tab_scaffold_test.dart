@@ -340,7 +340,7 @@ void main() {
       matching: find.byType(DecoratedBox),
     )).decoration;
 
-    expect(tabDecoration.color, isSameColorAs(const Color(0xF0F9F9F9))); // Inherited from theme.
+    expect(tabDecoration.color, const Color(0xCCF8F8F8));
 
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
@@ -366,7 +366,7 @@ void main() {
       matching: find.byType(DecoratedBox),
     )).decoration;
 
-    expect(tabDecoration.color, isSameColorAs(const Color(0xF01D1D1D)));
+    expect(tabDecoration.color, const Color(0xB7212121));
 
     final RichText tab1 = tester.widget(find.descendant(
       of: find.text('Tab 1'),
@@ -378,7 +378,7 @@ void main() {
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(tab2.text.style.color, isSameColorAs(CupertinoColors.systemRed.darkColor));
+    expect(tab2.text.style.color.value, CupertinoColors.systemRed.darkColor.value);
   });
 
   testWidgets('Tab contents are padded when there are view insets', (WidgetTester tester) async {

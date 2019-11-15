@@ -273,10 +273,9 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
-      hostVmServicePort: command.hostVmservicePort,
+      observatoryPort: command.observatoryPort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
-      dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,

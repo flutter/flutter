@@ -103,7 +103,6 @@ class TestCompiler {
         // We already ran codegen once at the start, we only need to
         // configure builders.
         runCold: true,
-        dartDefines: const <String>[],
       );
     }
     return ResidentCompiler(
@@ -114,7 +113,6 @@ class TestCompiler {
       compilerMessageConsumer: _reportCompilerMessage,
       initializeFromDill: testFilePath,
       unsafePackageSerialization: false,
-      dartDefines: const <String>[],
     );
   }
 
