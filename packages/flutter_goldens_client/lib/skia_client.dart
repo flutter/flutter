@@ -364,27 +364,24 @@ class SkiaGoldClient {
 
   /// Returns the number of commits made on the current branch.
   Future<String> getBranchCommitCount() async {
-    final String branch = platform.environment['CIRRUS_BRANCH'] ?? '';
-    final String masterBranch = platform.environment['CIRRUS_BASE_BRANCH'] ?? '';
     final io.ProcessResult revParse = await process.run(
+      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+      workingDirectory: _flutterRoot.path,
+    );
+    final String branch = revParse.stdout;
+
+    const String masterBranch = 'origin/master';
+    
+    final io.ProcessResult revList = await process.run(
       <String>['git', 'rev-list', branch, '^$masterBranch', '--count'],
       workingDirectory: _flutterRoot.path,
     );
-    print('other stuff: ');
-    print('node index: ${platform.environment['CI_NODE_INDEX']}');
-    print('node total: ${platform.environment['CI_NODE_TOTAL']}');
-    print('base sha: ${platform.environment['CIRRUS_BASE_SHA']}');
-    print('build id: ${platform.environment['CIRRUS_BUILD_ID']}');
-    print('change in repo: ${platform.environment['CIRRUS_CHANGE_IN_REPO']}');
-    print('task name: ${platform.environment['CIRRUS_TASK_NAME']}');
-    print('task id: ${platform.environment['CIRRUS_TASK_ID']}');
-    print('github check suite id: ${platform.environment['GITHUB_CHECK_SUITE_ID']}');
     print('***');
     print('branch: $branch');
     print('masterBranch: $masterBranch');
-    print('stdout: ${revParse?.stdout ?? ' '}');
+    print('stdout: ${revList.stdout}');
     print('***');
-    return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+    return revList.exitCode == 0 ? revParse.stdout.trim() : null;
   }
 
   /// Returns a JSON String with keys value pairs used to uniquely identify the
