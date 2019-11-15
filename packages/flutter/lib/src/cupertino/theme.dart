@@ -99,12 +99,6 @@ class CupertinoTheme extends StatelessWidget {
       ),
     );
   }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    data.debugFillProperties(properties);
-  }
 }
 
 class _InheritedCupertinoTheme extends InheritedWidget {
@@ -290,10 +284,10 @@ class CupertinoThemeData extends Diagnosticable {
       _brightness,
       convertColor(_primaryColor),
       convertColor(_primaryContrastingColor),
-      _textTheme?.resolveFrom(context, nullOk: nullOk),
+      textTheme?.resolveFrom(context, nullOk: nullOk),
       convertColor(_barBackgroundColor),
       convertColor(_scaffoldBackgroundColor),
-      _defaults.resolveFrom(context, _textTheme == null, nullOk: nullOk),
+      _defaults.resolveFrom(context, nullOk: nullOk),
     );
   }
 
@@ -328,11 +322,11 @@ class CupertinoThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     const CupertinoThemeData defaultData = CupertinoThemeData();
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
-    properties.add(createCupertinoColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
-    properties.add(createCupertinoColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
-    properties.add(createCupertinoColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
-    properties.add(createCupertinoColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
-    textTheme.debugFillProperties(properties);
+    properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
+    properties.add(ColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
+    properties.add(DiagnosticsProperty<CupertinoTextThemeData>('textTheme', textTheme, defaultValue: defaultData.textTheme));
+    properties.add(ColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
+    properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
   }
 }
 
@@ -419,7 +413,7 @@ class _CupertinoThemeDefaults {
   final Color scaffoldBackgroundColor;
   final _CupertinoTextThemeDefaults textThemeDefaults;
 
-  _CupertinoThemeDefaults resolveFrom(BuildContext context, bool resolveTextTheme, { @required bool nullOk }) {
+  _CupertinoThemeDefaults resolveFrom(BuildContext context, { @required bool nullOk }) {
     assert(nullOk != null);
     Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
@@ -429,7 +423,7 @@ class _CupertinoThemeDefaults {
       convertColor(primaryContrastingColor),
       convertColor(barBackgroundColor),
       convertColor(scaffoldBackgroundColor),
-      resolveTextTheme ? textThemeDefaults?.resolveFrom(context, nullOk: nullOk) : textThemeDefaults,
+      textThemeDefaults?.resolveFrom(context, nullOk: nullOk),
     );
   }
 }

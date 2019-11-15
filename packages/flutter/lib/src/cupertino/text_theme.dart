@@ -8,9 +8,9 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-// Please update _TextThemeDefaultsBuilder accordingly after changing the default
-// color here, as their implementation depends on the default value of the color
-// field.
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly after changing the default color here, as their implementation
+// depends on the default value of the color field.
 //
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTextStyle = TextStyle(
@@ -22,9 +22,9 @@ const TextStyle _kDefaultTextStyle = TextStyle(
   decoration: TextDecoration.none,
 );
 
-// Please update _TextThemeDefaultsBuilder accordingly after changing the default
-// color here, as their implementation depends on the default value of the color
-// field.
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly after changing the default color here, as their implementation
+// depends on the default value of the color field.
 //
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultActionTextStyle = TextStyle(
@@ -36,9 +36,9 @@ const TextStyle _kDefaultActionTextStyle = TextStyle(
   decoration: TextDecoration.none,
 );
 
-// Please update _TextThemeDefaultsBuilder accordingly after changing the default
-// color here, as their implementation depends on the default value of the color
-// field.
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly after changing the default color here, as their implementation
+// depends on the default value of the color field.
 //
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
@@ -49,6 +49,9 @@ const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   color: CupertinoColors.inactiveGray,
 );
 
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly after changing the default color here, as their implementation
+// depends on the default value of the color field.
 const TextStyle _kDefaultMiddleTitleTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Text',
@@ -58,6 +61,9 @@ const TextStyle _kDefaultMiddleTitleTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly after changing the default color here, as their implementation
+// depends on the default value of the color field.
 const TextStyle _kDefaultLargeTitleTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
@@ -67,9 +73,9 @@ const TextStyle _kDefaultLargeTitleTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
-// Please update _TextThemeDefaultsBuilder accordingly after changing the default
-// color here, as their implementation depends on the default value of the color
-// field.
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly after changing the default color here, as their implementation
+// depends on the default value of the color field.
 //
 // Inspected on iOS 13 simulator with "Debug View Hierarchy".
 // Value extracted from off-center labels. Centered labels have a font size of 25pt.
@@ -82,9 +88,9 @@ const TextStyle _kDefaultPickerTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
-// Please update _TextThemeDefaultsBuilder accordingly after changing the default
-// color here, as their implementation depends on the default value of the color
-// field.
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly after changing the default color here, as their implementation
+// depends on the default value of the color field.
 //
 // Inspected on iOS 13 simulator with "Debug View Hierarchy".
 // Value extracted from off-center labels. Centered labels have a font size of 25pt.
@@ -129,7 +135,7 @@ class CupertinoTextThemeData extends Diagnosticable {
     TextStyle pickerTextStyle,
     TextStyle dateTimePickerTextStyle,
   }) : this._raw(
-         const _TextThemeDefaultsBuilder(CupertinoColors.label, CupertinoColors.inactiveGray),
+         const _DefaultCupertinoTextThemeData(),
          primaryColor,
          textStyle,
          actionTextStyle,
@@ -154,7 +160,7 @@ class CupertinoTextThemeData extends Diagnosticable {
     this._dateTimePickerTextStyle,
   ) : assert((_navActionTextStyle != null && _actionTextStyle != null) || _primaryColor != null);
 
-  final _TextThemeDefaultsBuilder _defaults;
+  final _DefaultCupertinoTextThemeData _defaults;
   final Color _primaryColor;
 
   final TextStyle _textStyle;
@@ -242,30 +248,15 @@ class CupertinoTextThemeData extends Diagnosticable {
       dateTimePickerTextStyle ?? _dateTimePickerTextStyle,
     );
   }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    const CupertinoTextThemeData defaultData = CupertinoTextThemeData();
-    properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: defaultData.textStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('actionTextStyle', actionTextStyle, defaultValue: defaultData.actionTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('tabLabelTextStyle', tabLabelTextStyle, defaultValue: defaultData.tabLabelTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('navTitleTextStyle', navTitleTextStyle, defaultValue: defaultData.navTitleTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('navLargeTitleTextStyle', navLargeTitleTextStyle, defaultValue: defaultData.navLargeTitleTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('navActionTextStyle', navActionTextStyle, defaultValue: defaultData.navActionTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('pickerTextStyle', pickerTextStyle, defaultValue: defaultData.pickerTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('dateTimePickerTextStyle', dateTimePickerTextStyle, defaultValue: defaultData.dateTimePickerTextStyle));
-  }
 }
 
-
 @immutable
-class _TextThemeDefaultsBuilder {
-  const _TextThemeDefaultsBuilder(
-    this.labelColor,
-    this.inactiveGrayColor,
-  ) : assert(labelColor != null),
-      assert(inactiveGrayColor != null);
+class _DefaultCupertinoTextThemeData extends Diagnosticable {
+  const _DefaultCupertinoTextThemeData({
+    this.labelColor = CupertinoColors.label,
+    this.inactiveGrayColor = CupertinoColors.inactiveGray,
+  }) : assert(labelColor != null),
+       assert(inactiveGrayColor != null);
 
   final Color labelColor;
   final Color inactiveGrayColor;
@@ -286,11 +277,11 @@ class _TextThemeDefaultsBuilder {
   TextStyle actionTextStyle({ Color primaryColor }) => _kDefaultActionTextStyle.copyWith(color: primaryColor);
   TextStyle navActionTextStyle({ Color primaryColor }) => actionTextStyle(primaryColor: primaryColor);
 
-  _TextThemeDefaultsBuilder resolveFrom(BuildContext context, bool nullOk) {
+  _DefaultCupertinoTextThemeData resolveFrom(BuildContext context, bool nullOk) {
     final Color resolvedLabelColor = CupertinoDynamicColor.resolve(labelColor, context, nullOk: nullOk);
     final Color resolvedInactiveGray = CupertinoDynamicColor.resolve(inactiveGrayColor, context, nullOk: nullOk);
     return resolvedLabelColor == labelColor && resolvedInactiveGray == CupertinoColors.inactiveGray
       ? this
-      : _TextThemeDefaultsBuilder(resolvedLabelColor, resolvedInactiveGray);
+      : _DefaultCupertinoTextThemeData(labelColor: resolvedLabelColor, inactiveGrayColor: resolvedInactiveGray);
   }
 }

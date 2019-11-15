@@ -4,9 +4,6 @@
 
 import 'dart:async';
 
-import 'package:collection/collection.dart' show SetEquality;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -59,10 +56,10 @@ void main() {
 
   testWidgets('Theme attributes cascade', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
-      primaryColor: CupertinoColors.systemRed,
+      primaryColor: CupertinoColors.destructiveRed,
     ));
 
-    expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemRed.color));
+    expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.destructiveRed));
   });
 
   testWidgets('Dependent attribute can be overridden from cascaded value', (WidgetTester tester) async {
@@ -140,12 +137,12 @@ void main() {
   );
 
   testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
-    const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
+    const CupertinoDynamicColor primaryColor = CupertinoColors.destructiveRed;
     const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
     final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
 
-    expect(resultingIconTheme.color, isSameColorAs(primaryColor));
+    expect(resultingIconTheme.color, themeData.primaryColor);
 
     // Works in dark mode if primaryColor is a CupertinoDynamicColor.
     final Color darkColor = (await testIconTheme(
@@ -167,36 +164,6 @@ void main() {
     expect(iconTheme.color, CupertinoColors.activeOrange);
   });
 
-  testWidgets('CupertinoTheme diagnostics', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const CupertinoThemeData().debugFillProperties(builder);
-
-    final Set<String> description = builder.properties
-      .map((DiagnosticsNode node) => node.name.toString())
-      .toSet();
-
-    expect(
-      const SetEquality<String>().equals(
-        description,
-        <String>{ 'brightness',
-          'primaryColor',
-          'primaryContrastingColor',
-          'barBackgroundColor',
-          'scaffoldBackgroundColor',
-          'textStyle',
-          'actionTextStyle',
-          'tabLabelTextStyle',
-          'navTitleTextStyle',
-          'navLargeTitleTextStyle',
-          'navActionTextStyle',
-          'pickerTextStyle',
-          'dateTimePickerTextStyle'
-        }
-      ),
-      isTrue,
-    );
-  });
-
   Brightness currentBrightness;
   void colorMatches(Color componentColor, CupertinoDynamicColor expectedDynamicColor) {
     switch (currentBrightness) {
@@ -214,7 +181,7 @@ void main() {
       final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
       final CupertinoThemeData theme = await testTheme(tester, data);
 
-      expect(data.primaryColor, isSameColorAs(CupertinoColors.systemRed));
+      expect(data.primaryColor, isSameColorAs(CupertinoColors.systemRed.color));
       colorMatches(theme.primaryColor, CupertinoColors.systemRed);
     });
 

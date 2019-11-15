@@ -165,11 +165,11 @@ class _ListItem extends StatelessWidget {
           Container(
             width: 38.0,
             child: called
-                ? Align(
+                ? const Align(
                     alignment: Alignment.topCenter,
                     child: Icon(
                       CupertinoIcons.phone_solid,
-                      color: CupertinoColors.inactiveGray.resolveFrom(context),
+                      color: CupertinoColors.inactiveGray,
                       size: 18.0,
                     ),
                   )
@@ -203,10 +203,10 @@ class _ListItem extends StatelessWidget {
                           place,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 15.0,
                             letterSpacing: -0.24,
-                            color: CupertinoColors.inactiveGray.resolveFrom(context),
+                            color: CupertinoColors.inactiveGray,
                           ),
                         ),
                       ],
@@ -214,8 +214,8 @@ class _ListItem extends StatelessWidget {
                   ),
                   Text(
                     date,
-                    style: TextStyle(
-                      color: CupertinoColors.inactiveGray.resolveFrom(context),
+                    style: const TextStyle(
+                      color: CupertinoColors.inactiveGray,
                       fontSize: 15.0,
                       letterSpacing: -0.41,
                     ),

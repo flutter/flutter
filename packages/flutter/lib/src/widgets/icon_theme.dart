@@ -60,13 +60,7 @@ class IconTheme extends InheritedTheme {
   /// ```
   static IconThemeData of(BuildContext context) {
     final IconThemeData iconThemeData = _getInheritedIconThemeData(context).resolve(context);
-    return iconThemeData.isConcrete
-      ? iconThemeData
-      : iconThemeData.copyWith(
-        size: iconThemeData.size ?? const IconThemeData.fallback().size,
-        color: iconThemeData.color ?? const IconThemeData.fallback().color,
-        opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
-      );
+    return iconThemeData.isConcrete ? iconThemeData : const IconThemeData.fallback().merge(iconThemeData);
   }
 
   static IconThemeData _getInheritedIconThemeData(BuildContext context) {
@@ -86,6 +80,6 @@ class IconTheme extends InheritedTheme {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    data.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<IconThemeData>('data', data, showName: false));
   }
 }
