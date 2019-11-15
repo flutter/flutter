@@ -450,48 +450,37 @@ void main() {
     expect(find.byType(OutlineButton), paints..path(color: disabledColor));
   });
 
-  testWidgets('OutlineButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+  testWidgets('Outline button responds to tap when enabled', (WidgetTester tester) async {
+    int pressedCount = 0;
 
-    bool wasPressed;
-    Finder outlineButton;
-
-    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
+    Widget buildFrame(VoidCallback onPressed) {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: OutlineButton(
-          child: const Text('button'),
-          onPressed: onPressed,
-          onLongPress: onLongPress,
+        child: Theme(
+          data: ThemeData(),
+          child: Center(
+            child: OutlineButton(onPressed: onPressed),
+          ),
         ),
       );
     }
 
-    // onPressed not null, onLongPress null.
-    wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+      buildFrame(() { pressedCount += 1; }),
     );
-    outlineButton = find.byType(OutlineButton);
-    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
-    await tester.tap(outlineButton);
-    expect(wasPressed, true);
+    expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, true);
+    await tester.tap(find.byType(OutlineButton));
+    await tester.pumpAndSettle();
+    expect(pressedCount, 1);
 
-    // onPressed null, onLongPress not null.
-    wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+      buildFrame(null),
     );
-    outlineButton = find.byType(OutlineButton);
-    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
-    await tester.longPress(outlineButton);
-    expect(wasPressed, true);
-
-    // onPressed null, onLongPress null.
-    await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: null),
-    );
-    outlineButton = find.byType(OutlineButton);
+    final Finder outlineButton = find.byType(OutlineButton);
     expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
+    await tester.tap(outlineButton);
+    await tester.pumpAndSettle();
+    expect(pressedCount, 1);
   });
 
   testWidgets('Outline button doesn\'t crash if disabled during a gesture', (WidgetTester tester) async {
@@ -824,37 +813,6 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     _checkPhysicalLayer(buttonElement, fillColor.withAlpha(0x00));
-  });
-
-  testWidgets('OutlineButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
-    bool didPressButton = false;
-    bool didLongPressButton = false;
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: OutlineButton(
-          onPressed: () {
-            didPressButton = true;
-          },
-          onLongPress: () {
-            didLongPressButton = true;
-          },
-          child: const Text('button'),
-        ),
-      ),
-    );
-
-    final Finder outlineButton = find.byType(OutlineButton);
-    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
-
-    expect(didPressButton, isFalse);
-    await tester.tap(outlineButton);
-    expect(didPressButton, isTrue);
-
-    expect(didLongPressButton, isFalse);
-    await tester.longPress(outlineButton);
-    expect(didLongPressButton, isTrue);
   });
 }
 
