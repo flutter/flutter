@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'input_border.dart';
 import 'theme.dart';
 
@@ -496,6 +497,7 @@ class _Decoration {
     this.counter,
     this.container,
     this.alignLabelWithHint,
+    this.isDense,
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
@@ -508,6 +510,7 @@ class _Decoration {
   final InputBorder border;
   final _InputBorderGap borderGap;
   final bool alignLabelWithHint;
+  final bool isDense;
   final Widget icon;
   final Widget input;
   final Widget label;
@@ -904,7 +907,13 @@ class _RenderDecoration extends RenderBox {
       return 0.0;
     }
     box.layout(constraints, parentUsesSize: true);
-    final double baseline = box.getDistanceToBaseline(textBaseline);
+    // Since internally, all layout is performed against the alphabetic baseline,
+    // (eg, ascents/descents are all relative to alphabetic, even if the font is
+    // an ideographic or hanging font), we should always obtain the reference
+    // baseline from the alphabetic baseline. The ideographic baseline is for
+    // use post-layout and is derived from the alphabetic baseline combined with
+    // the font metrics.
+    final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
     assert(baseline != null && baseline >= 0.0);
     return baseline;
   }
@@ -1037,10 +1046,19 @@ class _RenderDecoration extends RenderBox {
       + fixBelowInput
       + contentPadding.bottom,
     );
+    final double minContainerHeight = decoration.isDense || expands
+      ? 0.0
+      : kMinInteractiveDimension;
     final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
     final double containerHeight = expands
       ? maxContainerHeight
-      : math.min(contentHeight, maxContainerHeight);
+      : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
+
+    // Ensure the text is vertically centered in cases where the content is
+    // shorter than kMinInteractiveDimension.
+    final double interactiveAdjustment = minContainerHeight > contentHeight
+      ? (minContainerHeight - contentHeight) / 2.0
+      : 0.0;
 
     // Try to consider the prefix/suffix as part of the text when aligning it.
     // If the prefix/suffix overflows however, allow it to extend outside of the
@@ -1058,7 +1076,8 @@ class _RenderDecoration extends RenderBox {
     final double topInputBaseline = contentPadding.top
       + topHeight
       + inputInternalBaseline
-      + baselineAdjustment;
+      + baselineAdjustment
+      + interactiveAdjustment;
     final double maxContentHeight = containerHeight
       - contentPadding.top
       - topHeight
@@ -2156,7 +2175,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          constraints: const BoxConstraints(
+            minWidth: kMinInteractiveDimension,
+            minHeight: kMinInteractiveDimension,
+          ),
           child: IconTheme.merge(
             data: IconThemeData(
               color: iconColor,
@@ -2172,7 +2194,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          constraints: const BoxConstraints(
+            minWidth: kMinInteractiveDimension,
+            minHeight: kMinInteractiveDimension,
+          ),
           child: IconTheme.merge(
             data: IconThemeData(
               color: iconColor,
@@ -2253,6 +2278,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         input: widget.child,
         label: label,
         alignLabelWithHint: decoration.alignLabelWithHint,
+        isDense: decoration.isDense,
         hint: hint,
         prefix: prefix,
         suffix: suffix,

@@ -48,13 +48,13 @@ void main() {
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
     expect(licenseStatus, LicensesAccepted.unknown);
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager', () async {
     processManager.runSucceeds = false;
@@ -62,13 +62,13 @@ void main() {
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
     expect(licenseStatus, LicensesAccepted.unknown);
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('licensesAccepted handles garbage/no output', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
@@ -77,13 +77,13 @@ void main() {
     expect(result, equals(LicensesAccepted.unknown));
     expect(processManager.commands.first, equals('/foo/bar/sdkmanager'));
     expect(processManager.commands.last, equals('--licenses'));
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('licensesAccepted works for all licenses accepted', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
@@ -95,13 +95,13 @@ void main() {
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.all));
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('licensesAccepted works for some licenses accepted', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
@@ -114,13 +114,13 @@ void main() {
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.some));
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('licensesAccepted works for no licenses accepted', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
@@ -133,78 +133,78 @@ void main() {
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.none));
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('runLicenseManager succeeds for version >= 26', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('26.0.0');
 
     expect(await AndroidLicenseValidator.runLicenseManager(), isTrue);
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('runLicenseManager errors for version < 26', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('25.0.0');
 
     expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('runLicenseManager errors correctly for null version', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn(null);
 
     expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('runLicenseManager errors when sdkmanager is not found', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.canRunSucceeds = false;
 
     expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit());
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('runLicenseManager errors when sdkmanager fails to run', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.runSucceeds = false;
 
     expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit());
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('detects license-only SDK installation', () async {
     when(sdk.licensesAvailable).thenReturn(true);
@@ -215,13 +215,13 @@ void main() {
       validationResult.messages.last.message,
       userMessages.androidSdkLicenseOnly(kAndroidHome),
     );
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
 
   testUsingContext('detects minium required SDK and buildtools', () async {
     final AndroidSdkVersion mockSdkVersion = MockAndroidSdkVersion();
@@ -269,12 +269,44 @@ void main() {
       validationResult.messages.any((ValidationMessage message) => message.message == errorMessage),
       isFalse,
     );
-  }, overrides: <Type, Generator>{
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
     ProcessManager: () => processManager,
     Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     Stdio: () => stdio,
-  });
+  }));
+
+  testUsingContext('detects minimum required java version', () async {
+    final AndroidSdkVersion mockSdkVersion = MockAndroidSdkVersion();
+
+    // Mock a pass through scenario to reach _checkJavaVersion()
+    when(sdk.licensesAvailable).thenReturn(true);
+    when(sdk.platformToolsAvailable).thenReturn(true);
+    when(mockSdkVersion.sdkLevel).thenReturn(28);
+    when(mockSdkVersion.buildToolsVersion).thenReturn(Version(28, 0, 3));
+    when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
+    when(sdk.latestVersion).thenReturn(mockSdkVersion);
+    when(sdk.validateSdkWellFormed()).thenReturn(<String>[]);
+
+    //Test with older version of JDK
+    const String javaVersionText = 'openjdk version "1.7.0_212"';
+    when(processManager.run(argThat(contains('-version')))).thenAnswer((_) =>
+      Future<ProcessResult>.value(ProcessResult(0, 0, null, javaVersionText)));
+    final String errorMessage = userMessages.androidJavaMinimumVersion(javaVersionText);
+
+    final ValidationResult validationResult = await AndroidValidator().validate();
+    expect(validationResult.type, ValidationType.partial);
+    expect(
+      validationResult.messages.last.message,
+      errorMessage,
+    );
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
+    AndroidSdk: () => sdk,
+    FileSystem: () => fs,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+    ProcessManager: () => processManager,
+    Stdio: () => stdio,
+  }));
 
 }

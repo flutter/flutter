@@ -33,6 +33,7 @@ class AndroidSemanticsNode  {
   ///         "isEnabled": bool,
   ///         "isFocusable": bool,
   ///         "isFocused": bool,
+  ///         "isHeading": bool,
   ///         "isPassword": bool,
   ///         "isLongClickable": bool,
   ///       },
@@ -114,6 +115,9 @@ class AndroidSemanticsNode  {
 
   /// Whether the node is focused.
   bool get isFocused => _flags['isFocused'];
+
+  /// Whether the node is considered a heading.
+  bool get isHeading => _flags['isHeading'];
 
   /// Whether the node represents a password field.
   ///

@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/file_hash_store.dart';
+import 'package:flutter_tools/src/globals.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -25,7 +28,7 @@ void main() {
   });
 
   test('Initializes file cache', () => testbed.run(() {
-    final FileHashStore fileCache = FileHashStore(environment);
+    final FileHashStore fileCache = FileHashStore(environment, fs);
     fileCache.initialize();
     fileCache.persist();
 
@@ -43,7 +46,7 @@ void main() {
     final File file = fs.file('foo.dart')
       ..createSync()
       ..writeAsStringSync('hello');
-    final FileHashStore fileCache = FileHashStore(environment);
+    final FileHashStore fileCache = FileHashStore(environment, fs);
     fileCache.initialize();
     await fileCache.hashFiles(<File>[file]);
     fileCache.persist();
@@ -56,7 +59,7 @@ void main() {
     expect(fileStorage.files.single.path, file.path);
 
 
-    final FileHashStore newFileCache = FileHashStore(environment);
+    final FileHashStore newFileCache = FileHashStore(environment, fs);
     newFileCache.initialize();
     expect(newFileCache.currentHashes, isEmpty);
     expect(newFileCache.previousHashes['foo.dart'],  currentHash);
@@ -73,7 +76,7 @@ void main() {
     final File file = fs.file('foo.dart')
       ..createSync()
       ..writeAsStringSync('hello');
-    final FileHashStore fileCache = FileHashStore(environment);
+    final FileHashStore fileCache = FileHashStore(environment, fs);
     fileCache.initialize();
     environment.buildDir.deleteSync(recursive: true);
 
@@ -83,7 +86,7 @@ void main() {
   }));
 
   test('handles hashing missing files', () => testbed.run(() async {
-    final FileHashStore fileCache = FileHashStore(environment);
+    final FileHashStore fileCache = FileHashStore(environment, fs);
     fileCache.initialize();
 
     final List<File> results = await fileCache.hashFiles(<File>[fs.file('hello.dart')]);
@@ -92,4 +95,45 @@ void main() {
     expect(results.single.path, 'hello.dart');
     expect(fileCache.currentHashes, isNot(contains(fs.path.absolute('hello.dart'))));
   }));
+
+  test('handles failure to persist file cache', () => testbed.run(() async {
+    final BufferLogger bufferLogger = logger;
+    final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(fs);
+    final FileHashStore fileCache = FileHashStore(environment, fakeForwardingFileSystem);
+    final String cacheFile = environment.buildDir.childFile('.filecache').path;
+    final MockFile mockFile = MockFile();
+    when(mockFile.writeAsBytesSync(any)).thenThrow(const FileSystemException('Out of space!'));
+    when(mockFile.existsSync()).thenReturn(true);
+
+    fileCache.initialize();
+    fakeForwardingFileSystem.files[cacheFile] = mockFile;
+    fileCache.persist();
+
+    expect(bufferLogger.errorText, contains('Out of space!'));
+  }));
+
+  test('handles failure to restore file cache', () => testbed.run(() async {
+    final BufferLogger bufferLogger = logger;
+    final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(fs);
+    final FileHashStore fileCache = FileHashStore(environment, fakeForwardingFileSystem);
+    final String cacheFile = environment.buildDir.childFile('.filecache').path;
+    final MockFile mockFile = MockFile();
+    when(mockFile.readAsBytesSync()).thenThrow(const FileSystemException('Out of space!'));
+    when(mockFile.existsSync()).thenReturn(true);
+
+    fakeForwardingFileSystem.files[cacheFile] = mockFile;
+    fileCache.initialize();
+
+    expect(bufferLogger.errorText, contains('Out of space!'));
+  }));
 }
+
+class FakeForwardingFileSystem extends ForwardingFileSystem {
+  FakeForwardingFileSystem(FileSystem fileSystem) : super(fileSystem);
+
+  final Map<String, FileSystemEntity> files = <String, FileSystemEntity>{};
+
+  @override
+  File file(dynamic path) => files[path] ?? super.file(path);
+}
+class MockFile extends Mock implements File {}

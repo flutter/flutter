@@ -587,13 +587,22 @@ class FlutterValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType valid = ValidationType.installed;
+    String versionChannel;
+    String frameworkVersion;
 
-    final FlutterVersion version = FlutterVersion.instance;
+    try {
+      final FlutterVersion version = FlutterVersion.instance;
+      versionChannel = version.channel;
+      frameworkVersion = version.frameworkVersion;
+      messages.add(ValidationMessage(userMessages.flutterVersion(frameworkVersion, Cache.flutterRoot)));
+      messages.add(ValidationMessage(userMessages.flutterRevision(version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
+      messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
+      messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
+    } on VersionCheckError catch (e) {
+      messages.add(ValidationMessage.error(e.message));
+      valid = ValidationType.partial;
+    }
 
-    messages.add(ValidationMessage(userMessages.flutterVersion(version.frameworkVersion, Cache.flutterRoot)));
-    messages.add(ValidationMessage(userMessages.flutterRevision(version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
-    messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
-    messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
     final String genSnapshotPath =
       artifacts.getArtifactPath(Artifact.genSnapshot);
 
@@ -609,7 +618,7 @@ class FlutterValidator extends DoctorValidator {
     }
 
     return ValidationResult(valid, messages,
-      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName),
+      statusInfo: userMessages.flutterStatusInfo(versionChannel, frameworkVersion, os.name, platform.localeName),
     );
   }
 }

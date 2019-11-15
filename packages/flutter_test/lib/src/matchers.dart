@@ -9,7 +9,9 @@ import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:meta/meta.dart';
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
 import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
@@ -126,6 +128,12 @@ const Matcher isInCard = _IsInCard();
 ///
 ///  * [isInCard], the opposite.
 const Matcher isNotInCard = _IsNotInCard();
+
+/// Asserts that the object represents the same color as [color] when used to paint.
+///
+/// Specifically this matcher checks the object is of type [Color] and its [Color.value]
+/// equals to that of the given [color].
+Matcher isSameColorAs(Color color) => _ColorMatcher(targetColor: color);
 
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
@@ -1607,6 +1615,24 @@ class _CoversSameAreaAs extends Matcher {
   @override
   Description describe(Description description) =>
     description.add('covers expected area and only expected area');
+}
+
+class _ColorMatcher extends Matcher {
+  const _ColorMatcher({
+      @required this.targetColor,
+  }) : assert(targetColor != null);
+
+  final Color targetColor;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is Color)
+      return item == targetColor || item.value == targetColor.value;
+    return false;
+  }
+
+  @override
+  Description describe(Description description) => description.add('matches color $targetColor');
 }
 
 Future<ui.Image> _captureImage(Element element) {

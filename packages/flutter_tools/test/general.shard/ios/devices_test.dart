@@ -68,6 +68,16 @@ void main() {
       Platform: () => macPlatform,
     });
 
+    testUsingContext('parses major version', () {
+      expect(IOSDevice('device-123', sdkVersion: '1.0.0').majorSdkVersion, 1);
+      expect(IOSDevice('device-123', sdkVersion: '13.1.1').majorSdkVersion, 13);
+      expect(IOSDevice('device-123', sdkVersion: '10').majorSdkVersion, 10);
+      expect(IOSDevice('device-123', sdkVersion: '0').majorSdkVersion, 0);
+      expect(IOSDevice('device-123', sdkVersion: 'bogus').majorSdkVersion, 0);
+    }, overrides: <Type, Generator>{
+      Platform: () => macPlatform,
+    });
+
     for (Platform platform in unsupportedPlatforms) {
       testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
@@ -249,7 +259,7 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -319,7 +329,7 @@ void main() {
           mockLogReader.addLine('Foo');
           mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
         });
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(null));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -352,7 +362,7 @@ void main() {
           mockLogReader.addLine('Foo');
           mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
         });
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(null));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -401,7 +411,7 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
             .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
         List<String> args;

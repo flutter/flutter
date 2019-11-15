@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -151,6 +152,38 @@ void main() {
     await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(Scrollbar), paints..rrect());
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
+
+  testWidgets('Scrollbar passes controller to CupertinoScrollbar', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll(TargetPlatform platform) {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(
+            platform: platform
+          ),
+          child: Scrollbar(
+            controller: controller,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll(TargetPlatform.iOS));
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView))
+    );
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+    final CupertinoScrollbar scrollbar = find.byType(CupertinoScrollbar).evaluate().first.widget;
+    expect(scrollbar.controller, isNotNull);
+  });
+
 }

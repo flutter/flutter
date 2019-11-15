@@ -31,6 +31,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
+    usesDartDefines();
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
@@ -43,7 +44,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addFlag('cache-sksl',
         negatable: false,
-        help: 'Only cache the shader in SkSL instead of binary or GLSL.',)
+        help: 'Only cache the shader in SkSL instead of binary or GLSL.',
+      )
+      ..addFlag('dump-skp-on-shader-compilation',
+        negatable: false,
+        help: 'Automatically dump the skp that triggers new shader compilations. '
+            'This is useful for wrting custom ShaderWarmUp to reduce jank. '
+            'By default, this is not enabled to reduce the overhead. '
+            'This is only available in profile or debug build. ',
+      )
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
@@ -63,6 +72,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get traceStartup => argResults['trace-startup'];
   bool get cacheSkSL => argResults['cache-sksl'];
+  bool get dumpSkpOnShaderCompilation => argResults['dump-skp-on-shader-compilation'];
 
   String get route => argResults['route'];
 }
@@ -97,13 +107,6 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         help: 'Enable tracing to the system tracer. This is only useful on '
               'platforms where such a tracer is available (Android and Fuchsia).',
-      )
-      ..addFlag('dump-skp-on-shader-compilation',
-        negatable: false,
-        help: 'Automatically dump the skp that triggers new shader compilations. '
-              'This is useful for wrting custom ShaderWarmUp to reduce jank. '
-              'By default, this is not enabled to reduce the overhead. '
-              'This is only available in profile or debug build. ',
       )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
@@ -248,6 +251,7 @@ class RunCommand extends RunCommandBase {
       CustomDimensions.commandRunModeName: modeName,
       CustomDimensions.commandRunProjectModule: '${FlutterProject.current().isModule}',
       CustomDimensions.commandRunProjectHostLanguage: hostLanguage.join(','),
+      CustomDimensions.commandRunAndroidEmbeddingVersion: androidProject.getEmbeddingVersion().toString().split('.').last,
     };
   }
 
@@ -309,9 +313,10 @@ class RunCommand extends RunCommandBase {
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
-        dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
+        dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
         cacheSkSL: cacheSkSL,
-        observatoryPort: observatoryPort,
+        deviceVmServicePort: deviceVmservicePort,
+        hostVmServicePort: hostVmservicePort,
         verboseSystemLogs: argResults['verbose-system-logs'],
         initializePlatform: argResults['web-initialize-platform'],
         hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
@@ -423,6 +428,7 @@ class RunCommand extends RunCommandBase {
           experimentalFlags: expFlags,
           target: argResults['target'],
           buildMode: getBuildMode(),
+          dartDefines: dartDefines,
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner
@@ -450,11 +456,13 @@ class RunCommand extends RunCommandBase {
       );
     } else if (webMode) {
       runner = webRunnerFactory.createWebRunner(
-        devices.single,
+        flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
         debuggingOptions: _createDebuggingOptions(),
+        stayResident: stayResident,
+        dartDefines: dartDefines,
       );
     } else {
       runner = ColdRunner(

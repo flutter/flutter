@@ -97,7 +97,7 @@ const Feature flutterWebFeature = Feature(
 const Feature flutterMacOSDesktopFeature = Feature(
   name: 'Flutter for desktop on macOS',
   configSetting: 'enable-macos-desktop',
-  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  environmentOverride: 'FLUTTER_MACOS',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -108,7 +108,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 const Feature flutterLinuxDesktopFeature = Feature(
   name: 'Flutter for desktop on Linux',
   configSetting: 'enable-linux-desktop',
-  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  environmentOverride: 'FLUTTER_LINUX',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -119,7 +119,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
 const Feature flutterWindowsDesktopFeature = Feature(
   name: 'Flutter for desktop on Windows',
   configSetting: 'enable-windows-desktop',
-  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  environmentOverride: 'FLUTTER_WINDOWS',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -143,7 +143,7 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
   configSetting: 'enable-android-embedding-v2',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
 );
 
@@ -151,7 +151,12 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
 const Feature flutterWebIncrementalCompiler = Feature(
   name: 'Enable the incremental compiler for web builds',
   configSetting: 'enable-web-incremental-compiler',
+  environmentOverride: 'WEB_INCREMENTAL_COMPILER',
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),

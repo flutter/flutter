@@ -323,6 +323,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 
     return InkWell(
       onTap: widget.enabled ? handleTap : null,
+      canRequestFocus: widget.enabled,
       child: item,
     );
   }
@@ -789,6 +790,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// the menu. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the popup menu is closed.
 ///
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// menu to the [Navigator] furthest from or nearest to the given `context`. It
+/// is `false` by default.
+///
 /// The `semanticLabel` argument is used by accessibility frameworks to
 /// announce screen transitions when the menu is opened and closed. If this
 /// label is not provided, it will default to
@@ -813,9 +818,11 @@ Future<T> showMenu<T>({
   ShapeBorder shape,
   Color color,
   bool captureInheritedThemes = true,
+  bool useRootNavigator = false,
 }) {
   assert(context != null);
   assert(position != null);
+  assert(useRootNavigator != null);
   assert(items != null && items.isNotEmpty);
   assert(captureInheritedThemes != null);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -830,7 +837,7 @@ Future<T> showMenu<T>({
       label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
   }
 
-  return Navigator.push(context, _PopupMenuRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(_PopupMenuRoute<T>(
     position: position,
     items: items,
     initialValue: initialValue,
@@ -978,11 +985,13 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// to set the padding to zero.
   final EdgeInsetsGeometry padding;
 
-  /// If provided, the widget used for this button.
+  /// If provided, [child] is the widget used for this button
+  /// and the button will utilize an [InkWell] for taps.
   final Widget child;
 
-  /// If provided, the icon used for this button.
-  final Icon icon;
+  /// If provided, the [icon] is used for this button
+  /// and the button will behave like an [IconButton].
+  final Widget icon;
 
   /// The offset applied to the Popup Menu Button.
   ///
@@ -1088,6 +1097,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
+          canRequestFocus: widget.enabled,
           child: widget.child,
         ),
       );

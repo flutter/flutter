@@ -101,7 +101,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   bool get canUndo {
     if (_completedActions.isNotEmpty) {
       final Intent lastIntent = _completedActions.last.invocationIntent;
-      return lastIntent.isEnabled(WidgetsBinding.instance.focusManager.primaryFocus.context);
+      return lastIntent.isEnabled(primaryFocus.context);
     }
     return false;
   }
@@ -110,7 +110,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   bool get canRedo {
     if (_undoneActions.isNotEmpty) {
       final Intent lastIntent = _undoneActions.last.invocationIntent;
-      return lastIntent.isEnabled(WidgetsBinding.instance.focusManager.primaryFocus?.context);
+      return lastIntent.isEnabled(primaryFocus?.context);
     }
     return false;
   }
@@ -255,14 +255,14 @@ class UndoableFocusActionBase extends UndoableAction {
   @override
   void invoke(FocusNode node, Intent intent) {
     super.invoke(node, intent);
-    _previousFocus = WidgetsBinding.instance.focusManager.primaryFocus;
+    _previousFocus = primaryFocus;
     node.requestFocus();
   }
 
   @override
   void undo() {
     if (_previousFocus == null) {
-      WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+      primaryFocus?.unfocus();
       return;
     }
     if (_previousFocus is FocusScopeNode) {
@@ -272,7 +272,7 @@ class UndoableFocusActionBase extends UndoableAction {
 
       // Unfocus the current node to remove it from the focused child list of
       // the scope.
-      WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+      primaryFocus?.unfocus();
       // and then let the scope node be focused...
     }
     _previousFocus.requestFocus();

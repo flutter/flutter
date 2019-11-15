@@ -243,7 +243,7 @@ void main() {
     Pub: () => const Pub(),
   });
 
-  test('Pub error handling', () {
+  test('Pub error handling', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -278,8 +278,16 @@ void main() {
             ..setLastModifiedSync(DateTime(2002));
         }
       ),
+      const FakeCommand(
+        command: <String>[
+          '/bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+      ),
     ]);
-    Testbed().run(() async {
+    await Testbed().run(() async {
       // the good scenario: .packages is old, pub updates the file.
       fs.file('.packages')
         ..createSync()
@@ -315,7 +323,7 @@ void main() {
         await pub.get(context: PubContext.flutterTests, checkLastModified: true);
         expect(true, isFalse, reason: 'pub.get did not throw');
       } catch (error) {
-        expect(error.runtimeType, Exception);
+        expect(error, isInstanceOf<Exception>());
         expect(error.message, '/: unexpected concurrent modification of pubspec.yaml while running pub.');
       }
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
@@ -329,11 +337,11 @@ void main() {
         ..setLastModifiedSync(DateTime(9999));
       assert(DateTime(9999).isAfter(DateTime.now()));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
-      expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
+      expect(testLogger.statusText, contains('Running "flutter pub get" in /...\n'));
       expect(testLogger.errorText, startsWith(
         'Warning: File "/pubspec.yaml" was created in the future. Optimizations that rely on '
         'comparing time stamps will be unreliable. Check your system clock for accuracy.\n'
-        'The timestamp was: 2000-01-01 00:00:00.000\n'
+        'The timestamp was:'
       ));
       testLogger.clear();
     }, overrides: <Type, Generator>{

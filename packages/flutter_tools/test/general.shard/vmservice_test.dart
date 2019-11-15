@@ -47,7 +47,7 @@ class MockPeer implements rpc.Peer {
 
   @override
   void registerMethod(String name, Function callback) {
-    // this does get called
+    registeredMethods.add(name);
   }
 
   @override
@@ -57,6 +57,7 @@ class MockPeer implements rpc.Peer {
   }
 
   Map<String, List<dynamic>> sentNotifications = <String, List<dynamic>>{};
+  List<String> registeredMethods = <String>[];
 
   bool isolatesEnabled = false;
 
@@ -258,6 +259,19 @@ void main() {
         expect(done, isTrue);
         expect(mockStdio.writtenToStdout.join(''), message);
         expect(mockStdio.writtenToStderr.join(''), '');
+      });
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      Stdio: () => mockStdio,
+    });
+
+     testUsingContext('registers hot UI method', () {
+      FakeAsync().run((FakeAsync time) {
+        final MockPeer mockPeer = MockPeer();
+        Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+        VMService(mockPeer, null, null, reloadSources, null, null);
+
+        expect(mockPeer.registeredMethods, contains('reloadMethod'));
       });
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(),

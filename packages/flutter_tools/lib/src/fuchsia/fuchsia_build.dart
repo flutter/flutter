@@ -38,6 +38,7 @@ Future<void> buildFuchsia({
   @required FuchsiaProject fuchsiaProject,
   @required String target, // E.g., lib/main.dart
   BuildInfo buildInfo = BuildInfo.debug,
+  String runnerPackageSource = FuchsiaPackageServer.toolHost,
 }) async {
   final Directory outDir = fs.directory(getFuchsiaBuildDirectory());
   if (!outDir.existsSync()) {
@@ -50,7 +51,7 @@ Future<void> buildFuchsia({
   await _timedBuildStep('fuchsia-build-assets',
     () => _buildAssets(fuchsiaProject, target, buildInfo));
   await _timedBuildStep('fuchsia-build-package',
-    () => _buildPackage(fuchsiaProject, target, buildInfo));
+    () => _buildPackage(fuchsiaProject, target, buildInfo, runnerPackageSource));
 }
 
 Future<void> _buildAssets(
@@ -85,7 +86,7 @@ Future<void> _buildAssets(
   await outFile.close();
 }
 
-void _rewriteCmx(BuildMode mode, File src, File dst) {
+void _rewriteCmx(BuildMode mode, String runnerPackageSource, File src, File dst) {
   final Map<String, dynamic> cmx = json.decode(src.readAsStringSync());
   // If the app author has already specified the runner in the cmx file, then
   // do not override it with something else.
@@ -106,7 +107,7 @@ void _rewriteCmx(BuildMode mode, File src, File dst) {
       throwToolExit('Fuchsia does not support build mode "$mode"');
       break;
   }
-  cmx['runner'] = 'fuchsia-pkg://fuchsia.com/$runner#meta/$runner.cmx';
+  cmx['runner'] = 'fuchsia-pkg://$runnerPackageSource/$runner#meta/$runner.cmx';
   dst.writeAsStringSync(json.encode(cmx));
 }
 
@@ -115,6 +116,7 @@ Future<void> _buildPackage(
   FuchsiaProject fuchsiaProject,
   String target, // lib/main.dart
   BuildInfo buildInfo,
+  String runnerPackageSource,
 ) async {
   final String outDir = getFuchsiaBuildDirectory();
   final String pkgDir = fs.path.join(outDir, 'pkg');
@@ -132,7 +134,7 @@ Future<void> _buildPackage(
   final File srcCmx =
       fs.file(fs.path.join(fuchsiaProject.meta.path, '$appName.cmx'));
   final File dstCmx = fs.file(fs.path.join(outDir, '$appName.cmx'));
-  _rewriteCmx(buildInfo.mode, srcCmx, dstCmx);
+  _rewriteCmx(buildInfo.mode, runnerPackageSource, srcCmx, dstCmx);
 
   // Concatenate dilpmanifest and pkgassets into package_manifest.
   final File manifestFile = fs.file(packageManifest);

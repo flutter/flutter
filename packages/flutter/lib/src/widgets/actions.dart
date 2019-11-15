@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'binding.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
@@ -153,7 +152,7 @@ class ActionDispatcher extends Diagnosticable {
   bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
     assert(action != null);
     assert(intent != null);
-    focusNode ??= WidgetsBinding.instance.focusManager.primaryFocus;
+    focusNode ??= primaryFocus;
     if (action != null && intent.isEnabled(focusNode.context)) {
       action.invoke(focusNode, intent);
       return true;
@@ -376,12 +375,25 @@ class DoNothingAction extends Action {
 /// An action that invokes the currently focused control.
 ///
 /// This is an abstract class that serves as a base class for actions that
-/// activate a control. It is bound to [LogicalKeyboardKey.enter] in the default
-/// keyboard map in [WidgetsApp].
+/// activate a control. By default, is bound to [LogicalKeyboardKey.enter] in
+/// the default keyboard map in [WidgetsApp].
 abstract class ActivateAction extends Action {
   /// Creates a [ActivateAction] with a fixed [key];
   const ActivateAction() : super(key);
 
   /// The [LocalKey] that uniquely identifies this action.
   static const LocalKey key = ValueKey<Type>(ActivateAction);
+}
+
+/// An action that selects the currently focused control.
+///
+/// This is an abstract class that serves as a base class for actions that
+/// select something, like a checkbox or a radio button. By default, it is bound
+/// to [LogicalKeyboardKey.space] in the default keyboard map in [WidgetsApp].
+abstract class SelectAction extends Action {
+  /// Creates a [SelectAction] with a fixed [key];
+  const SelectAction() : super(key);
+
+  /// The [LocalKey] that uniquely identifies this action.
+  static const LocalKey key = ValueKey<Type>(SelectAction);
 }

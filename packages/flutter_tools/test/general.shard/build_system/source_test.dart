@@ -41,7 +41,6 @@ void main() {
   test('configures implicit vs explict correctly', () => testbed.run(() {
     expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
     expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
-    expect(Source.behavior(TestBehavior()).implicit, true);
   }));
 
   test('can substitute {PROJECT_DIR}/foo', () => testbed.run(() {
@@ -217,17 +216,4 @@ void main() {
   }));
 }
 
-class TestBehavior extends SourceBehavior {
-  @override
-  List<File> inputs(Environment environment) {
-    return null;
-  }
-
-  @override
-  List<File> outputs(Environment environment) {
-    return null;
-  }
-}
-
 class MockPlatform extends Mock implements Platform {}
-

@@ -109,6 +109,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     TargetModel targetModel = TargetModel.flutter,
     String initializeFromDill,
     String platformDill,
+    List<String> dartDefines,
   }) async {
     if (fileSystemRoots != null || fileSystemScheme != null || depFilePath != null || targetModel != null || sdkRoot != null || packagesPath != null) {
       printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel,'
@@ -147,6 +148,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       depFilePath: depFilePath,
       targetModel: targetModel,
       initializeFromDill: initializeFromDill,
+      dartDefines: dartDefines,
     );
   }
 }
@@ -171,10 +173,16 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     String outputPath,
     String initializeFromDill,
     bool runCold = false,
+    TargetPlatform targetPlatform,
+    @required List<String> dartDefines,
   }) async {
     codeGenerator.updatePackages(flutterProject);
     final ResidentCompiler residentCompiler = ResidentCompiler(
-      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: targetPlatform,
+        mode: buildMode,
+      ),
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
       packagesPath: PackageMap.globalGeneratedPackagesPath,
@@ -186,6 +194,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       targetModel: TargetModel.flutter,
       unsafePackageSerialization: unsafePackageSerialization,
       initializeFromDill: initializeFromDill,
+      dartDefines: dartDefines,
     );
     if (runCold) {
       return residentCompiler;

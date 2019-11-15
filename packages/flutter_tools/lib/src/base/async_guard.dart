@@ -26,8 +26,7 @@ import 'dart:async';
 /// completed with its result when passed the error object and stack trace.
 ///
 /// After the returned [Future] is completed, whether it be with a value or an
-/// error, all further errors resulting from the execution of [fn] both
-/// synchronous and asynchronous are ignored.
+/// error, all further errors resulting from the execution of [fn] are ignored.
 ///
 /// Rationale:
 ///
@@ -100,10 +99,10 @@ Future<T> asyncGuard<T>(
       completer.completeError(e, s);
       return;
     }
-    if (onError is _UnaryOnError) {
-      completer.complete(onError(e));
-    } else if (onError is _BinaryOnError) {
+    if (onError is _BinaryOnError) {
       completer.complete(onError(e, s));
+    } else if (onError is _UnaryOnError) {
+      completer.complete(onError(e));
     }
   }
 

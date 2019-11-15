@@ -738,7 +738,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
-  /// [AppBar] uses this this size to compute its own preferred size.
+  /// [AppBar] uses this size to compute its own preferred size.
   @override
   Size get preferredSize {
     for (Widget item in tabs) {

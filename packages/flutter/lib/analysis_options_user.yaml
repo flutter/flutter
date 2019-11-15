@@ -37,6 +37,7 @@ linter:
     - avoid_empty_else
     - avoid_init_to_null
     - avoid_return_types_on_setters
+    - avoid_web_libraries_in_flutter
     - await_only_futures
     - camel_case_types
     - cancel_subscriptions

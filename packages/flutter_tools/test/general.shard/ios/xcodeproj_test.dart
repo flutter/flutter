@@ -23,7 +23,7 @@ import '../../src/pubspec_schema.dart';
 const String xcodebuild = '/usr/bin/xcodebuild';
 
 void main() {
-  group('xcodebuild versioning', () {
+  group('xcodebuild commands', () {
     mocks.MockProcessManager mockProcessManager;
     XcodeProjectInterpreter xcodeProjectInterpreter;
     FakePlatform macOS;
@@ -171,6 +171,54 @@ void main() {
       Platform: () => macOS,
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingOsxContext('build settings contains Flutter Xcode environment variables', () async {
+      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
+        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+        'FLUTTER_XCODE_ARCHS': 'arm64'
+      });
+      when(mockProcessManager.runSync(<String>[
+        xcodebuild,
+        '-project',
+        macOS.pathSeparator,
+        '-target',
+        '',
+        '-showBuildSettings',
+        'CODE_SIGN_STYLE=Manual',
+        'ARCHS=arm64'
+      ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')))
+        .thenReturn(ProcessResult(1, 0, '', ''));
+      expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+    });
+
+    testUsingOsxContext('clean contains Flutter Xcode environment variables', () async {
+      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
+        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+        'FLUTTER_XCODE_ARCHS': 'arm64'
+      });
+      when(mockProcessManager.runSync(
+        any,
+        workingDirectory: anyNamed('workingDirectory')))
+        .thenReturn(ProcessResult(1, 0, '', ''));
+      xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Runner');
+      final List<dynamic> captured = verify(mockProcessManager.runSync(
+        captureAny,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'))).captured;
+      expect(captured.first, <String>[
+        xcodebuild,
+        '-workspace',
+        'workspace_path',
+        '-scheme',
+        'Runner',
+        '-quiet',
+        'clean',
+        'CODE_SIGN_STYLE=Manual',
+        'ARCHS=arm64'
+      ]);
     });
   });
 
@@ -335,6 +383,27 @@ Information about project "Runner":
       expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Free'), 'Free'), null);
       expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free'), 'Free'), null);
       expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid'), 'Paid'), null);
+    });
+  });
+
+  group('environmentVariablesAsXcodeBuildSettings', () {
+    FakePlatform platform;
+
+    setUp(() {
+      platform = fakePlatform('ignored');
+    });
+
+    testUsingContext('environment variables as Xcode build settings', () {
+      platform.environment = Map<String, String>.unmodifiable(<String, String>{
+        'Ignored': 'Bogus',
+        'FLUTTER_NOT_XCODE': 'Bogus',
+        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+        'FLUTTER_XCODE_ARCHS': 'arm64'
+      });
+      final List<String> environmentVariablesAsBuildSettings = environmentVariablesAsXcodeBuildSettings();
+      expect(environmentVariablesAsBuildSettings, <String>['CODE_SIGN_STYLE=Manual', 'ARCHS=arm64']);
+    }, overrides: <Type, Generator>{
+      Platform: () => platform
     });
   });
 

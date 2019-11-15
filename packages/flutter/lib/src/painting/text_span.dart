@@ -362,12 +362,15 @@ class TextSpan extends InlineSpan {
     assert(() {
       if (children != null) {
         for (InlineSpan child in children) {
-          assert(child != null,
-            'TextSpan contains a null child.\n...'
-            'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
-            'The full text in question was:\n'
-            '${toStringDeep(prefixLineOne: '  ')}'
-          );
+          if (child == null) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('TextSpan contains a null child.'),
+              ErrorDescription(
+                  'A TextSpan object with a non-null child list should not have any nulls in its child list.'),
+              toDiagnosticsNode(name: 'The full text in question was',
+                  style: DiagnosticsTreeStyle.errorProperty),
+            ]);
+          }
           assert(child.debugAssertIsValid());
         }
       }

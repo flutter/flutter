@@ -67,10 +67,6 @@ void main() {
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(observer.lifecycleState, AppLifecycleState.inactive);
-
-    message = const StringCodec().encodeMessage('AppLifecycleState.suspending');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(observer.lifecycleState, AppLifecycleState.suspending);
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
@@ -105,16 +101,6 @@ void main() {
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isFalse);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.suspending');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(tester.binding.hasScheduledFrame, isFalse);
-
-    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(tester.binding.hasScheduledFrame, isTrue);
-    await tester.pump();
-    expect(tester.binding.hasScheduledFrame, isFalse);
-
     message = const StringCodec().encodeMessage('AppLifecycleState.paused');
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isFalse);
@@ -137,5 +123,37 @@ void main() {
     tester.binding.scheduleWarmUpFrame(); // this actually tests flutter_test's implementation
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(frameCount, 1);
+  });
+
+  testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
+    FlutterError error;
+    try {
+      tester.binding.scheduleFrameCallback(null, rescheduling: true);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.diagnostics.length, 3);
+    expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics.last.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'If this is the initial registration of the callback, or if the\n'
+        'callback is asynchronous, then do not use the "rescheduling"\n'
+        'argument.\n'
+      ),
+    );
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   scheduleFrameCallback called with rescheduling true, but no\n'
+      '   callback is in scope.\n'
+      '   The "rescheduling" argument should only be set to true if the\n'
+      '   callback is being reregistered from within the callback itself,\n'
+      '   and only then if the callback itself is entirely synchronous.\n'
+      '   If this is the initial registration of the callback, or if the\n'
+      '   callback is asynchronous, then do not use the "rescheduling"\n'
+      '   argument.\n'
+    );
   });
 }
