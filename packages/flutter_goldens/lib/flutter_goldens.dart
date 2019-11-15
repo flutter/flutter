@@ -464,13 +464,12 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   /// Creates a new [FlutterLocalFileComparator] that mirrors the
   /// relative path resolution of the default [goldenFileComparator].
   ///
-  /// The [goldens] and [defaultComparator] parameters are visible for testing
-  /// purposes only.
+  /// The [goldens], [defaultComparator], and [baseDirectory] parameters are
+  /// visible for testing purposes only.
   static Future<FlutterGoldenFileComparator> fromDefaultComparator(
     final Platform platform, {
     SkiaGoldClient goldens,
     LocalFileComparator defaultComparator,
-    @visibleForTesting
     Directory baseDirectory,
   }) async {
     defaultComparator ??= goldenFileComparator;
