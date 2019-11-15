@@ -155,6 +155,21 @@ void main() {
       Usage: () => mockUsage,
     });
 
+    testUsingContext('warns the user to reload IDE', () async {
+      final BufferLogger logger = context.get<Logger>();
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      await commandRunner.run(<String>[
+        'config',
+        '--enable-web'
+      ]);
+
+      expect(logger.statusText, contains('You may need to restart any open editors'));
+    }, overrides: <Type, Generator>{
+      Usage: () => mockUsage,
+    });
+
     testUsingContext('displays which config settings are available on stable', () async {
       final BufferLogger logger = context.get<Logger>();
       when(mockFlutterVersion.channel).thenReturn('stable');

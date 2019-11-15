@@ -87,11 +87,16 @@ class AssembleCommand extends FlutterCommand {
     if (futterProject == null) {
       return const <CustomDimensions, String>{};
     }
-    final Environment localEnvironment = environment;
-    return <CustomDimensions, String>{
-      CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
-      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
-    };
+    try {
+      final Environment localEnvironment = environment;
+      return <CustomDimensions, String>{
+        CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
+        CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
+      };
+    } catch (err) {
+      // We've failed to send usage.
+    }
+    return const <CustomDimensions, String>{};
   }
 
   /// The target we are building.

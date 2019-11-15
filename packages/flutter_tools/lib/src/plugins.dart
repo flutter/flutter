@@ -35,28 +35,31 @@ class Plugin {
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
   /// This currently supports two formats. Legacy and Multi-platform.
+  ///
   /// Example of the deprecated Legacy format.
-  /// flutter:
-  ///  plugin:
-  ///    androidPackage: io.flutter.plugins.sample
-  ///    iosPrefix: FLT
-  ///    pluginClass: SamplePlugin
+  ///
+  ///     flutter:
+  ///      plugin:
+  ///        androidPackage: io.flutter.plugins.sample
+  ///        iosPrefix: FLT
+  ///        pluginClass: SamplePlugin
   ///
   /// Example Multi-platform format.
-  /// flutter:
-  ///  plugin:
-  ///    platforms:
-  ///      android:
-  ///        package: io.flutter.plugins.sample
-  ///        pluginClass: SamplePlugin
-  ///      ios:
-  ///        pluginClass: SamplePlugin
-  ///      linux:
-  ///        pluginClass: SamplePlugin
-  ///      macos:
-  ///        pluginClass: SamplePlugin
-  ///      windows:
-  ///        pluginClass: SamplePlugin
+  ///
+  ///     flutter:
+  ///      plugin:
+  ///        platforms:
+  ///          android:
+  ///            package: io.flutter.plugins.sample
+  ///            pluginClass: SamplePlugin
+  ///          ios:
+  ///            pluginClass: SamplePlugin
+  ///          linux:
+  ///            pluginClass: SamplePlugin
+  ///          macos:
+  ///            pluginClass: SamplePlugin
+  ///          windows:
+  ///            pluginClass: SamplePlugin
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
@@ -65,7 +68,7 @@ class Plugin {
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
       return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
     }
-    return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
+    return Plugin._fromLegacyYaml(name, path, pluginYaml);
   }
 
   factory Plugin._fromMultiPlatformYaml(String name, String path, dynamic pluginYaml) {
@@ -118,7 +121,6 @@ class Plugin {
     );
   }
 
-  @deprecated
   factory Plugin._fromLegacyYaml(String name, String path, dynamic pluginYaml) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String pluginClass = pluginYaml['pluginClass'];
@@ -396,10 +398,20 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     case AndroidEmbeddingVersion.v2:
       templateContext['needsShim'] = false;
       // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
-      // then add  shim for the old plugins.
+      // then add shim for the old plugins.
       for (Map<String, dynamic> plugin in androidPlugins) {
         if (plugin['supportsEmbeddingV1'] && !plugin['supportsEmbeddingV2']) {
           templateContext['needsShim'] = true;
+          if (project.isModule) {
+            printStatus(
+              'The plugin `${plugin['name']}` is built using an older version '
+              "of the Android plugin API which assumes that it's running in a "
+              'full-Flutter environment. It may have undefined behaviors when '
+              'Flutter is integrated into an existing app as a module.\n'
+              'The plugin can be updated to the v2 Android Plugin APIs by '
+              'following https://flutter.dev/go/android-plugin-migration.'
+            );
+          }
           break;
         }
       }
