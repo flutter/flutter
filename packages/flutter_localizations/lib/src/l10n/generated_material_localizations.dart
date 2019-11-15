@@ -15255,28 +15255,67 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   );
 
   @override
-  String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
+  String get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
 
   @override
-  String get alertDialogLabel => r'Obaveštenje';
+  String get selectedRowCountTitleFew => r'Izabrane su $selectedRowCount stavke';
 
   @override
-  String get anteMeridiemAbbreviation => r'pre podne';
+  String get openAppDrawerTooltip => r'Otvorite meni za navigaciju';
 
   @override
   String get backButtonTooltip => r'Nazad';
+
+  @override
+  String get closeButtonTooltip => r'Zatvorite';
+
+  @override
+  String get deleteButtonTooltip => r'Izbrišite';
+
+  @override
+  String get nextMonthTooltip => r'Sledeći mesec';
+
+  @override
+  String get previousMonthTooltip => r'Prethodni mesec';
+
+  @override
+  String get nextPageTooltip => r'Sledeća stranica';
+
+  @override
+  String get previousPageTooltip => r'Prethodna stranica';
+
+  @override
+  String get showMenuTooltip => r'Prikaži meni';
+
+  @override
+  String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
+
+  @override
+  String get licensesPageTitle => r'Licence';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow od $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow od približno $rowCount';
+
+  @override
+  String get rowsPerPageTitle => r'Redova po stranici:';
+
+  @override
+  String get tabLabelRaw => r'$tabIndex. kartica od $tabCount';
+
+  @override
+  String get selectedRowCountTitleOne => r'Izabrana je 1 stavka';
+
+  @override
+  String get selectedRowCountTitleOther => r'Izabrano je $selectedRowCount stavki';
 
   @override
   String get cancelButtonLabel => r'OTKAŽI';
 
   @override
   String get closeButtonLabel => r'ZATVORI';
-
-  @override
-  String get closeButtonTooltip => r'Zatvorite';
-
-  @override
-  String get collapsedIconTapHint => r'Proširi';
 
   @override
   String get continueButtonLabel => r'NASTAVI';
@@ -15288,70 +15327,64 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get cutButtonLabel => r'ISECI';
 
   @override
-  String get deleteButtonTooltip => r'Izbrišite';
-
-  @override
-  String get dialogLabel => r'Dijalog';
-
-  @override
-  String get drawerLabel => r'Meni za navigaciju';
-
-  @override
-  String get expandedIconTapHint => r'Skupi';
-
-  @override
-  String get hideAccountsLabel => r'Sakrij naloge';
-
-  @override
-  String get licensesPageTitle => r'Licence';
-
-  @override
-  String get modalBarrierDismissLabel => r'Odbaci';
-
-  @override
-  String get nextMonthTooltip => r'Sledeći mesec';
-
-  @override
-  String get nextPageTooltip => r'Sledeća stranica';
-
-  @override
   String get okButtonLabel => r'Potvrdi';
-
-  @override
-  String get openAppDrawerTooltip => r'Otvorite meni za navigaciju';
-
-  @override
-  String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow od $rowCount';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow od približno $rowCount';
 
   @override
   String get pasteButtonLabel => r'NALEPI';
 
   @override
-  String get popupMenuLabel => r'Iskačući meni';
+  String get selectAllButtonLabel => r'IZABERI SVE';
+
+  @override
+  String get viewLicensesButtonLabel => r'PRIKAŽI LICENCE';
+
+  @override
+  String get anteMeridiemAbbreviation => r'pre podne';
 
   @override
   String get postMeridiemAbbreviation => r'po podne';
 
   @override
-  String get previousMonthTooltip => r'Prethodni mesec';
+  String get timePickerHourModeAnnouncement => r'Izaberite sate';
 
   @override
-  String get previousPageTooltip => r'Prethodna stranica';
+  String get timePickerMinuteModeAnnouncement => r'Izaberite minute';
 
   @override
-  String get refreshIndicatorSemanticLabel => r'Osveži';
+  String get modalBarrierDismissLabel => r'Odbaci';
 
   @override
-  String get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
+  String get signedInLabel => r'Prijavljeni ste';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'Preostao je 1 znak';
+  String get hideAccountsLabel => r'Sakrij naloge';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
+  String get showAccountsLabel => r'Prikaži naloge';
+
+  @override
+  String get drawerLabel => r'Meni za navigaciju';
+
+  @override
+  String get popupMenuLabel => r'Iskačući meni';
+
+  @override
+  String get dialogLabel => r'Dijalog';
+
+  @override
+  String get alertDialogLabel => r'Obaveštenje';
+
+  @override
+  String get searchFieldLabel => r'Pretražite';
+
+  @override
+  String get reorderItemToStart => r'Pomerite na početak';
+
+  @override
+  String get reorderItemToEnd => r'Pomerite na kraj';
+
+  @override
+  String get reorderItemUp => r'Pomerite nagore';
 
   @override
   String get reorderItemDown => r'Pomerite nadole';
@@ -15363,52 +15396,19 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get reorderItemRight => r'Pomerite udesno';
 
   @override
-  String get reorderItemToEnd => r'Pomerite na kraj';
+  String get expandedIconTapHint => r'Skupi';
 
   @override
-  String get reorderItemToStart => r'Pomerite na početak';
+  String get collapsedIconTapHint => r'Proširi';
 
   @override
-  String get reorderItemUp => r'Pomerite nagore';
+  String get remainingTextFieldCharacterCountOne => r'Preostao je 1 znak';
 
   @override
-  String get rowsPerPageTitle => r'Redova po stranici:';
+  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
 
   @override
-  String get searchFieldLabel => r'Pretražite';
-
-  @override
-  String get selectAllButtonLabel => r'IZABERI SVE';
-
-  @override
-  String get selectedRowCountTitleFew => r'Izabrane su $selectedRowCount stavke';
-
-  @override
-  String get selectedRowCountTitleOne => r'Izabrana je 1 stavka';
-
-  @override
-  String get selectedRowCountTitleOther => r'Izabrano je $selectedRowCount stavki';
-
-  @override
-  String get showAccountsLabel => r'Prikaži naloge';
-
-  @override
-  String get showMenuTooltip => r'Prikaži meni';
-
-  @override
-  String get signedInLabel => r'Prijavljeni ste';
-
-  @override
-  String get tabLabelRaw => r'$tabIndex. kartica od $tabCount';
-
-  @override
-  String get timePickerHourModeAnnouncement => r'Izaberite sate';
-
-  @override
-  String get timePickerMinuteModeAnnouncement => r'Izaberite minute';
-
-  @override
-  String get viewLicensesButtonLabel => r'PRIKAŽI LICENCE';
+  String get refreshIndicatorSemanticLabel => r'Osveži';
 }
 
 /// The translations for Swedish (`sv`).
@@ -17907,19 +17907,67 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   );
 
   @override
-  String get aboutListTileTitleRaw => r'關於$applicationName';
+  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
 
   @override
-  String get alertDialogLabel => r'通知';
+  String get showAccountsLabel => r'顯示帳戶';
 
   @override
-  String get closeButtonLabel => r'關閉';
+  String get modalBarrierDismissLabel => r'關閉';
+
+  @override
+  String get hideAccountsLabel => r'隱藏帳戶';
+
+  @override
+  String get signedInLabel => r'已登入帳戶';
+
+  @override
+  String get openAppDrawerTooltip => r'開啟導覽選單';
 
   @override
   String get closeButtonTooltip => r'關閉';
 
   @override
-  String get collapsedIconTapHint => r'展開';
+  String get deleteButtonTooltip => r'刪除';
+
+  @override
+  String get nextMonthTooltip => r'下個月';
+
+  @override
+  String get previousMonthTooltip => r'上個月';
+
+  @override
+  String get nextPageTooltip => r'下一頁';
+
+  @override
+  String get previousPageTooltip => r'上一頁';
+
+  @override
+  String get showMenuTooltip => r'顯示選單';
+
+  @override
+  String get aboutListTileTitleRaw => r'關於「$applicationName」';
+
+  @override
+  String get licensesPageTitle => r'授權';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
+
+  @override
+  String get rowsPerPageTitle => r'每頁列數：';
+
+  @override
+  String get selectedRowCountTitleOne => r'已選取 1 個項目';
+
+  @override
+  String get selectedRowCountTitleOther => r'已選取 $selectedRowCount 個項目';
+
+  @override
+  String get closeButtonLabel => r'關閉';
 
   @override
   String get continueButtonLabel => r'繼續';
@@ -17931,64 +17979,46 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get cutButtonLabel => r'剪下';
 
   @override
-  String get deleteButtonTooltip => r'刪除';
-
-  @override
-  String get dialogLabel => r'對話方塊';
-
-  @override
-  String get drawerLabel => r'導覽選單';
-
-  @override
-  String get expandedIconTapHint => r'收合';
-
-  @override
-  String get hideAccountsLabel => r'隱藏帳戶';
-
-  @override
-  String get licensesPageTitle => r'授權';
-
-  @override
-  String get modalBarrierDismissLabel => r'拒絕';
-
-  @override
-  String get nextMonthTooltip => r'下個月';
-
-  @override
-  String get nextPageTooltip => r'下一頁';
-
-  @override
   String get okButtonLabel => r'確定';
-
-  @override
-  String get openAppDrawerTooltip => r'開啟導覽選單';
-
-  @override
-  String get pageRowsInfoTitleRaw => r'第 $firstRow 至 $lastRow 列，共 $rowCount 列';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
 
   @override
   String get pasteButtonLabel => r'貼上';
 
   @override
+  String get selectAllButtonLabel => r'全選';
+
+  @override
+  String get viewLicensesButtonLabel => r'查看授權';
+
+  @override
+  String get timePickerHourModeAnnouncement => r'選取小時數';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
+
+  @override
+  String get drawerLabel => r'導覽選單';
+
+  @override
   String get popupMenuLabel => r'彈出式選單';
 
   @override
-  String get previousMonthTooltip => r'上個月';
+  String get dialogLabel => r'對話方塊';
 
   @override
-  String get previousPageTooltip => r'上一頁';
+  String get alertDialogLabel => r'快訊';
 
   @override
-  String get refreshIndicatorSemanticLabel => r'重新整理';
+  String get searchFieldLabel => r'搜尋';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'尚餘 1 個字元';
+  String get reorderItemToStart => r'移至開頭';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'尚餘 $remainingCount 個字元';
+  String get reorderItemToEnd => r'移至結尾';
+
+  @override
+  String get reorderItemUp => r'向上移';
 
   @override
   String get reorderItemDown => r'向下移';
@@ -18000,49 +18030,19 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get reorderItemRight => r'向右移';
 
   @override
-  String get reorderItemToEnd => r'移到最後';
+  String get expandedIconTapHint => r'收合';
 
   @override
-  String get reorderItemToStart => r'移到開頭';
+  String get collapsedIconTapHint => r'展開';
 
   @override
-  String get reorderItemUp => r'向上移';
+  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
 
   @override
-  String get rowsPerPageTitle => r'每頁列數：';
+  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 
   @override
-  String get searchFieldLabel => r'搜尋';
-
-  @override
-  String get selectAllButtonLabel => r'全選';
-
-  @override
-  String get selectedRowCountTitleOne => r'已選取 1 個項目';
-
-  @override
-  String get selectedRowCountTitleOther => r'已選取 $selectedRowCount 個項目';
-
-  @override
-  String get showAccountsLabel => r'顯示帳戶';
-
-  @override
-  String get showMenuTooltip => r'顯示選單';
-
-  @override
-  String get signedInLabel => r'已登入';
-
-  @override
-  String get tabLabelRaw => r'第 $tabIndex 個標籤，總共 $tabCount 個';
-
-  @override
-  String get timePickerHourModeAnnouncement => r'揀選小時';
-
-  @override
-  String get timePickerMinuteModeAnnouncement => r'揀選分鐘';
-
-  @override
-  String get viewLicensesButtonLabel => r'查看授權';
+  String get refreshIndicatorSemanticLabel => r'重新整理';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -18067,6 +18067,45 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
+
+  @override
+  String get tabLabelRaw => r'第 $tabIndex 個標籤，總共 $tabCount 個';
+
+  @override
+  String get modalBarrierDismissLabel => r'拒絕';
+
+  @override
+  String get signedInLabel => r'已登入';
+
+  @override
+  String get aboutListTileTitleRaw => r'關於$applicationName';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'第 $firstRow 至 $lastRow 列，共 $rowCount 列';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
+
+  @override
+  String get timePickerHourModeAnnouncement => r'揀選小時';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'揀選分鐘';
+
+  @override
+  String get alertDialogLabel => r'通知';
+
+  @override
+  String get reorderItemToStart => r'移到開頭';
+
+  @override
+  String get reorderItemToEnd => r'移到最後';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'尚餘 1 個字元';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'尚餘 $remainingCount 個字元';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -18091,45 +18130,6 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
-
-  @override
-  String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';
-
-  @override
-  String get modalBarrierDismissLabel => r'關閉';
-
-  @override
-  String get signedInLabel => r'已登入帳戶';
-
-  @override
-  String get aboutListTileTitleRaw => r'關於「$applicationName」';
-
-  @override
-  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
-
-  @override
-  String get timePickerHourModeAnnouncement => r'選取小時數';
-
-  @override
-  String get timePickerMinuteModeAnnouncement => r'選取分鐘數';
-
-  @override
-  String get alertDialogLabel => r'快訊';
-
-  @override
-  String get reorderItemToStart => r'移至開頭';
-
-  @override
-  String get reorderItemToEnd => r'移至結尾';
-
-  @override
-  String get remainingTextFieldCharacterCountOne => r'還可輸入 1 個字元';
-
-  @override
-  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
 }
 
 /// The translations for Zulu (`zu`).
