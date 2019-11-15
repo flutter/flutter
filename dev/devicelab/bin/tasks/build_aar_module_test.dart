@@ -42,7 +42,7 @@ Future<void> main() async {
       String content = pubspec.readAsStringSync();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n',
+        '\ndependencies:\n  device_info:\n  package_info:\n',
       );
       pubspec.writeAsStringSync(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -69,8 +69,6 @@ Future<void> main() async {
         'repo',
       );
 
-      section('Check release Maven artifacts');
-
       checkFileExists(path.join(
         repoPath,
         'io',
@@ -95,59 +93,12 @@ Future<void> main() async {
 
       checkFileExists(releasePom);
 
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'deviceinfo',
-        'device_info_release',
-        '1.0',
-        'device_info_release-1.0.aar',
-      ));
-
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'deviceinfo',
-        'device_info_release',
-        '1.0',
-        'device_info_release-1.0.pom',
-      ));
-
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'packageinfo',
-        'package_info_release',
-        '1.0',
-        'package_info_release-1.0.aar',
-      ));
-
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'packageinfo',
-        'package_info_release',
-        '1.0',
-        'package_info_release-1.0.pom',
-      ));
-
       section('Check AOT blobs in release POM');
 
       checkFileContains(<String>[
         'flutter_embedding_release',
         'armeabi_v7a_release',
         'arm64_v8a_release',
-        'x86_64_release',
-        'package_info_release',
-        'device_info_release',
       ], releasePom);
 
       section('Check assets in release AAR');
@@ -158,7 +109,6 @@ Future<void> main() async {
           // AOT snapshots
           'jni/arm64-v8a/libapp.so',
           'jni/armeabi-v7a/libapp.so',
-          'jni/x86_64/libapp.so',
         ],
         await getFilesInAar(
           path.join(
@@ -182,8 +132,6 @@ Future<void> main() async {
           options: <String>['aar', '--verbose', '--debug'],
         );
       });
-
-      section('Check debug Maven artifacts');
 
       checkFileExists(path.join(
         repoPath,
@@ -209,50 +157,6 @@ Future<void> main() async {
 
       checkFileExists(debugPom);
 
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'deviceinfo',
-        'device_info_debug',
-        '1.0',
-        'device_info_debug-1.0.aar',
-      ));
-
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'deviceinfo',
-        'device_info_debug',
-        '1.0',
-        'device_info_debug-1.0.pom',
-      ));
-
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'packageinfo',
-        'package_info_debug',
-        '1.0',
-        'package_info_debug-1.0.aar',
-      ));
-
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'packageinfo',
-        'package_info_debug',
-        '1.0',
-        'package_info_debug-1.0.pom',
-      ));
-
       section('Check AOT blobs in debug POM');
 
       checkFileContains(<String>[
@@ -261,8 +165,6 @@ Future<void> main() async {
         'x86_64_debug',
         'armeabi_v7a_debug',
         'arm64_v8a_debug',
-        'package_info_debug',
-        'device_info_debug',
       ], debugPom);
 
       section('Check assets in debug AAR');
