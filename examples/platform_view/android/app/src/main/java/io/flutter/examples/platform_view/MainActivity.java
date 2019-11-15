@@ -21,6 +21,8 @@ public class MainActivity extends FlutterActivity {
 
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    GeneratedPluginRegistrant.registerWith(flutterEngine);
+
     new MethodChannel(flutterEngine.getDartExecutor(), CHANNEL).setMethodCallHandler(
       new MethodChannel.MethodCallHandler() {
         @Override

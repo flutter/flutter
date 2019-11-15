@@ -31,6 +31,8 @@ public class MainActivity extends FlutterActivity {
 
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    GeneratedPluginRegistrant.registerWith(flutterEngine);
+
     new EventChannel(flutterEngine.getDartExecutor(), CHARGING_CHANNEL).setStreamHandler(
       new StreamHandler() {
         private BroadcastReceiver chargingStateChangeReceiver;
