@@ -512,6 +512,150 @@ abstract class ResidentCompiler {
   Future<dynamic> shutdown();
 }
 
+// An experimental interface to hot ui.
+class HotUIServer {
+  HotUIServer(
+    String sdkRoot, {
+    @required this.buildMode,
+    this.causalAsyncStacks = true,
+    this.trackWidgetCreation = true,
+    this.packagesPath,
+    this.fileSystemRoots,
+    this.fileSystemScheme,
+    this.initializeFromDill,
+    this.targetModel = TargetModel.flutter,
+    this.unsafePackageSerialization,
+    this.experimentalFlags,
+    this.platformDill,
+    List<String> dartDefines,
+  }) : assert(sdkRoot != null),
+       dartDefines = dartDefines ?? const <String>[],
+       // This is a URI, not a file path, so the forward slash is correct even on Windows.
+       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
+
+  final BuildMode buildMode;
+  final bool causalAsyncStacks;
+  final bool trackWidgetCreation;
+  final String packagesPath;
+  final TargetModel targetModel;
+  final List<String> fileSystemRoots;
+  final String fileSystemScheme;
+  final String initializeFromDill;
+  final bool unsafePackageSerialization;
+  final List<String> experimentalFlags;
+  final List<String> dartDefines;
+
+  String outputDill;
+  String packagesFilePath;
+  String mainPath;
+
+  bool get isReady => _server != null;
+
+  /// The path to the root of the Dart SDK used to compile.
+  ///
+  /// This is used to resolve the [platformDill].
+  final String sdkRoot;
+
+  /// The path to the platform dill file.
+  ///
+  /// This does not need to be provided for the normal Flutter workflow.
+  final String platformDill;
+
+  Process _server;
+  final StreamController<_CompilationRequest> _controller = StreamController<_CompilationRequest>();
+
+  Future<void> startup() async {
+     final String hotUiServer = artifacts.getArtifactPath(
+      Artifact.hotUiServer
+    );
+    final List<String> command = <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      hotUiServer,
+      '--sdk-root',
+      sdkRoot,
+      '--target=$mainPath',
+      '--target-model=$targetModel',
+      //'-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
+      for (Object dartDefine in dartDefines)
+        '-D$dartDefine',
+      if (outputDill != null) ...<String>[
+        '--output-dill',
+        outputDill,
+      ],
+      if (packagesFilePath != null) ...<String>[
+        '--packages',
+        packagesFilePath,
+      ] else if (packagesPath != null) ...<String>[
+        '--packages',
+        packagesPath,
+      ],
+      //..._buildModeOptions(buildMode),
+      //if (trackWidgetCreation) '--track-widget-creation',
+      if (fileSystemRoots != null)
+        for (String root in fileSystemRoots) ...<String>[
+          '--filesystem-root',
+          root,
+        ],
+      if (fileSystemScheme != null) ...<String>[
+        '--filesystem-scheme',
+        fileSystemScheme,
+      ],
+      if (initializeFromDill != null) ...<String>[
+        '--initialize-from-dill',
+        initializeFromDill,
+      ],
+      if (platformDill != null) ...<String>[
+        '--platform',
+        platformDill,
+      ],
+      if (unsafePackageSerialization == true) '--unsafe-package-serialization',
+      if ((experimentalFlags != null) && experimentalFlags.isNotEmpty)
+        '--enable-experiment=${experimentalFlags.join(',')}',
+    ];
+    printTrace(command.join(' '));
+    _server = await processManager.start(command);
+    _server.stdout
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) {
+        printTrace(line);
+        if (line == 'READY' && _lastCompile != null) {
+          _lastCompile.complete(true);
+          return;
+        }
+        if (line == 'FAILED' && _lastCompile != null) {
+          _lastCompile.complete(false);
+          return;
+        }
+      });
+
+    _server.stderr
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(printError);
+  }
+
+  Completer<bool> _lastCompile;
+
+  // {"class":"_DemoItem","method":"build","library":"package:flutter_gallery/gallery/home.dart","methodBody":"Text('Hello, World')"}
+  Future<bool> patch({
+    @required String classId,
+    @required String methodId,
+    @required String libraryId,
+    @required String methodBody,
+  }) async {
+    if (_lastCompile != null) {
+      await _lastCompile.future;
+    }
+    _lastCompile = Completer<bool>();
+    _server.stdin.writeln('{"class":"$classId","method":"$methodId",'
+      '"library":"$libraryId","methodBody":"$methodBody"}');
+    final bool result = await _lastCompile.future;
+    _lastCompile = null;
+    return result;
+  }
+}
+
 @visibleForTesting
 class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(

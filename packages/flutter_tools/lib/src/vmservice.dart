@@ -61,6 +61,13 @@ typedef CompileExpression = Future<String> Function(
   bool isStatic,
 );
 
+typedef ReloadMethod = Future<void> Function({
+  String classId,
+  String libraryId,
+  String methodId,
+  String methodBody,
+});
+
 const String _kRecordingType = 'vmservice';
 
 Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOptions compression = io.CompressionOptions.compressionDefault}) async {
@@ -101,7 +108,13 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOption
 
 /// Override `VMServiceConnector` in [context] to return a different VMService
 /// from [VMService.connect] (used by tests).
-typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, { ReloadSources reloadSources, Restart restart, CompileExpression compileExpression, io.CompressionOptions compression });
+typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, {
+  ReloadSources reloadSources,
+  Restart restart,
+  CompileExpression compileExpression,
+  ReloadMethod reloadMethod,
+  io.CompressionOptions compression,
+});
 
 /// A connection to the Dart VM Service.
 // TODO(mklim): Test this, https://github.com/flutter/flutter/issues/23031
@@ -113,6 +126,7 @@ class VMService {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
   ) {
     _vm = VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
@@ -169,10 +183,18 @@ class VMService {
           throw rpc.RpcException.invalidParams('Invalid \'methodBody\': $methodBody');
         }
 
-        printTrace('reloadMethod not yet supported, falling back to hot reload');
-
         try {
-          await reloadSources(isolateId);
+          if (reloadMethod == null) {
+            printTrace('reloadMethod not yet supported, falling back to hot reload');
+            await reloadSources(isolateId);
+          } else {
+            await reloadMethod(
+              classId: classId,
+              libraryId: libraryId,
+              methodId: methodId,
+              methodBody: methodBody,
+            );
+          }
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
@@ -309,10 +331,17 @@ class VMService {
       ReloadSources reloadSources,
       Restart restart,
       CompileExpression compileExpression,
+      ReloadMethod reloadMethod,
       io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     }) async {
     final VMServiceConnector connector = context.get<VMServiceConnector>() ?? VMService._connect;
-    return connector(httpUri, reloadSources: reloadSources, restart: restart, compileExpression: compileExpression, compression: compression);
+    return connector(httpUri,
+      reloadSources: reloadSources,
+      restart: restart,
+      compileExpression: compileExpression,
+      compression: compression,
+      reloadMethod: reloadMethod,
+    );
   }
 
   static Future<VMService> _connect(
@@ -320,12 +349,13 @@ class VMService {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
     final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel), onUnhandledError: _unhandledError);
-    final VMService service = VMService(peer, httpUri, wsUri, reloadSources, restart, compileExpression);
+    final VMService service = VMService(peer, httpUri, wsUri, reloadSources, restart, compileExpression, reloadMethod);
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.
     await service._sendRequest('getVersion', const <String, dynamic>{});

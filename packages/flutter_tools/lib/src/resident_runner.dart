@@ -19,6 +19,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'compile.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -42,6 +43,7 @@ class FlutterDevice {
     ResidentCompiler generator,
     @required BuildMode buildMode,
     List<String> dartDefines,
+    this.hotUIServer,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(
@@ -114,6 +116,26 @@ class FlutterDevice {
         dartDefines: dartDefines,
       );
     }
+
+    // Conditionally create the Hot UI server if the feature is enabled.
+    HotUIServer hotUIServer;
+    if (featureFlags.isHotUIServerEnabled) {
+      hotUIServer = HotUIServer(
+        artifacts.getArtifactPath(
+          Artifact.flutterPatchedSdkPath,
+          platform: targetPlatform,
+          mode: buildMode,
+        ),
+        buildMode: buildMode,
+        trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots,
+        fileSystemScheme: fileSystemScheme,
+        targetModel: targetModel,
+        experimentalFlags: experimentalFlags,
+        dartDefines: dartDefines,
+      );
+    }
+
     return FlutterDevice(
       device,
       trackWidgetCreation: trackWidgetCreation,
@@ -126,6 +148,7 @@ class FlutterDevice {
       generator: generator,
       buildMode: buildMode,
       dartDefines: dartDefines,
+      hotUIServer: hotUIServer,
     );
   }
 
@@ -141,6 +164,11 @@ class FlutterDevice {
   final String viewFilter;
   final bool trackWidgetCreation;
 
+  /// Experimental HotUIServer.
+  ///
+  /// This is only available if the feature flag HotUIServer is enabled.
+  final HotUIServer hotUIServer;
+
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
   /// The 'reloadSources' service can be used by other Service Protocol clients
@@ -154,6 +182,7 @@ class FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
   }) async {
     if (vmServices != null) {
       return;
@@ -166,6 +195,7 @@ class FlutterDevice {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
+        reloadMethod: reloadMethod,
       );
       printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
@@ -671,6 +701,15 @@ abstract class ResidentRunner {
     Completer<void> appStartedCompleter,
   });
 
+  Future<void> reloadMethod({
+    String libraryId,
+    String classId,
+    String methodId,
+    String methodBody,
+  }) {
+    throw UnsupportedError('Not currently supported');
+  }
+
   bool get supportsRestart => false;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
@@ -857,6 +896,7 @@ abstract class ResidentRunner {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -868,6 +908,7 @@ abstract class ResidentRunner {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
+        reloadMethod: reloadMethod,
       );
       await device.getVMs();
       await device.refreshViews();
@@ -1182,6 +1223,26 @@ class TerminalHandler {
       case 'z':
       case 'Z':
         await residentRunner.debugToggleDebugCheckElevationsEnabled();
+        return true;
+      case 'X':
+        final File patchFile = fs.currentDirectory.childFile('hot_ui.json');
+        if (!patchFile.existsSync()) {
+          printError('Did not find patch file at ${patchFile.path}');
+          return true;
+        }
+        Map<String, Object> source;
+        try {
+          source = json.decode(patchFile.readAsStringSync());
+        } on FormatException {
+          printError('patch file did not conform to json format.');
+          return true;
+        }
+        await residentRunner.reloadMethod(
+          classId: source['class'],
+          libraryId: source['library'],
+          methodId: source['method'],
+          methodBody: source['methodBody'],
+        );
         return true;
     }
     return false;

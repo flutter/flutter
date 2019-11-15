@@ -713,6 +713,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isWindowsEnabled = false,
     this.isAndroidEmbeddingV2Enabled = false,
     this.isWebIncrementalCompilerEnabled = false,
+    this.isHotUIServerEnabled = false,
 });
 
   @override
@@ -734,6 +735,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWebIncrementalCompilerEnabled;
 
   @override
+  final bool isHotUIServerEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -748,6 +752,8 @@ class TestFeatureFlags implements FeatureFlags {
         return isAndroidEmbeddingV2Enabled;
       case flutterWebIncrementalCompiler:
         return isWebIncrementalCompilerEnabled;
+      case flutterHotUIServer:
+        return isHotUIServerEnabled;
     }
     return false;
   }

@@ -42,6 +42,9 @@ class FeatureFlags {
   /// Whether the web incremental compiler is enabled.
   bool get isWebIncrementalCompilerEnabled => isEnabled(flutterWebIncrementalCompiler);
 
+  /// Whether the Hot UI server is enabled.
+  bool get isHotUIServerEnabled => isEnabled(flutterHotUIServer);
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -76,6 +79,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterBuildPluginAsAarFeature,
   flutterAndroidEmbeddingV2Feature,
   flutterWebIncrementalCompiler,
+  flutterHotUIServer,
 ];
 
 /// The [Feature] for flutter web.
@@ -157,6 +161,16 @@ const Feature flutterWebIncrementalCompiler = Feature(
     enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
+/// The [Feature] for using the hot ui specific reload.
+const Feature flutterHotUIServer = Feature(
+  name: 'Enable the Hot UI server. Only supported on local engine builds.',
+  configSetting: 'enable-hot-ui-server',
+  master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),

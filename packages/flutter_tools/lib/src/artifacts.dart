@@ -62,6 +62,9 @@ enum Artifact {
   // Fuchsia artifacts from the engine prebuilts.
   fuchsiaKernelCompiler,
   fuchsiaFlutterJitRunner,
+
+  // experimental hot ui snapshot.
+  hotUiServer,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -141,6 +144,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
         return 'flutter_jit_runner-0.far';
       }
       return 'flutter_jit_product_runner-0.far';
+    case Artifact.hotUiServer:
+      return 'hotui_server.dart.snapshot';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -444,6 +449,8 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
       case Artifact.frontendServerSnapshotForEngineDartSdk:
+        return fs.path.join(_hostEngineOutPath, 'gen', artifactFileName);
+      case Artifact.hotUiServer:
         return fs.path.join(_hostEngineOutPath, 'gen', artifactFileName);
       case Artifact.engineDartSdkPath:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk');

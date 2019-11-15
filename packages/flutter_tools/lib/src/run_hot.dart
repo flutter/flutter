@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
@@ -22,6 +23,7 @@ import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart';
 import 'globals.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -124,6 +126,77 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  HttpClient _httpClient;
+
+  @override
+  Future<void> reloadMethod({
+    String libraryId,
+    String classId,
+    String methodId,
+    String methodBody,
+  }) async {
+    final Stopwatch sw = Stopwatch()..start();
+    final FlutterDevice flutterDevice = flutterDevices.single;
+    final VMService vmService = flutterDevice.vmServices.single;
+    if (flutterDevice.hotUIServer == null) {
+      return;
+    }
+    if (!flutterDevice.hotUIServer.isReady) {
+      flutterDevice.hotUIServer
+        ..outputDill = dillOutputPath
+        ..packagesFilePath = packagesFilePath
+        ..mainPath = fs.file(target).absolute.uri.toString();
+      await flutterDevice.hotUIServer.startup();
+    }
+    printTrace('Started Hot UI server');
+    final bool result = await flutterDevice.hotUIServer.patch(
+      libraryId: libraryId,
+      classId: classId,
+      methodId: methodId,
+      methodBody: methodBody,
+    );
+    if (!result) {
+      return;
+    }
+    final File patchDill = fs.file(dillOutputPath).parent.childFile('hotui.dill');
+    if (!patchDill.existsSync()) {
+      printError('Failed to create patch dill file at ${patchDill.path}');
+      return;
+    }
+    printTrace('Created Patch in ${sw.elapsedMilliseconds}');
+    final Uri deviceEntryUri = flutterDevice.devFS.baseUri.resolveUri(fs.path.toUri('hotui.dill'));
+    try {
+      _httpClient ??= HttpClient();
+      final HttpClientRequest request = await _httpClient.putUrl(vmService.httpAddress);
+      request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
+      request.headers.add('dev_fs_name', flutterDevice.devFS.fsName);
+      request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceEntryUri')));
+      final Stream<List<int>> contents = patchDill.openRead()
+        .cast<List<int>>()
+        .transform<List<int>>(gzip.encoder);
+      await request.addStream(contents);
+      final HttpClientResponse response = await request.close();
+
+      if (response.statusCode != HttpStatus.ok) {
+        printError('response: ${response.statusCode}');
+        return;
+      }
+    } on SocketException catch (err) {
+      printError(err.toString());
+      return;
+    }
+    final FlutterView view = flutterDevice.views.single;
+    final Uri devicePackagesUri = flutterDevice.devFS.baseUri.resolve('.packages');
+    final Map<String, Object> response = await view.uiIsolate.reloadSources(
+      rootLibUri: deviceEntryUri,
+      packagesUri: devicePackagesUri,
+      pause: false,
+    );
+    printTrace(response.toString());
+    await view.uiIsolate.flutterReassemble();
+    printTrace('Hot UI took: ${sw.elapsedMilliseconds}');
+  }
+
   Future<String> _compileExpressionService(
     String isolateId,
     String expression,
@@ -158,6 +231,7 @@ class HotRunner extends ResidentRunner {
         reloadSources: _reloadSourcesService,
         restart: _restartService,
         compileExpression: _compileExpressionService,
+        reloadMethod: featureFlags.isHotUIServerEnabled ? reloadMethod : null,
       );
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
