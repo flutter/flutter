@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/run_hot.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -106,39 +107,45 @@ void main() {
       testUsingContext('finds all observatory ports and forwards them', () async {
         when(device.getLogReader()).thenReturn(mockLogReader);
         testDeviceManager.addDevice(device);
+
         final List<String> observatoryLogs = <String>[];
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
           if (message.startsWith('[verbose] Observatory URL on device')) {
             observatoryLogs.add(message);
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand()).run(<String>['attach']);
 
-        mockLogReader.addLine('Observatory listening on http://127.0.0.1:0001');
-        mockLogReader.addLine('Observatory listening on http://127.0.0.1:1234');
+        FakeAsync().run((FakeAsync time) {
+          unawaited(runZoned(() async {
+            final Future<void> task = createTestCommandRunner(AttachCommand()).run(<String>['attach']);
 
-        await Future<void>.delayed(const Duration(milliseconds: 400));
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:0001');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:1234');
 
-        mockLogReader.addLine('Observatory listening on http://127.0.0.1:0002');
-        mockLogReader.addLine('Observatory listening on http://127.0.0.1:1235');
+            time.elapse(const Duration(milliseconds: 200));
 
-        await Future<void>.delayed(const Duration(milliseconds: 400));
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:0002');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:1235');
 
-        expect(observatoryLogs.length, 2);
-        expect(observatoryLogs[0], '[verbose] Observatory URL on device: http://127.0.0.1:1234');
-        expect(observatoryLogs[1], '[verbose] Observatory URL on device: http://127.0.0.1:1235');
+            time.elapse(const Duration(milliseconds: 200));
 
-        verify(
-          portForwarder.forward(1234, hostPort: anyNamed('hostPort')),
-        ).called(1);
+            expect(observatoryLogs.length, 2);
+            expect(observatoryLogs[0], '[verbose] Observatory URL on device: http://127.0.0.1:1234');
+            expect(observatoryLogs[1], '[verbose] Observatory URL on device: http://127.0.0.1:1235');
 
-        verify(
-          portForwarder.forward(1235, hostPort: anyNamed('hostPort')),
-        ).called(1);
+            verify(
+              portForwarder.forward(1234, hostPort: anyNamed('hostPort')),
+            ).called(1);
 
-        await mockLogReader.dispose();
-        await expectLoggerInterruptEndsTask(task, logger);
-        await loggerSubscription.cancel();
+            verify(
+              portForwarder.forward(1235, hostPort: anyNamed('hostPort')),
+            ).called(1);
+
+            await mockLogReader.dispose();
+            await expectLoggerInterruptEndsTask(task, logger);
+            await loggerSubscription.cancel();
+          }));
+        });
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
