@@ -17,6 +17,7 @@ function script_location() {
 # expected.
 SCRIPT_LOCATION="$(script_location)"
 FLUTTER_ROOT="$(dirname "$(dirname "$SCRIPT_LOCATION")")"
+
 export PATH="$FLUTTER_ROOT/bin:$FLUTTER_ROOT/bin/cache/dart-sdk/bin:$PATH"
 
 set -x
@@ -26,7 +27,6 @@ cd "$FLUTTER_ROOT"
 version="$(<version)"
 if [[ "$OS" == "linux" ]]; then
   echo "Building Flutter Gallery $version for Android..."
-  export BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/docker_linux/Gemfile"
   # ANDROID_SDK_ROOT must be set in the env.
   (
     cd examples/flutter_gallery
@@ -42,14 +42,13 @@ if [[ "$OS" == "linux" ]]; then
     set -x
     (
       cd examples/flutter_gallery/android
-      bundle exec fastlane deploy_play_store
+      fastlane deploy_play_store
     )
   else
     echo "(Not deploying; Flutter Gallery is only deployed to Play store for tagged dev branch commits.)"
   fi
 elif [[ "$OS" == "darwin" ]]; then
   echo "Building Flutter Gallery $version for iOS..."
-  export BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/mac/Gemfile"
   (
     cd examples/flutter_gallery
     flutter build ios --release --no-codesign -t lib/main_publish.dart
@@ -91,7 +90,7 @@ elif [[ "$OS" == "darwin" ]]; then
       (
         cd examples/flutter_gallery/ios
         export DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="-t DAV"
-        bundle exec fastlane build_and_deploy_testflight upload:true
+        fastlane build_and_deploy_testflight upload:true
       )
     else
       # On iOS the signing can break as well, so we verify this regularly (not just
@@ -100,7 +99,8 @@ elif [[ "$OS" == "darwin" ]]; then
       echo "Testing archiving with distribution profile..."
       (
         cd examples/flutter_gallery/ios
-        bundle exec fastlane build_and_deploy_testflight
+        # TODO(fujino) re-enable after resolving https://github.com/flutter/flutter/issues/43204
+        #fastlane build_and_deploy_testflight
       )
       echo "(Not deploying; Flutter Gallery is only deployed to TestFlight for tagged dev branch commits.)"
     fi
