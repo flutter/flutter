@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
@@ -736,15 +735,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     RouteSettings settings,
-    ui.ImageFilter filter,
-  }) : _filter = filter,
-       super(settings: settings);
-
-  /// The filter to add to the barrier.
-  ///
-  /// If given, this filter will be applied to the modal barrier using
-  /// [BackdropFilter]. This allows blur effects, for example.
-  final ui.ImageFilter _filter;
+  }) : super(settings: settings);
 
   // The API for general users of this class
 
@@ -1295,12 +1286,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         barrierSemanticsDismissible: semanticsDismissible,
       );
     }
-    if (_filter != null) {
-      barrier = BackdropFilter(
-        filter: _filter,
-        child: barrier,
-      );
-    }
     return IgnorePointer(
       ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when this updates
                 animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
@@ -1336,11 +1321,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
     RouteSettings settings,
-    ui.ImageFilter filter,
-  }) : super(
-         filter: filter,
-         settings: settings,
-       );
+  }) : super(settings: settings);
 
   @override
   bool get opaque => false;
