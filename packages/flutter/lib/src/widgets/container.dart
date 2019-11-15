@@ -388,7 +388,7 @@ class Container extends StatelessWidget {
   final Matrix4 transform;
 
   /// The clip behaviour when [Container.decoration] has a border.
-  /// 
+  ///
   /// By default [Container] doesn't clip the child when it is outside the
   /// border.
   ///
