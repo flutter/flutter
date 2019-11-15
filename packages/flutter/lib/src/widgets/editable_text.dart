@@ -1395,20 +1395,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(
-        this,
-        TextInputConfiguration(
-          inputType: widget.keyboardType,
-          obscureText: widget.obscureText,
-          autocorrect: widget.autocorrect,
-          enableSuggestions: widget.enableSuggestions,
-          inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
-              ? TextInputAction.newline
-              : TextInputAction.done
+      _textInputConnection = TextInput.attach(this,
+          TextInputConfiguration(
+              inputType: widget.keyboardType,
+              obscureText: widget.obscureText,
+              autocorrect: widget.autocorrect,
+              enableSuggestions: widget.enableSuggestions,
+              inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
+                  ? TextInputAction.newline
+                  : TextInputAction.done
+              ),
+              textCapitalization: widget.textCapitalization,
+              keyboardAppearance: widget.keyboardAppearance,
           ),
-          textCapitalization: widget.textCapitalization,
-          keyboardAppearance: widget.keyboardAppearance,
-        ),
       );
       _textInputConnection.show();
 

@@ -17,7 +17,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'message_codec.dart';
-import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
@@ -674,34 +673,24 @@ class TextInputConnection {
   static int _nextId = 1;
   final int _id;
 
-  /// Resets the internal ID counter for testing purposes.
-  ///
-  /// This call has no effect when asserts are disabled. Calling it from
-  /// application code will likely break text input for the application.
-  @visibleForTesting
-  static void debugResetId({int to = 1}) {
-    assert(to != null);
-    assert(() {
-      _nextId = to;
-      return true;
-    }());
-  }
-
   final TextInputClient _client;
 
   /// Whether this connection is currently interacting with the text input control.
-  bool get attached => TextInput._instance._currentConnection == this;
+  bool get attached => _clientHandler._currentConnection == this;
 
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    TextInput._instance._show();
+    SystemChannels.textInput.invokeMethod<void>('TextInput.show');
   }
 
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
-    TextInput._instance._setEditingState(value);
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setEditingState',
+      value.toJSON(),
+    );
   }
 
   /// Send the size and transform of the editable text to engine.
@@ -717,7 +706,8 @@ class TextInputConnection {
     if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
       _cachedSize = editableBoxSize;
       _cachedTransform = transform;
-      TextInput._instance._setEditableSizeAndTransform(
+      SystemChannels.textInput.invokeMethod<void>(
+        'TextInput.setEditableSizeAndTransform',
         <String, dynamic>{
           'width': editableBoxSize.width,
           'height': editableBoxSize.height,
@@ -741,7 +731,8 @@ class TextInputConnection {
   }) {
     assert(attached);
 
-    TextInput._instance._setStyle(
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setStyle',
       <String, dynamic>{
         'fontFamily': fontFamily,
         'fontSize': fontSize,
@@ -758,7 +749,10 @@ class TextInputConnection {
   /// other client attaches to it within this animation frame.
   void close() {
     if (attached) {
-      TextInput._instance._clearClient();
+      SystemChannels.textInput.invokeMethod<void>('TextInput.clearClient');
+      _clientHandler
+        .._currentConnection = null
+        .._scheduleHide();
     }
     assert(!attached);
   }
@@ -767,7 +761,7 @@ class TextInputConnection {
   ///
   /// [TextInputConnection] should clean current client connection.
   void connectionClosedReceived() {
-    TextInput._instance._currentConnection = null;
+    _clientHandler._currentConnection = null;
     assert(!attached);
   }
 }
@@ -824,28 +818,63 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
+class _TextInputClientHandler {
+  _TextInputClientHandler() {
+    SystemChannels.textInput.setMethodCallHandler(_handleTextInputInvocation);
+  }
+
+  TextInputConnection _currentConnection;
+
+  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
+    if (_currentConnection == null)
+      return;
+    final String method = methodCall.method;
+    final List<dynamic> args = methodCall.arguments;
+    final int client = args[0];
+    // The incoming message was for a different client.
+    if (client != _currentConnection._id)
+      return;
+    switch (method) {
+      case 'TextInputClient.updateEditingState':
+        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
+        break;
+      case 'TextInputClient.performAction':
+        _currentConnection._client.performAction(_toTextInputAction(args[1]));
+        break;
+      case 'TextInputClient.updateFloatingCursor':
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        break;
+      case 'TextInputClient.onConnectionClosed':
+        _currentConnection._client.connectionClosed();
+        break;
+      default:
+        throw MissingPluginException();
+    }
+  }
+
+  bool _hidePending = false;
+
+  void _scheduleHide() {
+    if (_hidePending)
+      return;
+    _hidePending = true;
+
+    // Schedule a deferred task that hides the text input. If someone else
+    // shows the keyboard during this update cycle, then the task will do
+    // nothing.
+    scheduleMicrotask(() {
+      _hidePending = false;
+      if (_currentConnection == null)
+        SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    });
+  }
+}
+
+final _TextInputClientHandler _clientHandler = _TextInputClientHandler();
+
 /// An interface to the system's text input control.
 class TextInput {
-  TextInput._() {
-    _channel = SystemChannels.textInput;
-    _channel.setMethodCallHandler(_handleTextInputInvocation);
-  }
-
-  /// Set the [MethodChannel] used to communicate with the system's text input
-  /// control.
-  ///
-  /// This is only meant for testing within the Flutter SDK. Changing this
-  /// will break the ability to input text. This has no effect if asserts are
-  /// disabled.
-  @visibleForTesting
-  static void setChannel(MethodChannel newChannel) {
-    assert(() {
-      _instance._channel = newChannel..setMethodCallHandler(_instance._handleTextInputInvocation);
-      return true;
-    }());
-  }
-
-  static final TextInput _instance = TextInput._();
+  TextInput._();
 
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
     TextInputAction.none,
@@ -886,25 +915,14 @@ class TextInput {
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
     assert(client != null);
     assert(configuration != null);
-    final TextInputConnection connection = TextInputConnection._(client);
-    _instance._attach(connection, configuration);
-    return connection;
-  }
-
-  /// This method actually notifies the embedding of the client. It is utilized
-  /// by [attach] and by [_handleTextInputInvocation] for the
-  /// `TextInputClient.requestExistingInputState` method.
-  void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
-    assert(connection != null);
-    assert(connection._client != null);
-    assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    _channel.invokeMethod<void>(
+    final TextInputConnection connection = TextInputConnection._(client);
+    _clientHandler._currentConnection = connection;
+    SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJson() ],
     );
-    _currentConnection = connection;
-    _currentConfiguration = configuration;
+    return connection;
   }
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
@@ -927,101 +945,5 @@ class TextInput {
       return true;
     }());
     return true;
-  }
-
-  MethodChannel _channel;
-
-  TextInputConnection _currentConnection;
-  TextInputConfiguration _currentConfiguration;
-  TextEditingValue _currentTextEditingValue;
-
-  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
-    if (_currentConnection == null)
-      return;
-    final String method = methodCall.method;
-
-    // The requestExistingInputState request needs to be handled regardless of
-    // the client ID, as long as we have a _currentConnection.
-    if (method == 'TextInputClient.requestExistingInputState') {
-      assert(_currentConnection._client != null);
-      _attach(_currentConnection, _currentConfiguration);
-      // This will be null if we've never had a call to [_setEditingState].
-      if (_currentTextEditingValue != null) {
-        _setEditingState(_currentTextEditingValue);
-      }
-      return;
-    }
-
-    final List<dynamic> args = methodCall.arguments;
-    final int client = args[0];
-    // The incoming message was for a different client.
-    if (client != _currentConnection._id)
-      return;
-    switch (method) {
-      case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
-        break;
-      case 'TextInputClient.performAction':
-        _currentConnection._client.performAction(_toTextInputAction(args[1]));
-        break;
-      case 'TextInputClient.updateFloatingCursor':
-        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
-        break;
-      case 'TextInputClient.onConnectionClosed':
-        _currentConnection._client.connectionClosed();
-        break;
-      default:
-        throw MissingPluginException();
-    }
-  }
-
-  bool _hidePending = false;
-
-  void _scheduleHide() {
-    if (_hidePending)
-      return;
-    _hidePending = true;
-
-    // Schedule a deferred task that hides the text input. If someone else
-    // shows the keyboard during this update cycle, then the task will do
-    // nothing.
-    scheduleMicrotask(() {
-      _hidePending = false;
-      if (_currentConnection == null)
-        _channel.invokeMethod<void>('TextInput.hide');
-    });
-  }
-
-  void _clearClient() {
-    _channel.invokeMethod<void>('TextInput.clearClient');
-    _currentConnection = null;
-    _scheduleHide();
-  }
-
-  void _setEditingState(TextEditingValue value) {
-    assert(value != null);
-    _channel.invokeMethod<void>(
-      'TextInput.setEditingState',
-      value.toJSON(),
-    );
-    _currentTextEditingValue = value;
-  }
-
-  void _show() {
-    _channel.invokeMethod<void>('TextInput.show');
-  }
-
-  void _setEditableSizeAndTransform(Map<String, dynamic> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setEditableSizeAndTransform',
-      args,
-    );
-  }
-
-  void _setStyle(Map<String, dynamic> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setStyle',
-      args,
-    );
   }
 }
