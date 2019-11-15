@@ -159,7 +159,6 @@ flutter_tools:lib/''');
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
-      linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -184,14 +183,11 @@ flutter_tools:lib/''');
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
-      linkPlatformKernelIn: false,
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(androidEnvironment
-      ..defines[kBuildMode] = 'debug'
-      ..defines[kTrackWidgetCreation] = 'false');
+    await const KernelSnapshot().build(androidEnvironment..defines[kTrackWidgetCreation] = 'false');
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
@@ -211,7 +207,6 @@ flutter_tools:lib/''');
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
-      linkPlatformKernelIn: false,
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
