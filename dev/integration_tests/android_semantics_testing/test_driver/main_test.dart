@@ -61,8 +61,6 @@ void main() {
     group('TextField', () {
       setUpAll(() async {
         await driver.tap(find.text(textFieldRoute));
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
-        await Future<void>.delayed(const Duration(milliseconds: 500));
       });
 
       test('TextField has correct Android semantics', () async {
@@ -87,7 +85,6 @@ void main() {
         );
 
         await driver.tap(normalTextField);
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
@@ -108,7 +105,6 @@ void main() {
         );
 
         await driver.enterText('hello world');
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
@@ -152,8 +148,6 @@ void main() {
         );
 
         await driver.tap(passwordTextField);
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
-        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
           await getSemantics(passwordTextField),
@@ -173,8 +167,6 @@ void main() {
         );
 
         await driver.enterText('hello world');
-        // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
-        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(
           await getSemantics(passwordTextField),
@@ -638,30 +630,5 @@ void main() {
         await driver.tap(find.byValueKey('back'));
       });
     });
-
-    group('Headings', () {
-      setUpAll(() async {
-        await driver.tap(find.text(headingsRoute));
-      });
-
-      test('AppBar title has correct Android heading semantics', () async {
-        expect(
-          await getSemantics(find.byValueKey(appBarTitleKeyValue)),
-          hasAndroidSemantics(isHeading: true),
-        );
-      });
-
-      test('body text does not have Android heading semantics', () async {
-        expect(
-          await getSemantics(find.byValueKey(bodyTextKeyValue)),
-          hasAndroidSemantics(isHeading: false),
-        );
-      });
-
-      tearDownAll(() async {
-        await driver.tap(find.byValueKey('back'));
-      });
-    });
-
   });
 }
