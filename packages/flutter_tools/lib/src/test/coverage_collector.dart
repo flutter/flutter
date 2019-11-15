@@ -245,37 +245,20 @@ void _buildCoverageMap(
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
   for (String scriptId in scripts.keys) {
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
-    final Map<String, dynamic> scripts = sourceReport['scripts'];
-    final List<Map<String, Object>> ranges = sourceReport['ranges'];
-    // Ranges may sometimes be null for a report.
-    if (ranges == null || scripts == null) {
-      continue;
-    }
-    for (Map<String, dynamic> range in ranges) {
+    for (Map<String, dynamic> range in sourceReport['ranges']) {
       final Map<String, dynamic> coverage = range['coverage'];
-      final String scriptIndex = range['scriptIndex'];
       // Coverage reports may sometimes be null for a Script.
-      if (coverage == null || scriptIndex == null) {
+      if (coverage == null) {
         continue;
       }
-      final Map<String, dynamic> scriptRef = scripts[scriptIndex];
-      if (scriptRef == null) {
-        continue;
-      }
+      final Map<String, dynamic> scriptRef = sourceReport['scripts'][range['scriptIndex']];
       final String uri = scriptRef['uri'];
-      final String id = scriptRef['id'];
-      if (uri == null || id == null) {
-        continue;
-      }
-      final Map<String, Object> scriptById = scripts[id];
-      if (scriptById == null) {
-        continue;
-      }
+
       hitMaps[uri] ??= <int, int>{};
       final Map<int, int> hitMap = hitMaps[uri];
       final List<dynamic> hits = coverage['hits'];
       final List<dynamic> misses = coverage['misses'];
-      final List<dynamic> tokenPositions = scriptById['tokenPosTable'];
+      final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'];
       // The token positions can be null if the script has no coverable lines.
       if (tokenPositions == null) {
         continue;
