@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../android/android_builder.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -34,12 +33,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   final String name = 'appbundle';
-
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.universal,
-  };
 
   @override
   final String description =

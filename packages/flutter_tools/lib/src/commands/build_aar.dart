@@ -7,7 +7,6 @@ import 'dart:async';
 import '../android/android_builder.dart';
 import '../base/os.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -33,12 +32,6 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   final String name = 'aar';
-
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.universal,
-  };
 
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
