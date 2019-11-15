@@ -57,7 +57,6 @@ void main() {
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
-      const <String>[],
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 
@@ -70,7 +69,6 @@ void main() {
       ipv6: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       stayResident: true,
-      dartDefines: const <String>[],
     );
     expect(await runner.run(), 1);
   }));

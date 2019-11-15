@@ -424,7 +424,6 @@ class AppDomain extends Domain {
       viewFilter: isolateFilter,
       target: target,
       buildMode: options.buildInfo.mode,
-      dartDefines: command?.dartDefines,
     );
 
     ResidentRunner runner;
@@ -437,7 +436,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         ipv6: ipv6,
         stayResident: true,
-        dartDefines: command?.dartDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(

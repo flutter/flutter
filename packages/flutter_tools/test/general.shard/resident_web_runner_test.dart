@@ -73,7 +73,6 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           ipv6: true,
           stayResident: true,
-          dartDefines: const <String>[],
         );
       },
       overrides: <Type, Generator>{
@@ -85,7 +84,6 @@ void main() {
           @required bool initializePlatform,
           @required String hostname,
           @required String port,
-          @required List<String> dartDefines,
         }) async {
           return mockWebFs;
         },
@@ -135,7 +133,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -153,7 +150,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -208,7 +204,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
-      dartDefines: const <String>[],
     );
 
     expect(await residentWebRunner.run(), 0);
@@ -245,7 +240,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
     );
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();

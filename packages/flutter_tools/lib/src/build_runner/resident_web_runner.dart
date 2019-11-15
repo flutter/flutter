@@ -46,7 +46,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
-    @required List<String> dartDefines,
   }) {
     if (featureFlags.isWebIncrementalCompilerEnabled) {
       return _ExperimentalResidentWebRunner(
@@ -56,7 +55,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
         debuggingOptions: debuggingOptions,
         ipv6: ipv6,
         stayResident: stayResident,
-        dartDefines: dartDefines,
       );
     }
     return _DwdsResidentWebRunner(
@@ -66,7 +64,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       debuggingOptions: debuggingOptions,
       ipv6: ipv6,
       stayResident: stayResident,
-      dartDefines: dartDefines,
     );
   }
 }
@@ -80,7 +77,6 @@ abstract class ResidentWebRunner extends ResidentRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
-    @required this.dartDefines,
   }) : super(
           <FlutterDevice>[],
           target: target ?? fs.path.join('lib', 'main.dart'),
@@ -91,7 +87,6 @@ abstract class ResidentWebRunner extends ResidentRunner {
 
   final FlutterDevice device;
   final FlutterProject flutterProject;
-  final List<String> dartDefines;
   DateTime firstBuildTime;
 
   // Only the debug builds of the web support the service protocol.
@@ -353,7 +348,6 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
-    @required List<String> dartDefines,
   }) : super(
           device,
           flutterProject: flutterProject,
@@ -361,7 +355,6 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
-          dartDefines: dartDefines,
         );
 
   @override
@@ -547,7 +540,6 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
-    @required List<String> dartDefines,
   }) : super(
           device,
           flutterProject: flutterProject,
@@ -555,7 +547,6 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
-          dartDefines: dartDefines,
         );
 
   @override
@@ -603,7 +594,6 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           hostname: debuggingOptions.hostname,
           port: debuggingOptions.port,
           skipDwds: device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
-          dartDefines: dartDefines,
         );
         // When connecting to a browser, update the message with a seemsSlow notification
         // to handle the case where we fail to connect.

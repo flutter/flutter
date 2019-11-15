@@ -136,7 +136,6 @@ flutter_tools:lib/''');
       fileSystemScheme: anyNamed('fileSystemScheme'),
       platformDill: anyNamed('platformDill'),
       initializeFromDill: anyNamed('initializeFromDill'),
-      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation invocation) async {
       return null;
     });
@@ -164,7 +163,6 @@ flutter_tools:lib/''');
       fileSystemRoots: anyNamed('fileSystemRoots'),
       fileSystemScheme: anyNamed('fileSystemScheme'),
       linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
-      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -193,7 +191,6 @@ flutter_tools:lib/''');
       fileSystemRoots: anyNamed('fileSystemRoots'),
       fileSystemScheme: anyNamed('fileSystemScheme'),
       linkPlatformKernelIn: false,
-      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -224,7 +221,6 @@ flutter_tools:lib/''');
       fileSystemRoots: anyNamed('fileSystemRoots'),
       fileSystemScheme: anyNamed('fileSystemScheme'),
       linkPlatformKernelIn: false,
-      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -435,7 +431,6 @@ class FakeKernelCompiler implements KernelCompiler {
     String fileSystemScheme,
     String platformDill,
     String initializeFromDill,
-    List<String> dartDefines,
   }) async {
     fs.file(outputFilePath).createSync(recursive: true);
     return CompilerOutput(outputFilePath, 0, null);

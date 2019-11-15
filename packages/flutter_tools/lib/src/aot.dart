@@ -34,7 +34,6 @@ class AotBuilder {
     Iterable<DarwinArch> iosBuildArchs = defaultIOSArchs,
     List<String> extraFrontEndOptions,
     List<String> extraGenSnapshotOptions,
-    @required List<String> dartDefines,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
@@ -79,7 +78,6 @@ class AotBuilder {
         trackWidgetCreation: false,
         outputPath: outputPath,
         extraFrontEndOptions: extraFrontEndOptions,
-        dartDefines: dartDefines,
       );
       if (kernelOut == null) {
         throwToolExit('Compiler terminated unexpectedly.');
