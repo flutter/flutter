@@ -84,7 +84,7 @@ void main() {
         testDeviceManager.addDevice(device);
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Observatory URL on device: http://127.0.0.1:499') {
+          if (message == '[verbose] Observatory URL on device: http://127.0.0.1:$devicePort') {
             // The "Observatory URL on device" message is output by the ProtocolDiscovery when it found the observatory.
             completer.complete();
           }

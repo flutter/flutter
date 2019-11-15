@@ -293,34 +293,34 @@ class AttachCommand extends FlutterCommand {
         }
         result = await app.runner.waitForAppToFinish();
         assert(result != null);
-      } else {
-        while (true) {
-          final ResidentRunner runner = await createResidentRunner(
-            observatoryUris: observatoryUri,
-            device: device,
-            flutterProject: flutterProject,
-            usesIpv6: usesIpv6,
-          );
-          final Completer<void> onAppStart = Completer<void>.sync();
-          TerminalHandler terminalHandler;
-          unawaited(onAppStart.future.whenComplete(() {
-            terminalHandler = TerminalHandler(runner)
-              ..setupTerminal()
-              ..registerSignalHandlers();
-          }));
-          result = await runner.attach(
-            appStartedCompleter: onAppStart,
-          );
-          if (result != 0) {
-            throwToolExit(null, exitCode: result);
-          }
-          terminalHandler?.stop();
-          assert(result != null);
-          if (runner.exited || !runner.isStreamingNewObservatoryUris) {
-            break;
-          }
-          printStatus('Waiting for a new connection from Flutter on ${device.name}...');
+        return;
+      }
+      while (true) {
+        final ResidentRunner runner = await createResidentRunner(
+          observatoryUris: observatoryUri,
+          device: device,
+          flutterProject: flutterProject,
+          usesIpv6: usesIpv6,
+        );
+        final Completer<void> onAppStart = Completer<void>.sync();
+        TerminalHandler terminalHandler;
+        unawaited(onAppStart.future.whenComplete(() {
+          terminalHandler = TerminalHandler(runner)
+            ..setupTerminal()
+            ..registerSignalHandlers();
+        }));
+        result = await runner.attach(
+          appStartedCompleter: onAppStart,
+        );
+        if (result != 0) {
+          throwToolExit(null, exitCode: result);
         }
+        terminalHandler?.stop();
+        assert(result != null);
+        if (runner.exited || !runner.isStreamingNewObservatoryUris) {
+          break;
+        }
+        printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
