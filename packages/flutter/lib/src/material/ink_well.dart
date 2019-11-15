@@ -489,20 +489,25 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
 
+  void _handleAction(FocusNode node, Intent intent) {
+    _startSplash(context: node.context);
+    _handleTap(node.context);
+  }
+
   Action _createAction() {
     return CallbackAction(
       ActivateAction.key,
-      onInvoke: (FocusNode node, Intent intent) {
-        _startSplash(context: node.context);
-        _handleTap(node.context);
-      },
+      onInvoke:  _handleAction,
     );
   }
 
   @override
   void initState() {
     super.initState();
-    _actionMap = <LocalKey, ActionFactory>{ ActivateAction.key: _createAction };
+    _actionMap = <LocalKey, ActionFactory>{
+      SelectAction.key: _createAction,
+      if (!kIsWeb) ActivateAction.key: _createAction,
+    };
     WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
