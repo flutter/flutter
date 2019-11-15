@@ -286,7 +286,8 @@ class IOSDevice extends Device {
 
       try {
         cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
-      } on IOSDeviceNotFoundError {
+      } on IOSDeviceNotFoundError catch (e) {
+        printError(e.message);
         return LaunchResult.failed();
       }
 
