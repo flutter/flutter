@@ -1620,6 +1620,7 @@ void main() {
                       TestSemantics(
                         label: 'test',
                         textDirection: TextDirection.ltr,
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                       ),
                     ],
                   ),

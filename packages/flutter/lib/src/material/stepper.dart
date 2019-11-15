@@ -593,7 +593,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                   if (widget.onStepTapped != null)
                     widget.onStepTapped(i);
                 } : null,
-                canRequestFocus: widget.steps[i].state != StepState.disabled,
                 child: _buildVerticalHeader(i),
               ),
               _buildVerticalBody(i),
@@ -611,7 +610,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             if (widget.onStepTapped != null)
               widget.onStepTapped(i);
           } : null,
-          canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
               Container(
