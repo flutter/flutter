@@ -482,23 +482,16 @@ abstract class CachedArtifact extends ArtifactSet {
   /// Template method to perform artifact update.
   Future<void> updateInner();
 
-  @visibleForTesting
-  String get storageBaseUrl {
+  String get _storageBaseUrl {
     final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
     if (overrideUrl == null) {
       return 'https://storage.googleapis.com';
-    }
-    // verify that this is a valid URI.
-    try {
-      Uri.parse(overrideUrl);
-    } on FormatException catch (err) {
-      throwToolExit('"FLUTTER_STORAGE_BASE_URL" contains an invalid URI:\n$err');
     }
     _maybeWarnAboutStorageOverride(overrideUrl);
     return overrideUrl;
   }
 
-  Uri _toStorageUri(String path) => Uri.parse('$storageBaseUrl/$path');
+  Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
 
   /// Download an archive from the given [url] and unzip it to [location].
   Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
@@ -594,7 +587,7 @@ class FlutterWebSdk extends CachedArtifact {
     } else if (platform.isWindows) {
       platformName += 'windows-x64';
     }
-    final Uri url = Uri.parse('$storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
+    final Uri url = Uri.parse('$_storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
     await _downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
     for (FileSystemEntity entity in location.listSync(recursive: true)) {
@@ -659,7 +652,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   @override
   Future<void> updateInner() async {
-    final String url = '$storageBaseUrl/flutter_infra/flutter/$version/';
+    final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in getPackageDirs()) {
@@ -694,7 +687,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   Future<bool> checkForArtifacts(String engineVersion) async {
     engineVersion ??= version;
-    final String url = '$storageBaseUrl/flutter_infra/flutter/$engineVersion/';
+    final String url = '$_storageBaseUrl/flutter_infra/flutter/$engineVersion/';
 
     bool exists = false;
     for (String pkgName in getPackageDirs()) {
@@ -1118,7 +1111,7 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @visibleForTesting
-  Uri get archiveUri => Uri.parse('$storageBaseUrl/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
+  Uri get archiveUri => Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
 }
 
 // Many characters are problematic in filenames, especially on Windows.
