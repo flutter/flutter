@@ -345,7 +345,7 @@ void main() {
 
       expect(mavenArtifacts.isUpToDate(), isFalse);
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => processManager,
     });
