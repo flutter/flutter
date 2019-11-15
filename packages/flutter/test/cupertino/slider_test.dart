@@ -427,9 +427,10 @@ void main() {
       ),
     );
 
+    const CupertinoDynamicColor orange = CupertinoColors.activeOrange;
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoColors.systemBlue.darkColor),
+      paints..rrect(color: orange.darkColor),
     );
   });
 
