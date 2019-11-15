@@ -645,6 +645,11 @@ class AndroidProject {
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {
+    if (isModule) {
+      // A module type's Android project is used in add-to-app scenarios and
+      // only supports the V2 embedding.
+      return AndroidEmbeddingVersion.v2;
+    }
     if (appManifestFile == null || !appManifestFile.existsSync()) {
       return AndroidEmbeddingVersion.v1;
     }

@@ -868,8 +868,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   static const double _kDamping = 400.0;
   static const Duration _kMoveControllerDuration = Duration(milliseconds: 600);
 
-  final GlobalKey _childGlobalKey = GlobalKey();
-
   Offset _dragOffset;
   double _lastScale = 1.0;
   AnimationController _moveController;

@@ -41,6 +41,7 @@ class FlutterDevice {
     List<String> experimentalFlags,
     ResidentCompiler generator,
     @required BuildMode buildMode,
+    List<String> dartDefines,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(
@@ -54,6 +55,7 @@ class FlutterDevice {
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
          experimentalFlags: experimentalFlags,
+         dartDefines: dartDefines,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -69,6 +71,7 @@ class FlutterDevice {
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
+    List<String> dartDefines,
   }) async {
     ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -86,12 +89,14 @@ class FlutterDevice {
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode),
+        dartDefines: dartDefines,
       );
     } else if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         targetPlatform: targetPlatform,
         buildMode: buildMode,
         flutterProject: flutterProject,
+        dartDefines: dartDefines,
       );
     } else {
       generator = ResidentCompiler(
@@ -106,6 +111,7 @@ class FlutterDevice {
         fileSystemScheme: fileSystemScheme,
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
+        dartDefines: dartDefines,
       );
     }
     return FlutterDevice(
@@ -119,6 +125,7 @@ class FlutterDevice {
       targetPlatform: targetPlatform,
       generator: generator,
       buildMode: buildMode,
+      dartDefines: dartDefines,
     );
   }
 

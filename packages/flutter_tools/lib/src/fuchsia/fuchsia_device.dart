@@ -246,14 +246,25 @@ class FuchsiaDevice extends Device {
       printError('Failed to find a free port');
       return LaunchResult.failed();
     }
+
+    // Try Start with a fresh package repo in case one was left over from a
+    // previous run.
     final Directory packageRepo =
         fs.directory(fs.path.join(getFuchsiaBuildDirectory(), '.pkg-repo'));
-    packageRepo.createSync(recursive: true);
+    try {
+      if (packageRepo.existsSync()) {
+        packageRepo.deleteSync(recursive: true);
+      }
+      packageRepo.createSync(recursive: true);
+    } catch (e) {
+      printError('Failed to create Fuchisa package repo directory '
+                 'at ${packageRepo.path}: $e');
+      return LaunchResult.failed();
+    }
 
     final String appName = FlutterProject.current().manifest.appName;
-
     final Status status = logger.startProgress(
-      'Starting Fuchsia application...',
+      'Starting Fuchsia application $appName...',
       timeout: null,
     );
     FuchsiaPackageServer fuchsiaPackageServer;
@@ -332,8 +343,7 @@ class FuchsiaDevice extends Device {
       }
 
       // Instruct tiles_ctl to start the app.
-      final String fuchsiaUrl =
-          'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
+      final String fuchsiaUrl = 'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
       if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
         printError('Failed to add the app to tiles');
         return LaunchResult.failed();
@@ -345,8 +355,15 @@ class FuchsiaDevice extends Device {
         await fuchsiaDeviceTools.amberCtl.pkgCtlRepoRemove(this, fuchsiaPackageServer);
       }
       // Shutdown the package server and delete the package repo;
+      printTrace('Shutting down the tool\'s package server.');
       fuchsiaPackageServer?.stop();
-      packageRepo.deleteSync(recursive: true);
+      printTrace('Removing the tool\'s package repo: at ${packageRepo.path}');
+      try {
+        packageRepo.deleteSync(recursive: true);
+      } catch (e) {
+        printError('Failed to remove Fuchsia package repo directory '
+                   'at ${packageRepo.path}: $e.');
+      }
       status.cancel();
     }
 
