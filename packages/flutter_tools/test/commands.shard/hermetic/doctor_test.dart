@@ -546,9 +546,7 @@ void main() {
   testUsingContext('validate non-verbose output wrapping', () async {
     expect(await FakeDoctor().diagnose(verbose: false), isFalse);
     expect(testLogger.statusText, equals(
-        'Doctor summary (to see all\n'
-        'details, run flutter doctor\n'
-        '-v):\n'
+        'Doctor summary:\n'
         '[✓] Passing Validator (with\n'
         '    statusInfo)\n'
         '[✗] Missing Validator\n'
