@@ -109,7 +109,7 @@ void main() {
       await artifact.update();
       expect(testLogger.errorText, contains('delete failed'));
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -122,7 +122,7 @@ void main() {
       when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
       expect(gradleWrapper.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -138,7 +138,7 @@ void main() {
       when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
       expect(gradleWrapper.isUpToDateInner(), true);
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -195,7 +195,7 @@ void main() {
         '/path/to/alpha:/path/to/beta:/path/to/gamma:/path/to/delta:/path/to/epsilon',
       );
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
     });
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
@@ -293,7 +293,7 @@ void main() {
       expect(dir.path, artifactDir.childDirectory('bin_dir').path);
       verify(mockOperatingSystemUtils.chmod(argThat(hasPath(dir.path)), 'a+r,a+x'));
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       HttpClientFactory: () => () => fakeHttpClient,
