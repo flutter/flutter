@@ -90,7 +90,6 @@ void main() {
 
     void doWhileAsync(FakeAsync time, bool doThis()) {
       do {
-        mockStopwatch.elapsed += const Duration(milliseconds: 1);
         time.elapse(const Duration(milliseconds: 1));
       } while (doThis());
     }
@@ -98,7 +97,6 @@ void main() {
     for (String testOs in testPlatforms) {
       testUsingContext('AnsiSpinner works for $testOs (1)', () async {
         bool done = false;
-        mockStopwatch = FakeStopwatch();
         FakeAsync().run((FakeAsync time) {
           final AnsiSpinner ansiSpinner = AnsiSpinner(
             timeout: const Duration(hours: 10),
@@ -131,7 +129,6 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
         Stdio: () => mockStdio,
-        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('AnsiSpinner works for $testOs (2)', () async {
