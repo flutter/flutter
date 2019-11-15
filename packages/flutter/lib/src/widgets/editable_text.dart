@@ -342,10 +342,10 @@ class EditableText extends StatefulWidget {
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
-  /// [enableSmartDashes], [enableSmartQuotes], [enableSuggestions],
-  /// [paintCursorAboveText], [textAlign], [dragStartBehavior],
-  /// [scrollPadding], [dragStartBehavior], [toolbarOptions],
-  /// [rendererIgnoresPointer], and [readOnly] arguments must not be null.
+  /// [enableSuggestions], [paintCursorAboveText], [textAlign],
+  /// [dragStartBehavior], [scrollPadding], [dragStartBehavior],
+  /// [toolbarOptions], [rendererIgnoresPointer], and [readOnly] arguments must
+  /// not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -1053,8 +1053,8 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('enableSmartDashes', enableSmartDashes, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('enableSmartQuotes', enableSmartQuotes, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableSmartDashes', enableSmartDashes));
+    properties.add(DiagnosticsProperty<bool>('enableSmartQuotes', enableSmartQuotes));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     style?.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));

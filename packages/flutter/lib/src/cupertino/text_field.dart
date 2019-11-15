@@ -197,7 +197,8 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], and [enableSuggestions] properties
+  /// [scrollPadding], [suffixMode], [textAlign], [enableSmartDashes],
+  /// [enableSmartQuotes], and [enableSuggestions] properties
   /// must not be null.
   ///
   /// See also:
@@ -235,6 +236,8 @@ class CupertinoTextField extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
+    bool enableSmartDashes,
+    bool enableSmartQuotes,
     this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
@@ -261,6 +264,8 @@ class CupertinoTextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       enableSmartDashes = enableSmartDashes ?? !obscureText,
+       enableSmartQuotes = enableSmartQuotes ?? !obscureText,
        assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -417,6 +422,12 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
+  /// {@macro flutter.services.textInput.enableSmartDashes}
+  final bool enableSmartDashes;
+
+  /// {@macro flutter.services.textInput.enableSmartQuotes}
+  final bool enableSmartQuotes;
+
   /// {@macro flutter.services.textInput.enableSuggestions}
   final bool enableSuggestions;
 
@@ -567,6 +578,8 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableSmartDashes', enableSmartDashes));
+    properties.add(DiagnosticsProperty<bool>('enableSmartQuotes', enableSmartQuotes));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
@@ -883,6 +896,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           autofocus: widget.autofocus,
           obscureText: widget.obscureText,
           autocorrect: widget.autocorrect,
+          enableSmartDashes: widget.enableSmartDashes,
+          enableSmartQuotes: widget.enableSmartQuotes,
           enableSuggestions: widget.enableSuggestions,
           maxLines: widget.maxLines,
           minLines: widget.minLines,
