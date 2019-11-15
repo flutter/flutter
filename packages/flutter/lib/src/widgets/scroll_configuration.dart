@@ -74,12 +74,6 @@ class ScrollBehavior {
   /// method returns false, the rebuilds might be optimized away.
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 
-  /// How much a particular scrollable should move if asked to move by an
-  /// Action, in logical pixels.
-  double getScrollActionIncrement(BuildContext context, AxisDirection direction) {
-    return 50.0;
-  }
-
   @override
   String toString() => '$runtimeType';
 }

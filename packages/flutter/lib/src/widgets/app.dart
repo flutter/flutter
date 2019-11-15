@@ -1042,16 +1042,31 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   final Map<LogicalKeySet, Intent> _keyMap = <LogicalKeySet, Intent>{
+    // Next/previous keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+
+    // Directional keyboard traversal.
     if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
     if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
     if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
     if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
-    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const ScrollIntent(AxisDirection.up),
-    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const ScrollIntent(AxisDirection.down),
-    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const ScrollIntent(AxisDirection.left),
-    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const ScrollIntent(AxisDirection.right),
+
+    // Scrollable scrolling.
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+    if (!kIsWeb) LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+
+    // Web scrolling.
+    if (kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+    if (kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+    if (kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+    if (kIsWeb) LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+
+    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+
     LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
     LogicalKeySet(LogicalKeyboardKey.space): const Intent(SelectAction.key),
   };
@@ -1062,6 +1077,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     NextFocusAction.key: () => NextFocusAction(),
     PreviousFocusAction.key: () => PreviousFocusAction(),
     DirectionalFocusAction.key: () => DirectionalFocusAction(),
+    ScrollAction.key: () => ScrollAction(),
   };
 
   @override

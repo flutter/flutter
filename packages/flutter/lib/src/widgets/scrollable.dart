@@ -84,6 +84,7 @@ class Scrollable extends StatefulWidget {
     this.controller,
     this.physics,
     @required this.viewportBuilder,
+    this.incrementCalculator,
     this.excludeFromSemantics = false,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -157,6 +158,14 @@ class Scrollable extends StatefulWidget {
   ///  * [ShrinkWrappingViewport], which is a viewport that displays a list of
   ///    slivers and sizes itself based on the size of the slivers.
   final ViewportBuilder viewportBuilder;
+
+  /// An optional function that will calculate the distance to scroll then the
+  /// scrollable is asked to scroll via the keyboard.
+  ///
+  /// If not supplied, the [Scrollable] will scroll a fixed default amount when
+  /// a keyboard navigation key is pressed (e.g. pageUp/pageDown,
+  /// control-upArrow, etc.).
+  final ScrollIncrementCalculator incrementCalculator;
 
   /// Whether the scroll actions introduced by this [Scrollable] are exposed
   /// in the semantics tree.
@@ -290,6 +299,45 @@ class _ScrollableScope extends InheritedWidget {
   }
 }
 
+/// A typedef for a function that can calculate the offset for a type of scroll
+/// increment given a [ScrollIncrementDetails].
+typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails details);
+
+/// Describes the type of scroll increment that will be performed by
+/// [ScrollAction] on a [Scrollable].
+///
+/// This is used to configure a [ScrollIncrementDetails] object to pass to a
+/// [ScrollIncrementCalculator] function on a [Scrollable].
+enum ScrollIncrementType {
+  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
+  /// distance for a line.
+  line,
+
+  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
+  /// distance for an entire page.
+  page,
+}
+
+/// A details object that describes the type of scroll increment being requested
+/// of a [ScrollIncrementCalculator] function.
+class ScrollIncrementDetails {
+  /// A const constructor for a [ScrollIncrementDetails].
+  ///
+  /// All of the arguments must not be null.
+  const ScrollIncrementDetails({
+    @required this.type,
+    @required this.position,
+  })  : assert(type != null),
+        assert(position != null);
+
+  /// The type of scroll this is (e.g. line, page, etc.).
+  final ScrollIncrementType type;
+
+  /// The current [ScrollPosition] that describes the extents of the scrolling
+  /// area, and current position.
+  final ScrollPosition position;
+}
+
 /// State object for a [Scrollable] widget.
 ///
 /// To manipulate a [Scrollable] widget's scroll position, use the object
@@ -309,6 +357,24 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   /// [ScrollPosition] in its [ScrollController.createScrollPosition] method.
   ScrollPosition get position => _position;
   ScrollPosition _position;
+
+  /// Returns the scroll increment for a single line, for use when scrolling
+  /// using a hardware keyboard.
+  double getIncrement({ ScrollIncrementType type = ScrollIncrementType.line }) {
+    assert(type != null);
+    double defaultScrollIncrement() {
+      switch (type) {
+        case ScrollIncrementType.line:
+          return 50.0;
+          break;
+        case ScrollIncrementType.page:
+          return 0.8 * (position.maxScrollExtent - position.minScrollExtent).clamp(0.0, double.infinity);
+          break;
+      }
+      return 0.0;
+    }
+    return widget.incrementCalculator?.call(ScrollIncrementDetails(type: type, position: position)) ?? defaultScrollIncrement();
+  }
 
   @override
   AxisDirection get axisDirection => widget.axisDirection;
@@ -568,10 +634,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     }
   }
 
-  final Map<LocalKey, ActionFactory> _actionMap = <LocalKey, ActionFactory>{
-    ScrollAction.key: () => ScrollAction(),
-  };
-
   // DESCRIPTION
 
   @override
@@ -588,24 +650,21 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     Widget result = _ScrollableScope(
       scrollable: this,
       position: position,
-      child: Actions(
-        actions: _actionMap,
-        child: Listener(
-          onPointerSignal: _receivedPointerSignal,
-          // TODO(ianh): Having all these global keys is sad.
-          child: RawGestureDetector(
-            key: _gestureDetectorKey,
-            gestures: _gestureRecognizers,
-            behavior: HitTestBehavior.opaque,
-            excludeFromSemantics: widget.excludeFromSemantics,
-            child: Semantics(
-              explicitChildNodes: !widget.excludeFromSemantics,
-              child: IgnorePointer(
-                key: _ignorePointerKey,
-                ignoring: _shouldIgnorePointer,
-                ignoringSemantics: false,
-                child: widget.viewportBuilder(context, position),
-              ),
+      // TODO(ianh): Having all these global keys is sad.
+      child: Listener(
+        onPointerSignal: _receivedPointerSignal,
+        child: RawGestureDetector(
+          key: _gestureDetectorKey,
+          gestures: _gestureRecognizers,
+          behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: widget.excludeFromSemantics,
+          child: Semantics(
+            explicitChildNodes: !widget.excludeFromSemantics,
+            child: IgnorePointer(
+              key: _ignorePointerKey,
+              ignoring: _shouldIgnorePointer,
+              ignoringSemantics: false,
+              child: widget.viewportBuilder(context, position),
             ),
           ),
         ),
@@ -788,12 +847,22 @@ class _RenderScrollSemantics extends RenderProxyBox {
 class ScrollIntent extends Intent {
   /// Creates a [ScrollIntent] with a fixed [key], and the given
   /// [direction].
-  const ScrollIntent(this.direction)
-      : assert(direction != null), super(ScrollAction.key);
+  const ScrollIntent({@required this.direction, this.type = ScrollIncrementType.line})
+      : assert(direction != null),
+        assert(type != null),
+        super(ScrollAction.key);
 
   /// The direction in which to scroll the scrollable containing the focused
-  /// widget.
+  /// widget is intended to move.
   final AxisDirection direction;
+
+  /// The type of scroll that is intended.
+  final ScrollIncrementType type;
+
+  @override
+  bool isEnabled(BuildContext context) {
+    return Scrollable.of(context) != null;
+  }
 }
 
 /// An [Action] that moves the focus to the focusable node in the given
@@ -813,8 +882,9 @@ class ScrollAction extends Action {
   @override
   void invoke(FocusNode node, ScrollIntent intent) {
     final ScrollableState state = Scrollable.of(node.context);
+    assert(state != null, 'ScrollAction invoked on a context that has no scrollable parent');
     double newPosition = state.position.pixels;
-    final double increment = ScrollConfiguration.of(node.context).getScrollActionIncrement(node.context, intent.direction);
+    final double increment = state.getIncrement(type: intent.type);
     switch (intent.direction) {
       case AxisDirection.down:
         switch (state.axisDirection) {

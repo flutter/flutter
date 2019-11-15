@@ -4,7 +4,6 @@
 
 // Thanks for checking out Flutter!
 // Like what you see? Tweet us @FlutterDev
-import 'dart:io';
 
 import 'dart:io';
 
