@@ -24,11 +24,6 @@ void main() {
   final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
   group('AppContext', () {
-    FakeStopwatch fakeStopWatch;
-
-    setUp(() {
-      fakeStopWatch = FakeStopwatch();
-    });
     testUsingContext('error', () async {
       final BufferLogger mockLogger = BufferLogger();
       final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
@@ -44,7 +39,6 @@ void main() {
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: false),
       Platform: _kNoAnsiPlatform,
-      Stopwatch: () => fakeStopWatch,
     });
 
     testUsingContext('ANSI colored errors', () async {
@@ -66,7 +60,6 @@ void main() {
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
-      Stopwatch: () => fakeStopWatch,
     });
   });
 
