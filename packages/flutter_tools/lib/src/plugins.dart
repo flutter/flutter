@@ -361,11 +361,8 @@ List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String typ
 /// [project] is using.
 String _getAndroidEmbeddingVersion(FlutterProject project) {
   assert(project.android != null);
-
   final File androidManifest = project.android.appManifestFile;
-  if (androidManifest == null || !androidManifest.existsSync()) {
-    return '1';
-  }
+  assert(androidManifest.existsSync());
   xml.XmlDocument document;
   try {
     document = xml.parse(androidManifest.readAsStringSync());
