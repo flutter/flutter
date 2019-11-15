@@ -262,6 +262,7 @@ void main() {
         expect(result.started, false);
       }, overrides: <Type, Generator>{
         IMobileDevice: () => mockIMobileDevice,
+        Platform: () => macPlatform,
       });
 
       testUsingContext(' succeeds in debug mode via mDNS', () async {
