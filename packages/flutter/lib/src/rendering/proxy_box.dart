@@ -1274,6 +1274,25 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   }
 }
 
+class PathClipper extends CustomClipper<Path> {
+
+  PathClipper({this.textDirection, this.getClipPath});
+
+  final TextDirection textDirection;
+  final Path Function(Rect rect, TextDirection direction) getClipPath;
+
+  @override
+  Path getClip(Size size) => getClipPath(
+    Rect.fromLTRB(0, 0, size.width, size.height),
+    textDirection,
+  );
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+
+
+}
+
 /// Clips its child using a rectangle.
 ///
 /// By default, [RenderClipRect] prevents its child from painting outside its

@@ -166,7 +166,7 @@ abstract class Decoration extends Diagnosticable {
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
   BoxPainter createBoxPainter([ VoidCallback onChanged ]);
 
-  BorderRadius getBorderRadius() => null;
+  Path getClipPath(Rect rect, TextDirection textDirection) => null;
 }
 
 /// A stateful class that can paint a particular [Decoration].

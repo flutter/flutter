@@ -473,7 +473,7 @@ void main() {
   });
 
   testWidgets(
-      'giving clipBehaviour null or Clip.None, will not add a ClipRRect to the tree',
+      'giving clipBehaviour null or Clip.None, will not add a ClipPath to the tree',
       (WidgetTester tester) async {
     await tester.pumpWidget(Container(
       clipBehaviour: Clip.none,
@@ -484,7 +484,7 @@ void main() {
     ));
 
     expect(
-      find.byType(ClipRRect),
+      find.byType(ClipPath),
       findsNothing,
     );
 
@@ -497,13 +497,13 @@ void main() {
     ));
 
     expect(
-      find.byType(ClipRRect),
+      find.byType(ClipPath),
       findsNothing,
     );
   });
 
   testWidgets(
-      'giving clipBehaviour not a null, will add a ClipRRect to the tree',
+      'giving clipBehaviour not a null, will add a ClipPath to the tree',
       (WidgetTester tester) async {
     final Container container = Container(
       clipBehaviour: Clip.hardEdge,
@@ -516,7 +516,7 @@ void main() {
     await tester.pumpWidget(container);
 
     expect(
-      find.byType(ClipRRect),
+      find.byType(ClipPath),
       findsOneWidget,
     );
   });

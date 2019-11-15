@@ -445,10 +445,11 @@ class Container extends StatelessWidget {
 
     if (clipBehaviour != null &&
         clipBehaviour != Clip.none) {
-      final BorderRadius _borderRadius = decoration.getBorderRadius();
-      assert(_borderRadius != null);
-      current = ClipRRect(
-        borderRadius: _borderRadius,
+      current = ClipPath(
+        clipper: PathClipper(
+          textDirection: TextDirection.ltr,
+          getClipPath: decoration.getClipPath
+        ),
         clipBehavior: clipBehaviour,
         child: current,
       );

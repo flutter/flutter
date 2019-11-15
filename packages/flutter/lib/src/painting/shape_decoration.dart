@@ -76,7 +76,6 @@ class ShapeDecoration extends Decoration {
     this.image,
     this.gradient,
     this.shadows,
-    this.borderRadius,
     @required this.shape,
   }) : assert(!(color != null && gradient != null)),
        assert(shape != null);
@@ -92,7 +91,6 @@ class ShapeDecoration extends Decoration {
   /// [RoundedRectangleBorder]; the [BoxDecoration] class cannot animate the
   /// transition from a [BoxShape.circle] to [BoxShape.rectangle]).
   factory ShapeDecoration.fromBoxDecoration(BoxDecoration source) {
-    final BorderRadius _borderRadius = source.borderRadius;
     ShapeBorder shape;
     assert(source.shape != null);
     switch (source.shape) {
@@ -122,14 +120,13 @@ class ShapeDecoration extends Decoration {
       gradient: source.gradient,
       shadows: source.boxShadow,
       shape: shape,
-      borderRadius: _borderRadius,
     );
   }
 
-  final BorderRadius borderRadius = null;
-
   @override
-  BorderRadius getBorderRadius() => borderRadius;
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    return shape.getOuterPath(rect, textDirection: textDirection);
+  }
 
   /// The color to fill in the background of the shape.
   ///
