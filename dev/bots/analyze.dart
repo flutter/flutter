@@ -4,10 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:core' as core_internals show print;
-import 'dart:core' hide print;
-import 'dart:io' as io_internals show exit;
-import 'dart:io' hide exit;
+import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
@@ -20,59 +17,34 @@ final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Pl
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 
-class ExitException implements Exception {
-  ExitException(this.exitCode);
-
-  final int exitCode;
-
-  void apply() {
-    io_internals.exit(exitCode);
-  }
-}
-
-// We actually reimplement exit() so that it uses exceptions rather
-// than truly immediately terminating the application, so that we can
-// test the exit code in unit tests (see test/analyze_test.dart).
-void exit(int exitCode) {
-  throw ExitException(exitCode);
-}
-
-typedef PrintCallback = void Function(Object line);
-
-// Allow print() to be overridden, for tests.
-PrintCallback print = core_internals.print;
-
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter analyze. For example, you might want to call this
 /// script with the parameter --dart-sdk to use custom dart sdk.
 ///
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
-Future<void> main(List<String> arguments) async {
-  try {
-    await run(arguments);
-  } on ExitException catch (error) {
-    error.apply();
-  }
-  print('${bold}DONE: Analysis successful.$reset');
-}
-
-Future<void> run(List<String> arguments) async {
+Future<void> main(List<String> args) async {
   bool assertsEnabled = false;
   assert(() { assertsEnabled = true; return true; }());
   if (!assertsEnabled) {
     print('The analyze.dart script must be run with --enable-asserts.');
     exit(1);
   }
+  await _verifyNoMissingLicense(flutterRoot);
+  await _verifyNoTestImports(flutterRoot);
+  await _verifyNoTestPackageImports(flutterRoot);
+  await _verifyGeneratedPluginRegistrants(flutterRoot);
+  await _verifyNoBadImportsInFlutter(flutterRoot);
+  await _verifyNoBadImportsInFlutterTools(flutterRoot);
+  await _verifyInternationalizations();
 
-  await verifyNoMissingLicense(flutterRoot);
-  await verifyNoTestImports(flutterRoot);
-  await verifyNoTestPackageImports(flutterRoot);
-  await verifyGeneratedPluginRegistrants(flutterRoot);
-  await verifyNoBadImportsInFlutter(flutterRoot);
-  await verifyNoBadImportsInFlutterTools(flutterRoot);
-  await verifyInternationalizations();
-  await verifyNoTrailingSpaces();
+  {
+    // Analyze all the Dart code in the repo.
+    await _runFlutterAnalyze(flutterRoot, options: <String>[
+      '--flutter-repo',
+      ...args,
+    ]);
+  }
 
   // Ensure that all package dependencies are in sync.
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
@@ -85,20 +57,18 @@ Future<void> run(List<String> arguments) async {
     workingDirectory: flutterRoot,
   );
 
-  // Analyze all the Dart code in the repo.
-  await _runFlutterAnalyze(flutterRoot, options: <String>[
-    '--flutter-repo',
-    ...arguments,
-  ]);
-
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
-  await _runFlutterAnalyze(flutterRoot, options: <String>[
-    '--flutter-repo',
-    '--watch',
-    '--benchmark',
-    ...arguments,
-  ]);
+  {
+    await _runFlutterAnalyze(flutterRoot, options: <String>[
+      '--flutter-repo',
+      '--watch',
+      '--benchmark',
+      ...args,
+    ]);
+  }
+
+  await _checkForTrailingSpaces();
 
   // Try analysis against a big version of the gallery; generate into a temporary directory.
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
@@ -116,70 +86,195 @@ Future<void> run(List<String> arguments) async {
       await _runFlutterAnalyze(outDir.path, options: <String>[
         '--watch',
         '--benchmark',
-        ...arguments,
+        ...args,
       ]);
     }
   } finally {
     outDir.deleteSync(recursive: true);
   }
+
+  print('${bold}DONE: Analysis successful.$reset');
 }
 
-Future<void> verifyNoMissingLicense(String workingDirectory) async {
-  final List<String> errors = <String>[];
-  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
-      .listSync(recursive: true)
-      .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
-    final File file = entity;
-    bool hasLicense = false;
-    final List<String> lines = file.readAsLinesSync();
-    if (lines.isNotEmpty)
-      hasLicense = lines.first.startsWith(RegExp(r'// Copyright \d{4}'));
-    if (!hasLicense)
-      errors.add(file.path);
+Future<void> _verifyInternationalizations() async {
+  final EvalResult materialGenResult = await _evalCommand(
+    dart,
+    <String>[
+      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      '--material',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  final EvalResult cupertinoGenResult = await _evalCommand(
+    dart,
+    <String>[
+      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      '--cupertino',
+    ],
+    workingDirectory: flutterRoot,
+  );
+
+  final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
+  final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
+  final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
+  final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
+
+  if (materialGenResult.stdout.trim() != expectedMaterialResult.trim()) {
+    stderr
+      ..writeln('<<<<<<< $materialLocalizationsFile')
+      ..writeln(expectedMaterialResult.trim())
+      ..writeln('=======')
+      ..writeln(materialGenResult.stdout.trim())
+      ..writeln('>>>>>>> gen_localizations')
+      ..writeln('The contents of $materialLocalizationsFile are different from that produced by gen_localizations.')
+      ..writeln()
+      ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
+    exit(1);
   }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    print('$redLine');
-    final String s = errors.length == 1 ? '' : 's';
-    print('${bold}License headers cannot be found at the beginning of the following file$s.$reset\n');
-    print(errors.join('\n'));
-    print('$redLine\n');
+  if (cupertinoGenResult.stdout.trim() != expectedCupertinoResult.trim()) {
+    stderr
+      ..writeln('<<<<<<< $cupertinoLocalizationsFile')
+      ..writeln(expectedCupertinoResult.trim())
+      ..writeln('=======')
+      ..writeln(cupertinoGenResult.stdout.trim())
+      ..writeln('>>>>>>> gen_localizations')
+      ..writeln('The contents of $cupertinoLocalizationsFile are different from that produced by gen_localizations.')
+      ..writeln()
+      ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
     exit(1);
   }
 }
 
-final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
-const Set<String> _exemptTestImports = <String>{
-  'package:flutter_test/flutter_test.dart',
-  'hit_test.dart',
-  'package:test_api/src/backend/live_test.dart',
-};
+Future<String> _getCommitRange() async {
+  // Using --fork-point is more conservative, and will result in the correct
+  // fork point, but when running locally, it may return nothing. Git is
+  // guaranteed to return a (reasonable, but maybe not optimal) result when not
+  // using --fork-point, so we fall back to that if we can't get a definitive
+  // fork point. See "git merge-base" documentation for more info.
+  EvalResult result = await _evalCommand(
+    'git',
+    <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+    workingDirectory: flutterRoot,
+    allowNonZeroExit: true,
+  );
+  if (result.exitCode != 0) {
+    result = await _evalCommand(
+      'git',
+      <String>['merge-base', 'FETCH_HEAD', 'HEAD'],
+      workingDirectory: flutterRoot,
+    );
+  }
+  return result.stdout.trim();
+}
 
-Future<void> verifyNoTestImports(String workingDirectory) async {
-  final List<String> errors = <String>[];
-  assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
-  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
-    .listSync(recursive: true)
-    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
-    final File file = entity;
-    for (String line in file.readAsLinesSync()) {
-      final Match match = _testImportPattern.firstMatch(line);
-      if (match != null && !_exemptTestImports.contains(match.group(2)))
-        errors.add(file.path);
+
+Future<void> _checkForTrailingSpaces() async {
+  if (!Platform.isWindows) {
+    final String commitRange = Platform.environment.containsKey('TEST_COMMIT_RANGE')
+        ? Platform.environment['TEST_COMMIT_RANGE']
+        : await _getCommitRange();
+    final List<String> fileTypes = <String>[
+      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '*.yml',
+    ];
+    final EvalResult changedFilesResult = await _evalCommand(
+      'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--', ...fileTypes],
+      workingDirectory: flutterRoot,
+    );
+    if (changedFilesResult.stdout == null || changedFilesResult.stdout.trim().isEmpty) {
+      print('No files found that need to be checked for trailing whitespace.');
+      return;
+    }
+    // Only include files that actually exist, so that we don't try and grep for
+    // nonexistent files, which can occur when files are deleted or moved.
+    final List<String> changedFiles = changedFilesResult.stdout.split('\n').where((String filename) {
+      return File(filename).existsSync();
+    }).toList();
+    if (changedFiles.isNotEmpty) {
+      await runCommand('grep',
+        <String>[
+          '--line-number',
+          '--extended-regexp',
+          r'[[:blank:]]$',
+          ...changedFiles,
+        ],
+        workingDirectory: flutterRoot,
+        failureMessage: '${red}Detected trailing whitespace in the file[s] listed above.$reset\nPlease remove them from the offending line[s].',
+        expectNonZeroExit: true, // Just means a non-zero exit code is expected.
+        expectedExitCode: 1, // Indicates that zero lines were found.
+      );
     }
   }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    print('$redLine');
-    final String s = errors.length == 1 ? '' : 's';
-    print('${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset\n');
-    print(errors.join('\n'));
-    print('$redLine\n');
-    exit(1);
-  }
 }
 
-Future<void> verifyNoTestPackageImports(String workingDirectory) async {
+class EvalResult {
+  EvalResult({
+    this.stdout,
+    this.stderr,
+    this.exitCode = 0,
+  });
+
+  final String stdout;
+  final String stderr;
+  final int exitCode;
+}
+
+Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
+  @required String workingDirectory,
+  Map<String, String> environment,
+  bool skip = false,
+  bool allowNonZeroExit = false,
+}) async {
+  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
+  final String relativeWorkingDir = path.relative(workingDirectory);
+  if (skip) {
+    printProgress('SKIPPING', relativeWorkingDir, commandDescription);
+    return null;
+  }
+  printProgress('RUNNING', relativeWorkingDir, commandDescription);
+
+  final Stopwatch time = Stopwatch()..start();
+  final Process process = await Process.start(executable, arguments,
+    workingDirectory: workingDirectory,
+    environment: environment,
+  );
+
+  final Future<List<List<int>>> savedStdout = process.stdout.toList();
+  final Future<List<List<int>>> savedStderr = process.stderr.toList();
+  final int exitCode = await process.exitCode;
+  final EvalResult result = EvalResult(
+    stdout: utf8.decode((await savedStdout).expand<int>((List<int> ints) => ints).toList()),
+    stderr: utf8.decode((await savedStderr).expand<int>((List<int> ints) => ints).toList()),
+    exitCode: exitCode,
+  );
+
+  print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
+
+  if (exitCode != 0 && !allowNonZeroExit) {
+    stderr.write(result.stderr);
+    print(
+      '$redLine\n'
+      '${bold}ERROR:$red Last command exited with $exitCode.$reset\n'
+      '${bold}Command:$red $commandDescription$reset\n'
+      '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
+      '$redLine'
+    );
+    exit(1);
+  }
+
+  return result;
+}
+
+Future<void> _runFlutterAnalyze(String workingDirectory, {
+  List<String> options = const <String>[],
+}) {
+  return runCommand(
+    flutter,
+    <String>['analyze', '--dartdocs', ...options],
+    workingDirectory: workingDirectory,
+  );
+}
+
+Future<void> _verifyNoTestPackageImports(String workingDirectory) async {
   // TODO(ianh): Remove this whole test once https://github.com/dart-lang/matcher/issues/98 is fixed.
   final List<String> shims = <String>[];
   final List<String> errors = Directory(workingDirectory)
@@ -258,52 +353,7 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
   }
 }
 
-Future<void> verifyGeneratedPluginRegistrants(String flutterRoot) async {
-  final Directory flutterRootDir = Directory(flutterRoot);
-
-  final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
-
-  for (FileSystemEntity entity in flutterRootDir.listSync(recursive: true)) {
-    if (entity is! File)
-      continue;
-    if (_isGeneratedPluginRegistrant(entity)) {
-      final String package = _getPackageFor(entity, flutterRootDir);
-      final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
-      registrants.add(entity);
-    }
-  }
-
-  final Set<String> outOfDate = <String>{};
-
-  for (String package in packageToRegistrants.keys) {
-    final Map<File, String> fileToContent = <File, String>{};
-    for (File f in packageToRegistrants[package]) {
-      fileToContent[f] = f.readAsStringSync();
-    }
-    await runCommand(flutter, <String>['inject-plugins'],
-      workingDirectory: package,
-      outputMode: OutputMode.discard,
-    );
-    for (File registrant in fileToContent.keys) {
-      if (registrant.readAsStringSync() != fileToContent[registrant]) {
-        outOfDate.add(registrant.path);
-      }
-    }
-  }
-
-  if (outOfDate.isNotEmpty) {
-    print('$redLine');
-    print('${bold}The following GeneratedPluginRegistrants are out of date:$reset');
-    for (String registrant in outOfDate) {
-      print(' - $registrant');
-    }
-    print('\nRun "flutter inject-plugins" in the package that\'s out of date.');
-    print('$redLine');
-    exit(1);
-  }
-}
-
-Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
+Future<void> _verifyNoBadImportsInFlutter(String workingDirectory) async {
   final List<String> errors = <String>[];
   final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
   final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
@@ -316,7 +366,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
     .whereType<Directory>()
     .map<String>((Directory entity) => path.basename(entity.path))
     .toList()..sort();
-  if (!_listEquals<String>(packages, directories)) {
+  if (!_matches<String>(packages, directories)) {
     errors.add(
       'flutter/lib/*.dart does not match flutter/lib/src/*/:\n'
       'These are the exported packages:\n' +
@@ -363,121 +413,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   }
 }
 
-Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
-  final List<String> errors = <String>[];
-  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
-    .listSync(recursive: true)
-    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
-    final File file = entity;
-    if (file.readAsStringSync().contains('package:flutter_tools/')) {
-      errors.add('$yellow${file.path}$reset imports flutter_tools.');
-    }
-  }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    print('$redLine');
-    if (errors.length == 1) {
-      print('${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset\n');
-    } else {
-      print('${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset\n');
-    }
-    print(errors.join('\n\n'));
-    print('$redLine\n');
-    exit(1);
-  }
-}
-
-Future<void> verifyInternationalizations() async {
-  final EvalResult materialGenResult = await _evalCommand(
-    dart,
-    <String>[
-      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
-      '--material',
-    ],
-    workingDirectory: flutterRoot,
-  );
-  final EvalResult cupertinoGenResult = await _evalCommand(
-    dart,
-    <String>[
-      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
-      '--cupertino',
-    ],
-    workingDirectory: flutterRoot,
-  );
-
-  final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
-  final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
-  final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
-  final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
-
-  if (materialGenResult.stdout.trim() != expectedMaterialResult.trim()) {
-    stderr
-      ..writeln('<<<<<<< $materialLocalizationsFile')
-      ..writeln(expectedMaterialResult.trim())
-      ..writeln('=======')
-      ..writeln(materialGenResult.stdout.trim())
-      ..writeln('>>>>>>> gen_localizations')
-      ..writeln('The contents of $materialLocalizationsFile are different from that produced by gen_localizations.')
-      ..writeln()
-      ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
-    exit(1);
-  }
-  if (cupertinoGenResult.stdout.trim() != expectedCupertinoResult.trim()) {
-    stderr
-      ..writeln('<<<<<<< $cupertinoLocalizationsFile')
-      ..writeln(expectedCupertinoResult.trim())
-      ..writeln('=======')
-      ..writeln(cupertinoGenResult.stdout.trim())
-      ..writeln('>>>>>>> gen_localizations')
-      ..writeln('The contents of $cupertinoLocalizationsFile are different from that produced by gen_localizations.')
-      ..writeln()
-      ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
-    exit(1);
-  }
-}
-
-Future<void> verifyNoTrailingSpaces() async {
-  if (!Platform.isWindows) {
-    final String commitRange = Platform.environment.containsKey('TEST_COMMIT_RANGE')
-        ? Platform.environment['TEST_COMMIT_RANGE']
-        : await _getCommitRange();
-    final List<String> fileTypes = <String>[
-      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '*.yml',
-    ];
-    final EvalResult changedFilesResult = await _evalCommand(
-      'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--', ...fileTypes],
-      workingDirectory: flutterRoot,
-    );
-    if (changedFilesResult.stdout == null || changedFilesResult.stdout.trim().isEmpty) {
-      print('No files found that need to be checked for trailing whitespace.');
-      return;
-    }
-    // Only include files that actually exist, so that we don't try and grep for
-    // nonexistent files, which can occur when files are deleted or moved.
-    final List<String> changedFiles = changedFilesResult.stdout.split('\n').where((String filename) {
-      return File(filename).existsSync();
-    }).toList();
-    if (changedFiles.isNotEmpty) {
-      await runCommand('grep',
-        <String>[
-          '--line-number',
-          '--extended-regexp',
-          r'[[:blank:]]$',
-          ...changedFiles,
-        ],
-        workingDirectory: flutterRoot,
-        failureMessage: '${red}Detected trailing whitespace in the file[s] listed above.$reset\nPlease remove them from the offending line[s].',
-        expectNonZeroExit: true, // Just means a non-zero exit code is expected.
-        expectedExitCode: 1, // Indicates that zero lines were found.
-      );
-    }
-  }
-}
-
-
-// UTILITY FUNCTIONS
-
-bool _listEquals<T>(List<T> a, List<T> b) {
+bool _matches<T>(List<T> a, List<T> b) {
   assert(a != null);
   assert(b != null);
   if (a.length != b.length)
@@ -487,96 +423,6 @@ bool _listEquals<T>(List<T> a, List<T> b) {
       return false;
   }
   return true;
-}
-
-Future<String> _getCommitRange() async {
-  // Using --fork-point is more conservative, and will result in the correct
-  // fork point, but when running locally, it may return nothing. Git is
-  // guaranteed to return a (reasonable, but maybe not optimal) result when not
-  // using --fork-point, so we fall back to that if we can't get a definitive
-  // fork point. See "git merge-base" documentation for more info.
-  EvalResult result = await _evalCommand(
-    'git',
-    <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
-    workingDirectory: flutterRoot,
-    allowNonZeroExit: true,
-  );
-  if (result.exitCode != 0) {
-    result = await _evalCommand(
-      'git',
-      <String>['merge-base', 'FETCH_HEAD', 'HEAD'],
-      workingDirectory: flutterRoot,
-    );
-  }
-  return result.stdout.trim();
-}
-
-class EvalResult {
-  EvalResult({
-    this.stdout,
-    this.stderr,
-    this.exitCode = 0,
-  });
-
-  final String stdout;
-  final String stderr;
-  final int exitCode;
-}
-
-Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
-  @required String workingDirectory,
-  Map<String, String> environment,
-  bool skip = false,
-  bool allowNonZeroExit = false,
-}) async {
-  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory);
-  if (skip) {
-    printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return null;
-  }
-  printProgress('RUNNING', relativeWorkingDir, commandDescription);
-
-  final Stopwatch time = Stopwatch()..start();
-  final Process process = await Process.start(executable, arguments,
-    workingDirectory: workingDirectory,
-    environment: environment,
-  );
-
-  final Future<List<List<int>>> savedStdout = process.stdout.toList();
-  final Future<List<List<int>>> savedStderr = process.stderr.toList();
-  final int exitCode = await process.exitCode;
-  final EvalResult result = EvalResult(
-    stdout: utf8.decode((await savedStdout).expand<int>((List<int> ints) => ints).toList()),
-    stderr: utf8.decode((await savedStderr).expand<int>((List<int> ints) => ints).toList()),
-    exitCode: exitCode,
-  );
-
-  print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
-
-  if (exitCode != 0 && !allowNonZeroExit) {
-    stderr.write(result.stderr);
-    print(
-      '$redLine\n'
-      '${bold}ERROR:$red Last command exited with $exitCode.$reset\n'
-      '${bold}Command:$red $commandDescription$reset\n'
-      '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
-      '$redLine'
-    );
-    exit(1);
-  }
-
-  return result;
-}
-
-Future<void> _runFlutterAnalyze(String workingDirectory, {
-  List<String> options = const <String>[],
-}) {
-  return runCommand(
-    flutter,
-    <String>['analyze', '--dartdocs', ...options],
-    workingDirectory: workingDirectory,
-  );
 }
 
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
@@ -635,6 +481,130 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
     }
   }
   return null;
+}
+
+Future<void> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
+    .listSync(recursive: true)
+    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
+    final File file = entity;
+    if (file.readAsStringSync().contains('package:flutter_tools/')) {
+      errors.add('$yellow${file.path}$reset imports flutter_tools.');
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$redLine');
+    if (errors.length == 1) {
+      print('${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset\n');
+    } else {
+      print('${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset\n');
+    }
+    print(errors.join('\n\n'));
+    print('$redLine\n');
+    exit(1);
+  }
+}
+
+Future<void> _verifyNoMissingLicense(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
+      .listSync(recursive: true)
+      .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
+    final File file = entity;
+    bool hasLicense = false;
+    final List<String> lines = file.readAsLinesSync();
+    if (lines.isNotEmpty)
+      hasLicense = lines.first.startsWith(RegExp(r'// Copyright \d{4}'));
+    if (!hasLicense)
+      errors.add(file.path);
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$redLine');
+    final String s = errors.length == 1 ? '' : 's';
+    print('${bold}License headers cannot be found at the beginning of the following file$s.$reset\n');
+    print(errors.join('\n'));
+    print('$redLine\n');
+    exit(1);
+  }
+}
+
+final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
+const Set<String> _exemptTestImports = <String>{
+  'package:flutter_test/flutter_test.dart',
+  'hit_test.dart',
+  'package:test_api/src/backend/live_test.dart',
+};
+
+Future<void> _verifyNoTestImports(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
+  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
+    .listSync(recursive: true)
+    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
+    final File file = entity;
+    for (String line in file.readAsLinesSync()) {
+      final Match match = _testImportPattern.firstMatch(line);
+      if (match != null && !_exemptTestImports.contains(match.group(2)))
+        errors.add(file.path);
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$redLine');
+    final String s = errors.length == 1 ? '' : 's';
+    print('${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset\n');
+    print(errors.join('\n'));
+    print('$redLine\n');
+    exit(1);
+  }
+}
+
+Future<void> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
+  final Directory flutterRootDir = Directory(flutterRoot);
+
+  final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
+
+  for (FileSystemEntity entity in flutterRootDir.listSync(recursive: true)) {
+    if (entity is! File)
+      continue;
+    if (_isGeneratedPluginRegistrant(entity)) {
+      final String package = _getPackageFor(entity, flutterRootDir);
+      final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
+      registrants.add(entity);
+    }
+  }
+
+  final Set<String> outOfDate = <String>{};
+
+  for (String package in packageToRegistrants.keys) {
+    final Map<File, String> fileToContent = <File, String>{};
+    for (File f in packageToRegistrants[package]) {
+      fileToContent[f] = f.readAsStringSync();
+    }
+    await runCommand(flutter, <String>['inject-plugins'],
+      workingDirectory: package,
+      outputMode: OutputMode.discard,
+    );
+    for (File registrant in fileToContent.keys) {
+      if (registrant.readAsStringSync() != fileToContent[registrant]) {
+        outOfDate.add(registrant.path);
+      }
+    }
+  }
+
+  if (outOfDate.isNotEmpty) {
+    print('$redLine');
+    print('${bold}The following GeneratedPluginRegistrants are out of date:$reset');
+    for (String registrant in outOfDate) {
+      print(' - $registrant');
+    }
+    print('\nRun "flutter inject-plugins" in the package that\'s out of date.');
+    print('$redLine');
+    exit(1);
+  }
 }
 
 String _getPackageFor(File entity, Directory flutterRootDir) {
