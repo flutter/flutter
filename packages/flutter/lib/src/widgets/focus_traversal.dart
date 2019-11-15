@@ -1016,9 +1016,6 @@ class DirectionalFocusAction extends _RequestFocusActionBase {
   /// The [LocalKey] that uniquely identifies this action to [DirectionalFocusIntent].
   static const LocalKey key = ValueKey<Type>(DirectionalFocusAction);
 
-  /// The direction in which to look for the next focusable node when invoked.
-  TraversalDirection direction;
-
   @override
   void invoke(FocusNode node, DirectionalFocusIntent intent) {
     if (!intent.ignoreTextFields || node.context.widget is! EditableText) {
