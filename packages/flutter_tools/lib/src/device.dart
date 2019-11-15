@@ -23,7 +23,6 @@ import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
-import 'vmservice.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
@@ -619,10 +618,6 @@ abstract class DeviceLogReader {
   /// A broadcast stream where each element in the string is a line of log output.
   Stream<String> get logLines;
 
-  /// Some logs can be obtained from a VM service stream.
-  /// Set this after the VM services are connected.
-  List<VMService> connectedVMServices;
-
   @override
   String toString() => name;
 
@@ -649,9 +644,6 @@ class NoOpDeviceLogReader implements DeviceLogReader {
 
   @override
   int appPid;
-
-  @override
-  List<VMService> connectedVMServices;
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();

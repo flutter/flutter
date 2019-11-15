@@ -163,7 +163,6 @@ class FlutterDevice {
       printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
     vmServices = localVmServices;
-    device.getLogReader(app: package).connectedVMServices = vmServices;
   }
 
   Future<void> refreshViews() async {
