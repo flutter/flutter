@@ -193,19 +193,6 @@ class KernelSnapshot extends Target {
         targetPlatform == TargetPlatform.fuchsia_arm64) {
       targetModel = TargetModel.flutterRunner;
     }
-    // Force linking of the platform for desktop embedder targets since these
-    // do not correctly load the core snapshots in debug mode.
-    // See https://github.com/flutter/flutter/issues/44724
-    bool forceLinkPlatform;
-    switch (targetPlatform) {
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.linux_x64:
-        forceLinkPlatform = true;
-        break;
-      default:
-        forceLinkPlatform = false;
-    }
 
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(
@@ -219,7 +206,7 @@ class KernelSnapshot extends Target {
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
-      linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
+      linkPlatformKernelIn: buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
       extraFrontEndOptions: extraFrontEndOptions,
