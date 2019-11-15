@@ -562,16 +562,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     } else {
       printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
     }
-    return XcodeBuildResult(
-        success: true,
-        output: outputDir,
-        xcodeBuildExecution: XcodeBuildExecution(
-          buildCommands: buildCommands,
-          appDirectory: app.project.hostAppRoot.path,
-          buildForPhysicalDevice: buildForDevice,
-          buildSettings: buildSettings,
-      ),
-    );
+    return XcodeBuildResult(success: true, output: outputDir);
   }
 }
 
