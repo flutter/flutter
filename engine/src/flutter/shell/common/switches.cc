@@ -56,6 +56,8 @@ static const std::string gDartFlagsWhitelist[] = {
     "--write-service-info",
     "--sample-buffer-duration",
     "--no-causal_async_stacks",
+    "--trace-reload",
+    "--trace-reload-verbose",
 };
 // clang-format on
 
