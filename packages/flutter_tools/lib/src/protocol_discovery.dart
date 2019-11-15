@@ -61,19 +61,17 @@ class ProtocolDiscovery {
   final int throttleTimeInMilliseconds;
 
   StreamSubscription<String> _deviceLogSubscription;
-
   StreamController<Uri> _uriStreamController;
+  bool _isUriStreamEmpty = false;
 
   /// The discovered service URI.
   /// Use [uris] instead.
   // TODO(egarciad): replace `uri` for `uris`.
-  Future<Uri> get uri async {
-    try {
-      return await uris.first;
-    } on StateError {
-      // If the stream is closed and empty.
-      return null;
+  Future<Uri> get uri {
+    if (_uriStreamController.isClosed && _isUriStreamEmpty) {
+      return Future<Uri>.error('No observatory URI available');
     }
+    return uris.first;
   }
 
   /// The discovered service URI stream.
@@ -118,6 +116,7 @@ class ProtocolDiscovery {
       uri = _getObservatoryUri(line);
     } on FormatException catch(error, stackTrace) {
       _uriStreamController.addError(error, stackTrace);
+      _isUriStreamEmpty = false;
     }
     if (uri == null) {
       return;
@@ -127,6 +126,7 @@ class ProtocolDiscovery {
       return;
     }
     _uriStreamController.add(uri);
+    _isUriStreamEmpty = false;
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
