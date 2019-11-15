@@ -89,36 +89,28 @@ void main() {
   test('Handles against malformed manifest', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = fs.file('sourcemap')
-      ..writeAsStringSync('{}');
 
     // Missing ending offset.
     final File manifestMissingOffset = fs.file('manifestA')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0],
-        'sourcemap': <int>[0],
-      }}));
-    final File manifestOutOfBounds = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, 100],
-        'sourcemap': <int>[0],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0]}));
+    // Non-file URI.
+    final File manifestNonFileScheme = fs.file('manifestA')
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, 10]}));
 
-    expect(webAssetServer.write(source, manifestMissingOffset, sourcemap), isEmpty);
-    expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap), isEmpty);
+    final File manifestOutOfBounds = fs.file('manifest')
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, 100]}));
+
+    expect(webAssetServer.write(source, manifestMissingOffset), isEmpty);
+    expect(webAssetServer.write(source, manifestNonFileScheme), isEmpty);
+    expect(webAssetServer.write(source, manifestOutOfBounds), isEmpty);
   }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = fs.file('sourcemap')
-      ..writeAsStringSync('{}');
     final File manifest = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, 2],
-      }}));
-    webAssetServer.write(source, manifest, sourcemap);
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, source.lengthSync()]}));
+    webAssetServer.write(source, manifest);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
     requestController.add(request);
@@ -144,14 +136,9 @@ void main() {
   test('handles missing JavaScript files from in memory cache', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = fs.file('sourcemap')
-      ..writeAsStringSync('{}');
     final File manifest = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, 2],
-      }}));
-    webAssetServer.write(source, manifest, sourcemap);
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, source.lengthSync()]}));
+    webAssetServer.write(source, manifest);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/bar.js'));
     requestController.add(request);
