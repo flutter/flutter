@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Brightness;
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -20,27 +19,7 @@ void main() {
       ),
     );
     expect(tested, isTrue);
-    final dynamic exception = tester.takeException();
-    expect(exception, isNotNull);
-    expect(exception ,isFlutterError);
-    final FlutterError error = exception;
-    expect(error.diagnostics.length, 3);
-    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Element>>());
-    expect(
-      error.toStringDeep(),
-      equalsIgnoringHashCodes(
-        'FlutterError\n'
-        '   MediaQuery.of() called with a context that does not contain a\n'
-        '   MediaQuery.\n'
-        '   No MediaQuery ancestor could be found starting from the context\n'
-        '   that was passed to MediaQuery.of(). This can happen because you\n'
-        '   do not have a WidgetsApp or MaterialApp widget (those widgets\n'
-        '   introduce a MediaQuery), or it can happen if the context you use\n'
-        '   comes from a widget above those widgets.\n'
-        '   The context used was:\n'
-        '     Builder\n',
-      ),
-    );
+    expect(tester.takeException(), isFlutterError);
   });
 
   testWidgets('MediaQuery defaults to null', (WidgetTester tester) async {

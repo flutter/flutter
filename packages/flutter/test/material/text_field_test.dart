@@ -3259,24 +3259,9 @@ void main() {
     expect(controller.selection.start, lessThanOrEqualTo(0));
     expect(controller.selection.end, lessThanOrEqualTo(0));
 
-    FlutterError error;
-    try {
+    expect(() {
       controller.selection = const TextSelection.collapsed(offset: 10);
-    } on FlutterError catch (e) {
-      error = e;
-    } finally {
-      expect(error, isNotNull);
-      expect(error.diagnostics.length, 1);
-      expect(
-        error.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   invalid text selection: TextSelection(baseOffset: 10,\n'
-          '   extentOffset: 10, affinity: TextAffinity.downstream,\n'
-          '   isDirectional: false)\n',
-        ),
-      );
-    }
+    }, throwsFlutterError);
   });
 
   testWidgets('maxLength limits input.', (WidgetTester tester) async {
