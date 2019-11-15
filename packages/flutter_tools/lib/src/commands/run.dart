@@ -457,7 +457,6 @@ class RunCommand extends RunCommandBase {
         flutterProject: flutterProject,
         ipv6: ipv6,
         debuggingOptions: _createDebuggingOptions(),
-        stayResident: stayResident,
       );
     } else {
       runner = ColdRunner(
