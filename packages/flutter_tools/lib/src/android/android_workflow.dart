@@ -19,7 +19,6 @@ import '../globals.dart';
 import 'android_sdk.dart';
 
 const int kAndroidSdkMinVersion = 28;
-final Version kAndroidJavaMinVersion = Version(1, 8, 0);
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
 AndroidWorkflow get androidWorkflow => context.get<AndroidWorkflow>();
@@ -58,19 +57,8 @@ class AndroidValidator extends DoctorValidator {
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
   String _task;
 
-  /// Finds the semantic version anywhere in a text.
-  static final RegExp _javaVersionPattern = RegExp(r'(\d+)(\.(\d+)(\.(\d+))?)?');
-
-  /// `java -version` response is not only a number, but also includes other
-  /// information eg. `openjdk version "1.7.0_212"`.
-  /// This method extracts only the semantic version from from that response.
-  static String _extractJavaVersion(String text) {
-    final Match match = _javaVersionPattern.firstMatch(text ?? '');
-    return text?.substring(match.start, match.end);
-  }
-
   /// Returns false if we cannot determine the Java version or if the version
-  /// is older that the minimum allowed version of 1.8.
+  /// is not compatible.
   Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
@@ -78,28 +66,24 @@ class AndroidValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(userMessages.androidCantRunJavaBinary(javaBinary)));
         return false;
       }
-      String javaVersionText;
+      String javaVersion;
       try {
         printTrace('java -version');
         final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
         if (result.exitCode == 0) {
           final List<String> versionLines = result.stderr.split('\n');
-          javaVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+          javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         }
       } catch (error) {
         printTrace(error.toString());
       }
-      if (javaVersionText == null || javaVersionText.isEmpty) {
+      if (javaVersion == null) {
         // Could not determine the java version.
         messages.add(ValidationMessage.error(userMessages.androidUnknownJavaVersion));
         return false;
       }
-      final Version javaVersion = Version.parse(_extractJavaVersion(javaVersionText));
-      if (javaVersion < kAndroidJavaMinVersion) {
-        messages.add(ValidationMessage.error(userMessages.androidJavaMinimumVersion(javaVersionText)));
-        return false;
-      }
-      messages.add(ValidationMessage(userMessages.androidJavaVersion(javaVersionText)));
+      messages.add(ValidationMessage(userMessages.androidJavaVersion(javaVersion)));
+      // TODO(johnmccutchan): Validate version.
       return true;
     } finally {
       _task = null;
