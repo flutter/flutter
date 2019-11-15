@@ -132,8 +132,6 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    // use frameTimings. https://github.com/flutter/flutter/issues/38838
-    // ignore: deprecated_member_use
     window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
       // build start, build finish
       10000, 15000,
@@ -150,6 +148,18 @@ void main() {
     expect(event['elapsed'], 10000);
     expect(event['build'], 5000);
     expect(event['raster'], 4000);
+  });
+
+  test('TimingsCallback exceptions are caught', () {
+    FlutterErrorDetails errorCaught;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorCaught = details;
+    };
+    SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+      throw Exception('Test');
+    });
+    window.onReportTimings(<FrameTiming>[]);
+    expect(errorCaught.exceptionAsString(), equals('Exception: Test'));
   });
 
   test('currentSystemFrameTimeStamp is the raw timestamp', () {

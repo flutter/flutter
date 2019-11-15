@@ -50,7 +50,7 @@ class BundleBuilder {
   /// The default `mainPath` is `lib/main.dart`.
   /// The default  `manifestPath` is `pubspec.yaml`
   Future<void> build({
-    TargetPlatform platform,
+    @required TargetPlatform platform,
     BuildMode buildMode,
     String mainPath,
     String manifestPath = defaultManifestPath,
@@ -182,7 +182,7 @@ Future<void> writeBundle(
     assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
+        final File file = fs.file(bundleDir.uri.resolve(entry.key));
         file.parent.createSync(recursive: true);
         await file.writeAsBytes(await entry.value.contentsAsBytes());
       } finally {

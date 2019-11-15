@@ -9,7 +9,9 @@ import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:meta/meta.dart';
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
 import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
@@ -1625,7 +1627,7 @@ class _ColorMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     if (item is Color)
-      return item.value == targetColor.value;
+      return item == targetColor || item.value == targetColor.value;
     return false;
   }
 

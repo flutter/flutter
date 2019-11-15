@@ -23,6 +23,17 @@ enum TerminalColor {
 AnsiTerminal get terminal {
   return context?.get<AnsiTerminal>() ?? _defaultAnsiTerminal;
 }
+
+/// Warning mark to use in stdout or stderr.
+String get warningMark {
+  return terminal.bolden(terminal.color('[!]', TerminalColor.red));
+}
+
+/// Success mark to use in stdout.
+String get successMark {
+  return terminal.bolden(terminal.color('✓', TerminalColor.green));
+}
+
 final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal();
 
 OutputPreferences get outputPreferences {

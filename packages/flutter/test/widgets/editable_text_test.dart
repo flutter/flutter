@@ -585,6 +585,175 @@ void main() {
         equals('TextInputAction.done'));
   });
 
+  testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(state.wantKeepAlive, true);
+
+    tester.testTextInput.log.clear();
+    tester.testTextInput.closeConnection();
+    await tester.idle();
+
+    // Widget does not have focus anymore.
+    expect(state.wantKeepAlive, false);
+    // No method calls are sent from the framework.
+    // This makes sure hide/clearClient methods are not called after connection
+    // closed.
+    expect(tester.testTextInput.log, isEmpty);
+  });
+
+  testWidgets('closed connection reopened when user focused', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test3';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals('test3'));
+    expect(state.wantKeepAlive, true);
+
+    tester.testTextInput.log.clear();
+    tester.testTextInput.closeConnection();
+    await tester.pumpAndSettle();
+
+    // Widget does not have focus anymore.
+    expect(state.wantKeepAlive, false);
+    // No method calls are sent from the framework.
+    // This makes sure hide/clearClient methods are not called after connection
+    // closed.
+    expect(tester.testTextInput.log, isEmpty);
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
+    controller.text = 'test2';
+    expect(tester.testTextInput.editingState['text'], equals('test2'));
+    // Widget regained the focus.
+    expect(state.wantKeepAlive, true);
+  });
+
+  testWidgets('closed connection reopened when user focused on another field', (WidgetTester tester) async {
+    final EditableText testNameField =
+      EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        maxLines: null,
+        keyboardType: TextInputType.text,
+        style: textStyle,
+        cursorColor: cursorColor,
+      );
+
+    final EditableText testPhoneField =
+      EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: TextInputType.phone,
+        maxLines: 3,
+        style: textStyle,
+        cursorColor: cursorColor,
+      );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: ListView(
+              children: <Widget>[
+                testNameField,
+                testPhoneField,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap, enter text.
+    await tester.tap(find.byWidget(testNameField));
+    await tester.showKeyboard(find.byWidget(testNameField));
+    controller.text = 'test';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byWidget(testNameField));
+    expect(state.wantKeepAlive, true);
+
+    tester.testTextInput.log.clear();
+    tester.testTextInput.closeConnection();
+
+    // Widget does not have focus anymore.
+    expect(state.wantKeepAlive, false);
+    // No method calls are sent from the framework.
+    // This makes sure hide/clearClient methods are not called after connection
+    // closed.
+    expect(tester.testTextInput.log, isEmpty);
+
+    // For the next fields, tap, enter text.
+    await tester.tap(find.byWidget(testPhoneField));
+    await tester.showKeyboard(find.byWidget(testPhoneField));
+    controller.text = '650123123';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('650123123'));
+    // Widget regained the focus.
+    expect(state.wantKeepAlive, true);
+  });
+
   /// Toolbar is not used in Flutter Web. Skip this check.
   ///
   /// Web is using native dom elements (it is also used as platform input)
@@ -3412,6 +3581,45 @@ void main() {
       },
       throwsAssertionError,
     );
+  });
+
+  testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    const String testText = 'flutter is the best!';
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText et = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: et,
+        ),
+      ),
+    ));
+
+    await tester.showKeyboard(find.byType(EditableText));
+    expect(log.length, 7);
+    // TextInput.show should be before TextInput.setEditingState
+    final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
+    int index = 0;
+    for (MethodCall m in log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
   });
 }
 

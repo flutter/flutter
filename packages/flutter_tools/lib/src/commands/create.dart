@@ -10,7 +10,7 @@ import 'package:yaml/yaml.dart' as yaml;
 
 import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
-import '../android/gradle.dart' as gradle;
+import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/net.dart';
@@ -85,6 +85,8 @@ class CreateCommand extends FlutterCommand {
         getEnumName(_ProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
+        getEnumName(_ProjectType.module): 'Generate a project to add a Flutter module to an '
+            'existing Android or iOS application.',
       },
       defaultsTo: null,
     );
@@ -363,7 +365,7 @@ class CreateCommand extends FlutterCommand {
       final Set<String> existingOrganizations = await project.organizationNames;
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
-      } else if (1 < existingOrganizations.length) {
+      } else if (existingOrganizations.length > 1) {
         throwToolExit(
           'Ambiguous organization in existing files: $existingOrganizations. '
           'The --org command line argument must be specified to recreate project.'

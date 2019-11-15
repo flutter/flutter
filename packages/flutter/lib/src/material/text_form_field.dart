@@ -74,7 +74,7 @@ class TextFormField extends FormField<String> {
   /// When a [controller] is specified, [initialValue] must be null (the
   /// default). If [controller] is null, then a [TextEditingController]
   /// will be constructed automatically and its `text` will be initialized
-  /// to [initalValue] or the empty string.
+  /// to [initialValue] or the empty string.
   ///
   /// For documentation about the various parameters, see the [TextField] class
   /// and [new TextField], the constructor.

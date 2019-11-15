@@ -236,7 +236,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     // Read all $HOME/.AndroidStudio*/system/.home files. There may be several
     // pointing to the same installation, so we grab only the latest one.
-    if (fs.directory(homeDirPath).existsSync()) {
+    if (homeDirPath != null && fs.directory(homeDirPath).existsSync()) {
       for (FileSystemEntity entity in fs.directory(homeDirPath).listSync(followLinks: false)) {
         if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
           final AndroidStudio studio = AndroidStudio.fromHomeDot(entity);

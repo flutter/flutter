@@ -526,17 +526,20 @@ class _BuildInstance {
       await node.target.build(environment);
       printTrace('${node.target.name}: Complete');
 
-      // If we were missing the depfile, resolve files after executing the
+      node.inputs
+        ..clear()
+        ..addAll(node.target.resolveInputs(environment).sources);
+      node.outputs
+        ..clear()
+        ..addAll(node.target.resolveOutputs(environment).sources);
+
+      // If we were missing the depfile, resolve  input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
-        node.inputs.clear();
-        node.outputs.clear();
-        node.inputs.addAll(node.target.resolveInputs(environment).sources);
-        node.outputs.addAll(node.target.resolveOutputs(environment).sources);
         await fileCache.hashFiles(node.inputs);
       }
 
-      // Update hashes for output files.
+      // Always update hashes for output files.
       await fileCache.hashFiles(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();

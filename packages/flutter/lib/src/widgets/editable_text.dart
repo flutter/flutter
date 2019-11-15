@@ -1395,20 +1395,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(this,
-          TextInputConfiguration(
-              inputType: widget.keyboardType,
-              obscureText: widget.obscureText,
-              autocorrect: widget.autocorrect,
-              enableSuggestions: widget.enableSuggestions,
-              inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
-                  ? TextInputAction.newline
-                  : TextInputAction.done
-              ),
-              textCapitalization: widget.textCapitalization,
-              keyboardAppearance: widget.keyboardAppearance,
+      _textInputConnection = TextInput.attach(
+        this,
+        TextInputConfiguration(
+          inputType: widget.keyboardType,
+          obscureText: widget.obscureText,
+          autocorrect: widget.autocorrect,
+          enableSuggestions: widget.enableSuggestions,
+          inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
+              ? TextInputAction.newline
+              : TextInputAction.done
           ),
+          textCapitalization: widget.textCapitalization,
+          keyboardAppearance: widget.keyboardAppearance,
+        ),
       );
+      _textInputConnection.show();
 
       _updateSizeAndTransform();
       final TextStyle style = widget.style;
@@ -1421,8 +1423,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           textAlign: widget.textAlign,
         )
         ..setEditingState(localValue);
+    } else {
+      _textInputConnection.show();
     }
-    _textInputConnection.show();
   }
 
   void _closeInputConnectionIfNeeded() {
@@ -1439,6 +1442,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else if (!_hasFocus) {
       _closeInputConnectionIfNeeded();
       widget.controller.clearComposing();
+    }
+  }
+
+  @override
+  void connectionClosed() {
+    if (_hasInputConnection) {
+      _textInputConnection.connectionClosedReceived();
+      _textInputConnection = null;
+      _lastKnownRemoteTextEditingValue = null;
+      _finalizeEditing(true);
     }
   }
 

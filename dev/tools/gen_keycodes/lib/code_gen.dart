@@ -114,6 +114,13 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     }).toList();
   }
 
+  List<Key> get functionKeyData {
+    final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
+    return keyData.data.where((Key entry) {
+      return functionKeyRe.hasMatch(entry.constantName);
+    }).toList();
+  }
+
   /// This generates the map of USB HID codes to physical keys.
   String get predefinedHidCodeMap {
     final StringBuffer scanCodeMap = StringBuffer();
@@ -240,6 +247,16 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return macOsNumPadMap.toString().trimRight();
   }
 
+  String get macOsFunctionKeyMap {
+    final StringBuffer macOsFunctionKeyMap = StringBuffer();
+    for (Key entry in functionKeyData) {
+      if (entry.macOsScanCode != null) {
+        macOsFunctionKeyMap.writeln('  ${toHex(entry.macOsScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+      }
+    }
+    return macOsFunctionKeyMap.toString().trimRight();
+  }
+
   /// This generates the map of Fuchsia key codes to logical keys.
   String get fuchsiaKeyCodeMap {
     final StringBuffer fuchsiaKeyCodeMap = StringBuffer();
@@ -324,6 +341,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       'FUCHSIA_KEY_CODE_MAP': fuchsiaKeyCodeMap,
       'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
       'MACOS_NUMPAD_MAP': macOsNumpadMap,
+      'MACOS_FUNCTION_KEY_MAP': macOsFunctionKeyMap,
       'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,
       'GLFW_NUMPAD_MAP': glfwNumpadMap,
       'XKB_SCAN_CODE_MAP': xkbScanCodeMap,

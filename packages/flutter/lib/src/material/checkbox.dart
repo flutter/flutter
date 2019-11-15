@@ -168,8 +168,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       SelectAction.key: _createAction,
       if (!kIsWeb) ActivateAction.key: _createAction,
     };
-    _updateHighlightMode(WidgetsBinding.instance.focusManager.highlightMode);
-    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
+    _updateHighlightMode(FocusManager.instance.highlightMode);
+    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   void _actionHandler(FocusNode node, Intent intent){
@@ -198,7 +198,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   }
 
   void _updateHighlightMode(FocusHighlightMode mode) {
-    switch (WidgetsBinding.instance.focusManager.highlightMode) {
+    switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         _showHighlight = false;
         break;

@@ -77,7 +77,7 @@ void main() {
     test('Doesnt throw a StateError if Timer is left cleaned up', () async {
       final Testbed testbed = Testbed();
 
-      testbed.run(() async {
+      await testbed.run(() async {
         final Timer timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
         timer.cancel();
       });
