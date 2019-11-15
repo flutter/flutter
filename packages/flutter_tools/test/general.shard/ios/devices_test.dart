@@ -258,7 +258,8 @@ void main() {
             'Try unlocking attached devices.'
           )
         );
-        await device.startApp(mockApp);
+        final LaunchResult result = await device.startApp(mockApp);
+        expect(result.started, false);
       }, overrides: <Type, Generator>{
         IMobileDevice: () => mockIMobileDevice,
       });
