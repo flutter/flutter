@@ -26,9 +26,9 @@ abstract class AndroidBuilder {
   /// Builds an AAR artifact.
   Future<void> buildAar({
     @required FlutterProject project,
-    @required Set<AndroidBuildInfo> androidBuildInfo,
+    @required AndroidBuildInfo androidBuildInfo,
     @required String target,
-    @required String outputDirectoryPath,
+    @required String outputDir,
   });
 
   /// Builds an APK artifact.
@@ -54,32 +54,23 @@ class _AndroidBuilderImpl extends AndroidBuilder {
   @override
   Future<void> buildAar({
     @required FlutterProject project,
-    @required Set<AndroidBuildInfo> androidBuildInfo,
+    @required AndroidBuildInfo androidBuildInfo,
     @required String target,
-    @required String outputDirectoryPath,
+    @required String outputDir,
   }) async {
     try {
       Directory outputDirectory =
-        fs.directory(outputDirectoryPath ?? project.android.buildDirectory);
+        fs.directory(outputDir ?? project.android.buildDirectory);
       if (project.isModule) {
         // Module projects artifacts are located in `build/host`.
         outputDirectory = outputDirectory.childDirectory('host');
       }
-      for (AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
-        await buildGradleAar(
-          project: project,
-          androidBuildInfo: androidBuildInfo,
-          target: target,
-          outputDirectory: outputDirectory,
-        );
-      }
-      printHowToConsumeAar(
-        buildModes: androidBuildInfo
-          .map<String>((AndroidBuildInfo androidBuildInfo) {
-            return androidBuildInfo.buildInfo.modeName;
-          }).toSet(),
-        androidPackage: project.manifest.androidPackage,
-        repoDirectory: getRepoDirectory(outputDirectory),
+      await buildGradleAar(
+        project: project,
+        androidBuildInfo: androidBuildInfo,
+        target: target,
+        outputDir: outputDirectory,
+        printHowToConsumeAaar: true,
       );
     } finally {
       androidSdk.reinitialize();

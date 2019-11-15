@@ -57,6 +57,7 @@ Directory getBundleDirectory(FlutterProject project) {
 
 /// The directory where the repo is generated.
 /// Only applicable to AARs.
+@visibleForTesting
 Directory getRepoDirectory(Directory buildDirectory) {
   return buildDirectory
     .childDirectory('outputs')
@@ -473,17 +474,20 @@ Future<void> buildGradleApp({
 ///
 /// * [project] is typically [FlutterProject.current()].
 /// * [androidBuildInfo] is the build configuration.
+/// * [target] is the target dart entrypoint. Typically, `lib/main.dart`.
 /// * [outputDir] is the destination of the artifacts,
 Future<void> buildGradleAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
-  @required Directory outputDirectory,
+  @required Directory outputDir,
+  @required bool printHowToConsumeAaar,
 }) async {
   assert(project != null);
-  assert(target != null);
   assert(androidBuildInfo != null);
-  assert(outputDirectory != null);
+  assert(target != null);
+  assert(outputDir != null);
+  assert(printHowToConsumeAaar != null);
 
   if (androidSdk == null) {
     exitWithNoSdkMessage();
@@ -512,14 +516,13 @@ Future<void> buildGradleAar({
     gradleUtils.getExecutable(project),
     '-I=$initScript',
     '-Pflutter-root=$flutterRoot',
-    '-Poutput-dir=${outputDirectory.path}',
+    '-Poutput-dir=${outputDir.path}',
     '-Pis-plugin=${manifest.isPlugin}',
   ];
 
   if (target != null && target.isNotEmpty) {
     command.add('-Ptarget=$target');
   }
-
   if (androidBuildInfo.targetArchs.isNotEmpty) {
     final String targetPlatforms = androidBuildInfo.targetArchs
         .map(getPlatformNameForAndroidArch).join(',');
@@ -564,7 +567,7 @@ Future<void> buildGradleAar({
       exitCode: exitCode,
     );
   }
-  final Directory repoDirectory = getRepoDirectory(outputDirectory);
+  final Directory repoDirectory = getRepoDirectory(outputDir);
   if (!repoDirectory.existsSync()) {
     printStatus(result.stdout, wrap: false);
     printError(result.stderr, wrap: false);
@@ -577,17 +580,24 @@ Future<void> buildGradleAar({
     '$successMark Built ${fs.path.relative(repoDirectory.path)}.',
     color: TerminalColor.green,
   );
+  if (printHowToConsumeAaar) {
+    _printHowToConsumeAar(
+      buildMode: androidBuildInfo.buildInfo.modeName,
+      androidPackage: project.manifest.androidPackage,
+      repoPath: repoDirectory.path,
+    );
+  }
 }
 
 /// Prints how to consume the AAR from a host app.
-void printHowToConsumeAar({
-  @required Set<String> buildModes,
+void _printHowToConsumeAar({
+  @required String buildMode,
   @required String androidPackage,
-  @required Directory repoDirectory,
+  @required String repoPath,
 }) {
-  assert(buildModes != null && buildModes.isNotEmpty);
+  assert(buildMode != null);
   assert(androidPackage != null);
-  assert(repoDirectory != null);
+  assert(repoPath != null);
 
   printStatus('''
 
@@ -597,42 +607,20 @@ ${terminal.bolden('Consuming the Module')}
 
       repositories {
         maven {
-            url '${repoDirectory.path}'
+            url '$repoPath'
         }
         maven {
             url 'http://download.flutter.io'
         }
       }
 
-  3. Make the host app depend on the Flutter module:
+  3. Make the host app depend on the $buildMode module:
 
-    dependencies {''');
-
-  for (String buildMode in buildModes) {
-    printStatus('''
-      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0''');
-  }
-
-printStatus('''
-    }
-''');
-
-  if (buildModes.contains('profile')) {
-    printStatus('''
-
-  4. Add the `profile` build type:
-
-    android {
-      buildTypes {
-        profile {
-          initWith debug
-        }
+      dependencies {
+        ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0'
       }
-    }
-''');
-  }
 
-printStatus('To learn more, visit https://flutter.dev/go/build-aar''');
+To learn more, visit https://flutter.dev/go/build-aar''');
 }
 
 String _hex(List<int> bytes) {
@@ -717,7 +705,8 @@ Future<void> buildPluginsAsAar(
           ),
         ),
         target: '',
-        outputDirectory: buildDirectory,
+        outputDir: buildDirectory,
+        printHowToConsumeAaar: false,
       );
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it
