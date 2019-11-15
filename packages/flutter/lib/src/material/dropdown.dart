@@ -5,9 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -118,12 +116,6 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
   CurvedAnimation _fadeOpacity;
   CurvedAnimation _resize;
 
-  // On the web, enter doesn't select things, *except* in a <select>
-  // element, which is what a dropdown emulates.
-  static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(SelectAction.key),
-  };
-
   @override
   void initState() {
     super.initState();
@@ -167,7 +159,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
         final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
         opacity = CurvedAnimation(parent: route.animation, curve: Interval(start, end));
       }
-      Widget child = FadeTransition(
+      children.add(FadeTransition(
         opacity: opacity,
         child: InkWell(
           child: Container(
@@ -179,16 +171,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             _DropdownRouteResult<T>(route.items[itemIndex].item.value),
           ),
         ),
-      );
-      if (kIsWeb) {
-        // On the web, enter doesn't select things, *except* in a <select>
-        // element, which is what a dropdown emulates.
-        child = Shortcuts(
-          shortcuts: _webShortcuts,
-          child: child,
-        );
-      }
-      children.add(child);
+      ));
     }
 
     return FadeTransition(
@@ -991,10 +974,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (widget.focusNode == null) {
       _internalNode ??= _createFocusNode();
     }
-    _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
-    };
+    _actionMap = <LocalKey, ActionFactory>{ ActivateAction.key: _createAction };
     focusNode.addListener(_handleFocusChanged);
   }
 
