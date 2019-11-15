@@ -447,7 +447,7 @@ class Container extends StatelessWidget {
         clipBehaviour != Clip.none) {
       current = ClipPath(
         clipper: PathClipper(
-          textDirection: TextDirection.ltr,
+          textDirection: Directionality.of(context),
           getClipPath: decoration.getClipPath
         ),
         clipBehavior: clipBehaviour,
