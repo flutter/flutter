@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
 import 'goldens.dart';

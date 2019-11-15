@@ -602,7 +602,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           initializePlatform: debuggingOptions.initializePlatform,
           hostname: debuggingOptions.hostname,
           port: debuggingOptions.port,
-          skipDwds: device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
+          skipDwds: device.device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
           dartDefines: dartDefines,
         );
         // When connecting to a browser, update the message with a seemsSlow notification
