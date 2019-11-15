@@ -54,6 +54,22 @@ void main() {
     expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']), throwsA(isInstanceOf<ToolExit>()));
   });
 
+  testbed.test('Does not log stack traces during build failure', () async {
+    final BufferLogger bufferLogger = logger;
+    final StackTrace testStackTrace = StackTrace.current;
+    when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+      .thenAnswer((Invocation invocation) async {
+        return BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
+          'hello': ExceptionMeasurement('hello', 'bar', testStackTrace),
+        });
+      });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+
+    await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']), throwsA(isInstanceOf<ToolExit>()));
+    expect(bufferLogger.errorText, contains('bar'));
+    expect(bufferLogger.errorText, isNot(contains(testStackTrace.toString())));
+  });
+
   testbed.test('Only writes input and output files when the values change', () async {
     when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
