@@ -194,6 +194,8 @@ class FlutterDevice {
       device.getLogReader(app: package).connectedVMServices = vmServices;
       completer.complete();
       await subscription.cancel();
+    }, onError: (dynamic error) {
+      printTrace('Fail to handle observatory URI: $error');
     }, onDone: () {
       _isStreamingNewObservatoryUri = false;
       if (!completer.isCompleted && !isWaitingForVm) {
