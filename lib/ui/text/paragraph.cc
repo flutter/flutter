@@ -140,7 +140,7 @@ Dart_Handle Paragraph::getLineBoundary(unsigned offset) {
   int line_start = -1;
   int line_end = -1;
   for (txt::LineMetrics& line : metrics) {
-    if (offset >= line.start_index && offset < line.end_index) {
+    if (offset >= line.start_index && offset <= line.end_index) {
       line_start = line.start_index;
       line_end = line.end_index;
       break;
