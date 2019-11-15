@@ -36,13 +36,13 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
-    final FlutterProject flutterProject = _getProject();
-    if (flutterProject == null) {
+    final FlutterProject futterProject = _getProject();
+    if (futterProject == null) {
       return usage;
     }
-    if (flutterProject.manifest.isModule) {
+    if (futterProject.manifest.isModule) {
       usage[CustomDimensions.commandBuildAarProjectType] = 'module';
-    } else if (flutterProject.manifest.isPlugin) {
+    } else if (futterProject.manifest.isPlugin) {
       usage[CustomDimensions.commandBuildAarProjectType] = 'plugin';
     } else {
       usage[CustomDimensions.commandBuildAarProjectType] = 'app';
