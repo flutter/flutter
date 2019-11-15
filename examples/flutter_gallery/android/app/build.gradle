@@ -73,6 +73,14 @@ flutter {
 }
 
 dependencies {
+    // TODO(egarciad): Remove these dependencies once https://github.com/flutter/flutter/issues/40866 is fixed.
+    implementation "androidx.annotation:annotation:1.1.0"
+    def lifecycle_version = "2.1.0"
+    implementation "androidx.lifecycle:lifecycle-common:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
+    implementation "androidx.fragment:fragment:1.1.0"
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:rules:1.1.1'
     androidTestImplementation 'androidx.test:runner:1.1.1'
