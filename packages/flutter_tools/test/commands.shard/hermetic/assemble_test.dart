@@ -16,22 +16,14 @@ import '../../src/common.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  Testbed testbed;
-  MockBuildSystem mockBuildSystem;
-
-  setUpAll(() {
-    Cache.disableLocking();
+  Cache.disableLocking();
+  final Testbed testbed = Testbed(overrides: <Type, Generator>{
+    BuildSystem: ()  => MockBuildSystem(),
+    Cache: () => FakeCache(),
   });
 
-  setUp(() {
-    mockBuildSystem = MockBuildSystem();
-    testbed = Testbed(overrides: <Type, Generator>{
-      BuildSystem: ()  => mockBuildSystem,
-    });
-  });
-
-  test('Can run a build', () => testbed.run(() async {
-    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+  testbed.test('Can run a build', () async {
+    when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: true);
       });
@@ -39,31 +31,31 @@ void main() {
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
     final BufferLogger bufferLogger = logger;
 
-    expect(bufferLogger.statusText.trim(), 'build succeeded.');
-  }));
+    expect(bufferLogger.traceText, contains('build succeeded.'));
+  });
 
-  test('Throws ToolExit if not provided with output', () => testbed.run(() async {
-    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+  testbed.test('Throws ToolExit if not provided with output', () async {
+    when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: true);
       });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
     expect(commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']), throwsA(isInstanceOf<ToolExit>()));
-  }));
+  });
 
-  test('Throws ToolExit if called with non-existent rule', () => testbed.run(() async {
-    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+  testbed.test('Throws ToolExit if called with non-existent rule', () async {
+    when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: true);
       });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
     expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']), throwsA(isInstanceOf<ToolExit>()));
-  }));
+  });
 
-  test('Only writes input and output files when the values change', () => testbed.run(() async {
-    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+  testbed.test('Only writes input and output files when the values change', () async {
+    when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(
           success: true,
@@ -88,8 +80,7 @@ void main() {
     expect(inputs.lastModifiedSync(), theDistantPast);
     expect(outputs.lastModifiedSync(), theDistantPast);
 
-
-    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+    when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(
           success: true,
@@ -101,7 +92,7 @@ void main() {
     expect(inputs.readAsStringSync(), contains('foo'));
     expect(inputs.readAsStringSync(), contains('fizz'));
     expect(inputs.lastModifiedSync(), isNot(theDistantPast));
-  }));
+  });
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}

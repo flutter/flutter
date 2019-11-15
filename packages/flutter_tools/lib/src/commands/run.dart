@@ -31,6 +31,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
+    usesDartDefines();
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
@@ -314,7 +315,8 @@ class RunCommand extends RunCommandBase {
         traceSystrace: argResults['trace-systrace'],
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
         cacheSkSL: cacheSkSL,
-        observatoryPort: observatoryPort,
+        deviceVmServicePort: deviceVmservicePort,
+        hostVmServicePort: hostVmservicePort,
         verboseSystemLogs: argResults['verbose-system-logs'],
         initializePlatform: argResults['web-initialize-platform'],
         hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
@@ -426,6 +428,7 @@ class RunCommand extends RunCommandBase {
           experimentalFlags: expFlags,
           target: argResults['target'],
           buildMode: getBuildMode(),
+          dartDefines: dartDefines,
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner
@@ -453,12 +456,13 @@ class RunCommand extends RunCommandBase {
       );
     } else if (webMode) {
       runner = webRunnerFactory.createWebRunner(
-        devices.single,
+        flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
         debuggingOptions: _createDebuggingOptions(),
         stayResident: stayResident,
+        dartDefines: dartDefines,
       );
     } else {
       runner = ColdRunner(

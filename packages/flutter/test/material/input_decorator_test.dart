@@ -3551,4 +3551,47 @@ void main() {
       'alignLabelWithHint: true',
     ]);
   });
+
+  testWidgets('uses alphabetic baseline for CJK layout', (WidgetTester tester) async {
+    await tester.binding.setLocale('zh', 'CN');
+    final Typography typography = Typography();
+
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController();
+    // The dense theme uses ideographic baselines
+    Widget buildFrame(bool alignLabelWithHint) {
+      return MaterialApp(
+        theme: ThemeData(
+          textTheme: typography.dense,
+        ),
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                labelText: 'label',
+                alignLabelWithHint: alignLabelWithHint,
+                hintText: 'hint',
+                hintStyle: const TextStyle(
+                  fontFamily: 'Cough',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+
+    // These numbers should be the values from using alphabetic baselines:
+    // Ideographic (incorrect) value is 31.299999713897705
+    expect(tester.getTopLeft(find.text('hint')).dy, 28.75);
+
+    // Ideographic (incorrect) value is 50.299999713897705
+    expect(tester.getBottomLeft(find.text('hint')).dy, 47.75);
+  });
 }

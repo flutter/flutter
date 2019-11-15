@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
+import 'package:xml/xml.dart' as xml;
 
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
@@ -56,7 +57,6 @@ Directory getBundleDirectory(FlutterProject project) {
 
 /// The directory where the repo is generated.
 /// Only applicable to AARs.
-@visibleForTesting
 Directory getRepoDirectory(Directory buildDirectory) {
   return buildDirectory
     .childDirectory('outputs')
@@ -282,8 +282,17 @@ Future<void> buildGradleApp({
   }
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
-    printTrace('Using local engine: ${localEngineArtifacts.engineOutPath}');
-    command.add('-PlocalEngineOut=${localEngineArtifacts.engineOutPath}');
+    final Directory localEngineRepo = _getLocalEngineRepo(
+      engineOutPath: localEngineArtifacts.engineOutPath,
+      androidBuildInfo: androidBuildInfo,
+    );
+    printTrace(
+      'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
+      'Local Maven repo: ${localEngineRepo.path}'
+    );
+    command.add('-Plocal-engine-repo=${localEngineRepo.path}');
+    command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
+    command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
   }
   if (target != null) {
     command.add('-Ptarget=$target');
@@ -324,39 +333,48 @@ Future<void> buildGradleApp({
   }
   command.add(assembleTask);
 
-  final Stopwatch sw = Stopwatch()..start();
-  int exitCode = 1;
   GradleHandledError detectedGradleError;
   String detectedGradleErrorLine;
+  String consumeLog(String line) {
+    // This message was removed from first-party plugins,
+    // but older plugin versions still display this message.
+    if (androidXPluginWarningRegex.hasMatch(line)) {
+      // Don't pipe.
+      return null;
+    }
+    if (detectedGradleError != null) {
+      // Pipe stdout/stderr from Gradle.
+      return line;
+    }
+    for (final GradleHandledError gradleError in localGradleErrors) {
+      if (gradleError.test(line)) {
+        detectedGradleErrorLine = line;
+        detectedGradleError = gradleError;
+        // The first error match wins.
+        break;
+      }
+    }
+    // Pipe stdout/stderr from Gradle.
+    return line;
+  }
+
+  final Stopwatch sw = Stopwatch()..start();
+  int exitCode = 1;
   try {
     exitCode = await processUtils.stream(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
       environment: gradleEnvironment,
-      mapFunction: (String line) {
-        // This message was removed from first-party plugins,
-        // but older plugin versions still display this message.
-        if (androidXPluginWarningRegex.hasMatch(line)) {
-          // Don't pipe.
-          return null;
-        }
-        if (detectedGradleError != null) {
-          // Pipe stdout/stderr from Gradle.
-          return line;
-        }
-        for (final GradleHandledError gradleError in localGradleErrors) {
-          if (gradleError.test(line)) {
-            detectedGradleErrorLine = line;
-            detectedGradleError = gradleError;
-            // The first error match wins.
-            break;
-          }
-        }
-        // Pipe stdout/stderr from Gradle.
-        return line;
-      },
+      mapFunction: consumeLog,
     );
+  } on ProcessException catch(exception) {
+    consumeLog(exception.toString());
+    // Rethrow the exception if the error isn't handled by any of the
+    // `localGradleErrors`.
+    if (detectedGradleError == null) {
+      rethrow;
+    }
   } finally {
     status.stop();
   }
@@ -455,14 +473,18 @@ Future<void> buildGradleApp({
 ///
 /// * [project] is typically [FlutterProject.current()].
 /// * [androidBuildInfo] is the build configuration.
-/// * [target] is the target dart entrypoint. Typically, `lib/main.dart`.
 /// * [outputDir] is the destination of the artifacts,
 Future<void> buildGradleAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
-  @required Directory outputDir,
+  @required Directory outputDirectory,
 }) async {
+  assert(project != null);
+  assert(target != null);
+  assert(androidBuildInfo != null);
+  assert(outputDirectory != null);
+
   if (androidSdk == null) {
     exitWithNoSdkMessage();
   }
@@ -490,13 +512,14 @@ Future<void> buildGradleAar({
     gradleUtils.getExecutable(project),
     '-I=$initScript',
     '-Pflutter-root=$flutterRoot',
-    '-Poutput-dir=${outputDir.path}',
+    '-Poutput-dir=${outputDirectory.path}',
     '-Pis-plugin=${manifest.isPlugin}',
   ];
 
   if (target != null && target.isNotEmpty) {
     command.add('-Ptarget=$target');
   }
+
   if (androidBuildInfo.targetArchs.isNotEmpty) {
     final String targetPlatforms = androidBuildInfo.targetArchs
         .map(getPlatformNameForAndroidArch).join(',');
@@ -504,8 +527,17 @@ Future<void> buildGradleAar({
   }
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
-    printTrace('Using local engine: ${localEngineArtifacts.engineOutPath}');
-    command.add('-PlocalEngineOut=${localEngineArtifacts.engineOutPath}');
+    final Directory localEngineRepo = _getLocalEngineRepo(
+      engineOutPath: localEngineArtifacts.engineOutPath,
+      androidBuildInfo: androidBuildInfo,
+    );
+    printTrace(
+      'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
+      'Local Maven repo: ${localEngineRepo.path}'
+    );
+    command.add('-Plocal-engine-repo=${localEngineRepo.path}');
+    command.add('-Plocal-engine-build-mode=${androidBuildInfo.buildInfo.modeName}');
+    command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
   }
 
   command.add(aarTask);
@@ -532,7 +564,7 @@ Future<void> buildGradleAar({
       exitCode: exitCode,
     );
   }
-  final Directory repoDirectory = getRepoDirectory(outputDir);
+  final Directory repoDirectory = getRepoDirectory(outputDirectory);
   if (!repoDirectory.existsSync()) {
     printStatus(result.stdout, wrap: false);
     printError(result.stderr, wrap: false);
@@ -545,22 +577,17 @@ Future<void> buildGradleAar({
     '$successMark Built ${fs.path.relative(repoDirectory.path)}.',
     color: TerminalColor.green,
   );
-  _printHowToConsumeAar(
-    buildMode: androidBuildInfo.buildInfo.modeName,
-    androidPackage: project.manifest.androidPackage,
-    repoPath: repoDirectory.path,
-  );
 }
 
 /// Prints how to consume the AAR from a host app.
-void _printHowToConsumeAar({
-  @required String buildMode,
+void printHowToConsumeAar({
+  @required Set<String> buildModes,
   @required String androidPackage,
-  @required String repoPath,
+  @required Directory repoDirectory,
 }) {
-  assert(buildMode != null);
+  assert(buildModes != null && buildModes.isNotEmpty);
   assert(androidPackage != null);
-  assert(repoPath != null);
+  assert(repoDirectory != null);
 
   printStatus('''
 
@@ -570,20 +597,42 @@ ${terminal.bolden('Consuming the Module')}
 
       repositories {
         maven {
-            url '$repoPath'
+            url '${repoDirectory.path}'
         }
         maven {
             url 'http://download.flutter.io'
         }
       }
 
-  3. Make the host app depend on the $buildMode module:
+  3. Make the host app depend on the Flutter module:
 
-      dependencies {
-        ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0'
+    dependencies {''');
+
+  for (String buildMode in buildModes) {
+    printStatus('''
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0''');
+  }
+
+printStatus('''
+    }
+''');
+
+  if (buildModes.contains('profile')) {
+    printStatus('''
+
+  4. Add the `profile` build type:
+
+    android {
+      buildTypes {
+        profile {
+          initWith debug
+        }
       }
+    }
+''');
+  }
 
-To learn more, visit https://flutter.dev/go/build-aar''');
+printStatus('To learn more, visit https://flutter.dev/go/build-aar''');
 }
 
 String _hex(List<int> bytes) {
@@ -668,7 +717,7 @@ Future<void> buildPluginsAsAar(
           ),
         ),
         target: '',
-        outputDir: buildDirectory,
+        outputDirectory: buildDirectory,
       );
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it
@@ -780,4 +829,111 @@ void _exitWithExpectedFileNotFound({
     'It\'s likely that this file was generated under ${project.android.buildDirectory.path}, '
     'but the tool couldn\'t find it.'
   );
+}
+
+void _createSymlink(String targetPath, String linkPath) {
+  final File targetFile = fs.file(targetPath);
+  if (!targetFile.existsSync()) {
+    throwToolExit('The file $targetPath wasn\'t found in the local engine out directory.');
+  }
+  final File linkFile = fs.file(linkPath);
+  final Link symlink = linkFile.parent.childLink(linkFile.basename);
+  try {
+    symlink.createSync(targetPath, recursive: true);
+  } on FileSystemException catch (exception) {
+    throwToolExit(
+      'Failed to create the symlink $linkPath->$targetPath: $exception'
+    );
+  }
+}
+
+String _getLocalArtifactVersion(String pomPath) {
+  final File pomFile = fs.file(pomPath);
+  if (!pomFile.existsSync()) {
+    throwToolExit('The file $pomPath wasn\'t found in the local engine out directory.');
+  }
+  xml.XmlDocument document;
+  try {
+    document = xml.parse(pomFile.readAsStringSync());
+  } on xml.XmlParserException {
+    throwToolExit(
+      'Error parsing $pomPath. Please ensure that this is a valid XML document.'
+    );
+  } on FileSystemException {
+    throwToolExit(
+      'Error reading $pomPath. Please ensure that you have read permission to this'
+      'file and try again.');
+  }
+  final Iterable<xml.XmlElement> project = document.findElements('project');
+  assert(project.isNotEmpty);
+  for (xml.XmlElement versionElement in document.findAllElements('version')) {
+    if (versionElement.parent == project.first) {
+      return versionElement.text;
+    }
+  }
+  throwToolExit('Error while parsing the <version> element from $pomPath');
+  return null;
+}
+
+/// Returns the local Maven repository for a local engine build.
+/// For example, if the engine is built locally at <home>/engine/src/out/android_release_unopt
+/// This method generates symlinks in the temp directory to the engine artifacts
+/// following the convention specified on https://maven.apache.org/pom.html#Repositories
+Directory _getLocalEngineRepo({
+  @required String engineOutPath,
+  @required AndroidBuildInfo androidBuildInfo,
+}) {
+  assert(engineOutPath != null);
+  assert(androidBuildInfo != null);
+
+  final String abi = getEnumName(androidBuildInfo.targetArchs.first);
+  final Directory localEngineRepo = fs.systemTempDirectory
+    .createTempSync('flutter_tool_local_engine_repo.');
+
+  // Remove the local engine repo before the tool exits.
+  addShutdownHook(
+    () => localEngineRepo.deleteSync(recursive: true),
+    ShutdownStage.CLEANUP,
+  );
+
+  final String buildMode = androidBuildInfo.buildInfo.modeName;
+  final String artifactVersion = _getLocalArtifactVersion(
+    fs.path.join(
+      engineOutPath,
+      'flutter_embedding_$buildMode.pom',
+    )
+  );
+  for (String artifact in const <String>['pom', 'jar']) {
+    // The Android embedding artifacts.
+    _createSymlink(
+      fs.path.join(
+        engineOutPath,
+        'flutter_embedding_$buildMode.$artifact',
+      ),
+      fs.path.join(
+        localEngineRepo.path,
+        'io',
+        'flutter',
+        'flutter_embedding_$buildMode',
+        artifactVersion,
+        'flutter_embedding_$buildMode-$artifactVersion.$artifact',
+      ),
+    );
+    // The engine artifacts (libflutter.so).
+    _createSymlink(
+      fs.path.join(
+        engineOutPath,
+        '${abi}_$buildMode.$artifact',
+      ),
+      fs.path.join(
+        localEngineRepo.path,
+        'io',
+        'flutter',
+        '${abi}_$buildMode',
+        artifactVersion,
+        '${abi}_$buildMode-$artifactVersion.$artifact',
+      ),
+    );
+  }
+  return localEngineRepo;
 }

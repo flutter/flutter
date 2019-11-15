@@ -173,12 +173,12 @@ void main() {
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },
-            child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x000001),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.color, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.black, index: 0x000100),
           trailing: CupertinoButton(
             onPressed: () { },
-            child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x010000),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.color, index: 0x010000),
           ),
         ),
       ),

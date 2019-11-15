@@ -31,46 +31,46 @@ void main() {
     testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
       Cache.flutterRoot = '../..';
       return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
     testUsingContext('report a nice error when a guarded function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
     testUsingContext('report a nice error when an async function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
     testUsingContext('report a nice error when a Ticker is left running', () async {
       Cache.flutterRoot = '../..';
       return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
     testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
       final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
       return _testFile('trivial', missingDependencyTests, missingDependencyTests);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
     testUsingContext('report which user created widget caused the error', () async {
       Cache.flutterRoot = '../..';
       return _testFile('print_user_created_ancestor', automatedTestsDirectory, flutterTestDirectory,
           extraArguments: const <String>['--track-widget-creation']);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
     testUsingContext('report which user created widget caused the error - no flag', () async {
       Cache.flutterRoot = '../..';
       return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory,
          extraArguments: const <String>['--no-track-widget-creation']);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
     testUsingContext('report correct created widget caused the error', () async {
       Cache.flutterRoot = '../..';
       return _testFile('print_correct_local_widget', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--track-widget-creation']);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
     testUsingContext('can load assets within its own package', () async {
       Cache.flutterRoot = '../..';

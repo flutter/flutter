@@ -85,7 +85,7 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    printStatus('$warningMark Gradle does not have permission to execute by your user.', emphasis: true);
+    printStatus('$warningMark Gradle does not have execution permission.', emphasis: true);
     printStatus(
       'You should change the ownership of the project directory to your user, '
       'or move the project to a directory with execute permissions.',
