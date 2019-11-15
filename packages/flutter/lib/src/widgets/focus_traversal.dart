@@ -249,11 +249,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         }
       }
     });
-
-    if (sorted.isNotEmpty)
-      return sorted.first;
-
-    return null;
+    return sorted.first;
   }
 
   // Sorts nodes from left to right horizontally, and removes nodes that are
