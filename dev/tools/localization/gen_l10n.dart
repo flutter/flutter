@@ -164,7 +164,7 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
   if (attributesMap != null) {
     if (attributesMap.containsKey('description')) {
       final String description = attributesMap['description'];
-      attributes.add('desc: ${generateString(description)}');
+      attributes.add('desc: \'$description\'');
     }
     if (attributesMap.containsKey('placeholders')) {
       final Map<String, dynamic> placeholders = attributesMap['placeholders'];

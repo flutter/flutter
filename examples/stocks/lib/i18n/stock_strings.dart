@@ -30,7 +30,8 @@ import 'messages_all.dart';
 ///
 /// ```
 /// dependencies:
-///   # Internationalization support.
+///   # rest of dependencies
+///
 ///   flutter_localizations:
 ///     sdk: flutter
 ///   intl: 0.16.0
@@ -89,8 +90,8 @@ class StockStrings {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('es', 'ES'),
     Locale('en', 'US'),
+    Locale('es', 'ES'),
   ];
 
   String title() {
@@ -98,7 +99,7 @@ class StockStrings {
       r'Stocks',
       locale: _localeName,
       name: 'title',
-      desc: r'Title for the Stocks application',
+      desc: 'Title for the Stocks application',
       args: <Object>[]
     );
   }
@@ -108,7 +109,7 @@ class StockStrings {
       r'MARKET',
       locale: _localeName,
       name: 'market',
-      desc: r'Label for the Market tab',
+      desc: 'Label for the Market tab',
       args: <Object>[]
     );
   }
@@ -118,7 +119,7 @@ class StockStrings {
       r'PORTFOLIO',
       locale: _localeName,
       name: 'portfolio',
-      desc: r'Label for the Portfolio tab',
+      desc: 'Label for the Portfolio tab',
       args: <Object>[]
     );
   }
@@ -132,7 +133,7 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
   Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
 
   @override
-  bool isSupported(Locale locale) => <String>['es', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'es'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_StockStringsDelegate old) => false;
