@@ -338,7 +338,11 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand.
 ///
 /// This class is deprecated. It will be deleted soon.
-@Deprecated('This class is no longer used in framework and will be deleted soon.')
+// TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+@Deprecated(
+  'TypeMatcher has been deprecated because it is no longer used in framework(only in deprecated methods). '
+  'This feature was deprecated after v1.12.1.'
+)
 @optionalTypeArgs
 class TypeMatcher<T> {
   /// Creates a type matcher for the given type parameter.
@@ -1924,7 +1928,11 @@ abstract class BuildContext {
   /// [ancestor]'s widget changes this build context is rebuilt.
   ///
   /// This method is deprecated. Please use [dependOnInheritedElement] instead.
-  @Deprecated('Use dependOnInheritedElement instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedElement instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
 
   /// Registers this build context with [ancestor] such that when
@@ -1947,7 +1955,11 @@ abstract class BuildContext {
   /// rebuilt so that it can obtain new values from that widget.
   ///
   /// This method is deprecated. Please use [dependOnInheritedWidgetOfExactType] instead.
-  @Deprecated('Use dependOnInheritedWidgetOfExactType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
 
   /// Obtains the nearest widget of the given type [T], which must be the type of a
@@ -1995,7 +2007,11 @@ abstract class BuildContext {
   /// which must be the type of a concrete [InheritedWidget] subclass.
   ///
   /// This method is deprecated. Please use [getElementForInheritedWidgetOfExactType] instead.
-  @Deprecated('Use getElementForInheritedWidgetOfExactType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use getElementForInheritedWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
   /// Obtains the element corresponding to the nearest widget of the given type [T],
@@ -2018,7 +2034,11 @@ abstract class BuildContext {
   /// type of a concrete [Widget] subclass.
   ///
   /// This method is deprecated. Please use [findAncestorWidgetOfExactType] instead.
-  @Deprecated('Use findAncestorWidgetOfExactType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   Widget ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type [T], which must be the
@@ -2048,7 +2068,11 @@ abstract class BuildContext {
   /// that matches the given [TypeMatcher].
   ///
   /// This method is deprecated. Please use [findAncestorStateOfType] instead.
-  @Deprecated('Use findAncestorStateOfType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorStateOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   State ancestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
@@ -2088,7 +2112,11 @@ abstract class BuildContext {
   /// that matches the given [TypeMatcher].
   ///
   /// This method is deprecated. Please use [findRootAncestorStateOfType] instead.
-  @Deprecated('Use findRootAncestorStateOfType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findRootAncestorStateOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   State rootAncestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
@@ -2106,7 +2134,11 @@ abstract class BuildContext {
   /// that matches the given [TypeMatcher].
   ///
   /// This method is deprecated. Please use [findAncestorRenderObjectOfType] instead.
-  @Deprecated('Use findAncestorRenderObjectOfType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorRenderObjectOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
@@ -3491,7 +3523,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return true;
   }
 
-  @Deprecated('Use dependOnInheritedElement instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedElement instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect }) {
     return dependOnInheritedElement(ancestor, aspect: aspect);
@@ -3506,7 +3542,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor.widget;
   }
 
-  @Deprecated('Use dependOnInheritedWidgetOfExactType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3531,7 +3571,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  @Deprecated('Use getElementForInheritedWidgetOfExactType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use getElementForInheritedWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3551,7 +3595,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
-  @Deprecated('Use findAncestorWidgetOfExactType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   Widget ancestorWidgetOfExactType(Type targetType) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3570,7 +3618,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor?.widget;
   }
 
-  @Deprecated('Use findAncestorStateOfType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorStateOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   State ancestorStateOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3597,7 +3649,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return statefulAncestor?.state;
   }
 
-  @Deprecated('Use findRootAncestorStateOfType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findRootAncestorStateOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   State rootAncestorStateOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3624,7 +3680,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return statefulAncestor?.state;
   }
 
-  @Deprecated('Use findAncestorRenderObjectOfType instead.')
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorRenderObjectOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -4310,6 +4370,11 @@ class StatefulElement extends ComponentElement {
     _state = null;
   }
 
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedElement instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   InheritedWidget inheritFromElement(Element ancestor, { Object aspect }) {
     return dependOnInheritedElement(ancestor, aspect: aspect);
