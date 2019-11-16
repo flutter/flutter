@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'colors.dart';
+import 'icon_theme_data.dart';
 
 /// A button in a _ContextMenuSheet.
 ///
@@ -19,11 +20,11 @@ class CupertinoContextMenuAction extends StatefulWidget {
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     this.onPressed,
-    this.trailingIcon,
+    this.trailing,
   }) : assert(child != null),
-       assert(isDefaultAction != null),
-       assert(isDestructiveAction != null),
-       super(key: key);
+        assert(isDefaultAction != null),
+        assert(isDestructiveAction != null),
+        super(key: key);
 
   /// The widget that will be placed inside the action.
   final Widget child;
@@ -39,11 +40,11 @@ class CupertinoContextMenuAction extends StatefulWidget {
   /// Called when the action is pressed.
   final VoidCallback onPressed;
 
-  /// An optional icon to display to the right of the child.
+  /// An optional [Icon] widget to display to the right of the child.
   ///
   /// Will be colored in the same way as the [TextStyle] used for [child] (for
   /// example, if using [isDestructiveAction]).
-  final IconData trailingIcon;
+  final Widget trailing;
 
   @override
   _CupertinoContextMenuActionState createState() => _CupertinoContextMenuActionState();
@@ -132,10 +133,12 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
                   Flexible(
                     child: widget.child,
                   ),
-                  if (widget.trailingIcon != null)
-                    Icon(
-                      widget.trailingIcon,
-                      color: CupertinoColors.destructiveRed,
+                  if (widget.trailing != null)
+                    IconTheme(
+                      child: widget.trailing,
+                      data: CupertinoIconThemeData(
+                        color: _textStyle.color,
+                      ),
                     ),
                 ],
               ),
