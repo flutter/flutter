@@ -44,7 +44,7 @@ void main() {
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
-        }
+        },
       );
       iosEnvironment = Environment(
         outputDir: fs.currentDirectory,
@@ -52,7 +52,7 @@ void main() {
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
-        }
+        },
       );
       HostPlatform hostPlatform;
       if (platform.isWindows) {
@@ -60,13 +60,13 @@ void main() {
       } else if (platform.isLinux) {
         hostPlatform = HostPlatform.linux_x64;
       } else if (platform.isMacOS) {
-          hostPlatform = HostPlatform.darwin_x64;
+        hostPlatform = HostPlatform.darwin_x64;
       } else {
         assert(false);
       }
-        final String skyEngineLine = platform.isWindows
-          ? r'sky_engine:file:///C:/bin/cache/pkg/sky_engine/lib/'
-          : 'sky_engine:file:///bin/cache/pkg/sky_engine/lib/';
+      final String skyEngineLine = platform.isWindows
+        ? r'sky_engine:file:///C:/bin/cache/pkg/sky_engine/lib/'
+        : 'sky_engine:file:///bin/cache/pkg/sky_engine/lib/';
       fs.file('.packages')
         ..createSync()
         ..writeAsStringSync('''
@@ -81,6 +81,7 @@ flutter_tools:lib/''');
         fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'sdk_ext',
             'vmservice_io.dart'),
         fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+        fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart.exe'),
         fs.path.join(engineArtifacts, getNameForHostPlatform(hostPlatform),
             'frontend_server.dart.snapshot'),
         fs.path.join(engineArtifacts, 'android-arm-profile',
@@ -116,6 +117,34 @@ flutter_tools:lib/''');
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
+  test('kernel_snapshot handles null result from kernel compilation', () => testbed.run(() async {
+    final FakeKernelCompilerFactory fakeKernelCompilerFactory = kernelCompilerFactory;
+    fakeKernelCompilerFactory.kernelCompiler = MockKernelCompiler();
+    when(fakeKernelCompilerFactory.kernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      mainPath: anyNamed('mainPath'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      targetModel: anyNamed('targetModel'),
+      linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
+      aot: anyNamed('aot'),
+      buildMode: anyNamed('buildMode'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      packagesPath: anyNamed('packagesPath'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
+      platformDill: anyNamed('platformDill'),
+      initializeFromDill: anyNamed('initializeFromDill'),
+      dartDefines: anyNamed('dartDefines'),
+    )).thenAnswer((Invocation invocation) async {
+      return null;
+    });
+    final BuildResult result = await buildSystem.build(const KernelSnapshot(), androidEnvironment);
+
+    expect(result.exceptions.values.single.exception, isInstanceOf<Exception>());
+  }));
+
   test('kernel_snapshot does not use track widget creation on profile builds', () => testbed.run(() async {
     final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
     when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
@@ -124,21 +153,91 @@ flutter_tools:lib/''');
     when(mockKernelCompiler.compile(
       sdkRoot: anyNamed('sdkRoot'),
       aot: anyNamed('aot'),
+      buildMode: anyNamed('buildMode'),
       trackWidgetCreation: false,
       targetModel: anyNamed('targetModel'),
-      targetProductVm: anyNamed('targetProductVm'),
       outputFilePath: anyNamed('outputFilePath'),
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
-      mainPath: anyNamed('mainPath')
+      mainPath: anyNamed('mainPath'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
+      linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
+      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(<File>[], androidEnvironment);
+    await const KernelSnapshot().build(androidEnvironment);
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
+
+  test('kernel_snapshot can disable track-widget-creation on debug builds', () => testbed.run(() async {
+    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
+    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
+      return mockKernelCompiler;
+    });
+    when(mockKernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      aot: anyNamed('aot'),
+      buildMode: anyNamed('buildMode'),
+      trackWidgetCreation: false,
+      targetModel: anyNamed('targetModel'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      packagesPath: anyNamed('packagesPath'),
+      mainPath: anyNamed('mainPath'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
+      linkPlatformKernelIn: false,
+      dartDefines: anyNamed('dartDefines'),
+    )).thenAnswer((Invocation _) async {
+      return const CompilerOutput('example', 0, <Uri>[]);
+    });
+
+    await const KernelSnapshot().build(androidEnvironment
+      ..defines[kBuildMode] = 'debug'
+      ..defines[kTrackWidgetCreation] = 'false');
+  }, overrides: <Type, Generator>{
+    KernelCompilerFactory: () => MockKernelCompilerFactory(),
+  }));
+
+  test('kernel_snapshot forces platform linking on debug for darwin target platforms', () => testbed.run(() async {
+    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
+    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
+      return mockKernelCompiler;
+    });
+    when(mockKernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      aot: anyNamed('aot'),
+      buildMode: anyNamed('buildMode'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      targetModel: anyNamed('targetModel'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      packagesPath: anyNamed('packagesPath'),
+      mainPath: anyNamed('mainPath'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
+      linkPlatformKernelIn: true,
+      dartDefines: anyNamed('dartDefines'),
+    )).thenAnswer((Invocation _) async {
+      return const CompilerOutput('example', 0, <Uri>[]);
+    });
+
+    await const KernelSnapshot().build(androidEnvironment
+      ..defines[kTargetPlatform]  = 'darwin-x64'
+      ..defines[kBuildMode] = 'debug'
+      ..defines[kTrackWidgetCreation] = 'false'
+    );
+  }, overrides: <Type, Generator>{
+    KernelCompilerFactory: () => MockKernelCompilerFactory(),
+  }));
+
 
   test('kernel_snapshot does use track widget creation on debug builds', () => testbed.run(() async {
     final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
@@ -148,24 +247,29 @@ flutter_tools:lib/''');
     when(mockKernelCompiler.compile(
       sdkRoot: anyNamed('sdkRoot'),
       aot: anyNamed('aot'),
+      buildMode: anyNamed('buildMode'),
       trackWidgetCreation: true,
       targetModel: anyNamed('targetModel'),
-      targetProductVm: anyNamed('targetProductVm'),
       outputFilePath: anyNamed('outputFilePath'),
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
-      mainPath: anyNamed('mainPath')
+      mainPath: anyNamed('mainPath'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
+      linkPlatformKernelIn: false,
+      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(<File>[], Environment(
-        outputDir: fs.currentDirectory,
-        projectDir: fs.currentDirectory,
-        defines: <String, String>{
-      kBuildMode: 'debug',
-      kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
-    }));
+    await const KernelSnapshot().build(Environment(
+      outputDir: fs.currentDirectory,
+      projectDir: fs.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: 'debug',
+        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+      }));
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
@@ -184,14 +288,12 @@ flutter_tools:lib/''');
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
-
   test('aot_elf_profile throws error if missing target platform', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const AotElfProfile(),
         androidEnvironment..defines.remove(kTargetPlatform));
 
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
-
 
   test('aot_assembly_profile throws error if missing build mode', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(),
@@ -304,14 +406,12 @@ flutter_tools:lib/''');
     ProcessManager: () => mockProcessManager,
   }));
 
-  test('list dart sources handles packages without lib directories', () => testbed.run(() {
-    fs.file('.packages')
-      ..createSync()
-      ..writeAsStringSync('''
-# Generated
-example:fiz/lib/''');
-    fs.directory('fiz').createSync();
-    expect(listDartSources(androidEnvironment), <File>[]);
+  test('Profile/ReleaseCopyFlutterAotBundle copies .so to correct output directory', () => testbed.run(() async {
+    androidEnvironment.buildDir.createSync(recursive: true);
+    androidEnvironment.buildDir.childFile('app.so').createSync();
+    await const ProfileCopyFlutterAotBundle().build(androidEnvironment);
+
+    expect(androidEnvironment.outputDir.childFile('app.so').existsSync(), true);
   }));
 }
 
@@ -342,7 +442,7 @@ class FakeGenSnapshot implements GenSnapshot {
 }
 
 class FakeKernelCompilerFactory implements KernelCompilerFactory {
-  FakeKernelCompiler kernelCompiler = FakeKernelCompiler();
+  KernelCompiler kernelCompiler = FakeKernelCompiler();
 
   @override
   Future<KernelCompiler> create(FlutterProject flutterProject) async {
@@ -360,17 +460,19 @@ class FakeKernelCompiler implements KernelCompiler {
     TargetModel targetModel = TargetModel.flutter,
     bool linkPlatformKernelIn = false,
     bool aot = false,
+    BuildMode buildMode,
+    bool causalAsyncStacks = true,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath,
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    bool targetProductVm = false,
     String platformDill,
-    String initializeFromDill}) async {
-      fs.file(outputFilePath).createSync(recursive: true);
-      return CompilerOutput(outputFilePath, 0, null);
+    String initializeFromDill,
+    List<String> dartDefines,
+  }) async {
+    fs.file(outputFilePath).createSync(recursive: true);
+    return CompilerOutput(outputFilePath, 0, null);
   }
 }
 

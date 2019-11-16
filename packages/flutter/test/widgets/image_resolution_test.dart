@@ -13,6 +13,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'image_data.dart';
+
 class TestImage implements ui.Image {
   TestImage(this.scale);
   final double scale;
@@ -104,7 +106,7 @@ class TestAssetImage extends AssetImage {
   TestAssetImage(String name) : super(name);
 
   @override
-  ImageStreamCompleter load(AssetBundleImageKey key) {
+  ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
     ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
       final TestByteData testData = data;
@@ -145,6 +147,30 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [ 
             width: imageSize,
             fit: BoxFit.fill,
           ),
+      ),
+    ),
+  );
+}
+
+Widget buildImageCacheResized(String name, Key key, int width, int height, int cacheWidth, int cacheHeight) {
+  return Center(
+    child: RepaintBoundary(
+      child: Container(
+        width: 250,
+        height: 250,
+        child: Center(
+          child: Image.memory(
+            Uint8List.fromList(kTransparentImage),
+            key: key,
+            excludeFromSemantics: true,
+            color: const Color(0xFF00FFFF),
+            colorBlendMode: BlendMode.plus,
+            width: width.toDouble(),
+            height: height.toDouble(),
+            cacheWidth: cacheWidth,
+            cacheHeight: cacheHeight,
+          ),
+        ),
       ),
     ),
   );
@@ -301,6 +327,24 @@ void main() {
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, bundle));
     expect(getRenderImage(tester, key).size, const Size(480.0, 480.0));
     expect(getTestImage(tester, key).scale, 10.0);
+  });
+
+  testWidgets('Image cache resize upscale display 5', (WidgetTester tester) async {
+    final Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 5, 5, 20, 20));
+    expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
+  });
+
+  testWidgets('Image cache resize upscale display 50', (WidgetTester tester) async {
+    final Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 50, 50, 20, 20));
+    expect(getRenderImage(tester, key).size, const Size(50.0, 50.0));
+  });
+
+  testWidgets('Image cache resize downscale display 5', (WidgetTester tester) async {
+    final Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 5, 5, 1, 1));
+    expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
   });
 
 }

@@ -48,6 +48,15 @@ enum CustomDimensions {
   commandBuildAarProjectType,  // cd35
   buildEventCommand,  // cd36
   buildEventSettings,  // cd37
+  commandBuildApkTargetPlatform, // cd38
+  commandBuildApkBuildMode, // cd39
+  commandBuildApkSplitPerAbi, // cd40
+  commandBuildAppBundleTargetPlatform, // cd41
+  commandBuildAppBundleBuildMode, // cd42
+  buildEventError,  // cd43
+  commandResultEventMaxRss,  // cd44
+  commandRunAndroidEmbeddingVersion, // cd45
+  commandPackagesAndroidEmbeddingVersion, // cd46
 }
 
 String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';
@@ -103,8 +112,9 @@ abstract class Usage {
   ///
   /// Note that using [command] above is preferred to ensure that the parameter
   /// keys are well-defined in [CustomDimensions] above.
-  void sendCommand(String command, {
-    Map<String, String> parameters
+  void sendCommand(
+    String command, {
+    Map<String, String> parameters,
   });
 
   /// Sends an 'event' to the underlying analytics implementation.
@@ -113,13 +123,20 @@ abstract class Usage {
   /// event types defined in this directory in events.dart.
   @visibleForOverriding
   @visibleForTesting
-  void sendEvent(String category, String parameter, {
-    Map<String, String> parameters
+  void sendEvent(
+    String category,
+    String parameter, {
+    String label,
+    int value,
+    Map<String, String> parameters,
   });
 
   /// Sends timing information to the underlying analytics implementation.
-  void sendTiming(String category, String variableName, Duration duration, {
-    String label
+  void sendTiming(
+    String category,
+    String variableName,
+    Duration duration, {
+    String label,
   });
 
   /// Sends an exception to the underlying analytics implementation.
@@ -249,6 +266,8 @@ class _DefaultUsage implements Usage {
   void sendEvent(
     String category,
     String parameter, {
+    String label,
+    int value,
     Map<String, String> parameters,
   }) {
     if (suppressAnalytics) {
@@ -260,7 +279,13 @@ class _DefaultUsage implements Usage {
       cdKey(CustomDimensions.localTime): formatDateTime(systemClock.now()),
     };
 
-    _analytics.sendEvent(category, parameter, parameters: paramsWithLocalTime);
+    _analytics.sendEvent(
+      category,
+      parameter,
+      label: label,
+      value: value,
+      parameters: paramsWithLocalTime,
+    );
   }
 
   @override
@@ -300,34 +325,54 @@ class _DefaultUsage implements Usage {
     await _analytics.waitForLastPing(timeout: const Duration(milliseconds: 250));
   }
 
-  @override
-  void printWelcome() {
-    // This gets called if it's the first run by the selected command, if any,
-    // and on exit, in case there was no command.
-    if (_printedWelcome) {
-      return;
-    }
-    _printedWelcome = true;
-
+  void _printWelcome() {
     printStatus('');
     printStatus('''
   ╔════════════════════════════════════════════════════════════════════════════╗
   ║                 Welcome to Flutter! - https://flutter.dev                  ║
   ║                                                                            ║
-  ║ The Flutter tool anonymously reports feature usage statistics and crash    ║
-  ║ reports to Google in order to help Google contribute improvements to       ║
-  ║ Flutter over time.                                                         ║
+  ║ The Flutter tool uses Google Analytics to anonymously report feature usage ║
+  ║ statistics and basic crash reports. This data is used to help improve      ║
+  ║ Flutter tools over time.                                                   ║
+  ║                                                                            ║
+  ║ Flutter tool analytics are not sent on the very first run. To disable      ║
+  ║ reporting, type 'flutter config --no-analytics'. To display the current    ║
+  ║ setting, type 'flutter config'. If you opt out of analytics, an opt-out    ║
+  ║ event will be sent, and then no further information will be sent by the    ║
+  ║ Flutter tool.                                                              ║
+  ║                                                                            ║
+  ║ By downloading the Flutter SDK, you agree to the Google Terms of Service.  ║
+  ║ Note: The Google Privacy Policy describes how data is handled in this      ║
+  ║ service.                                                                   ║
+  ║                                                                            ║
+  ║ Moreover, Flutter includes the Dart SDK, which may send usage metrics and  ║
+  ║ crash reports to Google.                                                   ║
   ║                                                                            ║
   ║ Read about data we send with crash reports:                                ║
   ║ https://github.com/flutter/flutter/wiki/Flutter-CLI-crash-reporting        ║
   ║                                                                            ║
   ║ See Google's privacy policy:                                               ║
   ║ https://www.google.com/intl/en/policies/privacy/                           ║
-  ║                                                                            ║
-  ║ Use "flutter config --no-analytics" to disable analytics and crash         ║
-  ║ reporting.                                                                 ║
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
+  }
+
+  @override
+  void printWelcome() {
+    // Only print once per run.
+    if (_printedWelcome) {
+      return;
+    }
+    if (// Display the welcome message if this is the first run of the tool.
+        isFirstRun ||
+        // Display the welcome message if we are not on master, and if the
+        // persistent tool state instructs that we should.
+        (!FlutterVersion.instance.isMaster &&
+        (persistentToolState.redisplayWelcomeMessage ?? true))) {
+      _printWelcome();
+      _printedWelcome = true;
+      persistentToolState.redisplayWelcomeMessage = false;
+    }
   }
 }
 

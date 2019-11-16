@@ -14,7 +14,7 @@ class RunningProcessInfo {
         assert(commandLine != null);
 
   final String commandLine;
-  final int pid;
+  final String pid;
   final DateTime creationDate;
 
   @override
@@ -47,7 +47,7 @@ class RunningProcessInfo {
   }
 }
 
-Future<bool> killProcess(int pid, {ProcessManager processManager}) async {
+Future<bool> killProcess(String pid, {ProcessManager processManager}) async {
   assert(pid != null, 'Must specify a pid to kill');
   processManager ??= const LocalProcessManager();
   ProcessResult result;
@@ -55,14 +55,14 @@ Future<bool> killProcess(int pid, {ProcessManager processManager}) async {
     result = await processManager.run(<String>[
       'taskkill.exe',
       '/pid',
-      pid.toString(),
+      pid,
       '/f',
     ]);
   } else {
     result = await processManager.run(<String>[
       'kill',
       '-9',
-      pid.toString(),
+      pid,
     ]);
   }
   return result.exitCode == 0;
@@ -163,7 +163,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
       time = '${hours + 12}${time.substring(2)}';
     }
 
-    final int pid = int.parse(line.substring(0, processIdHeaderSize).trim());
+    final String pid = line.substring(0, processIdHeaderSize).trim();
     final DateTime creationDate = DateTime.parse('$year-$month-${day}T$time');
     final String commandLine = line.substring(commandLineHeaderStart).trim();
     yield RunningProcessInfo(pid, creationDate, commandLine);
@@ -254,7 +254,7 @@ Iterable<RunningProcessInfo> processPsOutput(
     final DateTime creationDate = DateTime.parse('$year-$month-${day}T$time');
     line = line.substring(24).trim();
     final int nextSpace = line.indexOf(' ');
-    final int pid = int.parse(line.substring(0, nextSpace));
+    final String pid = line.substring(0, nextSpace);
     final String commandLine = line.substring(nextSpace + 1);
     yield RunningProcessInfo(pid, creationDate, commandLine);
   }

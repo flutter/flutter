@@ -38,7 +38,7 @@ void main() {
       data: <ui.PointerData>[
         ui.PointerData(change: ui.PointerChange.down),
         ui.PointerData(change: ui.PointerChange.up),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
@@ -56,7 +56,7 @@ void main() {
         ui.PointerData(change: ui.PointerChange.down),
         ui.PointerData(change: ui.PointerChange.move),
         ui.PointerData(change: ui.PointerChange.up),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
@@ -76,7 +76,7 @@ void main() {
           ui.PointerData(change: ui.PointerChange.hover),
           ui.PointerData(change: ui.PointerChange.remove),
           ui.PointerData(change: ui.PointerChange.hover),
-        ]
+        ],
     );
 
     final List<PointerEvent> pointerRouterEvents = <PointerEvent>[];
@@ -110,7 +110,7 @@ void main() {
           physicalX: 10.0 * ui.window.devicePixelRatio,
           physicalY: 15.0 * ui.window.devicePixelRatio,
         ),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
@@ -129,7 +129,7 @@ void main() {
       data: <ui.PointerData>[
         ui.PointerData(change: ui.PointerChange.down),
         ui.PointerData(change: ui.PointerChange.cancel),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
@@ -146,7 +146,7 @@ void main() {
       data: <ui.PointerData>[
         ui.PointerData(change: ui.PointerChange.down),
         ui.PointerData(change: ui.PointerChange.up),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
@@ -169,7 +169,7 @@ void main() {
         ui.PointerData(change: ui.PointerChange.hover, device: 24),
         ui.PointerData(change: ui.PointerChange.remove, device: 24),
         ui.PointerData(change: ui.PointerChange.hover, device: 24),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = PointerEventConverter.expand(
@@ -189,7 +189,7 @@ void main() {
         ui.PointerData(change: ui.PointerChange.add, device: 25, physicalX: 10.0 * ui.window.devicePixelRatio, physicalY: 10.0 * ui.window.devicePixelRatio),
         ui.PointerData(change: ui.PointerChange.down, device: 25, physicalX: 15.0 * ui.window.devicePixelRatio, physicalY: 17.0 * ui.window.devicePixelRatio),
         const ui.PointerData(change: ui.PointerChange.remove, device: 25),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = PointerEventConverter.expand(
@@ -210,7 +210,7 @@ void main() {
         data: <ui.PointerData>[
           ui.PointerData(change: ui.PointerChange.add),
           ui.PointerData(change: ui.PointerChange.hover, signalKind: ui.PointerSignalKind.scroll),
-        ]
+        ],
     );
 
     final List<PointerEvent> events = PointerEventConverter.expand(
@@ -233,7 +233,7 @@ void main() {
         ui.PointerData(change: ui.PointerChange.hover, physicalX: lastLocation.dx, physicalY: lastLocation.dy),
         ui.PointerData(change: ui.PointerChange.down, physicalX: lastLocation.dx, physicalY: lastLocation.dy),
         ui.PointerData(change: ui.PointerChange.hover, physicalX: scrollLocation.dx, physicalY: scrollLocation.dy, signalKind: ui.PointerSignalKind.scroll),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = PointerEventConverter.expand(
@@ -261,7 +261,7 @@ void main() {
         ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ui.PointerData(change: ui.PointerChange.move, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = PointerEventConverter.expand(
@@ -296,7 +296,7 @@ void main() {
           ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
           ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryStylusButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
           ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ]
+        ],
       );
 
       final List<PointerEvent> events = PointerEventConverter.expand(
@@ -328,7 +328,7 @@ void main() {
         ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ui.PointerData(change: ui.PointerChange.move, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
-      ]
+      ],
     );
 
     final List<PointerEvent> events = PointerEventConverter.expand(
@@ -361,7 +361,7 @@ void main() {
           ui.PointerData(change: ui.PointerChange.down, kind: kind, buttons: kMiddleMouseButton, physicalX: location.dx, physicalY: location.dy),
           ui.PointerData(change: ui.PointerChange.move, kind: kind, buttons: kMiddleMouseButton | kSecondaryMouseButton, physicalX: location.dx, physicalY: location.dy),
           ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ]
+        ],
       );
 
       final List<PointerEvent> events = PointerEventConverter.expand(

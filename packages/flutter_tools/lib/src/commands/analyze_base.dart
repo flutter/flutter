@@ -56,14 +56,16 @@ abstract class AnalyzeBase {
 /// Return true if [fileList] contains a path that resides inside the Flutter repository.
 /// If [fileList] is empty, then return true if the current directory resides inside the Flutter repository.
 bool inRepo(List<String> fileList) {
-  if (fileList == null || fileList.isEmpty)
+  if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fs.path.current];
+  }
   final String root = fs.path.normalize(fs.path.absolute(Cache.flutterRoot));
   final String prefix = root + fs.path.separator;
   for (String file in fileList) {
     file = fs.path.normalize(fs.path.absolute(file));
-    if (file == root || file.startsWith(prefix))
+    if (file == root || file.startsWith(prefix)) {
       return true;
+    }
   }
   return false;
 }
@@ -87,8 +89,9 @@ class PackageDependency {
     for (List<String> targetSources in values.values) {
       for (String source in targetSources) {
         assert(fs.path.isAbsolute(source));
-        if (fs.path.isWithin(Cache.flutterRoot, source))
+        if (fs.path.isWithin(Cache.flutterRoot, source)) {
           return true;
+        }
       }
     }
     return false;
@@ -103,8 +106,9 @@ class PackageDependency {
       bool canonical = false;
       for (String source in values[target]) {
         result.writeln('    $source');
-        if (source == canonicalSource)
+        if (source == canonicalSource) {
           canonical = true;
+        }
       }
       if (canonical) {
         result.writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
@@ -144,8 +148,9 @@ class PackageDependencyTracker {
           // Ensure that we only add `analyzer` and dependent packages defined in the vended SDK (and referred to with a local
           // fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored
           // since they would produce spurious conflicts.
-          if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..'))
+          if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..')) {
             add(packageName, fs.path.normalize(fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
+          }
         }
       }
     }
@@ -215,8 +220,9 @@ class PackageDependencyTracker {
 
   Map<String, String> asPackageMap() {
     final Map<String, String> result = <String, String>{};
-    for (String package in packages.keys)
+    for (String package in packages.keys) {
       result[package] = packages[package].target;
+    }
     return result;
   }
 }

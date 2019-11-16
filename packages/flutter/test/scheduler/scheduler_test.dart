@@ -132,17 +132,12 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    // We can't use Future in scheduler_test so we'll use dynamic instead.
-    final dynamic firstFrameEventFired = window.frameTimings.first;
-
-    window.debugReportTimings(<FrameTiming>[FrameTiming(<int>[
+    window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
       // build start, build finish
       10000, 15000,
       // raster start, raster finish
       16000, 20000,
     ])]);
-
-    await firstFrameEventFired;
 
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
     expect(events, hasLength(1));
@@ -153,6 +148,18 @@ void main() {
     expect(event['elapsed'], 10000);
     expect(event['build'], 5000);
     expect(event['raster'], 4000);
+  });
+
+  test('TimingsCallback exceptions are caught', () {
+    FlutterErrorDetails errorCaught;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorCaught = details;
+    };
+    SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+      throw Exception('Test');
+    });
+    window.onReportTimings(<FrameTiming>[]);
+    expect(errorCaught.exceptionAsString(), equals('Exception: Test'));
   });
 
   test('currentSystemFrameTimeStamp is the raw timestamp', () {

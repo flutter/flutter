@@ -71,7 +71,7 @@ void main() {
     });
 
     testUsingContext('a - debugToggleProfileWidgetBuilds without service protocol', () async {
-       when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
+      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
       await terminalHandler.processTerminalInput('a');
 
       verifyNever(mockResidentRunner.debugToggleProfileWidgetBuilds());

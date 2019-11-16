@@ -321,7 +321,7 @@ class TraversalTester {
                 ),
               ),
             ),
-        )
+        ),
     );
 
     expect(semantics, hasSemantics(

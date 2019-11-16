@@ -4,6 +4,7 @@
 
 @implementation ViewController
 
+// Boiler-plate add-to-app demo. Not integration tested anywhere.
 - (void)viewDidLoad {
     [super viewDidLoad];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];

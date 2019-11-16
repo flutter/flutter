@@ -244,7 +244,12 @@ class CommonFinders {
   ///
   /// If the [skipOffstage] argument is true (the default), then nodes that are
   /// [Offstage] or that are from inactive [Route]s are skipped.
-  Finder descendant({ Finder of, Finder matching, bool matchRoot = false, bool skipOffstage = true }) {
+  Finder descendant({
+    @required Finder of,
+    @required Finder matching,
+    bool matchRoot = false,
+    bool skipOffstage = true,
+  }) {
     return _DescendantFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
   }
 
@@ -269,7 +274,11 @@ class CommonFinders {
   ///
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the ancestors.
-  Finder ancestor({ Finder of, Finder matching, bool matchRoot = false }) {
+  Finder ancestor({
+    @required Finder of,
+    @required Finder matching,
+    bool matchRoot = false,
+  }) {
     return _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
 

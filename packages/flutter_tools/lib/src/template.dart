@@ -91,13 +91,19 @@ class Template {
       if (match != null) {
         final String platform = match.group(1);
         final String language = context['${platform}Language'];
-        if (language != match.group(2))
+        if (language != match.group(2)) {
           return null;
+        }
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
       // Only build a web project if explicitly asked.
       final bool web = context['web'];
       if (relativeDestinationPath.contains('web') && !web) {
+        return null;
+      }
+      // Only build a macOS project if explicitly asked.
+      final bool macOS = context['macos'];
+      if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
         return null;
       }
       final String projectName = context['projectName'];
@@ -114,21 +120,25 @@ class Template {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
-      if (projectName != null)
+      if (projectName != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
-      if (pluginClass != null)
+      }
+      if (pluginClass != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
+      }
       return finalDestinationPath;
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
       final bool withRootModule = context['withRootModule'] ?? false;
-      if (!withRootModule && absoluteSourcePath.contains('flutter_root'))
+      if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
         return;
+      }
 
       final String finalDestinationPath = renderPath(relativeDestinationPath);
-      if (finalDestinationPath == null)
+      if (finalDestinationPath == null) {
         return;
+      }
       final File finalDestinationFile = fs.file(finalDestinationPath);
       final String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
 
@@ -137,17 +147,20 @@ class Template {
       if (finalDestinationFile.existsSync()) {
         if (overwriteExisting) {
           finalDestinationFile.deleteSync(recursive: true);
-          if (printStatusWhenWriting)
+          if (printStatusWhenWriting) {
             printStatus('  $relativePathForLogging (overwritten)');
+          }
         } else {
           // The file exists but we cannot overwrite it, move on.
-          if (printStatusWhenWriting)
+          if (printStatusWhenWriting) {
             printTrace('  $relativePathForLogging (existing - skipped)');
+          }
           return;
         }
       } else {
-        if (printStatusWhenWriting)
+        if (printStatusWhenWriting) {
           printStatus('  $relativePathForLogging (created)');
+        }
       }
 
       fileCount++;

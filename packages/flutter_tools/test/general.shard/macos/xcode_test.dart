@@ -52,8 +52,8 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is false when version is less than minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(8);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(17);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
       expect(xcode.isVersionSatisfactory, isFalse);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
@@ -68,8 +68,8 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is true when version meets minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
       expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
@@ -77,8 +77,8 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
       expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
@@ -86,8 +86,8 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(1);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(3);
       expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
@@ -113,7 +113,7 @@ void main() {
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('isInstalledAndMeetsVersionCheck is false when no xcode-select', () {
@@ -123,14 +123,14 @@ void main() {
         .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
 
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(1);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
       expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
@@ -141,13 +141,13 @@ void main() {
         .thenReturn(ProcessResult(1, 0, xcodePath, ''));
 
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(8);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
       when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
       expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
@@ -158,13 +158,13 @@ void main() {
         .thenReturn(ProcessResult(1, 0, xcodePath, ''));
 
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(1);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
       expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('eulaSigned is false when clang is not installed', () {

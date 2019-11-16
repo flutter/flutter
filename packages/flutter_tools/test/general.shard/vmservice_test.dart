@@ -47,13 +47,17 @@ class MockPeer implements rpc.Peer {
 
   @override
   void registerMethod(String name, Function callback) {
-    // this does get called
+    registeredMethods.add(name);
   }
 
   @override
   void sendNotification(String method, [ dynamic parameters ]) {
-    throw 'unexpected call to sendNotification';
+    // this does get called
+    sentNotifications.putIfAbsent(method, () => <dynamic>[]).add(parameters);
   }
+
+  Map<String, List<dynamic>> sentNotifications = <String, List<dynamic>>{};
+  List<String> registeredMethods = <String>[];
 
   bool isolatesEnabled = false;
 
@@ -71,8 +75,9 @@ class MockPeer implements rpc.Peer {
 
   @override
   Future<dynamic> sendRequest(String method, [ dynamic parameters ]) async {
-    if (method == 'getVM')
+    if (method == 'getVM') {
       await _getVMLatch;
+    }
     await Future<void>.delayed(Duration.zero);
     returnedFromSendRequest += 1;
     if (method == 'getVM') {
@@ -192,6 +197,12 @@ void main() {
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
         final VMService vmService = VMService(mockPeer, null, null, null, null, null);
+        expect(mockPeer.sentNotifications, contains('registerService'));
+        final List<String> registeredServices =
+          mockPeer.sentNotifications['registerService']
+            .map((dynamic service) => (service as Map<String, String>)['service'])
+            .toList();
+        expect(registeredServices, contains('flutterVersion'));
         vmService.getVM().then((void value) { done = true; });
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 0);
@@ -248,6 +259,19 @@ void main() {
         expect(done, isTrue);
         expect(mockStdio.writtenToStdout.join(''), message);
         expect(mockStdio.writtenToStderr.join(''), '');
+      });
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      Stdio: () => mockStdio,
+    });
+
+     testUsingContext('registers hot UI method', () {
+      FakeAsync().run((FakeAsync time) {
+        final MockPeer mockPeer = MockPeer();
+        Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+        VMService(mockPeer, null, null, reloadSources, null, null);
+
+        expect(mockPeer.registeredMethods, contains('reloadMethod'));
       });
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(),

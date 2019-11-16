@@ -89,7 +89,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows an [AppBar] with two simple actions. The first action
 /// opens a [SnackBar], while the second action navigates to a new page.
@@ -380,7 +380,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// A size whose height is the sum of [kToolbarHeight] and the [bottom] widget's
   /// preferred height.
   ///
-  /// [Scaffold] uses this this size to set its app bar's height.
+  /// [Scaffold] uses this size to set its app bar's height.
   @override
   final Size preferredSize;
 
@@ -480,8 +480,8 @@ class _AppBarState extends State<AppBar> {
       switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-           namesRoute = true;
-           break;
+          namesRoute = true;
+          break;
         case TargetPlatform.iOS:
           break;
       }
@@ -491,7 +491,7 @@ class _AppBarState extends State<AppBar> {
         overflow: TextOverflow.ellipsis,
         child: Semantics(
           namesRoute: namesRoute,
-          child: title,
+          child: _AppBarTitleBox(child: title),
           header: true,
         ),
       );
@@ -552,10 +552,13 @@ class _AppBarState extends State<AppBar> {
               child: appBar,
             ),
           ),
-          widget.bottomOpacity == 1.0 ? widget.bottom : Opacity(
-            opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
-            child: widget.bottom,
-          ),
+          if (widget.bottomOpacity == 1.0)
+            widget.bottom
+          else
+            Opacity(
+              opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
+              child: widget.bottom,
+            ),
         ],
       );
     }
@@ -687,6 +690,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.floating,
     @required this.pinned,
     @required this.snapConfiguration,
+    @required this.stretchConfiguration,
     @required this.shape,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
@@ -724,6 +728,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   final FloatingHeaderSnapConfiguration snapConfiguration;
+
+  @override
+  final OverScrollHeaderStretchConfiguration stretchConfiguration;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -797,7 +804,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || topPadding != oldDelegate.topPadding
         || pinned != oldDelegate.pinned
         || floating != oldDelegate.floating
-        || snapConfiguration != oldDelegate.snapConfiguration;
+        || snapConfiguration != oldDelegate.snapConfiguration
+        || stretchConfiguration != oldDelegate.stretchConfiguration;
   }
 
   @override
@@ -911,6 +919,9 @@ class SliverAppBar extends StatefulWidget {
     this.floating = false,
     this.pinned = false,
     this.snap = false,
+    this.stretch = false,
+    this.stretchTriggerOffset = 100.0,
+    this.onStretchTrigger,
     this.shape,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
@@ -919,7 +930,9 @@ class SliverAppBar extends StatefulWidget {
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),
+       assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
+       assert(stretchTriggerOffset > 0.0),
        super(key: key);
 
   /// A widget to display before the [title].
@@ -1129,10 +1142,9 @@ class SliverAppBar extends StatefulWidget {
   ///    behavior of the app bar in combination with [floating].
   final bool pinned;
 
-  /// The material's shape as well its shadow.
+  /// The material's shape as well as its shadow.
   ///
-  /// A shadow is only displayed if the [elevation] is greater than
-  /// zero.
+  /// A shadow is only displayed if the [elevation] is greater than zero.
   final ShapeBorder shape;
 
   /// If [snap] and [floating] are true then the floating app bar will "snap"
@@ -1162,6 +1174,21 @@ class SliverAppBar extends StatefulWidget {
   ///    behavior of the app bar in combination with [pinned] and [floating].
   final bool snap;
 
+  /// Whether the app bar should stretch to fill the over-scroll area.
+  ///
+  /// The app bar can still expand and contract as the user scrolls, but it will
+  /// also stretch when the user over-scrolls.
+  final bool stretch;
+
+  /// The offset of overscroll required to activate [onStretchTrigger].
+  ///
+  /// This defaults to 100.0.
+  final double stretchTriggerOffset;
+
+  /// The callback function to be executed when a user over-scrolls to the
+  /// offset specified by [stretchTriggerOffset].
+  final AsyncCallback onStretchTrigger;
+
   @override
   _SliverAppBarState createState() => _SliverAppBarState();
 }
@@ -1170,6 +1197,7 @@ class SliverAppBar extends StatefulWidget {
 // by the floating appbar snap animation (via FloatingHeaderSnapConfiguration).
 class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
   FloatingHeaderSnapConfiguration _snapConfiguration;
+  OverScrollHeaderStretchConfiguration _stretchConfiguration;
 
   void _updateSnapConfiguration() {
     if (widget.snap && widget.floating) {
@@ -1183,10 +1211,22 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     }
   }
 
+  void _updateStretchConfiguration() {
+    if (widget.stretch) {
+      _stretchConfiguration = OverScrollHeaderStretchConfiguration(
+        stretchTriggerOffset: widget.stretchTriggerOffset,
+        onStretchTrigger: widget.onStretchTrigger,
+      );
+    } else {
+      _stretchConfiguration = null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _updateSnapConfiguration();
+    _updateStretchConfiguration();
   }
 
   @override
@@ -1194,6 +1234,8 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     super.didUpdateWidget(oldWidget);
     if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
       _updateSnapConfiguration();
+    if (widget.stretch != oldWidget.stretch)
+      _updateStretchConfiguration();
   }
 
   @override
@@ -1233,8 +1275,43 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           pinned: widget.pinned,
           shape: widget.shape,
           snapConfiguration: _snapConfiguration,
+          stretchConfiguration: _stretchConfiguration,
         ),
       ),
     );
+  }
+}
+
+// Layout the AppBar's title with unconstrained height, vertically
+// center it within its (NavigationToolbar) parent, and allow the
+// parent to constrain the title's actual height.
+class _AppBarTitleBox extends SingleChildRenderObjectWidget {
+  const _AppBarTitleBox({ Key key, @required Widget child }) : assert(child != null), super(key: key, child: child);
+
+  @override
+  _RenderAppBarTitleBox createRenderObject(BuildContext context) {
+    return _RenderAppBarTitleBox(
+      textDirection: Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderAppBarTitleBox renderObject) {
+    renderObject.textDirection = Directionality.of(context);
+  }
+}
+
+class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
+  _RenderAppBarTitleBox({
+    RenderBox child,
+    TextDirection textDirection,
+  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
+
+  @override
+  void performLayout() {
+    final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
+    child.layout(innerConstraints, parentUsesSize: true);
+    size = constraints.constrain(child.size);
+    alignChild();
   }
 }

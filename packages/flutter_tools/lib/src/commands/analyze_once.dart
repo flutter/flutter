@@ -57,15 +57,18 @@ class AnalyzeOnce extends AnalyzeBase {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       directories.addAll(repoRoots);
-      if (argResults.wasParsed('current-package') && argResults['current-package'])
+      if (argResults.wasParsed('current-package') && argResults['current-package']) {
         directories.add(currentDirectory);
+      }
     } else {
-      if (argResults['current-package'])
+      if (argResults['current-package']) {
         directories.add(currentDirectory);
+      }
     }
 
-    if (directories.isEmpty)
+    if (directories.isEmpty) {
       throwToolExit('Nothing to analyze.', exitCode: 0);
+    }
 
     // analyze all
     final Completer<void> analysisCompleter = Completer<void>();
@@ -118,22 +121,26 @@ class AnalyzeOnce extends AnalyzeBase {
     final int undocumentedMembers = errors.where((AnalysisError error) {
       return error.code == 'public_member_api_docs';
     }).length;
-    if (!argResults['dartdocs'])
+    if (!argResults['dartdocs']) {
       errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
+    }
 
     // emit benchmarks
-    if (isBenchmarking)
+    if (isBenchmarking) {
       writeBenchmark(timer, errors.length, undocumentedMembers);
+    }
 
     // --write
     dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
     // report errors
-    if (errors.isNotEmpty && argResults['preamble'])
+    if (errors.isNotEmpty && argResults['preamble']) {
       printStatus('');
+    }
     errors.sort();
-    for (AnalysisError error in errors)
+    for (AnalysisError error in errors) {
       printStatus(error.toString(), hangingIndent: 7);
+    }
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 

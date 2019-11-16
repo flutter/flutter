@@ -35,8 +35,7 @@ class OnTapPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Push and Pop should send platform messages',
-      (WidgetTester tester) async {
+  testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
           id: '/',
@@ -52,8 +51,7 @@ void main() {
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.navigation
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -68,7 +66,7 @@ void main() {
           'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': null,
-            'routeName': '/'
+            'routeName': '/',
           },
         ));
 
@@ -83,7 +81,7 @@ void main() {
           'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
-            'routeName': '/A'
+            'routeName': '/A',
           },
         ));
 
@@ -98,13 +96,12 @@ void main() {
           'routePopped',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
-            'routeName': '/A'
+            'routeName': '/A',
           },
         ));
   });
 
-  testWidgets('Replace should send platform messages',
-      (WidgetTester tester) async {
+  testWidgets('Replace should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
           id: '/',
@@ -121,8 +118,7 @@ void main() {
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.navigation
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -137,7 +133,7 @@ void main() {
           'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': null,
-            'routeName': '/'
+            'routeName': '/',
           },
         ));
 
@@ -152,7 +148,7 @@ void main() {
           'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
-            'routeName': '/A'
+            'routeName': '/A',
           },
         ));
 
@@ -167,8 +163,55 @@ void main() {
           'routeReplaced',
           arguments: <String, dynamic>{
             'previousRouteName': '/A',
-            'routeName': '/B'
+            'routeName': '/B',
           },
         ));
+  });
+
+  testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      initialRoute: '/home',
+      routes: <String, WidgetBuilder>{
+        '/home': (BuildContext context) {
+          return OnTapPage(
+            id: 'Home',
+            onTap: () {
+              // Create a route with no name.
+              final Route<void> route = MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('Nameless Route'),
+              );
+              Navigator.push<void>(context, route);
+            },
+          );
+        },
+      },
+    ));
+
+    expect(log, hasLength(1));
+    expect(
+      log.last,
+      isMethodCall('routePushed', arguments: <String, dynamic>{
+        'previousRouteName': null,
+        'routeName': '/home',
+      }),
+    );
+
+    await tester.tap(find.text('Home'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(log, hasLength(2));
+    expect(
+      log.last,
+      isMethodCall('routePushed', arguments: <String, dynamic>{
+        'previousRouteName': '/home',
+        'routeName': null,
+      }),
+    );
   });
 }

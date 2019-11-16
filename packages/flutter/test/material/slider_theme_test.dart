@@ -90,7 +90,7 @@ void main() {
       'rangeTrackShape: Instance of \'RoundedRectRangeSliderTrackShape\'',
       'rangeValueIndicatorShape: Instance of \'PaddleRangeSliderValueIndicatorShape\'',
       'showValueIndicator: always',
-      'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))'
+      'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
     ]);
   });
 
@@ -528,8 +528,7 @@ void main() {
         ),
     );
     await gesture.up();
-  }, skip: isBrowser
-  );
+  }, skip: isBrowser);
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
@@ -815,9 +814,39 @@ void main() {
 
     await gesture.up();
   });
+
+  testWidgets('PaddleRangeSliderValueIndicatorShape skips all painting at zero scale', (WidgetTester tester) async {
+    // Pump a slider with just a value indicator.
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: const PaddleRangeSliderValueIndicatorShape(),
+      ),
+      value: 0.5,
+      divisions: 4,
+    ));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // Tap the center of the track to kick off the animation of the value indicator.
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
+
+    // Nothing to paint at scale 0.
+    await tester.pump();
+    expect(sliderBox, paintsNothing);
+
+    // Painting a path for the value indicator.
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 1));
+
+    await gesture.up();
+  });
 }
-
-
 
 Widget _buildApp(
   SliderThemeData sliderTheme, {
@@ -842,5 +871,3 @@ Widget _buildApp(
     ),
   );
 }
-
-

@@ -52,7 +52,7 @@ void main() {
             child: Container(),
           ),
         ),
-      )
+      ),
     );
 
     final TestWidgetState state = tester.state(find.byType(TestWidget));
@@ -68,7 +68,7 @@ void main() {
             child: Container(),
           ),
         ),
-      )
+      ),
     );
 
     expect(state.persistentState, equals(1));
@@ -86,7 +86,7 @@ void main() {
             child: Container(),
           ),
         ),
-      )
+      ),
     );
 
     TestWidgetState state = tester.state(find.byType(TestWidget));
@@ -100,7 +100,7 @@ void main() {
           persistentState: 11,
           child: Container(),
         ),
-      )
+      ),
     );
 
     state = tester.state(find.byType(TestWidget));
@@ -131,7 +131,7 @@ void main() {
             child: b,
           ),
         ],
-      )
+      ),
     );
 
     TestWidgetState first, second;
@@ -158,7 +158,7 @@ void main() {
             child: b,
           ),
         ],
-      )
+      ),
     );
 
     first = tester.state(find.byWidget(a));
@@ -187,7 +187,7 @@ void main() {
             child: a,
           ),
         ],
-      )
+      ),
     );
 
     first = tester.state(find.byWidget(b));

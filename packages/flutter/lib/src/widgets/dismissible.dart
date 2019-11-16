@@ -523,11 +523,13 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       assert(() {
         if (_resizeAnimation.status != AnimationStatus.forward) {
           assert(_resizeAnimation.status == AnimationStatus.completed);
-          throw FlutterError(
-            'A dismissed Dismissible widget is still part of the tree.\n'
-            'Make sure to implement the onDismissed handler and to immediately remove the Dismissible\n'
-            'widget from the application once that handler has fired.'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('A dismissed Dismissible widget is still part of the tree.'),
+            ErrorHint(
+              'Make sure to implement the onDismissed handler and to immediately remove the Dismissible '
+              'widget from the application once that handler has fired.'
+            )
+          ]);
         }
         return true;
       }());
@@ -549,22 +551,19 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     );
 
     if (background != null) {
-      final List<Widget> children = <Widget>[];
-
-      if (!_moveAnimation.isDismissed) {
-        children.add(Positioned.fill(
-          child: ClipRect(
-            clipper: _DismissibleClipper(
-              axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
-              moveAnimation: _moveAnimation,
+      content = Stack(children: <Widget>[
+        if (!_moveAnimation.isDismissed)
+          Positioned.fill(
+            child: ClipRect(
+              clipper: _DismissibleClipper(
+                axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
+                moveAnimation: _moveAnimation,
+              ),
+              child: background,
             ),
-            child: background,
           ),
-        ));
-      }
-
-      children.add(content);
-      content = Stack(children: children);
+        content,
+      ]);
     }
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(

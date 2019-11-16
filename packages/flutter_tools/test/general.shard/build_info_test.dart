@@ -16,7 +16,7 @@ void main() {
 
     testUsingContext('CFBundleVersion for iOS', () async {
       String buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz');
-      expect(buildName, '0');
+      expect(buildName, isNull);
       buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1');
       expect(buildName, '0.0.1');
       buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.xyz');
@@ -38,7 +38,7 @@ void main() {
 
     testUsingContext('CFBundleShortVersionString for iOS', () async {
       String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz');
-      expect(buildName, '0.0.0');
+      expect(buildName, isNull);
       buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1');
       expect(buildName, '0.0.1');
       buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.456.xyz');
@@ -52,6 +52,30 @@ void main() {
       expect(buildName, '123.abc+-');
       buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-');
       expect(buildName, 'abc+-');
+    });
+
+    test('build mode configuration is correct', () {
+      expect(BuildMode.debug.isRelease, false);
+      expect(BuildMode.debug.isPrecompiled, false);
+      expect(BuildMode.debug.isJit, true);
+
+      expect(BuildMode.profile.isRelease, false);
+      expect(BuildMode.profile.isPrecompiled, true);
+      expect(BuildMode.profile.isJit, false);
+
+      expect(BuildMode.release.isRelease, true);
+      expect(BuildMode.release.isPrecompiled, true);
+      expect(BuildMode.release.isJit, false);
+
+      expect(BuildMode.jitRelease.isRelease, true);
+      expect(BuildMode.jitRelease.isPrecompiled, false);
+      expect(BuildMode.jitRelease.isJit, true);
+
+      expect(BuildMode.fromName('debug'), BuildMode.debug);
+      expect(BuildMode.fromName('profile'), BuildMode.profile);
+      expect(BuildMode.fromName('jit_release'), BuildMode.jitRelease);
+      expect(BuildMode.fromName('release'), BuildMode.release);
+      expect(() => BuildMode.fromName('foo'), throwsA(isInstanceOf<ArgumentError>()));
     });
   });
 }

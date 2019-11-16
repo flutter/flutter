@@ -59,7 +59,7 @@ import 'value_listenable_builder.dart';
 ///
 /// ## Example Code
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 /// This example shows an [IconButton] that "zooms" in when the widget first
 /// builds (its size smoothly increases from 0 to 24) and whenever the button
 /// is pressed, it smoothly changes its size to the new target value of either
@@ -70,24 +70,22 @@ import 'value_listenable_builder.dart';
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: TweenAnimationBuilder(
-///       tween: Tween<double>(begin: 0, end: targetValue),
-///       duration: Duration(seconds: 1),
-///       builder: (BuildContext context, double size, Widget child) {
-///         return IconButton(
-///           iconSize: size,
-///           color: Colors.blue,
-///           icon: child,
-///           onPressed: () {
-///             setState(() {
-///               targetValue = targetValue == 24.0 ? 48.0 : 24.0;
-///             });
-///           },
-///         );
-///       },
-///       child: Icon(Icons.aspect_ratio),
-///     ),
+///   return TweenAnimationBuilder(
+///     tween: Tween<double>(begin: 0, end: targetValue),
+///     duration: Duration(seconds: 1),
+///     builder: (BuildContext context, double size, Widget child) {
+///       return IconButton(
+///         iconSize: size,
+///         color: Colors.blue,
+///         icon: child,
+///         onPressed: () {
+///           setState(() {
+///             targetValue = targetValue == 24.0 ? 48.0 : 24.0;
+///           });
+///         },
+///       );
+///     },
+///     child: Icon(Icons.aspect_ratio),
 ///   );
 /// }
 /// ```
@@ -129,12 +127,12 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
     @required Duration duration,
     Curve curve = Curves.linear,
     @required this.builder,
-    this.onEnd,
+    VoidCallback onEnd,
     this.child,
   }) : assert(tween != null),
        assert(curve != null),
        assert(builder != null),
-       super(key: key, duration: duration, curve: curve);
+       super(key: key, duration: duration, curve: curve, onEnd: onEnd);
 
   /// Defines the target value for the animation.
   ///
@@ -188,12 +186,6 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   /// performance significantly in some cases and is therefore a good practice.
   final Widget child;
 
-  /// Called every time an animation completes.
-  ///
-  /// This can be useful to trigger additional actions (e.g. another animation)
-  /// at the end of the current animation.
-  final VoidCallback onEnd;
-
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState() {
     return _TweenAnimationBuilderState<T>();
@@ -208,24 +200,8 @@ class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimat
     _currentTween = widget.tween;
     _currentTween.begin ??= _currentTween.end;
     super.initState();
-    // The statusListener is removed when the superclass disposes the controller.
-    controller.addStatusListener(_onAnimationStatusChanged);
     if (_currentTween.begin != _currentTween.end) {
       controller.forward();
-    }
-  }
-
-  void _onAnimationStatusChanged(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
-      case AnimationStatus.completed:
-        if (widget.onEnd != null) {
-          widget.onEnd();
-        }
-        break;
     }
   }
 

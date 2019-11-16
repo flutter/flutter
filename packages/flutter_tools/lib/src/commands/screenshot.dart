@@ -63,26 +63,36 @@ class ScreenshotCommand extends FlutterCommand {
 
   Device device;
 
+  static void validateOptions(String screenshotType, Device device, String observatoryUri) {
+    switch (screenshotType) {
+      case _kDeviceType:
+        if (device == null) {
+          throwToolExit('Must have a connected device for screenshot type $screenshotType');
+        }
+        if (!device.supportsScreenshot) {
+          throwToolExit('Screenshot not supported for ${device.name}.');
+        }
+        break;
+      default:
+        if (observatoryUri == null) {
+          throwToolExit('Observatory URI must be specified for screenshot type $screenshotType');
+        }
+    }
+  }
+
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     device = await findTargetDevice();
-    if (device == null) {
-      throwToolExit('Must have a connected device');
-    }
-    if (argResults[_kType] == _kDeviceType && !device.supportsScreenshot) {
-      throwToolExit('Screenshot not supported for ${device.name}.');
-    }
-    if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryUri] == null) {
-      throwToolExit('Observatory URI must be specified for screenshot type ${argResults[_kType]}');
-    }
+    validateOptions(argResults[_kType], device, argResults[_kObservatoryUri]);
     return super.verifyThenRunCommand(commandPath);
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     File outputFile;
-    if (argResults.wasParsed(_kOut))
+    if (argResults.wasParsed(_kOut)) {
       outputFile = fs.file(argResults[_kOut]);
+    }
 
     switch (argResults[_kType]) {
       case _kDeviceType:

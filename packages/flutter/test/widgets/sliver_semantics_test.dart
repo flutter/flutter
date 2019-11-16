@@ -55,7 +55,7 @@ void _tests() {
                     expandedHeight: appBarExpandedHeight,
                     title: Text('Semantics Test with Slivers'),
                   ),
-                   SliverList(
+                  SliverList(
                     delegate: SliverChildListDelegate(listChildren),
                   ),
                 ],

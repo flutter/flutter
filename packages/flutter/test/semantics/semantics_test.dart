@@ -74,15 +74,15 @@ void main() {
       final List<SemanticsNode> children = <SemanticsNode>[
         SemanticsNode()
           ..isMergedIntoParent = true
-          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
       ];
 
       node.updateWith(
         config: config,
-        childrenInInversePaintOrder: children
+        childrenInInversePaintOrder: children,
       );
 
-      children.add( SemanticsNode()
+      children.add(SemanticsNode()
         ..isMergedIntoParent = true
         ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0)
       );
@@ -92,7 +92,7 @@ void main() {
         try {
           node.updateWith(
             config: config,
-            childrenInInversePaintOrder: children
+            childrenInInversePaintOrder: children,
           );
         } on FlutterError catch (e) {
           error = e;
@@ -106,7 +106,7 @@ void main() {
         ));
         expect(
           error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
         );
       }
 
@@ -118,7 +118,7 @@ void main() {
             ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
           SemanticsNode()
             ..isMergedIntoParent = true
-            ..rect = const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0)
+            ..rect = const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0),
         ];
         node.updateWith(
           config: config,
@@ -133,7 +133,7 @@ void main() {
             ..rect = const Rect.fromLTRB(40.0, 14.0, 20.0, 20.0);
           node.updateWith(
             config: config,
-            childrenInInversePaintOrder: modifiedChildren
+            childrenInInversePaintOrder: modifiedChildren,
           );
         } on FlutterError catch (e) {
           error = e;
@@ -157,7 +157,7 @@ void main() {
 
         expect(
           error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
         );
         // Two previous children and two new children.
         expect(error.diagnostics.where((DiagnosticsNode node) => node.value is SemanticsNode).length, 4);
@@ -263,10 +263,9 @@ void main() {
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
-    final List<int> results = <int>[];
-    for (List<SemanticsSortKey> tuple in tests) {
-      results.add(tuple[0].compareTo(tuple[1]));
-    }
+    final List<int> results = <int>[
+      for (List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
+    ];
     expect(results, orderedEquals(expectedResults));
   });
 
@@ -279,10 +278,9 @@ void main() {
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
-    final List<int> results = <int>[];
-    for (List<SemanticsSortKey> tuple in tests) {
-      results.add(tuple[0].compareTo(tuple[1]));
-    }
+    final List<int> results = <int>[
+      for (List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
+    ];
     expect(results, orderedEquals(expectedResults));
   });
 
@@ -449,6 +447,8 @@ void main() {
       '   textDirection: null\n'
       '   sortKey: null\n'
       '   platformViewId: null\n'
+      '   maxValueLength: null\n'
+      '   currentValueLength: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
@@ -545,6 +545,8 @@ void main() {
       '   textDirection: null\n'
       '   sortKey: null\n'
       '   platformViewId: null\n'
+      '   maxValueLength: null\n'
+      '   currentValueLength: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
@@ -571,6 +573,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
+    expect(config.isLink, isFalse);
     expect(config.isMergingSemanticsOfDescendants, isFalse);
     expect(config.isEnabled, null);
     expect(config.isChecked, null);
@@ -594,6 +597,7 @@ void main() {
 
     config.isSemanticBoundary = true;
     config.isButton = true;
+    config.isLink = true;
     config.isMergingSemanticsOfDescendants = true;
     config.isEnabled = true;
     config.isChecked = true;
@@ -630,6 +634,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isTrue);
     expect(config.isButton, isTrue);
+    expect(config.isLink, isTrue);
     expect(config.isMergingSemanticsOfDescendants, isTrue);
     expect(config.isEnabled, isTrue);
     expect(config.isChecked, isTrue);

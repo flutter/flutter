@@ -62,9 +62,20 @@ void main() {
     testUsingContext('Emits partial status when CocoaPods version is too low', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.belowRecommendedVersion);
+      const String currentVersion = '1.4.0';
+      when(cocoaPods.cocoaPodsVersionText)
+          .thenAnswer((_) async => currentVersion);
+      const String recommendedVersion = '1.8.0';
+      when(cocoaPods.cocoaPodsRecommendedVersion)
+          .thenAnswer((_) => recommendedVersion);
       const CocoaPodsValidator workflow = CocoaPodsValidator();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
+      expect(result.messages.length, 1);
+      final ValidationMessage message = result.messages.first;
+      expect(message.type, ValidationMessageType.hint);
+      expect(message.message, contains('CocoaPods $currentVersion out of date'));
+      expect(message.message, contains('($recommendedVersion is recommended)'));
     }, overrides: <Type, Generator>{
       CocoaPods: () => cocoaPods,
     });

@@ -21,7 +21,7 @@ void main() {
               opacity: 1.0
             )
           ),
-        )
+        ),
       ),
     );
     layout(a, phase: EnginePhase.flushSemantics);

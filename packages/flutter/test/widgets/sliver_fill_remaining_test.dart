@@ -104,11 +104,11 @@ void main() {
     testWidgets('scrolls beyond viewport by default', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       final List<Widget> slivers = <Widget>[
-              sliverBox,
-              SliverFillRemaining(
-                child: Container(color: Colors.white),
-              ),
-            ];
+        sliverBox,
+        SliverFillRemaining(
+          child: Container(color: Colors.white),
+        ),
+      ];
       await tester.pumpWidget(boilerplate(slivers, controller: controller));
       expect(controller.offset, 0.0);
       expect(find.byType(Container), findsNWidgets(2));

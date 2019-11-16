@@ -87,7 +87,7 @@ class SshCommandRunner {
       if (sshConfigPath != null)
         ...<String>['-F', sshConfigPath],
       if (isIpV6Address(address))
-        ...<String>['-6', interface.isEmpty ? address : '$address%$interface']
+        ...<String>['-6', if (interface.isEmpty) address else '$address%$interface']
       else
         address,
       command,

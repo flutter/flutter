@@ -9,8 +9,7 @@ import 'package:meta/meta.dart';
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
@@ -50,13 +49,10 @@ class AndroidEmulator extends Emulator {
 
   @override
   Future<void> launch() async {
-    final Future<void> launchResult =
-        processManager.run(<String>[getEmulatorPath(), '-avd', id])
-            .then((ProcessResult runResult) {
-              if (runResult.exitCode != 0) {
-                throw '${runResult.stdout}\n${runResult.stderr}'.trimRight();
-              }
-            });
+    final Future<void> launchResult = processUtils.run(
+      <String>[getEmulatorPath(), '-avd', id],
+      throwOnError: true,
+    );
     // The emulator continues running on a successful launch, so if it hasn't
     // quit within 3 seconds we assume that's a success and just return. This
     // means that on a slow machine, a failure that takes more than three
@@ -75,7 +71,8 @@ List<AndroidEmulator> getEmulatorAvds() {
     return <AndroidEmulator>[];
   }
 
-  final String listAvdsOutput = processManager.runSync(<String>[emulatorPath, '-list-avds']).stdout;
+  final String listAvdsOutput = processUtils.runSync(
+    <String>[emulatorPath, '-list-avds']).stdout.trim();
 
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];
   if (listAvdsOutput != null) {

@@ -286,7 +286,11 @@ class TestWindow implements Window {
   }
 
   @override
-  Stream<FrameTiming> get frameTimings => _window.frameTimings;
+  TimingsCallback get onReportTimings => _window.onReportTimings;
+  @override
+  set onReportTimings(TimingsCallback callback) {
+    _window.onReportTimings = callback;
+  }
 
   @override
   PointerDataPacketCallback get onPointerDataPacket => _window.onPointerDataPacket;

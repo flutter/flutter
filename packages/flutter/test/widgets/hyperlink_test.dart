@@ -38,10 +38,10 @@ void main() {
                 text: 'zzzzzzzzz',
                 recognizer: tapRight,
               ),
-            ]
+            ],
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byKey(textKey));

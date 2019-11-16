@@ -525,14 +525,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         double crossSize;
         if (flex == 0) {
           switch (_direction) {
-              case Axis.horizontal:
-                mainSize = child.getMaxIntrinsicWidth(double.infinity);
-                crossSize = childSize(child, mainSize);
-                break;
-              case Axis.vertical:
-                mainSize = child.getMaxIntrinsicHeight(double.infinity);
-                crossSize = childSize(child, mainSize);
-                break;
+            case Axis.horizontal:
+              mainSize = child.getMaxIntrinsicWidth(double.infinity);
+              crossSize = childSize(child, mainSize);
+              break;
+            case Axis.vertical:
+              mainSize = child.getMaxIntrinsicHeight(double.infinity);
+              crossSize = childSize(child, mainSize);
+              break;
           }
           inflexibleSpace += mainSize;
           maxCrossSize = math.max(maxCrossSize, crossSize);
@@ -713,7 +713,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             ErrorDescription(
               'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
               '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
-            )
+            ),
           ]);
         }());
         totalFlex += childParentData.flex;
@@ -979,7 +979,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           'than the available space, consider clipping it with a ClipRect widget '
           'before putting it in the flex, or using a scrollable container rather '
           'than a Flex, like a ListView.'
-        )
+        ),
       ];
 
       // Simulate a child rect that overflows by the right amount. This child

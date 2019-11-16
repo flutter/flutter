@@ -87,7 +87,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(Icon));

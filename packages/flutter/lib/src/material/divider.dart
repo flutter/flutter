@@ -91,12 +91,16 @@ class Divider extends StatelessWidget {
   /// {@end-tool}
   final Color color;
 
-  /// Computes the [BorderSide] that represents a divider of the specified
-  /// color, or, if there is no specified color, of the default
-  /// [ThemeData.dividerColor] specified in the ambient [Theme].
+  /// Computes the [BorderSide] that represents a divider..
   ///
-  /// The `width` argument can be used to override the default width of the
-  /// divider border, which defaults to 0.0 (a hairline border).
+  /// If [color] is null, then [DividerThemeData.color] is used. If that is also
+  /// null, then [ThemeData.dividerColor] is used.
+  ///
+  /// If [width] is null, then [DividerThemeData.thickness] is used. If that is
+  /// also null, then this defaults to 0.0 (a hairline border).
+  ///
+  /// If [context] is null, the default color of [BorderSide] is used and the
+  /// default width of 0.0 is used.
   ///
   /// {@tool sample}
   ///
@@ -117,9 +121,22 @@ class Divider extends StatelessWidget {
   /// ```
   /// {@end-tool}
   static BorderSide createBorderSide(BuildContext context, { Color color, double width }) {
+    final Color effectiveColor = color
+        ?? (context != null ? (DividerTheme.of(context).color ?? Theme.of(context).dividerColor) : null);
+    final double effectiveWidth =  width
+        ?? (context != null ? DividerTheme.of(context).thickness : null)
+        ?? 0.0;
+
+    // Prevent assertion since it is possible that context is null and no color
+    // is specified.
+    if (effectiveColor == null) {
+      return BorderSide(
+        width: effectiveWidth,
+      );
+    }
     return BorderSide(
-      color: color ?? DividerTheme.of(context).color ?? Theme.of(context).dividerColor,
-      width: width ?? DividerTheme.of(context).thickness ?? 0.0,
+      color: effectiveColor,
+      width: effectiveWidth,
     );
   }
 

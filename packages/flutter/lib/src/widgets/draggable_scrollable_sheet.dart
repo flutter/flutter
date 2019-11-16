@@ -520,7 +520,7 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// The [child] parameter is required.
   DraggableScrollableActuator({
     Key key,
-    @required this.child
+    @required this.child,
   }) : super(key: key);
 
   /// This child's [DraggableScrollableSheet] descendant will be reset when the

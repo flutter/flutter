@@ -94,25 +94,20 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> lines = _kNameLines
-      .map<Widget>((List<String> nameAndText) => _toText(nameAndText[0], nameAndText[1]))
-      .toList();
-
-    final List<Widget> children = <Widget>[];
-    for (Widget line in lines) {
-      children.add(line);
-      if (line != lines.last)
-        children.add(SpeakerSeparator());
-    }
-
     return GestureDetector(
       onTap: _handleTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Column(
-          children: children,
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
+          children: _kNameLines
+            .map<Widget>((List<String> nameAndText) => _toText(nameAndText[0], nameAndText[1]))
+            .expand((Widget line) => <Widget>[
+              line,
+              SpeakerSeparator(),
+            ])
+            .toList()..removeLast(),
         ),
       ),
     );

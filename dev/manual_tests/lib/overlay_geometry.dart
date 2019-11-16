@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -179,30 +182,37 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> layers = <Widget>[
-      Scaffold(
-        appBar: AppBar(title: const Text('Tap a Card')),
-        body: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-          child: NotificationListener<ScrollNotification>(
-            onNotification: handleScrollNotification,
-            child: ListView.custom(
-              childrenDelegate: CardBuilder(
-                cardModels: cardModels,
-                onTapUp: handleTapUp,
+    return Stack(
+      children: <Widget>[
+        Scaffold(
+          appBar: AppBar(title: const Text('Tap a Card')),
+          body: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: handleScrollNotification,
+              child: ListView.custom(
+                childrenDelegate: CardBuilder(
+                  cardModels: cardModels,
+                  onTapUp: handleTapUp,
+                ),
               ),
             ),
           ),
         ),
-      ),
-    ];
-    for (MarkerType type in markers.keys)
-      layers.add(Marker(type: type, position: markers[type]));
-    return Stack(children: layers);
+        for (MarkerType type in markers.keys)
+          Marker(type: type, position: markers[type]),
+      ],
+    );
   }
 }
 
 void main() {
+  if (Platform.isMacOS) {
+    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
+    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+
   runApp(MaterialApp(
     theme: ThemeData(
       brightness: Brightness.light,

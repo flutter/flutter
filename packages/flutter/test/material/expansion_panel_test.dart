@@ -10,7 +10,7 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
     Key key,
     this.firstPanelKey,
     this.secondPanelKey,
-    this.canTapOnHeader = false
+    this.canTapOnHeader = false,
   }) : super(key: key);
 
   final Key firstPanelKey;
@@ -194,6 +194,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       hasTapAction: true,
     ));
 
@@ -636,132 +637,135 @@ void main() {
     expect(callbackResults['isExpanded'], equals(false));
   });
 
-  testWidgets('didUpdateWidget accounts for toggling between ExpansionPanelList'
-    'and ExpansionPaneList.radio', (WidgetTester tester) async {
-    bool isRadioList = false;
-    final List<bool> _panelExpansionState = <bool>[
-      false,
-      false,
-      false,
-    ];
+  testWidgets(
+    'didUpdateWidget accounts for toggling between ExpansionPanelList'
+    'and ExpansionPaneList.radio',
+    (WidgetTester tester) async {
+      bool isRadioList = false;
+      final List<bool> _panelExpansionState = <bool>[
+        false,
+        false,
+        false,
+      ];
 
-    ExpansionPanelList buildRadioExpansionPanelList() {
-      return ExpansionPanelList.radio(
-        initialOpenPanelValue: 2,
-        children: <ExpansionPanelRadio>[
-          ExpansionPanelRadio(
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return Text(isExpanded ? 'B' : 'A');
-            },
-            body: const SizedBox(height: 100.0),
-            value: 0,
-          ),
-          ExpansionPanelRadio(
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return Text(isExpanded ? 'D' : 'C');
-            },
-            body: const SizedBox(height: 100.0),
-            value: 1,
-          ),
-          ExpansionPanelRadio(
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return Text(isExpanded ? 'F' : 'E');
-            },
-            body: const SizedBox(height: 100.0),
-            value: 2,
-          ),
-        ],
-      );
-    }
-
-    ExpansionPanelList buildExpansionPanelList(Function setState) {
-      return ExpansionPanelList(
-        expansionCallback: (int index, _) => setState(() { _panelExpansionState[index] = !_panelExpansionState[index]; }),
-        children: <ExpansionPanel>[
-          ExpansionPanel(
-            isExpanded: _panelExpansionState[0],
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return Text(isExpanded ? 'B' : 'A');
-            },
-            body: const SizedBox(height: 100.0),
-          ),
-          ExpansionPanel(
-            isExpanded: _panelExpansionState[1],
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return Text(isExpanded ? 'D' : 'C');
-            },
-            body: const SizedBox(height: 100.0),
-          ),
-          ExpansionPanel(
-            isExpanded: _panelExpansionState[2],
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return Text(isExpanded ? 'F' : 'E');
-            },
-            body: const SizedBox(height: 100.0),
-          ),
-        ],
-      );
-    }
-
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return MaterialApp(
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: isRadioList
-                ? buildRadioExpansionPanelList()
-                : buildExpansionPanelList(setState)
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => setState(() { isRadioList = !isRadioList; }),
-              ),
+      ExpansionPanelList buildRadioExpansionPanelList() {
+        return ExpansionPanelList.radio(
+          initialOpenPanelValue: 2,
+          children: <ExpansionPanelRadio>[
+            ExpansionPanelRadio(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Text(isExpanded ? 'B' : 'A');
+              },
+              body: const SizedBox(height: 100.0),
+              value: 0,
             ),
-          );
-        },
-      ),
-    );
+            ExpansionPanelRadio(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Text(isExpanded ? 'D' : 'C');
+              },
+              body: const SizedBox(height: 100.0),
+              value: 1,
+            ),
+            ExpansionPanelRadio(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Text(isExpanded ? 'F' : 'E');
+              },
+              body: const SizedBox(height: 100.0),
+              value: 2,
+            ),
+          ],
+        );
+      }
 
-    expect(find.text('A'), findsOneWidget);
-    expect(find.text('B'), findsNothing);
-    expect(find.text('C'), findsOneWidget);
-    expect(find.text('D'), findsNothing);
-    expect(find.text('E'), findsOneWidget);
-    expect(find.text('F'), findsNothing);
+      ExpansionPanelList buildExpansionPanelList(Function setState) {
+        return ExpansionPanelList(
+          expansionCallback: (int index, _) => setState(() { _panelExpansionState[index] = !_panelExpansionState[index]; }),
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              isExpanded: _panelExpansionState[0],
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Text(isExpanded ? 'B' : 'A');
+              },
+              body: const SizedBox(height: 100.0),
+            ),
+            ExpansionPanel(
+              isExpanded: _panelExpansionState[1],
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Text(isExpanded ? 'D' : 'C');
+              },
+              body: const SizedBox(height: 100.0),
+            ),
+            ExpansionPanel(
+              isExpanded: _panelExpansionState[2],
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Text(isExpanded ? 'F' : 'E');
+              },
+              body: const SizedBox(height: 100.0),
+            ),
+          ],
+        );
+      }
 
-    await tester.tap(find.byType(ExpandIcon).at(0));
-    await tester.tap(find.byType(ExpandIcon).at(1));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: isRadioList
+                  ? buildRadioExpansionPanelList()
+                  : buildExpansionPanelList(setState)
+                ),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () => setState(() { isRadioList = !isRadioList; }),
+                ),
+              ),
+            );
+          },
+        ),
+      );
 
-    expect(find.text('A'), findsNothing);
-    expect(find.text('B'), findsOneWidget);
-    expect(find.text('C'), findsNothing);
-    expect(find.text('D'), findsOneWidget);
-    expect(find.text('E'), findsOneWidget);
-    expect(find.text('F'), findsNothing);
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsNothing);
+      expect(find.text('C'), findsOneWidget);
+      expect(find.text('D'), findsNothing);
+      expect(find.text('E'), findsOneWidget);
+      expect(find.text('F'), findsNothing);
 
-    // ExpansionPanelList --> ExpansionPanelList.radio
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byType(ExpandIcon).at(0));
+      await tester.tap(find.byType(ExpandIcon).at(1));
+      await tester.pumpAndSettle();
 
-    expect(find.text('A'), findsOneWidget);
-    expect(find.text('B'), findsNothing);
-    expect(find.text('C'), findsOneWidget);
-    expect(find.text('D'), findsNothing);
-    expect(find.text('E'), findsNothing);
-    expect(find.text('F'), findsOneWidget);
+      expect(find.text('A'), findsNothing);
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsNothing);
+      expect(find.text('D'), findsOneWidget);
+      expect(find.text('E'), findsOneWidget);
+      expect(find.text('F'), findsNothing);
 
-    // ExpansionPanelList.radio --> ExpansionPanelList
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
+      // ExpansionPanelList --> ExpansionPanelList.radio
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
 
-    expect(find.text('A'), findsNothing);
-    expect(find.text('B'), findsOneWidget);
-    expect(find.text('C'), findsNothing);
-    expect(find.text('D'), findsOneWidget);
-    expect(find.text('E'), findsOneWidget);
-    expect(find.text('F'), findsNothing);
-  });
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsNothing);
+      expect(find.text('C'), findsOneWidget);
+      expect(find.text('D'), findsNothing);
+      expect(find.text('E'), findsNothing);
+      expect(find.text('F'), findsOneWidget);
+
+      // ExpansionPanelList.radio --> ExpansionPanelList
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('A'), findsNothing);
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsNothing);
+      expect(find.text('D'), findsOneWidget);
+      expect(find.text('E'), findsOneWidget);
+      expect(find.text('F'), findsNothing);
+    },
+  );
 
   testWidgets('No duplicate global keys at layout/build time', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/13780
@@ -934,6 +938,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       hasTapAction: true,
       onTapHint: localizations.expandedIconTapHint,
     ));
@@ -957,6 +962,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       hasTapAction: true,
       onTapHint: localizations.collapsedIconTapHint,
     ));
@@ -1008,6 +1014,7 @@ void main() {
     expect(tester.getSemantics(find.byKey(expandedKey)), matchesSemantics(
       label: 'Expanded',
       isButton: true,
+      isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
     ));
@@ -1015,6 +1022,7 @@ void main() {
     expect(tester.getSemantics(find.byKey(collapsedKey)), matchesSemantics(
       label: 'Collapsed',
       isButton: true,
+      isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
     ));

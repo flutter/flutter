@@ -452,15 +452,46 @@ void main() {
       ),
     );
 
+    final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester);
+    final RenderObject renderTextfield = tester.renderObject(find.descendant(of: find.byKey(textField), matching: find.byType(Semantics)).first);
+
     expect(
-      _getMessageShownInSemanticsDebugger(widgetKey: textField, debuggerKey: debugger, tester: tester),
+      semanticsDebuggerPainter.getMessage(renderTextfield.debugSemantics),
       'textfield',
     );
+  });
+
+  testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
+    final UniqueKey debugger = UniqueKey();
+    const TextStyle labelStyle = TextStyle(color: Colors.amber);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          key: debugger,
+          labelStyle: labelStyle,
+          child: Semantics(
+            label: 'label',
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
   });
 }
 
 String _getMessageShownInSemanticsDebugger({
   @required Key widgetKey,
+  @required Key debuggerKey,
+  @required WidgetTester tester,
+}) {
+  final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
+  return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics);
+}
+
+dynamic _getSemanticsDebuggerPainter({
   @required Key debuggerKey,
   @required WidgetTester tester,
 }) {
@@ -470,5 +501,5 @@ String _getMessageShownInSemanticsDebugger({
   )).first;
   final dynamic semanticsDebuggerPainter = customPaint.foregroundPainter;
   expect(semanticsDebuggerPainter.runtimeType.toString(), '_SemanticsDebuggerPainter');
-  return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics);
+  return semanticsDebuggerPainter;
 }

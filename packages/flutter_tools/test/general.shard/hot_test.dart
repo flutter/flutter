@@ -290,7 +290,7 @@ void main() {
           device: mockDevice,
           generator: residentCompiler,
           exception: const HttpException('Connection closed before full header was received, '
-              'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws')
+              'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
         ),
       ];
 
@@ -319,7 +319,7 @@ void main() {
         TestFlutterDevice(
           device: mockDevice,
           generator: residentCompiler,
-          exception: const HttpException(', uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws')
+          exception: const HttpException(', uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
         ),
       ];
 
@@ -337,6 +337,36 @@ void main() {
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
   });
+
+  group('hot cleanupAtFinish()', () {
+    MockFlutterDevice mockFlutterDeviceFactory(Device device) {
+      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
+      when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) => Future<void>.value(null));
+      when(mockFlutterDevice.device).thenReturn(device);
+      return mockFlutterDevice;
+    }
+
+    testUsingContext('disposes each device', () async {
+      final MockDevice mockDevice1 = MockDevice();
+      final MockDevice mockDevice2 = MockDevice();
+      final MockFlutterDevice mockFlutterDevice1 = mockFlutterDeviceFactory(mockDevice1);
+      final MockFlutterDevice mockFlutterDevice2 = mockFlutterDeviceFactory(mockDevice2);
+
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        mockFlutterDevice1,
+        mockFlutterDevice2,
+      ];
+
+      await HotRunner(devices,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ).cleanupAtFinish();
+
+      verify(mockDevice1.dispose());
+      verify(mockFlutterDevice1.stopEchoingDeviceLog());
+      verify(mockDevice2.dispose());
+      verify(mockFlutterDevice2.stopEchoingDeviceLog());
+    });
+  });
 }
 
 class MockDevFs extends Mock implements DevFS {}
@@ -349,11 +379,13 @@ class MockDevice extends Mock implements Device {
   }
 }
 
+class MockFlutterDevice extends Mock implements FlutterDevice {}
+
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice({
     @required Device device,
     @required this.exception,
-    @required ResidentCompiler generator
+    @required ResidentCompiler generator,
   })  : assert(exception != null),
         super(device, buildMode: BuildMode.debug, generator: generator, trackWidgetCreation: false);
 

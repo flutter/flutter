@@ -37,7 +37,7 @@ import 'theme_data.dart';
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// ![CheckboxListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile.png)
 ///
@@ -53,15 +53,13 @@ import 'theme_data.dart';
 /// ```dart
 /// @override
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: CheckboxListTile(
-///       title: const Text('Animate Slowly'),
-///       value: timeDilation != 1.0,
-///       onChanged: (bool value) {
-///         setState(() { timeDilation = value ? 10.0 : 1.0; });
-///       },
-///       secondary: const Icon(Icons.hourglass_empty),
-///     ),
+///   return CheckboxListTile(
+///     title: const Text('Animate Slowly'),
+///     value: timeDilation != 1.0,
+///     onChanged: (bool value) {
+///       setState(() { timeDilation = value ? 10.0 : 1.0; });
+///     },
+///     secondary: const Icon(Icons.hourglass_empty),
 ///   );
 /// }
 /// ```
@@ -84,7 +82,7 @@ import 'theme_data.dart';
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// ![Checkbox list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_semantics.png)
 ///
@@ -147,19 +145,15 @@ import 'theme_data.dart';
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: LinkedLabelCheckbox(
-///         label: 'Linked, tappable label text',
-///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///         value: _isSelected,
-///         onChanged: (bool newValue) {
-///           setState(() {
-///             _isSelected = newValue;
-///           });
-///         },
-///       ),
-///     ),
+///   return LinkedLabelCheckbox(
+///     label: 'Linked, tappable label text',
+///     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///     value: _isSelected,
+///     onChanged: (bool newValue) {
+///       setState(() {
+///         _isSelected = newValue;
+///       });
+///     },
 ///   );
 /// }
 /// ```
@@ -172,7 +166,7 @@ import 'theme_data.dart';
 /// combining [Checkbox] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// ![Custom checkbox list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_custom.png)
 ///
@@ -222,19 +216,15 @@ import 'theme_data.dart';
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: LabeledCheckbox(
-///         label: 'This is the label text',
-///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///         value: _isSelected,
-///         onChanged: (bool newValue) {
-///           setState(() {
-///             _isSelected = newValue;
-///           });
-///         },
-///       ),
-///     ),
+///   return LabeledCheckbox(
+///     label: 'This is the label text',
+///     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///     value: _isSelected,
+///     onChanged: (bool newValue) {
+///       setState(() {
+///         _isSelected = newValue;
+///       });
+///     },
 ///   );
 /// }
 /// ```

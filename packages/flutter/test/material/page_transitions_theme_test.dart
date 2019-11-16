@@ -117,4 +117,44 @@ void main() {
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
   });
 
+  testWidgets('pageTranstionsTheme override builds a _ZoomPageTransition for android', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: FlatButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.android,
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: ZoomPageTransitionsBuilder(), // creates a _ZoomPageTransition
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    Finder findZoomPageTransition() {
+      return find.descendant(
+        of: find.byType(MaterialApp),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ZoomPageTransition'),
+      );
+    }
+
+    expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.android);
+    expect(findZoomPageTransition(), findsOneWidget);
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('page b'), findsOneWidget);
+    expect(findZoomPageTransition(), findsOneWidget);
+  });
 }

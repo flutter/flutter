@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -611,5 +612,90 @@ void main() {
     await tester.pump();
 
     expect(buildOrder, <int>[3, 4, 1, 2, 0]);
+  });
+
+  testWidgets('OverlayState.of() called without Overlay being exist', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Builder(
+          builder: (BuildContext context) {
+            FlutterError error;
+            final Widget debugRequiredFor = Container();
+            try {
+              Overlay.of(context, debugRequiredFor: debugRequiredFor);
+            } on FlutterError catch (e) {
+              error = e;
+            } finally {
+              expect(error, isNotNull);
+              expect(error.diagnostics.length, 5);
+              expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+              expect(error.diagnostics[2].toStringDeep(), equalsIgnoringHashCodes(
+                'The most common way to add an Overlay to an application is to\n'
+                'include a MaterialApp or Navigator widget in the runApp() call.\n',
+              ));
+              expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Widget>>());
+              expect(error.diagnostics[3].value, debugRequiredFor);
+              expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+              expect(error.toStringDeep(), equalsIgnoringHashCodes(
+                'FlutterError\n'
+                '   No Overlay widget found.\n'
+                '   Container widgets require an Overlay widget ancestor for correct\n'
+                '   operation.\n'
+                '   The most common way to add an Overlay to an application is to\n'
+                '   include a MaterialApp or Navigator widget in the runApp() call.\n'
+                '   The specific widget that failed to find an overlay was:\n'
+                '     Container\n'
+                '   The context from which that widget was searching for an overlay\n'
+                '   was:\n'
+                '     Builder\n',
+              ));
+            }
+            return Container();
+          }
+        ),
+      ),
+    );
+  });
+
+  testWidgets('OverlayEntry.opaque can be changed when OverlayEntry is not part of an Overlay (yet)', (WidgetTester tester) async {
+    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    final Key root = UniqueKey();
+    final Key top = UniqueKey();
+    final OverlayEntry rootEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Container(key: root);
+      },
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            rootEntry,
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byKey(root), findsOneWidget);
+
+    final OverlayEntry newEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Container(key: top);
+      },
+    );
+    expect(newEntry.opaque, isFalse);
+    newEntry.opaque = true; // Does neither trigger an assert nor throw.
+    expect(newEntry.opaque, isTrue);
+
+    // The new opaqueness is honored when inserted into an overlay.
+    overlayKey.currentState.insert(newEntry);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(root), findsNothing);
+    expect(find.byKey(top), findsOneWidget);
   });
 }

@@ -156,21 +156,22 @@ class DecorationImage {
 
   @override
   String toString() {
-    final List<String> properties = <String>[];
-    properties.add('$image');
-    if (colorFilter != null)
-      properties.add('$colorFilter');
-    if (fit != null &&
-        !(fit == BoxFit.fill && centerSlice != null) &&
-        !(fit == BoxFit.scaleDown && centerSlice == null))
-      properties.add('$fit');
-    properties.add('$alignment');
-    if (centerSlice != null)
-      properties.add('centerSlice: $centerSlice');
-    if (repeat != ImageRepeat.noRepeat)
-      properties.add('$repeat');
-    if (matchTextDirection)
-      properties.add('match text direction');
+    final List<String> properties = <String>[
+      '$image',
+      if (colorFilter != null)
+        '$colorFilter',
+      if (fit != null &&
+          !(fit == BoxFit.fill && centerSlice != null) &&
+          !(fit == BoxFit.scaleDown && centerSlice == null))
+        '$fit',
+      '$alignment',
+      if (centerSlice != null)
+        'centerSlice: $centerSlice',
+      if (repeat != ImageRepeat.noRepeat)
+        '$repeat',
+      if (matchTextDirection)
+        'match text direction',
+    ];
     return '$runtimeType(${properties.join(", ")})';
   }
 }
@@ -220,15 +221,15 @@ class DecorationImagePainter {
         // We check this first so that the assert will fire immediately, not just
         // when the image is ready.
         if (configuration.textDirection == null) {
-          throw FlutterError(
-            'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.\n'
-            'When DecorationImagePainter.paint() was called, there was no text direction provided '
-            'in the ImageConfiguration object to match.\n'
-            'The DecorationImage was:\n'
-            '  $_details\n'
-            'The ImageConfiguration was:\n'
-            '  $configuration'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('ImageDecoration.matchTextDirection can only be used when a TextDirection is available.'),
+            ErrorDescription(
+              'When DecorationImagePainter.paint() was called, there was no text direction provided '
+              'in the ImageConfiguration object to match.'
+            ),
+            DiagnosticsProperty<DecorationImage>('The DecorationImage was', _details, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<ImageConfiguration>('The ImageConfiguration was', configuration, style: DiagnosticsTreeStyle.errorProperty),
+          ]);
         }
         return true;
       }());

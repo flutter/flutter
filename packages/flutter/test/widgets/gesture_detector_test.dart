@@ -601,6 +601,104 @@ void main() {
         'excludeFromSemantics: true',
       ]);
     });
+
+    group('error control test', () {
+      test('constructor redundant pan and scale', () {
+        FlutterError error;
+        try {
+          GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {},);
+        } on FlutterError catch (e) {
+          error = e;
+        } finally {
+          expect(error, isNotNull);
+          expect(
+            error.toStringDeep(),
+            'FlutterError\n'
+            '   Incorrect GestureDetector arguments.\n'
+            '   Having both a pan gesture recognizer and a scale gesture\n'
+            '   recognizer is redundant; scale is a superset of pan.\n'
+            '   Just use the scale gesture recognizer.\n',
+          );
+          expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+          expect(
+            error.diagnostics.last.toStringDeep(),
+            equalsIgnoringHashCodes(
+              'Just use the scale gesture recognizer.\n',
+            )
+          );
+        }
+      });
+
+      test('constructur duplicate drag recognizer', () {
+        FlutterError error;
+        try {
+          GestureDetector(
+            onVerticalDragStart: (_) {},
+            onHorizontalDragStart: (_) {},
+            onPanStart: (_) {},
+          );
+        } on FlutterError catch (e) {
+          error = e;
+        } finally {
+          expect(error, isNotNull);
+          expect(
+            error.toStringDeep(),
+            'FlutterError\n'
+            '   Incorrect GestureDetector arguments.\n'
+            '   Simultaneously having a vertical drag gesture recognizer, a\n'
+            '   horizontal drag gesture recognizer, and a pan gesture recognizer\n'
+            '   will result in the pan gesture recognizer being ignored, since\n'
+            '   the other two will catch all drags.\n',
+          );
+        }
+      });
+
+      testWidgets('replaceGestureRecognizers not during layout', (WidgetTester tester) async {
+        final GlobalKey<RawGestureDetectorState> key = GlobalKey<RawGestureDetectorState>();
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: RawGestureDetector(
+              key: key,
+              child: Container(
+                child: const Text('Text'),
+              ),
+            ),
+          ),
+        );
+        FlutterError error;
+        try {
+          key.currentState.replaceGestureRecognizers(
+            <Type, GestureRecognizerFactory>{});
+        } on FlutterError catch (e) {
+          error = e;
+        } finally {
+          expect(error, isNotNull);
+          expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+          expect(
+            error.diagnostics.last.toStringDeep(),
+            equalsIgnoringHashCodes(
+              'To set the gesture recognizers at other times, trigger a new\n'
+              'build using setState() and provide the new gesture recognizers as\n'
+              'constructor arguments to the corresponding RawGestureDetector or\n'
+              'GestureDetector object.\n'
+            ),
+          );
+          expect(
+            error.toStringDeep(),
+            'FlutterError\n'
+            '   Unexpected call to replaceGestureRecognizers() method of\n'
+            '   RawGestureDetectorState.\n'
+            '   The replaceGestureRecognizers() method can only be called during\n'
+            '   the layout phase.\n'
+            '   To set the gesture recognizers at other times, trigger a new\n'
+            '   build using setState() and provide the new gesture recognizers as\n'
+            '   constructor arguments to the corresponding RawGestureDetector or\n'
+            '   GestureDetector object.\n',
+          );
+        }
+      });
+    });
   });
 }
 

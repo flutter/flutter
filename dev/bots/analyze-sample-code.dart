@@ -208,23 +208,20 @@ class SampleChecker {
 
   /// Computes the headers needed for each sample file.
   List<Line> get headers {
-    if (_headers == null) {
-      final List<String> buffer = <String>[];
-      buffer.add('// generated code');
-      buffer.add('import \'dart:async\';');
-      buffer.add('import \'dart:convert\';');
-      buffer.add('import \'dart:math\' as math;');
-      buffer.add('import \'dart:typed_data\';');
-      buffer.add('import \'dart:ui\' as ui;');
-      buffer.add('import \'package:flutter_test/flutter_test.dart\';');
-      for (File file in _listDartFiles(Directory(_defaultFlutterPackage))) {
-        buffer.add('');
-        buffer.add('// ${file.path}');
-        buffer.add('import \'package:flutter/${path.basename(file.path)}\';');
-      }
-      _headers = buffer.map<Line>((String code) => Line(code)).toList();
-    }
-    return _headers;
+    return _headers ??= <String>[
+      '// generated code',
+      "import 'dart:async';",
+      "import 'dart:convert';",
+      "import 'dart:math' as math;",
+      "import 'dart:typed_data';",
+      "import 'dart:ui' as ui;",
+      "import 'package:flutter_test/flutter_test.dart';",
+      for (File file in _listDartFiles(Directory(_defaultFlutterPackage))) ...<String>[
+        '',
+        '// ${file.path}',
+        "import 'package:flutter/${path.basename(file.path)}';",
+      ],
+    ].map<Line>((String code) => Line(code)).toList();
   }
 
   List<Line> _headers;

@@ -164,9 +164,7 @@ class MatrixUtils {
   }
 
   static Float64List _minMax;
-  static void _accumulate(Float64List m, double x, double y,
-      bool first, bool isAffine)
-  {
+  static void _accumulate(Float64List m, double x, double y, bool first, bool isAffine) {
     final double w = isAffine ? 1.0 : 1.0 / (m[3] * x + m[7] * y + m[15]);
     final double tx = (m[0] * x + m[4] * y + m[12]) * w;
     final double ty = (m[1] * x + m[5] * y + m[13]) * w;

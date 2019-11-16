@@ -25,7 +25,7 @@ class BuildMacosCommand extends BuildSubCommand {
   final String name = 'macos';
 
   @override
-  bool hidden = true;
+  bool get hidden => !featureFlags.isMacOSEnabled || !platform.isMacOS;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{

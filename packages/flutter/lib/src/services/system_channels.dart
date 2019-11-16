@@ -159,6 +159,21 @@ class SystemChannels {
   ///    second argument is a [String] consisting of the stringification of one
   ///    of the values of the [TextInputAction] enum.
   ///
+  ///  * `TextInputClient.requestExistingInputState`: The embedding may have
+  ///    lost its internal state about the current editing client, if there is
+  ///    one. The framework should call `TextInput.setClient` and
+  ///    `TextInput.setEditingState` again with its most recent information. If
+  ///    there is no existing state on the framework side, the call should
+  ///    fizzle.
+  ///
+  ///  * `TextInputClient.onConnectionClosed`: The text input connection closed
+  ///    on the platform side. For example the application is moved to
+  ///    background or used closed the virtual keyboard. This method informs
+  ///    [TextInputClient] to clear connection and finalize editing.
+  ///    `TextInput.clearClient` and `TextInput.hide` is not called after
+  ///    clearing the connection since on the platform side the connection is
+  ///    already finalized.
+  ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel textInput = OptionalMethodChannel(

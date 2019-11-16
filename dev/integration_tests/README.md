@@ -4,3 +4,11 @@ from the UI, or a native app that is meant to integrate with Flutter for
 testing.
 
 Intended for use with devicelab tests.
+
+If you want to run a driver test locally, to debug a problem with a test,
+you can use this command from the appropriate subdirectory:
+
+```shell
+% flutter drive
+```
+

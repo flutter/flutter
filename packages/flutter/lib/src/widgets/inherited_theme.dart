@@ -138,7 +138,7 @@ class _CaptureAll extends StatelessWidget {
   const _CaptureAll({
     Key key,
     @required this.themes,
-    @required this.child
+    @required this.child,
   }) : assert(themes != null), assert(child != null), super(key: key);
 
   final List<InheritedTheme> themes;

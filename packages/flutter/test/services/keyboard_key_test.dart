@@ -60,5 +60,51 @@ void main() {
       expect(LogicalKeyboardKey.altRight.synonyms.first, equals(LogicalKeyboardKey.alt));
       expect(LogicalKeyboardKey.metaRight.synonyms.first, equals(LogicalKeyboardKey.meta));
     });
+    test('Synonyms get collapsed properly.', () async {
+      expect(LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{}), isEmpty);
+      expect(
+          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftLeft,
+            LogicalKeyboardKey.controlLeft,
+            LogicalKeyboardKey.altLeft,
+            LogicalKeyboardKey.metaLeft,
+          }),
+          equals(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shift,
+            LogicalKeyboardKey.control,
+            LogicalKeyboardKey.alt,
+            LogicalKeyboardKey.meta,
+          }));
+      expect(
+          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftRight,
+            LogicalKeyboardKey.controlRight,
+            LogicalKeyboardKey.altRight,
+            LogicalKeyboardKey.metaRight,
+          }),
+          equals(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shift,
+            LogicalKeyboardKey.control,
+            LogicalKeyboardKey.alt,
+            LogicalKeyboardKey.meta,
+          }));
+      expect(
+          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftLeft,
+            LogicalKeyboardKey.controlLeft,
+            LogicalKeyboardKey.altLeft,
+            LogicalKeyboardKey.metaLeft,
+            LogicalKeyboardKey.shiftRight,
+            LogicalKeyboardKey.controlRight,
+            LogicalKeyboardKey.altRight,
+            LogicalKeyboardKey.metaRight,
+          }),
+          equals(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shift,
+            LogicalKeyboardKey.control,
+            LogicalKeyboardKey.alt,
+            LogicalKeyboardKey.meta,
+          }));
+    });
   });
 }
