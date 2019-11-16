@@ -263,6 +263,8 @@ class DevFSException implements Exception {
   final StackTrace stackTrace;
 }
 
+HttpClient get httpClient => context.get<HttpClient>() ?? HttpClient();
+
 class _DevFSHttpWriter {
   _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
     : httpAddress = serviceProtocol.httpAddress;
@@ -275,7 +277,7 @@ class _DevFSHttpWriter {
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
   Completer<void> _completer;
-  final HttpClient _client = HttpClient();
+  final HttpClient _client = httpClient;
 
   Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client.maxConnectionsPerHost = kMaxInFlight;

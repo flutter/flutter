@@ -17,37 +17,42 @@ void main() {
     MockDeviceLogReader logReader;
     ProtocolDiscovery discoverer;
 
-    group('no port forwarding', () {
-      /// Performs test set-up functionality that must be performed as part of
-      /// the `test()` pass and not part of the `setUp()` pass.
-      ///
-      /// This exists to make sure we're not creating an error that tries to
-      /// cross an error-zone boundary. Our use of `testUsingContext()` runs the
-      /// test code inside an error zone, but the `setUp()` code is not run in
-      /// any zone. This creates the potential for errors that try to cross
-      /// error-zone boundaries, which are considered uncaught.
-      ///
-      /// This also exists for cases where our initialization requires access to
-      /// a `Context` object, which is only set up inside the zone.
-      ///
-      /// These issues do not pertain to real code and are a test-only concern,
-      /// because in real code, the zone is set up in `main()`.
-      ///
-      /// See also: [runZoned]
-      void initialize({
-        int devicePort,
-        int throttleTimeInMilliseconds = 200,
-      }) {
-        logReader = MockDeviceLogReader();
-        discoverer = ProtocolDiscovery.observatory(
-          logReader,
-          ipv6: false,
-          hostPort: null,
-          devicePort: devicePort,
-          throttleTimeInMilliseconds: throttleTimeInMilliseconds,
-        );
-      }
+    /// Performs test set-up functionality that must be performed as part of
+    /// the `test()` pass and not part of the `setUp()` pass.
+    ///
+    /// This exists to make sure we're not creating an error that tries to
+    /// cross an error-zone boundary. Our use of `testUsingContext()` runs the
+    /// test code inside an error zone, but the `setUp()` code is not run in
+    /// any zone. This creates the potential for errors that try to cross
+    /// error-zone boundaries, which are considered uncaught.
+    ///
+    /// This also exists for cases where our initialization requires access to
+    /// a `Context` object, which is only set up inside the zone.
+    ///
+    /// These issues do not pertain to real code and are a test-only concern,
+    /// because in real code, the zone is set up in `main()`.
+    ///
+    /// See also: [runZoned]
+    void initialize({
+      int devicePort,
+      int throttleTimeInMilliseconds = 200,
+    }) {
+      logReader = MockDeviceLogReader();
+      discoverer = ProtocolDiscovery.observatory(
+        logReader,
+        ipv6: false,
+        hostPort: null,
+        devicePort: devicePort,
+        throttleTimeInMilliseconds: throttleTimeInMilliseconds,
+      );
+    }
 
+    testUsingContext('returns non-null uri future', () async {
+      initialize();
+      expect(discoverer.uri, isNotNull);
+    });
+
+    group('no port forwarding', () {
       tearDown(() {
         discoverer.cancel();
         logReader.dispose();
