@@ -446,7 +446,7 @@ class Container extends StatelessWidget {
     if (clipBehaviour != null &&
         clipBehaviour != Clip.none) {
       current = ClipPath(
-        clipper: PathClipper(
+        clipper: _PathClipper(
           textDirection: Directionality.of(context),
           getClipPath: decoration.getClipPath
         ),
@@ -470,4 +470,27 @@ class Container extends StatelessWidget {
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
+}
+
+// this is used in Container for ClipPath and implementation is closely related
+// to the [Container.clipBehaviour].
+//
+// if there is any plan to make this public, it's better to change the
+// implementation to fit more general use cases.
+class _PathClipper extends CustomClipper<Path> {
+
+  _PathClipper({this.textDirection, this.getClipPath});
+
+  final TextDirection textDirection;
+  final Path Function(Rect rect, TextDirection direction) getClipPath;
+
+  @override
+  Path getClip(Size size) => getClipPath(
+    Rect.fromLTRB(0, 0, size.width, size.height),
+    textDirection,
+  );
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+
 }
