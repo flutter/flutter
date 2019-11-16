@@ -48,7 +48,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   _SelectableTextSelectionGestureDetectorBuilder({
     @required _SelectableTextState state,
   }) : _state = state,
-        super(delegate: state);
+       super(delegate: state);
 
   final _SelectableTextState _state;
 
@@ -396,7 +396,7 @@ class SelectableText extends StatefulWidget {
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
