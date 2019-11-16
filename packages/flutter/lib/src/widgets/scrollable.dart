@@ -14,6 +14,7 @@ import 'package:flutter/painting.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -159,12 +160,16 @@ class Scrollable extends StatefulWidget {
   ///    slivers and sizes itself based on the size of the slivers.
   final ViewportBuilder viewportBuilder;
 
-  /// An optional function that will calculate the distance to scroll then the
+  /// An optional function that should calculate the distance to scroll when the
   /// scrollable is asked to scroll via the keyboard.
   ///
-  /// If not supplied, the [Scrollable] will scroll a fixed default amount when
-  /// a keyboard navigation key is pressed (e.g. pageUp/pageDown,
-  /// control-upArrow, etc.).
+  /// If not supplied, the [Scrollable] will scroll a default amount when a
+  /// keyboard navigation key is pressed (e.g. pageUp/pageDown, control-upArrow,
+  /// etc.).
+  ///
+  /// For [ScrollIncrementType.page], the default is 80% of the size of the
+  /// scroll window, and for [ScrollIncrementType.line], the default is 50
+  /// logical pixels.
   final ScrollIncrementCalculator incrementCalculator;
 
   /// Whether the scroll actions introduced by this [Scrollable] are exposed
@@ -879,68 +884,75 @@ class ScrollAction extends Action {
   /// The [LocalKey] that uniquely identifies this action to [ScrollIntent].
   static const LocalKey key = ValueKey<Type>(ScrollAction);
 
-  @override
-  void invoke(FocusNode node, ScrollIntent intent) {
-    final ScrollableState state = Scrollable.of(node.context);
-    assert(state != null, 'ScrollAction invoked on a context that has no scrollable parent');
-    double newPosition = state.position.pixels;
+  double _getIncrement(ScrollableState state, ScrollIntent intent) {
     final double increment = state.getIncrement(type: intent.type);
     switch (intent.direction) {
       case AxisDirection.down:
         switch (state.axisDirection) {
           case AxisDirection.up:
-            newPosition -= increment;
+            return -increment;
             break;
           case AxisDirection.down:
-            newPosition += increment;
+            return increment;
             break;
           case AxisDirection.right:
           case AxisDirection.left:
-            break;
+            return 0.0;
         }
         break;
       case AxisDirection.up:
         switch (state.axisDirection) {
           case AxisDirection.up:
-            newPosition += increment;
+            return increment;
             break;
           case AxisDirection.down:
-            newPosition -= increment;
+            return -increment;
             break;
           case AxisDirection.right:
           case AxisDirection.left:
-            break;
-        }
-        break;
-      case AxisDirection.right:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            newPosition += increment;
-            break;
-          case AxisDirection.left:
-            newPosition -= increment;
-            break;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            break;
+            return 0.0;
         }
         break;
       case AxisDirection.left:
         switch (state.axisDirection) {
           case AxisDirection.right:
-            newPosition -= increment;
+            return -increment;
             break;
           case AxisDirection.left:
-            newPosition += increment;
+            return increment;
             break;
           case AxisDirection.up:
           case AxisDirection.down:
+            return 0.0;
+        }
+        break;
+      case AxisDirection.right:
+        switch (state.axisDirection) {
+          case AxisDirection.right:
+            return increment;
             break;
+          case AxisDirection.left:
+            return -increment;
+            break;
+          case AxisDirection.up:
+          case AxisDirection.down:
+            return 0.0;
         }
         break;
     }
-    state.position.animateTo(
-      newPosition.clamp(state.position.minScrollExtent, state.position.maxScrollExtent),
+    return 0.0;
+  }
+
+  @override
+  void invoke(FocusNode node, ScrollIntent intent) {
+    final ScrollableState state = Scrollable.of(node.context);
+    assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
+    final double increment = _getIncrement(state, intent);
+    if (increment == 0.0) {
+      return;
+    }
+    state.position.moveTo(
+      state.position.pixels + increment,
       duration: const Duration(milliseconds: 100),
       curve: Curves.easeInOut,
     );

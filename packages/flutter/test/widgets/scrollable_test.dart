@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,12 +14,14 @@ Future<void> pumpTest(
   TargetPlatform platform, {
   bool scrollable = true,
   bool reverse = false,
+  ScrollController controller,
 }) async {
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
       platform: platform,
     ),
     home: CustomScrollView(
+      controller: controller,
       reverse: reverse,
       physics: scrollable ? null : const NeverScrollableScrollPhysics(),
       slivers: const <Widget>[
@@ -266,5 +269,86 @@ void main() {
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)), result);
 
     expect(getScrollOffset(tester), 20.0);
+  });
+
+  testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.fuchsia,
+        ),
+        home: CustomScrollView(
+          controller: controller,
+          physics: const NeverScrollableScrollPhysics(),
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Focus(
+                focusNode: focusNode,
+                child: const SizedBox(height: 2000.0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(50.0));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(1120.0));
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+  });
+
+  testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.fuchsia,
+        ),
+        home: CustomScrollView(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Focus(
+                focusNode: focusNode,
+                child: const SizedBox(width: 2000.0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(50.0));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
   });
 }
