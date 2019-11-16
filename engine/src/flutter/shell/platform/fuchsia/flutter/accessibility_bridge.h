@@ -5,6 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_ACCESSIBILITY_BRIDGE_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_ACCESSIBILITY_BRIDGE_H_
 
+// Work around symbol conflicts with ICU.
+#undef TRUE
+#undef FALSE
+
 #include <fuchsia/accessibility/semantics/cpp/fidl.h>
 #include <fuchsia/sys/cpp/fidl.h>
 #include <fuchsia/ui/gfx/cpp/fidl.h>
