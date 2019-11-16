@@ -28,7 +28,10 @@ class _TestGestureFlutterBinding extends BindingBase
   @override
   SchedulerPhase get schedulerPhase => _overridePhase ?? super.schedulerPhase;
 
-  // Bypass the phase assert of [MouseTracker.schedulePostFrameCheck]
+  // Mannually schedule a postframe check.
+  // 
+  // It is usually done by the renderer binding, but in tests we have to bypass
+  // the phase assert of [MouseTracker.schedulePostFrameCheck]
   void scheduleMouseTrackerPostFrameCheck() {
     final SchedulerPhase lastPhase = _overridePhase;
     _overridePhase = SchedulerPhase.persistentCallbacks;
@@ -248,8 +251,12 @@ void main() {
     events.clear();
   });
 
-  test('should handle detaching during the callback of exiting', () {
-    bool isInHitRegion;
+  test('should not flip out when attaching and detaching during callbacks', () {
+    // It is a common pattern that a callback that listens to the changes of
+    // [MouseTracker.mouseIsConnected] triggers annotation attaching and
+    // detaching. This test ensures that no exceptions are thrown for this
+    // pattern.
+    bool isInHitRegion = false;
     final List<PointerEvent> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) => events.add(event),
@@ -262,8 +269,15 @@ void main() {
       }
     });
 
-    isInHitRegion = true;
-    _mouseTracker.attachAnnotation(annotation);
+    _mouseTracker.addListener(() {
+      if (!_mouseTracker.mouseIsConnected) {
+        _mouseTracker.detachAnnotation(annotation);
+        isInHitRegion = false;
+      } else {
+        _mouseTracker.attachAnnotation(annotation);
+        isInHitRegion = true;
+      }
+    });
 
     // Enter
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -323,7 +337,7 @@ void main() {
     events.clear();
   });
 
-  test('should detect enter in the next frame after annotations are attached on the pointer, but keep quiet on detaching', () {
+  test('should correctly handle when annotation is attached or detached on the pointer', () {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
@@ -348,16 +362,13 @@ void main() {
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
-    // Attach an annotation
+    // Attaching an annotation should trigger Enter event
     isInHitRegion = true;
     _mouseTracker.attachAnnotation(annotation);
-    // No callbacks are triggered or scheduled immediately
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
 
-    // Mannually schedule a postframe check, which is usually done by the
-    // renderer binding
     _binding.scheduleMouseTrackerPostFrameCheck();
     expect(_binding.postFrameCallbacks, hasLength(1));
 
@@ -367,16 +378,13 @@ void main() {
     ]));
     events.clear();
 
-    // Detach the annotation
+    // Detaching an annotation should not trigger events
     isInHitRegion = false;
     _mouseTracker.detachAnnotation(annotation);
-    // No callbacks are triggered or scheduled immediately
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
 
-    // Mannually schedule a postframe check, which is usually done by the
-    // renderer binding
     _binding.scheduleMouseTrackerPostFrameCheck();
     expect(_binding.postFrameCallbacks, hasLength(1));
 
@@ -386,7 +394,146 @@ void main() {
     expect(_binding.postFrameCallbacks, hasLength(0));
   });
 
-  test('should correctly stay quiet when annotations are attached or detached not on the pointer', () {
+  test('should correctly handle when annotation moves in or out of the pointer', () {
+    bool isInHitRegion;
+    final List<Object> events = <PointerEvent>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => events.add(event),
+      onHover: (PointerHoverEvent event) => events.add(event),
+      onExit: (PointerExitEvent event) => events.add(event),
+    );
+    _setUpMouseAnnotationFinder((Offset position) sync* {
+      if (isInHitRegion) {
+        yield annotation;
+      }
+    });
+
+    // Start with an annotation attached
+    _mouseTracker.attachAnnotation(annotation);
+    isInHitRegion = false;
+
+    // Connect a mouse
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
+    ]));
+    events.clear();
+
+    // During a frame, the annotation moves into the pointer
+    isInHitRegion = true;
+    expect(_binding.postFrameCallbacks, hasLength(0));
+    _binding.scheduleMouseTrackerPostFrameCheck();
+    expect(_binding.postFrameCallbacks, hasLength(1));
+
+    _binding.flushPostFrameCallbacks(Duration.zero);
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerEnterEvent(position: Offset(0.0, 100.0)),
+    ]));
+    events.clear();
+
+    expect(_binding.postFrameCallbacks, hasLength(0));
+
+    // During a frame, the annotation moves out of the pointer
+    isInHitRegion = false;
+    expect(_binding.postFrameCallbacks, hasLength(0));
+    _binding.scheduleMouseTrackerPostFrameCheck();
+    expect(_binding.postFrameCallbacks, hasLength(1));
+
+    _binding.flushPostFrameCallbacks(Duration.zero);
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerExitEvent(position: Offset(0.0, 100.0)),
+    ]));
+    expect(_binding.postFrameCallbacks, hasLength(0));
+  });
+
+  test('should correctly handle when the pointer is added or removed on the annotation', () {
+    bool isInHitRegion;
+    final List<Object> events = <PointerEvent>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => events.add(event),
+      onHover: (PointerHoverEvent event) => events.add(event),
+      onExit: (PointerExitEvent event) => events.add(event),
+    );
+    _setUpMouseAnnotationFinder((Offset position) sync* {
+      if (isInHitRegion) {
+        yield annotation;
+      }
+    });
+
+    // Start with an annotation attached
+    _mouseTracker.attachAnnotation(annotation);
+    isInHitRegion = false;
+
+    // Connect a mouse in the region. Should trigger Enter
+    isInHitRegion = true;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
+    ]));
+
+    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerEnterEvent(position: Offset(0.0, 100.0)),
+    ]));
+    events.clear();
+
+    // Disconnect the mouse from the region. Should trigger Exit
+    isInHitRegion = false;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
+    ]));
+    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerExitEvent(position: Offset(0.0, 100.0)),
+    ]));
+  });
+
+  test('should correctly handle when the pointer moves in or out of the annotation', () {
+    bool isInHitRegion;
+    final List<Object> events = <PointerEvent>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => events.add(event),
+      onHover: (PointerHoverEvent event) => events.add(event),
+      onExit: (PointerExitEvent event) => events.add(event),
+    );
+    _setUpMouseAnnotationFinder((Offset position) sync* {
+      if (isInHitRegion) {
+        yield annotation;
+      }
+    });
+
+    // Start with annotation and mouse attached
+    _mouseTracker.attachAnnotation(annotation);
+    isInHitRegion = false;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(200.0, 100.0)),
+    ]));
+
+    expect(_binding.postFrameCallbacks, hasLength(0));
+    events.clear();
+
+    // Moves the mouse into the region. Should trigger Enter
+    isInHitRegion = true;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 100.0)),
+    ]));
+    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerEnterEvent(position: Offset(0.0, 100.0)),
+      const PointerHoverEvent(position: Offset(0.0, 100.0)),
+    ]));
+    events.clear();
+
+    // Moves the mouse out of the region. Should trigger Exit
+    isInHitRegion = false;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(200.0, 100.0)),
+    ]));
+    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerExitEvent(position: Offset(200.0, 100.0)),
+    ]));
+  });
+
+  test('should correctly handle when annotation is attached or detached while not containing the pointer', () {
     final List<PointerEvent> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) => events.add(event),
@@ -406,7 +553,7 @@ void main() {
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
-    // Attach an annotation out of region and schedule a frame
+    // Attaching an annotation should not trigger events
     _mouseTracker.attachAnnotation(annotation);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
@@ -420,7 +567,7 @@ void main() {
     ]));
     events.clear();
 
-    // Detach the annotation and schedule a frame
+    // Detaching an annotation should not trigger events
     _mouseTracker.detachAnnotation(annotation);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
