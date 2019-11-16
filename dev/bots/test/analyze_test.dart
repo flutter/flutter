@@ -31,13 +31,38 @@ Future<String> capture(AsyncVoidCallback callback, { int exitCode = 0 }) async {
 }
 
 void main() {
+  test('analyze.dart - verifyDeprecations', () async {
+    final String result = await capture(() => verifyDeprecations(path.join('test', 'analyze-test-input', 'root')), exitCode: 1);
+    expect(result,
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      +
+      (
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:29: Deprecation notice does not match required pattern.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:32: Deprecation notice does not match required pattern.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:37: Deprecation notice does not match required pattern.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.\n'
+        'test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.\n'
+        .replaceAll('/', Platform.isWindows ? '\\' : '/')
+      )
+      +
+      'See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
+      '\n'
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      '\n'
+    );
+  });
+
   test('analyze.dart - verifyNoMissingLicense', () async {
-    final String result = await capture(() => verifyNoMissingLicense(path.join('test', 'analyze-test-input')), exitCode: 1);
+    final String result = await capture(() => verifyNoMissingLicense(path.join('test', 'analyze-test-input', 'root')), exitCode: 1);
     expect(result, '''
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 License headers cannot be found at the beginning of the following file.
 
-test/analyze-test-input/packages/foo/foo.dart
+test/analyze-test-input/root/packages/foo/foo.dart
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 '''.replaceAll('/', Platform.isWindows ? '\\' : '/'));

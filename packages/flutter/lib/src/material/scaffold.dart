@@ -1166,7 +1166,10 @@ class Scaffold extends StatefulWidget {
   /// Originally the name referred [MediaQueryData.padding]. Now it refers
   /// [MediaQueryData.viewInsets], so using [resizeToAvoidBottomInset]
   /// should be clearer to readers.
-  @Deprecated('Use resizeToAvoidBottomInset to specify if the body should resize when the keyboard appears')
+  @Deprecated(
+    'Use resizeToAvoidBottomInset to specify if the body should resize when the keyboard appears. '
+    'This feature was deprecated after v1.1.9.'
+  )
   final bool resizeToAvoidBottomPadding;
 
   /// If true the [body] and the scaffold's floating widgets should size
