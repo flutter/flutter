@@ -22,9 +22,9 @@ class CupertinoContextMenuAction extends StatefulWidget {
     this.onPressed,
     this.trailing,
   }) : assert(child != null),
-        assert(isDefaultAction != null),
-        assert(isDestructiveAction != null),
-        super(key: key);
+       assert(isDefaultAction != null),
+       assert(isDestructiveAction != null),
+       super(key: key);
 
   /// The widget that will be placed inside the action.
   final Widget child;
