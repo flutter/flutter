@@ -14,7 +14,6 @@ import 'package:flutter/painting.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'binding.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
