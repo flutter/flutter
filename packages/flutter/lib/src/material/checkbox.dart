@@ -164,8 +164,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+      ActivateAction.key: _createAction,
     };
   }
 
@@ -189,7 +188,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
 
   Action _createAction() {
     return CallbackAction(
-      SelectAction.key,
+      ActivateAction.key,
       onInvoke: _actionHandler,
     );
   }

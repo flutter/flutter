@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'banner.dart';
@@ -712,12 +711,15 @@ class WidgetsApp extends StatefulWidget {
 class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // STATE LIFECYCLE
 
+  Map<LogicalKeySet, Intent> _keyMap;
+
   @override
   void initState() {
     super.initState();
     _updateNavigator();
     _locale = _resolveLocales(WidgetsBinding.instance.window.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
+    _keyMap = defaultKeyBindings(defaultTargetPlatform);
   }
 
   @override
