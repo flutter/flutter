@@ -57,7 +57,7 @@ class _BannerDemoState extends State<BannerDemo> {
             setState(() {
               _displayBanner = false;
             });
-          }
+          },
         ),
         if (_showMultipleActions)
           FlatButton(
@@ -66,7 +66,7 @@ class _BannerDemoState extends State<BannerDemo> {
               setState(() {
                 _displayBanner = false;
               });
-            }
+            },
           ),
       ],
     );

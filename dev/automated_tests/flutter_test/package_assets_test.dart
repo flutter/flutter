@@ -13,7 +13,7 @@ void main() {
         width: 54,
         height: 54,
         fit: BoxFit.none,
-        package: 'flutter_automated_tests'
+        package: 'flutter_automated_tests',
       ),
     );
   });

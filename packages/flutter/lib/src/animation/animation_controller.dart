@@ -673,6 +673,10 @@ class AnimationController extends Animation<double>
 
   /// Drives the animation according to the given simulation.
   ///
+  /// The values from the simulation are clamped to the [lowerBound] and
+  /// [upperBound]. To avoid this, consider creating the [AnimationController]
+  /// using the [new AnimationController.unbounded] constructor.
+  ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been

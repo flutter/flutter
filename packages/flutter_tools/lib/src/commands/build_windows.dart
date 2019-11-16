@@ -24,7 +24,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     );
     argParser.addFlag('profile',
       negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.'
+      help: 'Build a version of your app specialized for performance profiling.',
     );
     argParser.addFlag('release',
       negatable: false,
@@ -36,7 +36,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   final String name = 'windows';
 
   @override
-  bool hidden = true;
+  bool get hidden => !featureFlags.isWindowsEnabled || !platform.isWindows;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{

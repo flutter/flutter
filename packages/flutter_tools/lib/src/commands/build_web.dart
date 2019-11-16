@@ -17,7 +17,14 @@ class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand() {
     usesTargetOption();
     usesPubOption();
-    addBuildModeFlags();
+    addBuildModeFlags(excludeDebug: true);
+    usesDartDefines();
+    argParser.addFlag('web-initialize-platform',
+        defaultsTo: true,
+        negatable: true,
+        hide: true,
+        help: 'Whether to automatically invoke webOnlyInitializePlatform.',
+    );
   }
 
   @override
@@ -31,7 +38,7 @@ class BuildWebCommand extends BuildSubCommand {
   final String name = 'web';
 
   @override
-  bool get hidden => true;
+  bool get hidden => !featureFlags.isWebEnabled;
 
   @override
   final String description = 'build a web application bundle.';
@@ -44,7 +51,16 @@ class BuildWebCommand extends BuildSubCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final String target = argResults['target'];
     final BuildInfo buildInfo = getBuildInfo();
-    await buildWeb(flutterProject, target, buildInfo);
+    if (buildInfo.isDebug) {
+      throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
+    }
+    await buildWeb(
+      flutterProject,
+      target,
+      buildInfo,
+      argResults['web-initialize-platform'],
+      dartDefines,
+    );
     return null;
   }
 }

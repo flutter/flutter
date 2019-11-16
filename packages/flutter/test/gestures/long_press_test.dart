@@ -80,6 +80,29 @@ void main() {
       longPress.dispose();
     });
 
+    testGesture('Should recognize long press with altered duration', (GestureTester tester) {
+      longPress = LongPressGestureRecognizer(duration: const Duration(milliseconds: 100));
+      longPressDown = false;
+      longPress.onLongPress = () {
+        longPressDown = true;
+      };
+      longPressUp = false;
+      longPress.onLongPressUp = () {
+        longPressUp = true;
+      };
+      longPress.addPointer(down);
+      tester.closeArena(5);
+      expect(longPressDown, isFalse);
+      tester.route(down);
+      expect(longPressDown, isFalse);
+      tester.async.elapse(const Duration(milliseconds: 50));
+      expect(longPressDown, isFalse);
+      tester.async.elapse(const Duration(milliseconds: 50));
+      expect(longPressDown, isTrue);
+
+      longPress.dispose();
+    });
+
     testGesture('Up cancels long press', (GestureTester tester) {
       longPress.addPointer(down);
       tester.closeArena(5);

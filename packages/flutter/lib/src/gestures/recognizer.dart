@@ -189,7 +189,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
         informationCollector: () sync* {
           yield StringProperty('Handler', name);
           yield DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty);
-        }
+        },
       ));
     }
     return result;

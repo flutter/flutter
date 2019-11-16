@@ -707,9 +707,9 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
         assert(hitTestBehavior != null),
         assert(gestureRecognizers != null),
         _controller = controller {
-          this.hitTestBehavior = hitTestBehavior;
-          updateGestureRecognizers(gestureRecognizers);
-        }
+    this.hitTestBehavior = hitTestBehavior;
+    updateGestureRecognizers(gestureRecognizers);
+  }
 
   /// Sets the [controller] for this render object.
   ///
@@ -722,8 +722,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
       return;
     }
     final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
-     _controller = controller;
-     markNeedsPaint();
+    _controller = controller;
+    markNeedsPaint();
     if (needsSemanticsUpdate) {
       markNeedsSemanticsUpdate();
     }
@@ -738,8 +738,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
-   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
-     _updateGestureRecognizersWithCallBack(gestureRecognizers, _controller.dispatchPointerEvent);
+  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
+    _updateGestureRecognizersWithCallBack(gestureRecognizers, _controller.dispatchPointerEvent);
   }
 
   PlatformViewController _controller;

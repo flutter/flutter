@@ -117,7 +117,7 @@ class PaletteTabView extends StatelessWidget {
               );
             }),
         ],
-      )
+      ),
     );
   }
 }

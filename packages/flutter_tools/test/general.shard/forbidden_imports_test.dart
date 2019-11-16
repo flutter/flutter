@@ -12,7 +12,7 @@ void main() {
   test('no imports of commands/* or test/* in lib/src/*', () {
     final List<String> skippedPaths = <String> [
       fs.path.join(flutterTools, 'lib', 'src', 'commands'),
-      fs.path.join(flutterTools, 'lib', 'src', 'test')
+      fs.path.join(flutterTools, 'lib', 'src', 'test'),
     ];
     bool _isNotSkipped(FileSystemEntity entity) => skippedPaths.every((String path) => !entity.path.startsWith(path));
 

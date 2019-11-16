@@ -667,92 +667,98 @@ void main() {
     statusLog.clear();
   });
 
-  test('calling repeat with reverse set to true makes the animation alternate '
-       'between lowerBound and upperBound values on each repeat', () {
-    final AnimationController controller = AnimationController(
-      duration: const Duration(milliseconds: 100),
-      value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
-      vsync: const TestVSync(),
-    );
+  test(
+    'calling repeat with reverse set to true makes the animation alternate '
+    'between lowerBound and upperBound values on each repeat',
+    () {
+      final AnimationController controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        value: 0.0,
+        lowerBound: 0.0,
+        upperBound: 1.0,
+        vsync: const TestVSync(),
+      );
 
-    expect(controller.value, 0.0);
+      expect(controller.value, 0.0);
 
-    controller.repeat(reverse: true);
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 25));
-    expect(controller.value, 0.25);
+      controller.repeat(reverse: true);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 25));
+      expect(controller.value, 0.25);
 
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 125));
-    expect(controller.value, 0.75);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 125));
+      expect(controller.value, 0.75);
 
-    controller.reset();
-    controller.value = 1.0;
-    expect(controller.value, 1.0);
+      controller.reset();
+      controller.value = 1.0;
+      expect(controller.value, 1.0);
 
-    controller.repeat(reverse: true);
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 25));
-    expect(controller.value, 0.75);
+      controller.repeat(reverse: true);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 25));
+      expect(controller.value, 0.75);
 
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 125));
-    expect(controller.value, 0.25);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 125));
+      expect(controller.value, 0.25);
 
-    controller.reset();
-    controller.value = 0.5;
-    expect(controller.value, 0.5);
+      controller.reset();
+      controller.value = 0.5;
+      expect(controller.value, 0.5);
 
-    controller.repeat(reverse: true);
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 50));
-    expect(controller.value, 1.0);
+      controller.repeat(reverse: true);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 1.0);
 
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 150));
-    expect(controller.value, 0.0);
-  });
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 150));
+      expect(controller.value, 0.0);
+    },
+  );
 
-  test('calling repeat with specified min and max values makes the animation '
-       'alternate between min and max values on each repeat', () {
-    final AnimationController controller = AnimationController(
-      duration: const Duration(milliseconds: 100),
-      value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
-      vsync: const TestVSync(),
-    );
+  test(
+    'calling repeat with specified min and max values makes the animation '
+    'alternate between min and max values on each repeat',
+    () {
+      final AnimationController controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        value: 0.0,
+        lowerBound: 0.0,
+        upperBound: 1.0,
+        vsync: const TestVSync(),
+      );
 
-    expect(controller.value, 0.0);
+      expect(controller.value, 0.0);
 
-    controller.repeat(reverse: true, min: 0.5, max: 1.0);
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 50));
-    expect(controller.value, 0.75);
+      controller.repeat(reverse: true, min: 0.5, max: 1.0);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 0.75);
 
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 100));
-    expect(controller.value, 1.00);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 100));
+      expect(controller.value, 1.00);
 
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 200));
-    expect(controller.value, 0.5);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 200));
+      expect(controller.value, 0.5);
 
-    controller.reset();
-    controller.value = 0.0;
-    expect(controller.value, 0.0);
+      controller.reset();
+      controller.value = 0.0;
+      expect(controller.value, 0.0);
 
-    controller.repeat(reverse: true, min: 1.0, max: 1.0);
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 25));
-    expect(controller.value, 1.0);
+      controller.repeat(reverse: true, min: 1.0, max: 1.0);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 25));
+      expect(controller.value, 1.0);
 
-    tick(const Duration(milliseconds: 0));
-    tick(const Duration(milliseconds: 125));
-    expect(controller.value, 1.0);
-  });
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 125));
+      expect(controller.value, 1.0);
+    },
+  );
 
   group('AnimationBehavior', () {
     test('Default values for constructor', () {

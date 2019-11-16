@@ -14,7 +14,10 @@ import 'constants.dart';
 ///   function();
 /// }
 /// ```
-@Deprecated('Use `if (!kReleaseMode) { function(); }` instead')
+@Deprecated(
+  'Use `if (!kReleaseMode) { function(); }` instead. '
+  'This feature was deprecated after v1.3.9.'
+)
 void profile(VoidCallback function) {
   if (kReleaseMode)
     return;

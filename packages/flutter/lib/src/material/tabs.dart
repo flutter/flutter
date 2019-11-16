@@ -419,7 +419,9 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   static bool _tabOffsetsEqual(List<double> a, List<double> b) {
-    if (a?.length != b?.length)
+    // TODO(shihaohong): The following null check should be replaced when a fix
+    // for https://github.com/flutter/flutter/issues/40014 is available.
+    if (a == null || b == null || a.length != b.length)
       return false;
     for (int i = 0; i < a.length; i += 1) {
       if (a[i] != b[i])
@@ -736,7 +738,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
-  /// [AppBar] uses this this size to compute its own preferred size.
+  /// [AppBar] uses this size to compute its own preferred size.
   @override
   Size get preferredSize {
     for (Widget item in tabs) {

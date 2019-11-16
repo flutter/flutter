@@ -29,6 +29,7 @@ class BottomSheetThemeData extends Diagnosticable {
   const BottomSheetThemeData({
     this.backgroundColor,
     this.elevation,
+    this.modalBackgroundColor,
     this.modalElevation,
     this.shape,
     this.clipBehavior,
@@ -46,10 +47,12 @@ class BottomSheetThemeData extends Diagnosticable {
   /// If null, [BottomSheet] defaults to 0.0.
   final double elevation;
 
+  /// Value for [BottomSheet.backgroundColor] when the Bottom sheet is presented
+  /// as a modal bottom sheet.
+  final Color modalBackgroundColor;
+
   /// Value for [BottomSheet.elevation] when the Bottom sheet is presented as a
   /// modal bottom sheet.
-  ///
-  /// If null, [BottomSheet.elevation] defaults to [elevation].
   final double modalElevation;
 
   /// Default value for [BottomSheet.shape].
@@ -68,6 +71,7 @@ class BottomSheetThemeData extends Diagnosticable {
   BottomSheetThemeData copyWith({
     Color backgroundColor,
     double elevation,
+    Color modalBackgroundColor,
     double modalElevation,
     ShapeBorder shape,
     Clip clipBehavior,
@@ -75,6 +79,7 @@ class BottomSheetThemeData extends Diagnosticable {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
+      modalBackgroundColor: modalBackgroundColor ?? this.modalBackgroundColor,
       modalElevation: modalElevation ?? this.modalElevation,
       shape: shape ?? this.shape,
       clipBehavior: clipBehavior ?? this.clipBehavior,
@@ -93,6 +98,7 @@ class BottomSheetThemeData extends Diagnosticable {
     return BottomSheetThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      modalBackgroundColor: Color.lerp(a?.modalBackgroundColor, b?.modalBackgroundColor, t),
       modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
@@ -104,6 +110,7 @@ class BottomSheetThemeData extends Diagnosticable {
     return hashValues(
       backgroundColor,
       elevation,
+      modalBackgroundColor,
       modalElevation,
       shape,
       clipBehavior,
@@ -119,6 +126,7 @@ class BottomSheetThemeData extends Diagnosticable {
     final BottomSheetThemeData typedOther = other;
     return typedOther.backgroundColor == backgroundColor
         && typedOther.elevation == elevation
+        && typedOther.modalBackgroundColor == modalBackgroundColor
         && typedOther.modalElevation == modalElevation
         && typedOther.shape == shape
         && typedOther.clipBehavior == clipBehavior;
@@ -129,6 +137,7 @@ class BottomSheetThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(ColorProperty('modalBackgroundColor', modalBackgroundColor, defaultValue: null));
     properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));

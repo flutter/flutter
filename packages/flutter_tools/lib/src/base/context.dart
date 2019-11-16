@@ -81,8 +81,9 @@ class AppContext {
   /// If the generator ends up triggering a reentrant call, it signals a
   /// dependency cycle, and a [ContextDependencyCycleException] will be thrown.
   dynamic _generateIfNecessary(Type type, Map<Type, Generator> generators) {
-    if (!generators.containsKey(type))
+    if (!generators.containsKey(type)) {
       return null;
+    }
 
     return _values.putIfAbsent(type, () {
       _reentrantChecks ??= <Type>[];
@@ -99,8 +100,9 @@ class AppContext {
         return _boxNull(generators[type]());
       } finally {
         _reentrantChecks.removeLast();
-        if (_reentrantChecks.isEmpty)
+        if (_reentrantChecks.isEmpty) {
           _reentrantChecks = null;
+        }
       }
     });
   }
@@ -113,16 +115,6 @@ class AppContext {
       value = _parent.get<T>();
     }
     return _unboxNull(value ?? _generateIfNecessary(T, _fallbacks)) as T;
-  }
-
-  /// Gets the value associated with the specified [type], or `null` if no
-  /// such value has been associated.
-  @Deprecated('use get<T> instead for type safety.')
-  Object operator [](Type type) {
-    dynamic value = _generateIfNecessary(type, _overrides);
-    if (value == null && _parent != null)
-      value = _parent[type];
-    return _unboxNull(value ?? _generateIfNecessary(type, _fallbacks));
   }
 
   /// Runs [body] in a child context and returns the value returned by [body].
@@ -164,14 +156,18 @@ class AppContext {
     AppContext ctx = this;
     while (ctx != null) {
       buf.write('AppContext');
-      if (ctx.name != null)
+      if (ctx.name != null) {
         buf.write('[${ctx.name}]');
-      if (ctx._overrides.isNotEmpty)
+      }
+      if (ctx._overrides.isNotEmpty) {
         buf.write('\n$indent  overrides: [${ctx._overrides.keys.join(', ')}]');
-      if (ctx._fallbacks.isNotEmpty)
+      }
+      if (ctx._fallbacks.isNotEmpty) {
         buf.write('\n$indent  fallbacks: [${ctx._fallbacks.keys.join(', ')}]');
-      if (ctx._parent != null)
+      }
+      if (ctx._parent != null) {
         buf.write('\n$indent  parent: ');
+      }
       ctx = ctx._parent;
       indent += '  ';
     }

@@ -286,20 +286,23 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
-    final Widget overlay = _TooltipOverlay(
-      message: widget.message,
-      height: height,
-      padding: padding,
-      margin: margin,
-      decoration: decoration,
-      textStyle: textStyle,
-      animation: CurvedAnimation(
-        parent: _controller,
-        curve: Curves.fastOutSlowIn,
+    final Widget overlay = Directionality(
+      textDirection: Directionality.of(context),
+      child: _TooltipOverlay(
+        message: widget.message,
+        height: height,
+        padding: padding,
+        margin: margin,
+        decoration: decoration,
+        textStyle: textStyle,
+        animation: CurvedAnimation(
+          parent: _controller,
+          curve: Curves.fastOutSlowIn,
+        ),
+        target: target,
+        verticalOffset: verticalOffset,
+        preferBelow: preferBelow,
       ),
-      target: target,
-      verticalOffset: verticalOffset,
-      preferBelow: preferBelow,
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);

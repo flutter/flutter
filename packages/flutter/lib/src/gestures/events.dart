@@ -804,8 +804,8 @@ class PointerHoverEvent extends PointerEvent {
   }
 }
 
-/// The pointer has moved with respect to the device while the pointer is not
-/// in contact with the device, and it has entered a target object.
+/// The pointer has moved with respect to the device while the pointer is or is
+/// not in contact with the device, and it has entered a target object.
 ///
 /// See also:
 ///
@@ -839,6 +839,7 @@ class PointerEnterEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
+    bool down = false,
     bool synthesized = false,
     Matrix4 transform,
     PointerEnterEvent original,
@@ -851,7 +852,7 @@ class PointerEnterEvent extends PointerEvent {
          delta: delta,
          localDelta: localDelta,
          buttons: buttons,
-         down: false,
+         down: down,
          obscured: obscured,
          pressure: 0.0,
          pressureMin: pressureMin,
@@ -873,7 +874,10 @@ class PointerEnterEvent extends PointerEvent {
   /// Creates an enter event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
-  @Deprecated('use PointerEnterEvent.fromMouseEvent instead')
+  @Deprecated(
+    'Use PointerEnterEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
   PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an enter event from a [PointerEvent].
@@ -900,6 +904,7 @@ class PointerEnterEvent extends PointerEvent {
     radiusMax: event?.radiusMax,
     orientation: event?.orientation,
     tilt: event?.tilt,
+    down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
     original: event?.original,
@@ -937,6 +942,7 @@ class PointerEnterEvent extends PointerEvent {
       radiusMax: radiusMax,
       orientation: orientation,
       tilt: tilt,
+      down: down,
       synthesized: synthesized,
       transform: transform,
       original: original ?? this,
@@ -944,8 +950,8 @@ class PointerEnterEvent extends PointerEvent {
   }
 }
 
-/// The pointer has moved with respect to the device while the pointer is not
-/// in contact with the device, and entered a target object.
+/// The pointer has moved with respect to the device while the pointer is or is
+/// not in contact with the device, and entered a target object.
 ///
 /// See also:
 ///
@@ -979,6 +985,7 @@ class PointerExitEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
+    bool down = false,
     bool synthesized = false,
     Matrix4 transform,
     PointerExitEvent original,
@@ -991,7 +998,7 @@ class PointerExitEvent extends PointerEvent {
          delta: delta,
          localDelta: localDelta,
          buttons: buttons,
-         down: false,
+         down: down,
          obscured: obscured,
          pressure: 0.0,
          pressureMin: pressureMin,
@@ -1013,7 +1020,10 @@ class PointerExitEvent extends PointerEvent {
   /// Creates an exit event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
-  @Deprecated('use PointerExitEvent.fromMouseEvent instead')
+  @Deprecated(
+    'Use PointerExitEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
   PointerExitEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an exit event from a [PointerEvent].
@@ -1040,6 +1050,7 @@ class PointerExitEvent extends PointerEvent {
     radiusMax: event?.radiusMax,
     orientation: event?.orientation,
     tilt: event?.tilt,
+    down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
     original: event?.original,
@@ -1077,6 +1088,7 @@ class PointerExitEvent extends PointerEvent {
       radiusMax: radiusMax,
       orientation: orientation,
       tilt: tilt,
+      down: down,
       synthesized: synthesized,
       transform: transform,
       original: original ?? this,

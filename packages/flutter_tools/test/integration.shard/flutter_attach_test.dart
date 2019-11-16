@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Integration tests which invoke flutter instead of unit testing the code
-// will not produce meaningful coverage information - we can measure coverage
-// from the isolate running the test, but not from the isolate started via
-// the command line process.
-@Tags(<String>['no_coverage'])
+import 'dart:io';
+
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
@@ -33,35 +30,36 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  group('attached process', () {
-    test('writes pid-file', () async {
-      final File pidFile = tempDir.childFile('test.pid');
-      await _flutterRun.run(withDebugger: true);
-      await _flutterAttach.attach(
-        _flutterRun.vmServicePort,
-        pidFile: pidFile,
-      );
-      expect(pidFile.existsSync(), isTrue);
-    });
-    test('can hot reload', () async {
-      await _flutterRun.run(withDebugger: true);
-      await _flutterAttach.attach(_flutterRun.vmServicePort);
-      await _flutterAttach.hotReload();
-    });
-    test('can detach, reattach, hot reload', () async {
-      await _flutterRun.run(withDebugger: true);
-      await _flutterAttach.attach(_flutterRun.vmServicePort);
-      await _flutterAttach.detach();
-      await _flutterAttach.attach(_flutterRun.vmServicePort);
-      await _flutterAttach.hotReload();
-    });
-    test('killing process behaves the same as detach ', () async {
-      await _flutterRun.run(withDebugger: true);
-      await _flutterAttach.attach(_flutterRun.vmServicePort);
-      await _flutterAttach.quit();
-      _flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH-2');
-      await _flutterAttach.attach(_flutterRun.vmServicePort);
-      await _flutterAttach.hotReload();
-    });
-  }, timeout: const Timeout.factor(10), tags: <String>['integration']); // The DevFS sync takes a really long time, so these tests can be slow.
+  test('writes pid-file', () async {
+    final File pidFile = tempDir.childFile('test.pid');
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(
+      _flutterRun.vmServicePort,
+      pidFile: pidFile,
+    );
+    expect(pidFile.existsSync(), isTrue);
+  });
+
+  test('can hot reload', () async {
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.hotReload();
+  });
+
+  test('can detach, reattach, hot reload', () async {
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.detach();
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.hotReload();
+  });
+
+  test('killing process behaves the same as detach ', () async {
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.quit();
+    _flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH-2');
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.hotReload();
+  });
 }

@@ -108,6 +108,19 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return synonyms.toString();
   }
 
+  List<Key> get numpadKeyData {
+    return keyData.data.where((Key entry) {
+      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
+    }).toList();
+  }
+
+  List<Key> get functionKeyData {
+    final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
+    return keyData.data.where((Key entry) {
+      return functionKeyRe.hasMatch(entry.constantName);
+    }).toList();
+  }
+
   /// This generates the map of USB HID codes to physical keys.
   String get predefinedHidCodeMap {
     final StringBuffer scanCodeMap = StringBuffer();
@@ -139,10 +152,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of GLFW number pad key codes to logical keys.
   String get glfwNumpadMap {
     final StringBuffer glfwNumpadMap = StringBuffer();
-    final List<Key> onlyNumpads = keyData.data.where((Key entry) {
-      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
-    }).toList();
-    for (Key entry in onlyNumpads) {
+    for (Key entry in numpadKeyData) {
       if (entry.glfwKeyCodes != null) {
         for (int code in entry.glfwKeyCodes.cast<int>()) {
           glfwNumpadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
@@ -192,10 +202,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of Android number pad key codes to logical keys.
   String get androidNumpadMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
-    final List<Key> onlyNumpads = keyData.data.where((Key entry) {
-      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
-    }).toList();
-    for (Key entry in onlyNumpads) {
+    for (Key entry in numpadKeyData) {
       if (entry.androidKeyCodes != null) {
         for (int code in entry.androidKeyCodes.cast<int>()) {
           androidKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
@@ -232,15 +239,22 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of macOS number pad key codes to logical keys.
   String get macOsNumpadMap {
     final StringBuffer macOsNumPadMap = StringBuffer();
-    final List<Key> onlyNumpads = keyData.data.where((Key entry) {
-      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
-    }).toList();
-    for (Key entry in onlyNumpads) {
+    for (Key entry in numpadKeyData) {
       if (entry.macOsScanCode != null) {
         macOsNumPadMap.writeln('  ${toHex(entry.macOsScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return macOsNumPadMap.toString().trimRight();
+  }
+
+  String get macOsFunctionKeyMap {
+    final StringBuffer macOsFunctionKeyMap = StringBuffer();
+    for (Key entry in functionKeyData) {
+      if (entry.macOsScanCode != null) {
+        macOsFunctionKeyMap.writeln('  ${toHex(entry.macOsScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+      }
+    }
+    return macOsFunctionKeyMap.toString().trimRight();
   }
 
   /// This generates the map of Fuchsia key codes to logical keys.
@@ -263,6 +277,39 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       }
     }
     return fuchsiaScanCodeMap.toString().trimRight();
+  }
+
+  /// This generates the map of Web KeyboardEvent codes to logical keys.
+  String get webLogicalKeyMap {
+    final StringBuffer result = StringBuffer();
+    for (Key entry in keyData.data) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
+      }
+    }
+    return result.toString().trimRight();
+  }
+
+  /// This generates the map of Web KeyboardEvent codes to physical keys.
+  String get webPhysicalKeyMap {
+    final StringBuffer result = StringBuffer();
+    for (Key entry in keyData.data) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': PhysicalKeyboardKey.${entry.constantName},");
+      }
+    }
+    return result.toString().trimRight();
+  }
+
+  /// This generates the map of Web number pad codes to logical keys.
+  String get webNumpadMap {
+    final StringBuffer result = StringBuffer();
+    for (Key entry in numpadKeyData) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
+      }
+    }
+    return result.toString().trimRight();
   }
 
   /// Substitutes the various maps and definitions into the template file for
@@ -294,9 +341,13 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       'FUCHSIA_KEY_CODE_MAP': fuchsiaKeyCodeMap,
       'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
       'MACOS_NUMPAD_MAP': macOsNumpadMap,
+      'MACOS_FUNCTION_KEY_MAP': macOsFunctionKeyMap,
       'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,
       'GLFW_NUMPAD_MAP': glfwNumpadMap,
       'XKB_SCAN_CODE_MAP': xkbScanCodeMap,
+      'WEB_LOGICAL_KEY_MAP': webLogicalKeyMap,
+      'WEB_PHYSICAL_KEY_MAP': webPhysicalKeyMap,
+      'WEB_NUMPAD_MAP': webNumpadMap,
     };
 
     final String template = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_maps.tmpl')).readAsStringSync();

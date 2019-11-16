@@ -108,11 +108,12 @@ Future<void> main(List<String> arguments) async {
   createSearchMetadata('$kDocsRoot/lib/opensearch.xml', '$kDocsRoot/doc/opensearch.xml');
   cleanOutSnippets();
 
-  final List<String> dartdocBaseArgs = <String>['global', 'run'];
-  if (args['checked']) {
-    dartdocBaseArgs.add('-c');
-  }
-  dartdocBaseArgs.add('dartdoc');
+  final List<String> dartdocBaseArgs = <String>[
+    'global',
+    'run',
+    if (args['checked']) '-c',
+    'dartdoc',
+  ];
 
   // Verify which version of dartdoc we're using.
   final ProcessResult result = Process.runSync(
@@ -123,24 +124,17 @@ Future<void> main(List<String> arguments) async {
   );
   print('\n${result.stdout}flutter version: $version\n');
 
-  dartdocBaseArgs.add('--allow-tools');
-
-  if (args['json']) {
-    dartdocBaseArgs.add('--json');
-  }
-  if (args['validate-links']) {
-    dartdocBaseArgs.add('--validate-links');
-  } else {
-    dartdocBaseArgs.add('--no-validate-links');
-  }
-  dartdocBaseArgs.addAll(<String>['--link-to-source-excludes', '../../bin/cache',
-                                  '--link-to-source-root', '../..',
-                                  '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/master/%f%#L%l%']);
   // Generate the documentation.
   // We don't need to exclude flutter_tools in this list because it's not in the
   // recursive dependencies of the package defined at dev/docs/pubspec.yaml
   final List<String> dartdocArgs = <String>[
     ...dartdocBaseArgs,
+    '--allow-tools',
+    if (args['json']) '--json',
+    if (args['validate-links']) '--validate-links' else '--no-validate-links',
+    '--link-to-source-excludes', '../../bin/cache',
+    '--link-to-source-root', '../..',
+    '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
     '--inject-html',
     '--header', 'styles.html',
     '--header', 'analytics.html',

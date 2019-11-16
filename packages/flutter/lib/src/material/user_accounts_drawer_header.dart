@@ -134,71 +134,63 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     assert(debugCheckHasMaterialLocalizations(context));
 
     final ThemeData theme = Theme.of(context);
-    final List<Widget> children = <Widget>[];
-
-    if (widget.accountName != null) {
-      final Widget accountNameLine = LayoutId(
-        id: _AccountDetailsLayout.accountName,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: DefaultTextStyle(
-            style: theme.primaryTextTheme.body2,
-            overflow: TextOverflow.ellipsis,
-            child: widget.accountName,
-          ),
-        ),
-      );
-      children.add(accountNameLine);
-    }
-
-    if (widget.accountEmail != null) {
-      final Widget accountEmailLine = LayoutId(
-        id: _AccountDetailsLayout.accountEmail,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: DefaultTextStyle(
-            style: theme.primaryTextTheme.body1,
-            overflow: TextOverflow.ellipsis,
-            child: widget.accountEmail,
-          ),
-        ),
-      );
-      children.add(accountEmailLine);
-    }
-    if (widget.onTap != null) {
-      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-      final Widget dropDownIcon = LayoutId(
-        id: _AccountDetailsLayout.dropdownIcon,
-        child: Semantics(
-          container: true,
-          button: true,
-          onTap: widget.onTap,
-          child: SizedBox(
-            height: _kAccountDetailsHeight,
-            width: _kAccountDetailsHeight,
-            child: Center(
-              child: Transform.rotate(
-                angle: _animation.value * math.pi,
-                child: Icon(
-                  Icons.arrow_drop_down,
-                  color: widget.arrowColor,
-                  semanticLabel: widget.isOpen
-                    ? localizations.hideAccountsLabel
-                    : localizations.showAccountsLabel,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      children.add(dropDownIcon);
-    }
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     Widget accountDetails = CustomMultiChildLayout(
       delegate: _AccountDetailsLayout(
         textDirection: Directionality.of(context),
       ),
-      children: children,
+      children: <Widget>[
+        if (widget.accountName != null)
+          LayoutId(
+            id: _AccountDetailsLayout.accountName,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: DefaultTextStyle(
+                style: theme.primaryTextTheme.body2,
+                overflow: TextOverflow.ellipsis,
+                child: widget.accountName,
+              ),
+            ),
+          ),
+        if (widget.accountEmail != null)
+          LayoutId(
+            id: _AccountDetailsLayout.accountEmail,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: DefaultTextStyle(
+                style: theme.primaryTextTheme.body1,
+                overflow: TextOverflow.ellipsis,
+                child: widget.accountEmail,
+              ),
+            ),
+          ),
+        if (widget.onTap != null)
+          LayoutId(
+            id: _AccountDetailsLayout.dropdownIcon,
+            child: Semantics(
+              container: true,
+              button: true,
+              onTap: widget.onTap,
+              child: SizedBox(
+                height: _kAccountDetailsHeight,
+                width: _kAccountDetailsHeight,
+                child: Center(
+                  child: Transform.rotate(
+                    angle: _animation.value * math.pi,
+                    child: Icon(
+                      Icons.arrow_drop_down,
+                      color: widget.arrowColor,
+                      semanticLabel: widget.isOpen
+                        ? localizations.hideAccountsLabel
+                        : localizations.showAccountsLabel,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
 
     if (widget.onTap != null) {

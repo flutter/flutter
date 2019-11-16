@@ -1,3 +1,7 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/demo/all.dart';
@@ -45,7 +49,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: ChipDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
-    });
+    }, skip: true); // TODO(gspencergoog): Stop skipping when issue is fixed. https://github.com/flutter/flutter/issues/42455
 
     testWidgets('data_table_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();

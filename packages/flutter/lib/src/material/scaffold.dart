@@ -339,7 +339,7 @@ class _BodyBuilder extends StatelessWidget {
     Key key,
     @required this.extendBody,
     @required this.extendBodyBehindAppBar,
-    @required this.body
+    @required this.body,
   }) : assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
        assert(body != null),
@@ -749,46 +749,40 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-
-    if (_previousController.status != AnimationStatus.dismissed) {
-      if (_isExtendedFloatingActionButton(_previousChild)) {
-        children.add(FadeTransition(
-          opacity: _previousScaleAnimation,
-          child: _previousChild,
-        ));
-      } else {
-        children.add(ScaleTransition(
-          scale: _previousScaleAnimation,
-          child: RotationTransition(
-            turns: _previousRotationAnimation,
-            child: _previousChild,
-          ),
-        ));
-      }
-    }
-
-    if (_isExtendedFloatingActionButton(widget.child)) {
-      children.add(ScaleTransition(
-        scale: _extendedCurrentScaleAnimation,
-        child: FadeTransition(
-          opacity: _currentScaleAnimation,
-          child: widget.child,
-        ),
-      ));
-    } else {
-      children.add(ScaleTransition(
-        scale: _currentScaleAnimation,
-        child: RotationTransition(
-          turns: _currentRotationAnimation,
-          child: widget.child,
-        ),
-      ));
-    }
-
     return Stack(
       alignment: Alignment.centerRight,
-      children: children,
+      children: <Widget>[
+        if (_previousController.status != AnimationStatus.dismissed)
+          if (_isExtendedFloatingActionButton(_previousChild))
+            FadeTransition(
+              opacity: _previousScaleAnimation,
+              child: _previousChild,
+            )
+          else
+            ScaleTransition(
+              scale: _previousScaleAnimation,
+              child: RotationTransition(
+                turns: _previousRotationAnimation,
+                child: _previousChild,
+              ),
+            ),
+        if (_isExtendedFloatingActionButton(widget.child))
+          ScaleTransition(
+            scale: _extendedCurrentScaleAnimation,
+            child: FadeTransition(
+              opacity: _currentScaleAnimation,
+              child: widget.child,
+            ),
+          )
+        else
+          ScaleTransition(
+            scale: _currentScaleAnimation,
+            child: RotationTransition(
+              turns: _currentRotationAnimation,
+              child: widget.child,
+            ),
+          ),
+      ],
     );
   }
 
@@ -817,7 +811,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
 /// callback that increments a counter.
 ///
-/// ![A screenshot of the Scaffold widget with a body and floating action button](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
+/// ![The Scaffold has a white background with a blue AppBar at the top. A blue FloatingActionButton is positioned at the bottom right corner of the Scaffold.](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
 ///
 /// ```dart
 /// int _count = 0;
@@ -841,12 +835,12 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// {@end-tool}
 ///
 /// {@tool snippet --template=stateful_widget_material}
-/// This example shows a [Scaffold] with a [backgroundColor], [body] and
-/// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
-/// to center the text within the [Scaffold]. The [FloatingActionButton] is
-/// connected to a callback that increments a counter.
+/// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
+/// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
+/// order to center the text within the [Scaffold]. The [FloatingActionButton]
+/// is connected to a callback that increments a counter.
 ///
-/// ![A screenshot of the Scaffold widget example with a background color](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_background_color.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_background_color.png)
 ///
 /// ```dart
 /// int _count = 0;
@@ -878,7 +872,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [FloatingActionButtonLocation.centerDocked]. The [FloatingActionButton] is
 /// connected to a callback that increments a counter.
 ///
-/// ![A screenshot of the Scaffold widget with a bottom navigation bar and docked floating action button](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_bottom_app_bar.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_bottom_app_bar.png)
 ///
 /// ```dart
 /// int _count = 0;
@@ -1172,7 +1166,10 @@ class Scaffold extends StatefulWidget {
   /// Originally the name referred [MediaQueryData.padding]. Now it refers
   /// [MediaQueryData.viewInsets], so using [resizeToAvoidBottomInset]
   /// should be clearer to readers.
-  @Deprecated('Use resizeToAvoidBottomInset to specify if the body should resize when the keyboard appears')
+  @Deprecated(
+    'Use resizeToAvoidBottomInset to specify if the body should resize when the keyboard appears. '
+    'This feature was deprecated after v1.1.9.'
+  )
   final bool resizeToAvoidBottomPadding;
 
   /// If true the [body] and the scaffold's floating widgets should size
@@ -1316,25 +1313,32 @@ class Scaffold extends StatefulWidget {
     final ScaffoldState result = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
     if (nullOk || result != null)
       return result;
-    throw FlutterError(
-      'Scaffold.of() called with a context that does not contain a Scaffold.\n'
-      'No Scaffold ancestor could be found starting from the context that was passed to Scaffold.of(). '
-      'This usually happens when the context provided is from the same StatefulWidget as that '
-      'whose build function actually creates the Scaffold widget being sought.\n'
-      'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
-      'context that is "under" the Scaffold. For an example of this, please see the '
-      'documentation for Scaffold.of():\n'
-      '  https://api.flutter.dev/flutter/material/Scaffold/of.html\n'
-      'A more efficient solution is to split your build function into several widgets. This '
-      'introduces a new context from which you can obtain the Scaffold. In this solution, '
-      'you would have an outer widget that creates the Scaffold populated by instances of '
-      'your new inner widgets, and then in these inner widgets you would use Scaffold.of().\n'
-      'A less elegant but more expedient solution is assign a GlobalKey to the Scaffold, '
-      'then use the key.currentState property to obtain the ScaffoldState rather than '
-      'using the Scaffold.of() function.\n'
-      'The context used was:\n'
-      '  $context'
-    );
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'Scaffold.of() called with a context that does not contain a Scaffold.'
+      ),
+      ErrorDescription(
+        'No Scaffold ancestor could be found starting from the context that was passed to Scaffold.of(). '
+        'This usually happens when the context provided is from the same StatefulWidget as that '
+        'whose build function actually creates the Scaffold widget being sought.'
+      ),
+      ErrorHint(
+        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+        'context that is "under" the Scaffold. For an example of this, please see the '
+        'documentation for Scaffold.of():\n'
+        '  https://api.flutter.dev/flutter/material/Scaffold/of.html'
+      ),
+      ErrorHint(
+        'A more efficient solution is to split your build function into several widgets. This '
+        'introduces a new context from which you can obtain the Scaffold. In this solution, '
+        'you would have an outer widget that creates the Scaffold populated by instances of '
+        'your new inner widgets, and then in these inner widgets you would use Scaffold.of().\n'
+        'A less elegant but more expedient solution is assign a GlobalKey to the Scaffold, '
+        'then use the key.currentState property to obtain the ScaffoldState rather than '
+        'using the Scaffold.of() function.'
+      ),
+      context.describeElement('The context used was')
+    ]);
   }
 
   /// Returns a [ValueListenable] for the [ScaffoldGeometry] for the closest
@@ -1360,22 +1364,28 @@ class Scaffold extends StatefulWidget {
   static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
     final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
     if (scaffoldScope == null)
-      throw FlutterError(
-        'Scaffold.geometryOf() called with a context that does not contain a Scaffold.\n'
-        'This usually happens when the context provided is from the same StatefulWidget as that '
-        'whose build function actually creates the Scaffold widget being sought.\n'
-        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
-        'context that is "under" the Scaffold. For an example of this, please see the '
-        'documentation for Scaffold.of():\n'
-        '  https://api.flutter.dev/flutter/material/Scaffold/of.html\n'
-        'A more efficient solution is to split your build function into several widgets. This '
-        'introduces a new context from which you can obtain the Scaffold. In this solution, '
-        'you would have an outer widget that creates the Scaffold populated by instances of '
-        'your new inner widgets, and then in these inner widgets you would use Scaffold.geometryOf().\n'
-        'The context used was:\n'
-        '  $context'
-      );
-
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'Scaffold.geometryOf() called with a context that does not contain a Scaffold.'
+        ),
+        ErrorDescription(
+          'This usually happens when the context provided is from the same StatefulWidget as that '
+          'whose build function actually creates the Scaffold widget being sought.'
+        ),
+        ErrorHint(
+          'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+          'context that is "under" the Scaffold. For an example of this, please see the '
+          'documentation for Scaffold.of():\n'
+          '  https://api.flutter.dev/flutter/material/Scaffold/of.html'
+        ),
+        ErrorHint(
+          'A more efficient solution is to split your build function into several widgets. This '
+          'introduces a new context from which you can obtain the Scaffold. In this solution, '
+          'you would have an outer widget that creates the Scaffold populated by instances of '
+          'your new inner widgets, and then in these inner widgets you would use Scaffold.geometryOf().',
+        ),
+        context.describeElement('The context used was')
+      ]);
     return scaffoldScope.geometryNotifier;
   }
 
@@ -1685,9 +1695,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
         throw FlutterError(
-          'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
-          'with showBottomSheet() is still visible.\n Rebuild the Scaffold with a null '
-          'bottomSheet before calling showBottomSheet().'
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet'
+          'displayed with showBottomSheet() is still visible.\n'
+          'Rebuild the Scaffold with a null bottomSheet before calling showBottomSheet().'
         );
       }
       return true;
@@ -1729,10 +1739,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final LocalHistoryEntry entry = isPersistent
       ? null
       : LocalHistoryEntry(onRemove: () {
-        if (!removedEntry) {
-          _removeCurrentBottomSheet();
-        }
-      });
+          if (!removedEntry) {
+            _removeCurrentBottomSheet();
+          }
+        });
 
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
@@ -1824,9 +1834,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(() {
       if (widget.bottomSheet != null) {
         throw FlutterError(
-          'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
-          'with showBottomSheet() is still visible.\n Rebuild the Scaffold with a null '
-          'bottomSheet before calling showBottomSheet().'
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet'
+          'displayed with showBottomSheet() is still visible.\n'
+          'Rebuild the Scaffold with a null bottomSheet before calling showBottomSheet().'
         );
       }
       return true;
@@ -1958,12 +1968,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (widget.bottomSheet != oldWidget.bottomSheet) {
       assert(() {
         if (widget.bottomSheet != null && _currentBottomSheet?._isLocalHistoryEntry == true) {
-          throw FlutterError(
-            'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
-            'with showBottomSheet() is still visible.\n Use the PersistentBottomSheetController '
-            'returned by showBottomSheet() to close the old bottom sheet before creating '
-            'a Scaffold with a (non null) bottomSheet.'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
+              'with showBottomSheet() is still visible.'
+            ),
+            ErrorHint(
+              'Use the PersistentBottomSheetController '
+              'returned by showBottomSheet() to close the old bottom sheet before creating '
+              'a Scaffold with a (non null) bottomSheet.'
+            ),
+          ]);
         }
         return true;
       }());
@@ -2145,7 +2160,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       widget.body == null ? null : _BodyBuilder(
         extendBody: widget.extendBody,
         extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-        body: widget.body
+        body: widget.body,
       ),
       _ScaffoldSlot.body,
       removeLeftPadding: false,
@@ -2456,7 +2471,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       child:  NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
         child: bottomSheet,
-      )
+      ),
     );
   }
 
@@ -2469,7 +2484,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           return Align(
             alignment: AlignmentDirectional.topStart,
             heightFactor: widget.animationController.value,
-            child: child
+            child: child,
           );
         },
         child: _wrapBottomSheet(

@@ -138,7 +138,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
       return;
     switch (side.style) {
       case BorderStyle.none:
-      break;
+        break;
       case BorderStyle.solid:
         final Path path = getOuterPath(rect, textDirection: textDirection);
         final Paint paint = side.toPaint();

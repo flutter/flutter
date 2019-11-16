@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 void main() {
-  runApp(Center(
-    child: const Text('Hello, World', textDirection: TextDirection.ltr),
+  runApp(const Center(
+    child: Text('Hello, World', textDirection: TextDirection.ltr),
   ));
 }

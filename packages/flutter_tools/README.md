@@ -23,6 +23,7 @@ $ ../../bin/cache/dart-sdk/bin/dart bin/flutter_tools.dart
 ```
 followed by command line arguments, as usual.
 
+
 ### Analyzing
 
 To run the analyzer on Flutter Tools, in this directory run:
@@ -56,6 +57,8 @@ run:
 ```shell
 $ ../../bin/cache/dart-sdk/bin/pub run build_runner test
 ```
+This is what we do in the continuous integration bots.
+
 
 ### Forcing snapshot regeneration
 

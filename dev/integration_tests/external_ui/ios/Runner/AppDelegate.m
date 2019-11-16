@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "AppDelegate.h"
+#import "AppDelegate.h"
 
 @interface AppDelegate ()
   @property (atomic) uint64_t textureId;

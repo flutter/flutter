@@ -123,7 +123,7 @@ final ArgParser _argParser = ArgParser()
         if (fragments.length == 1 && !isDartFile) {
           // Not a path
           _taskNames.add(nameOrPath);
-        } else if (!isDartFile || fragments.length != 3 || !_listsEqual(<String>['bin', 'tasks'], fragments.take(2).toList())) {
+        } else if (!isDartFile || !path.equals(path.dirname(nameOrPath), path.join('bin', 'tasks'))) {
           // Unsupported executable location
           throw FormatException('Invalid value for option -t (--task): $nameOrPath');
         } else {
@@ -197,15 +197,3 @@ final ArgParser _argParser = ArgParser()
       }
     },
   );
-
-bool _listsEqual(List<dynamic> a, List<dynamic> b) {
-  if (a.length != b.length)
-    return false;
-
-  for (int i = 0; i < a.length; i++) {
-    if (a[i] != b[i])
-      return false;
-  }
-
-  return true;
-}

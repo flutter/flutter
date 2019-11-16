@@ -34,7 +34,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('X'));
@@ -58,7 +58,7 @@ void main() {
               events.add(event);
             },
             onPointerUp: (PointerUpEvent event) {
-            events.add(event);
+              events.add(event);
             },
             onPointerMove: (PointerMoveEvent event) {
               events.add(event);
@@ -368,7 +368,7 @@ void main() {
       'constraints: MISSING',
       'size: MISSING',
       'behavior: deferToChild',
-      'listeners: <none>'
+      'listeners: <none>',
     ]);
   });
 
@@ -394,7 +394,7 @@ void main() {
       'constraints: MISSING',
       'size: MISSING',
       'behavior: opaque',
-      'listeners: down, move, up, cancel, signal'
+      'listeners: down, move, up, cancel, signal',
     ]);
   });
 }

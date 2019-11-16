@@ -140,7 +140,7 @@ class CategoryView extends StatelessWidget {
             ],
           );
         }).toList(),
-      )
+      ),
     );
   }
 }

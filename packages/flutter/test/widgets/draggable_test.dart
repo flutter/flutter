@@ -158,18 +158,20 @@ void main() {
                 onTap: () {
                   events.add('tap');
                 },
-                child: Container(child: const Text('Button'),
+                child: Container(
+                  child: const Text('Button'),
+                ),
               ),
-            ),
-            DragTarget<int>(
-              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-                return IgnorePointer(
-                  child: Container(child: const Text('Target')),
-                );
-              },
-              onAccept: (int data) {
-                events.add('drop');
-              }),
+              DragTarget<int>(
+                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                  return IgnorePointer(
+                    child: Container(child: const Text('Target')),
+                  );
+                },
+                onAccept: (int data) {
+                  events.add('drop');
+                },
+              ),
             ],
           ),
         ],
@@ -982,8 +984,7 @@ void main() {
             feedback: Text('Dragging'),
           ),
           DragTarget<int>(
-            builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return Container(
                 height: 100.0,
                 child: rejects.isNotEmpty
@@ -1041,8 +1042,7 @@ void main() {
           },
           ),
           DragTarget<int>(
-            builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return Container(
                 height: 100.0,
                 child: rejects.isNotEmpty

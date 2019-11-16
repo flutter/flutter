@@ -20,6 +20,7 @@ const String _kOutputOption = 'output';
 const String _kPackageOption = 'package';
 const String _kTemplateOption = 'template';
 const String _kTypeOption = 'type';
+const String _kShowDartPad = 'dartpad';
 
 /// Generates snippet dartdoc output for a given input, and creates any sample
 /// applications needed by the snippet.
@@ -87,6 +88,14 @@ void main(List<String> argList) {
     negatable: false,
     help: 'Prints help documentation for this command',
   );
+  parser.addFlag(
+    _kShowDartPad,
+    defaultsTo: false,
+    negatable: false,
+    help: 'Indicates whether DartPad should be included in the snippet\'s '
+        'final HTML output. This flag only applies when the type parameter is '
+        '"application".',
+  );
 
   final ArgResults args = parser.parse(argList);
 
@@ -98,6 +107,11 @@ void main(List<String> argList) {
   final SnippetType snippetType = SnippetType.values
       .firstWhere((SnippetType type) => getEnumName(type) == args[_kTypeOption], orElse: () => null);
   assert(snippetType != null, "Unable to find '${args[_kTypeOption]}' in SnippetType enum.");
+
+  if (args[_kShowDartPad] == true && snippetType != SnippetType.application) {
+    errorExit('${args[_kTypeOption]} was selected, but the --dartpad flag is only valid '
+      'for application snippets.');
+  }
 
   if (args[_kInputOption] == null) {
     stderr.writeln(parser.usage);
@@ -151,6 +165,7 @@ void main(List<String> argList) {
   stdout.write(generator.generate(
     input,
     snippetType,
+    showDartPad: args[_kShowDartPad],
     template: template,
     output: args[_kOutputOption] != null ? File(args[_kOutputOption]) : null,
     metadata: <String, Object>{

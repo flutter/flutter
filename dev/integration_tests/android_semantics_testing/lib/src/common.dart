@@ -33,6 +33,7 @@ class AndroidSemanticsNode  {
   ///         "isEnabled": bool,
   ///         "isFocusable": bool,
   ///         "isFocused": bool,
+  ///         "isHeading": bool,
   ///         "isPassword": bool,
   ///         "isLongClickable": bool,
   ///       },
@@ -115,6 +116,9 @@ class AndroidSemanticsNode  {
   /// Whether the node is focused.
   bool get isFocused => _flags['isFocused'];
 
+  /// Whether the node is considered a heading.
+  bool get isHeading => _flags['isHeading'];
+
   /// Whether the node represents a password field.
   ///
   /// Equivalent to [SemanticsFlag.isObscured].
@@ -144,13 +148,9 @@ class AndroidSemanticsNode  {
   }
 
   /// Gets a list of [AndroidSemanticsActions] which are defined for the node.
-  List<AndroidSemanticsAction> getActions() {
-    final List<AndroidSemanticsAction> result = <AndroidSemanticsAction>[];
-    for (int id in _values['actions']) {
-      result.add(AndroidSemanticsAction.deserialize(id));
-    }
-    return result;
-  }
+  List<AndroidSemanticsAction> getActions() => <AndroidSemanticsAction>[
+    for (int id in _values['actions']) AndroidSemanticsAction.deserialize(id),
+  ];
 
   @override
   String toString() {

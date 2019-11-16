@@ -10,7 +10,7 @@ UserMessages get userMessages => context.get<UserMessages>();
 class UserMessages {
   // Messages used in FlutterValidator
   String flutterStatusInfo(String channel, String version, String os, String locale) =>
-      'Channel $channel, v$version, on $os, locale $locale';
+      'Channel ${channel ?? 'unknown'}, v${version ?? 'Unknown'}, on $os, locale $locale';
   String flutterVersion(String version, String flutterRoot) =>
       'Flutter version $version at $flutterRoot';
   String flutterRevision(String revision, String age, String date) =>
@@ -49,6 +49,7 @@ class UserMessages {
   String androidCantRunJavaBinary(String javaBinary) => 'Cannot execute $javaBinary to determine the version';
   String get androidUnknownJavaVersion => 'Could not determine java version';
   String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
+  String androidJavaMinimumVersion(String javaVersion) => 'Java version $javaVersion is older than the minimum recommended version of 1.8';
   String androidSdkLicenseOnly(String envKey) =>
       'Android SDK contains licenses only.\n'
       'Your first build of an Android application will take longer than usual, '
@@ -138,7 +139,8 @@ class UserMessages {
   String get xcodeEula => 'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.';
   String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
-      'Launch Xcode and install additional required components when prompted.';
+      'Launch Xcode and install additional required components when prompted or run:\n'
+      '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
       'Xcode not installed; this is necessary for iOS development.\n'
       'Download at https://developer.apple.com/xcode/download/.';
@@ -147,7 +149,8 @@ class UserMessages {
       'Download at: https://developer.apple.com/xcode/download/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
-      '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer';
+      '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\n'
+      '  sudo xcodebuild -runFirstLaunch';
 
   // Messages used in CocoaPodsValidator
   String cocoaPodsVersion(String version) => 'CocoaPods version $version';
@@ -167,8 +170,8 @@ class UserMessages {
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
-  String cocoaPodsOutdated(String recVersion, String consequence, String upgradeInstructions) =>
-      'CocoaPods out of date ($recVersion is recommended).\n'
+  String cocoaPodsOutdated(String currentVersion, String recVersion, String consequence, String upgradeInstructions) =>
+      'CocoaPods $currentVersion out of date ($recVersion is recommended).\n'
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
@@ -190,9 +193,16 @@ class UserMessages {
       'Visual Studio is missing necessary components. Please re-run the '
       'Visual Studio installer for the "$workload" workload, and include these components:\n'
       '  ${components.join('\n  ')}';
-  String get visualStudioMissing =>
+  String visualStudioMissing(String workload, List<String> components) =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
-      'Download at https://visualstudio.microsoft.com/downloads/.';
+      'Download at https://visualstudio.microsoft.com/downloads/.\n'
+      'Please install the "$workload" workload, including following components:\n  ${components.join('\n  ')}';
+  String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
+      'supported by Flutter yet.';
+  String get visualStudioNotLaunchable =>
+      'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.';
+  String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete. Please reinstall Visual Studio.';
+  String get visualStudioRebootRequired => 'Visual Studio requires a reboot of your system to complete installation.';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';
@@ -216,20 +226,6 @@ class UserMessages {
       'Error: No pubspec.yaml file found.\n'
       'This command should be run from the root of your Flutter project.\n'
       'Do not run this command from the root of your git clone of Flutter.';
-  String get flutterMergeYamlFiles =>
-      'Please merge your flutter.yaml into your pubspec.yaml.\n\n'
-      'We have changed from having separate flutter.yaml and pubspec.yaml\n'
-      'files to having just one pubspec.yaml file. Transitioning is simple:\n'
-      'add a line that just says "flutter:" to your pubspec.yaml file, and\n'
-      'move everything from your current flutter.yaml file into the\n'
-      'pubspec.yaml file, below that line, with everything indented by two\n'
-      'extra spaces compared to how it was in the flutter.yaml file. Then, if\n'
-      'you had a "name:" line, move that to the top of your "pubspec.yaml"\n'
-      'file (you may already have one there), so that there is only one\n'
-      '"name:" line. Finally, delete the flutter.yaml file.\n\n'
-      'For an example of what a new-style pubspec.yaml file might look like,\n'
-      'check out the Flutter Gallery pubspec.yaml:\n'
-      'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n';
   String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
   String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
   String get flutterBaselineRequiresTraceFile => 'Error: --baseline requires --compilation-trace-file to be specified.';

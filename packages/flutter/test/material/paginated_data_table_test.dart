@@ -259,7 +259,7 @@ void main() {
     expect(find.text('501'), findsOneWidget);
     // Test that it fits:
     expect(tester.getTopRight(find.text('501')).dx, greaterThanOrEqualTo(tester.getTopRight(find.text('Rows per page:')).dx + 40.0));
-  });
+  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/43433
 
   testWidgets('PaginatedDataTable footer scrolls', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();

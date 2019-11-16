@@ -81,7 +81,7 @@ void main() {
             id: 3,
             label: 'test1\ntest2',
           ),
-        ]
+        ],
       ),
       ignoreRect: true,
       ignoreTransform: true,
@@ -156,7 +156,7 @@ void main() {
               ],
               label: 'test1\ntest2',
             ),
-          ]
+          ],
       ),
       ignoreRect: true,
       ignoreTransform: true,

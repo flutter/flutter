@@ -100,6 +100,51 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/39574
+  testWidgets('Single action laid out beside content but aligned to the trailing edge', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MaterialBanner(
+          content: const Text('Content'),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text('Action'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset actionsTopRight = tester.getTopRight(find.byType(ButtonBar));
+    final Offset bannerTopRight = tester.getTopRight(find.byType(MaterialBanner));
+    expect(actionsTopRight.dx, bannerTopRight.dx);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/39574
+  testWidgets('Single action laid out beside content but aligned to the trailing edge - RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+        textDirection: TextDirection.rtl,
+          child: MaterialBanner(
+            content: const Text('Content'),
+            actions: <Widget>[
+              FlatButton(
+                child: const Text('Action'),
+                onPressed: () { },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset actionsTopLeft = tester.getTopLeft(find.byType(ButtonBar));
+    final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
+    expect(actionsTopLeft.dx, bannerTopLeft.dx);
+  });
+
   testWidgets('Actions laid out below content if forced override', (WidgetTester tester) async {
     const String contentText = 'Content';
 

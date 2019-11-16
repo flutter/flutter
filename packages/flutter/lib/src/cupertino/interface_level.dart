@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import '../widgets/framework.dart';
 
 /// Indicates the visual level for a piece of content. Equivalent to `UIUserInterfaceLevel`
@@ -72,5 +74,11 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
       'The context used was:\n'
       '  $context'
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<CupertinoUserInterfaceLevelData>('user interface level', _data));
   }
 }
