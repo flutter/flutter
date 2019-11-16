@@ -1,4 +1,4 @@
-Signature: 76f98515c74adaad2c0ac623b724e2ed
+Signature: 4d7c8c6647cb2443e468da2d73f41706
 
 UNUSED LICENSES:
 
@@ -2181,7 +2181,6 @@ FILE: ../../../third_party/skia/gm/imagefilterscropexpand.cpp
 FILE: ../../../third_party/skia/gm/imagefiltersscaled.cpp
 FILE: ../../../third_party/skia/gm/imageresizetiled.cpp
 FILE: ../../../third_party/skia/gm/matriximagefilter.cpp
-FILE: ../../../third_party/skia/gm/multipicturedraw.cpp
 FILE: ../../../third_party/skia/gm/patch.cpp
 FILE: ../../../third_party/skia/gm/picture.cpp
 FILE: ../../../third_party/skia/gm/pictureshader.cpp
@@ -2212,7 +2211,6 @@ FILE: ../../../third_party/skia/include/core/SkBBHFactory.h
 FILE: ../../../third_party/skia/include/core/SkBlurTypes.h
 FILE: ../../../third_party/skia/include/core/SkDrawable.h
 FILE: ../../../third_party/skia/include/core/SkFont.h
-FILE: ../../../third_party/skia/include/core/SkMultiPictureDraw.h
 FILE: ../../../third_party/skia/include/core/SkPictureRecorder.h
 FILE: ../../../third_party/skia/include/core/SkSurfaceProps.h
 FILE: ../../../third_party/skia/include/core/SkTextBlob.h
@@ -2244,7 +2242,6 @@ FILE: ../../../third_party/skia/src/core/SkHalf.cpp
 FILE: ../../../third_party/skia/src/core/SkImageGenerator.cpp
 FILE: ../../../third_party/skia/src/core/SkMaskCache.cpp
 FILE: ../../../third_party/skia/src/core/SkMaskCache.h
-FILE: ../../../third_party/skia/src/core/SkMultiPictureDraw.cpp
 FILE: ../../../third_party/skia/src/core/SkPicturePlayback.cpp
 FILE: ../../../third_party/skia/src/core/SkPicturePlayback.h
 FILE: ../../../third_party/skia/src/core/SkPictureRecorder.cpp
