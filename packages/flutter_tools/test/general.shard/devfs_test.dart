@@ -159,6 +159,7 @@ void main() {
       verify(httpRequest.close()).called(kFailedAttempts + 1);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      HttpClient: () => httpClient,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -208,6 +209,7 @@ void main() {
       expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      HttpClient: () => HttpClient(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -310,6 +312,7 @@ void main() {
       expect(devFS.lastCompiled, isNot(previousCompile));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      HttpClient: () => HttpClient(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
