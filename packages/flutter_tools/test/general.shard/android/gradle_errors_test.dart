@@ -231,7 +231,7 @@ Command: /home/android/gradlew assembleRelease
       final BufferLogger logger = context.get<Logger>();
       expect(
         logger.statusText,
-        contains('Gradle does not have permission to execute by your user.'),
+        contains('Gradle does not have execution permission.'),
       );
       expect(
         logger.statusText,
@@ -399,7 +399,7 @@ Command: /home/android/gradlew assembleRelease
       final BufferLogger logger = context.get<Logger>();
       expect(
         logger.statusText,
-        contains('Gradle does not have permission to execute by your user.'),
+        contains('Gradle does not have execution permission.'),
       );
       expect(
         logger.statusText,

@@ -741,6 +741,41 @@ void main() {
           isTrue,
         );
       });
+
+      test('compare properly awaits validation & output before failing.', () async {
+        final Completer<bool> completer = Completer<bool>();
+        when(mockSkiaClient.isValidDigestForExpectation(
+          '55109a4bed52acc780530f7a9aeff6c0',
+          'library.flutter.golden_test.1.png',
+        ))
+          .thenAnswer((_) => completer.future);
+        final Future<bool> result = comparator.compare(
+          Uint8List.fromList(_kFailPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        bool shouldThrow = true;
+        result.then((_) {
+          if (shouldThrow)
+            fail('Compare completed before validation completed!');
+        });
+        await Future<void>.value();
+        shouldThrow = false;
+        completer.complete(Future<bool>.value(false));
+      });
+
+      test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
+        final MockDirectory mockDirectory = MockDirectory();
+        when(mockDirectory.existsSync()).thenReturn(true);
+        when(mockDirectory.uri).thenReturn(Uri.parse('/flutter'));
+        when(mockSkiaClient.getExpectations())
+          .thenAnswer((_) => throw const OSError());
+        final FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          platform,
+          goldens: mockSkiaClient,
+          baseDirectory: mockDirectory,
+        );
+        expect(comparator.runtimeType, FlutterSkippingGoldenFileComparator);
+      });
     });
   });
 }
@@ -750,6 +785,8 @@ class MockProcessManager extends Mock implements ProcessManager {}
 class MockSkiaGoldClient extends Mock implements SkiaGoldClient {}
 
 class MockLocalFileComparator extends Mock implements LocalFileComparator {}
+
+class MockDirectory extends Mock implements Directory {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 

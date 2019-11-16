@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test_core/backend.dart';
+import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 import '../src/common.dart';
 import '../src/context.dart';
