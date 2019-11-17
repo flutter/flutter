@@ -10,18 +10,22 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-// the numbers below are odd, so that the totals don't seem round. :-)
+// the numbers below are prime, so that the totals don't seem round. :-)
 const double todoCost = 1009.0; // about two average SWE days, in dollars
 const double ignoreCost = 2003.0; // four average SWE days, in dollars
 const double pythonCost = 3001.0; // six average SWE days, in dollars
 const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
 const double ignoreForFileCost = 2477.0; // similar thinking as skipCost
-const double asDynamicCost = 2003.0; // same as ignoring analyzer warning
+const double asDynamicCost = 2011.0; // a few days to refactor the code.
+const double deprecationCost = 233.0; // a few hours to remove the old code.
+const double grandfatheredDeprecationCost = 9973.0; // a couple of weeks.
 
 final RegExp todoPattern = RegExp(r'(?://|#) *TODO');
 final RegExp ignorePattern = RegExp(r'// *ignore:');
 final RegExp ignoreForFilePattern = RegExp(r'// *ignore_for_file:');
-final RegExp asDynamicPattern = RegExp(r'as dynamic');
+final RegExp asDynamicPattern = RegExp(r'\bas dynamic\b');
+final RegExp deprecationPattern = RegExp(r'^ *@[dD]eprecated');
+const String grandfatheredDeprecationPattern = '// ignore: flutter_deprecation_syntax, https';
 
 Future<double> findCostsForFile(File file) async {
   if (path.extension(file.path) == '.py')
@@ -39,8 +43,12 @@ Future<double> findCostsForFile(File file) async {
       total += ignoreCost;
     if (line.contains(ignoreForFilePattern))
       total += ignoreForFileCost;
-    if (line.contains(asDynamicPattern))
+    if (!isTest && line.contains(asDynamicPattern))
       total += asDynamicCost;
+    if (line.contains(deprecationPattern))
+      total += deprecationCost;
+    if (line.contains(grandfatheredDeprecationPattern))
+      total += grandfatheredDeprecationCost;
     if (isTest && line.contains('skip:'))
       total += skipCost;
   }
