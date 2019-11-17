@@ -122,12 +122,12 @@ typedef _CollectionHandler = void Function(Map<int, _MouseState> _mergedStates);
 // Various states of each connected mouse device.
 //
 // It is used by [MouseTracker] to compute which callbacks should be triggered
-// by each event.
+// by each event. 
 class _MouseState {
   _MouseState({
     @required PointerAddedEvent initialEvent,
   }) : assert(initialEvent != null),
-       _handledEvent = initialEvent;
+       _mostRecentEvent = initialEvent;
 
   // The list of annotations that contains this device during the current frame.
   //
@@ -142,23 +142,23 @@ class _MouseState {
   }
 
   // The most recent processed mouse event observed from this device.
-  PointerEvent get handledEvent => _handledEvent;
-  PointerEvent _handledEvent;
-  set handledEvent(PointerEvent value) {
+  PointerEvent get mostRecentEvent => _mostRecentEvent;
+  PointerEvent _mostRecentEvent;
+  set mostRecentEvent(PointerEvent value) {
     assert(value != null);
-    _handledEvent = value;
+    _mostRecentEvent = value;
   }
 
-  int get device => handledEvent.device;
+  int get device => mostRecentEvent.device;
 
   @override
   String toString() {
     String describeEvent(PointerEvent event) {
       return event == null ? 'null' : '${describeIdentity(event)}';
     }
-    final String describeHandledEvent = 'handledEvent: ${describeEvent(handledEvent)}';
+    final String describeMostRecentEvent = 'mostRecentEvent: ${describeEvent(mostRecentEvent)}';
     final String describeAnnotations = 'annotations: [list of ${annotations.length}]';
-    return '${describeIdentity(this)}($describeHandledEvent, $describeAnnotations)';
+    return '${describeIdentity(this)}($describeMostRecentEvent, $describeAnnotations)';
   }
 }
 
@@ -209,8 +209,8 @@ class MouseTracker extends ChangeNotifier {
   // mouse events from.
   final PointerRouter _router;
 
-  // The collection of annotations that are currently being tracked.
-  // It is operated on by [attachAnnotation] and [detachAnnotation].
+  // The collection of annotations that are currently being tracked. It is
+  // operated on by [attachAnnotation] and [detachAnnotation].
   final Set<MouseTrackerAnnotation> _trackedAnnotations = <MouseTrackerAnnotation>{};
 
   // Tracks the state of connected mouse devices.
@@ -222,7 +222,7 @@ class MouseTracker extends ChangeNotifier {
     if (state == null)
       return true;
     assert(value != null);
-    final PointerEvent lastEvent = state.handledEvent;
+    final PointerEvent lastEvent = state.mostRecentEvent;
     assert(value.device == lastEvent.device);
     // An Added can only follow a Removed, and a Removed can only be followed
     // by an Added
@@ -237,6 +237,8 @@ class MouseTracker extends ChangeNotifier {
   }
 
   // Handler for events coming from the PointerRouter.
+  //
+  // If the event marks the device dirty, collect the device immediately.
   void _handleEvent(PointerEvent event) {
     if (event.kind != PointerDeviceKind.mouse)
       return;
@@ -244,10 +246,10 @@ class MouseTracker extends ChangeNotifier {
       return;
     final int device = event.device;
     final _MouseState existingState = _mouseStates[device];
-    final PointerEvent handledEvent = existingState?.handledEvent;
     if (!_shouldMarkStateDirty(existingState, event))
       return;
 
+    final PointerEvent handledEvent = existingState?.mostRecentEvent;
     _collectionPhase(
       newEvent: event,
       task: (Map<int, _MouseState> mergedStates) {
@@ -259,7 +261,7 @@ class MouseTracker extends ChangeNotifier {
           lastAnnotations: lastAnnotations,
           nextAnnotations: nextAnnotations,
           handledEvent: handledEvent,
-          latestEvent: event,
+          unhandledEvent: event,
           trackedAnnotations: _trackedAnnotations,
         );
       },
@@ -267,7 +269,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   LinkedHashSet<MouseTrackerAnnotation> _findAnnotations(_MouseState state) {
-    final Offset globalPosition = state.handledEvent.position;
+    final Offset globalPosition = state.mostRecentEvent.position;
     final int device = state.device;
     return (_mouseStates.containsKey(device) && _trackedAnnotations.isNotEmpty)
       ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(globalPosition))
@@ -280,7 +282,29 @@ class MouseTracker extends ChangeNotifier {
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       assert(_hasScheduledPostFrameCheck);
       _hasScheduledPostFrameCheck = false;
-      _updateDevices();
+      _collectAllDevices();
+    });
+  }
+
+  // Collect the annotations of all devices, and dispatch callbacks if necessary.
+  void _collectAllDevices() {
+    _collectionPhase(task: (Map<int, _MouseState> mergedStates) {
+      final List<int> dirtyDevices = _mouseStates.keys.toList();
+
+      for (int device in dirtyDevices) {
+        final _MouseState mouseState = mergedStates[device];
+        assert(mouseState != null);
+
+        final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(mouseState);
+        final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = mouseState.replaceAnnotations(nextAnnotations);
+        _dispatchDeviceCallbacks(
+          lastAnnotations: lastAnnotations,
+          nextAnnotations: nextAnnotations,
+          handledEvent: mouseState.mostRecentEvent,
+          unhandledEvent: mouseState.mostRecentEvent,
+          trackedAnnotations: _trackedAnnotations,
+        );
+      }
     });
   }
 
@@ -289,6 +313,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   bool _duringCollection = false;
+  // Prepare the colection phase.
   void _collectionPhase({
     PointerEvent newEvent,
     @required _CollectionHandler task,
@@ -298,8 +323,7 @@ class MouseTracker extends ChangeNotifier {
     assert(!_duringCollection);
     final bool mouseWasConnected = mouseIsConnected;
 
-    // Create new state based on new event if necessary, 
-    // and update handledEvent
+    // Create new state based on new event if necessary, and update mostRecentEvent
     if (newEvent != null) {
       final _MouseState existingState = _mouseStates[newEvent.device];
       if (existingState == null) {
@@ -307,7 +331,7 @@ class MouseTracker extends ChangeNotifier {
         final _MouseState newState = _MouseState(initialEvent: newEvent);
         _mouseStates[newState.device] = newState;
       } else {
-        existingState.handledEvent = newEvent;
+        existingState.mostRecentEvent = newEvent;
       }
     }
     final Map<int, _MouseState> mergedStates = Map<int, _MouseState>.from(_mouseStates);
@@ -334,27 +358,6 @@ class MouseTracker extends ChangeNotifier {
       notifyListeners();
   }
 
-  void _updateDevices() {
-    _collectionPhase(task: (Map<int, _MouseState> mergedStates) {
-      final List<int> dirtyDevices = _mouseStates.keys.toList();
-
-      for (int device in dirtyDevices) {
-        final _MouseState mouseState = mergedStates[device];
-        assert(mouseState != null);
-
-        final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(mouseState);
-        final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = mouseState.replaceAnnotations(nextAnnotations);
-        _dispatchDeviceCallbacks(
-          lastAnnotations: lastAnnotations,
-          nextAnnotations: nextAnnotations,
-          handledEvent: mouseState.handledEvent,
-          latestEvent: mouseState.handledEvent,
-          trackedAnnotations: _trackedAnnotations,
-        );
-      }
-    });
-  }
-
   // Dispatch callbacks related to a device after all necessary information
   // has been collected.
   //
@@ -363,12 +366,13 @@ class MouseTracker extends ChangeNotifier {
     @required LinkedHashSet<MouseTrackerAnnotation> lastAnnotations,
     @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
     @required PointerEvent handledEvent,
-    @required PointerEvent latestEvent,
+    @required PointerEvent unhandledEvent,
     @required Set<MouseTrackerAnnotation> trackedAnnotations,
   }) {
     assert(lastAnnotations != null);
     assert(nextAnnotations != null);
-    assert(latestEvent != null);
+    // handledEvent can be null
+    assert(unhandledEvent != null);
     assert(trackedAnnotations != null);
     // Order is important for mouse event callbacks. The `findAnnotations`
     // returns annotations in the visual order from front to back. We call
@@ -385,7 +389,7 @@ class MouseTracker extends ChangeNotifier {
       // trigger may cause crashes and has safer alternatives. See
       // [MouseRegion.onExit] for details.
       if (annotation.onExit != null && attached) {
-        annotation.onExit(PointerExitEvent.fromMouseEvent(latestEvent));
+        annotation.onExit(PointerExitEvent.fromMouseEvent(unhandledEvent));
       }
     }
 
@@ -395,14 +399,14 @@ class MouseTracker extends ChangeNotifier {
     for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
       assert(trackedAnnotations.contains(annotation));
       if (annotation.onEnter != null) {
-        annotation.onEnter(PointerEnterEvent.fromMouseEvent(latestEvent));
+        annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent));
       }
     }
 
     // Send hover events in reverse visual order.
     // For now the order between the hover events is designed this way for no
     // solid reasons but to keep it aligned with enter events for simplicity.
-    if (latestEvent is PointerHoverEvent) {
+    if (unhandledEvent is PointerHoverEvent) {
       final Iterable<MouseTrackerAnnotation> hoveringAnnotations =
         nextAnnotations.toList().reversed;
       for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
@@ -410,9 +414,9 @@ class MouseTracker extends ChangeNotifier {
         // or the position has changed
         if (!lastAnnotations.contains(annotation)
             || handledEvent is! PointerHoverEvent
-            || latestEvent.position != handledEvent.position) {
+            || handledEvent.position != unhandledEvent.position) {
           if (annotation.onHover != null) {
-            annotation.onHover(latestEvent);
+            annotation.onHover(unhandledEvent);
           }
         }
       }
