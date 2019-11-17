@@ -164,7 +164,10 @@ class ButtonTheme extends InheritedTheme {
   ///
   /// You can also replace the defaults for all [ButtonBar] widgets by updating
   /// [ThemeData.buttonBarTheme] for your app.
-  @Deprecated('use ButtonBarTheme instead')
+  @Deprecated(
+    'Use ButtonBarTheme instead. '
+    'This feature was deprecated after v1.9.1.'
+  )
   ButtonTheme.bar({
     Key key,
     ButtonTextTheme textTheme = ButtonTextTheme.accent,

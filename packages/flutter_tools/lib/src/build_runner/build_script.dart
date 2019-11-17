@@ -23,7 +23,7 @@ import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
-import 'package:test_core/backend.dart';
+import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 const String ddcBootstrapExtension = '.dart.bootstrap.js';
 const String jsEntrypointExtension = '.dart.js';
