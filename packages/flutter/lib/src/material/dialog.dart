@@ -694,8 +694,10 @@ Future<T> showDialog<T>({
   @Deprecated(
     'Instead of using the "child" argument, return the child from a closure '
     'provided to the "builder" argument. This will ensure that the BuildContext '
-    'is appropriate for widgets built in the dialog.'
-  ) Widget child,
+    'is appropriate for widgets built in the dialog. '
+    'This feature was deprecated after v0.2.3.'
+  )
+  Widget child,
   WidgetBuilder builder,
   bool useRootNavigator = true,
 }) {

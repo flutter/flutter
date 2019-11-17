@@ -15,6 +15,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWindow;
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';

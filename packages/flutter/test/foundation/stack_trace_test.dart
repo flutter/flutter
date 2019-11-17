@@ -23,7 +23,6 @@ void main() {
     final List<String> filtered = FlutterError.defaultStackFilter(StackTrace.current.toString().trimRight().split('\n')).toList();
     expect(filtered.length, greaterThanOrEqualTo(3));
     expect(filtered[0], matches(r'^#0 +main\.<anonymous closure> \(.*stack_trace_test\.dart:[0-9]+:[0-9]+\)$'));
-    expect(filtered[1], equals('<asynchronous suspension>'));
     expect(filtered.last, matches(r'^\(elided [1-9][0-9]+ frames from package dart:async(, package dart:async-patch,)? and package stack_trace\)$'));
   });
 }
