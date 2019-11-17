@@ -19,9 +19,6 @@ post_install do |installer|
         file.settings = { 'ATTRIBUTES' => ['Public'] }
       end
     end
-    target.build_configurations.each do |config|
-      config.build_settings['ENABLE_BITCODE'] = 'NO'
-    end
   end
 end
 

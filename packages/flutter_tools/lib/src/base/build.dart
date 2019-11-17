@@ -286,6 +286,7 @@ class AOTSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required bool trackWidgetCreation,
+    @required List<String> dartDefines,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final FlutterProject flutterProject = FlutterProject.current();
@@ -316,6 +317,7 @@ class AOTSnapshotter {
       aot: true,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
+      dartDefines: dartDefines,
     ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.

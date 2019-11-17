@@ -287,7 +287,10 @@ class CupertinoAlertDialog extends StatelessWidget {
 ///  * [CupertinoAlertDialog], which is a dialog with title, contents, and
 ///    actions.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-@Deprecated('Use CupertinoAlertDialog for alert dialogs. Use CupertinoPopupSurface for custom popups.')
+@Deprecated(
+  'Use CupertinoAlertDialog for alert dialogs. Use CupertinoPopupSurface for custom popups. '
+  'This feature was deprecated after v0.2.3.'
+)
 class CupertinoDialog extends StatelessWidget {
   /// Creates an iOS-style dialog.
   const CupertinoDialog({
