@@ -132,7 +132,14 @@ class _MouseState {
   // The list of annotations that contains this device during the current frame.
   //
   // It uses [LinkedHashSet] to keep the insertion order.
-  LinkedHashSet<MouseTrackerAnnotation> annotations = LinkedHashSet<MouseTrackerAnnotation>();
+  LinkedHashSet<MouseTrackerAnnotation> get annotations => _annotations;
+  LinkedHashSet<MouseTrackerAnnotation> _annotations = LinkedHashSet<MouseTrackerAnnotation>();
+
+  LinkedHashSet<MouseTrackerAnnotation> replaceAnnotations(LinkedHashSet<MouseTrackerAnnotation> value) {
+    final LinkedHashSet<MouseTrackerAnnotation> previous = _annotations;
+    _annotations = value;
+    return previous;
+  }
 
   // The most recent processed mouse event observed from this device.
   PointerEvent get handledEvent => _handledEvent;
@@ -241,14 +248,13 @@ class MouseTracker extends ChangeNotifier {
     if (!_shouldMarkStateDirty(existingState, event))
       return;
 
-    _collectionContext(
+    _collectionPhase(
       newEvent: event,
       task: (Map<int, _MouseState> mergedStates) {
         final _MouseState mouseState = mergedStates[device];
         assert(mouseState != null);
         final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(mouseState);
-        final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = mouseState.annotations;
-        mouseState.annotations = nextAnnotations;
+        final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = mouseState.replaceAnnotations(nextAnnotations);
         _dispatchDeviceCallbacks(
           lastAnnotations: lastAnnotations,
           nextAnnotations: nextAnnotations,
@@ -283,7 +289,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   bool _duringCollection = false;
-  void _collectionContext({
+  void _collectionPhase({
     PointerEvent newEvent,
     @required _CollectionHandler task,
   }) {
@@ -329,16 +335,15 @@ class MouseTracker extends ChangeNotifier {
   }
 
   void _updateDevices() {
-    _collectionContext(task: (Map<int, _MouseState> mergedStates) {
+    _collectionPhase(task: (Map<int, _MouseState> mergedStates) {
       final List<int> dirtyDevices = _mouseStates.keys.toList();
 
       for (int device in dirtyDevices) {
         final _MouseState mouseState = mergedStates[device];
         assert(mouseState != null);
 
-        final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = mouseState.annotations;
         final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(mouseState);
-        mouseState.annotations = nextAnnotations;
+        final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = mouseState.replaceAnnotations(nextAnnotations);
         _dispatchDeviceCallbacks(
           lastAnnotations: lastAnnotations,
           nextAnnotations: nextAnnotations,
