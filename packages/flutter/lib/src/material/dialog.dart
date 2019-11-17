@@ -217,6 +217,37 @@ class AlertDialog extends StatelessWidget {
     this.semanticLabel,
     this.shape,
   }) : assert(contentPadding != null),
+       _scrollable = false,
+       super(key: key);
+
+  /// Creates an alert dialog with scrollable [title] and [content].
+  ///
+  /// In contrast with a typical alert dialog, this configuration
+  /// is used when the [title] and [content] is expected to overflow.
+  /// Both [title] and [content] is wrapped in a scroll view, allowing
+  /// all overflowed content to be visible while still showing the button
+  /// bar.
+  ///
+  /// Typically used in conjunction with [showDialog].
+  ///
+  /// The [contentPadding] must not be null. The [titlePadding] defaults to
+  /// null, which implies a default that depends on the values of the other
+  /// properties. See the documentation of [titlePadding] for details.
+  const AlertDialog.scrollable({
+    Key key,
+    this.title,
+    this.titlePadding,
+    this.titleTextStyle,
+    this.content,
+    this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+    this.contentTextStyle,
+    this.actions,
+    this.backgroundColor,
+    this.elevation,
+    this.semanticLabel,
+    this.shape,
+  }) : assert(contentPadding != null),
+       _scrollable = true,
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -302,6 +333,10 @@ class AlertDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder shape;
 
+  /// Determines whether the [title] and [content] widgets are wrapped in a
+  /// scrollable.
+  final bool _scrollable;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -320,11 +355,45 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
-    Widget dialogChild = IntrinsicWidth(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
+    List<Widget> columnChildren;
+    if (_scrollable) {
+      columnChildren = <Widget>[
+        if (title != null || content != null)
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  if (title != null)
+                    Padding(
+                      padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+                      child: DefaultTextStyle(
+                        style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
+                        child: Semantics(
+                          child: title,
+                          namesRoute: true,
+                          container: true,
+                        ),
+                      ),
+                    ),
+                  if (content != null)
+                    Padding(
+                      padding: contentPadding,
+                      child: DefaultTextStyle(
+                        style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+                        child: content,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        if (actions != null)
+          ButtonBar(children: actions),
+      ];
+    } else {
+      columnChildren = <Widget>[
         if (title != null)
           Padding(
             padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
@@ -337,21 +406,26 @@ class AlertDialog extends StatelessWidget {
               ),
             ),
           ),
-          if (content != null)
-            Flexible(
-              child: Padding(
-                padding: contentPadding,
-                child: DefaultTextStyle(
-                  style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
-                  child: content,
-                ),
+        if (content != null)
+          Flexible(
+            child: Padding(
+              padding: contentPadding,
+              child: DefaultTextStyle(
+                style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+                child: content,
               ),
             ),
-          if (actions != null)
-            ButtonBar(
-              children: actions,
-            ),
-        ],
+          ),
+        if (actions != null)
+          ButtonBar(children: actions),
+      ];
+    }
+
+    Widget dialogChild = IntrinsicWidth(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: columnChildren,
       ),
     );
 
