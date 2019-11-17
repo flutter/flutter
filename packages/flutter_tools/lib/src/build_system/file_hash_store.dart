@@ -83,7 +83,7 @@ class FileHashStore {
   static const String _kFileCache = '.filecache';
 
   // The current version of the file cache storage format.
-  static const int _kVersion = 3;
+  static const int _kVersion = 2;
 
   /// Read file hashes from disk.
   void initialize() {
@@ -132,9 +132,6 @@ class FileHashStore {
     }
     final List<FileHash> fileHashes = <FileHash>[];
     for (MapEntry<String, String> entry in currentHashes.entries) {
-      previousHashes[entry.key] = entry.value;
-    }
-    for (MapEntry<String, String> entry in previousHashes.entries) {
       fileHashes.add(FileHash(entry.key, entry.value));
     }
     final FileStorage fileStorage = FileStorage(
