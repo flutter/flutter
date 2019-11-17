@@ -211,18 +211,6 @@ class MouseTracker extends ChangeNotifier {
   // It is the source of truth for the list of connected mouse devices.
   final Map<int, _MouseState> _mouseStates = <int, _MouseState>{};
 
-  // Tracks the state of mouse devices that are newly connected during this
-  // frame, and has not been handled.
-  // It is separated in order not to affect [mouseIsConnected].
-  final Map<int, _MouseState> _newMouseStates = <int, _MouseState>{};
-
-  _MouseState _getMouseState(int device) {
-    final _MouseState state = _mouseStates[device];
-    final _MouseState newState = _newMouseStates[device];
-    assert(state == null || newState == null);
-    return state ?? newState;
-  }
-
   static bool _shouldMarkStateDirty(_MouseState state, PointerEvent value) {
     if (state == null)
       return true;
@@ -248,7 +236,7 @@ class MouseTracker extends ChangeNotifier {
     if (event is PointerSignalEvent)
       return;
     final int device = event.device;
-    final _MouseState existingState = _getMouseState(device);
+    final _MouseState existingState = _mouseStates[device];
     final PointerEvent handledEvent = existingState?.handledEvent;
     if (!_shouldMarkStateDirty(existingState, event))
       return;
@@ -304,33 +292,27 @@ class MouseTracker extends ChangeNotifier {
     assert(!_duringCollection);
     final bool mouseWasConnected = mouseIsConnected;
 
-    final Map<int, _MouseState> mergedStates = Map<int, _MouseState>.fromEntries(
-      _mouseStates.entries.followedBy(_newMouseStates.entries),
-    );
-
-    // Create new state based on new event if necessary
+    // Create new state based on new event if necessary, 
+    // and update handledEvent
     if (newEvent != null) {
-      final _MouseState existingState = mergedStates[newEvent.device];
+      final _MouseState existingState = _mouseStates[newEvent.device];
       if (existingState == null) {
         assert(newEvent is PointerAddedEvent);
         final _MouseState newState = _MouseState(initialEvent: newEvent);
-        mergedStates[newState.device] = newState;
+        _mouseStates[newState.device] = newState;
       } else {
         existingState.handledEvent = newEvent;
       }
     }
+    final Map<int, _MouseState> mergedStates = Map<int, _MouseState>.from(_mouseStates);
 
     // Update mouseState to the latest devices that have not been removed, so
     // that [mouseIsConnected], which is decided by `_mouseStates`, is correct
     // during the callbacks.
-    _newMouseStates.clear();
-    _mouseStates
-      ..clear()
-      ..addEntries(
-        mergedStates.entries.where((MapEntry<int, _MouseState> entry) {
-          return entry.value.handledEvent is! PointerRemovedEvent;
-        }),
-      );
+    if (newEvent is PointerRemovedEvent) {
+      final _MouseState removedState = _mouseStates.remove(newEvent.device);
+      assert(removedState != null);
+    }
 
     assert(() {
       _duringCollection = true;
