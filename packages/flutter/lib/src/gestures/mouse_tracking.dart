@@ -81,7 +81,7 @@ class MouseTrackerAnnotation {
   ///
   /// The last case is when [onExit] does not match an earlier [onEnter].
   /// This design is because the last case is very likely to be handled
-  /// improperly and crash the app (such as calling `setState` of the disposed
+  /// improperly and cause exceptions (such as calling `setState` of the disposed
   /// widget). Also, the last case can already be achieved by using the event
   /// that causes the removal, or simply overriding [Widget.dispose] or
   /// [RenderObject.detach].
@@ -410,7 +410,7 @@ class MouseTracker extends ChangeNotifier {
     for (final MouseTrackerAnnotation annotation in exitingAnnotations) {
       final bool attached = trackedAnnotations.contains(annotation);
       // Exit is not sent if annotation is no longer attached, because this
-      // trigger may cause crashes and has safer alternatives. See
+      // trigger may cause exceptions and has safer alternatives. See
       // [MouseRegion.onExit] for details.
       if (annotation.onExit != null && attached) {
         annotation.onExit(PointerExitEvent.fromMouseEvent(unhandledEvent));
@@ -499,8 +499,8 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// The state of annotation attachment determines whether an exit event is
   /// caused by movement or by the disposal of its owner render object,
-  /// preventing some common patterns causing crashes. See [MouseTracker.onExit]
-  /// for its application.
+  /// preventing some common patterns causing exceptions. See
+  /// [MouseTracker.onExit] for its application.
   ///
   /// The [MouseTracker] also uses this to track the number of attached
   /// annotations, and will skip mouse position checks if there is no

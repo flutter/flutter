@@ -5866,7 +5866,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///
   /// The last case is when [onExit] does not match an earlier [onEnter].
   /// This design is because the last case is very likely to be handled
-  /// improperly and crash the app (such as calling `setState` of the disposed
+  /// improperly and cause exceptions (such as calling `setState` of the disposed
   /// widget). Also, the last case can already be achieved by using the event
   /// that causes the removal, or simply overriding [Widget.dispose].
   ///
