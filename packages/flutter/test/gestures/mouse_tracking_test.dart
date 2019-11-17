@@ -476,7 +476,6 @@ void main() {
     events.clear();
 
     // Disconnect the mouse from the region. Should trigger Exit
-    isInHitRegion = false;
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
     ]));
