@@ -166,7 +166,7 @@ abstract class Decoration extends Diagnosticable {
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
   BoxPainter createBoxPainter([ VoidCallback onChanged ]);
 
-  /// Returns a closed [Path] that will shows all the area that this decoration
+  /// Returns a closed [Path] that will show all the area that this decoration
   /// covers.
   ///
   /// for example in [BoxDecoration] if you specify [BoxDecoration.borderRadius]

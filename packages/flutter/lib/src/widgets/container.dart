@@ -310,7 +310,7 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
-    this.clipBehaviour,
+    this.clipBehavior,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
@@ -387,13 +387,13 @@ class Container extends StatelessWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
-  /// The clip behaviour when [Container.decoration] has a border.
+  /// The clip behavior when [Container.decoration] has a border.
   ///
   /// By default [Container] doesn't clip the child when it is outside the
   /// border.
   ///
   /// Defaults to [Clip.none].
-  final Clip clipBehaviour;
+  final Clip clipBehavior;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
     if (decoration == null || decoration.padding == null)
@@ -443,14 +443,14 @@ class Container extends StatelessWidget {
     if (transform != null)
       current = Transform(transform: transform, child: current);
 
-    if (clipBehaviour != null &&
-        clipBehaviour != Clip.none) {
+    if (clipBehavior != null &&
+        clipBehavior != Clip.none) {
       current = ClipPath(
         clipper: _PathClipper(
           textDirection: Directionality.of(context),
           getClipPath: decoration.getClipPath
         ),
-        clipBehavior: clipBehaviour,
+        clipBehavior: clipBehavior,
         child: current,
       );
     }
@@ -463,7 +463,7 @@ class Container extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<Clip>('clipBehaviour', clipBehaviour, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehaviour', clipBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));

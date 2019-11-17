@@ -501,7 +501,7 @@ void main() {
 
   testWidgets('giving clipBehaviour null or Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
     await tester.pumpWidget(Container(
-      clipBehaviour: Clip.none,
+      clipBehavior: Clip.none,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1),
       ),
@@ -514,7 +514,7 @@ void main() {
     );
 
     await tester.pumpWidget(Container(
-      clipBehaviour: null,
+      clipBehavior: null,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1),
       ),
@@ -529,7 +529,7 @@ void main() {
 
   testWidgets('giving clipBehaviour not a null, will add a ClipPath to the tree', (WidgetTester tester) async {
     final Container container = Container(
-      clipBehaviour: Clip.hardEdge,
+      clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1),
       ),
