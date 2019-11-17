@@ -585,10 +585,11 @@ void main() {
 
   testWidgets('Switch.adaptive', (WidgetTester tester) async {
     bool value = false;
+    const Color toggleableActiveColor = Colors.red;
 
     Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
-        theme: ThemeData(platform: platform),
+        theme: ThemeData(platform: platform).copyWith(toggleableActiveColor: toggleableActiveColor),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Material(
@@ -610,6 +611,9 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
     expect(find.byType(CupertinoSwitch), findsOneWidget);
+    
+    final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
+    expect(adaptiveSwitch.activeColor, toggleableActiveColor);
 
     expect(value, isFalse);
     await tester.tap(find.byType(Switch));
@@ -621,7 +625,6 @@ void main() {
     expect(value, isTrue);
     await tester.tap(find.byType(Switch));
     expect(value, isFalse);
-
   });
 
   testWidgets('Switch is focusable and has correct focus color', (WidgetTester tester) async {

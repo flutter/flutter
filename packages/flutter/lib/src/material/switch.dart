@@ -339,7 +339,10 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   }
 
   Widget buildCupertinoSwitch(BuildContext context) {
-    final Size size = getSwitchSize(Theme.of(context));
+    final ThemeData theme = Theme.of(context);
+    final Size size = getSwitchSize(theme);
+    final Color activeColor = widget.activeColor ?? theme.toggleableActiveColor;
+
     return Focus(
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
@@ -351,7 +354,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
           dragStartBehavior: widget.dragStartBehavior,
           value: widget.value,
           onChanged: widget.onChanged,
-          activeColor: widget.activeColor,
+          activeColor: activeColor,
         ),
       ),
     );
