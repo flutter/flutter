@@ -117,7 +117,7 @@ class MouseTrackerAnnotation {
 /// position.
 typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
 
-typedef _CollectionHandler = void Function(Map<int, _MouseState> _mergedStates);
+typedef _CollectDeviceHandler = void Function(_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations);
 
 // Various states of each connected mouse device.
 //
@@ -249,18 +249,18 @@ class MouseTracker extends ChangeNotifier {
     if (!_shouldMarkStateDirty(existingState, event))
       return;
 
-    final PointerEvent handledEvent = existingState?.mostRecentEvent;
+    final PointerEvent previousEvent = existingState?.mostRecentEvent;
     _collectionPhase(
-      newEvent: event,
-      task: (Map<int, _MouseState> mergedStates) {
-        final _MouseState mouseState = mergedStates[device];
-        assert(mouseState != null);
-        final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(mouseState);
-        final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = mouseState.replaceAnnotations(nextAnnotations);
+      targetEvent: event,
+      collectDevice: (
+        _MouseState mouseState,
+        LinkedHashSet<MouseTrackerAnnotation> previousAnnotations,
+      ) {
+        assert(mouseState.device == event.device);
         _dispatchDeviceCallbacks(
-          lastAnnotations: lastAnnotations,
-          nextAnnotations: nextAnnotations,
-          handledEvent: handledEvent,
+          lastAnnotations: previousAnnotations,
+          nextAnnotations: mouseState.annotations,
+          handledEvent: previousEvent,
           unhandledEvent: event,
           trackedAnnotations: _trackedAnnotations,
         );
@@ -288,24 +288,20 @@ class MouseTracker extends ChangeNotifier {
 
   // Collect the annotations of all devices, and dispatch callbacks if necessary.
   void _collectAllDevices() {
-    _collectionPhase(task: (Map<int, _MouseState> mergedStates) {
-      final List<int> dirtyDevices = _mouseStates.keys.toList();
-
-      for (int device in dirtyDevices) {
-        final _MouseState mouseState = mergedStates[device];
-        assert(mouseState != null);
-
-        final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(mouseState);
-        final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = mouseState.replaceAnnotations(nextAnnotations);
+    _collectionPhase(
+      collectDevice: (
+        _MouseState mouseState,
+        LinkedHashSet<MouseTrackerAnnotation> previousAnnotations,
+      ) {
         _dispatchDeviceCallbacks(
-          lastAnnotations: lastAnnotations,
-          nextAnnotations: nextAnnotations,
+          lastAnnotations: previousAnnotations,
+          nextAnnotations: mouseState.annotations,
           handledEvent: mouseState.mostRecentEvent,
           unhandledEvent: mouseState.mostRecentEvent,
           trackedAnnotations: _trackedAnnotations,
         );
       }
-    });
+    );
   }
 
   bool get _duringBuildPhase {
@@ -313,42 +309,48 @@ class MouseTracker extends ChangeNotifier {
   }
 
   bool _duringCollection = false;
-  // Prepare the colection phase.
+  // Colect device updates, update states, and trigger handlers.
   void _collectionPhase({
-    PointerEvent newEvent,
-    @required _CollectionHandler task,
+    PointerEvent targetEvent,
+    @required _CollectDeviceHandler collectDevice,
   }) {
-    assert(task != null);
+    assert(collectDevice != null);
     assert(!_duringBuildPhase);
     assert(!_duringCollection);
     final bool mouseWasConnected = mouseIsConnected;
 
-    // Create new state based on new event if necessary, and update mostRecentEvent
-    if (newEvent != null) {
-      final _MouseState existingState = _mouseStates[newEvent.device];
-      if (existingState == null) {
-        assert(newEvent is PointerAddedEvent);
-        final _MouseState newState = _MouseState(initialEvent: newEvent);
-        _mouseStates[newState.device] = newState;
+    // If new event is not null, only the device that observed this event is
+    // dirty. The target device's state is inserted into or removed from
+    // `_mouseStates` if needed, stored as `targetState`, and its
+    // `mostRecentDevice` is updated.
+    _MouseState targetState;
+    if (targetEvent != null) {
+      targetState = _mouseStates[targetEvent.device];
+      assert((targetState == null) == (targetEvent is PointerAddedEvent));
+      if (targetEvent is PointerAddedEvent) {
+        targetState = _MouseState(initialEvent: targetEvent);
+        _mouseStates[targetState.device] = targetState;
       } else {
-        existingState.mostRecentEvent = newEvent;
+        targetState.mostRecentEvent = targetEvent;
+        // Update mouseState to the latest devices that have not been removed,
+        // so that [mouseIsConnected], which is decided by `_mouseStates`, is
+        // correct during the callbacks.
+        if (targetEvent is PointerRemovedEvent)
+          _mouseStates.remove(targetEvent.device);
       }
     }
-    final Map<int, _MouseState> mergedStates = Map<int, _MouseState>.from(_mouseStates);
-
-    // Update mouseState to the latest devices that have not been removed, so
-    // that [mouseIsConnected], which is decided by `_mouseStates`, is correct
-    // during the callbacks.
-    if (newEvent is PointerRemovedEvent) {
-      final _MouseState removedState = _mouseStates.remove(newEvent.device);
-      assert(removedState != null);
-    }
+    assert((targetState == null) == (targetEvent == null));
 
     assert(() {
       _duringCollection = true;
       return true;
     }());
-    task(mergedStates);
+    final Iterable<_MouseState> dirtyStates = targetEvent == null ? _mouseStates.values : <_MouseState>[targetState];
+    for (_MouseState dirtyState in dirtyStates) {
+      final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(dirtyState);
+      final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = dirtyState.replaceAnnotations(nextAnnotations);
+      collectDevice(dirtyState, lastAnnotations);
+    }
     assert(() {
       _duringCollection = false;
       return true;
