@@ -569,8 +569,8 @@ class FlutterPlugin implements Plugin<Project> {
                 dependsOn compileTask
                 targetPlatforms.each { targetPlatform ->
                     String abi = PLATFORM_ARCH_MAP[targetPlatform]
-                    from(compileTask.intermediateDir) {
-                        include "${abi}/app.so"
+                    from("${compileTask.intermediateDir}/${abi}") {
+                        include "*.so"
                         // Move `app.so` to `lib/<abi>/libapp.so`
                         rename { String filename ->
                             return "lib/${abi}/lib${filename}"
