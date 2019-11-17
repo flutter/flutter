@@ -117,7 +117,7 @@ class MouseTrackerAnnotation {
 /// position.
 typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
 
-typedef _CollectDeviceHandler = void Function(_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations);
+typedef _UpdatedDeviceHandler = void Function(_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations);
 
 // Various states of each connected mouse device.
 //
@@ -127,7 +127,7 @@ class _MouseState {
   _MouseState({
     @required PointerAddedEvent initialEvent,
   }) : assert(initialEvent != null),
-       _mostRecentEvent = initialEvent;
+       _latestEvent = initialEvent;
 
   // The list of annotations that contains this device during the current frame.
   //
@@ -142,23 +142,23 @@ class _MouseState {
   }
 
   // The most recent processed mouse event observed from this device.
-  PointerEvent get mostRecentEvent => _mostRecentEvent;
-  PointerEvent _mostRecentEvent;
-  set mostRecentEvent(PointerEvent value) {
+  PointerEvent get latestEvent => _latestEvent;
+  PointerEvent _latestEvent;
+  set latestEvent(PointerEvent value) {
     assert(value != null);
-    _mostRecentEvent = value;
+    _latestEvent = value;
   }
 
-  int get device => mostRecentEvent.device;
+  int get device => latestEvent.device;
 
   @override
   String toString() {
     String describeEvent(PointerEvent event) {
       return event == null ? 'null' : '${describeIdentity(event)}';
     }
-    final String describeMostRecentEvent = 'mostRecentEvent: ${describeEvent(mostRecentEvent)}';
+    final String describeLatestEvent = 'latestEvent: ${describeEvent(latestEvent)}';
     final String describeAnnotations = 'annotations: [list of ${annotations.length}]';
-    return '${describeIdentity(this)}($describeMostRecentEvent, $describeAnnotations)';
+    return '${describeIdentity(this)}($describeLatestEvent, $describeAnnotations)';
   }
 }
 
@@ -222,7 +222,7 @@ class MouseTracker extends ChangeNotifier {
     if (state == null)
       return true;
     assert(value != null);
-    final PointerEvent lastEvent = state.mostRecentEvent;
+    final PointerEvent lastEvent = state.latestEvent;
     assert(value.device == lastEvent.device);
     // An Added can only follow a Removed, and a Removed can only be followed
     // by an Added
@@ -238,7 +238,7 @@ class MouseTracker extends ChangeNotifier {
 
   // Handler for events coming from the PointerRouter.
   //
-  // If the event marks the device dirty, collect the device immediately.
+  // If the event marks the device dirty, update the device immediately.
   void _handleEvent(PointerEvent event) {
     if (event.kind != PointerDeviceKind.mouse)
       return;
@@ -249,13 +249,10 @@ class MouseTracker extends ChangeNotifier {
     if (!_shouldMarkStateDirty(existingState, event))
       return;
 
-    final PointerEvent previousEvent = existingState?.mostRecentEvent;
-    _collectionPhase(
+    final PointerEvent previousEvent = existingState?.latestEvent;
+    _updateDevices(
       targetEvent: event,
-      collectDevice: (
-        _MouseState mouseState,
-        LinkedHashSet<MouseTrackerAnnotation> previousAnnotations,
-      ) {
+      handleUpdatedDevice: (_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations) {
         assert(mouseState.device == event.device);
         _dispatchDeviceCallbacks(
           lastAnnotations: previousAnnotations,
@@ -268,55 +265,78 @@ class MouseTracker extends ChangeNotifier {
     );
   }
 
+  // Find the annotations that is hovered by the device of the `state`.
+  //
+  // If the device is not connected or there are no annotations attached, empty
+  // is returned without calling `annotationFinder`.
   LinkedHashSet<MouseTrackerAnnotation> _findAnnotations(_MouseState state) {
-    final Offset globalPosition = state.mostRecentEvent.position;
+    final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
     return (_mouseStates.containsKey(device) && _trackedAnnotations.isNotEmpty)
       ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(globalPosition))
       : <MouseTrackerAnnotation>{};
   }
 
-  bool _hasScheduledPostFrameCheck = false;
-  void _schedulePostFrameCheck() {
-    assert(!_duringCollection);
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-      assert(_hasScheduledPostFrameCheck);
-      _hasScheduledPostFrameCheck = false;
-      _collectAllDevices();
-    });
+  static bool get _duringBuildPhase {
+    return SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks;
   }
 
-  // Collect the annotations of all devices, and dispatch callbacks if necessary.
-  void _collectAllDevices() {
-    _collectionPhase(
-      collectDevice: (
-        _MouseState mouseState,
-        LinkedHashSet<MouseTrackerAnnotation> previousAnnotations,
-      ) {
+  // Update all devices, despite observing no new events.
+  // 
+  // This is called after a new frame, since annotations can be moved after
+  // every frame.
+  void _updateAllDevices() {
+    _updateDevices(
+      handleUpdatedDevice: (_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations) {
         _dispatchDeviceCallbacks(
           lastAnnotations: previousAnnotations,
           nextAnnotations: mouseState.annotations,
-          handledEvent: mouseState.mostRecentEvent,
-          unhandledEvent: mouseState.mostRecentEvent,
+          handledEvent: mouseState.latestEvent,
+          unhandledEvent: mouseState.latestEvent,
           trackedAnnotations: _trackedAnnotations,
         );
       }
     );
   }
 
-  bool get _duringBuildPhase {
-    return SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks;
-  }
-
-  bool _duringCollection = false;
-  // Colect device updates, update states, and trigger handlers.
-  void _collectionPhase({
+  bool _duringDeviceUpdate = false;
+  // Update device states with the change of a new event or a new frame, and
+  // trigger `handleUpdateDevice` for each dirty device.
+  //
+  // This method is called either when a new event is observed, or when no new
+  // event is observed but all devices are marked dirty due to a new frame. It
+  // means that no one can mark all devices as dirty when a new event is
+  // unprocessed.
+  //
+  // This method is the moment where `_mouseState` is updated. Before 
+  // this method, `_mouseState` is in sync with the state before the event or
+  // before the frame. During `handleUpdateDevice` and after this method, 
+  // `_mouseState` is in sync with the state after the event or after the frame.
+  //
+  // The dirty devices are decided as follows: if `targetEvent` is not null, the
+  // dirty devices are the device that observed the event; otherwise all devices
+  // are dirty.
+  //
+  // This method first keeps `_mouseStates` up to date. More specifically,
+  // 
+  //  * If an event is observed, update `_mouseStates` by inserting or removing
+  //    the state that corresponds to the event if needed, then update the
+  //    `latestEvent` property of this mouse state.
+  //  * For each mouse state that will correspond to a dirty device, update the
+  //    `annotations` property with the annotations the device is contained.
+  //
+  // Then, for each dirty device, `handleUpdatedDevice` is called with the 
+  // updated state and the annotations before the update.
+  //
+  // Last, the method checks if `mouseIsConnected` has been changed, and notify
+  // listeners if needed.
+  void _updateDevices({
     PointerEvent targetEvent,
-    @required _CollectDeviceHandler collectDevice,
+    @required _UpdatedDeviceHandler handleUpdatedDevice,
   }) {
-    assert(collectDevice != null);
+    assert(handleUpdatedDevice != null);
     assert(!_duringBuildPhase);
-    assert(!_duringCollection);
+    assert(!_duringDeviceUpdate);
     final bool mouseWasConnected = mouseIsConnected;
 
     // If new event is not null, only the device that observed this event is
@@ -331,7 +351,7 @@ class MouseTracker extends ChangeNotifier {
         targetState = _MouseState(initialEvent: targetEvent);
         _mouseStates[targetState.device] = targetState;
       } else {
-        targetState.mostRecentEvent = targetEvent;
+        targetState.latestEvent = targetEvent;
         // Update mouseState to the latest devices that have not been removed,
         // so that [mouseIsConnected], which is decided by `_mouseStates`, is
         // correct during the callbacks.
@@ -342,17 +362,19 @@ class MouseTracker extends ChangeNotifier {
     assert((targetState == null) == (targetEvent == null));
 
     assert(() {
-      _duringCollection = true;
+      _duringDeviceUpdate = true;
       return true;
     }());
+    // We can safely use `_mouseStates` here without worrying about the removed
+    // state, because `targetEvent` should be null when `_mouseStates` is used.
     final Iterable<_MouseState> dirtyStates = targetEvent == null ? _mouseStates.values : <_MouseState>[targetState];
     for (_MouseState dirtyState in dirtyStates) {
       final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(dirtyState);
       final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = dirtyState.replaceAnnotations(nextAnnotations);
-      collectDevice(dirtyState, lastAnnotations);
+      handleUpdatedDevice(dirtyState, lastAnnotations);
     }
     assert(() {
-      _duringCollection = false;
+      _duringDeviceUpdate = false;
       return true;
     }());
 
@@ -425,20 +447,28 @@ class MouseTracker extends ChangeNotifier {
     }
   }
 
+  bool _hasScheduledPostFrameCheck = false;
   /// Mark all devices as dirty, and schedule a callback that is executed in the
   /// upcoming post-frame phase to check their updates.
   ///
   /// Checking a device means to collect the annotations that the pointer
   /// hovers, and triggers necessary callbacks accordingly.
   ///
-  /// This callback must be called in scheduler's persistent callback phase,
-  /// and is typically called by [RendererBinding]'s drawing method. This is
-  /// because every new frame can change the position of annotations.
+  /// Although the actual callback belongs to the scheduler's post-frame phase,
+  /// this method must be called in persistent callback phase to ensure that
+  /// the callback is scheduled after every frame, since every frame can change
+  /// the position of annotations. Typically the method is called by
+  /// [RendererBinding]'s drawing method.
   void schedulePostFrameCheck() {
     assert(_duringBuildPhase);
+    assert(!_duringDeviceUpdate);
     if (!_hasScheduledPostFrameCheck) {
       _hasScheduledPostFrameCheck = true;
-      _schedulePostFrameCheck();
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        assert(_hasScheduledPostFrameCheck);
+        _hasScheduledPostFrameCheck = false;
+        _updateAllDevices();
+      });
     }
   }
 
@@ -477,7 +507,7 @@ class MouseTracker extends ChangeNotifier {
   /// annotations attached.
   /// {@endtemplate}
   void attachAnnotation(MouseTrackerAnnotation annotation) {
-    assert(!_duringCollection);
+    assert(!_duringDeviceUpdate);
     _trackedAnnotations.add(annotation);
   }
 
@@ -490,7 +520,7 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// {@macro flutter.mouseTracker.attachAnnotation}
   void detachAnnotation(MouseTrackerAnnotation annotation) {
-    assert(!_duringCollection);
+    assert(!_duringDeviceUpdate);
     _trackedAnnotations.remove(annotation);
   }
 }
