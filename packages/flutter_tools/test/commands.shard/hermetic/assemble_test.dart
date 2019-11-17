@@ -41,7 +41,8 @@ void main() {
       });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
-    expect(commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']), throwsA(isInstanceOf<ToolExit>()));
+    expect(commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']),
+      throwsA(isInstanceOf<ToolExit>()));
   });
 
   testbed.test('Throws ToolExit if called with non-existent rule', () async {
@@ -51,7 +52,8 @@ void main() {
       });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
-    expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']), throwsA(isInstanceOf<ToolExit>()));
+    expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']),
+      throwsA(isInstanceOf<ToolExit>()));
   });
 
   testbed.test('Does not log stack traces during build failure', () async {
@@ -65,7 +67,8 @@ void main() {
       });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
-    await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']), throwsA(isInstanceOf<ToolExit>()));
+    await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
+      throwsA(isInstanceOf<ToolExit>()));
     expect(bufferLogger.errorText, contains('bar'));
     expect(bufferLogger.errorText, isNot(contains(testStackTrace.toString())));
   });
@@ -81,7 +84,13 @@ void main() {
       });
 
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-    await commandRunner.run(<String>['assemble', '-o Output', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '--build-outputs=outputs',
+      '--build-inputs=inputs',
+      'debug_macos_bundle_flutter_assets',
+    ]);
 
     final File inputs = fs.file('inputs');
     final File outputs = fs.file('outputs');
@@ -91,7 +100,13 @@ void main() {
     final DateTime theDistantPast = DateTime(1991, 8, 23);
     inputs.setLastModifiedSync(theDistantPast);
     outputs.setLastModifiedSync(theDistantPast);
-    await commandRunner.run(<String>['assemble', '-o Output', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '--build-outputs=outputs',
+      '--build-inputs=inputs',
+      'debug_macos_bundle_flutter_assets',
+    ]);
 
     expect(inputs.lastModifiedSync(), theDistantPast);
     expect(outputs.lastModifiedSync(), theDistantPast);
@@ -103,7 +118,13 @@ void main() {
           inputFiles: <File>[fs.file('foo'), fs.file('fizz')..createSync()],
           outputFiles: <File>[fs.file('bar'), fs.file(fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)]);
       });
-    await commandRunner.run(<String>['assemble', '-o Output', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '--build-outputs=outputs',
+      '--build-inputs=inputs',
+      'debug_macos_bundle_flutter_assets',
+    ]);
 
     expect(inputs.readAsStringSync(), contains('foo'));
     expect(inputs.readAsStringSync(), contains('fizz'));
