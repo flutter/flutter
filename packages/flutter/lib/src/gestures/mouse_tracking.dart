@@ -122,7 +122,7 @@ typedef _UpdatedDeviceHandler = void Function(_MouseState mouseState, LinkedHash
 // Various states of each connected mouse device.
 //
 // It is used by [MouseTracker] to compute which callbacks should be triggered
-// by each event. 
+// by each event.
 class _MouseState {
   _MouseState({
     @required PointerAddedEvent initialEvent,
@@ -282,7 +282,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   // Update all devices, despite observing no new events.
-  // 
+  //
   // This is called after a new frame, since annotations can be moved after
   // every frame.
   void _updateAllDevices() {
@@ -308,9 +308,9 @@ class MouseTracker extends ChangeNotifier {
   // means that no one can mark all devices as dirty when a new event is
   // unprocessed.
   //
-  // This method is the moment where `_mouseState` is updated. Before 
+  // This method is the moment where `_mouseState` is updated. Before
   // this method, `_mouseState` is in sync with the state before the event or
-  // before the frame. During `handleUpdateDevice` and after this method, 
+  // before the frame. During `handleUpdateDevice` and after this method,
   // `_mouseState` is in sync with the state after the event or after the frame.
   //
   // The dirty devices are decided as follows: if `targetEvent` is not null, the
@@ -318,14 +318,14 @@ class MouseTracker extends ChangeNotifier {
   // are dirty.
   //
   // This method first keeps `_mouseStates` up to date. More specifically,
-  // 
+  //
   //  * If an event is observed, update `_mouseStates` by inserting or removing
   //    the state that corresponds to the event if needed, then update the
   //    `latestEvent` property of this mouse state.
   //  * For each mouse state that will correspond to a dirty device, update the
   //    `annotations` property with the annotations the device is contained.
   //
-  // Then, for each dirty device, `handleUpdatedDevice` is called with the 
+  // Then, for each dirty device, `handleUpdatedDevice` is called with the
   // updated state and the annotations before the update.
   //
   // Last, the method checks if `mouseIsConnected` has been changed, and notify
