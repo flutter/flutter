@@ -717,7 +717,7 @@ void main() {
     expect(nestedObserver.dialogCount, 1);
   });
 
-  group('Scrollable title and content', () {
+  group('AlertDialog.scrollable: ', () {
     testWidgets('Title is scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final AlertDialog dialog = AlertDialog.scrollable(
