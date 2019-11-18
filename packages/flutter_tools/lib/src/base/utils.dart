@@ -252,7 +252,7 @@ class Uuid {
 /// the same structure (`Map<String, dynamic>`) with the correct runtime types.
 Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
   final Map<dynamic, dynamic> map = untyped as Map<dynamic, dynamic>;
-  return map.cast<String, dynamic>();
+  return map?.cast<String, dynamic>();
 }
 
 typedef AsyncCallback = Future<void> Function();

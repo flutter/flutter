@@ -152,7 +152,7 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
-      resourcePoolSize: int.parse(stringArg('resource-pool-size')),
+      resourcePoolSize: argResults.wasParsed('resource-pool-size') ? int.parse(stringArg('resource-pool-size')) : null,
     ));
     if (!result.success) {
       for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
