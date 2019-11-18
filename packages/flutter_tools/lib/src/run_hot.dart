@@ -158,13 +158,14 @@ class HotRunner extends ResidentRunner {
     if (!result) {
       return;
     }
-    final File patchDill = fs.file(dillOutputPath).parent.childFile('hotui.dill');
+    final File patchDill = fs.file(dillOutputPath + '.incremental.dill');
     if (!patchDill.existsSync()) {
       printError('Failed to create patch dill file at ${patchDill.path}');
       return;
     }
-    printTrace('Created Patch in ${sw.elapsedMilliseconds}');
-    final Uri deviceEntryUri = flutterDevice.devFS.baseUri.resolveUri(fs.path.toUri('hotui.dill'));
+    int current = sw.elapsedMilliseconds;
+    printStatus('Created Patch: $current');
+    final Uri deviceEntryUri = flutterDevice.devFS.baseUri.resolveUri(fs.path.toUri(target + '.dill.incremental.dill'));
     try {
       _httpClient ??= HttpClient();
       final HttpClientRequest request = await _httpClient.putUrl(vmService.httpAddress);
@@ -192,9 +193,13 @@ class HotRunner extends ResidentRunner {
       packagesUri: devicePackagesUri,
       pause: false,
     );
-    printTrace(response.toString());
-    await view.uiIsolate.flutterReassemble();
-    printTrace('Hot UI took: ${sw.elapsedMilliseconds}');
+    current = sw.elapsedMilliseconds - current;
+    printStatus('Reloaded Sources: $current');
+    //await view.uiIsolate.flutterReassemble();
+    final int count = await view.uiIsolate.flutterReassembleElements(classId);
+    current = sw.elapsedMilliseconds - current;
+    printStatus('Reassemble $count: $current');
+    printStatus('Hot UI Complete: ${sw.elapsedMilliseconds}');
   }
 
   Future<String> _compileExpressionService(

@@ -1413,6 +1413,14 @@ class Isolate extends ServiceObjectOwner {
     return 'unknown';
   }
 
+  Future<int> flutterReassembleElements(String classId) async {
+     final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
+      'ext.flutter.reassembleElements',
+      params: <String, Object>{'class': classId}
+    );
+    return result['count'];
+  }
+
   @override
   String toString() => 'Isolate $id';
 }

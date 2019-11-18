@@ -718,6 +718,16 @@ mixin WidgetInspectorService {
 
   static bool _debugServiceExtensionsRegistered = false;
 
+  final Set<Element> _activeElements = <Element>{};
+
+  void activateElement(Element element) {
+    _activeElements.add(element);
+  }
+
+  void deactiveElement(Element element) {
+    _activeElements.remove(element);
+  }
+
   /// Ground truth tracking what object(s) are currently selected used by both
   /// GUI tools such as the Flutter IntelliJ Plugin and the [WidgetInspector]
   /// displayed on the device.
@@ -1154,6 +1164,19 @@ mixin WidgetInspectorService {
         };
       },
     );
+     _registerServiceExtensionCallback(
+        name: 'reassembleElements',
+        callback: (Map<String, dynamic> params) async {
+          final String classId = params['class'];
+          int count = 0;
+          for (Element element in _activeElements) {
+            if (element.widget.runtimeType.toString() == classId) {
+              element.markNeedsBuild();
+              count += 1;
+            }
+          }
+          return <String, Object>{'result': count};
+      });
   }
 
   void _clearStats() {
