@@ -165,7 +165,8 @@ class EngineParagraph implements ui.Paragraph {
     } else {
       canDrawTextOnCanvas = _measurementResult.isSingleLine &&
           _plainText != null &&
-          _geometricStyle.ellipsis == null;
+          _geometricStyle.ellipsis == null &&
+          _geometricStyle.shadows == null;
     }
 
     return canDrawTextOnCanvas &&
@@ -364,7 +365,9 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   double get _lineHeight {
     // TODO(mdebbar): Implement proper support for strut styles.
     // https://github.com/flutter/flutter/issues/32243
-    if (_strutStyle == null || _strutStyle._height == null || _strutStyle._height == 0) {
+    if (_strutStyle == null ||
+        _strutStyle._height == null ||
+        _strutStyle._height == 0) {
       // When there's no strut height, always use paragraph style height.
       return _height;
     }
@@ -908,6 +911,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
           wordSpacing: wordSpacing,
           decoration: _textDecorationToCssString(decoration, decorationStyle),
           ellipsis: _paragraphStyle._ellipsis,
+          shadows: shadows,
         ),
         plainText: '',
         paint: paint,
@@ -961,6 +965,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
         wordSpacing: wordSpacing,
         decoration: _textDecorationToCssString(decoration, decorationStyle),
         ellipsis: _paragraphStyle._ellipsis,
+        shadows: shadows,
       ),
       plainText: plainText,
       paint: paint,
