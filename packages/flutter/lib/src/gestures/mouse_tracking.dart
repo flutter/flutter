@@ -178,9 +178,22 @@ class _MouseState {
 /// [RendererBinding].
 ///
 /// ### Details
-/// TODO
-/// where the "collection" stands for the process of collecting the annotations of the
-// device, dispatch callbacks and update states accordingly, which is done
+///
+/// The state of [MouseTracker] consists of 3 parts:
+///
+///  * The mouse that are connected.
+///  * The annotations that are attached, i.e. whose owner render object is
+///    painted on the screen.
+///  * In which annotations each device is contained.
+///
+/// The states remain stable most of the time, and are only changed at the
+/// following moments:
+///
+///  * An eligible [PointerEvent] has been observed, e.g. a device is added,
+///    removed, or moved. In this case, the state related to this device will
+///    be immediately updated.
+///  * A frame has been painted. In this case, a callback will be scheduled to
+///    the upcoming post-frame phase to update all devices.
 class MouseTracker extends ChangeNotifier {
   /// Creates a mouse tracker to keep track of mouse locations.
   ///
@@ -228,6 +241,7 @@ class MouseTracker extends ChangeNotifier {
   // It is the source of truth for the list of connected mouse devices.
   final Map<int, _MouseState> _mouseStates = <int, _MouseState>{};
 
+  // Whether an observed event might update a device.
   static bool _shouldMarkStateDirty(_MouseState state, PointerEvent value) {
     if (state == null)
       return true;
@@ -313,10 +327,10 @@ class MouseTracker extends ChangeNotifier {
   // Update device states with the change of a new event or a new frame, and
   // trigger `handleUpdateDevice` for each dirty device.
   //
-  // This method is called either when a new event is observed, or when no new
-  // event is observed but all devices are marked dirty due to a new frame. It
-  // means that no one can mark all devices as dirty when a new event is
-  // unprocessed.
+  // This method is called either when a new event is observed (`targetEvent`
+  // being non-null), or when no new event is observed but all devices are
+  // marked dirty due to a new frame. It means that it will not happen that all
+  // devices are marked dirty when a new event is unprocessed.
   //
   // This method is the moment where `_mouseState` is updated. Before
   // this method, `_mouseState` is in sync with the state before the event or
@@ -446,6 +460,7 @@ class MouseTracker extends ChangeNotifier {
       for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
         // Deduplicate: Trigger hover if it's a newly hovered annotation
         // or the position has changed
+        assert(trackedAnnotations.contains(annotation));
         if (!lastAnnotations.contains(annotation)
             || handledEvent is! PointerHoverEvent
             || handledEvent.position != unhandledEvent.position) {
@@ -498,39 +513,47 @@ class MouseTracker extends ChangeNotifier {
   /// Notify [MouseTracker] that a new [MouseTrackerAnnotation] has started to
   /// take effect.
   ///
-  /// This method should be called as soon as the render object that owns this
-  /// annotation is added to the render tree, so that whether the annotation is
-  /// attached is kept in sync with whether its owner object is mounted.
-  ///
+  /// This method is typically called by the [RenderObject] that owns an
+  /// annotation, as soon as the render object is added to the render tree.
   /// {@template flutter.mouseTracker.attachAnnotation}
   /// This method does not cause any immediate effect, since the state it
-  /// changes is used during a post-frame callback or while handling certain
+  /// changes is used during a post-frame callback or when handling certain
   /// pointer events.
   ///
-  /// The state of annotation attachment determines whether an exit event is
-  /// caused by movement or by the disposal of its owner render object,
-  /// preventing some common patterns causing exceptions. See
-  /// [MouseTracker.onExit] for its application.
+  /// ### About annotation attachment
   ///
-  /// The [MouseTracker] also uses this to track the number of attached
-  /// annotations, and will skip mouse position checks if there is no
-  /// annotations attached.
+  /// It is the responsibility of the render object that owns the annotation to
+  /// maintain the attachment of the annotation. Whether an annotation is
+  /// attached should be kept in sync with whether its owner object is mounted,
+  /// which is used in the following ways:
+  ///
+  ///  * If a pointer enters an annotation, it is asserted that the annotation
+  ///    is attached.
+  ///  * If a pointer stops being contained by an annotation,
+  ///    the exit event is triggered only if the annotation is still attached.
+  ///    This is to prevent exceptions caused calling setState of a disposed
+  ///    widget. See [MouseTrackerAnnotation.onExit] for more details.
+  ///  * The [MouseTracker] also uses the attachment to track the number of
+  ///    attached annotations, and will skip mouse position checks if there is no
+  ///    annotations attached.
   /// {@endtemplate}
+  ///  * Attaching an annotation that has been attached will assert.
   void attachAnnotation(MouseTrackerAnnotation annotation) {
     assert(!_duringDeviceUpdate);
+    assert(!_trackedAnnotations.contains(annotation));
     _trackedAnnotations.add(annotation);
   }
 
   /// Notify [MouseTracker] that a mouse tracker annotation that was previously
   /// attached has stopped taking effect.
   ///
-  /// This method should be called as soon as the render object that owns this
-  /// annotation is removed from the render tree, so that whether the annotation
-  /// is attached is kept in sync with whether its owner object is mounted.
-  ///
+  /// This method is typically called by the [RenderObject] that owns an
+  /// annotation, as soon as the render object is removed from the render tree.
   /// {@macro flutter.mouseTracker.attachAnnotation}
+  ///  * Detaching an annotation that has not been attached will assert.
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     assert(!_duringDeviceUpdate);
+    assert(_trackedAnnotations.contains(annotation));
     _trackedAnnotations.remove(annotation);
   }
 }
