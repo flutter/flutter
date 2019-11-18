@@ -78,7 +78,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(pressed, kIsWeb ? isFalse : isTrue);
+    expect(pressed, isTrue);
 
     pressed = false;
     await tester.sendKeyEvent(LogicalKeyboardKey.space);

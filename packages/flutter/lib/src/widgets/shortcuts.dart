@@ -369,46 +369,55 @@ class _ShortcutsMarker extends InheritedNotifier<ShortcutManager> {
         super(notifier: manager, child: child);
 }
 
+// Default shortcuts for the web platform.
+final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
+  LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+  LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+  LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+};
+
+// Default shortcuts for the macOS platform.
+final Map<LogicalKeySet, Intent> _defaultMacOsShortcuts = <LogicalKeySet, Intent>{
+  LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+  LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+  LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+  LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+  LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+  LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+  LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+  LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+};
+
+// Default shortcuts for most platforms.
+final Map<LogicalKeySet, Intent> _defaultShortcuts = <LogicalKeySet, Intent>{
+  LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+  LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+  LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+  LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+  LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+  LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+  LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+  LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+};
+
 /// Generates the default key bindings for the given `platform`.
 ///
 /// Used by [WidgetsApp] to assign the default key bindings if none are
 /// supplied.
 Map<LogicalKeySet, Intent> defaultShortcuts(TargetPlatform platform) {
   if (kIsWeb) {
-    return <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
-      LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
-    };
+    return _defaultWebShortcuts;
   }
 
   // TODO(gspencergoog): Move this into the switch below once TargetPlatform.macOS exists.
   if (Platform.isMacOS) {
-    return  <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
-      LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-      LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
-    };
+    return _defaultMacOsShortcuts;
   }
 
   switch (platform) {
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
-      return <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
-        LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-        LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-        LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
-        LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-        LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
-      };
+      return _defaultShortcuts;
       break;
     case TargetPlatform.iOS:
       // No keyboard support on iOS yet.

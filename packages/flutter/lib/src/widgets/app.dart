@@ -684,7 +684,7 @@ class WidgetsApp extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   /// {@template flutter.widgets.widgetsApp.shortcuts}
-  /// The default map of keyboard keys to intents for the application.
+  /// The default map of keyboard shortcuts to intents for the application.
   ///
   /// By default, this is the output of [defaultShortcuts], called with
   /// [defaultTargetPlatform]. Specifying [shortcuts] for an app overrides the
@@ -757,17 +757,12 @@ class WidgetsApp extends StatefulWidget {
 class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // STATE LIFECYCLE
 
-  Map<LogicalKeySet, Intent> _keyMap;
-  Map<LocalKey, ActionFactory> _actionMap;
-
   @override
   void initState() {
     super.initState();
     _updateNavigator();
     _locale = _resolveLocales(WidgetsBinding.instance.window.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
-    _keyMap = widget.shortcuts ?? defaultShortcuts(defaultTargetPlatform);
-    _actionMap = widget.actions ?? defaultActions(defaultTargetPlatform);
   }
 
   @override
@@ -1256,9 +1251,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
     return Shortcuts(
-      shortcuts: _keyMap,
+      shortcuts: widget.shortcuts ?? defaultShortcuts(defaultTargetPlatform),
       child: Actions(
-        actions: _actionMap,
+        actions: widget.actions ?? defaultActions(defaultTargetPlatform),
         child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
           child: _MediaQueryFromWindow(
