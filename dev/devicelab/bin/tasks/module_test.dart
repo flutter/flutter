@@ -216,12 +216,12 @@ Future<void> main() async {
       }
 
       final String analyticsOutput = analyticsOutputFile.readAsStringSync();
-      if (!analyticsOutput.contains('cd24: android-arm64')
+      if (!analyticsOutput.contains('cd24: android')
           || !analyticsOutput.contains('cd25: true')
           || !analyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
           'Building outer app produced the following analytics: "$analyticsOutput"'
-          'but not the expected strings: "cd24: android-arm64", "cd25: true" and '
+          'but not the expected strings: "cd24: android", "cd25: true" and '
           '"viewName: assemble"'
         );
       }
