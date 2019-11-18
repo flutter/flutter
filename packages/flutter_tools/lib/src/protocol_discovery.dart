@@ -80,7 +80,7 @@ class ProtocolDiscovery {
   Stream<Uri> get uris {
     return _uriStreamController.stream
       .transform(_throttle<Uri>(
-        throttleDuration: throttleDuration,
+        waitDuration: throttleDuration,
       ))
       .asyncMap<Uri>((Uri observatoryUri) => _forwardPort(observatoryUri));
   }
@@ -142,11 +142,15 @@ class ProtocolDiscovery {
   }
 }
 
-/// Throttles a stream by [timeInMilliseconds].
+/// This transformer will produce an event at most once every [waitDuration].
+///
+/// For example, consider a `waitDuration` of `10ms`, and list of event names
+/// and arrival times: `a (0ms), b (5ms), c (11ms), d (21ms)`.
+/// The events `c` and `d` will be produced as a result.
 StreamTransformer<S, S> _throttle<S>({
-  @required Duration throttleDuration,
+  @required Duration waitDuration,
 }) {
-  assert(throttleDuration != null);
+  assert(waitDuration != null);
 
   S latestLine;
   int lastExecution;
@@ -160,9 +164,10 @@ StreamTransformer<S, S> _throttle<S>({
         final int currentTime = DateTime.now().millisecondsSinceEpoch;
         lastExecution ??= currentTime;
         final int remainingTime = currentTime - lastExecution;
-        final int nextExecutionTime = remainingTime > throttleDuration.inMilliseconds
+        final int nextExecutionTime = remainingTime > waitDuration.inMilliseconds
           ? 0
-          : throttleDuration.inMilliseconds - remainingTime;
+          : waitDuration.inMilliseconds - remainingTime;
+
         throttleFuture ??= Future<void>
           .delayed(Duration(milliseconds: nextExecutionTime))
           .whenComplete(() {
