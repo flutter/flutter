@@ -425,15 +425,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   // Sets the fallback affinity to the affinity of the selection.
-  //
-  // Require a full selection as affinity should always be computed with a selection.
   void _setFallbackAffinity(
-    TextSelection selection,
+    TextAffinity affinity,
   ) {
     // Engine-computed selections will always compute affinity when necessary.
     // We cache this affinity in the case we use a platform supplied selection
     // that does not provide an affinity.
-    _fallbackAffinity = selection.affinity;
+    _fallbackAffinity = affinity;
   }
 
   static final Set<LogicalKeyboardKey> _movementKeys = <LogicalKeyboardKey>{
@@ -1592,7 +1590,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
     // Call [onSelectionChanged] only when the selection actually changed.
     _handleSelectionChange(newSelection, cause);
-    _setFallbackAffinity(newSelection);
+    _setFallbackAffinity(newSelection.affinity);
   }
 
   /// Select a word around the location of the last tap down.
@@ -1641,6 +1639,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition - _paintOffset));
+    _setFallbackAffinity(position.affinity);
     final TextRange word = _textPainter.getWordBoundary(position);
     if (position.offset - word.start <= 1) {
       _handleSelectionChange(

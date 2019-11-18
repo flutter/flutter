@@ -82,9 +82,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
-          // Call regular selectPosition to set tap fallback affinity.
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          // Call selectWordEdge to achieve desired selection.
           renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
           break;
         case TargetPlatform.android:
