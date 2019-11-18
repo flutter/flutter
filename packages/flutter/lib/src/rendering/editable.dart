@@ -525,58 +525,59 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return result;
     }
 
-    // Jump to begin/end of word.
-    if (wordModifier) {
-      // If control/option is pressed, we will decide which way to look for a
-      // word based on which arrow is pressed.
-      if (leftArrow) {
-        // When going left, we want to skip over any whitespace before the word,
-        // so we go back to the first non-whitespace before asking for the word
-        // boundary, since _selectWordAtOffset finds the word boundaries without
-        // including whitespace.
-        final int startPoint = previousNonWhitespace(newSelection.extentOffset);
-        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
-      } else if (rightArrow) {
-        // When going right, we want to skip over any whitespace after the word,
-        // so we go forward to the first non-whitespace character before asking
-        // for the word bounds, since _selectWordAtOffset finds the word
-        // boundaries without including whitespace.
-        final int startPoint = nextNonWhitespace(newSelection.extentOffset);
-        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
-      }
-    } else if (lineModifier) {
-      // If control/command is pressed, we will decide which way to expand to
-      // the beginning/end of the line based on which arrow is pressed.
-      if (leftArrow) {
-        // When going left, we want to skip over any whitespace before the line,
-        // so we go back to the first non-whitespace before asking for the line
-        // bounds, since _selectLineAtOffset finds the line boundaries without
-        // including whitespace (like the newline).
-        final int startPoint = previousNonWhitespace(newSelection.extentOffset);
-        final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
-      } else if (rightArrow) {
-        // When going right, we want to skip over any whitespace after the line,
-        // so we go forward to the first non-whitespace character before asking
-        // for the line bounds, since _selectLineAtOffset finds the line
-        // boundaries without including whitespace (like the newline).
-        final int startPoint = nextNonWhitespace(newSelection.extentOffset);
-        final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
-      }
-    } else {
-      if (rightArrow && newSelection.extentOffset < _plainText.length) {
-        newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset + 1);
-        if (shift) {
-          _cursorResetLocation += 1;
+    if ((rightArrow || leftArrow) && !(rightArrow && leftArrow)) {
+      // Jump to begin/end of word.
+      if (wordModifier) {
+        // If control/option is pressed, we will decide which way to look for a
+        // word based on which arrow is pressed.
+        if (leftArrow) {
+          // When going left, we want to skip over any whitespace before the word,
+          // so we go back to the first non-whitespace before asking for the word
+          // boundary, since _selectWordAtOffset finds the word boundaries without
+          // including whitespace.
+          final int startPoint = previousNonWhitespace(newSelection.extentOffset);
+          final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
+          newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
+        } else {
+          // When going right, we want to skip over any whitespace after the word,
+          // so we go forward to the first non-whitespace character before asking
+          // for the word bounds, since _selectWordAtOffset finds the word
+          // boundaries without including whitespace.
+          final int startPoint = nextNonWhitespace(newSelection.extentOffset);
+          final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
+          newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
         }
-      }
-      if (leftArrow && newSelection.extentOffset > 0) {
-        newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset - 1);
-        if (shift) {
-          _cursorResetLocation -= 1;
+      } else if (lineModifier) {
+        // If control/command is pressed, we will decide which way to expand to
+        // the beginning/end of the line based on which arrow is pressed.
+        if (leftArrow) {
+          // When going left, we want to skip over any whitespace before the line,
+          // so we go back to the first non-whitespace before asking for the line
+          // bounds, since _selectLineAtOffset finds the line boundaries without
+          // including whitespace (like the newline).
+          final int startPoint = previousNonWhitespace(newSelection.extentOffset);
+          final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
+          newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
+        } else {
+          // When going right, we want to skip over any whitespace after the line,
+          // so we go forward to the first non-whitespace character before asking
+          // for the line bounds, since _selectLineAtOffset finds the line
+          // boundaries without including whitespace (like the newline).
+          final int startPoint = nextNonWhitespace(newSelection.extentOffset);
+          final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
+          newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
+        }
+      } else {
+        if (rightArrow && newSelection.extentOffset < _plainText.length) {
+          newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset + 1);
+          if (shift) {
+            _cursorResetLocation += 1;
+          }
+        } else if (leftArrow && newSelection.extentOffset > 0) {
+          newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset - 1);
+          if (shift) {
+            _cursorResetLocation -= 1;
+          }
         }
       }
     }
