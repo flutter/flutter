@@ -97,6 +97,47 @@ class TextSelectionPoint {
   }
 }
 
+// Check if the given code unit is a white space or separator
+// character.
+//
+// Includes newline characters from ASCII and separators from the
+// [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
+// TODO(gspencergoog): replace when we expose this ICU information.
+bool _isWhitespace(int codeUnit) {
+  switch (codeUnit) {
+    case 0x9: // horizontal tab
+    case 0xA: // line feed
+    case 0xB: // vertical tab
+    case 0xC: // form feed
+    case 0xD: // carriage return
+    case 0x1C: // file separator
+    case 0x1D: // group separator
+    case 0x1E: // record separator
+    case 0x1F: // unit separator
+    case 0x20: // space
+    case 0xA0: // no-break space
+    case 0x1680: // ogham space mark
+    case 0x2000: // en quad
+    case 0x2001: // em quad
+    case 0x2002: // en space
+    case 0x2003: // em space
+    case 0x2004: // three-per-em space
+    case 0x2005: // four-er-em space
+    case 0x2006: // six-per-em space
+    case 0x2007: // figure space
+    case 0x2008: // punctuation space
+    case 0x2009: // thin space
+    case 0x200A: // hair space
+    case 0x202F: // narrow no-break space
+    case 0x205F: // medium mathematical space
+    case 0x3000: // ideographic space
+      break;
+    default:
+      return false;
+  }
+  return true;
+}
+
 /// Displays some text in a scrollable container with a potentially blinking
 /// cursor and with gesture recognizers.
 ///
@@ -467,14 +508,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final bool upArrow = key == LogicalKeyboardKey.arrowUp;
     final bool downArrow = key == LogicalKeyboardKey.arrowDown;
 
-    // Returns true if [c] represents a whitespace code unit.
-    bool isWhitespace(int c) => (c <= 0x000D && c >= 0x0009) || c == 0x0020;
-
     // Find the previous non-whitespace character
     int previousNonWhitespace(int extent) {
       int result = math.max(extent - 1, 0);
       final String plain = text.toPlainText();
-      while (result > 0 && isWhitespace(plain.codeUnitAt(result))) {
+      while (result > 0 && _isWhitespace(plain.codeUnitAt(result))) {
         result--;
       }
       return result;
@@ -483,7 +521,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     int nextNonWhitespace(int extent) {
       final String plain = text.toPlainText();
       int result = math.min(extent + 1, plain.length);
-      while (result < plain.length && isWhitespace(plain.codeUnitAt(result))) {
+      while (result < plain.length && _isWhitespace(plain.codeUnitAt(result))) {
         result++;
       }
       return result;
@@ -1195,42 +1233,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Check if the given text range only contains white space or separator
   // characters.
   //
-  // newline characters from ascii and separators from the
+  // Includes newline characters from ASCII and separators from the
   // [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
   // TODO(jonahwilliams): replace when we expose this ICU information.
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int codeUnit = text.codeUnitAt(i);
-      switch (codeUnit) {
-        case 0x9: // horizontal tab
-        case 0xA: // line feed
-        case 0xB: // vertical tab
-        case 0xC: // form feed
-        case 0xD: // carriage return
-        case 0x1C: // file separator
-        case 0x1D: // group separator
-        case 0x1E: // record separator
-        case 0x1F: // unit separator
-        case 0x20: // space
-        case 0xA0: // no-break space
-        case 0x1680: // ogham space mark
-        case 0x2000: // en quad
-        case 0x2001: // em quad
-        case 0x2002: // en space
-        case 0x2003: // em space
-        case 0x2004: // three-per-em space
-        case 0x2005: // four-er-em space
-        case 0x2006: // six-per-em space
-        case 0x2007: // figure space
-        case 0x2008: // punctuation space
-        case 0x2009: // thin space
-        case 0x200A: // hair space
-        case 0x202F: // narrow no-break space
-        case 0x205F: // medium mathematical space
-        case 0x3000: // ideographic space
-          break;
-        default:
-          return false;
+      if (!_isWhitespace(codeUnit)) {
+        return false;
       }
     }
     return true;
