@@ -145,7 +145,7 @@ void main() {
       expect(exit, isNotNull);
       expect(exit.position, equals(const Offset(1.0, 1.0)));
     });
-    testWidgets('doesn not detect pointer exit when widget disappears', (WidgetTester tester) async {
+    testWidgets('does not detect pointer exit when widget disappears', (WidgetTester tester) async {
       PointerEnterEvent enter;
       PointerHoverEvent move;
       PointerExitEvent exit;
@@ -528,7 +528,7 @@ void main() {
       );
       await tester.pump();
       expect(HoverClientState.numEntries, equals(1));
-      // Unmounting a MouseRegion doesn't trigger onExit, but onExitOrDispose
+      // Unmounting a MouseRegion doesn't trigger onExit
       expect(HoverClientState.numExits, equals(0));
 
       await tester.pumpWidget(
@@ -566,7 +566,7 @@ void main() {
       );
       await tester.pump();
       expect(HoverClientState.numEntries, equals(1));
-      // Unmounting a MouseRegion doesn't trigger onExit, but onExitOrDispose
+      // Unmounting a MouseRegion doesn't trigger onExit
       expect(HoverClientState.numExits, equals(0));
     });
 

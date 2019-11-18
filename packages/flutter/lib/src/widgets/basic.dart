@@ -5575,11 +5575,20 @@ class Listener extends StatelessWidget {
     // TODO(tongmu): After it goes stable, remove these 3 parameters from Listener
     // and Listener should no longer need an intermediate class _PointerListener.
     // https://github.com/flutter/flutter/issues/36085
-    @Deprecated('Use MouseRegion.onEnter instead. See MouseRegion.opaque for behavioral difference.')
+    @Deprecated(
+      'Use MouseRegion.onEnter instead. See MouseRegion.opaque for behavioral difference. '
+      'This feature was deprecated after v1.10.14.'
+    )
     this.onPointerEnter, // ignore: deprecated_member_use_from_same_package
-    @Deprecated('Use MouseRegion.onExit instead. See MouseRegion.opaque for behavioral difference.')
+    @Deprecated(
+      'Use MouseRegion.onExit instead. See MouseRegion.opaque for behavioral difference. '
+      'This feature was deprecated after v1.10.14.'
+    )
     this.onPointerExit, // ignore: deprecated_member_use_from_same_package
-    @Deprecated('Use MouseRegion.onHover instead. See MouseRegion.opaque for behavioral difference.')
+    @Deprecated(
+      'Use MouseRegion.onHover instead. See MouseRegion.opaque for behavioral difference. '
+      'This feature was deprecated after v1.10.14.'
+    )
     this.onPointerHover, // ignore: deprecated_member_use_from_same_package
     this.onPointerUp,
     this.onPointerCancel,
@@ -5866,7 +5875,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///
   /// The last case is when [onExit] does not match an earlier [onEnter].
   /// This design is because the last case is very likely to be handled
-  /// improperly and crash the app (such as calling `setState` of the disposed
+  /// improperly and cause exceptions (such as calling `setState` of the disposed
   /// widget). Also, the last case can already be achieved by using the event
   /// that causes the removal, or simply overriding [Widget.dispose].
   ///

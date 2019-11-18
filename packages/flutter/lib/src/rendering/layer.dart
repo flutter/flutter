@@ -384,7 +384,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///    position of the event related to each annotation, and is equally fast,
   ///    hence is preferred over [findAll].
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  @Deprecated('Use findAllAnnotations instead. This API will be removed in early 2020.')
+  @Deprecated(
+    'Use findAllAnnotations(...).annotations instead. '
+    'This feature was deprecated after v1.10.14.'
+  )
   Iterable<S> findAll<S>(Offset localPosition) {
     final AnnotationResult<S> result = findAllAnnotations(localPosition);
     return result.entries.map((AnnotationEntry<S> entry) => entry.annotation);

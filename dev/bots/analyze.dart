@@ -65,6 +65,7 @@ Future<void> run(List<String> arguments) async {
     exit(1);
   }
 
+  await verifyDeprecations(flutterRoot);
   await verifyNoMissingLicense(flutterRoot);
   await verifyNoTestImports(flutterRoot);
   await verifyNoTestPackageImports(flutterRoot);
@@ -124,11 +125,100 @@ Future<void> run(List<String> arguments) async {
   }
 }
 
+
+// TESTS
+
+final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
+final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // ignore: flutter_deprecation_syntax (see analyze.dart)
+final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
+final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)\.(?: See: (https://flutter.dev/.+))?'$");
+final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
+
+/// Some deprecation notices are special, for example they're used to annotate members that
+/// will never go away and were never allowed but which we are trying to show messages for.
+/// (One example would be a library that intentionally conflicts with a member in another
+/// library to indicate that it is incompatible with that other library. Another would be
+/// the regexp just above...)
+const String _ignoreDeprecation = ' // ignore: flutter_deprecation_syntax (see analyze.dart)';
+
+/// Some deprecation notices are grand-fathered in for now. They must have an issue listed.
+final RegExp _grandfatheredDeprecation = RegExp(r' // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/[0-9]+$');
+
+Future<void> verifyDeprecations(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  for (File file in _dartFiles(workingDirectory)) {
+    int lineNumber = 0;
+    final List<String> lines = file.readAsLinesSync();
+    final List<int> linesWithDeprecations = <int>[];
+    for (String line in lines) {
+      if (line.contains(_findDeprecationPattern) &&
+          !line.endsWith(_ignoreDeprecation) &&
+          !line.contains(_grandfatheredDeprecation)) {
+        linesWithDeprecations.add(lineNumber);
+      }
+      lineNumber += 1;
+    }
+    for (int lineNumber in linesWithDeprecations) {
+      try {
+        final Match match1 = _deprecationPattern1.firstMatch(lines[lineNumber]);
+        if (match1 == null)
+          throw 'Deprecation notice does not match required pattern.';
+        final String indent = match1[1];
+        lineNumber += 1;
+        if (lineNumber >= lines.length)
+          throw 'Incomplete deprecation notice.';
+        Match match3;
+        String message;
+        do {
+          final Match match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
+          if (match2 == null)
+            throw 'Deprecation notice does not match required pattern.';
+          if (!lines[lineNumber].startsWith("$indent  '"))
+            throw 'Unexpected deprecation notice indent.';
+          if (message == null) {
+            final String firstChar = String.fromCharCode(match2[1].runes.first);
+            if (firstChar.toUpperCase() != firstChar)
+              throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide.';
+          }
+          message = match2[1];
+          lineNumber += 1;
+          if (lineNumber >= lines.length)
+            throw 'Incomplete deprecation notice.';
+          match3 = _deprecationPattern3.firstMatch(lines[lineNumber]);
+        } while (match3 == null);
+        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
+          throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
+        if (!lines[lineNumber].startsWith("$indent  '"))
+          throw 'Unexpected deprecation notice indent.';
+        if (int.parse(match3[1]) > 1 || int.parse(match3[2]) > 11) {
+          if (match3[4] == null)
+            throw 'A URL to the deprecation notice is required.';
+        }
+        lineNumber += 1;
+        if (lineNumber >= lines.length)
+          throw 'Incomplete deprecation notice.';
+        if (!lines[lineNumber].contains(_deprecationPattern4))
+          throw 'End of deprecation notice does not match required pattern.';
+        if (!lines[lineNumber].startsWith('$indent)'))
+          throw 'Unexpected deprecation notice indent.';
+      } catch (error) {
+        errors.add('${file.path}:${lineNumber + 1}: $error');
+      }
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$redLine');
+    print(errors.join('\n'));
+    print('${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes$reset\n');
+    print('$redLine\n');
+    exit(1);
+  }
+}
+
 Future<void> verifyNoMissingLicense(String workingDirectory) async {
   final List<String> errors = <String>[];
-  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
-      .listSync(recursive: true)
-      .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
+  for (FileSystemEntity entity in _dartFiles(workingDirectory)) {
     final File file = entity;
     bool hasLicense = false;
     final List<String> lines = file.readAsLinesSync();
@@ -487,6 +577,26 @@ bool _listEquals<T>(List<T> a, List<T> b) {
       return false;
   }
   return true;
+}
+
+Iterable<File> _dartFiles(String workingDirectory) sync* {
+  final Set<FileSystemEntity> pending = <FileSystemEntity>{ Directory(workingDirectory) };
+  while (pending.isNotEmpty) {
+    final FileSystemEntity entity = pending.first;
+    pending.remove(entity);
+    if (entity is File) {
+      if (path.extension(entity.path) == '.dart')
+        yield entity;
+    } else if (entity is Directory) {
+      if (File(path.join(entity.path, '.dartignore')).existsSync())
+        continue;
+      if (path.basename(entity.path) == '.git')
+        continue;
+      if (path.basename(entity.path) == '.dart_tool')
+        continue;
+      pending.addAll(entity.listSync());
+    }
+  }
 }
 
 Future<String> _getCommitRange() async {

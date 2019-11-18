@@ -764,7 +764,7 @@ void main() {
     expect(paintCount, 1);
   });
 
-  testWidgets('Annotations mounted under the pointer should should take effect in the next postframe', (WidgetTester tester) async {
+  testWidgets('A MouseRegion mounted under the pointer should should take effect in the next postframe', (WidgetTester tester) async {
     bool hovered = false;
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -807,7 +807,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Annotations unmounted under the pointer should not trigger state change', (WidgetTester tester) async {
+  testWidgets('A MouseRegion unmounted under the pointer should not trigger state change', (WidgetTester tester) async {
     bool hovered = true;
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -851,7 +851,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Annotations moved into the mouse should take effect in the next postframe', (WidgetTester tester) async {
+  testWidgets('A MouseRegion moved into the mouse should take effect in the next postframe', (WidgetTester tester) async {
     bool hovered = false;
     final List<bool> logHovered = <bool>[];
     bool moved = false;
