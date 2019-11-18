@@ -189,13 +189,14 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
         'hasScrollBody property of SliverFillRemaining should not be set to'
         'false.',
     );
+
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
     geometry = SliverGeometry(
       scrollExtent: hasScrollBody ? constraints.viewportMainAxisExtent : extent,
-      paintExtent: paintedChildSize,
-      maxPaintExtent: paintedChildSize,
+      paintExtent: fillOverscroll ? math.min(maxExtent, constraints.remainingPaintExtent) : paintedChildSize,
+      maxPaintExtent: fillOverscroll ? math.min(maxExtent, constraints.remainingPaintExtent) : paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     if (child != null)
