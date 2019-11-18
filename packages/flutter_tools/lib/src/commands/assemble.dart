@@ -173,8 +173,12 @@ class AssembleCommand extends FlutterCommand {
         : null,
     ));
     if (!result.success) {
-      for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
-        printError('Target ${data.key} failed: ${data.value.exception}', stackTrace: data.value.stackTrace);
+      for (ExceptionMeasurement measurement in result.exceptions.values) {
+        printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
       }
       throwToolExit('build failed.');
     }
