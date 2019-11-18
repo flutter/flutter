@@ -190,16 +190,6 @@ abstract class Source {
   /// If [artifact] points to a directory then all child files are included.
   const factory Source.artifact(Artifact artifact, {TargetPlatform platform, BuildMode mode}) = _ArtifactSource;
 
-  /// The source is provided by a depfile generated at runtime.
-  ///
-  /// The `name` is of the file, and is expected to be output relative to the
-  /// build directory.
-  ///
-  /// Before the first build, the depfile is expected to be missing. Its
-  /// absence is interpreted as the build needing to run. Afterwards, both
-  /// input and output file hashes are updated.
-  ///const factory Source.depfile(String name) = _DepfileSource;
-
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
 
