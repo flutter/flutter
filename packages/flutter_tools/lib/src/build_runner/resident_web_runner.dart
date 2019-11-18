@@ -745,7 +745,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
       }
     }
     // Allows browser refresh hot restart on non-debug builds.
-    if (device is ChromeDevice && !isRunningDebug) {
+    if (device.device is ChromeDevice && !isRunningDebug) {
       try {
         final Chrome chrome = await ChromeLauncher.connectedInstance;
         final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
