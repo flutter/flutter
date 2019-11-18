@@ -17,7 +17,7 @@ class ProtocolDiscovery {
     this.logReader,
     this.serviceName, {
     this.portForwarder,
-    this.throttleTimeInMilliseconds,
+    this.throttleDuration,
     this.hostPort,
     this.devicePort,
     this.ipv6,
@@ -33,7 +33,7 @@ class ProtocolDiscovery {
   factory ProtocolDiscovery.observatory(
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
-    int throttleTimeInMilliseconds = 200,
+    Duration throttleDuration = const Duration(milliseconds: 200),
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
@@ -43,7 +43,7 @@ class ProtocolDiscovery {
       logReader,
       kObservatoryService,
       portForwarder: portForwarder,
-      throttleTimeInMilliseconds: throttleTimeInMilliseconds,
+      throttleDuration: throttleDuration,
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
@@ -57,8 +57,8 @@ class ProtocolDiscovery {
   final int devicePort;
   final bool ipv6;
 
-  /// The time to wait before forwarding observatory URIs from [logReader].
-  final int throttleTimeInMilliseconds;
+  /// The time to wait before forwarding a new observatory URIs from [logReader].
+  final Duration throttleDuration;
 
   StreamSubscription<String> _deviceLogSubscription;
   StreamController<Uri> _uriStreamController;
@@ -80,7 +80,7 @@ class ProtocolDiscovery {
   Stream<Uri> get uris {
     return _uriStreamController.stream
       .transform(_throttle<Uri>(
-        timeInMilliseconds: throttleTimeInMilliseconds,
+        throttleDuration: throttleDuration,
       ))
       .asyncMap<Uri>((Uri observatoryUri) => _forwardPort(observatoryUri));
   }
@@ -144,9 +144,9 @@ class ProtocolDiscovery {
 
 /// Throttles a stream by [timeInMilliseconds].
 StreamTransformer<S, S> _throttle<S>({
-  @required int timeInMilliseconds,
+  @required Duration throttleDuration,
 }) {
-  assert(timeInMilliseconds != null);
+  assert(throttleDuration != null);
 
   S latestLine;
   int lastExecution;
@@ -160,9 +160,9 @@ StreamTransformer<S, S> _throttle<S>({
         final int currentTime = DateTime.now().millisecondsSinceEpoch;
         lastExecution ??= currentTime;
         final int remainingTime = currentTime - lastExecution;
-        final int nextExecutionTime = remainingTime > timeInMilliseconds
+        final int nextExecutionTime = remainingTime > throttleDuration.inMilliseconds
           ? 0
-          : timeInMilliseconds - remainingTime;
+          : throttleDuration.inMilliseconds - remainingTime;
         throttleFuture ??= Future<void>
           .delayed(Duration(milliseconds: nextExecutionTime))
           .whenComplete(() {
