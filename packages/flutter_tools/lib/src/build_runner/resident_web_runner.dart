@@ -104,6 +104,8 @@ abstract class ResidentWebRunner extends ResidentRunner {
   /// WebServer device is debuggable when running with --start-paused.
   bool get deviceIsDebuggable => device.device is! WebServerDevice || debuggingOptions.startPaused;
 
+  bool get _enableDwds => debuggingEnabled;
+
   WebFs _webFs;
   ConnectionResult _connectionResult;
   StreamSubscription<vmservice.Event> _stdOutSub;
@@ -603,7 +605,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           initializePlatform: debuggingOptions.initializePlatform,
           hostname: debuggingOptions.hostname,
           port: debuggingOptions.port,
-          skipDwds: !deviceIsDebuggable || !debuggingOptions.buildInfo.isDebug,
+          skipDwds: !_enableDwds,
           dartDefines: dartDefines,
         );
         // When connecting to a browser, update the message with a seemsSlow notification
@@ -625,7 +627,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
             'uri': _webFs.uri,
           },
         );
-        if (supportsServiceProtocol) {
+        if (_enableDwds) {
           final bool useDebugExtension = device.device is WebServerDevice && debuggingOptions.startPaused;
           _connectionResult = await _webFs.connect(useDebugExtension);
           unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
