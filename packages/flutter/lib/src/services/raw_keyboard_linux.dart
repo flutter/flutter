@@ -208,33 +208,45 @@ class GLFWKeyHelper with KeyHelper {
   static const int modifierNumericPad = 0x0020;
 
   int _mergeModifiers({int modifiers, int keyCode, bool isDown}) {
-    // On GLFW, the "modifiers" flag is the state as it is BEFORE this event
+    // GLFW Key codes for modifier keys.
+    const int shiftLeftKeyCode = 340;
+    const int shiftRightKeyCode = 344;
+    const int controlLeftKeyCode = 341;
+    const int controlRightKeyCode = 345;
+    const int altLeftKeyCode = 342;
+    const int altRightKeyCode = 346;
+    const int metaLeftKeyCode = 343;
+    const int metaRightKeyCode = 347;
+    const int capsLockKeyCode = 280;
+    const int numLockKeyCode = 282;
+
+    // On GLFW, the "modifiers" bitfield is the state as it is BEFORE this event
     // happened, not AFTER, like every other platform. Consequently, if this is
-    // a key down, then we need to add the correct modifier mask, and if it's a
-    // key up, we need to remove it.
+    // a key down, then we need to add the correct modifier bits, and if it's a
+    // key up, we need to remove them.
 
     int modifierChange = 0;
     switch (keyCode) {
-      case 341: // controlLeft
-      case 345: // controlRight
-        modifierChange = modifierControl;
-        break;
-      case 342: // altLeft
-      case 346: // altRight
-        modifierChange = modifierAlt;
-        break;
-      case 340: // shiftLeft
-      case 344: // shiftRight
+      case shiftLeftKeyCode:
+      case shiftRightKeyCode:
         modifierChange = modifierShift;
         break;
-      case 343: // metaLeft
-      case 347: // metaRight
+      case controlLeftKeyCode:
+      case controlRightKeyCode:
+        modifierChange = modifierControl;
+        break;
+      case altLeftKeyCode:
+      case altRightKeyCode:
+        modifierChange = modifierAlt;
+        break;
+      case metaLeftKeyCode:
+      case metaRightKeyCode:
         modifierChange = modifierMeta;
         break;
-      case 280: // capsLock
+      case capsLockKeyCode:
         modifierChange = modifierCapsLock;
         break;
-      case 282: // numLock
+      case numLockKeyCode:
         modifierChange = modifierNumericPad;
         break;
       default:
