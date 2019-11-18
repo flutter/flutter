@@ -13,6 +13,7 @@ import 'package:pool/pool.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
@@ -662,7 +663,7 @@ class Node {
     }
     Map<String, Object> values;
     try {
-      values = json.decode(content) as Map<String, Object>;
+      values = castStringKeyedMap(json.decode(content));
     } on FormatException {
       // The json is malformed in some way.
       _dirty = true;

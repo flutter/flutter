@@ -12,6 +12,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../vmservice.dart';
@@ -246,12 +247,12 @@ void _buildCoverageMap(
   for (String scriptId in scripts.keys) {
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
     for (Map<String, dynamic> range in sourceReport['ranges']) {
-      final Map<String, dynamic> coverage = range['coverage'] as Map<String, dynamic>;
+      final Map<String, dynamic> coverage = castStringKeyedMap(range['coverage']);
       // Coverage reports may sometimes be null for a Script.
       if (coverage == null) {
         continue;
       }
-      final Map<String, dynamic> scriptRef = sourceReport['scripts'][range['scriptIndex']] as Map<String, dynamic>;
+      final Map<String, dynamic> scriptRef = castStringKeyedMap(sourceReport['scripts'][range['scriptIndex']]);
       final String uri = scriptRef['uri'] as String;
 
       hitMaps[uri] ??= <int, int>{};

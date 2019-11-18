@@ -5,6 +5,7 @@
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
@@ -223,7 +224,7 @@ class VsCode {
       return null;
     }
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
-    final Map<String, dynamic> jsonObject = json.decode(jsonString) as Map<String, dynamic>;
+    final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(jsonString));
     return jsonObject['version'] as String;
   }
 }

@@ -6,6 +6,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../globals.dart';
 
@@ -45,7 +46,7 @@ class PlistParser {
         args,
         throwOnError: true,
       ).stdout.trim();
-      return json.decode(jsonContent) as Map<String, dynamic>;
+      return castStringKeyedMap(json.decode(jsonContent));
     } on ProcessException catch (error) {
       printTrace('$error');
       return const <String, dynamic>{};

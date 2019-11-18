@@ -146,7 +146,7 @@ class Daemon {
         throw 'no domain for method: $method';
       }
 
-      _domainMap[prefix].handleCommand(name, id, request['params'] as Map<String, dynamic> ?? const <String, dynamic>{});
+      _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request['params']) ?? const <String, dynamic>{});
     } catch (error, trace) {
       _send(<String, dynamic>{
         'id': id,
@@ -786,7 +786,7 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
   .map<Map<String, dynamic>>((String line) {
     line = line.substring(1, line.length - 1);
-    return json.decode(line) as Map<String, dynamic>;
+    return castStringKeyedMap(json.decode(line));
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {

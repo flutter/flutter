@@ -8,6 +8,7 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../base/version.dart';
 import '../globals.dart';
 import '../ios/plist_parser.dart';
@@ -60,9 +61,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     String pathsSelectorValue;
-    final Map<String, dynamic> jvmOptions = plistValues['JVMOptions'] as Map<String, dynamic>;
+    final Map<String, dynamic> jvmOptions = castStringKeyedMap(plistValues['JVMOptions']);
     if (jvmOptions != null) {
-      final Map<String, dynamic> jvmProperties = jvmOptions['Properties'] as Map<String, dynamic>;
+      final Map<String, dynamic> jvmProperties = castStringKeyedMap(jvmOptions['Properties']);
       if (jvmProperties != null) {
         pathsSelectorValue = jvmProperties['idea.paths.selector'] as String;
       }

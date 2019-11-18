@@ -754,7 +754,7 @@ class HotRunner extends ResidentRunner {
         // Collect stats only from the first device. If/when run -d all is
         // refactored, we'll probably need to send one hot reload/restart event
         // per device to analytics.
-        firstReloadDetails ??= reloadReport['details'] as Map<String, dynamic>;
+        firstReloadDetails ??= castStringKeyedMap(reloadReport['details']);
         final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'] as int;
         final int finalLibraryCount = reloadReport['details']['finalLibraryCount'] as int;
         printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');

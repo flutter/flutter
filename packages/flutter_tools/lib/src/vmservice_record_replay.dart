@@ -9,6 +9,7 @@ import 'package:stream_channel/stream_channel.dart';
 
 import 'base/io.dart';
 import 'base/process.dart';
+import 'base/utils.dart';
 import 'convert.dart';
 import 'globals.dart';
 
@@ -57,8 +58,8 @@ abstract class _Message implements Comparable<_Message> {
 
   factory _Message.fromRecording(Map<String, dynamic> recordingData) {
     return recordingData[_kType] == _kRequest
-        ? _Request(recordingData[_kData] as Map<String, dynamic>)
-        : _Response(recordingData[_kData] as Map<String, dynamic>);
+        ? _Request(castStringKeyedMap(recordingData[_kData]))
+        : _Response(castStringKeyedMap(recordingData[_kData]));
   }
 
   final String type;
@@ -94,13 +95,13 @@ abstract class _Message implements Comparable<_Message> {
 /// A VM service JSON-rpc request (sent to the VM).
 class _Request extends _Message {
   _Request(Map<String, dynamic> data) : super(_kRequest, data);
-  _Request.fromString(String data) : this(json.decode(data) as Map<String, dynamic>);
+  _Request.fromString(String data) : this(castStringKeyedMap(json.decode(data)));
 }
 
 /// A VM service JSON-rpc response (from the VM).
 class _Response extends _Message {
   _Response(Map<String, dynamic> data) : super(_kResponse, data);
-  _Response.fromString(String data) : this(json.decode(data) as Map<String, dynamic>);
+  _Response.fromString(String data) : this(castStringKeyedMap(json.decode(data)));
 }
 
 /// A matching request/response pair.

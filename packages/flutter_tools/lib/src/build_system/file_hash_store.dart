@@ -10,6 +10,7 @@ import 'package:crypto/crypto.dart';
 import 'package:pool/pool.dart';
 
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../globals.dart';
 import 'build_system.dart';
@@ -19,7 +20,7 @@ class FileStorage {
   FileStorage(this.version, this.files);
 
   factory FileStorage.fromBuffer(Uint8List buffer) {
-    final Map<String, dynamic> json = jsonDecode(utf8.decode(buffer)) as Map<String, dynamic>;
+    final Map<String, dynamic> json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
     final int version = json['version'] as int;
     final List<Map<String, Object>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, Object>>();
     final List<FileHash> cachedFiles = <FileHash>[

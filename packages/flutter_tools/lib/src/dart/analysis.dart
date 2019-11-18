@@ -92,16 +92,16 @@ class AnalysisServer {
 
         if (params is Map<String, dynamic>) {
           if (event == 'server.status') {
-            _handleStatus(response['params'] as Map<String, dynamic>);
+            _handleStatus(castStringKeyedMap(response['params']));
           } else if (event == 'analysis.errors') {
-            _handleAnalysisIssues(response['params'] as Map<String, dynamic>);
+            _handleAnalysisIssues(castStringKeyedMap(response['params']));
           } else if (event == 'server.error') {
-            _handleServerError(response['params'] as Map<String, dynamic>);
+            _handleServerError(castStringKeyedMap(response['params']));
           }
         }
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
-        final Map<String, dynamic> error = response['error'] as Map<String, dynamic>;
+        final Map<String, dynamic> error = castStringKeyedMap(response['error']);
         printError(
             'Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {

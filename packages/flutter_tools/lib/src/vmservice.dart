@@ -397,8 +397,8 @@ class VMService {
 
   void _handleStreamNotify(Map<String, dynamic> data) {
     final String streamId = data['streamId'] as String;
-    final Map<String, dynamic> eventData = data['event'] as Map<String, dynamic>;
-    final Map<String, dynamic> eventIsolate = eventData['isolate'] as Map<String, dynamic>;
+    final Map<String, dynamic> eventData = castStringKeyedMap(data['event']);
+    final Map<String, dynamic> eventIsolate = castStringKeyedMap(eventData['isolate']);
 
     // Log event information.
     printTrace('Notification from VM: $data');
@@ -701,7 +701,7 @@ class ServiceEvent extends ServiceObject {
         DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int);
     if (map['extensionKind'] != null) {
       _extensionKind = map['extensionKind'] as String;
-      _extensionData = map['extensionData'] as Map<String, dynamic>;
+      _extensionData = castStringKeyedMap(map['extensionData']);
     }
     // map['timelineEvents'] is List<dynamic> which can't be assigned to
     // List<Map<String, dynamic>> directly. Unfortunately, we previously didn't
@@ -1208,9 +1208,9 @@ class Isolate extends ServiceObjectOwner {
 
   void _updateHeaps(Map<String, dynamic> map, bool mapIsRef) {
     _newSpace ??= HeapSpace._empty(this);
-    _newSpace._update(map['new'] as Map<String, dynamic>, mapIsRef);
+    _newSpace._update(castStringKeyedMap(map['new']), mapIsRef);
     _oldSpace ??= HeapSpace._empty(this);
-    _oldSpace._update(map['old'] as Map<String, dynamic>, mapIsRef);
+    _oldSpace._update(castStringKeyedMap(map['old']), mapIsRef);
   }
 
   @override
@@ -1227,7 +1227,7 @@ class Isolate extends ServiceObjectOwner {
 
     pauseEvent = map['pauseEvent'] as ServiceEvent;
 
-    _updateHeaps(map['_heaps'] as Map<String, dynamic>, mapIsRef);
+    _updateHeaps(castStringKeyedMap(map['_heaps']), mapIsRef);
   }
 
   static const int kIsolateReloadBarred = 1005;
