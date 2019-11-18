@@ -53,9 +53,10 @@ void main() {
 
   group('SkiaGoldClient', () {
     SkiaGoldClient skiaClient;
+    Directory workDirectory;
 
     setUp(() {
-      final Directory workDirectory = fs.directory('/workDirectory')
+      workDirectory = fs.directory('/workDirectory')
         ..createSync(recursive: true);
       skiaClient = SkiaGoldClient(
         workDirectory,
@@ -83,7 +84,8 @@ void main() {
     });
 
     test('Gets commit count for pre-submit tryjobs', () async {
-      skiaClient.getBranchCommitCount();
+      final SkiaGoldClient separateClient = SkiaGoldClient(workDirectory);
+      separateClient.getBranchCommitCount();
       expect(false, isTrue);
     });
 

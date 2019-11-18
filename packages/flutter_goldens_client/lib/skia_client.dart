@@ -371,7 +371,7 @@ class SkiaGoldClient {
     final String branch = revParse.stdout;
 
     const String masterBranch = 'origin/master';
-    
+
     final io.ProcessResult revList = await process.run(
       <String>['git', 'rev-list', branch, '^$masterBranch', '--count'],
       workingDirectory: _flutterRoot.path,
