@@ -364,13 +364,8 @@ class SkiaGoldClient {
 
   /// Returns the number of commits made on the current branch.
   Future<String> getBranchCommitCount() async {
-    final io.ProcessResult revParse = await process.run(
-      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: _flutterRoot.path,
-    );
-    final String branch = revParse.stdout;
-
-    const String masterBranch = 'master';
+    final String branch = platform.environment['CIRRUS_BRANCH'];
+    final String masterBranch = platform.environment['CIRRUS_BASE_BRANCH'];
 
     final io.ProcessResult revList = await process.run(
       <String>['git', 'rev-list', branch, '^$masterBranch', '--count'],
@@ -381,7 +376,7 @@ class SkiaGoldClient {
     print('masterBranch: $masterBranch');
     print('stdout: ${revList.stdout}');
     print('***');
-    return revList.exitCode == 0 ? revParse.stdout.trim() : null;
+    return revList.exitCode == 0 ? revList.stdout.trim() : null;
   }
 
   /// Returns a JSON String with keys value pairs used to uniquely identify the
