@@ -833,7 +833,8 @@ class TextPainter {
   ///
   /// Not valid until after layout.
   ///
-  /// This can potentially be expensive, since it needs to compute the line
+  /// This can potentially be expensive, since it needs to compute the full
+  /// layout before it is available.
   TextRange getLineBoundary(TextPosition position) {
     return _paragraph.getLineBoundary(position);
   }
