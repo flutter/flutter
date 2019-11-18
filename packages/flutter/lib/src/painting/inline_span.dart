@@ -156,18 +156,27 @@ abstract class InlineSpan extends DiagnosticableTree {
   // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
   /// Returns the text associated with this span if this is an instance of [TextSpan],
   /// otherwise returns null.
-  @Deprecated('InlineSpan does not innately have text. Use TextSpan.text instead.')
+  @Deprecated(
+    'InlineSpan does not innately have text. Use TextSpan.text instead. '
+    'This feature was deprecated after v1.7.3.'
+  )
   String get text => null;
 
   // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
   /// Returns the [InlineSpan] children list associated with this span if this is an
   /// instance of [TextSpan], otherwise returns null.
-  @Deprecated('InlineSpan does not innately have children. Use TextSpan.children instead.')
+  @Deprecated(
+    'InlineSpan does not innately have children. Use TextSpan.children instead. '
+    'This feature was deprecated after v1.7.3.'
+  )
   List<InlineSpan> get children => null;
 
   /// Returns the [GestureRecognizer] associated with this span if this is an
   /// instance of [TextSpan], otherwise returns null.
-  @Deprecated('InlineSpan does not innately have a recognizer. Use TextSpan.recognizer instead.')
+  @Deprecated(
+    'InlineSpan does not innately have a recognizer. Use TextSpan.recognizer instead. '
+    'This feature was deprecated after v1.7.3.'
+  )
   GestureRecognizer get recognizer => null;
 
   /// Apply the properties of this object to the given [ParagraphBuilder], from
@@ -190,7 +199,10 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// When `visitor` returns true, the walk will continue. When `visitor` returns
   /// false, then the walk will end.
-  @Deprecated('Use visitChildren instead')
+  @Deprecated(
+    'Use visitChildren instead. '
+    'This feature was deprecated after v1.7.3.'
+  )
   bool visitTextSpan(bool visitor(TextSpan span));
 
   /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
@@ -313,7 +325,10 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
   /// `semanticsElements` for [PlaceholderSpan]s.
-  @Deprecated('Implement computeSemanticsInformation instead.')
+  @Deprecated(
+    'Implement computeSemanticsInformation instead. '
+    'This feature was deprecated after v1.7.3.'
+  )
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements);
 
   /// In checked mode, throws an exception if the object is not in a
