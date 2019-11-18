@@ -85,7 +85,7 @@ void main() {
 
     test('Gets commit count for pre-submit tryjobs', () async {
       final SkiaGoldClient separateClient = SkiaGoldClient(workDirectory);
-      separateClient.getBranchCommitCount();
+      await separateClient.getBranchCommitCount();
       expect(false, isTrue);
     });
 
