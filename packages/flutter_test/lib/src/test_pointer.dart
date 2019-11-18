@@ -344,9 +344,9 @@ class TestGesture {
   /// hit test result.
   ///
   /// If the pointer has not been added, an added event will be dispatched first.
-  Future<void> down(Offset downLocation) async {
-    await _ensureAdded(location: downLocation);
+  Future<void> down(Offset downLocation) {
     return TestAsyncUtils.guard<void>(() async {
+      await _ensureAdded(location: downLocation);
       _result = _hitTester(downLocation);
       return _dispatcher(_pointer.down(downLocation), _result);
     });
@@ -356,10 +356,10 @@ class TestGesture {
   /// hit test result with a custom down event.
   ///
   /// If the pointer has not been added, an added event will be dispatched first.
-  Future<void> downWithCustomEvent(Offset downLocation, PointerDownEvent event) async {
-    await _ensureAdded(location: downLocation);
-    _pointer.setDownInfo(event, downLocation);
+  Future<void> downWithCustomEvent(Offset downLocation, PointerDownEvent event) {
     return TestAsyncUtils.guard<void>(() async {
+      await _ensureAdded(location: downLocation);
+      _pointer.setDownInfo(event, downLocation);
       _result = _hitTester(downLocation);
       return _dispatcher(event, _result);
     });
@@ -394,12 +394,12 @@ class TestGesture {
   /// In a test, send a pointer add event for this pointer.
   ///
   /// If a pointer has been added, the pointer will be removed first.
-  Future<void> addPointer({ Duration timeStamp = Duration.zero, Offset location }) async {
-    if (_added) {
-      await removePointer(timeStamp: timeStamp);
-    }
-    _added = true;
-    return TestAsyncUtils.guard<void>(() {
+  Future<void> addPointer({ Duration timeStamp = Duration.zero, Offset location }) {
+    return TestAsyncUtils.guard<void>(() async {
+      if (_added) {
+        await removePointer(timeStamp: timeStamp);
+      }
+      _added = true;
       return _dispatcher(_pointer.addPointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
     });
   }
@@ -407,12 +407,12 @@ class TestGesture {
   /// In a test, send a pointer remove event for this pointer.
   ///
   /// If no pointer has been added, the call will be a no-op.
-  Future<void> removePointer({ Duration timeStamp = Duration.zero, Offset location }) async {
-    if (!_added)
-      return;
-    _added = false;
-    await TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
+  Future<void> removePointer({ Duration timeStamp = Duration.zero, Offset location }) {
+    return TestAsyncUtils.guard<void>(() async {
+      if (!_added)
+        return;
+      _added = false;
+      await _dispatcher(_pointer.removePointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
     });
   }
 
@@ -434,9 +434,9 @@ class TestGesture {
   /// If the pointer is down, then a move event is dispatched. If the pointer is
   /// up, then a hover event is dispatched. Touch devices are not able to send
   /// hover events.
-  Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) async {
-    await _ensureAdded(location: location);
-    return TestAsyncUtils.guard<void>(() {
+  Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
+    return TestAsyncUtils.guard<void>(() async {
+      await _ensureAdded(location: location);
       if (_pointer._isDown) {
         assert(_result != null,
             'Move events with the pointer down must be preceded by a down '
@@ -453,9 +453,9 @@ class TestGesture {
   /// End the gesture by releasing the pointer.
   ///
   /// If the pointer has not been added, an added event will be dispatched first.
-  Future<void> up() async {
-    await _ensureAdded();
+  Future<void> up() {
     return TestAsyncUtils.guard<void>(() async {
+      await _ensureAdded();
       assert(_pointer._isDown);
       await _dispatcher(_pointer.up(), _result);
       assert(!_pointer._isDown);
@@ -468,9 +468,9 @@ class TestGesture {
   /// for instance).
   ///
   /// If the pointer has not been added, an added event will be dispatched first.
-  Future<void> cancel() async {
-    await _ensureAdded();
+  Future<void> cancel() {
     return TestAsyncUtils.guard<void>(() async {
+      await _ensureAdded();
       assert(_pointer._isDown);
       await _dispatcher(_pointer.cancel(), _result);
       assert(!_pointer._isDown);

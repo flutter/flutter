@@ -269,7 +269,7 @@ void main() {
       }
     });
 
-    _mouseTracker.addListener(() {
+    final VoidCallback firstListener = () {
       if (!_mouseTracker.mouseIsConnected) {
         _mouseTracker.detachAnnotation(annotation);
         isInHitRegion = false;
@@ -277,7 +277,8 @@ void main() {
         _mouseTracker.attachAnnotation(annotation);
         isInHitRegion = true;
       }
-    });
+    };
+    _mouseTracker.addListener(firstListener);
 
     // Enter
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -291,6 +292,7 @@ void main() {
     events.clear();
 
     // Remove
+    _mouseTracker.removeListener(firstListener);
     _mouseTracker.addListener(() {
       if (!_mouseTracker.mouseIsConnected) {
         _mouseTracker.detachAnnotation(annotation);
