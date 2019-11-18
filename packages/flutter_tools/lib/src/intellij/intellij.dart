@@ -56,8 +56,9 @@ class IntelliJPlugins {
         ? fs.path.join(pluginsPath, packageName)
         : fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
     try {
-      final Directory tempDirectory = fs.directory('flutter_tools_intellij.')
-        .createTempSync();
+      final Directory tempDirectory = fs.systemTempDirectory
+        .createTempSync('flutter_tools_intellij.')
+        ..createSync(recursive: true);
       os.unzip(fs.file(jarPath), tempDirectory);
       final File file = tempDirectory
         .childDirectory('META-INF')
@@ -68,11 +69,11 @@ class IntelliJPlugins {
       final int end = content.indexOf('</version>', start);
       try {
         tempDirectory?.deleteSync(recursive: true);
-      } catch (_) {
+      } on Exception catch (_) {
         printTrace('Failed to delete temp directory: ${tempDirectory?.path}');
       }
       return content.substring(start + versionStartTag.length, end);
-    } catch (_) {
+    } on Exception catch (_) {
       return null;
     }
   }
