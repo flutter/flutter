@@ -27,6 +27,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     this.scanCode = 0,
     this.keyCode = 0,
     this.modifiers = 0,
+    @required this.isDown,
   }) : assert(scanCode != null),
        assert(unicodeScalarValues != null),
        assert((unicodeScalarValues & ~LogicalKeyboardKey.valueMask) == 0),
@@ -63,6 +64,9 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// A mask of the current modifiers using the values in Modifier Flags.
   /// This value may be different depending on the window toolkit used. See [KeyHelper].
   final int modifiers;
+
+  /// Whether or not this key event is a key down (true) or key up (false).
+  final bool isDown;
 
   @override
   String get keyLabel => unicodeScalarValues == 0 ? null : String.fromCharCode(unicodeScalarValues);
@@ -113,7 +117,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 
   @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
-    return keyHelper.isModifierPressed(key, modifiers, side: side);
+    return keyHelper.isModifierPressed(key, modifiers, side: side, keyCode: keyCode, isDown: isDown);
   }
 
   @override
@@ -150,7 +154,7 @@ abstract class KeyHelper {
 
   /// Returns true if the given [ModifierKey] was pressed at the time of this
   /// event.
-  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any});
+  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, int keyCode, bool isDown});
 
   /// The numpad key from the specific key code mapping.
   LogicalKeyboardKey numpadKey(int keyCode);
@@ -164,46 +168,97 @@ class GLFWKeyHelper with KeyHelper {
   /// This mask is used to check the [modifiers] field to test whether the CAPS
   /// LOCK modifier key is on.
   ///
-  /// {@template flutter.services.logicalKeyboardKey.modifiers}
+  /// {@template flutter.services.glfwKeyHelper.modifiers}
   /// Use this value if you need to decode the [modifiers] field yourself, but
-  /// it's much easier to use [isModifierPressed] if you just want to know if
-  /// a modifier is pressed.
+  /// it's much easier to use [isModifierPressed] if you just want to know if a
+  /// modifier is pressed. This is especially true on GLFW, since its modifiers
+  /// don't include the effects of the current key event.
   /// {@endtemplate}
   static const int modifierCapsLock = 0x0010;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// SHIFT modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.glfwKeyHelper.modifiers}
   static const int modifierShift = 0x0001;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CTRL modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.glfwKeyHelper.modifiers}
   static const int modifierControl = 0x0002;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// ALT modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.glfwKeyHelper.modifiers}
   static const int modifierAlt = 0x0004;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// Meta(SUPER) modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.glfwKeyHelper.modifiers}
   static const int modifierMeta = 0x0008;
 
 
   /// This mask is used to check the [modifiers] field to test whether any key in
   /// the numeric keypad is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.glfwKeyHelper.modifiers}
   static const int modifierNumericPad = 0x0020;
 
+  int _mergeModifiers({int modifiers, int keyCode, bool isDown}) {
+    // GLFW Key codes for modifier keys.
+    const int shiftLeftKeyCode = 340;
+    const int shiftRightKeyCode = 344;
+    const int controlLeftKeyCode = 341;
+    const int controlRightKeyCode = 345;
+    const int altLeftKeyCode = 342;
+    const int altRightKeyCode = 346;
+    const int metaLeftKeyCode = 343;
+    const int metaRightKeyCode = 347;
+    const int capsLockKeyCode = 280;
+    const int numLockKeyCode = 282;
+
+    // On GLFW, the "modifiers" bitfield is the state as it is BEFORE this event
+    // happened, not AFTER, like every other platform. Consequently, if this is
+    // a key down, then we need to add the correct modifier bits, and if it's a
+    // key up, we need to remove them.
+
+    int modifierChange = 0;
+    switch (keyCode) {
+      case shiftLeftKeyCode:
+      case shiftRightKeyCode:
+        modifierChange = modifierShift;
+        break;
+      case controlLeftKeyCode:
+      case controlRightKeyCode:
+        modifierChange = modifierControl;
+        break;
+      case altLeftKeyCode:
+      case altRightKeyCode:
+        modifierChange = modifierAlt;
+        break;
+      case metaLeftKeyCode:
+      case metaRightKeyCode:
+        modifierChange = modifierMeta;
+        break;
+      case capsLockKeyCode:
+        modifierChange = modifierCapsLock;
+        break;
+      case numLockKeyCode:
+        modifierChange = modifierNumericPad;
+        break;
+      default:
+        break;
+    }
+
+    return isDown ? modifiers | modifierChange : modifiers & ~modifierChange;
+  }
+
   @override
-  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any}) {
+  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, int keyCode, bool isDown}) {
+    modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
     switch (key) {
       case ModifierKey.controlModifier:
         return modifiers & modifierControl != 0;
