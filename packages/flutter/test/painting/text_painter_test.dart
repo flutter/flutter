@@ -790,4 +790,42 @@ void main() {
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
   }, skip: !isLinux);
+
+  test('getLineBoundary', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'test1\nhello line two really long for soft break\nfinal line 4';
+    painter.text = const TextSpan(
+      text: text,
+    );
+
+    painter.layout(maxWidth: 300);
+
+    final List<ui.LineMetrics> lines = painter.computeLineMetrics();
+
+    expect(lines.length, 4);
+
+    expect(painter.getLineBoundary(TextPosition(offset: -1)), TextRange(start: -1, end: -1));
+    
+    expect(painter.getLineBoundary(TextPosition(offset: 0)), TextRange(start: 0, end: 5));
+    expect(painter.getLineBoundary(TextPosition(offset: 1)), TextRange(start: 0, end: 5));
+    expect(painter.getLineBoundary(TextPosition(offset: 4)), TextRange(start: 0, end: 5));
+    expect(painter.getLineBoundary(TextPosition(offset: 5)), TextRange(start: 0, end: 5));
+
+    expect(painter.getLineBoundary(TextPosition(offset: 10)), TextRange(start: 6, end: 28));
+    expect(painter.getLineBoundary(TextPosition(offset: 15)), TextRange(start: 6, end: 28));
+    expect(painter.getLineBoundary(TextPosition(offset: 21)), TextRange(start: 6, end: 28));
+    expect(painter.getLineBoundary(TextPosition(offset: 28)), TextRange(start: 6, end: 28));
+
+    expect(painter.getLineBoundary(TextPosition(offset: 29)), TextRange(start: 28, end: 47));
+    expect(painter.getLineBoundary(TextPosition(offset: 47)), TextRange(start: 28, end: 47));
+
+    expect(painter.getLineBoundary(TextPosition(offset: 48)), TextRange(start: 48, end: 60));
+    expect(painter.getLineBoundary(TextPosition(offset: 49)), TextRange(start: 48, end: 60));
+    expect(painter.getLineBoundary(TextPosition(offset: 60)), TextRange(start: 48, end: 60));
+
+    expect(painter.getLineBoundary(TextPosition(offset: 61)), TextRange(start: -1, end: -1));
+    expect(painter.getLineBoundary(TextPosition(offset: 100)), TextRange(start: -1, end: -1));
+  }, skip: !isLinux);
 }
