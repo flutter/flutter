@@ -54,8 +54,11 @@ Future<void> buildWeb(
     ));
     if (!result.success) {
       for (ExceptionMeasurement measurement in result.exceptions.values) {
-        printError(measurement.stackTrace.toString());
-        printError(measurement.exception.toString());
+        printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
       }
       throwToolExit('Failed to compile application for the Web.');
     }
