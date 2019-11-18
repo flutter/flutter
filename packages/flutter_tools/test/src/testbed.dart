@@ -801,8 +801,8 @@ class DelegateLogger implements Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) {
-    delegate.sendNotification(message, progressId: progressId);
+  void sendEvent(String name, [Map<String, dynamic> args]) {
+    delegate.sendEvent(name, args);
   }
 
   @override
