@@ -247,10 +247,8 @@ void main() {
       testUsingContext('accepts filesystem parameters', () async {
         when(device.getLogReader()).thenAnswer((_) {
           // Now that the reader is used, start writing messages to it.
-          Timer.run(() {
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-          });
+          mockLogReader.addLine('Foo');
+          mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
           return mockLogReader;
         });
         testDeviceManager.addDevice(device);
