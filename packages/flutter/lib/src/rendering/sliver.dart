@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui show Color;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1825,7 +1826,7 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
 /// blends the sliver child back into the scene, partially transparent.
 ///
 /// For values of opacity other than 0.0 and 1.0, this class is relatively
-/// expensive because it requires painting the sliver child into an intermediate
+/// expensive, because it requires painting the sliver child into an intermediate
 /// buffer. For the value 0.0, the sliver child is simply not painted at all.
 /// For the value 1.0, the sliver child is painted immediately without an
 /// intermediate buffer.
@@ -1841,7 +1842,7 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
       assert(alwaysIncludeSemantics != null),
       _opacity = opacity,
       _alwaysIncludeSemantics = alwaysIncludeSemantics,
-      _alpha = getAlphaFromOpacity(opacity) {
+      _alpha = ui.Color.getAlphaFromOpacity(opacity) {
     child = sliver;
   }
 
@@ -1853,7 +1854,7 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
   /// The fraction to scale the child's alpha value.
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
-  /// (i.e., invisible).
+  /// (i.e. invisible).
   ///
   /// The opacity must not be null.
   ///
@@ -1870,7 +1871,7 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
     final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
-    _alpha = getAlphaFromOpacity(_opacity);
+    _alpha = ui.Color.getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
     markNeedsPaint();

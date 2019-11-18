@@ -1707,7 +1707,7 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   /// The fraction to scale the sliver child's alpha value.
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
-  /// (i.e., invisible).
+  /// (i.e. invisible).
   ///
   /// The opacity must not be null.
   ///
