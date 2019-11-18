@@ -511,18 +511,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // Find the previous non-whitespace character
     int previousNonWhitespace(int extent) {
       int result = math.max(extent - 1, 0);
-      final String plain = text.toPlainText();
-      while (result > 0 && _isWhitespace(plain.codeUnitAt(result))) {
-        result--;
+      while (result > 0 && _isWhitespace(_plainText.codeUnitAt(result))) {
+        result -= 1;
       }
       return result;
     }
 
     int nextNonWhitespace(int extent) {
-      final String plain = text.toPlainText();
-      int result = math.min(extent + 1, plain.length);
-      while (result < plain.length && _isWhitespace(plain.codeUnitAt(result))) {
-        result++;
+      int result = math.min(extent + 1, _plainText.length);
+      while (result < _plainText.length && _isWhitespace(_plainText.codeUnitAt(result))) {
+        result += 1;
       }
       return result;
     }
@@ -569,7 +567,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
       }
     } else {
-      if (rightArrow && newSelection.extentOffset < text.toPlainText().length) {
+      if (rightArrow && newSelection.extentOffset < _plainText.length) {
         newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset + 1);
         if (shift) {
           _cursorResetLocation += 1;
@@ -603,7 +601,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // case that the user wants to unhighlight some text.
       if (position.offset == newSelection.extentOffset) {
         if (downArrow) {
-          newSelection = newSelection.copyWith(extentOffset: text.toPlainText().length);
+          newSelection = newSelection.copyWith(extentOffset: _plainText.length);
         } else if (upArrow) {
           newSelection = newSelection.copyWith(extentOffset: 0);
         }
@@ -648,16 +646,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (key == LogicalKeyboardKey.keyC) {
       if (!selection.isCollapsed) {
         Clipboard.setData(
-            ClipboardData(text: selection.textInside(text.toPlainText())));
+            ClipboardData(text: selection.textInside(_plainText)));
       }
       return;
     }
     if (key == LogicalKeyboardKey.keyX) {
       if (!selection.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection.textInside(text.toPlainText())));
+        Clipboard.setData(ClipboardData(text: selection.textInside(_plainText)));
         textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: selection.textBefore(text.toPlainText())
-              + selection.textAfter(text.toPlainText()),
+          text: selection.textBefore(_plainText)
+              + selection.textAfter(_plainText),
           selection: TextSelection.collapsed(offset: selection.start),
         );
       }
@@ -693,15 +691,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleDelete() {
-    if (selection.textAfter(text.toPlainText()).isNotEmpty) {
+    if (selection.textAfter(_plainText).isNotEmpty) {
       textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection.textBefore(text.toPlainText())
-          + selection.textAfter(text.toPlainText()).substring(1),
+        text: selection.textBefore(_plainText)
+          + selection.textAfter(_plainText).substring(1),
         selection: TextSelection.collapsed(offset: selection.start),
       );
     } else {
       textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection.textBefore(text.toPlainText()),
+        text: selection.textBefore(_plainText),
         selection: TextSelection.collapsed(offset: selection.start),
       );
     }
@@ -726,6 +724,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _textLayoutLastMinWidth = null;
   }
 
+  // Retuns a cached plain text version of the text in the painter.
+  String _cachedPlainText;
+  String get _plainText {
+    _cachedPlainText ??= _textPainter.text.toPlainText();
+    return _cachedPlainText;
+  }
+
   /// The text to display.
   TextSpan get text => _textPainter.text;
   final TextPainter _textPainter;
@@ -733,6 +738,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
+    _cachedPlainText = null;
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
   }
@@ -1122,8 +1128,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     config
       ..value = obscureText
-          ? obscuringCharacter * text.toPlainText().length
-          : text.toPlainText()
+          ? obscuringCharacter * _plainText.length
+          : _plainText
       ..isObscured = obscureText
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
@@ -1419,7 +1425,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // Set the height based on the content.
     if (width == double.infinity) {
-      final String text = _textPainter.text.toPlainText();
+      final String text = _plainText;
       int lines = 1;
       for (int index = 0; index < text.length; index += 1) {
         if (text.codeUnitAt(index) == 0x0A) // count explicit line breaks
@@ -1631,7 +1637,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return TextSelection.fromPosition(position);
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: text.toPlainText().length);
+      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     }
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
@@ -1645,7 +1651,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return TextSelection.fromPosition(position);
     // If text is obscured, the entire string should be treated as one line.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: text.toPlainText().length);
+      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     }
     return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }
