@@ -136,9 +136,10 @@ class ChromeDevice extends Device {
         dataDir: fs.currentDirectory
           .childDirectory('.dart_tool')
           .childDirectory('chrome-device'));
+      logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': true});
     } else {
       printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
-      logger.sendNotification(url, progressId: 'debugExtension');
+      logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
     }
     return LaunchResult.succeeded(observatoryUri: null);
   }
@@ -250,7 +251,7 @@ class WebServerDevice extends Device {
   }) async {
     final String url = platformArgs['uri'];
     printStatus('$mainPath is being served at $url', emphasis: true);
-    logger.sendNotification(url, progressId: 'debugExtension');
+    logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
     return LaunchResult.succeeded(observatoryUri: null);
   }
 
