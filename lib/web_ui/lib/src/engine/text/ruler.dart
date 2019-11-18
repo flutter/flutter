@@ -17,6 +17,7 @@ class ParagraphGeometricStyle {
     this.wordSpacing,
     this.decoration,
     this.ellipsis,
+    this.shadows,
   });
 
   final ui.FontWeight fontWeight;
@@ -29,6 +30,7 @@ class ParagraphGeometricStyle {
   final double wordSpacing;
   final String decoration;
   final String ellipsis;
+  final List<ui.Shadow> shadows;
 
   // Since all fields above are primitives, cache hashcode since ruler lookups
   // use this style as key.
