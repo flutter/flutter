@@ -806,26 +806,26 @@ void main() {
 
     expect(lines.length, 4);
 
-    expect(painter.getLineBoundary(TextPosition(offset: -1)), TextRange(start: -1, end: -1));
-    
-    expect(painter.getLineBoundary(TextPosition(offset: 0)), TextRange(start: 0, end: 5));
-    expect(painter.getLineBoundary(TextPosition(offset: 1)), TextRange(start: 0, end: 5));
-    expect(painter.getLineBoundary(TextPosition(offset: 4)), TextRange(start: 0, end: 5));
-    expect(painter.getLineBoundary(TextPosition(offset: 5)), TextRange(start: 0, end: 5));
+    expect(painter.getLineBoundary(const TextPosition(offset: -1)), const TextRange(start: -1, end: -1));
 
-    expect(painter.getLineBoundary(TextPosition(offset: 10)), TextRange(start: 6, end: 28));
-    expect(painter.getLineBoundary(TextPosition(offset: 15)), TextRange(start: 6, end: 28));
-    expect(painter.getLineBoundary(TextPosition(offset: 21)), TextRange(start: 6, end: 28));
-    expect(painter.getLineBoundary(TextPosition(offset: 28)), TextRange(start: 6, end: 28));
+    expect(painter.getLineBoundary(const TextPosition(offset: 0)), const TextRange(start: 0, end: 5));
+    expect(painter.getLineBoundary(const TextPosition(offset: 1)), const TextRange(start: 0, end: 5));
+    expect(painter.getLineBoundary(const TextPosition(offset: 4)), const TextRange(start: 0, end: 5));
+    expect(painter.getLineBoundary(const TextPosition(offset: 5)), const TextRange(start: 0, end: 5));
 
-    expect(painter.getLineBoundary(TextPosition(offset: 29)), TextRange(start: 28, end: 47));
-    expect(painter.getLineBoundary(TextPosition(offset: 47)), TextRange(start: 28, end: 47));
+    expect(painter.getLineBoundary(const TextPosition(offset: 10)), const TextRange(start: 6, end: 28));
+    expect(painter.getLineBoundary(const TextPosition(offset: 15)), const TextRange(start: 6, end: 28));
+    expect(painter.getLineBoundary(const TextPosition(offset: 21)), const TextRange(start: 6, end: 28));
+    expect(painter.getLineBoundary(const TextPosition(offset: 28)), const TextRange(start: 6, end: 28));
 
-    expect(painter.getLineBoundary(TextPosition(offset: 48)), TextRange(start: 48, end: 60));
-    expect(painter.getLineBoundary(TextPosition(offset: 49)), TextRange(start: 48, end: 60));
-    expect(painter.getLineBoundary(TextPosition(offset: 60)), TextRange(start: 48, end: 60));
+    expect(painter.getLineBoundary(const TextPosition(offset: 29)), const TextRange(start: 28, end: 47));
+    expect(painter.getLineBoundary(const TextPosition(offset: 47)), const TextRange(start: 28, end: 47));
 
-    expect(painter.getLineBoundary(TextPosition(offset: 61)), TextRange(start: -1, end: -1));
-    expect(painter.getLineBoundary(TextPosition(offset: 100)), TextRange(start: -1, end: -1));
+    expect(painter.getLineBoundary(const TextPosition(offset: 48)), const TextRange(start: 48, end: 60));
+    expect(painter.getLineBoundary(const TextPosition(offset: 49)), const TextRange(start: 48, end: 60));
+    expect(painter.getLineBoundary(const TextPosition(offset: 60)), const TextRange(start: 48, end: 60));
+
+    expect(painter.getLineBoundary(const TextPosition(offset: 61)), const TextRange(start: -1, end: -1));
+    expect(painter.getLineBoundary(const TextPosition(offset: 100)), const TextRange(start: -1, end: -1));
   }, skip: !isLinux);
 }
