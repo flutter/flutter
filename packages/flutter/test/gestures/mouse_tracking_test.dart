@@ -29,7 +29,7 @@ class _TestGestureFlutterBinding extends BindingBase
   SchedulerPhase get schedulerPhase => _overridePhase ?? super.schedulerPhase;
 
   // Mannually schedule a postframe check.
-  // 
+  //
   // It is usually done by the renderer binding, but in tests we have to bypass
   // the phase assert of [MouseTracker.schedulePostFrameCheck]
   void scheduleMouseTrackerPostFrameCheck() {
