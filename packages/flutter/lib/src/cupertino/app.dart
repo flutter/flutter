@@ -91,6 +91,8 @@ class CupertinoApp extends StatefulWidget {
     this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowCheckedModeBanner = true,
+    this.shortcuts,
+    this.actions,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -191,6 +193,12 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   final bool debugShowCheckedModeBanner;
+
+  /// {@macro flutter.widgets.widgetsApp.shortcuts}
+  final Map<LogicalKeySet, Intent> shortcuts;
+
+  /// {@macro flutter.widgets.widgetsApp.actions}
+  final Map<LocalKey, ActionFactory> actions;
 
   @override
   _CupertinoAppState createState() => _CupertinoAppState();
@@ -312,6 +320,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
                     onPressed: onPressed,
                   );
                 },
+                shortcuts: widget.shortcuts,
+                actions: widget.actions,
               );
             },
           ),

@@ -169,6 +169,8 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
     this.inspectorSelectButtonBuilder,
+    this.shortcuts,
+    this.actions,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -681,6 +683,50 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final bool debugShowCheckedModeBanner;
 
+  /// {@template flutter.widgets.widgetsApp.shortcuts}
+  /// The default map of keyboard keys to intents for the application.
+  ///
+  /// By default, this is the output of [defaultShortcuts], called with
+  /// [defaultTargetPlatform]. Specifying [shortcuts] for an app overrides the
+  /// default, so if you wish to modify the default [shortcuts], you can call
+  /// [defaultShortcuts] and modify the resulting map, passing it as the
+  /// [shortcuts] for this app. You may also add to the bindings, or override
+  /// specific bindings for a widget subtree, by adding your own [Shortcuts]
+  /// widget.
+  ///
+  /// See also:
+  ///
+  ///  - [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
+  ///    for this map.
+  ///  - The [Shortcuts] widget, which defines a keyboard mapping.
+  ///  - The [Actions] widget, which defines the mapping from intent to action.
+  ///  - The [Intent] and [Action] classes, which allow definition of new
+  ///    actions.
+  /// {@endtemplate}
+  final Map<LogicalKeySet, Intent> shortcuts;
+
+  /// {@template flutter.widgets.widgetsApp.actions}
+  /// The default map of intent keys to actions for the application.
+  ///
+  /// By default, this is the output of [defaultActions], called with
+  /// [defaultTargetPlatform]. Specifying [actions] for an app overrides the
+  /// default, so if you wish to modify the default [actions], you can call
+  /// [defaultActions] and modify the resulting map, passing it as the
+  /// [actions] for this app. You may also add to the bindings, or override
+  /// specific bindings for a widget subtree, by adding your own [Actions]
+  /// widget.
+  ///
+  /// See also:
+  ///
+  ///  - The [shortcuts] parameter, which defines the default set of shortcuts
+  ///    for the application.
+  ///  - The [Shortcuts] widget, which defines a keyboard mapping.
+  ///  - The [Actions] widget, which defines the mapping from intent to action.
+  ///  - The [Intent] and [Action] classes, which allow definition of new
+  ///    actions.
+  /// {@endtemplate}
+  final Map<LocalKey, ActionFactory> actions;
+
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -712,6 +758,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // STATE LIFECYCLE
 
   Map<LogicalKeySet, Intent> _keyMap;
+  Map<LocalKey, ActionFactory> _actionMap;
 
   @override
   void initState() {
@@ -719,7 +766,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     _updateNavigator();
     _locale = _resolveLocales(WidgetsBinding.instance.window.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
-    _keyMap = defaultKeyBindings(defaultTargetPlatform);
+    _keyMap = widget.shortcuts ?? defaultShortcuts(defaultTargetPlatform);
+    _actionMap = widget.actions ?? defaultActions(defaultTargetPlatform);
   }
 
   @override
@@ -819,7 +867,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     navigator.pushNamed(route);
     return true;
   }
-
 
   // LOCALIZATION
 

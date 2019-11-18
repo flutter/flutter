@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'shortcuts.dart';
 
@@ -705,6 +706,18 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 }
 
+/// Creates the default map of actions used by [WidgetsApp] to define the set
+/// of available actions for an application.
+Map<LocalKey, ActionFactory> defaultActions(TargetPlatform targetPlatform) {
+  return <LocalKey, ActionFactory>{
+    DoNothingAction.key: () => const DoNothingAction(),
+    RequestFocusAction.key: () => RequestFocusAction(),
+    NextFocusAction.key: () => NextFocusAction(),
+    PreviousFocusAction.key: () => PreviousFocusAction(),
+    DirectionalFocusAction.key: () => DirectionalFocusAction(),
+  };
+}
+
 /// An [Action], that, as the name implies, does nothing.
 ///
 /// This action is bound to the [Intent.doNothing] intent inside of
@@ -733,17 +746,4 @@ abstract class ActivateAction extends Action {
 
   /// The [LocalKey] that uniquely identifies this action.
   static const LocalKey key = ValueKey<Type>(ActivateAction);
-}
-
-/// An action that selects the currently focused control.
-///
-/// This is an abstract class that serves as a base class for actions that
-/// select something, like a checkbox or a radio button. By default, it is bound
-/// to [LogicalKeyboardKey.space] in the default keyboard map in [WidgetsApp].
-abstract class SelectAction extends Action {
-  /// Creates a [SelectAction] with a fixed [key];
-  const SelectAction() : super(key);
-
-  /// The [LocalKey] that uniquely identifies this action.
-  static const LocalKey key = ValueKey<Type>(SelectAction);
 }

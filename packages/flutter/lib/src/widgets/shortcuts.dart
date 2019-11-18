@@ -373,7 +373,7 @@ class _ShortcutsMarker extends InheritedNotifier<ShortcutManager> {
 ///
 /// Used by [WidgetsApp] to assign the default key bindings if none are
 /// supplied.
-Map<LogicalKeySet, Intent> defaultKeyBindings(TargetPlatform platform) {
+Map<LogicalKeySet, Intent> defaultShortcuts(TargetPlatform platform) {
   if (kIsWeb) {
     return <LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),

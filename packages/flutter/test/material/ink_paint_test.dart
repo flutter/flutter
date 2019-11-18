@@ -356,7 +356,7 @@ void main() {
     }
 
     // Now try it with a select action instead.
-    await buildTest(SelectAction.key);
+    await buildTest(ActivateAction.key);
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
