@@ -68,11 +68,11 @@ class FormatCommand extends FlutterCommand {
     final String dartfmt = sdkBinaryName('dartfmt');
     final List<String> command = <String>[
       dartfmt,
-      if (argResults['dry-run'] as bool) '-n',
-      if (argResults['machine'] as bool) '-m',
+      if (boolArg('dry-run')) '-n',
+      if (boolArg('machine')) '-m',
       if (argResults['line-length'] != null) '-l ${argResults['line-length']}',
-      if (!(argResults['dry-run'] as bool) && !(argResults['machine'] as bool)) '-w',
-      if (argResults['set-exit-if-changed'] as bool) '--set-exit-if-changed',
+      if (!boolArg('dry-run') && !boolArg('machine')) '-w',
+      if (boolArg('set-exit-if-changed')) '--set-exit-if-changed',
       ...argResults.rest,
     ];
 

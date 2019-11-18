@@ -175,9 +175,9 @@ class CreateCommand extends FlutterCommand {
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     return <CustomDimensions, String>{
-      CustomDimensions.commandCreateProjectType: argResults['template'] as String,
-      CustomDimensions.commandCreateAndroidLanguage: argResults['android-language'] as String,
-      CustomDimensions.commandCreateIosLanguage: argResults['ios-language'] as String,
+      CustomDimensions.commandCreateProjectType: stringArg('template'),
+      CustomDimensions.commandCreateAndroidLanguage: stringArg('android-language'),
+      CustomDimensions.commandCreateIosLanguage: stringArg('ios-language'),
     };
   }
 
@@ -280,7 +280,7 @@ class CreateCommand extends FlutterCommand {
     _ProjectType detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     if (argResults['template'] != null) {
-      template = _stringToProjectType(argResults['template'] as String);
+      template = _stringToProjectType(stringArg('template'));
     } else {
       // If the project directory exists and isn't empty, then try to determine the template
       // type from the project directory.
@@ -311,7 +311,7 @@ class CreateCommand extends FlutterCommand {
       // _writeSamplesJson can potentially be long-lived.
       Cache.releaseLockEarly();
 
-      await _writeSamplesJson(argResults['list-samples'] as String);
+      await _writeSamplesJson(stringArg('list-samples'));
       return null;
     }
 
@@ -356,12 +356,12 @@ class CreateCommand extends FlutterCommand {
     String sampleCode;
     if (argResults['sample'] != null) {
       if (argResults['template'] != null &&
-        _stringToProjectType(argResults['template'] as String ?? 'app') != _ProjectType.app) {
+        _stringToProjectType(stringArg('template') ?? 'app') != _ProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
           '"${getEnumName(_ProjectType.app)}"');
       }
       // Fetch the sample from the server.
-      sampleCode = await _fetchSampleFromServer(argResults['sample'] as String);
+      sampleCode = await _fetchSampleFromServer(stringArg('sample'));
     }
 
     final _ProjectType template = _getProjectType(projectDir);
@@ -369,7 +369,7 @@ class CreateCommand extends FlutterCommand {
     final bool generatePlugin = template == _ProjectType.plugin;
     final bool generatePackage = template == _ProjectType.package;
 
-    String organization = argResults['org'] as String;
+    String organization = stringArg('org');
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = await project.organizationNames;
@@ -383,13 +383,13 @@ class CreateCommand extends FlutterCommand {
       }
     }
 
-    final bool overwrite = argResults['overwrite'] as bool;
+    final bool overwrite = boolArg('overwrite');
     String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: overwrite);
     if (error != null) {
       throwToolExit(error);
     }
 
-    final String projectName = argResults['project-name'] as String ?? fs.path.basename(projectDirPath);
+    final String projectName = stringArg('project-name') ?? fs.path.basename(projectDirPath);
     error = _validateProjectName(projectName);
     if (error != null) {
       throwToolExit(error);
@@ -398,20 +398,20 @@ class CreateCommand extends FlutterCommand {
     final Map<String, dynamic> templateContext = _templateContext(
       organization: organization,
       projectName: projectName,
-      projectDescription: argResults['description'] as String,
+      projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
-      renderDriverTest: argResults['with-driver-test'] as bool,
+      renderDriverTest: boolArg('with-driver-test'),
       withPluginHook: generatePlugin,
-      androidX: argResults['androidx'] as bool,
-      androidLanguage: argResults['android-language'] as String,
-      iosLanguage: argResults['ios-language'] as String,
+      androidX: boolArg('androidx'),
+      androidLanguage: stringArg('android-language'),
+      iosLanguage: stringArg('ios-language'),
       web: featureFlags.isWebEnabled,
-      macos: argResults['macos'] as bool,
+      macos: boolArg('macos'),
     );
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
     if (!projectDir.existsSync() || projectDir.listSync().isEmpty) {
-      printStatus('Creating project $relativeDirPath... androidx: ${argResults['androidx']}');
+      printStatus('Creating project $relativeDirPath... androidx: ${boolArg('androidx')}');
     } else {
       if (sampleCode != null && !overwrite) {
         throwToolExit('Will not overwrite existing project in $relativeDirPath: '
@@ -506,15 +506,15 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
-        ? argResults['description'] as String
+        ? stringArg('description')
         : 'A new flutter module project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
-    if (argResults['pub'] as bool) {
+    if (boolArg('pub')) {
       await pub.get(
         context: PubContext.create,
         directory: directory.path,
-        offline: argResults['offline'] as bool,
+        offline: boolArg('offline'),
       );
       final FlutterProject project = FlutterProject.fromDirectory(directory);
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
@@ -525,15 +525,15 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
-        ? argResults['description'] as String
+        ? stringArg('description')
         : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
-    if (argResults['pub'] as bool) {
+    if (boolArg('pub')) {
       await pub.get(
         context: PubContext.createPackage,
         directory: directory.path,
-        offline: argResults['offline'] as bool,
+        offline: boolArg('offline'),
       );
     }
     return generatedCount;
@@ -542,15 +542,15 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
-        ? argResults['description'] as String
+        ? stringArg('description')
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
-    if (argResults['pub'] as bool) {
+    if (boolArg('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
         directory: directory.path,
-        offline: argResults['offline'] as bool,
+        offline: boolArg('offline'),
       );
     }
     final FlutterProject project = FlutterProject.fromDirectory(directory);
@@ -577,13 +577,13 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     generatedCount += _injectGradleWrapper(project);
 
-    if (argResults['with-driver-test'] as bool) {
+    if (boolArg('with-driver-test')) {
       final Directory testDirectory = directory.childDirectory('test_driver');
       generatedCount += _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
     }
 
-    if (argResults['pub'] as bool) {
-      await pub.get(context: PubContext.create, directory: directory.path, offline: argResults['offline'] as bool);
+    if (boolArg('pub')) {
+      await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 

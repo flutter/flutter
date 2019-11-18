@@ -60,7 +60,7 @@ class BuildIOSCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool forSimulator = argResults['simulator'] as bool;
+    final bool forSimulator = boolArg('simulator');
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
     if (!platform.isMacOS) {
@@ -73,7 +73,7 @@ class BuildIOSCommand extends BuildSubCommand {
       throwToolExit('Application not configured for iOS');
     }
 
-    final bool shouldCodesign = argResults['codesign'] as bool;
+    final bool shouldCodesign = boolArg('codesign');
 
     if (!forSimulator && !shouldCodesign) {
       printStatus('Warning: Building for device with codesigning disabled. You will '

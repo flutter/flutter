@@ -59,8 +59,8 @@ class UpgradeCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     await _commandRunner.runCommand(
-      argResults['force'] as bool,
-      argResults['continue'] as bool,
+      boolArg('force'),
+      boolArg('continue'),
       GitTagVersion.determine(),
       FlutterVersion.instance,
     );

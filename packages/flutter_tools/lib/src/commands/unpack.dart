@@ -58,7 +58,7 @@ class UnpackCommand extends FlutterCommand {
     final Set<DevelopmentArtifact> result = <DevelopmentArtifact>{
       DevelopmentArtifact.universal,
     };
-    final TargetPlatform targetPlatform = getTargetPlatformForName(argResults['target-platform'] as String);
+    final TargetPlatform targetPlatform = getTargetPlatformForName(stringArg('target-platform'));
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
         result.add(DevelopmentArtifact.windows);
@@ -73,8 +73,8 @@ class UnpackCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetName = argResults['target-platform'] as String;
-    final String targetDirectory = argResults['cache-dir'] as String;
+    final String targetName = stringArg('target-platform');
+    final String targetDirectory = stringArg('cache-dir');
     if (!fs.directory(targetDirectory).existsSync()) {
       fs.directory(targetDirectory).createSync(recursive: true);
     }

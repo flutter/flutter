@@ -126,7 +126,7 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesIpv6Flag = false;
 
-  bool get shouldRunPub => _usesPubOption && argResults['pub'] as bool;
+  bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
   bool get shouldUpdateCache => true;
 
@@ -173,7 +173,7 @@ abstract class FlutterCommand extends Command<void> {
 
   String get targetFile {
     if (argResults.wasParsed('target')) {
-      return argResults['target'] as String;
+      return stringArg('target');
     }
     if (argResults.rest.isNotEmpty) {
       return argResults.rest.first;
@@ -252,7 +252,7 @@ abstract class FlutterCommand extends Command<void> {
         '"--host-vmservice-port" may be specified.');
     }
     try {
-      return int.parse(argResults['observatory-port'] ?? argResults['host-vmservice-port']);
+      return int.parse(stringArg('observatory-port') ?? stringArg('host-vmservice-port'));
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
     }
@@ -267,7 +267,7 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
     try {
-      return int.parse(argResults['device-vmservice-port'] as String);
+      return int.parse(stringArg('device-vmservice-port'));
     } on FormatException catch (error) {
       throwToolExit('Invalid port for `--device-vmservice-port`: $error');
     }
@@ -285,7 +285,7 @@ abstract class FlutterCommand extends Command<void> {
     _usesIpv6Flag = true;
   }
 
-  bool get ipv6 => _usesIpv6Flag ? argResults['ipv6'] as bool : null;
+  bool get ipv6 => _usesIpv6Flag ? boolArg('ipv6') : null;
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
@@ -318,7 +318,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// The values passed via the `--dart-define` option.
-  List<String> get dartDefines => argResults['dart-define'] as List<String>;
+  List<String> get dartDefines => stringsArg('dart-define');
 
   void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
@@ -382,18 +382,18 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    final bool debugResult = !_excludeDebug && argResults['debug'] as bool;
-    final List<bool> modeFlags = <bool>[debugResult, argResults['profile'] as bool, argResults['release'] as bool];
+    final bool debugResult = !_excludeDebug && boolArg('debug');
+    final List<bool> modeFlags = <bool>[debugResult, boolArg('profile'), boolArg('release')];
     if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     }
     if (debugResult) {
       return BuildMode.debug;
     }
-    if (argResults['profile'] as bool) {
+    if (boolArg('profile')) {
       return BuildMode.profile;
     }
-    if (argResults['release'] as bool) {
+    if (boolArg('release')) {
       return BuildMode.release;
     }
     return _defaultBuildMode;
@@ -420,19 +420,19 @@ abstract class FlutterCommand extends Command<void> {
 
   BuildInfo getBuildInfo() {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
-      argResults['track-widget-creation'] as bool;
+      boolArg('track-widget-creation');
 
     final String buildNumber = argParser.options.containsKey('build-number')
-        ? argResults['build-number'] as String
+        ? stringArg('build-number')
         : null;
 
     String extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-            ? argResults[FlutterOptions.kExtraFrontEndOptions] as String
+            ? stringArg(FlutterOptions.kExtraFrontEndOptions)
             : null;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment] != null) {
-      for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
+      for (String expFlag in stringsArg(FlutterOptions.kEnableExperiment)) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
           extraFrontEndOptions += ',' + flag;
@@ -444,20 +444,22 @@ abstract class FlutterCommand extends Command<void> {
 
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
-        ? argResults['flavor'] as String
+        ? stringArg('flavor')
         : null,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? argResults[FlutterOptions.kExtraGenSnapshotOptions] as String
+          ? stringArg(FlutterOptions.kExtraGenSnapshotOptions)
           : null,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? argResults[FlutterOptions.kFileSystemRoot] as List<String> : null,
+          ? stringsArg(FlutterOptions.kFileSystemRoot)
+          : null,
       fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? argResults[FlutterOptions.kFileSystemScheme] as String : null,
+          ? stringArg(FlutterOptions.kFileSystemScheme)
+          : null,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
-          ? argResults['build-name'] as String
+          ? stringArg('build-name')
           : null,
     );
   }
@@ -682,7 +684,7 @@ abstract class FlutterCommand extends Command<void> {
       }
 
       // Validate the current package map only if we will not be running "pub get" later.
-      if (parent?.name != 'pub' && !(_usesPubOption && argResults['pub'] as bool)) {
+      if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
         final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
         if (error != null) {
           throw ToolExit(error);
@@ -699,6 +701,15 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   ApplicationPackageStore applicationPackages;
+
+  /// Gets the parsed command-line option named [name] as `bool`.
+  bool boolArg(String name) => argResults[name] as bool;
+
+  /// Gets the parsed command-line option named [name] as `String`.
+  String stringArg(String name) => argResults[name] as String;
+
+  /// Gets the parsed command-line option named [name] as `List<String>`.
+  List<String> stringsArg(String name) => argResults[name] as List<String>;
 }
 
 /// A mixin which applies an implementation of [requiredArtifacts] that only
@@ -734,7 +745,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     // If there is no specified target device, fallback to the default
     // confiugration.
-    final String rawTargetPlatform = argResults['target-platform'] as String;
+    final String rawTargetPlatform = stringArg('target-platform');
     final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
     if (targetPlatform == null) {
       return super.requiredArtifacts;
