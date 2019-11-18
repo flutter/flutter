@@ -424,6 +424,10 @@ class TextInputConfiguration {
   /// When true, it passes UITextSmartDashesTypeYes, and when false, it passes
   /// UITextSmartDashesTypeNo.
   ///
+  /// As an example of what this does, two consecutive hyphen characters will be
+  /// automatically replaced with one en dash, and three consecutive hyphens
+  /// will become one em dash.
+  ///
   /// Defaults to true, unless obscureText is true, when it defaults to false.
   /// This is to avoid the problem where password fields receive autoformatted
   /// characters.
@@ -440,6 +444,10 @@ class TextInputConfiguration {
   /// This flag only affects iOS. It sets UITextSmartQuotesType in the engine.
   /// When true, it passes UITextSmartQuotesTypeYes, and when false, it passes
   /// UITextSmartQuotesTypeNo.
+  ///
+  /// As an example of what this does, a standard vertical double quote
+  /// character will be automatically replaced by a left or right double quote
+  /// depending on its position in a word.
   ///
   /// Defaults to true, unless obscureText is true, when it defaults to false.
   /// This is to avoid the problem where password fields receive autoformatted
