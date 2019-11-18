@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -218,7 +219,7 @@ void main() {
 
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
-        HttpClient: () => httpClient,
+        HttpClientFactory: () => () => httpClient,
         ProcessManager: () => mockProcessManager,
         Logger: () => logger,
         VMServiceConnector: () => getFakeVmServiceFactory(
@@ -263,7 +264,7 @@ void main() {
         when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
             .thenAnswer((_) async => 0);
         when(mockHotRunner.exited).thenReturn(false);
-        when(mockHotRunner.isStreamingNewObservatoryUris).thenReturn(false);
+        when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
 
         final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
         when(
@@ -396,7 +397,7 @@ void main() {
         ipv6: false,
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
-      when(mockHotRunner.isStreamingNewObservatoryUris).thenReturn(false);
+      when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
 
       testDeviceManager.addDevice(device);
       when(device.getLogReader())

@@ -138,12 +138,12 @@ class FlutterDevice {
   List<String> fileSystemRoots;
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
-  bool _isStreamingNewObservatoryUri;
+  bool _isListeningForObservatoryUri;
   final String viewFilter;
   final bool trackWidgetCreation;
 
   /// Whether the stream [observatoryUris] is still open.
-  bool get isStreamingNewObservatoryUri => _isStreamingNewObservatoryUri ?? false;
+  bool get isWaitingForObservatory => _isListeningForObservatoryUri ?? false;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
@@ -159,8 +159,6 @@ class FlutterDevice {
     Restart restart,
     CompileExpression compileExpression,
   }) {
-    _isStreamingNewObservatoryUri = true;
-
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
     bool isWaitingForVm = false;
@@ -180,7 +178,7 @@ class FlutterDevice {
         );
       } catch (exception) {
         printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
-        if (!completer.isCompleted && !_isStreamingNewObservatoryUri) {
+        if (!completer.isCompleted && !_isListeningForObservatoryUri) {
           completer.completeError('failed to connect to $observatoryUri');
         }
         return;
@@ -197,11 +195,12 @@ class FlutterDevice {
     }, onError: (dynamic error) {
       printTrace('Fail to handle observatory URI: $error');
     }, onDone: () {
-      _isStreamingNewObservatoryUri = false;
+      _isListeningForObservatoryUri = false;
       if (!completer.isCompleted && !isWaitingForVm) {
         completer.completeError('connection to device ended too early');
       }
     });
+    _isListeningForObservatoryUri = true;
     return completer.future;
   }
 
@@ -664,9 +663,9 @@ abstract class ResidentRunner {
   bool hotMode;
 
   /// Returns true if every device is streaming observatory URIs.
-  bool get isStreamingNewObservatoryUris {
+  bool get isWaitingForObservatory {
     return flutterDevices.every((FlutterDevice device) {
-      return device.isStreamingNewObservatoryUri;
+      return device.isWaitingForObservatory;
     });
   }
 

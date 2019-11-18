@@ -11,6 +11,7 @@ import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/net.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'compile.dart';
@@ -263,7 +264,12 @@ class DevFSException implements Exception {
   final StackTrace stackTrace;
 }
 
-HttpClient get httpClient => context.get<HttpClient>() ?? HttpClient();
+HttpClient get httpClient {
+  if (context.get<HttpClientFactory>() != null) {
+    return context.get<HttpClientFactory>()();
+  }
+  return HttpClient();
+}
 
 class _DevFSHttpWriter {
   _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
