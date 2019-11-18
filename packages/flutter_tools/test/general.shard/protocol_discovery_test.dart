@@ -86,9 +86,7 @@ void main() {
 
       testUsingContext('uri throws if logs produce bad line', () async {
         initialize();
-        Timer.run(() {
-          logReader.addLine('Observatory listening on http://127.0.0.1:apple');
-        });
+        logReader.addLine('Observatory listening on http://127.0.0.1:apple');
         expect(discoverer.uri, throwsA(isFormatException));
       });
 
