@@ -282,7 +282,15 @@ class IOSDevice extends Device {
       // TODO(chinmaygarde): Use mainPath, route.
       printTrace('Building ${package.name} for $id');
 
-      final String cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
+      String cpuArchitecture;
+
+      try {
+        cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
+      } on IOSDeviceNotFoundError catch (e) {
+        printError(e.message);
+        return LaunchResult.failed();
+      }
+
       final DarwinArch iosArch = getIOSArchForName(cpuArchitecture);
 
       // Step 1: Build the precompiled/DBC application if necessary.
