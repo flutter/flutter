@@ -827,6 +827,17 @@ class TextPainter {
     return _paragraph.getLineBoundary(position);
   }
 
+  /// Returns the [TextRange] of the line at the given [TextPosition].
+  ///
+  /// The newline (if any) is returned as part of the range.
+  ///
+  /// Not valid until after layout.
+  ///
+  /// This can potentially be expensive, since it needs to compute the line
+  TextRange getLineBoundary(TextPosition position) {
+    return _paragraph.getLineBoundary(position);
+  }
+
   /// Returns the full list of [LineMetrics] that describe in detail the various
   /// metrics of each laid out line.
   ///

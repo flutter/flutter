@@ -1641,14 +1641,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition - _paintOffset));
     _setFallbackAffinity(position.affinity);
     final TextRange word = _textPainter.getWordBoundary(position);
+    final lineBoundary = _textPainter.getLineBoundary(position);
+    final bool endOfLine = lineBoundary.end == position.offset && position.affinity != null;
     if (position.offset - word.start <= 1) {
       _handleSelectionChange(
-        TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream),
+        TextSelection.collapsed(offset: word.start, affinity: endOfLine ? position.affinity : TextAffinity.downstream),
         cause,
       );
     } else {
       _handleSelectionChange(
-        TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream),
+        TextSelection.collapsed(offset: word.end, affinity: endOfLine ? position.affinity : TextAffinity.upstream),
         cause,
       );
     }
