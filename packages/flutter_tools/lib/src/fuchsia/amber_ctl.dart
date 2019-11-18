@@ -102,7 +102,7 @@ class FuchsiaAmberCtl {
   /// the Fuchsia package server that it was accessing via [serverUrl].
   Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
     final String repoUrl = 'fuchsia-pkg://${server.name}';
-    final RunResult result = await device.shell('pkgctl repo remove --repo-url $repoUrl');
+    final RunResult result = await device.shell('pkgctl repo rm $repoUrl');
     return result.exitCode == 0;
   }
 }

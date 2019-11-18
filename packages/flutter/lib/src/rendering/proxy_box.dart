@@ -2615,12 +2615,13 @@ class RenderMouseRegion extends RenderProxyBox {
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
-    this.opaque = true,
+    bool opaque = true,
     RenderBox child,
   }) : assert(opaque != null),
        _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
+       _opaque = opaque,
        _annotationIsActive = false,
        super(child) {
     _hoverAnnotation = MouseTrackerAnnotation(
@@ -2644,7 +2645,14 @@ class RenderMouseRegion extends RenderProxyBox {
   /// pointer is within their areas.
   ///
   /// This defaults to true.
-  bool opaque;
+  bool get opaque => _opaque;
+  bool _opaque;
+  set opaque(bool value) {
+    if (_opaque != value) {
+      _opaque = value;
+      _updateAnnotations();
+    }
+  }
 
   /// Called when a mouse pointer enters the region (with or without buttons
   /// pressed).
@@ -2705,7 +2713,8 @@ class RenderMouseRegion extends RenderProxyBox {
     final bool annotationWillBeActive = (
         _onEnter != null ||
         _onHover != null ||
-        _onExit != null
+        _onExit != null ||
+        opaque
       ) &&
       RendererBinding.instance.mouseTracker.mouseIsConnected;
     if (annotationWasActive != annotationWillBeActive) {

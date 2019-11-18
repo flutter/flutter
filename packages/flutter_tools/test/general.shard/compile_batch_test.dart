@@ -72,7 +72,39 @@ void main() {
     Platform: kNoColorTerminalPlatform,
   });
 
-  testUsingContext('passes no-gen-bytecode to kernel compiler in aot/release mode', () async {
+  testUsingContext('passes correct AOT config to kernel compiler in aot/profile mode', () async {
+    when(mockFrontendServer.stdout)
+      .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+        Future<List<int>>.value(utf8.encode(
+          'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
+        ))
+      ));
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
+    await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      buildMode: BuildMode.profile,
+      trackWidgetCreation: false,
+      aot: true,
+      dartDefines: const <String>[],
+    );
+
+    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
+    final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
+    expect(argVerification.captured.single, containsAll(<String>[
+      '--aot',
+      '--tfa',
+      '-Ddart.vm.profile=true',
+      '-Ddart.vm.product=false',
+      '--bytecode-options=source-positions',
+    ]));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => mockProcessManager,
+    OutputPreferences: () => OutputPreferences(showColor: false),
+    Platform: kNoColorTerminalPlatform,
+  });
+
+
+  testUsingContext('passes correct AOT config to kernel compiler in aot/release mode', () async {
     when(mockFrontendServer.stdout)
       .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
         Future<List<int>>.value(utf8.encode(
@@ -90,7 +122,13 @@ void main() {
 
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
-    expect(argVerification.captured.single, contains('--no-gen-bytecode'));
+    expect(argVerification.captured.single, containsAll(<String>[
+      '--aot',
+      '--tfa',
+      '-Ddart.vm.profile=false',
+      '-Ddart.vm.product=true',
+      '--bytecode-options=source-positions',
+    ]));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),

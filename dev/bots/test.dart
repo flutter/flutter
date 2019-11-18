@@ -106,6 +106,7 @@ Future<void> main(List<String> args) async {
   print('═' * 80);
   await selectShard(const <String, ShardRunner>{
     'add_to_app_tests': _runAddToAppTests,
+    'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
     'build_tests': _runBuildTests,
     'framework_coverage': _runFrameworkCoverage,
     'framework_tests': _runFrameworkTests,
@@ -358,6 +359,17 @@ Future<void> _runAddToAppTests() async {
   }
 }
 
+Future<void> _runAddToAppLifeCycleTests() async {
+  if (Platform.isMacOS) {
+    print('${green}Running add-to-app life cycle iOS integration tests$reset...');
+    final String addToAppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app_life_cycle');
+    await runCommand('./build_and_test.sh',
+      <String>[],
+      workingDirectory: addToAppDir,
+    );
+  }
+}
+
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
 
@@ -415,6 +427,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
