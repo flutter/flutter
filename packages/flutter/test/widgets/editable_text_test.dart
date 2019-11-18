@@ -1589,8 +1589,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 4);
@@ -1682,8 +1681,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 14);
@@ -1784,8 +1782,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 4);
@@ -1885,8 +1882,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 14);
@@ -2311,8 +2307,7 @@ void main() {
     ));
 
     // Simulate selection change via tap to show handles.
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>()
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     expect(render.text.style.fontStyle, FontStyle.italic);
   });
 
