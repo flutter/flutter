@@ -468,8 +468,8 @@ void main() {
       ];
 
       await tester.pumpWidget(boilerplate(slivers, controller: controller));
-      final BoxDecoration amberBox = BoxDecoration(color: Colors.amber);
-      final BoxDecoration blueBox = BoxDecoration(color: Colors.blue);
+      const BoxDecoration amberBox = BoxDecoration(color: Colors.amber);
+      const BoxDecoration blueBox = BoxDecoration(color: Colors.blue);
 
       // Scroll to bottom
       controller.jumpTo(controller.position.maxScrollExtent);
