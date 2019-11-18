@@ -67,6 +67,10 @@ void main() {
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(observer.lifecycleState, AppLifecycleState.inactive);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.detached');
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    expect(observer.lifecycleState, AppLifecycleState.detached);
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
@@ -99,6 +103,16 @@ void main() {
 
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.detached');
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.paused');
