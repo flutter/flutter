@@ -556,6 +556,8 @@ class _BuildInstance {
         }
       }
     } catch (exception, stackTrace) {
+      // TODO(jonahwilliams): throw specific exception for expected errors to mark
+      // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);
       passed = false;
       skipped = false;
@@ -573,11 +575,14 @@ class _BuildInstance {
 
 /// Helper class to collect exceptions.
 class ExceptionMeasurement {
-  ExceptionMeasurement(this.target, this.exception, this.stackTrace);
+  ExceptionMeasurement(this.target, this.exception, this.stackTrace, {this.fatal = false});
 
   final String target;
   final dynamic exception;
   final StackTrace stackTrace;
+
+  /// Whether this exception was a fatal build system error.
+  final bool fatal;
 
   @override
   String toString() => 'target: $target\nexception:$exception\n$stackTrace';
