@@ -198,7 +198,6 @@ abstract class Source {
   /// Before the first build, the depfile is expected to be missing. Its
   /// absence is interpreted as the build needing to run. Afterwards, both
   /// input and output file hashes are updated.
-  ///const factory Source.depfile(String name) = _DepfileSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
