@@ -1,4 +1,4 @@
-Signature: 9ccc5f19cc74f1d3b284857bd4436fbe
+Signature: 0f0c3ebb82bab6fceb91a92b239ea330
 
 UNUSED LICENSES:
 
@@ -1293,7 +1293,17 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/sl4f_client.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/ssh.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/storage.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/test.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/common.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/flutter_frame_stats.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/scenic_frame_stats.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics_results.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics_spec.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/time_delta.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/time_point.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/trace_importing.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/trace_model.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/webdriver.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/trace_processing.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/meta.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
@@ -1379,6 +1389,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/images.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/player.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/publisher.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_consumer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_core.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/usage_reporter.fidl
@@ -1491,11 +1502,13 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl-async/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/envelope_frames.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal_callable_traits.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/runtime_flag.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/transformer.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/txn_header.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/visitor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/internal.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/runtime_flag.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/transformer.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/txn_header.c
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/event_sender.h
