@@ -308,10 +308,6 @@ String getNameForHostPlatform(HostPlatform platform) {
 
 enum TargetPlatform {
   android,
-  android_arm,
-  android_arm64,
-  android_x64,
-  android_x86,
   ios,
   darwin_x64,
   linux_x64,
@@ -320,6 +316,14 @@ enum TargetPlatform {
   fuchsia_x64,
   tester,
   web_javascript,
+  // The arch specific android target platforms are soft-depreacted.
+  // Instead of using TargetPlatform as a combination arch + platform
+  // the code will be updated to carry arch information in [DarwinArch]
+  // and [AndroidArch].
+  android_arm,
+  android_arm64,
+  android_x64,
+  android_x86,
 }
 
 /// iOS and macOS target device architecture.

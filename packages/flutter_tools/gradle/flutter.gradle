@@ -714,8 +714,7 @@ abstract class BaseFlutterTask extends DefaultTask {
         if (buildMode == "debug") {
           ruleNames = ["debug_android_application"]
         } else {
-          ruleNames = targetPlatformValues.collect({ targetPlatform ->
-             "android_aot_bundle_${buildMode}_${targetPlatform}"})
+          ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }
         project.exec {
             executable flutterExecutable.absolutePath
@@ -765,8 +764,7 @@ class FlutterTask extends BaseFlutterTask {
 
             if (buildMode == 'release' || buildMode == 'profile') {
                 targetPlatformValues.each {
-                  String abi =  PLATFORM_ARCH_MAP[targetArch]
-                  include "${abi}/app.so"
+                    include "${PLATFORM_ARCH_MAP[targetArch]}/app.so"
                 }
             }
         }
