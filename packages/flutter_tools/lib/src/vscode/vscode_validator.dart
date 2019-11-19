@@ -32,7 +32,7 @@ class VsCodeValidator extends DoctorValidator {
 
     return ValidationResult(
       validationType,
-      _vsCode.validationMessages,
+      _vsCode.validationMessages.toList(),
       statusInfo: vsCodeVersionText,
     );
   }

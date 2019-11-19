@@ -571,9 +571,9 @@ class ValidationMessage {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final ValidationMessage typedOther = other;
-    return typedOther.message == message
-      && typedOther.type == type;
+    return other is ValidationMessage
+        && other.message == message
+        && other.type == type;
   }
 
   @override

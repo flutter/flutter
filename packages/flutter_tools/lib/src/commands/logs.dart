@@ -42,7 +42,7 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['clear']) {
+    if (boolArg('clear')) {
       device.clearLogs();
     }
 

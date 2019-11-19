@@ -11,6 +11,7 @@ import '../globals.dart';
 import '../version.dart';
 import 'file_system.dart';
 import 'platform.dart';
+import 'utils.dart';
 
 typedef FingerprintPathFilter = bool Function(String path);
 
@@ -130,14 +131,14 @@ class Fingerprint {
   /// Throws [ArgumentError], if there is a version mismatch between the
   /// serializing framework and this framework.
   Fingerprint.fromJson(String jsonData) {
-    final Map<String, dynamic> content = json.decode(jsonData);
+    final Map<String, dynamic> content = castStringKeyedMap(json.decode(jsonData));
 
-    final String version = content['version'];
+    final String version = content['version'] as String;
     if (version != FlutterVersion.instance.frameworkRevision) {
       throw ArgumentError('Incompatible fingerprint version: $version');
     }
-    _checksums = content['files']?.cast<String,String>() ?? <String, String>{};
-    _properties = content['properties']?.cast<String,String>() ?? <String, String>{};
+    _checksums = castStringKeyedMap(content['files'])?.cast<String,String>() ?? <String, String>{};
+    _properties = castStringKeyedMap(content['properties'])?.cast<String,String>() ?? <String, String>{};
   }
 
   Map<String, String> _checksums;
@@ -157,9 +158,9 @@ class Fingerprint {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final Fingerprint typedOther = other;
-    return _equalMaps(typedOther._checksums, _checksums)
-        && _equalMaps(typedOther._properties, _properties);
+    return other is Fingerprint
+        && _equalMaps(other._checksums, _checksums)
+        && _equalMaps(other._properties, _properties);
   }
 
   bool _equalMaps(Map<String, String> a, Map<String, String> b) {
