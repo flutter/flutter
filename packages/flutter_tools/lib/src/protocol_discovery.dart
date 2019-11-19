@@ -70,13 +70,13 @@ class ProtocolDiscovery {
     return uris.first;
   }
 
-  /// The discovered service URI stream.
+  /// The discovered service URIs.
   ///
-  /// Port forwarding is only attempted when this is invoked, in case we never
-  /// need to port forward.
+  /// When a new observatory URI is available in [logReader],
+  /// the URIs are forwarded at most once every [throttleDuration].
   ///
-  /// Dependending on the lifespan of the app running the observatory,
-  /// a new observatory URI may be assigned to the app.
+  /// Port forwarding is only attempted when this is invoked,
+  /// for each observatory URI in the stream.
   Stream<Uri> get uris {
     return _uriStreamController.stream
       .transform(_throttle<Uri>(
