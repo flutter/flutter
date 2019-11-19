@@ -196,8 +196,8 @@ class AndroidDevice extends Device {
           // like the Kindle Fire 8, misreport the abilist. We might not
           // be able to retrieve this property, in which case we fall back
           // to assuming 64 bit.
-          final String gabilist = await _getProperty('ro.product.cpu.abilist');
-          if (gabilist == null || gabilist.contains('arm64-v8a')) {
+          final String abilist = await _getProperty('ro.product.cpu.abilist');
+          if (abilist == null || abilist.contains('arm64-v8a')) {
             _platform = TargetPlatform.android_arm64;
           } else {
             _platform = TargetPlatform.android_arm;
