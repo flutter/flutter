@@ -249,4 +249,21 @@ class EngineImageFilter implements ui.ImageFilter {
 
   final double sigmaX;
   final double sigmaY;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! EngineImageFilter) {
+      return false;
+    }
+    final EngineImageFilter typedOther = other;
+    return sigmaX == typedOther.sigmaX && sigmaY == typedOther.sigmaY;
+  }
+
+  @override
+  int get hashCode => ui.hashValues(sigmaX, sigmaY);
+
+  @override
+  String toString() {
+    return 'ImageFilter.blur($sigmaX, $sigmaY)';
+  }
 }
