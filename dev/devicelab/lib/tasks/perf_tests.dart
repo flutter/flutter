@@ -72,6 +72,14 @@ TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createPictureCachePerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/picture_cache_perf.dart',
+    'picture_cache_perf',
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
