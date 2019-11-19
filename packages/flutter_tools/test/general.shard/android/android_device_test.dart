@@ -343,22 +343,34 @@ Use the 'android' tool to install them:
       });
     });
 
-    testUsingContext('detects normal ABIs', () async {
+    testUsingContext('detects x64', () async {
       cpu = 'x86_64';
       final AndroidDevice device = AndroidDevice('test');
 
       expect(await device.targetPlatform, TargetPlatform.android_x64);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager
+    });
 
+    testUsingContext('detects x86', () async {
       cpu = 'x86';
-      expect(await device.targetPlatform, TargetPlatform.android_x86);
+      final AndroidDevice device = AndroidDevice('test');
 
+      expect(await device.targetPlatform, TargetPlatform.android_x86);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager
+    });
+
+    testUsingContext('unknown device defaults to 32bit arm', () async {
       cpu = '???';
+      final AndroidDevice device = AndroidDevice('test');
+
       expect(await device.targetPlatform, TargetPlatform.android_arm);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager
     });
 
-    testUsingContext('detects kindle fire ABI', () async {
+    testUsingContext('detects 64 bit arm', () async {
       cpu = 'arm64-v8a';
       abilist = 'arm64-v8a,';
 
@@ -366,16 +378,17 @@ Use the 'android' tool to install them:
 
       // If both abi properties agree, we are 64 bit.
       expect(await device.targetPlatform, TargetPlatform.android_arm64);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager
+    });
 
-      abilist = 'arm6';
+    testUsingContext('detects kind fire ABI', () async {
+      final AndroidDevice device = AndroidDevice('test');
+      cpu = 'arm64-v8a';
+      abilist = 'arm';
 
       // If one does not contain arm64, assume 32 bit.
-      expect(await device.targetPlatform, TargetPlatform.android_arm);
-
-      includeAbilist = false;
-
-      // If the property cannot be retrieved assume 64 bit.
-      expect(await device.targetPlatform, TargetPlatform.android_arm64);
+      expect(await device.targetPlatform, TargetPlatform.android_arm)
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager
     });
