@@ -410,11 +410,11 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// See [pop] for details about the operation stack.
   BackdropFilterEngineLayer pushBackdropFilter(ImageFilter filter, { BackdropFilterEngineLayer oldLayer }) {
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushBackdropFilter'));
-    final BackdropFilterEngineLayer layer = BackdropFilterEngineLayer._(_pushBackdropFilter(filter));
+    final BackdropFilterEngineLayer layer = BackdropFilterEngineLayer._(_pushBackdropFilter(filter._toNativeImageFilter()));
     assert(_debugPushLayer(layer));
     return layer;
   }
-  EngineLayer _pushBackdropFilter(ImageFilter filter) native 'SceneBuilder_pushBackdropFilter';
+  EngineLayer _pushBackdropFilter(_ImageFilter filter) native 'SceneBuilder_pushBackdropFilter';
 
   /// Pushes a shader mask operation onto the operation stack.
   ///
