@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -200,16 +202,14 @@ class AttachCommand extends FlutterCommand {
             notifyingLogger: NotifyingLogger(), logToStdout: true)
       : null;
 
-    Uri observatoryUri;
+    Stream<Uri> observatoryUri;
     bool usesIpv6 = ipv6;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
 
-    bool attachLogger = false;
     if (devicePort == null && debugUri == null) {
       if (device is FuchsiaDevice) {
-        attachLogger = true;
         final String module = stringArg('module');
         if (module == null) {
           throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
@@ -218,8 +218,7 @@ class AttachCommand extends FlutterCommand {
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
-          observatoryUri = await isolateDiscoveryProtocol.uri;
-          printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+          observatoryUri = Stream<Uri>.fromFuture(isolateDiscoveryProtocol.uri).asBroadcastStream();
         } catch (_) {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
@@ -229,85 +228,55 @@ class AttachCommand extends FlutterCommand {
           rethrow;
         }
       } else if ((device is IOSDevice) || (device is IOSSimulator)) {
-        observatoryUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
-          appId,
-          device,
-          usesIpv6: usesIpv6,
-          deviceVmservicePort: deviceVmservicePort,
-        );
+        observatoryUri = Stream<Uri>
+          .fromFuture(
+            MDnsObservatoryDiscovery.instance.getObservatoryUri(
+              appId,
+              device,
+              usesIpv6: usesIpv6,
+              deviceVmservicePort: deviceVmservicePort,
+            )
+          ).asBroadcastStream();
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
       if (observatoryUri == null) {
-        ProtocolDiscovery observatoryDiscovery;
-        try {
-          observatoryDiscovery = ProtocolDiscovery.observatory(
+        final ProtocolDiscovery observatoryDiscovery =
+          ProtocolDiscovery.observatory(
             device.getLogReader(),
             portForwarder: device.portForwarder,
             ipv6: ipv6,
             devicePort: deviceVmservicePort,
             hostPort: hostVmservicePort,
           );
-          printStatus('Waiting for a connection from Flutter on ${device.name}...');
-          observatoryUri = await observatoryDiscovery.uri;
-          // Determine ipv6 status from the scanned logs.
-          usesIpv6 = observatoryDiscovery.ipv6;
-          printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
-        } catch (error) {
-          throwToolExit('Failed to establish a debug connection with ${device.name}: $error');
-        } finally {
-          await observatoryDiscovery?.cancel();
-        }
+        printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        observatoryUri = observatoryDiscovery.uris;
+        // Determine ipv6 status from the scanned logs.
+        usesIpv6 = observatoryDiscovery.ipv6;
       }
     } else {
-      observatoryUri = await buildObservatoryUri(
-        device,
-        debugUri?.host ?? hostname,
-        devicePort ?? debugUri.port,
-        hostVmservicePort,
-        debugUri?.path,
-      );
-    }
-    try {
-      final bool useHot = getBuildInfo().isDebug;
-      final FlutterDevice flutterDevice = await FlutterDevice.create(
-        device,
-        flutterProject: flutterProject,
-        trackWidgetCreation: boolArg('track-widget-creation'),
-        fileSystemRoots: stringsArg('filesystem-root'),
-        fileSystemScheme: stringArg('filesystem-scheme'),
-        viewFilter: stringArg('isolate-filter'),
-        target: stringArg('target'),
-        targetModel: TargetModel(stringArg('target-model')),
-        buildMode: getBuildMode(),
-        dartDefines: dartDefines,
-      );
-      flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
-      final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
-      final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
-      terminal.usesTerminalUi = daemon == null;
-      final ResidentRunner runner = useHot ?
-          hotRunnerFactory.build(
-            flutterDevices,
-            target: targetFile,
-            debuggingOptions: debuggingOptions,
-            packagesFilePath: globalResults['packages'] as String,
-            projectRootPath: stringArg('project-root'),
-            dillOutputPath: stringArg('output-dill'),
-            ipv6: usesIpv6,
-            flutterProject: flutterProject,
+      observatoryUri = Stream<Uri>
+        .fromFuture(
+          buildObservatoryUri(
+            device,
+            debugUri?.host ?? hostname,
+            devicePort ?? debugUri.port,
+            hostVmservicePort,
+            debugUri?.path,
           )
-        : ColdRunner(
-            flutterDevices,
-            target: targetFile,
-            debuggingOptions: debuggingOptions,
-            ipv6: usesIpv6,
-          );
-      if (attachLogger) {
-        flutterDevice.startEchoingDeviceLog();
-      }
+        ).asBroadcastStream();
+    }
 
+    terminal.usesTerminalUi = daemon == null;
+
+    try {
       int result;
       if (daemon != null) {
+        final ResidentRunner runner = await createResidentRunner(
+          observatoryUris: observatoryUri,
+          device: device,
+          flutterProject: flutterProject,
+          usesIpv6: usesIpv6,
+        );
         AppInstance app;
         try {
           app = await daemon.appDomain.launch(
@@ -324,20 +293,34 @@ class AttachCommand extends FlutterCommand {
         }
         result = await app.runner.waitForAppToFinish();
         assert(result != null);
-      } else {
+        return;
+      }
+      while (true) {
+        final ResidentRunner runner = await createResidentRunner(
+          observatoryUris: observatoryUri,
+          device: device,
+          flutterProject: flutterProject,
+          usesIpv6: usesIpv6,
+        );
         final Completer<void> onAppStart = Completer<void>.sync();
+        TerminalHandler terminalHandler;
         unawaited(onAppStart.future.whenComplete(() {
-          TerminalHandler(runner)
+          terminalHandler = TerminalHandler(runner)
             ..setupTerminal()
             ..registerSignalHandlers();
         }));
         result = await runner.attach(
           appStartedCompleter: onAppStart,
         );
+        if (result != 0) {
+          throwToolExit(null, exitCode: result);
+        }
+        terminalHandler?.stop();
         assert(result != null);
-      }
-      if (result != 0) {
-        throwToolExit(null, exitCode: result);
+        if (runner.exited || !runner.isWaitingForObservatory) {
+          break;
+        }
+        printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
@@ -345,6 +328,52 @@ class AttachCommand extends FlutterCommand {
         await device.portForwarder.unforward(port);
       }
     }
+  }
+
+  Future<ResidentRunner> createResidentRunner({
+    @required Stream<Uri> observatoryUris,
+    @required Device device,
+    @required FlutterProject flutterProject,
+    @required bool usesIpv6,
+  }) async {
+    assert(observatoryUris != null);
+    assert(device != null);
+    assert(flutterProject != null);
+    assert(usesIpv6 != null);
+
+    final FlutterDevice flutterDevice = await FlutterDevice.create(
+      device,
+      flutterProject: flutterProject,
+      trackWidgetCreation: boolArg('track-widget-creation'),
+      fileSystemRoots: stringsArg('filesystem-root'),
+      fileSystemScheme: stringArg('filesystem-scheme'),
+      viewFilter: stringArg('isolate-filter'),
+      target: stringArg('target'),
+      targetModel: TargetModel(stringArg('target-model')),
+      buildMode: getBuildMode(),
+      dartDefines: dartDefines,
+    );
+    flutterDevice.observatoryUris = observatoryUris;
+    final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
+
+    return getBuildInfo().isDebug
+      ? hotRunnerFactory.build(
+          flutterDevices,
+          target: targetFile,
+          debuggingOptions: debuggingOptions,
+          packagesFilePath: globalResults['packages'] as String,
+          projectRootPath: stringArg('project-root'),
+          dillOutputPath: stringArg('output-dill'),
+          ipv6: usesIpv6,
+          flutterProject: flutterProject,
+        )
+      : ColdRunner(
+          flutterDevices,
+          target: targetFile,
+          debuggingOptions: debuggingOptions,
+          ipv6: usesIpv6,
+        );
   }
 
   Future<void> _validateArguments() async { }

@@ -180,7 +180,7 @@ class HotRunner extends ResidentRunner {
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first.observatoryUris.first,
+            httpUri: flutterDevices.first.vmServices.first.httpAddress,
             wsUri: flutterDevices.first.vmServices.first.wsAddress,
             baseUri: baseUris.first.toString(),
           ),
@@ -987,8 +987,8 @@ class HotRunner extends ResidentRunner {
     printStatus(message);
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
-      for (Uri uri in device.observatoryUris) {
-        printStatus('An Observatory debugger and profiler on $dname is available at: $uri');
+      for (VMService vm in device.vmServices) {
+        printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.wsAddress}');
       }
     }
     final String quitMessage = _didAttach
