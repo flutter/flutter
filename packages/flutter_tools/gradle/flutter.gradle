@@ -732,7 +732,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "--depfile", "${intermediateDir}/flutter_build.d"
             args "--output", "${intermediateDir}"
             args "-dTargetFile=${targetPath}"
-            args "-dTargetPlatform=TargetPlatform.android"
+            args "-dTargetPlatform=android"
             args "-dBuildMode=${buildMode}"
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
