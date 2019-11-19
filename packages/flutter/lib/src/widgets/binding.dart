@@ -600,11 +600,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   /// Whether the first frame has finished building.
   ///
-  /// Only useful in profile and debug builds; in release builds, this always
-  /// return false. This can be deferred using [deferFirstFrameReport] and
-  /// [allowFirstFrameReport]. The value is set at the end of the call to
-  /// [drawFrame].
-  ///
   /// This value can also be obtained over the VM service protocol as
   /// `ext.flutter.didSendFirstFrameEvent`.
   ///
@@ -616,8 +611,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Tell the framework not to report the frame it is building as a "useful"
   /// first frame until there is a corresponding call to [allowFirstFrameReport].
   ///
-  /// This is used by [WidgetsApp] to avoid reporting frames that aren't useful
-  /// during startup as the "first frame".
+  /// Deprecated. Use deferFirstFrame/allowFirstFrame to delay rendering the first
+  /// frame.
+  @Deprecated('Use deferFirstFrame/allowFirstFrame to delay rendering the first frame.')
   void deferFirstFrameReport() {
     if (!kReleaseMode) {
       assert(_deferFirstFrameReportCount >= 0);
@@ -628,15 +624,45 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// When called after [deferFirstFrameReport]: tell the framework to report
   /// the frame it is building as a "useful" first frame.
   ///
-  /// This method may only be called once for each corresponding call
-  /// to [deferFirstFrameReport].
-  ///
-  /// This is used by [WidgetsApp] to report when the first useful frame is
-  /// painted.
+  /// Deprecated. Use deferFirstFrame/allowFirstFrame to delay rendering the first
+  /// frame.
+  @Deprecated('Use deferFirstFrame/allowFirstFrame to delay rendering the first frame.')
   void allowFirstFrameReport() {
     if (!kReleaseMode) {
       assert(_deferFirstFrameReportCount >= 1);
       _deferFirstFrameReportCount -= 1;
+    }
+  }
+
+  int _firstFrameDeferredCount = 0;
+  bool get _firstFrameDeferred => _firstFrameDeferredCount > 0;
+  bool _firstFrameRequested = false;
+  bool _firstFrameHappened = false;
+
+  /// Tell the framework to not render the first frames until there is a
+  /// corresponding call to [allowFirstFrame].
+  ///
+  /// Calling this allows a [Widget] to perform asynchronous initialisation work
+  /// before the first frame is rendered (which will take down the splash
+  /// screen).
+  ///
+  /// Calling this has no effect after the first frame has already been
+  /// rendered.
+  void deferFirstFrame() {
+    assert(_firstFrameDeferredCount >= 0);
+    _firstFrameDeferredCount += 1;
+  }
+
+  /// Called after [deferFirstFrame] to tell the framework that it is ok to
+  /// render the first frame now.
+  ///
+  /// This method may only be called once for each corresponding call
+  /// to [deferFirstFrame].
+  void allowFirstFrame() {
+    assert(_firstFrameDeferredCount > 0);
+    _firstFrameDeferredCount -= 1;
+    if (_firstFrameRequested && !_firstFrameHappened && !_firstFrameDeferred) {
+      drawFrame();
     }
   }
 
@@ -747,6 +773,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   // When editing the above, also update rendering/binding.dart's copy.
   @override
   void drawFrame() {
+    if (!_firstFrameHappened && _firstFrameDeferred) {
+      _firstFrameRequested = true;
+      return;
+    }
+    _firstFrameHappened = true;
+
     assert(!debugBuildingDirtyElements);
     assert(() {
       debugBuildingDirtyElements = true;
@@ -832,12 +864,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return true;
     }());
 
-    deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    return super.performReassemble().then((void value) {
-      allowFirstFrameReport();
-    });
+    return super.performReassemble();
   }
 }
 
