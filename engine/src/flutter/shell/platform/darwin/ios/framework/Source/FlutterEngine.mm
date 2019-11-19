@@ -553,7 +553,6 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 - (flutter::Rasterizer::Screenshot)takeScreenshot:(flutter::Rasterizer::ScreenshotType)type
                                   asBase64Encoded:(BOOL)base64Encode {
   FML_DCHECK(_shell) << "Cannot takeScreenshot without a shell";
-  NSLog(@"NSLog take screenshoit");
   return _shell->Screenshot(type, base64Encode);
 }
 
