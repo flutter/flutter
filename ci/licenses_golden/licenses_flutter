@@ -344,6 +344,9 @@ FILE: ../../../flutter/lib/ui/window/pointer_data.cc
 FILE: ../../../flutter/lib/ui/window/pointer_data.h
 FILE: ../../../flutter/lib/ui/window/pointer_data_packet.cc
 FILE: ../../../flutter/lib/ui/window/pointer_data_packet.h
+FILE: ../../../flutter/lib/ui/window/pointer_data_packet_converter.cc
+FILE: ../../../flutter/lib/ui/window/pointer_data_packet_converter.h
+FILE: ../../../flutter/lib/ui/window/pointer_data_packet_converter_unittests.cc
 FILE: ../../../flutter/lib/ui/window/viewport_metrics.cc
 FILE: ../../../flutter/lib/ui/window/viewport_metrics.h
 FILE: ../../../flutter/lib/ui/window/window.cc
