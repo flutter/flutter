@@ -3,12 +3,50 @@
 // found in the LICENSE file.
 import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:yaml/yaml.dart';
 
 import 'common.dart';
 import 'environment.dart';
+
+class FirefoxArgParser extends BrowserArgParser {
+  static final FirefoxArgParser _singletonInstance = FirefoxArgParser._();
+
+  /// The [ChromeArgParser] singleton.
+  static FirefoxArgParser get instance => _singletonInstance;
+
+  String _version;
+
+  FirefoxArgParser._();
+
+  @override
+  void populateOptions(ArgParser argParser) {
+    final YamlMap browserLock = BrowserLock.instance.configuration;
+    String firefoxVersion = browserLock['firefox']['version'];
+
+    argParser
+      ..addOption(
+        'firefox-version',
+        defaultsTo: '$firefoxVersion',
+        help: 'The Firefox version to use while running tests. If the requested '
+            'version has not been installed, it will be downloaded and installed '
+            'automatically. Value "latest" will use the latest '
+            'stable build of Firefox, installing it if necessary. Value "system" '
+            'will use the manually installed version of Firefox on this computer.',
+      );
+  }
+
+  @override
+  void parseOptions(ArgResults argResults) {
+    _version = argResults['firefox-version'];
+  }
+
+  @override
+  String get version => _version;
+}
 
 /// Returns the installation of Firefox, installing it if necessary.
 ///
@@ -106,7 +144,7 @@ class FirefoxInstaller {
   /// HTTP client used to download Firefox.
   final Client client = Client();
 
-  /// Root directory that contains Chrome versions.
+  /// Root directory that contains Firefox versions.
   final io.Directory firefoxInstallationDir;
 
   /// Installation directory for Firefox of the requested [version].
