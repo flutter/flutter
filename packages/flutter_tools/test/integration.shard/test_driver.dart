@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -706,7 +707,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
 
   Map<String, dynamic> _parseJsonResponse(String line) {
     try {
-      return json.decode(line) as Map<String, dynamic>;
+      return castStringKeyedMap(json.decode(line));
     } catch (e) {
       // Not valid JSON, so likely some other output.
       return null;
@@ -721,7 +722,7 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
 Map<String, dynamic> parseFlutterResponse(String line) {
   if (line.startsWith('[') && line.endsWith(']')) {
     try {
-      final Map<String, dynamic> response = json.decode(line)[0] as Map<String, dynamic>;
+      final Map<String, dynamic> response = castStringKeyedMap(json.decode(line)[0]);
       return response;
     } catch (e) {
       // Not valid JSON, so likely some other output that was surrounded by [brackets]

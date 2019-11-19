@@ -8,6 +8,7 @@ import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
@@ -454,7 +455,7 @@ void fakeData(
     expect(invocation.positionalArguments.first, VersionCheckStamp.flutterVersionCheckStampFile);
 
     if (expectSetStamp) {
-      stamp = VersionCheckStamp.fromJson(json.decode(invocation.positionalArguments[1] as String) as Map<String, dynamic>);
+      stamp = VersionCheckStamp.fromJson(castStringKeyedMap(json.decode(invocation.positionalArguments[1] as String)));
       return null;
     }
 
