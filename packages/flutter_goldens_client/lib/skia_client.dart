@@ -233,10 +233,19 @@ class SkiaGoldClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    await io.Process.run(
+    final io.ProcessResult result = await io.Process.run(
       _goldctl,
       imgtestInitArguments,
     );
+
+    if (result.exitCode != 0) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold tryjobInit failure.')
+        ..writeln('exit code: ${result.exitCode}')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}\n');
+      throw NonZeroExitCode(1, buf.toString());
+    }
   }
 
   /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
@@ -271,7 +280,7 @@ class SkiaGoldClient {
         ..writeln('Skia Gold tryjobAdd failure.')
         ..writeln('exit code: ${result.exitCode}')
         ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
+        ..writeln('stderr: ${result.stderr}\n');
       throw NonZeroExitCode(1, buf.toString());
     }
     return result.exitCode == 0;
