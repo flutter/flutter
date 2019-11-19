@@ -87,5 +87,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+  - packages/flutter_gallery_assets/food/butternut_squash_soup.png
+  - packages/flutter_gallery_assets/food/cherry_pie.png
 
 # PUBSPEC CHECKSUM: eeee

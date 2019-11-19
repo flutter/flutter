@@ -167,6 +167,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  picture_cache_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of raster caching many pictures on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   cubic_bezier_perf__timeline_summary:
     description: >
       Measures the runtime performance of cubic bezier animations on Android.
