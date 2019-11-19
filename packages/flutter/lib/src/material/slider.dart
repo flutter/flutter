@@ -1211,6 +1211,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       parentBox: this,
       sliderTheme: _sliderTheme,
       textDirection: _textDirection,
+      sizeWithOverflow: _sizeWithOverflow,
       value: _value,
     );
   }
