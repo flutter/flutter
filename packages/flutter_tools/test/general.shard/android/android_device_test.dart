@@ -318,6 +318,68 @@ Use the 'android' tool to install them:
     });
   });
 
+  group('ABI detection', () {
+    ProcessManager mockProcessManager;
+    String cpu;
+    String abilist;
+    bool includeAbilist = true;
+
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+      cpu = 'unknown';
+      abilist = 'unknown';
+      when(mockProcessManager.run(
+        argThat(contains('getprop')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('[ro.product.cpu.abi]: [$cpu]');
+        if (includeAbilist) {
+          buf.writeln('[ro.product.cpu.abilist]: [$abilist]');
+        }
+        final ProcessResult result = ProcessResult(1, 0, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
+      });
+    });
+
+    testUsingContext('detects normal ABIs', () async {
+      cpu = 'x86_64';
+      final AndroidDevice device = AndroidDevice('test');
+
+      expect(await device.targetPlatform, TargetPlatform.android_x64);
+
+      cpu = 'x86';
+      expect(await device.targetPlatform, TargetPlatform.android_x86);
+
+      cpu = '???';
+      expect(await device.targetPlatform, TargetPlatform.android_arm);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager
+    });
+
+    testUsingContext('detects kindle fire ABI', () async {
+      cpu = 'arm64-v8a';
+      abilist = 'arm64-v8a,';
+
+      final AndroidDevice device = AndroidDevice('test');
+
+      // If both abi properties agree, we are 64 bit.
+      expect(await device.targetPlatform, TargetPlatform.android_arm64);
+
+      abilist = 'arm6';
+
+      // If one does not contain arm64, assume 32 bit.
+      expect(await device.targetPlatform, TargetPlatform.android_arm);
+
+      includeAbilist = false;
+
+      // If the property cannot be retrieved assume 64 bit.
+      expect(await device.targetPlatform, TargetPlatform.android_arm64);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager
+    });
+  });
 
   group('isLocalEmulator', () {
     final ProcessManager mockProcessManager = MockProcessManager();
