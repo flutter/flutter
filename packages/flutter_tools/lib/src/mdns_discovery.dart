@@ -50,7 +50,8 @@ class MDnsObservatoryDiscovery {
   /// If it is null and there is only one available instance of Observatory,
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
-  Future<MDnsObservatoryDiscoveryResult> query({String applicationId}) async {
+  // TODO(jonahwilliams): use `deviceVmservicePort` to filter mdns results.
+  Future<MDnsObservatoryDiscoveryResult> query({String applicationId, int deviceVmservicePort}) async {
     printTrace('Checking for advertised Dart observatories...');
     try {
       await client.start();
@@ -136,14 +137,27 @@ class MDnsObservatoryDiscovery {
     }
   }
 
-  Future<Uri> getObservatoryUri(String applicationId, Device device, [bool usesIpv6 = false, int observatoryPort]) async {
-    final MDnsObservatoryDiscoveryResult result = await query(applicationId: applicationId);
+  Future<Uri> getObservatoryUri(String applicationId, Device device, {
+    bool usesIpv6 = false,
+    int hostVmservicePort,
+    int deviceVmservicePort,
+  }) async {
+    final MDnsObservatoryDiscoveryResult result = await query(
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+    );
     Uri observatoryUri;
     if (result != null) {
       final String host = usesIpv6
         ? InternetAddress.loopbackIPv6.address
         : InternetAddress.loopbackIPv4.address;
-      observatoryUri = await buildObservatoryUri(device, host, result.port, observatoryPort, result.authCode);
+      observatoryUri = await buildObservatoryUri(
+        device,
+        host,
+        result.port,
+        hostVmservicePort,
+        result.authCode,
+      );
     }
     return observatoryUri;
   }
@@ -159,7 +173,7 @@ Future<Uri> buildObservatoryUri(
   Device device,
   String host,
   int devicePort, [
-  int observatoryPort,
+  int hostVmservicePort,
   String authCode,
 ]) async {
   String path = '/';
@@ -171,7 +185,7 @@ Future<Uri> buildObservatoryUri(
   if (!path.endsWith('/')) {
     path += '/';
   }
-  final int localPort = observatoryPort
-      ?? await device.portForwarder.forward(devicePort);
-  return Uri(scheme: 'http', host: host, port: localPort, path: path);
+  final int actualHostPort = hostVmservicePort ?? await device
+    .portForwarder.forward(devicePort);
+  return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

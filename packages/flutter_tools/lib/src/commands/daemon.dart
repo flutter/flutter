@@ -900,7 +900,7 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 /// A running application, started by this daemon.
@@ -1113,13 +1113,12 @@ class _AppRunLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) {
-    final int id = _nextProgressId++;
-    _sendProgressEvent(<String, dynamic>{
-      'id': id.toString(),
-      'progressId': progressId,
-      'finished': true,
-    });
+  void sendEvent(String name, [Map<String, dynamic> args]) {
+    if (domain == null) {
+      printStatus('event sent after app closed: $name');
+    } else {
+      domain.sendEvent(name, args);
+    }
   }
 }
 

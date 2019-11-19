@@ -154,6 +154,8 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.arguments.isEmpty) {
       printStatus(usage);
+    } else {
+      printStatus('\nYou may need to restart any open editors for them to read new settings.');
     }
 
     return null;

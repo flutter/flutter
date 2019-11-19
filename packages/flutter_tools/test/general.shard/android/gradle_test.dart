@@ -1618,79 +1618,6 @@ plugin2=${plugin2.path}
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('indicates how to consume an AAR when printHowToConsumeAaar is true', () async {
-      final File manifestFile = fs.file('pubspec.yaml');
-      manifestFile.createSync(recursive: true);
-      manifestFile.writeAsStringSync('''
-        flutter:
-          module:
-            androidPackage: com.example.test
-        '''
-      );
-
-      fs.file('.android/gradlew').createSync(recursive: true);
-
-      fs.file('.android/gradle.properties')
-        .writeAsStringSync('irrelevant');
-
-      fs.file('.android/build.gradle')
-        .createSync(recursive: true);
-
-      // Let any process start. Assert after.
-      when(mockProcessManager.run(
-        any,
-        environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'),
-      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
-
-      fs.directory('build/outputs/repo').createSync(recursive: true);
-
-      await buildGradleAar(
-        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
-        project: FlutterProject.current(),
-        outputDir: fs.directory('build/'),
-        target: '',
-        printHowToConsumeAaar: true,
-      );
-
-      final BufferLogger logger = context.get<Logger>();
-      expect(
-        logger.statusText,
-        contains('Built build/outputs/repo'),
-      );
-      expect(
-        logger.statusText,
-        contains('''
-Consuming the Module
-  1. Open <host>/app/build.gradle
-  2. Ensure you have the repositories configured, otherwise add them:
-
-      repositories {
-        maven {
-            url 'build/outputs/repo'
-        }
-        maven {
-            url 'http://download.flutter.io'
-        }
-      }
-
-  3. Make the host app depend on the release module:
-
-      dependencies {
-        releaseImplementation 'com.example.test:flutter_release:1.0'
-      }
-
-To learn more, visit https://flutter.dev/go/build-aar'''));
-
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
-    });
-
     testUsingContext('doesn\'t indicate how to consume an AAR when printHowToConsumeAaar is false', () async {
       final File manifestFile = fs.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -1721,9 +1648,8 @@ To learn more, visit https://flutter.dev/go/build-aar'''));
       await buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
         project: FlutterProject.current(),
-        outputDir: fs.directory('build/'),
+        outputDirectory: fs.directory('build/'),
         target: '',
-        printHowToConsumeAaar: false,
       );
 
       final BufferLogger logger = context.get<Logger>();
@@ -1885,9 +1811,8 @@ To learn more, visit https://flutter.dev/go/build-aar'''));
       await buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
         project: FlutterProject.current(),
-        outputDir: fs.directory('build/'),
+        outputDirectory: fs.directory('build/'),
         target: '',
-        printHowToConsumeAaar: false,
       );
 
       final List<String> actualGradlewCall = verify(
@@ -1911,6 +1836,192 @@ To learn more, visit https://flutter.dev/go/build-aar'''));
       Platform: () => android,
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('printHowToConsumeAar', () {
+    testUsingContext('stdout contains release, debug and profile', () async {
+      printHowToConsumeAar(
+        buildModes: const <String>{'release', 'debug', 'profile'},
+        androidPackage: 'com.mycompany',
+        repoDirectory: fs.directory('build/'),
+      );
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(
+        logger.statusText,
+        contains(
+          '\n'
+          'Consuming the Module\n'
+          '  1. Open <host>/app/build.gradle\n'
+          '  2. Ensure you have the repositories configured, otherwise add them:\n'
+          '\n'
+          '      repositories {\n'
+          '        maven {\n'
+          '            url \'build/\'\n'
+          '        }\n'
+          '        maven {\n'
+          '            url \'http://download.flutter.io\'\n'
+          '        }\n'
+          '      }\n'
+          '\n'
+          '  3. Make the host app depend on the Flutter module:\n'
+          '\n'
+          '    dependencies {\n'
+          '      releaseImplementation \'com.mycompany:flutter_release:1.0\n'
+          '      debugImplementation \'com.mycompany:flutter_debug:1.0\n'
+          '      profileImplementation \'com.mycompany:flutter_profile:1.0\n'
+          '    }\n'
+          '\n'
+          '\n'
+          '  4. Add the `profile` build type:\n'
+          '\n'
+          '    android {\n'
+          '      buildTypes {\n'
+          '        profile {\n'
+          '          initWith debug\n'
+          '        }\n'
+          '      }\n'
+          '    }\n'
+          '\n'
+          'To learn more, visit https://flutter.dev/go/build-aar\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      Platform: () => fakePlatform('android'),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('stdout contains release', () async {
+      printHowToConsumeAar(
+        buildModes: const <String>{'release'},
+        androidPackage: 'com.mycompany',
+        repoDirectory: fs.directory('build/'),
+      );
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(
+        logger.statusText,
+        contains(
+          '\n'
+          'Consuming the Module\n'
+          '  1. Open <host>/app/build.gradle\n'
+          '  2. Ensure you have the repositories configured, otherwise add them:\n'
+          '\n'
+          '      repositories {\n'
+          '        maven {\n'
+          '            url \'build/\'\n'
+          '        }\n'
+          '        maven {\n'
+          '            url \'http://download.flutter.io\'\n'
+          '        }\n'
+          '      }\n'
+          '\n'
+          '  3. Make the host app depend on the Flutter module:\n'
+          '\n'
+          '    dependencies {\n'
+          '      releaseImplementation \'com.mycompany:flutter_release:1.0\n'
+          '    }\n'
+          '\n'
+          'To learn more, visit https://flutter.dev/go/build-aar\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      Platform: () => fakePlatform('android'),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('stdout contains debug', () async {
+      printHowToConsumeAar(
+        buildModes: const <String>{'debug'},
+        androidPackage: 'com.mycompany',
+        repoDirectory: fs.directory('build/'),
+      );
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(
+        logger.statusText,
+        contains(
+          '\n'
+          'Consuming the Module\n'
+          '  1. Open <host>/app/build.gradle\n'
+          '  2. Ensure you have the repositories configured, otherwise add them:\n'
+          '\n'
+          '      repositories {\n'
+          '        maven {\n'
+          '            url \'build/\'\n'
+          '        }\n'
+          '        maven {\n'
+          '            url \'http://download.flutter.io\'\n'
+          '        }\n'
+          '      }\n'
+          '\n'
+          '  3. Make the host app depend on the Flutter module:\n'
+          '\n'
+          '    dependencies {\n'
+          '      debugImplementation \'com.mycompany:flutter_debug:1.0\n'
+          '    }\n'
+          '\n'
+          'To learn more, visit https://flutter.dev/go/build-aar\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      Platform: () => fakePlatform('android'),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('stdout contains profile', () async {
+      printHowToConsumeAar(
+        buildModes: const <String>{'profile'},
+        androidPackage: 'com.mycompany',
+        repoDirectory: fs.directory('build/'),
+      );
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(
+        logger.statusText,
+        contains(
+          '\n'
+          'Consuming the Module\n'
+          '  1. Open <host>/app/build.gradle\n'
+          '  2. Ensure you have the repositories configured, otherwise add them:\n'
+          '\n'
+          '      repositories {\n'
+          '        maven {\n'
+          '            url \'build/\'\n'
+          '        }\n'
+          '        maven {\n'
+          '            url \'http://download.flutter.io\'\n'
+          '        }\n'
+          '      }\n'
+          '\n'
+          '  3. Make the host app depend on the Flutter module:\n'
+          '\n'
+          '    dependencies {\n'
+          '      profileImplementation \'com.mycompany:flutter_profile:1.0\n'
+          '    }\n'
+          '\n'
+          '\n'
+          '  4. Add the `profile` build type:\n'
+          '\n'
+          '    android {\n'
+          '      buildTypes {\n'
+          '        profile {\n'
+          '          initWith debug\n'
+          '        }\n'
+          '      }\n'
+          '    }\n'
+          '\n'
+          'To learn more, visit https://flutter.dev/go/build-aar\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      Platform: () => fakePlatform('android'),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }
