@@ -322,7 +322,6 @@ Use the 'android' tool to install them:
     ProcessManager mockProcessManager;
     String cpu;
     String abilist;
-    bool includeAbilist = true;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
@@ -334,10 +333,8 @@ Use the 'android' tool to install them:
         stdoutEncoding: anyNamed('stdoutEncoding'),
       )).thenAnswer((_) {
         final StringBuffer buf = StringBuffer()
-          ..writeln('[ro.product.cpu.abi]: [$cpu]');
-        if (includeAbilist) {
-          buf.writeln('[ro.product.cpu.abilist]: [$abilist]');
-        }
+          ..writeln('[ro.product.cpu.abi]: [$cpu]')
+          ..writeln('[ro.product.cpu.abilist]: [$abilist]');
         final ProcessResult result = ProcessResult(1, 0, buf.toString(), '');
         return Future<ProcessResult>.value(result);
       });
@@ -373,7 +370,6 @@ Use the 'android' tool to install them:
     testUsingContext('detects 64 bit arm', () async {
       cpu = 'arm64-v8a';
       abilist = 'arm64-v8a,';
-
       final AndroidDevice device = AndroidDevice('test');
 
       // If both abi properties agree, we are 64 bit.
@@ -383,12 +379,12 @@ Use the 'android' tool to install them:
     });
 
     testUsingContext('detects kind fire ABI', () async {
-      final AndroidDevice device = AndroidDevice('test');
       cpu = 'arm64-v8a';
       abilist = 'arm';
+      final AndroidDevice device = AndroidDevice('test');
 
       // If one does not contain arm64, assume 32 bit.
-      expect(await device.targetPlatform, TargetPlatform.android_arm)
+      expect(await device.targetPlatform, TargetPlatform.android_arm);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager
     });
