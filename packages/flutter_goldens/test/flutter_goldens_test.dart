@@ -609,50 +609,6 @@ void main() {
           );
         });
       });
-
-      test('comparison passes test that is ignored for this PR', () async {
-        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.testIsIgnoredForPullRequest(
-          '1234',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => Future<bool>.value(true));
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.golden_test.1.png'),
-          ),
-          isTrue,
-        );
-      });
-
-      test('fails test that is not ignored', () async {
-        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.testIsIgnoredForPullRequest(
-          '1234',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => Future<bool>.value(false));
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.golden_test.1.png'),
-          ),
-          isFalse,
-        );
-      });
-
-      test('passes non-existent baseline for new test', () async {
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.1.png'),
-          ),
-          isTrue,
-        );
-      });
     });
 
     group('Skipping', () {
