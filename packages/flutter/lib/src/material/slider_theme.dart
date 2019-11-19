@@ -2363,7 +2363,9 @@ class RoundSliderThumbShape extends SliderComponentShape {
     assert(sliderTheme != null);
     assert(sliderTheme.disabledThumbColor != null);
     assert(sliderTheme.thumbColor != null);
-    assert(!sizeWithOverflow.isEmpty);
+    if (sizeWithOverflow.isEmpty) {
+      sizeWithOverflow = parentBox.size;
+    }
 
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
@@ -2902,7 +2904,9 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     assert(labelPainter != null);
     assert(parentBox != null);
     assert(sliderTheme != null);
-    assert(!sizeWithOverflow.isEmpty);
+    if (sizeWithOverflow.isEmpty) {
+      sizeWithOverflow = parentBox.size;
+    }
     final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
@@ -2989,7 +2993,9 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     assert(labelPainter != null);
     assert(parentBox != null);
     assert(sliderTheme != null);
-    assert(!sizeWithOverflow.isEmpty);
+    if (sizeWithOverflow.isEmpty) {
+      sizeWithOverflow = parentBox.size;
+    }
     final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
