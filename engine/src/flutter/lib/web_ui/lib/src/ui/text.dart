@@ -472,15 +472,6 @@ abstract class TextStyle {
     List<Shadow> shadows,
     List<FontFeature> fontFeatures,
   }) = engine.EngineTextStyle;
-
-  @override
-  int get hashCode;
-
-  @override
-  bool operator ==(dynamic other);
-
-  @override
-  String toString();
 }
 
 /// An opaque object that determines the configuration used by
@@ -553,15 +544,6 @@ abstract class ParagraphStyle {
     String ellipsis,
     Locale locale,
   }) = engine.EngineParagraphStyle;
-
-  @override
-  bool operator ==(dynamic other);
-
-  @override
-  int get hashCode;
-
-  @override
-  String toString();
 }
 
 abstract class StrutStyle {
@@ -610,12 +592,6 @@ abstract class StrutStyle {
     FontStyle fontStyle,
     bool forceStrutHeight,
   }) = engine.EngineStrutStyle;
-
-  @override
-  int get hashCode;
-
-  @override
-  bool operator ==(dynamic other);
 }
 
 /// A direction in which text flows.

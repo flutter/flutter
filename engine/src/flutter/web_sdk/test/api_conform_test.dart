@@ -6,6 +6,13 @@ import 'dart:io';
 
 import 'package:analyzer/analyzer.dart';
 
+// Ignore members defined on Object.
+const Set<String> _kObjectMembers = <String>{
+  '==',
+  'toString',
+  'hashCode',
+};
+
 void main() {
   // These files just contain imports to the part files;
   final CompilationUnit uiUnit = parseDartFile('lib/ui/ui.dart',
@@ -105,6 +112,9 @@ void main() {
     }
 
     for (String methodName in uiMethods.keys) {
+      if (_kObjectMembers.contains(methodName)) {
+        continue;
+      }
       final MethodDeclaration uiMethod = uiMethods[methodName];
       final MethodDeclaration webMethod = webMethods[methodName];
       if (webMethod == null) {
