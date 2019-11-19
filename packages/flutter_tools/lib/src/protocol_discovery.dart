@@ -82,7 +82,7 @@ class ProtocolDiscovery {
       .transform(_throttle<Uri>(
         waitDuration: throttleDuration,
       ))
-      .asyncMap<Uri>((Uri observatoryUri) => _forwardPort(observatoryUri));
+      .asyncMap<Uri>(_forwardPort);
   }
 
   Future<void> cancel() => _stopScrapingLogs();
