@@ -284,14 +284,14 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   int _firstFrameDeferredCount = 0;
-  bool _firstFrameSend = false;
+  bool _firstFrameSent = false;
 
-  /// Whether frames produced by [drawFrame] should be send to the engine.
+  /// Whether frames produced by [drawFrame] are sent to the engine.
   ///
-  /// If set to false the framework will do all the work to produce a frame,
+  /// If false the framework will do all the work to produce a frame,
   /// but the frame is never send to the engine to actually appear on screen.
   @protected
-  bool get sendFramesToEngine => _firstFrameDeferredCount == 0;
+  bool get sendFramesToEngine => _firstFrameSent || _firstFrameDeferredCount == 0;
 
   /// Tell the framework to not render the first frames until there is a
   /// corresponding call to [allowFirstFrame].
@@ -305,9 +305,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   void deferFirstFrame() {
     assert(_firstFrameDeferredCount >= 0);
     _firstFrameDeferredCount += 1;
-    if (_firstFrameSend) {
-      return;
-    }
   }
 
   /// Called after [deferFirstFrame] to tell the framework that it is ok to
@@ -321,13 +318,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   void allowFirstFrame() {
     assert(_firstFrameDeferredCount > 0);
     _firstFrameDeferredCount -= 1;
-    if (_firstFrameSend) {
-      return;
-    }
     // Always schedule a warm up frame even if the deferral count is not down to
     // zero yet since the removal of a deferral may uncover new deferrals that
     // are lower in the widget tree.
-    if (!_firstFrameSend)
+    if (!_firstFrameSent)
       scheduleWarmUpFrame();
   }
 
@@ -395,7 +389,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     if (sendFramesToEngine) {
       renderView.compositeFrame(); // this sends the bits to the GPU
       pipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
-      _firstFrameSend = true;
+      _firstFrameSent = true;
     }
   }
 
