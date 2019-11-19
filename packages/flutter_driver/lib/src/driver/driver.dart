@@ -436,7 +436,7 @@ class FlutterDriver {
       final Future<Map<String, dynamic>> future = appIsolate.invokeExtension(
         _flutterExtensionMethodName,
         serialized,
-      ).then<Map<String, dynamic>>((Object value) => value);
+      ).then<Map<String, dynamic>>((Object value) => value as Map<String, dynamic>);
       response = await _warnIfSlow<Map<String, dynamic>>(
         future: future,
         timeout: command.timeout ?? kUnusuallyLongTimeout,
@@ -450,9 +450,9 @@ class FlutterDriver {
         stackTrace,
       );
     }
-    if (response['isError'])
+    if (response['isError'] as bool)
       throw DriverError('Error in Flutter application: ${response['response']}');
-    return response['response'];
+    return response['response'] as Map<String, dynamic>;
   }
 
   void _logCommunication(String message) {
@@ -850,8 +850,8 @@ class FlutterDriver {
     //       and a source of flakes.
     await Future<void>.delayed(const Duration(seconds: 2));
 
-    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot');
-    return base64.decode(result['screenshot']);
+    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot') as Map<String, dynamic>;
+    return base64.decode(result['screenshot'] as String);
   }
 
   /// Returns the Flags set in the Dart VM as JSON.
@@ -875,9 +875,9 @@ class FlutterDriver {
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   Future<List<Map<String, dynamic>>> getVmFlags() async {
     await _restorePeerConnectionIfNeeded();
-    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
+    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList') as Map<String, dynamic>;
     return result != null
-        ? result['flags'].cast<Map<String,dynamic>>()
+        ? (result['flags'] as List<dynamic>).cast<Map<String,dynamic>>()
         : const <Map<String, dynamic>>[];
   }
 
@@ -924,7 +924,7 @@ class FlutterDriver {
         timeout: timeout,
         message: 'VM is taking an unusually long time to respond to being told to stop tracing...',
       );
-      return Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName));
+      return Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName) as Map<String, dynamic>);
     } catch (error, stackTrace) {
       throw DriverError(
         'Failed to stop tracing due to remote error',
@@ -1239,10 +1239,9 @@ class DriverOffset {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! DriverOffset)
-      return false;
-    final DriverOffset typedOther = other;
-    return dx == typedOther.dx && dy == typedOther.dy;
+    return other is DriverOffset
+        && other.dx == dx
+        && other.dy == dy;
   }
 
   @override

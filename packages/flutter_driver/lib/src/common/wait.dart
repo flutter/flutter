@@ -251,7 +251,7 @@ class CombinedCondition extends SerializableWaitCondition {
     }
 
     final List<SerializableWaitCondition> conditions = <SerializableWaitCondition>[];
-    for (Map<String, dynamic> condition in json.decode(jsonMap['conditions'])) {
+    for (Map<String, dynamic> condition in json.decode(jsonMap['conditions'] as String)) {
       conditions.add(_deserialize(condition));
     }
     return CombinedCondition(conditions);
@@ -281,7 +281,7 @@ class CombinedCondition extends SerializableWaitCondition {
 /// The [json] argument must not be null.
 SerializableWaitCondition _deserialize(Map<String, dynamic> json) {
   assert(json != null);
-  final String conditionName = json['conditionName'];
+  final String conditionName = json['conditionName'] as String;
   switch (conditionName) {
     case 'NoTransientCallbacksCondition':
       return NoTransientCallbacks.deserialize(json);

@@ -152,14 +152,14 @@ class FlutterDriverExtension {
     });
 
     _finders.addAll(<String, FinderConstructor>{
-      'ByText': (SerializableFinder finder) => _createByTextFinder(finder),
-      'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder),
-      'BySemanticsLabel': (SerializableFinder finder) => _createBySemanticsLabelFinder(finder),
-      'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
-      'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
+      'ByText': (SerializableFinder finder) => _createByTextFinder(finder as ByText),
+      'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder as ByTooltipMessage),
+      'BySemanticsLabel': (SerializableFinder finder) => _createBySemanticsLabelFinder(finder as BySemanticsLabel),
+      'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder as ByValueKey),
+      'ByType': (SerializableFinder finder) => _createByTypeFinder(finder as ByType),
       'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
-      'Ancestor': (SerializableFinder finder) => _createAncestorFinder(finder),
-      'Descendant': (SerializableFinder finder) => _createDescendantFinder(finder),
+      'Ancestor': (SerializableFinder finder) => _createAncestorFinder(finder as Ancestor),
+      'Descendant': (SerializableFinder finder) => _createDescendantFinder(finder as Descendant),
     });
   }
 
@@ -314,9 +314,9 @@ class FlutterDriverExtension {
   Finder _createByValueKeyFinder(ByValueKey arguments) {
     switch (arguments.keyValueType) {
       case 'int':
-        return find.byKey(ValueKey<int>(arguments.keyValue));
+        return find.byKey(ValueKey<int>(arguments.keyValue as int));
       case 'String':
-        return find.byKey(ValueKey<String>(arguments.keyValue));
+        return find.byKey(ValueKey<String>(arguments.keyValue as String));
       default:
         throw 'Unsupported ByValueKey type: ${arguments.keyValueType}';
     }
@@ -367,7 +367,7 @@ class FlutterDriverExtension {
   }
 
   Future<TapResult> _tap(Command command) async {
-    final Tap tapCommand = command;
+    final Tap tapCommand = command as Tap;
     final Finder computedFinder = await _waitForElement(
       _createFinder(tapCommand.finder).hitTestable()
     );
@@ -376,20 +376,20 @@ class FlutterDriverExtension {
   }
 
   Future<WaitForResult> _waitFor(Command command) async {
-    final WaitFor waitForCommand = command;
+    final WaitFor waitForCommand = command as WaitFor;
     await _waitForElement(_createFinder(waitForCommand.finder));
     return const WaitForResult();
   }
 
   Future<WaitForAbsentResult> _waitForAbsent(Command command) async {
-    final WaitForAbsent waitForAbsentCommand = command;
+    final WaitForAbsent waitForAbsentCommand = command as WaitForAbsent;
     await _waitForAbsentElement(_createFinder(waitForAbsentCommand.finder));
     return const WaitForAbsentResult();
   }
 
   Future<Result> _waitForCondition(Command command) async {
     assert(command != null);
-    final WaitForCondition waitForConditionCommand = command;
+    final WaitForCondition waitForConditionCommand = command as WaitForCondition;
     final WaitCondition condition = deserializeCondition(waitForConditionCommand.condition);
     await condition.wait();
     return null;
@@ -437,7 +437,7 @@ class FlutterDriverExtension {
   }
 
   Future<GetSemanticsIdResult> _getSemanticsId(Command command) async {
-    final GetSemanticsId semanticsCommand = command;
+    final GetSemanticsId semanticsCommand = command as GetSemanticsId;
     final Finder target = await _waitForElement(_createFinder(semanticsCommand.finder));
     final Iterable<Element> elements = target.evaluate();
     if (elements.length > 1) {
@@ -448,7 +448,7 @@ class FlutterDriverExtension {
     SemanticsNode node;
     while (renderObject != null && node == null) {
       node = renderObject.debugSemantics;
-      renderObject = renderObject.parent;
+      renderObject = renderObject.parent as RenderObject;
     }
     if (node == null)
       throw StateError('No semantics data found');
@@ -456,10 +456,10 @@ class FlutterDriverExtension {
   }
 
   Future<GetOffsetResult> _getOffset(Command command) async {
-    final GetOffset getOffsetCommand = command;
+    final GetOffset getOffsetCommand = command as GetOffset;
     final Finder finder = await _waitForElement(_createFinder(getOffsetCommand.finder));
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject;
+    final RenderBox box = element.renderObject as RenderBox;
     Offset localPoint;
     switch (getOffsetCommand.offsetType) {
       case OffsetType.topLeft:
@@ -483,7 +483,7 @@ class FlutterDriverExtension {
   }
 
   Future<DiagnosticsTreeResult> _getDiagnosticsTree(Command command) async {
-    final GetDiagnosticsTree diagnosticsCommand = command;
+    final GetDiagnosticsTree diagnosticsCommand = command as GetDiagnosticsTree;
     final Finder finder = await _waitForElement(_createFinder(diagnosticsCommand.finder));
     final Element element = finder.evaluate().single;
     DiagnosticsNode diagnosticsNode;
@@ -502,7 +502,7 @@ class FlutterDriverExtension {
   }
 
   Future<ScrollResult> _scroll(Command command) async {
-    final Scroll scrollCommand = command;
+    final Scroll scrollCommand = command as Scroll;
     final Finder target = await _waitForElement(_createFinder(scrollCommand.finder));
     final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.microsecondsPerSecond;
     final Offset delta = Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
@@ -526,22 +526,22 @@ class FlutterDriverExtension {
   }
 
   Future<ScrollResult> _scrollIntoView(Command command) async {
-    final ScrollIntoView scrollIntoViewCommand = command;
+    final ScrollIntoView scrollIntoViewCommand = command as ScrollIntoView;
     final Finder target = await _waitForElement(_createFinder(scrollIntoViewCommand.finder));
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment ?? 0.0);
     return const ScrollResult();
   }
 
   Future<GetTextResult> _getText(Command command) async {
-    final GetText getTextCommand = command;
+    final GetText getTextCommand = command as GetText;
     final Finder target = await _waitForElement(_createFinder(getTextCommand.finder));
     // TODO(yjbanov): support more ways to read text
-    final Text text = target.evaluate().single.widget;
+    final Text text = target.evaluate().single.widget as Text;
     return GetTextResult(text.data);
   }
 
   Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {
-    final SetTextEntryEmulation setTextEntryEmulationCommand = command;
+    final SetTextEntryEmulation setTextEntryEmulationCommand = command as SetTextEntryEmulation;
     if (setTextEntryEmulationCommand.enabled) {
       _testTextInput.register();
     } else {
@@ -555,18 +555,18 @@ class FlutterDriverExtension {
       throw 'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
             'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
     }
-    final EnterText enterTextCommand = command;
+    final EnterText enterTextCommand = command as EnterText;
     _testTextInput.enterText(enterTextCommand.text);
     return const EnterTextResult();
   }
 
   Future<RequestDataResult> _requestData(Command command) async {
-    final RequestData requestDataCommand = command;
+    final RequestData requestDataCommand = command as RequestData;
     return RequestDataResult(_requestDataHandler == null ? 'No requestData Extension registered' : await _requestDataHandler(requestDataCommand.message));
   }
 
   Future<SetFrameSyncResult> _setFrameSync(Command command) async {
-    final SetFrameSync setFrameSyncCommand = command;
+    final SetFrameSync setFrameSyncCommand = command as SetFrameSync;
     _frameSync = setFrameSyncCommand.enabled;
     return const SetFrameSyncResult();
   }
@@ -575,7 +575,7 @@ class FlutterDriverExtension {
   bool get _semanticsIsEnabled => RendererBinding.instance.pipelineOwner.semanticsOwner != null;
 
   Future<SetSemanticsResult> _setSemantics(Command command) async {
-    final SetSemantics setSemanticsCommand = command;
+    final SetSemantics setSemanticsCommand = command as SetSemantics;
     final bool semanticsWasEnabled = _semanticsIsEnabled;
     if (setSemanticsCommand.enabled && _semantics == null) {
       _semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
