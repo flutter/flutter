@@ -608,8 +608,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Tell the framework not to report the frame it is building as a "useful"
   /// first frame until there is a corresponding call to [allowFirstFrameReport].
   ///
-  /// Deprecated. Use deferFirstFrame/allowFirstFrame to delay rendering the first
-  /// frame.
+  /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
+  /// first frame.
   @Deprecated('Use deferFirstFrame/allowFirstFrame to delay rendering the first frame.')
   void deferFirstFrameReport() {
     if (!kReleaseMode) {
@@ -620,8 +620,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// When called after [deferFirstFrameReport]: tell the framework to report
   /// the frame it is building as a "useful" first frame.
   ///
-  /// Deprecated. Use deferFirstFrame/allowFirstFrame to delay rendering the first
-  /// frame.
+  /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
+  /// first frame.
   @Deprecated('Use deferFirstFrame/allowFirstFrame to delay rendering the first frame.')
   void allowFirstFrameReport() {
     if (!kReleaseMode) {
@@ -747,13 +747,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       assert(!_firstFrameCompleter.isCompleted);
 
       firstFrameCallback = (List<FrameTiming> timings) {
+        assert(sendFramesToEngine);
         if (!kReleaseMode) {
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
-        _firstFrameCompleter.complete();
         SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
         firstFrameCallback = null;
+        _firstFrameCompleter.complete();
       };
       // Callback is only invoked when [Window.render] is called. When
       // [sendFramesToEngine] is set to false during the frame, it will not
