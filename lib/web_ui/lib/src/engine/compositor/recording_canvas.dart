@@ -179,26 +179,11 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    // TODO(het): This doesn't support most paragraph features. We are just
-    // creating a font from the family and size, and drawing it with
-    // ShapedText.
-    final EngineParagraph engineParagraph = paragraph;
-    final ParagraphGeometricStyle style = engineParagraph.geometricStyle;
-    final js.JsObject skFont = skiaFontCollection.getFont(
-        style.effectiveFontFamily, style.fontSize ?? 12.0);
-    final js.JsObject skShapedTextOpts = js.JsObject.jsify(<String, dynamic>{
-      'font': skFont,
-      'leftToRight': true,
-      'text': engineParagraph.plainText,
-      'width': engineParagraph.width + 1,
-    });
-    final js.JsObject skShapedText =
-        js.JsObject(canvasKit['ShapedText'], <js.JsObject>[skShapedTextOpts]);
-    skCanvas.callMethod('drawText', <dynamic>[
-      skShapedText,
-      offset.dx + engineParagraph._alignOffset,
+    final SkParagraph skParagraph = paragraph;
+    skCanvas.callMethod('drawParagraph', <dynamic>[
+      skParagraph.skParagraph,
+      offset.dx,
       offset.dy,
-      makeSkPaint(engineParagraph._paint)
     ]);
   }
 
