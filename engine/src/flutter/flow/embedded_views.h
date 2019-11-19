@@ -19,6 +19,7 @@
 
 namespace flutter {
 
+// TODO(chinmaygarde): Make these enum names match the style guide.
 enum MutatorType { clip_rect, clip_rrect, clip_path, transform, opacity };
 
 // Stores mutation information like clipping or transform.
