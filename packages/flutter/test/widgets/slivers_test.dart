@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+
+import 'semantics_tester.dart';
 
 Future<void> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {
   return tester.pumpWidget(
@@ -417,6 +420,55 @@ void main() {
     await tester.pumpAndSettle();
     // It will be corrected after a auto scroll animation.
     expect(controller.offset, 800.0);
+  });
+
+  group('SliverOffstage - ', () {
+    Widget _boilerPlate(Widget sliver) {
+      return Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: CustomScrollView(slivers: <Widget>[sliver])
+          )
+        )
+      );
+    }
+
+    testWidgets('offstage true', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOffstage(
+          offstage: true,
+          sliver: SliverToBoxAdapter(
+            child: Text('a'),
+          )
+        )
+      ));
+
+      expect(semantics.nodesWith(label:'a'), hasLength(0));
+      expect(find.byType(Text), findsNothing);
+    });
+
+    testWidgets('offstage false', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOffstage(
+          offstage: false,
+          sliver: SliverToBoxAdapter(
+            child: Text('a'),
+          )
+        )
+      ));
+
+      expect(semantics.nodesWith(label:'a'), hasLength(1));
+      expect(find.byType(Text), findsOneWidget);
+    });
   });
 }
 
