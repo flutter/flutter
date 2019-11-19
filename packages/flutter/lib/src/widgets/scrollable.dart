@@ -314,11 +314,21 @@ typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails detai
 /// [ScrollIncrementCalculator] function on a [Scrollable].
 enum ScrollIncrementType {
   /// Indicates that the [ScrollIncrementCalculator] should return the scroll
-  /// distance for a line.
+  /// distance it should move when the user requests to scroll by a "line".
+  ///
+  /// The distance a "line" scrolls is really refers to what should happen when
+  /// the key binding for "scroll down/up by a line" is triggered. It's up to
+  /// the [ScrollIncrementCalculator] function to decide what that means for a
+  /// particular scrollable.
   line,
 
   /// Indicates that the [ScrollIncrementCalculator] should return the scroll
-  /// distance for an entire page.
+  /// distance it should move when the user requests to scroll by a "page".
+  ///
+  /// The distance a "page" scrolls is really refers to what should happen when
+  /// the key binding for "scroll down/up by a page" is triggered. It's up to
+  /// the [ScrollIncrementCalculator] function to decide what that means for a
+  /// particular scrollable.
   page,
 }
 
@@ -331,15 +341,32 @@ class ScrollIncrementDetails {
   const ScrollIncrementDetails({
     @required this.type,
     @required this.position,
+    @required this.minScrollExtent,
+    @required this.maxScrollExtent,
+    @required this.viewportDimension,
   })  : assert(type != null),
-        assert(position != null);
+        assert(position != null),
+        assert(minScrollExtent != null),
+        assert(maxScrollExtent != null),
+        assert(viewportDimension != null);
 
   /// The type of scroll this is (e.g. line, page, etc.).
   final ScrollIncrementType type;
 
-  /// The current [ScrollPosition] that describes the extents of the scrolling
-  /// area, and current position.
-  final ScrollPosition position;
+  /// The current position of the scrollable that is being scrolled.
+  final double position;
+
+  /// The minimum scroll extent of the current [ScrollPosition] of the
+  /// scrollable being scrolled.
+  final double minScrollExtent;
+
+  /// The maximum scroll extent of the current [ScrollPosition] of the
+  /// scrollable being scrolled.
+  final double maxScrollExtent;
+
+  /// The max dimension of the viewport in the [ScrollPosition] of the
+  /// scrollable being scrolled.
+  final double viewportDimension;
 }
 
 /// State object for a [Scrollable] widget.
@@ -362,22 +389,29 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   ScrollPosition get position => _position;
   ScrollPosition _position;
 
-  /// Returns the scroll increment for a single line, for use when scrolling
-  /// using a hardware keyboard.
-  double getIncrement({ ScrollIncrementType type = ScrollIncrementType.line }) {
+  /// Returns the scroll increment for a single scroll request, for use when
+  /// scrolling using a hardware keyboard.
+  double calculateIncrement({ ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(type != null);
-    double defaultScrollIncrement() {
-      switch (type) {
-        case ScrollIncrementType.line:
-          return 50.0;
-          break;
-        case ScrollIncrementType.page:
-          return 0.8 * (position.maxScrollExtent - position.minScrollExtent).clamp(0.0, double.infinity);
-          break;
-      }
-      return 0.0;
+    if (widget.incrementCalculator != null) {
+      return widget.incrementCalculator(
+        ScrollIncrementDetails(
+          type: type,
+          position: position.pixels,
+          minScrollExtent: position.minScrollExtent,
+          maxScrollExtent: position.maxScrollExtent,
+          viewportDimension: position.viewportDimension,
+        ),
+      );
     }
-    return widget.incrementCalculator?.call(ScrollIncrementDetails(type: type, position: position)) ?? defaultScrollIncrement();
+    switch (type) {
+      case ScrollIncrementType.line:
+        return 50.0;
+      case ScrollIncrementType.page:
+        return (0.8 * (position.maxScrollExtent - position.minScrollExtent) + position.minScrollExtent)
+            .clamp(0.0, position.viewportDimension);
+    }
+    return 0.0;
   }
 
   @override
@@ -841,26 +875,20 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }
 }
 
-/// An [Intent] that represents moving to the next focusable node in the given
-/// [direction].
-///
-/// This is the [Intent] bound by default to the [LogicalKeyboardKey.arrowUp],
-/// [LogicalKeyboardKey.arrowDown], [LogicalKeyboardKey.arrowLeft], and
-/// [LogicalKeyboardKey.arrowRight] keys in the [WidgetsApp], with the
-/// appropriate associated directions.
+/// An [Intent] that represents scrolling the nearest scrollable by the amount
+/// appropriate for the [type] specified.
 class ScrollIntent extends Intent {
-  /// Creates a [ScrollIntent] with a fixed [key], and the given
-  /// [direction].
+  /// Creates a const [ScrollIntent] in the given [direction], with the given [type].
   const ScrollIntent({@required this.direction, this.type = ScrollIncrementType.line})
       : assert(direction != null),
         assert(type != null),
         super(ScrollAction.key);
 
   /// The direction in which to scroll the scrollable containing the focused
-  /// widget is intended to move.
+  /// widget.
   final AxisDirection direction;
 
-  /// The type of scroll that is intended.
+  /// The type of scrolling that is intended.
   final ScrollIncrementType type;
 
   @override
@@ -869,22 +897,19 @@ class ScrollIntent extends Intent {
   }
 }
 
-/// An [Action] that moves the focus to the focusable node in the given
-/// [direction] configured by the associated [ScrollIntent].
-///
-/// This is the [Action] associated with the [key] and bound by default to the
-/// [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
-/// [LogicalKeyboardKey.arrowLeft], and [LogicalKeyboardKey.arrowRight] keys in
-/// the [WidgetsApp], with the appropriate associated directions.
+/// An [Action] that scrolls the [Scrollable] that encloses the current
+/// [primaryFocus] by the amount configured in the [ScrollIntent] given to it.
 class ScrollAction extends Action {
-  /// Creates a [ScrollAction] with a fixed [key];
+  /// Creates a const [ScrollAction].
   ScrollAction() : super(key);
 
-  /// The [LocalKey] that uniquely identifies this action to [ScrollIntent].
+  /// The [LocalKey] that uniquely connects this action to a [ScrollIntent].
   static const LocalKey key = ValueKey<Type>(ScrollAction);
 
+  // Find out how much of an increment to move by, taking the different
+  // directions into account.
   double _getIncrement(ScrollableState state, ScrollIntent intent) {
-    final double increment = state.getIncrement(type: intent.type);
+    final double increment = state.calculateIncrement(type: intent.type);
     switch (intent.direction) {
       case AxisDirection.down:
         switch (state.axisDirection) {
