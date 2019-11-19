@@ -62,7 +62,8 @@ class ShellTest : public ThreadTest {
                            LayerTreeBuilder = {});
 
   static void DispatchFakePointerData(Shell* shell);
-
+  static void DispatchPointerData(Shell* shell,
+                                  std::unique_ptr<PointerDataPacket> packet);
   // Declare |UnreportedTimingsCount|, |GetNeedsReportTimings| and
   // |SetNeedsReportTimings| inside |ShellTest| mainly for easier friend class
   // declarations as shell unit tests and Shell are in different name spaces.

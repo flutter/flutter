@@ -101,6 +101,8 @@ source_set("ui") {
     "window/pointer_data.h",
     "window/pointer_data_packet.cc",
     "window/pointer_data_packet.h",
+    "window/pointer_data_packet_converter.cc",
+    "window/pointer_data_packet_converter.h",
     "window/viewport_metrics.cc",
     "window/viewport_metrics.h",
     "window/window.cc",
@@ -161,6 +163,7 @@ if (current_toolchain == host_toolchain) {
 
     sources = [
       "painting/image_decoder_unittests.cc",
+      "window/pointer_data_packet_converter_unittests.cc",
     ]
 
     deps = [

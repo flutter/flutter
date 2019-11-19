@@ -8,10 +8,7 @@
 
 namespace flutter {
 
-// If this value changes, update the pointer data unpacking code in hooks.dart.
-static constexpr int kPointerDataFieldCount = 24;
-
-static_assert(sizeof(PointerData) == sizeof(int64_t) * kPointerDataFieldCount,
+static_assert(sizeof(PointerData) == kBytesPerField * kPointerDataFieldCount,
               "PointerData has the wrong size");
 
 void PointerData::Clear() {

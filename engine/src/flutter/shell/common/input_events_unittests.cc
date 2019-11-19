@@ -141,6 +141,40 @@ static void TestSimulatedInputEvents(
   ASSERT_EQ(events_consumed_at_frame.back(), num_events);
 }
 
+void CreateSimulatedPointerData(PointerData& data,
+                                PointerData::Change change,
+                                double dx,
+                                double dy) {
+  data.time_stamp = 0;
+  data.change = change;
+  data.kind = PointerData::DeviceKind::kTouch;
+  data.signal_kind = PointerData::SignalKind::kNone;
+  data.device = 0;
+  data.pointer_identifier = 0;
+  data.physical_x = dx;
+  data.physical_y = dy;
+  data.physical_delta_x = 0.0;
+  data.physical_delta_y = 0.0;
+  data.buttons = 0;
+  data.obscured = 0;
+  data.synthesized = 0;
+  data.pressure = 0.0;
+  data.pressure_min = 0.0;
+  data.pressure_max = 0.0;
+  data.distance = 0.0;
+  data.distance_max = 0.0;
+  data.size = 0.0;
+  data.radius_major = 0.0;
+  data.radius_minor = 0.0;
+  data.radius_min = 0.0;
+  data.radius_max = 0.0;
+  data.orientation = 0.0;
+  data.tilt = 0.0;
+  data.platformData = 0;
+  data.scroll_delta_x = 0.0;
+  data.scroll_delta_y = 0.0;
+}
+
 TEST_F(ShellTest, MissAtMostOneFrameForIrregularInputEvents) {
   // We don't use `constexpr int frame_time` here because MSVC doesn't handle
   // it well with lambda capture.
@@ -257,6 +291,126 @@ TEST_F(ShellTest, HandlesActualIphoneXsInputEvents) {
     int frame_drawn = events_consumed_at_frame.size();
     ASSERT_GE(frame_drawn, n - 1);
   }
+}
+
+TEST_F(ShellTest, CanCorrectlyPipePointerPacket) {
+  // Sets up shell with test fixture.
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings, true);
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("onPointerDataPacketMain");
+  // Sets up native handler.
+  fml::AutoResetWaitableEvent reportLatch;
+  std::vector<int64_t> result_sequence;
+  auto nativeOnPointerDataPacket = [&reportLatch, &result_sequence](
+                                       Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    result_sequence = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
+        args, 0, exception);
+    reportLatch.Signal();
+  };
+  // Starts engine.
+  AddNativeCallback("NativeOnPointerDataPacket",
+                    CREATE_NATIVE_ENTRY(nativeOnPointerDataPacket));
+  ASSERT_TRUE(configuration.IsValid());
+  RunEngine(shell.get(), std::move(configuration));
+  // Starts test.
+  auto packet = std::make_unique<PointerDataPacket>(6);
+  PointerData data;
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kHover, 3.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 3.0, 0.0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 3.0, 4.0);
+  packet->SetPointerData(3, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 3.0, 4.0);
+  packet->SetPointerData(4, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 3.0, 4.0);
+  packet->SetPointerData(5, data);
+  ShellTest::DispatchPointerData(shell.get(), std::move(packet));
+  bool will_draw_new_frame;
+  ShellTest::VSyncFlush(shell.get(), will_draw_new_frame);
+
+  reportLatch.Wait();
+  size_t expect_length = 6;
+  ASSERT_EQ(result_sequence.size(), expect_length);
+  ASSERT_EQ(PointerData::Change(result_sequence[0]), PointerData::Change::kAdd);
+  ASSERT_EQ(PointerData::Change(result_sequence[1]),
+            PointerData::Change::kHover);
+  ASSERT_EQ(PointerData::Change(result_sequence[2]),
+            PointerData::Change::kDown);
+  ASSERT_EQ(PointerData::Change(result_sequence[3]),
+            PointerData::Change::kMove);
+  ASSERT_EQ(PointerData::Change(result_sequence[4]), PointerData::Change::kUp);
+  ASSERT_EQ(PointerData::Change(result_sequence[5]),
+            PointerData::Change::kRemove);
+
+  // Cleans up shell.
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  DestroyShell(std::move(shell));
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, CanCorrectlySynthesizePointerPacket) {
+  // Sets up shell with test fixture.
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings, true);
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("onPointerDataPacketMain");
+  // Sets up native handler.
+  fml::AutoResetWaitableEvent reportLatch;
+  std::vector<int64_t> result_sequence;
+  auto nativeOnPointerDataPacket = [&reportLatch, &result_sequence](
+                                       Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    result_sequence = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
+        args, 0, exception);
+    reportLatch.Signal();
+  };
+  // Starts engine.
+  AddNativeCallback("NativeOnPointerDataPacket",
+                    CREATE_NATIVE_ENTRY(nativeOnPointerDataPacket));
+  ASSERT_TRUE(configuration.IsValid());
+  RunEngine(shell.get(), std::move(configuration));
+  // Starts test.
+  auto packet = std::make_unique<PointerDataPacket>(4);
+  PointerData data;
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 3.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 3.0, 4.0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 3.0, 4.0);
+  packet->SetPointerData(3, data);
+  ShellTest::DispatchPointerData(shell.get(), std::move(packet));
+  bool will_draw_new_frame;
+  ShellTest::VSyncFlush(shell.get(), will_draw_new_frame);
+
+  reportLatch.Wait();
+  size_t expect_length = 6;
+  ASSERT_EQ(result_sequence.size(), expect_length);
+  ASSERT_EQ(PointerData::Change(result_sequence[0]), PointerData::Change::kAdd);
+  // The pointer data packet converter should synthesize a hover event.
+  ASSERT_EQ(PointerData::Change(result_sequence[1]),
+            PointerData::Change::kHover);
+  ASSERT_EQ(PointerData::Change(result_sequence[2]),
+            PointerData::Change::kDown);
+  // The pointer data packet converter should synthesize a move event.
+  ASSERT_EQ(PointerData::Change(result_sequence[3]),
+            PointerData::Change::kMove);
+  ASSERT_EQ(PointerData::Change(result_sequence[4]), PointerData::Change::kUp);
+  ASSERT_EQ(PointerData::Change(result_sequence[5]),
+            PointerData::Change::kRemove);
+
+  // Cleans up shell.
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  DestroyShell(std::move(shell));
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 }  // namespace testing

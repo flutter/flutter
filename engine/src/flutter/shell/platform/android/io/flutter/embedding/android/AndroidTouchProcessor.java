@@ -66,7 +66,7 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the unpacking code in hooks.dart.
-  private static final int POINTER_DATA_FIELD_COUNT = 24;
+  private static final int POINTER_DATA_FIELD_COUNT = 28;
   private static final int BYTES_PER_FIELD = 8;
 
   // This value must match the value in framework's platform_view.dart.
@@ -198,8 +198,11 @@ public class AndroidTouchProcessor {
     packet.putLong(pointerKind); // kind
     packet.putLong(signalKind); // signal_kind
     packet.putLong(event.getPointerId(pointerIndex)); // device
+    packet.putLong(0); // pointer_identifier, will be generated in pointer_data_packet_converter.cc.
     packet.putDouble(event.getX(pointerIndex)); // physical_x
     packet.putDouble(event.getY(pointerIndex)); // physical_y
+    packet.putDouble(0.0); // physical_delta_x, will be generated in pointer_data_packet_converter.cc.
+    packet.putDouble(0.0); // physical_delta_y, will be generated in pointer_data_packet_converter.cc.
 
     long buttons;
     if (pointerKind == PointerDeviceKind.MOUSE) {
@@ -219,6 +222,8 @@ public class AndroidTouchProcessor {
     packet.putLong(buttons); // buttons
 
     packet.putLong(0); // obscured
+
+    packet.putLong(0); // synthesized
 
     packet.putDouble(event.getPressure(pointerIndex)); // pressure
     double pressureMin = 0.0;

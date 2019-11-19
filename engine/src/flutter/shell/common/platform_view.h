@@ -15,6 +15,7 @@
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
+#include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/pointer_data_dispatcher.h"
 #include "flutter/shell/common/surface.h"
@@ -544,6 +545,7 @@ class PlatformView {
   PlatformView::Delegate& delegate_;
   const TaskRunners task_runners_;
 
+  PointerDataPacketConverter pointer_data_packet_converter_;
   SkISize size_;
   fml::WeakPtrFactory<PlatformView> weak_factory_;
 

@@ -173,12 +173,19 @@ void ShellTest::PumpOneFrame(Shell* shell,
 }
 
 void ShellTest::DispatchFakePointerData(Shell* shell) {
+  auto packet = std::make_unique<PointerDataPacket>(1);
+  DispatchPointerData(shell, std::move(packet));
+}
+
+void ShellTest::DispatchPointerData(Shell* shell,
+                                    std::unique_ptr<PointerDataPacket> packet) {
   fml::AutoResetWaitableEvent latch;
-  shell->GetTaskRunners().GetPlatformTaskRunner()->PostTask([&latch, shell]() {
-    auto packet = std::make_unique<PointerDataPacket>(1);
-    shell->OnPlatformViewDispatchPointerDataPacket(std::move(packet));
-    latch.Signal();
-  });
+  shell->GetTaskRunners().GetPlatformTaskRunner()->PostTask(
+      [&latch, shell, &packet]() {
+        // Goes through PlatformView to ensure packet is corrected converted.
+        shell->GetPlatformView()->DispatchPointerDataPacket(std::move(packet));
+        latch.Signal();
+      });
   latch.Wait();
 }
 

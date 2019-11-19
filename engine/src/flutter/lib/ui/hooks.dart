@@ -308,8 +308,9 @@ void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1
 // If this value changes, update the encoding code in the following files:
 //
 //  * pointer_data.cc
-//  * FlutterView.java
-const int _kPointerDataFieldCount = 24;
+//  * pointers.dart
+//  * AndroidTouchProcessor.java
+const int _kPointerDataFieldCount = 28;
 
 PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
   const int kStride = Int64List.bytesPerElement;
@@ -325,10 +326,14 @@ PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
       kind: PointerDeviceKind.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
       signalKind: PointerSignalKind.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
       device: packet.getInt64(kStride * offset++, _kFakeHostEndian),
+      pointerIdentifier: packet.getInt64(kStride * offset++, _kFakeHostEndian),
       physicalX: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       physicalY: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      physicalDeltaX: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      physicalDeltaY: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       buttons: packet.getInt64(kStride * offset++, _kFakeHostEndian),
       obscured: packet.getInt64(kStride * offset++, _kFakeHostEndian) != 0,
+      synthesized: packet.getInt64(kStride * offset++, _kFakeHostEndian) != 0,
       pressure: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       pressureMin: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       pressureMax: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
