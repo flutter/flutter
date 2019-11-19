@@ -14,7 +14,7 @@ config("libwebp_defines") {
     # This makes WebP decode to BGR_565 when we ask for RGB_565.
     # (It also swaps the color order for 4444, but we don't care today.)
     "WEBP_SWAP_16BIT_CSP",
-    "WEBP_EXTERN(x)=x",
+    "WEBP_EXTERN(x)= extern x",
   ]
 }
 
