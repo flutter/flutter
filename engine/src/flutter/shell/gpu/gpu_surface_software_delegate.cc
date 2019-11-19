@@ -6,6 +6,8 @@
 
 namespace flutter {
 
+GPUSurfaceSoftwareDelegate::~GPUSurfaceSoftwareDelegate() = default;
+
 ExternalViewEmbedder* GPUSurfaceSoftwareDelegate::GetExternalViewEmbedder() {
   return nullptr;
 }
