@@ -846,25 +846,9 @@ class _AdbLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
-  DateTime _timeOrigin;
-
-  DateTime _adbTimestampToDateTime(String adbTimestamp) {
-    // The adb timestamp format is: mm-dd hours:minutes:seconds.milliseconds
-    // Dart's DateTime parse function accepts this format so long as we provide
-    // the year, resulting in:
-    // yyyy-mm-dd hours:minutes:seconds.milliseconds.
-    return DateTime.parse('${DateTime.now().year}-$adbTimestamp');
-  }
-
   void _start() {
-    // Start the adb logcat process.
-    final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time'];
-    final String lastTimestamp = device.lastLogcatTimestamp;
-    if (lastTimestamp != null) {
-      _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
-    } else {
-      _timeOrigin = null;
-    }
+    // Start the adb logcat process and filter logs by the "flutter" tag.
+    final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'];
     processUtils.start(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -914,18 +898,7 @@ class _AdbLogReader extends DeviceLogReader {
   // mm-dd hh:mm:ss.milliseconds Priority/Tag( PID): ....
   void _onLine(String line) {
     final Match timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
-    if (timeMatch == null) {
-      return;
-    }
-    if (_timeOrigin != null) {
-      final String timestamp = timeMatch.group(0);
-      final DateTime time = _adbTimestampToDateTime(timestamp);
-      if (!time.isAfter(_timeOrigin)) {
-        // Ignore log messages before the origin.
-        return;
-      }
-    }
-    if (line.length == timeMatch.end) {
+    if (timeMatch == null || line.length == timeMatch.end) {
       return;
     }
     // Chop off the time.
