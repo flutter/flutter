@@ -1,11 +1,16 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
+import 'basic.dart';
 import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
+import 'shortcuts.dart';
 
 /// Creates actions for use in defining shortcuts.
 ///
@@ -197,12 +202,14 @@ class Actions extends InheritedWidget {
   /// default-constructed [ActionDispatcher].
   final ActionDispatcher dispatcher;
 
+  /// {@template flutter.widgets.actions.actions}
   /// A map of [Intent] keys to [ActionFactory] factory methods that defines
   /// which actions this widget knows about.
   ///
   /// For performance reasons, it is recommended that a pre-built map is
   /// passed in here (e.g. a final variable from your widget class) instead of
   /// defining it inline in the build function.
+  /// {@endtemplate}
   final Map<LocalKey, ActionFactory> actions;
 
   // Finds the nearest valid ActionDispatcher, or creates a new one if it
@@ -352,6 +359,313 @@ class Actions extends InheritedWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ActionDispatcher>('dispatcher', dispatcher));
     properties.add(DiagnosticsProperty<Map<LocalKey, ActionFactory>>('actions', actions));
+  }
+}
+
+/// A widget that combines the functionality of [Actions], [Shortcuts],
+/// [MouseRegion] and a [Focus] widget to create a detector that defines actions
+/// and key bindings, and provides callbacks for handling focus and hover
+/// highlights.
+///
+/// This widget can be used to give a control the required detection modes for
+/// focus and hover handling. It is most often used when authoring a new control
+/// widget, and the new control should be enabled for keyboard traversal and
+/// activation.
+///
+/// {@tool snippet --template=stateful_widget_material}
+/// This example shows how keyboard interaction can be added to a custom control
+/// that changes color when hovered and focused, and can toggle a light when
+/// activated, either by touch or by hitting the `X` key on the keyboard.
+///
+/// This example defines its own key binding for the `X` key, but in this case,
+/// there is also a default key binding for [ActivateAction] in the default key
+/// bindings created by [WidgetsApp] (the parent for [MaterialApp], and
+/// [CupertinoApp]), so the `ENTER` key will also activate the control.
+///
+/// ```dart imports
+/// import 'package:flutter/services.dart';
+/// ```
+///
+/// ```dart preamble
+/// class FadButton extends StatefulWidget {
+///   const FadButton({Key key, this.onPressed, this.child}) : super(key: key);
+///
+///   final VoidCallback onPressed;
+///   final Widget child;
+///
+///   @override
+///   _FadButtonState createState() => _FadButtonState();
+/// }
+///
+/// class _FadButtonState extends State<FadButton> {
+///   bool _focused = false;
+///   bool _hovering = false;
+///   bool _on = false;
+///   Map<LocalKey, ActionFactory> _actionMap;
+///   Map<LogicalKeySet, Intent> _shortcutMap;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _actionMap = <LocalKey, ActionFactory>{
+///       ActivateAction.key: () {
+///         return CallbackAction(
+///           ActivateAction.key,
+///           onInvoke: (FocusNode node, Intent intent) => _toggleState(),
+///         );
+///       },
+///     };
+///     _shortcutMap = <LogicalKeySet, Intent>{
+///       LogicalKeySet(LogicalKeyboardKey.keyX): Intent(ActivateAction.key),
+///     };
+///   }
+///
+///   Color get color {
+///     Color baseColor = Colors.lightBlue;
+///     if (_focused) {
+///       baseColor = Color.alphaBlend(Colors.black.withOpacity(0.25), baseColor);
+///     }
+///     if (_hovering) {
+///       baseColor = Color.alphaBlend(Colors.black.withOpacity(0.1), baseColor);
+///     }
+///     return baseColor;
+///   }
+///
+///   void _toggleState() {
+///     setState(() {
+///       _on = !_on;
+///     });
+///   }
+///
+///   void _handleFocusHighlight(bool value) {
+///     setState(() {
+///       _focused = value;
+///     });
+///   }
+///
+///   void _handleHoveHighlight(bool value) {
+///     setState(() {
+///       _hovering = value;
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return GestureDetector(
+///       onTap: _toggleState,
+///       child: FocusableActionDetector(
+///         actions: _actionMap,
+///         shortcuts: _shortcutMap,
+///         onShowFocusHighlight: _handleFocusHighlight,
+///         onShowHoverHighlight: _handleHoveHighlight,
+///         child: Row(
+///           children: <Widget>[
+///             Container(
+///               padding: EdgeInsets.all(10.0),
+///               color: color,
+///               child: widget.child,
+///             ),
+///             Container(
+///               width: 30,
+///               height: 30,
+///               margin: EdgeInsets.all(10.0),
+///               color: _on ? Colors.red : Colors.transparent,
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('FocusableActionDetector Example'),
+///     ),
+///     body: Center(
+///       child: Row(
+///         mainAxisAlignment: MainAxisAlignment.center,
+///         children: <Widget>[
+///           Padding(
+///             padding: const EdgeInsets.all(8.0),
+///             child: FlatButton(onPressed: () {}, child: Text('Press Me')),
+///           ),
+///           Padding(
+///             padding: const EdgeInsets.all(8.0),
+///             child: FadButton(onPressed: () {}, child: Text('And Me')),
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// This widget doesn't have any visual representation, it is just a detector that
+/// provides focus and hover capabilities.
+///
+/// It hosts its own [FocusNode] or uses [focusNode], if given.
+class FocusableActionDetector extends StatefulWidget {
+  /// Create a const [FocusableActionDetector].
+  ///
+  /// The [enabled], [autofocus], and [child] arguments must not be null.
+  const FocusableActionDetector({
+    Key key,
+    this.enabled = true,
+    this.focusNode,
+    this.autofocus = false,
+    this.shortcuts,
+    this.actions,
+    this.onShowFocusHighlight,
+    this.onShowHoverHighlight,
+    this.onFocusChange,
+    @required this.child,
+  })  : assert(enabled != null),
+        assert(autofocus != null),
+        assert(child != null),
+        super(key: key);
+
+  /// Is this widget enabled or not.
+  ///
+  /// If disabled, will not send any notifications needed to update highlight or
+  /// focus state, and will not define or respond to any actions or shortcuts.
+  ///
+  /// When disabled, adds [Focus] to the widget tree, but sets
+  /// [Focus.canRequestFocus] to false.
+  final bool enabled;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
+  /// {@macro flutter.widgets.actions.actions}
+  final Map<LocalKey, ActionFactory> actions;
+
+  /// {@macro flutter.widgets.shortcuts.shortcuts}
+  final Map<LogicalKeySet, Intent> shortcuts;
+
+  /// A function that will be called when the focus highlight should be shown or hidden.
+  final ValueChanged<bool> onShowFocusHighlight;
+
+  /// A function that will be called when the hover highlight should be shown or hidden.
+  final ValueChanged<bool> onShowHoverHighlight;
+
+  /// A function that will be called when the focus changes.
+  ///
+  /// Called with true if the [focusNode] has primary focus.
+  final ValueChanged<bool> onFocusChange;
+
+  /// The child widget for this [FocusableActionDetector] widget.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  @override
+  _FocusableActionDetectorState createState() => _FocusableActionDetectorState();
+}
+
+class _FocusableActionDetectorState extends State<FocusableActionDetector> {
+  @override
+  void initState() {
+    super.initState();
+    _updateHighlightMode(FocusManager.instance.highlightMode);
+    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
+    super.dispose();
+  }
+
+  bool _canShowHighlight = false;
+  void _updateHighlightMode(FocusHighlightMode mode) {
+    final bool couldShowHighlight = _canShowHighlight;
+    switch (FocusManager.instance.highlightMode) {
+      case FocusHighlightMode.touch:
+        _canShowHighlight = false;
+        break;
+      case FocusHighlightMode.traditional:
+        _canShowHighlight = true;
+        break;
+    }
+    if  (couldShowHighlight != _canShowHighlight) {
+      _handleShowFocusHighlight();
+      _handleShowHoverHighlight();
+    }
+  }
+
+  /// Have to have this separate from the _updateHighlightMode because it gets
+  /// called in initState, where things aren't mounted yet.
+  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
+    if (!mounted) {
+      return;
+    }
+    _updateHighlightMode(mode);
+  }
+
+  bool _hovering = false;
+  void _handleMouseEnter(PointerEnterEvent event) {
+    assert(widget.onShowHoverHighlight != null);
+    if (!_hovering) {
+      // TODO(gspencergoog): remove scheduleMicrotask once MouseRegion event timing has changed.
+      scheduleMicrotask(() { setState(() { _hovering = true; _handleShowHoverHighlight(); }); });
+    }
+  }
+
+  void _handleMouseExit(PointerExitEvent event) {
+    assert(widget.onShowHoverHighlight != null);
+    if (_hovering) {
+      // TODO(gspencergoog): remove scheduleMicrotask once MouseRegion event timing has changed.
+      scheduleMicrotask(() { setState(() { _hovering = false; _handleShowHoverHighlight(); }); });
+    }
+  }
+
+  bool _focused = false;
+  void _handleFocusChange(bool focused) {
+    if (_focused != focused) {
+      setState(() {
+        _focused = focused;
+        _handleShowFocusHighlight();
+        widget.onFocusChange?.call(_focused);
+      });
+    }
+  }
+
+  void _handleShowHoverHighlight() {
+    widget.onShowHoverHighlight?.call(_hovering && widget.enabled && _canShowHighlight);
+  }
+
+  void _handleShowFocusHighlight() {
+    widget.onShowFocusHighlight?.call(_focused && widget.enabled && _canShowHighlight);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = MouseRegion(
+      onEnter: _handleMouseEnter,
+      onExit: _handleMouseExit,
+      child: Focus(
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        canRequestFocus: widget.enabled,
+        onFocusChange: _handleFocusChange,
+        child: widget.child,
+      ),
+    );
+    if (widget.enabled && widget.actions != null && widget.actions.isNotEmpty) {
+      child = Actions(actions: widget.actions, child: child);
+    }
+    if (widget.enabled && widget.shortcuts != null && widget.shortcuts.isNotEmpty) {
+      child = Shortcuts(shortcuts: widget.shortcuts, child: child);
+    }
+    return child;
   }
 }
 

@@ -79,7 +79,6 @@ Future<void> main() async {
       'When the exception was thrown, this was the stack:\n'
       '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '#2      getSampleStack \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
-      '<asynchronous suspension>\n' // TODO(ianh): https://github.com/flutter/flutter/issues/4021
       '#3      main \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
       '\\(elided [0-9]+ frames from package dart:async\\)\n'
@@ -162,7 +161,6 @@ Future<void> main() async {
       'When the exception was thrown, this was the stack:\n'
       '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '#2      getSampleStack \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
-      '<asynchronous suspension>\n' // TODO(ianh): https://github.com/flutter/flutter/issues/4021
       '#3      main \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
       '\\(elided [0-9]+ frames from package dart:async\\)\n'

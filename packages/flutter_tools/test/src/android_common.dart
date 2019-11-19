@@ -13,9 +13,9 @@ class FakeAndroidBuilder implements AndroidBuilder {
   @override
   Future<void> buildAar({
     @required FlutterProject project,
-    @required AndroidBuildInfo androidBuildInfo,
+    @required Set<AndroidBuildInfo> androidBuildInfo,
     @required String target,
-    @required String outputDir,
+    @required String outputDirectoryPath,
   }) async {}
 
   @override

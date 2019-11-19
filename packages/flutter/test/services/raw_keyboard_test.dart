@@ -706,32 +706,57 @@ void main() {
       GLFWKeyHelper.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
     };
 
+    // How modifiers are interpreted depends upon the keyCode for GLFW.
+    int keyCodeForModifier(int modifier, {bool isLeft}) {
+      switch (modifier) {
+        case GLFWKeyHelper.modifierAlt:
+          return isLeft ? 342 : 346;
+        case GLFWKeyHelper.modifierShift:
+          return isLeft ? 340 : 344;
+        case GLFWKeyHelper.modifierControl:
+          return isLeft ? 341 : 345;
+        case GLFWKeyHelper.modifierMeta:
+          return isLeft ? 343 : 347;
+        case GLFWKeyHelper.modifierNumericPad:
+          return 282;
+        case GLFWKeyHelper.modifierCapsLock:
+          return 280;
+        default:
+          return 65; // keyA
+      }
+    }
+
     test('modifier keys are recognized individually', () {
       for (int modifier in modifierTests.keys) {
-        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
-          'type': 'keydown',
-          'keymap': 'linux',
-          'toolkit': 'glfw',
-          'keyCode': 65,
-          'scanCode': 0x00000026,
-          'unicodeScalarValues': 97,
-          'modifiers': modifier,
-        });
-        final RawKeyEventDataLinux data = event.data;
-        for (ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier].key == key) {
-            expect(
-              data.isModifierPressed(key, side: modifierTests[modifier].side),
-              isTrue,
-              reason: "$key should be pressed with metaState $modifier, but isn't.",
-            );
-            expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
-          } else {
-            expect(
-              data.isModifierPressed(key, side: modifierTests[modifier].side),
-              isFalse,
-              reason: '$key should not be pressed with metaState $modifier.',
-            );
+        for (bool isDown in <bool>[true, false]) {
+          for (bool isLeft in <bool>[true, false]) {
+            final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+              'type': isDown ? 'keydown' : 'keyup',
+              'keymap': 'linux',
+              'toolkit': 'glfw',
+              'keyCode': keyCodeForModifier(modifier, isLeft: isLeft),
+              'scanCode': 0x00000026,
+              'unicodeScalarValues': 97,
+              // GLFW modifiers don't include the current key event.
+              'modifiers': isDown ? 0 : modifier,
+            });
+            final RawKeyEventDataLinux data = event.data;
+            for (ModifierKey key in ModifierKey.values) {
+              if (modifierTests[modifier].key == key) {
+                expect(
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
+                  isDown ? isTrue : isFalse,
+                  reason: "${isLeft ? 'left' : 'right'} $key ${isDown ? 'should' : 'should not'} be pressed with metaState $modifier, when key is ${isDown ? 'down' : 'up'}, but isn't.",
+                );
+                expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
+              } else {
+                expect(
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
+                  isFalse,
+                  reason: "${isLeft ? 'left' : 'right'} $key should not be pressed with metaState $modifier, wwhen key is ${isDown ? 'down' : 'up'}, but is.",
+                );
+              }
+            }
           }
         }
       }

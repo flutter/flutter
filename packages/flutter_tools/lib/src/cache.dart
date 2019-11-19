@@ -432,7 +432,8 @@ abstract class CachedArtifact extends ArtifactSet {
   /// can delete them after completion. We don't delete them right after
   /// extraction in case [update] is interrupted, so we can restart without
   /// starting from scratch.
-  final List<File> _downloadedFiles = <File>[];
+  @visibleForTesting
+  final List<File> downloadedFiles = <File>[];
 
   @override
   bool isUpToDate() {
@@ -465,8 +466,13 @@ abstract class CachedArtifact extends ArtifactSet {
 
   /// Clear any zip/gzip files downloaded.
   void _removeDownloadedFiles() {
-    for (File f in _downloadedFiles) {
-      f.deleteSync();
+    for (File f in downloadedFiles) {
+      try {
+        f.deleteSync();
+      } on FileSystemException catch (e) {
+        printError('Failed to delete "${f.path}". Please delete manually. $e');
+        continue;
+      }
       for (Directory d = f.parent; d.absolute.path != cache.getDownloadDir().absolute.path; d = d.parent) {
         if (d.listSync().isEmpty) {
           d.deleteSync();
@@ -532,10 +538,10 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
-  /// argument, then add the temporary file to the [_downloadedFiles].
+  /// argument, then add the temporary file to the [downloadedFiles].
   Future<void> _withDownloadFile(String name, Future<void> onTemporaryFile(File file)) async {
     final File tempFile = fs.file(fs.path.join(cache.getDownloadDir().path, name));
-    _downloadedFiles.add(tempFile);
+    downloadedFiles.add(tempFile);
     await onTemporaryFile(tempFile);
   }
 }

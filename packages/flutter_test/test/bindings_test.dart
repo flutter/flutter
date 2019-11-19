@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 
 void main() {

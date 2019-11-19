@@ -282,7 +282,15 @@ class IOSDevice extends Device {
       // TODO(chinmaygarde): Use mainPath, route.
       printTrace('Building ${package.name} for $id');
 
-      final String cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
+      String cpuArchitecture;
+
+      try {
+        cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
+      } on IOSDeviceNotFoundError catch (e) {
+        printError(e.message);
+        return LaunchResult.failed();
+      }
+
       final DarwinArch iosArch = getIOSArchForName(cpuArchitecture);
 
       // Step 1: Build the precompiled/DBC application if necessary.
@@ -356,7 +364,8 @@ class IOSDevice extends Device {
         observatoryDiscovery = ProtocolDiscovery.observatory(
           getLogReader(app: package),
           portForwarder: portForwarder,
-          hostPort: debuggingOptions.observatoryPort,
+          hostPort: debuggingOptions.hostVmServicePort,
+          devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
         );
       }
@@ -383,8 +392,8 @@ class IOSDevice extends Device {
         localUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
           packageId,
           this,
-          ipv6,
-          debuggingOptions.observatoryPort,
+          usesIpv6: ipv6,
+          hostVmservicePort: debuggingOptions.hostVmServicePort,
         );
         if (localUri != null) {
           UsageEvent('ios-mdns', 'success').send();

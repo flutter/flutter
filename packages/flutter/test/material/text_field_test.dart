@@ -1948,9 +1948,6 @@ void main() {
     expect(() async {
       await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 2));
     }, throwsAssertionError);
-    expect(() async {
-      await tester.pumpWidget(textFieldBuilder(minLines: 3));
-    }, throwsAssertionError);
 
     // maxLines defaults to 1 and can't be less than minLines
     expect(() async {
