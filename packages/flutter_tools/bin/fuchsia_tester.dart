@@ -134,7 +134,7 @@ Future<void> run(List<String> args) async {
 
     final Map<String, String> tests = <String, String>{};
     final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
-      json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<Map<String, dynamic>>);
+      (json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<dynamic>).cast<Map<String, dynamic>>());
     for (Map<String, dynamic> map in jsonList) {
       final String source = fs.file(map['source']).resolveSymbolicLinksSync();
       final String dill = fs.file(map['dill']).resolveSymbolicLinksSync();
