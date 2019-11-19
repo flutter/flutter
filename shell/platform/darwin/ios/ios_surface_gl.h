@@ -9,7 +9,6 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/ios/ios_gl_context.h"
-#include "flutter/shell/platform/darwin/ios/ios_gl_context_switch_manager.h"
 #include "flutter/shell/platform/darwin/ios/ios_gl_render_target.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
 
@@ -33,8 +32,7 @@ class IOSSurfaceGL final : public IOSSurface,
   bool IsValid() const override;
 
   // |IOSSurface|
-  std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch> ResourceContextMakeCurrent()
-      override;
+  bool ResourceContextMakeCurrent() override;
 
   // |IOSSurface|
   void UpdateStorageSizeIfNecessary() override;
@@ -42,8 +40,7 @@ class IOSSurfaceGL final : public IOSSurface,
   // |IOSSurface|
   std::unique_ptr<Surface> CreateGPUSurface(GrContext* gr_context = nullptr) override;
 
-  std::unique_ptr<RendererContextSwitchManager::RendererContextSwitch> GLContextMakeCurrent()
-      override;
+  bool GLContextMakeCurrent() override;
 
   bool GLContextClearCurrent() override;
 
@@ -55,9 +52,6 @@ class IOSSurfaceGL final : public IOSSurface,
 
   // |GPUSurfaceGLDelegate|
   ExternalViewEmbedder* GetExternalViewEmbedder() override;
-
-  // |GPUSurfaceGLDelegate|
-  std::shared_ptr<RendererContextSwitchManager> GetRendererContextSwitchManager() override;
 
   // |ExternalViewEmbedder|
   SkCanvas* GetRootCanvas() override;

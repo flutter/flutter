@@ -86,8 +86,6 @@ shared_library("create_flutter_framework_dylib") {
     "ios_external_texture_gl.mm",
     "ios_gl_context.h",
     "ios_gl_context.mm",
-    "ios_gl_context_switch_manager.h",
-    "ios_gl_context_switch_manager.mm",
     "ios_gl_render_target.h",
     "ios_gl_render_target.mm",
     "ios_surface.h",
