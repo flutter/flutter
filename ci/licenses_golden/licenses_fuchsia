@@ -1,4 +1,4 @@
-Signature: 0f0c3ebb82bab6fceb91a92b239ea330
+Signature: 93fab6fac8d4c4794020278cb30b613d
 
 UNUSED LICENSES:
 
@@ -1517,6 +1517,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/service_conne
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/service_handler_base.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/transition.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/internal/proxy_controller_util.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/internal/message_sender.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/internal/message_sender.cc
@@ -2688,6 +2689,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/comparis
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/decoder.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/encoder.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/internal/logging.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/internal/proxy_controller_util.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/object_coding.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/string.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/traits.h
@@ -2830,7 +2832,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/system
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/tls.h
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/surface/surface.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/auth_provider.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/auth_provider_factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/token_manager.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/client.fidl
