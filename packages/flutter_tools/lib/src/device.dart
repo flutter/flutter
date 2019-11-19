@@ -303,7 +303,6 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 }
 
 abstract class Device {
-
   Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
 
   final String id;
@@ -356,16 +355,16 @@ abstract class Device {
   bool isSupportedForProject(FlutterProject flutterProject);
 
   /// Check if a version of the given app is already installed
-  Future<bool> isAppInstalled(ApplicationPackage app);
+  Future<bool> isAppInstalled(covariant ApplicationPackage app);
 
   /// Check if the latest build of the [app] is already installed.
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app);
+  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app);
 
   /// Install an app package on the current device
-  Future<bool> installApp(ApplicationPackage app);
+  Future<bool> installApp(covariant ApplicationPackage app);
 
   /// Uninstall an app package from the current device
-  Future<bool> uninstallApp(ApplicationPackage app);
+  Future<bool> uninstallApp(covariant ApplicationPackage app);
 
   /// Check if the device is supported by Flutter
   bool isSupported();
@@ -382,7 +381,7 @@ abstract class Device {
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  DeviceLogReader getLogReader({ ApplicationPackage app });
+  DeviceLogReader getLogReader({ covariant ApplicationPackage app });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -398,7 +397,7 @@ abstract class Device {
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    covariant ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -422,7 +421,7 @@ abstract class Device {
   bool get supportsScreenshot => false;
 
   /// Stop an app package on the current device.
-  Future<bool> stopApp(ApplicationPackage app);
+  Future<bool> stopApp(covariant ApplicationPackage app);
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
@@ -582,17 +581,15 @@ class ForwardedPort {
 
   final int hostPort;
   final int devicePort;
-  final dynamic context;
+  final Process context;
 
   @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
 
   /// Kill subprocess (if present) used in forwarding.
   void dispose() {
-    final Process process = context;
-
-    if (process != null) {
-      process.kill();
+    if (context != null) {
+      context.kill();
     }
   }
 }

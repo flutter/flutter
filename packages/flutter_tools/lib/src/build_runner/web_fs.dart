@@ -427,7 +427,7 @@ class DebugAssetServer extends AssetServer {
           partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
           for (ArchiveFile file in archive) {
-            partFiles.childFile(file.name).writeAsBytesSync(file.content);
+            partFiles.childFile(file.name).writeAsBytesSync(file.content as List<int>);
           }
         }
       }

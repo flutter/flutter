@@ -72,7 +72,7 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   bool get shouldRunPub {
     // If they're not analyzing the current project.
-    if (!argResults['current-package']) {
+    if (!boolArg('current-package')) {
       return false;
     }
 
@@ -86,7 +86,7 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['watch']) {
+    if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults,
         runner.getRepoRoots(),

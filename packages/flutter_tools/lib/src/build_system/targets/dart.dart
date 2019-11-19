@@ -390,7 +390,7 @@ List<String> parseDartDefines(Environment environment) {
 
   final String dartDefinesJson = environment.defines[kDartDefines];
   try {
-    final List<Object> parsedDefines = jsonDecode(dartDefinesJson);
+    final List<Object> parsedDefines = jsonDecode(dartDefinesJson) as List<Object>;
     return parsedDefines.cast<String>();
   } on FormatException catch (_) {
     throw Exception(

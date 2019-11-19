@@ -198,7 +198,7 @@ class Stdio {
     if (stdin is! io.Stdin) {
       return _stdinHasTerminal = false;
     }
-    final io.Stdin ioStdin = stdin;
+    final io.Stdin ioStdin = stdin as io.Stdin;
     if (!ioStdin.hasTerminal) {
       return _stdinHasTerminal = false;
     }
