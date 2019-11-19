@@ -26,6 +26,8 @@ namespace flutter {
 ///
 class GPUSurfaceSoftwareDelegate {
  public:
+  virtual ~GPUSurfaceSoftwareDelegate();
+
   //----------------------------------------------------------------------------
   /// @brief      Called when the GPU surface needs a new buffer to render a new
   ///             frame into.
