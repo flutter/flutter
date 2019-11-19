@@ -1295,7 +1295,6 @@ abstract class RangeSliderValueIndicatorShape {
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
-    assert(!sizeWithOverflow.isEmpty);
     return 0;
   }
 
@@ -2642,7 +2641,6 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
-    assert(!sizeWithOverflow.isEmpty);
     final Canvas canvas = context.canvas;
     final double scale = activationAnimation.value;
     _pathPainter.paint(
@@ -2692,7 +2690,6 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
-    assert(!sizeWithOverflow.isEmpty);
     return _pathPainter.getHorizontalShift(
       parentBox: parentBox,
       center: center,
@@ -2720,7 +2717,6 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     double value,
     Thumb thumb,
   }) {
-    assert(!sizeWithOverflow.isEmpty);
     final Canvas canvas = context.canvas;
     final double scale = activationAnimation.value;
     _pathPainter.paint(
@@ -2769,7 +2765,9 @@ class _RectangularSliderValueIndicatorPathPainter {
     Size sizeWithOverflow,
     double scale,
   }) {
-    assert(!sizeWithOverflow.isEmpty);
+    if (sizeWithOverflow.isEmpty) {
+      sizeWithOverflow = parentBox.size;
+    }
     const double edgePadding = 8.0;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
 
@@ -2802,7 +2800,9 @@ class _RectangularSliderValueIndicatorPathPainter {
       // Zero scale essentially means "do not draw anything", so it's safe to just return.
       return;
     }
-    assert(!sizeWithOverflow.isEmpty);
+    if (sizeWithOverflow.isEmpty) {
+      sizeWithOverflow = parentBox.size;
+    }
 
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
     final double horizontalShift = getHorizontalShift(
@@ -2955,7 +2955,6 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
-    assert(!sizeWithOverflow.isEmpty);
     return _pathPainter.getHorizontalShift(
       parentBox: parentBox,
       center: center,
@@ -3078,7 +3077,9 @@ class _PaddleSliderValueIndicatorPathPainter {
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
-    assert(!sizeWithOverflow.isEmpty);
+    if (sizeWithOverflow.isEmpty) {
+      sizeWithOverflow = parentBox.size;
+    }
     final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
     final double labelHalfWidth = labelPainter.width / 2.0;
     final double halfWidthNeeded = math.max(
@@ -3147,7 +3148,9 @@ class _PaddleSliderValueIndicatorPathPainter {
       // our math below will attempt to divide by zero and send needless NaNs to the engine.
       return;
     }
-    assert(!sizeWithOverflow.isEmpty);
+    if (sizeWithOverflow.isEmpty) {
+      sizeWithOverflow = parentBox.size;
+    }
 
     // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.
