@@ -241,7 +241,12 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
   for(String pluralKey in pluralIds.keys) {
     final RegExp expRE = RegExp('($pluralKey){([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(message);
-    if (match.groupCount == 2) {
+    if (match == null) {
+      if (pluralKey == 'other') {
+        exitWithError('Plural message "@$key" was specified without the other argument.');
+      }
+      continue;
+    } else if (match.groupCount == 2) {
       String argValue = match.group(2);
       for (String placeholder in placeholders)
         argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
