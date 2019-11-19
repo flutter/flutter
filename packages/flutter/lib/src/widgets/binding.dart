@@ -610,7 +610,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
   /// first frame.
-  @Deprecated('Use deferFirstFrame/allowFirstFrame to delay rendering the first frame.')
+  @Deprecated(
+    'Use deferFirstFrame/allowFirstFrame to delay rendering the first frame. '
+    'This feature was deprecated after v1.12.4.'
+  )
   void deferFirstFrameReport() {
     if (!kReleaseMode) {
       deferFirstFrame();
@@ -622,7 +625,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
   /// first frame.
-  @Deprecated('Use deferFirstFrame/allowFirstFrame to delay rendering the first frame.')
+  @Deprecated(
+    'Use deferFirstFrame/allowFirstFrame to delay rendering the first frame. '
+    'This feature was deprecated after v1.12.4.'
+  )
   void allowFirstFrameReport() {
     if (!kReleaseMode) {
       allowFirstFrame();
