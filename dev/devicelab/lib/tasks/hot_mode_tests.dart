@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:path/path.dart' as path;
 
 import '../framework/adb.dart';
@@ -33,8 +32,6 @@ TaskFunction createHotModeTest() {
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
       await inDirectory<void>(_editedFlutterGalleryDir, () async {
-        if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-          await prepareProvisioningCertificates(_editedFlutterGalleryDir.path);
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
