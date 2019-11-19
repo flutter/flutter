@@ -534,5 +534,5 @@ class DevFS {
   }
 }
 
-/// Converts a platform-specific file path to a platform-independent Uri path.
+/// Converts a platform-specific file path to a platform-independent URI path.
 String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';

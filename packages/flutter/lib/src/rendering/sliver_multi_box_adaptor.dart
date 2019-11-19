@@ -228,7 +228,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// The integrity check consists of:
   ///
   /// 1. Verify that the children index in childList is in ascending order.
-  /// 2. Verify that there is no dangling keepalive child as the result of [move].
+  /// 2. Verify that there is no dangling keep-alive child as the result of [move].
   bool get debugChildIntegrityEnabled => _debugChildIntegrityEnabled;
   bool _debugChildIntegrityEnabled = true;
   set debugChildIntegrityEnabled(bool enabled) {

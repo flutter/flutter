@@ -1799,11 +1799,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// this method.
   ///
   /// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
-  /// [ModalRoute] and a back button is added to the appbar of the [Scaffold]
+  /// [ModalRoute] and a back button is added to the app bar of the [Scaffold]
   /// that closes the bottom sheet.
   ///
   /// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
-  /// does not add a back button to the enclosing Scaffold's appbar, use the
+  /// does not add a back button to the enclosing Scaffold's app bar, use the
   /// [Scaffold.bottomSheet] constructor parameter.
   ///
   /// A persistent bottom sheet shows information that supplements the primary

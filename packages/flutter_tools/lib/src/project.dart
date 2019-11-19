@@ -893,7 +893,7 @@ class LinuxProject {
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
-/// The Fuchisa sub project
+/// The Fuchsia sub project
 class FuchsiaProject {
   FuchsiaProject._(this.project);
 

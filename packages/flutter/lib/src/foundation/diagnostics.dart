@@ -1056,7 +1056,7 @@ bool _isSingleLine(DiagnosticsTreeStyle style) {
   return style == DiagnosticsTreeStyle.singleLine;
 }
 
-/// Renderer that creates ascii art representations of trees of
+/// Renderer that creates ASCII art representations of trees of
 /// [DiagnosticsNode] objects.
 ///
 /// See also:

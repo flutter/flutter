@@ -65,7 +65,7 @@ abstract class AccessibilityGuideline {
   String get description;
 }
 
-/// A guideline which enforces that all tapable semantics nodes have a minimum
+/// A guideline which enforces that all tappable semantics nodes have a minimum
 /// size.
 ///
 /// Each platform defines its own guidelines for minimum tap areas.
@@ -73,7 +73,7 @@ abstract class AccessibilityGuideline {
 class MinimumTapTargetGuideline extends AccessibilityGuideline {
   const MinimumTapTargetGuideline._(this.size, this.link);
 
-  /// The minimum allowed size of a tapable node.
+  /// The minimum allowed size of a tappable node.
   final Size size;
 
   /// A link describing the tap target guidelines for a platform.
@@ -419,7 +419,7 @@ class _ContrastReport {
   }
 }
 
-/// A guideline which requires tapable semantic nodes a minimum size of 48 by 48.
+/// A guideline which requires tappable semantic nodes a minimum size of 48 by 48.
 ///
 /// See also:
 ///
@@ -429,7 +429,7 @@ const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideli
   'https://support.google.com/accessibility/android/answer/7101858?hl=en',
 );
 
-/// A guideline which requires tapable semantic nodes a minimum size of 44 by 44.
+/// A guideline which requires tappable semantic nodes a minimum size of 44 by 44.
 ///
 /// See also:
 ///

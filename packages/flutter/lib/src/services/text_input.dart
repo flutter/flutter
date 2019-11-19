@@ -418,7 +418,7 @@ class TextInputConfiguration {
   ///
   /// This flag only affects Android. On iOS, suggestions are tied directly to
   /// [autocorrect], so that suggestions are only shown when [autocorrect] is
-  /// true. On Android autocorrection and suggestion are controlled separately.
+  /// true. On Android auto-correction and suggestion are controlled separately.
   ///
   /// Defaults to true. Cannot be null.
   ///

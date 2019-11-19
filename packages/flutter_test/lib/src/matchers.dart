@@ -589,8 +589,8 @@ Matcher matchesSemantics({
 ///
 /// Supported accessibility guidelines:
 ///
-///   * [androidTapTargetGuideline], for Android minimum tapable area guidelines.
-///   * [iOSTapTargetGuideline], for iOS minimum tapable area guidelines.
+///   * [androidTapTargetGuideline], for Android minimum tappable area guidelines.
+///   * [iOSTapTargetGuideline], for iOS minimum tappable area guidelines.
 ///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
   return _MatchesAccessibilityGuideline(guideline);
