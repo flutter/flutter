@@ -572,9 +572,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   bool _needToReportFirstFrame = true;
-  int _deferFirstFrameReportCount = 0;
-  bool get _reportFirstFrame => _deferFirstFrameReportCount == 0;
-
 
   final Completer<void> _firstFrameCompleter = Completer<void>();
 
@@ -616,8 +613,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @Deprecated('Use deferFirstFrame/allowFirstFrame to delay rendering the first frame.')
   void deferFirstFrameReport() {
     if (!kReleaseMode) {
-      assert(_deferFirstFrameReportCount >= 0);
-      _deferFirstFrameReportCount += 1;
+      deferFirstFrame();
     }
   }
 
@@ -629,40 +625,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @Deprecated('Use deferFirstFrame/allowFirstFrame to delay rendering the first frame.')
   void allowFirstFrameReport() {
     if (!kReleaseMode) {
-      assert(_deferFirstFrameReportCount >= 1);
-      _deferFirstFrameReportCount -= 1;
-    }
-  }
-
-  int _firstFrameDeferredCount = 0;
-  bool get _firstFrameDeferred => _firstFrameDeferredCount > 0;
-  bool _firstFrameRequested = false;
-  bool _firstFrameRendered = false;
-
-  /// Tell the framework to not render the first frames until there is a
-  /// corresponding call to [allowFirstFrame].
-  ///
-  /// Calling this allows a [Widget] to perform asynchronous initialisation work
-  /// before the first frame is rendered (which will take down the splash
-  /// screen).
-  ///
-  /// Calling this has no effect after the first frame has already been
-  /// rendered.
-  void deferFirstFrame() {
-    assert(_firstFrameDeferredCount >= 0);
-    _firstFrameDeferredCount += 1;
-  }
-
-  /// Called after [deferFirstFrame] to tell the framework that it is ok to
-  /// render the first frame now.
-  ///
-  /// This method may only be called once for each corresponding call
-  /// to [deferFirstFrame].
-  void allowFirstFrame() {
-    assert(_firstFrameDeferredCount > 0);
-    _firstFrameDeferredCount -= 1;
-    if (_firstFrameRequested && !_firstFrameRendered && !_firstFrameDeferred) {
-      drawFrame();
+      allowFirstFrame();
     }
   }
 
@@ -773,30 +736,28 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   // When editing the above, also update rendering/binding.dart's copy.
   @override
   void drawFrame() {
-    if (!_firstFrameRendered && _firstFrameDeferred) {
-      _firstFrameRequested = true;
-      return;
-    }
-    _firstFrameRendered = true;
-
     assert(!debugBuildingDirtyElements);
     assert(() {
       debugBuildingDirtyElements = true;
       return true;
     }());
 
-    if (_needToReportFirstFrame && _reportFirstFrame) {
+    TimingsCallback firstFrameCallback;
+    if (_needToReportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
 
-      TimingsCallback firstFrameCallback;
       firstFrameCallback = (List<FrameTiming> timings) {
         if (!kReleaseMode) {
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
-        SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
         _firstFrameCompleter.complete();
+        SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
+        firstFrameCallback = null;
       };
+      // Callback is only invoked when [Window.render] is called. When
+      // [sendFramesToEngine] is set to false during the frame, it will not
+      // be called and we need to remove the callback (see below).
       SchedulerBinding.instance.addTimingsCallback(firstFrameCallback);
     }
 
@@ -811,12 +772,15 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         return true;
       }());
     }
-    if (!kReleaseMode) {
-      if (_needToReportFirstFrame && _reportFirstFrame) {
+    if (_needToReportFirstFrame && sendFramesToEngine) {
+      _needToReportFirstFrame = false;
+      if (!kReleaseMode) {
         developer.Timeline.instantSync('Widgets built first useful frame');
       }
     }
-    _needToReportFirstFrame = false;
+    if (firstFrameCallback != null && !sendFramesToEngine) {
+      SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
+    }
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the

@@ -283,6 +283,54 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     drawFrame();
   }
 
+  int _firstFrameDeferredCount = 0;
+  bool _firstFrameSend = false;
+
+  /// Whether frames produced by [drawFrame] should be send to the engine.
+  ///
+  /// If set to false the framework will do all the work to produce a frame,
+  /// but the frame is never send to the engine to actually appear on screen.
+  @protected
+  bool get sendFramesToEngine => _firstFrameDeferredCount == 0;
+
+  /// Tell the framework to not render the first frames until there is a
+  /// corresponding call to [allowFirstFrame].
+  ///
+  /// Calling this allows a [Widget] to perform asynchronous initialisation work
+  /// before the first frame is rendered (which will take down the splash
+  /// screen).
+  ///
+  /// Calling this has no effect after the first frame has already been
+  /// rendered.
+  void deferFirstFrame() {
+    assert(_firstFrameDeferredCount >= 0);
+    _firstFrameDeferredCount += 1;
+    if (_firstFrameSend) {
+      return;
+    }
+  }
+
+  /// Called after [deferFirstFrame] to tell the framework that it is ok to
+  /// render the first frame now.
+  ///
+  /// For best performance, this method should only be called while the
+  /// [schedulerPhase] is [SchedulerPhase.idle].
+  ///
+  /// This method may only be called once for each corresponding call
+  /// to [deferFirstFrame].
+  void allowFirstFrame() {
+    assert(_firstFrameDeferredCount > 0);
+    _firstFrameDeferredCount -= 1;
+    if (_firstFrameSend) {
+      return;
+    }
+    // Always schedule a warm up frame even if the deferral count is not down to
+    // zero yet since the removal of a deferral may uncover new deferrals that
+    // are lower in the widget tree.
+    if (!_firstFrameSend)
+      scheduleWarmUpFrame();
+  }
+
   /// Pump the rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
@@ -344,8 +392,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     pipelineOwner.flushLayout();
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
-    renderView.compositeFrame(); // this sends the bits to the GPU
-    pipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
+    if (sendFramesToEngine) {
+      renderView.compositeFrame(); // this sends the bits to the GPU
+      pipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
+      _firstFrameSend = true;
+    }
   }
 
   @override
