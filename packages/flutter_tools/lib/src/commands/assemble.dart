@@ -43,6 +43,13 @@ const List<Target> _kDefaultTargets = <Target>[
   ReleaseCopyFlutterAotBundle(),
   ProfileCopyFlutterAotBundle(),
   CopyFlutterBundle(),
+  // Android ABI specific AOT rules.
+  androidArmProfileBundle,
+  androidArm64ProfileBundle,
+  androidx64ProfileBundle,
+  androidArmReleaseBundle,
+  androidArm64ReleaseBundle,
+  androidx64ReleaseBundle,
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -99,18 +106,25 @@ class AssembleCommand extends FlutterCommand {
     return const <CustomDimensions, String>{};
   }
 
-  /// The target we are building.
-  Target get target {
+  /// The target(s) we are building.
+  List<Target> get targets {
     if (argResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argResults.rest.first;
-    final Target result = _kDefaultTargets
-        .firstWhere((Target target) => target.name == name, orElse: () => null);
-    if (result == null) {
+    final Map<String, Target> targetMap = <String, Target>{
+      for (Target target in _kDefaultTargets)
+        target.name: target
+    };
+    final List<Target> results = <Target>[
+      for (String targetName in argResults.rest)
+        if (targetMap.containsKey(targetName))
+          targetMap[targetName]
+    ];
+    if (results.isEmpty) {
       throwToolExit('No target named "$name" defined.');
     }
-    return result;
+    return results;
   }
 
   /// The environmental configuration for a build invocation.
@@ -151,8 +165,12 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final List<Target> targets = this.targets;
+    final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
     final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
-      resourcePoolSize: argResults.wasParsed('resource-pool-size') ? int.parse(stringArg('resource-pool-size')) : null,
+      resourcePoolSize: argResults.wasParsed('resource-pool-size')
+        ? int.tryParse(argResults['resource-pool-size'])
+        : null,
     ));
     if (!result.success) {
       for (ExceptionMeasurement measurement in result.exceptions.values) {
@@ -196,4 +214,23 @@ void writeListIfChanged(List<File> files, String path) {
   if (currentContents != newContents) {
     file.writeAsStringSync(newContents);
   }
+}
+
+class _CompositeTarget extends Target {
+  _CompositeTarget(this.dependencies);
+
+  @override
+  final List<Target> dependencies;
+
+  @override
+  String get name => '_composite';
+
+  @override
+  Future<void> build(Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
 }

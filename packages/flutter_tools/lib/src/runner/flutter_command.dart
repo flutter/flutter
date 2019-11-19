@@ -766,6 +766,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
 // if none is supported
 DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
   switch (targetPlatform) {
+    case TargetPlatform.android:
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
