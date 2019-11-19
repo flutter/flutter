@@ -637,7 +637,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   int _firstFrameDeferredCount = 0;
   bool get _firstFrameDeferred => _firstFrameDeferredCount > 0;
   bool _firstFrameRequested = false;
-  bool _firstFrameHappened = false;
+  bool _firstFrameRendered = false;
 
   /// Tell the framework to not render the first frames until there is a
   /// corresponding call to [allowFirstFrame].
@@ -661,7 +661,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   void allowFirstFrame() {
     assert(_firstFrameDeferredCount > 0);
     _firstFrameDeferredCount -= 1;
-    if (_firstFrameRequested && !_firstFrameHappened && !_firstFrameDeferred) {
+    if (_firstFrameRequested && !_firstFrameRendered && !_firstFrameDeferred) {
       drawFrame();
     }
   }
@@ -773,11 +773,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   // When editing the above, also update rendering/binding.dart's copy.
   @override
   void drawFrame() {
-    if (!_firstFrameHappened && _firstFrameDeferred) {
+    if (!_firstFrameRendered && _firstFrameDeferred) {
       _firstFrameRequested = true;
       return;
     }
-    _firstFrameHappened = true;
+    _firstFrameRendered = true;
 
     assert(!debugBuildingDirtyElements);
     assert(() {
