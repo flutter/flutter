@@ -371,10 +371,6 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
               invalidateScopeData(nearestScope);
               break;
             case TraversalDirection.up:
-              if (popOrInvalidate(direction)) {
-                return true;
-              }
-              break;
             case TraversalDirection.down:
               if (popOrInvalidate(direction)) {
                 return true;
@@ -386,10 +382,6 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         case TraversalDirection.right:
           switch (policyData.history.first.direction) {
             case TraversalDirection.left:
-              if (popOrInvalidate(direction)) {
-                return true;
-              }
-              break;
             case TraversalDirection.right:
               if (popOrInvalidate(direction)) {
                 return true;

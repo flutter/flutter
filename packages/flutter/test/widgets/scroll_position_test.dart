@@ -14,7 +14,7 @@ ScrollController _controller = ScrollController(
 );
 
 class ThePositiveNumbers extends StatelessWidget {
-  const ThePositiveNumbers({ @required this.from });
+  const ThePositiveNumbers({@required this.from});
   final int from;
   @override
   Widget build(BuildContext context) {
@@ -142,6 +142,7 @@ void main() {
     await performTest(tester, true);
     await performTest(tester, false);
   });
+
   testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(11, (int index) => index).toList();
     final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
@@ -162,25 +163,46 @@ void main() {
       ),
     );
 
-    controller.position.ensureVisible(tester.renderObject(find.byKey(const ValueKey<int>(0))), alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(0))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
     expect(controller.position.pixels, equals(0.0));
 
-    controller.position.ensureVisible(tester.renderObject(find.byKey(const ValueKey<int>(1))), alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(1))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
     expect(controller.position.pixels, equals(0.0));
 
-    controller.position.ensureVisible(tester.renderObject(find.byKey(const ValueKey<int>(1))), alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(1))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    );
     expect(controller.position.pixels, equals(0.0));
 
-    controller.position.ensureVisible(tester.renderObject(find.byKey(const ValueKey<int>(4))), alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(4))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
     expect(controller.position.pixels, equals(0.0));
 
-    controller.position.ensureVisible(tester.renderObject(find.byKey(const ValueKey<int>(5))), alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(5))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
     expect(controller.position.pixels, equals(0.0));
 
-    controller.position.ensureVisible(tester.renderObject(find.byKey(const ValueKey<int>(5))), alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(5))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    );
     expect(controller.position.pixels, equals(60.0));
 
-    controller.position.ensureVisible(tester.renderObject(find.byKey(const ValueKey<int>(0))), alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(0))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
     expect(controller.position.pixels, equals(0.0));
   });
 }

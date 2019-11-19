@@ -50,6 +50,7 @@ void main() {
       expect(secondFocusNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
     });
+
     testWidgets('Move focus to next node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -166,6 +167,7 @@ void main() {
       expect(secondFocusNode.hasFocus, isTrue);
       expect(scope.hasFocus, isTrue);
     });
+
     testWidgets('Move focus to previous node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -239,6 +241,7 @@ void main() {
       expect(secondFocusNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
     });
+
     testWidgets('Find the initial focus when a route is pushed or popped.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -305,6 +308,7 @@ void main() {
       expect(scope.hasFocus, isTrue);
     });
   });
+
   group(ReadingOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
@@ -344,6 +348,7 @@ void main() {
       expect(secondFocusNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
     });
+
     testWidgets('Move reading focus to next node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -458,6 +463,7 @@ void main() {
       expect(secondFocusNode.hasFocus, isTrue);
       expect(scope.hasFocus, isTrue);
     });
+
     testWidgets('Move reading focus to previous node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -532,6 +538,7 @@ void main() {
       expect(scope.hasFocus, isTrue);
     });
   });
+
   group(DirectionalFocusTraversalPolicyMixin, () {
     testWidgets('Move focus in all directions.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
@@ -672,6 +679,7 @@ void main() {
       expect(lowerRightNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
     });
+
     testWidgets('Directional focus avoids hysterisis.', (WidgetTester tester) async {
       final List<GlobalKey> keys = <GlobalKey>[
         GlobalKey(debugLabel: 'row 1:1'),
@@ -809,6 +817,7 @@ void main() {
       expectState(<bool>[null, false, null, true, null, null]);
       clear();
     });
+
     testWidgets('Can find first focus in all directions.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
       final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
@@ -868,6 +877,7 @@ void main() {
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.left), equals(upperRightNode));
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.right), equals(upperLeftNode));
     });
+
     testWidgets('Can find focus when policy data dirty', (WidgetTester tester) async {
       final FocusNode focusTop = FocusNode(debugLabel: 'top');
       final FocusNode focusCenter = FocusNode(debugLabel: 'center');
@@ -918,6 +928,7 @@ void main() {
       expect(focusCenter.hasFocus, isFalse);
       expect(focusTop.hasFocus, isTrue);
     });
+
     testWidgets('Focus traversal actions are invoked when shortcuts are used.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
       final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
@@ -1006,6 +1017,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
     }, skip: kIsWeb);
+
     testWidgets('Focus traversal inside a vertical scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
       final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
@@ -1103,6 +1115,7 @@ void main() {
       expect(topNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
     }, skip: kIsWeb);
+
     testWidgets('Focus traversal inside a horizontal scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
       final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
@@ -1132,7 +1145,7 @@ void main() {
         ),
       );
 
-      // Start at the top
+      // Start at the right
       expect(controller.offset, equals(0.0));
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
@@ -1145,14 +1158,14 @@ void main() {
       expect(nodes[0].hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
 
-      // Go down until we hit the bottom of the visible area.
+      // Go right until we hit the right of the visible area.
       for (int i = 1; i <= 6; ++i) {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.pump();
         expect(controller.offset, equals(0.0), reason: 'Focusing item $i caused a scroll');
       }
 
-      // Now keep going down, and the scrollable should scroll automatically.
+      // Now keep going right, and the scrollable should scroll automatically.
       for (int i = 7; i <= 10; ++i) {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.pump();
@@ -1160,7 +1173,7 @@ void main() {
         expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll to $expectedOffset");
       }
 
-      // Now go one more, and see that the footer gets focused.
+      // Now go one more, and see that the right edge gets focused.
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
@@ -1172,7 +1185,7 @@ void main() {
       expect(nodes[10].hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(100.0 * 5));
 
-      // Now reverse directions and go back to the top.
+      // Now reverse directions and go back to the left.
 
       // These should not cause a scroll.
       final double lowestOffset = controller.offset;
@@ -1190,16 +1203,17 @@ void main() {
         expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll");
       }
 
-      // Back at the top.
+      // Back at the left side of the scrollable.
       expect(nodes[0].hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
 
-      // Now we jump to the header.
+      // Now we jump to the left edge of the app.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
       expect(leftNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
     }, skip: kIsWeb);
+
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
       final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
@@ -1322,10 +1336,37 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
     });
+
     testWidgets('Focus traversal does not break when no focusable is available on a MaterialApp', (WidgetTester tester) async {
       final List<RawKeyEvent> events = <RawKeyEvent>[];
 
       await tester.pumpWidget(MaterialApp(home: Container()));
+
+      RawKeyboard.instance.addListener((RawKeyEvent event) {
+        events.add(event);
+      });
+
+      await tester.idle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.idle();
+
+      expect(events.length, 2);
+    });
+
+    testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp', (WidgetTester tester) async {
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+
+      await tester.pumpWidget(
+        WidgetsApp(
+          color: Colors.white,
+          onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
+              return const Placeholder();
+            },
+          ),
+        ),
+      );
 
       RawKeyboard.instance.addListener((RawKeyEvent event) {
         events.add(event);
