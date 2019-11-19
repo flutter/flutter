@@ -89,7 +89,10 @@ class ChromeDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async {
+  Future<String> get sdkNameAndVersion async => _sdkNameAndVersion ??= await _computeSdkNameAndVersion();
+
+  String _sdkNameAndVersion;
+  Future<String> _computeSdkNameAndVersion() async {
     if (!isSupported()) {
       return 'unknown';
     }
