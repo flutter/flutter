@@ -321,7 +321,6 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        browserLaunch: featureFlags.isWebEnabled ? boolArg('web-browser-launch') : null,
         vmserviceOutFile: stringArg('vmservice-out-file'),
       );
     }
