@@ -122,9 +122,9 @@ void main() {
     tester.binding.scheduleFrame();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
+    // TODO(chunhtai): fix this test after workaround is removed
+    // https://github.com/flutter/flutter/issues/45131
     tester.binding.scheduleForcedFrame();
-    expect(tester.binding.hasScheduledFrame, isTrue);
-    await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     int frameCount = 0;
