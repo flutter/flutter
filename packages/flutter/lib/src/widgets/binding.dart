@@ -773,12 +773,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         return true;
       }());
     }
-    if (_needToReportFirstFrame && sendFramesToEngine) {
-      _needToReportFirstFrame = false;
-      if (!kReleaseMode) {
+    if (!kReleaseMode) {
+      if (_needToReportFirstFrame && sendFramesToEngine) {
         developer.Timeline.instantSync('Widgets built first useful frame');
       }
     }
+    _needToReportFirstFrame = false;
     if (firstFrameCallback != null && !sendFramesToEngine) {
       SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
     }
