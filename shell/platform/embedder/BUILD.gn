@@ -32,6 +32,8 @@ template("embedder_source_set") {
       "embedder_external_view_embedder.cc",
       "embedder_external_view_embedder.h",
       "embedder_include.c",
+      "embedder_layers.cc",
+      "embedder_layers.h",
       "embedder_platform_message_response.cc",
       "embedder_platform_message_response.h",
       "embedder_render_target.cc",

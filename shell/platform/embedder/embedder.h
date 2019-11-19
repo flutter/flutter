@@ -464,6 +464,24 @@ typedef struct {
   double bottom;
 } FlutterRect;
 
+typedef struct {
+  double x;
+  double y;
+} FlutterPoint;
+
+typedef struct {
+  double width;
+  double height;
+} FlutterSize;
+
+typedef struct {
+  FlutterRect rect;
+  FlutterSize upper_left_corner_radius;
+  FlutterSize upper_right_corner_radius;
+  FlutterSize lower_right_corner_radius;
+  FlutterSize lower_left_corner_radius;
+} FlutterRoundedRect;
+
 /// The identifier of the platform view. This identifier is specified by the
 /// application when a platform view is added to the scene via the
 /// `SceneBuilder.addPlatformView` call.
@@ -667,6 +685,32 @@ typedef struct {
   VoidCallback destruction_callback;
 } FlutterSoftwareBackingStore;
 
+typedef enum {
+  /// Indicates that the Flutter application requested that an opacity be
+  /// applied to the platform view.
+  kFlutterPlatformViewMutationTypeOpacity,
+  /// Indicates that the Flutter application requested that the platform view be
+  /// clipped using a rectangle.
+  kFlutterPlatformViewMutationTypeClipRect,
+  /// Indicates that the Flutter application requested that the platform view be
+  /// clipped using a rounded rectangle.
+  kFlutterPlatformViewMutationTypeClipRoundedRect,
+  /// Indicates that the Flutter application requested that the platform view be
+  /// transformed before composition.
+  kFlutterPlatformViewMutationTypeTransformation,
+} FlutterPlatformViewMutationType;
+
+typedef struct {
+  /// The type of the mutation described by the subsequent union.
+  FlutterPlatformViewMutationType type;
+  union {
+    double opacity;
+    FlutterRect clip_rect;
+    FlutterRoundedRect clip_rounded_rect;
+    FlutterTransformation transformation;
+  };
+} FlutterPlatformViewMutation;
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterPlatformView).
   size_t struct_size;
@@ -674,6 +718,22 @@ typedef struct {
   /// application when a platform view is added to the scene via the
   /// `SceneBuilder.addPlatformView` call.
   FlutterPlatformViewIdentifier identifier;
+  /// The number of mutations to be applied to the platform view by the embedder
+  /// before on-screen composition.
+  size_t mutations_count;
+  /// The mutations to be applied by this platform view before it is composited
+  /// on-screen. The Flutter application may transform the platform view but
+  /// these transformations cannot be affected by the Flutter compositor because
+  /// it does not render platform views. Since the embedder is responsible for
+  /// composition of these views, it is also the embedder's responsibility to
+  /// affect the appropriate transformation.
+  ///
+  /// The mutations must be applied in order. The mutations done in the
+  /// collection don't take into account the device pixel ratio or the root
+  /// surface transformation. If these exist, the first mutation in the list
+  /// will be a transformation mutation to make sure subsequent mutations are in
+  /// the correct coordinate space.
+  const FlutterPlatformViewMutation** mutations;
 } FlutterPlatformView;
 
 typedef enum {
@@ -703,16 +763,6 @@ typedef struct {
     FlutterSoftwareBackingStore software;
   };
 } FlutterBackingStore;
-
-typedef struct {
-  double x;
-  double y;
-} FlutterPoint;
-
-typedef struct {
-  double width;
-  double height;
-} FlutterSize;
 
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterBackingStoreConfig).

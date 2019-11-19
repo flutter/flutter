@@ -608,7 +608,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
         }
 
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 42;
 
@@ -701,7 +701,7 @@ TEST_F(EmbedderTest, RasterCacheDisabledWithPlatformViews) {
         }
 
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 42;
 
@@ -874,7 +874,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
         }
 
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 42;
 
@@ -968,7 +968,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
         }
 
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 42;
 
@@ -1189,7 +1189,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 1;
 
@@ -1222,7 +1222,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
 
         // Layer 3
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[3]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 2;
 
@@ -1365,7 +1365,7 @@ TEST_F(EmbedderTest,
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 1;
 
@@ -1398,7 +1398,7 @@ TEST_F(EmbedderTest,
 
         // Layer 3
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[3]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 2;
 
@@ -1549,7 +1549,7 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
         }
 
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 42;
 
@@ -1740,7 +1740,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 1;
 
@@ -1863,7 +1863,7 @@ TEST_F(EmbedderTest,
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 1;
 
@@ -1896,7 +1896,7 @@ TEST_F(EmbedderTest,
 
         // Layer 3
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[3]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 2;
 
@@ -2258,7 +2258,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 1;
 
@@ -2377,7 +2377,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 1;
 
@@ -2507,7 +2507,7 @@ TEST_F(EmbedderTest, VerifyB141980393) {
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 1337;
 
@@ -2794,7 +2794,7 @@ TEST_F(EmbedderTest,
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 42;
 
@@ -2893,7 +2893,7 @@ TEST_F(
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 42;
 
@@ -3041,7 +3041,7 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
 
         // Layer 1
         {
-          FlutterPlatformView platform_view = {};
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 42;
 
@@ -3201,6 +3201,302 @@ TEST_F(EmbedderTest,
   frame_latch.Wait();
 
   ASSERT_EQ(frames_expected, frames_seen);
+}
+
+TEST_F(EmbedderTest, PlatformViewMutatorsAreValid) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("platform_view_mutators");
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
+
+  fml::CountDownLatch latch(1);
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 2u);
+
+        // Layer 0 (Root)
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        // Layer 2
+        {
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 42;
+          platform_view.mutations_count = 3;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[1], layer);
+
+          // There are no ordering guarantees.
+          for (size_t i = 0; i < platform_view.mutations_count; i++) {
+            FlutterPlatformViewMutation mutation = *platform_view.mutations[i];
+            switch (mutation.type) {
+              case kFlutterPlatformViewMutationTypeClipRoundedRect:
+                mutation.clip_rounded_rect =
+                    FlutterRoundedRectMake(SkRRect::MakeRectXY(
+                        SkRect::MakeLTRB(10.0, 10.0, 800.0 - 10.0,
+                                         600.0 - 10.0),
+                        14.0, 14.0));
+                break;
+              case kFlutterPlatformViewMutationTypeClipRect:
+                mutation.type = kFlutterPlatformViewMutationTypeClipRect;
+                mutation.clip_rect = FlutterRectMake(
+                    SkRect::MakeXYWH(10.0, 10.0, 800.0 - 20.0, 600.0 - 20.0));
+                break;
+              case kFlutterPlatformViewMutationTypeOpacity:
+                mutation.type = kFlutterPlatformViewMutationTypeOpacity;
+                mutation.opacity = 128.0 / 255.0;
+                break;
+              case kFlutterPlatformViewMutationTypeTransformation:
+                FML_CHECK(false)
+                    << "There should be no transformation in the test.";
+                break;
+            }
+
+            ASSERT_EQ(*platform_view.mutations[i], mutation);
+          }
+        }
+        latch.CountDown();
+      });
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+}
+
+TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("platform_view_mutators_with_pixel_ratio");
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
+
+  fml::CountDownLatch latch(1);
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 2u);
+
+        // Layer 0 (Root)
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        // Layer 2
+        {
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 42;
+          platform_view.mutations_count = 4;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[1], layer);
+
+          // There are no ordering guarantees.
+          for (size_t i = 0; i < platform_view.mutations_count; i++) {
+            FlutterPlatformViewMutation mutation = *platform_view.mutations[i];
+            switch (mutation.type) {
+              case kFlutterPlatformViewMutationTypeClipRoundedRect:
+                mutation.clip_rounded_rect =
+                    FlutterRoundedRectMake(SkRRect::MakeRectXY(
+                        SkRect::MakeLTRB(5.0, 5.0, 400.0 - 5.0, 300.0 - 5.0),
+                        7.0, 7.0));
+                break;
+              case kFlutterPlatformViewMutationTypeClipRect:
+                mutation.type = kFlutterPlatformViewMutationTypeClipRect;
+                mutation.clip_rect = FlutterRectMake(
+                    SkRect::MakeXYWH(5.0, 5.0, 400.0 - 10.0, 300.0 - 10.0));
+                break;
+              case kFlutterPlatformViewMutationTypeOpacity:
+                mutation.type = kFlutterPlatformViewMutationTypeOpacity;
+                mutation.opacity = 128.0 / 255.0;
+                break;
+              case kFlutterPlatformViewMutationTypeTransformation:
+                mutation.type = kFlutterPlatformViewMutationTypeTransformation;
+                mutation.transformation =
+                    FlutterTransformationMake(SkMatrix::MakeScale(2.0));
+                break;
+            }
+
+            ASSERT_EQ(*platform_view.mutations[i], mutation);
+          }
+        }
+        latch.CountDown();
+      });
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 2.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+}
+
+TEST_F(EmbedderTest,
+       PlatformViewMutatorsAreValidWithPixelRatioAndRootSurfaceTransformation) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("platform_view_mutators_with_pixel_ratio");
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
+
+  static const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  fml::CountDownLatch latch(1);
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 2u);
+
+        // Layer 0 (Root)
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(600.0, 800.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        // Layer 2
+        {
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 42;
+          platform_view.mutations_count = 4;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(600.0, 800.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[1], layer);
+
+          // There are no ordering guarantees.
+          for (size_t i = 0; i < platform_view.mutations_count; i++) {
+            FlutterPlatformViewMutation mutation = *platform_view.mutations[i];
+            switch (mutation.type) {
+              case kFlutterPlatformViewMutationTypeClipRoundedRect:
+                mutation.clip_rounded_rect =
+                    FlutterRoundedRectMake(SkRRect::MakeRectXY(
+                        SkRect::MakeLTRB(5.0, 5.0, 400.0 - 5.0, 300.0 - 5.0),
+                        7.0, 7.0));
+                break;
+              case kFlutterPlatformViewMutationTypeClipRect:
+                mutation.type = kFlutterPlatformViewMutationTypeClipRect;
+                mutation.clip_rect = FlutterRectMake(
+                    SkRect::MakeXYWH(5.0, 5.0, 400.0 - 10.0, 300.0 - 10.0));
+                break;
+              case kFlutterPlatformViewMutationTypeOpacity:
+                mutation.type = kFlutterPlatformViewMutationTypeOpacity;
+                mutation.opacity = 128.0 / 255.0;
+                break;
+              case kFlutterPlatformViewMutationTypeTransformation:
+                mutation.type = kFlutterPlatformViewMutationTypeTransformation;
+                mutation.transformation =
+                    FlutterTransformationMake(SkMatrix::Concat(
+                        root_surface_transformation, SkMatrix::MakeScale(2.0)));
+
+                break;
+            }
+
+            ASSERT_EQ(*platform_view.mutations[i], mutation);
+          }
+        }
+        latch.CountDown();
+      });
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 2.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
 }
 
 }  // namespace testing
