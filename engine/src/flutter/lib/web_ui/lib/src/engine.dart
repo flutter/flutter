@@ -44,6 +44,7 @@ part 'engine/compositor/rasterizer.dart';
 part 'engine/compositor/recording_canvas.dart';
 part 'engine/compositor/runtime_delegate.dart';
 part 'engine/compositor/surface.dart';
+part 'engine/compositor/text.dart';
 part 'engine/compositor/util.dart';
 part 'engine/compositor/vertices.dart';
 part 'engine/compositor/viewport_metrics.dart';

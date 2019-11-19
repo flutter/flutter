@@ -23,6 +23,31 @@ js.JsObject makeSkRRect(ui.RRect rrect) {
   });
 }
 
+ui.Rect fromSkRect(js.JsObject skRect) {
+  return ui.Rect.fromLTRB(
+    skRect['fLeft'],
+    skRect['fTop'],
+    skRect['fRight'],
+    skRect['fBottom'],
+  );
+}
+
+ui.TextPosition fromPositionWithAffinity(js.JsObject positionWithAffinity) {
+  if (positionWithAffinity['affinity'] == canvasKit['Affinity']['Upstream']) {
+    return ui.TextPosition(
+      offset: positionWithAffinity['pos'],
+      affinity: ui.TextAffinity.upstream,
+    );
+  } else {
+    assert(positionWithAffinity['affinity'] ==
+        canvasKit['Affinity']['Downstream']);
+    return ui.TextPosition(
+      offset: positionWithAffinity['pos'],
+      affinity: ui.TextAffinity.downstream,
+    );
+  }
+}
+
 js.JsArray<double> makeSkPoint(ui.Offset point) {
   final js.JsArray<double> skPoint = js.JsArray<double>();
   skPoint.length = 2;

@@ -41,10 +41,11 @@ class SkPath implements ui.Path {
 
   @override
   void addArc(ui.Rect oval, double startAngle, double sweepAngle) {
+    const double _toDegrees = 180.0 / math.pi;
     _skPath.callMethod('addArc', <dynamic>[
       makeSkRect(oval),
-      startAngle,
-      sweepAngle,
+      startAngle * _toDegrees,
+      sweepAngle * _toDegrees,
     ]);
   }
 
@@ -205,8 +206,7 @@ class SkPath implements ui.Path {
   @override
   ui.Rect getBounds() {
     final js.JsObject bounds = _skPath.callMethod('getBounds');
-    return ui.Rect.fromLTRB(
-        bounds['fLeft'], bounds['fTop'], bounds['fRight'], bounds['fBottom']);
+    return fromSkRect(bounds);
   }
 
   @override

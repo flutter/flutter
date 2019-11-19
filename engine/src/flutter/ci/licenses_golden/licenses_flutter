@@ -379,6 +379,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/rasterizer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/recording_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/runtime_delegate.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/surface.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/text.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/util.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/vertices.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/viewport_metrics.dart
