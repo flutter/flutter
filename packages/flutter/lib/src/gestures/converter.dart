@@ -4,8 +4,6 @@
 
 import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
 
-import 'package:flutter/foundation.dart' show visibleForTesting;
-
 import 'events.dart';
 
 // Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
