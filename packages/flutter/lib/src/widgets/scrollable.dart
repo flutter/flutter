@@ -9,7 +9,6 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
 
 import 'actions.dart';
@@ -408,8 +407,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       case ScrollIncrementType.line:
         return 50.0;
       case ScrollIncrementType.page:
-        return (0.8 * (position.maxScrollExtent - position.minScrollExtent) + position.minScrollExtent)
-            .clamp(0.0, position.viewportDimension);
+        return 0.8 * position.viewportDimension;
     }
     return 0.0;
   }
@@ -878,15 +876,24 @@ class _RenderScrollSemantics extends RenderProxyBox {
 /// An [Intent] that represents scrolling the nearest scrollable by the amount
 /// appropriate for the [type] specified.
 class ScrollIntent extends Intent {
-  /// Creates a const [ScrollIntent] in the given [direction], with the given [type].
-  const ScrollIntent({@required this.direction, this.type = ScrollIncrementType.line})
-      : assert(direction != null),
+  /// Creates a const [ScrollIntent] in the given [axis], with the given [type].
+  /// If [reversed] is specified, then the scroll will happen in the opposite
+  /// direction from the natural scroll direction.
+  const ScrollIntent({
+    @required this.axis,
+    this.reversed = false,
+    this.type = ScrollIncrementType.line,
+  })  : assert(axis != null),
         assert(type != null),
         super(ScrollAction.key);
 
   /// The direction in which to scroll the scrollable containing the focused
   /// widget.
-  final AxisDirection direction;
+  final Axis axis;
+
+  /// Whether or not the natural scroll direction for this scroll operation
+  /// should be reversed.
+  final bool reversed;
 
   /// The type of scrolling that is intended.
   final ScrollIncrementType type;
@@ -910,7 +917,8 @@ class ScrollAction extends Action {
   // directions into account.
   double _getIncrement(ScrollableState state, ScrollIntent intent) {
     final double increment = state.calculateIncrement(type: intent.type);
-    switch (intent.direction) {
+    final AxisDirection resolvedDirection = getAxisDirectionFromAxisReverseAndDirectionality(state.context, intent.axis, intent.reversed);
+    switch (resolvedDirection) {
       case AxisDirection.down:
         switch (state.axisDirection) {
           case AxisDirection.up:

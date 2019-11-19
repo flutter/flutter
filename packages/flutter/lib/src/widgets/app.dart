@@ -1061,34 +1061,34 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     // TODO(gspencergoog): Convert all of the Platform.isMacOS checks to be
     // defaultTargetPlatform == TargetPlatform.macOS, once that exists.
     if (!kIsWeb && !Platform.isMacOS)
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(axis: Axis.vertical, reversed: true),
     if (!kIsWeb && !Platform.isMacOS)
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(axis: Axis.vertical),
     if (!kIsWeb && !Platform.isMacOS)
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(axis: Axis.horizontal, reversed: true),
     if (!kIsWeb && !Platform.isMacOS)
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(axis: Axis.horizontal),
     if (!kIsWeb && Platform.isMacOS)
-      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const ScrollIntent(axis: Axis.vertical, reversed: true),
     if (!kIsWeb && Platform.isMacOS)
-      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const ScrollIntent(axis: Axis.vertical, reversed: false),
     if (!kIsWeb && Platform.isMacOS)
-      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const ScrollIntent(axis: Axis.horizontal, reversed: true),
     if (!kIsWeb && Platform.isMacOS)
-      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const ScrollIntent(axis: Axis.horizontal, reversed: false),
 
     // Web scrolling.
     if (kIsWeb)
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(axis: Axis.vertical, reversed: true),
     if (kIsWeb)
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(axis: Axis.vertical),
     if (kIsWeb)
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(axis: Axis.horizontal, reversed: true),
     if (kIsWeb)
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(axis: Axis.horizontal),
 
-    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(axis: Axis.vertical, reversed: true, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(axis: Axis.vertical, type: ScrollIncrementType.page),
 
     LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
     LogicalKeySet(LogicalKeyboardKey.space): const Intent(SelectAction.key),
@@ -1213,7 +1213,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       : _locale;
 
     assert(_debugCheckLocalizations(appLocale));
-
     return Shortcuts(
       shortcuts: _keyMap,
       child: Actions(

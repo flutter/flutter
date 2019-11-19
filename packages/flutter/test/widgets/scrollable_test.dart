@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -293,26 +295,32 @@ void main() {
         ),
       ),
     );
+    final LogicalKeyboardKey modifierKey = Platform.isMacOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
+
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(50.0));
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(1120.0));
+    expect(controller.position.pixels, equals(480.0));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-  });
+
+    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
+    // of Platform.isMacOS, don't skip this on web anymore.
+    // https://github.com/flutter/flutter/issues/31366
+  }, skip: kIsWeb);
 
   testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -337,18 +345,121 @@ void main() {
         ),
       ),
     );
+
+    final LogicalKeyboardKey modifierKey = Platform.isMacOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
+
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(50.0));
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-  });
+
+    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
+    // of Platform.isMacOS, don't skip this on web anymore.
+    // https://github.com/flutter/flutter/issues/31366
+  }, skip: kIsWeb);
+
+  testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.fuchsia,
+        ),
+        home: CustomScrollView(
+          reverse: true,
+          controller: controller,
+          physics: const NeverScrollableScrollPhysics(),
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Focus(
+                focusNode: focusNode,
+                child: const SizedBox(height: 2000.0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    final LogicalKeyboardKey modifierKey = Platform.isMacOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    await tester.sendKeyDownEvent(modifierKey);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(modifierKey);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(50.0));
+    await tester.sendKeyDownEvent(modifierKey);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyUpEvent(modifierKey);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(480.0));
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+
+    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
+    // of Platform.isMacOS, don't skip this on web anymore.
+    // https://github.com/flutter/flutter/issues/31366
+  }, skip: kIsWeb);
+
+  testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.fuchsia,
+        ),
+        home: CustomScrollView(
+          reverse: true,
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Focus(
+                focusNode: focusNode,
+                child: const SizedBox(width: 2000.0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final LogicalKeyboardKey modifierKey = Platform.isMacOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    await tester.sendKeyDownEvent(modifierKey);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyUpEvent(modifierKey);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(50.0));
+    await tester.sendKeyDownEvent(modifierKey);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyUpEvent(modifierKey);
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+
+    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
+    // of Platform.isMacOS, don't skip this on web anymore.
+    // https://github.com/flutter/flutter/issues/31366
+  }, skip: kIsWeb);
 }

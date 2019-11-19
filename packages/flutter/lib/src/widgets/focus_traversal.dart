@@ -1002,8 +1002,8 @@ class DirectionalFocusIntent extends Intent {
   final bool ignoreTextFields;
 }
 
-/// An [Action] that moves the focus to the focusable node in the given
-/// [direction] configured by the associated [DirectionalFocusIntent].
+/// An [Action] that moves the focus to the focusable node in the direction
+/// configured by the associated [DirectionalFocusIntent.direction].
 ///
 /// This is the [Action] associated with the [key] and bound by default to the
 /// [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
