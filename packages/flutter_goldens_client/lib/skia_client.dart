@@ -442,11 +442,11 @@ class SkiaGoldClient {
     final String branch = platform.environment['CIRRUS_BRANCH'];
     final String masterBranch = platform.environment['CIRRUS_BASE_BRANCH'];
 
-    // This git wizardry does not appear to work as intended on Cirrus.
-    final io.ProcessResult revList = await process.run(
-      <String>['git', 'rev-list', branch, '^$masterBranch', '--count'],
-      workingDirectory: _flutterRoot.path,
-    );
+//    // This git wizardry does not appear to work as intended on Cirrus.
+//    final io.ProcessResult revList = await process.run(
+//      <String>['git', 'rev-list', branch, '^$masterBranch', '--count'],
+//      workingDirectory: _flutterRoot.path,
+//    );
     return '1';//revList.exitCode == 0 ? revList.stdout.trim() : null;
   }
 
