@@ -2592,6 +2592,16 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 }
 
+/// A key that is only equal to itself.
+class _UniqueKey extends LocalKey {
+  /// Creates a key that is equal only to itself.
+  // ignore: prefer_const_constructors_in_immutables , never use const for this class
+  _UniqueKey();
+
+  @override
+  String toString() => '[#${shortHash(this)}]';
+}
+
 /// Calls callbacks in response to pointer events that are exclusive to mice.
 ///
 /// It responds to events that are related to hovering, i.e. when the mouse
@@ -2623,14 +2633,12 @@ class RenderMouseRegion extends RenderProxyBox {
        _onHover = onHover,
        _onExit = onExit,
        _opaque = opaque,
-       _annotationIsActive = false,
+       _annotationKey = _UniqueKey(),
        super(child) {
-    _hoverAnnotation = MouseTrackerAnnotation(
-      onEnter: _handleEnter,
-      onHover: _handleHover,
-      onExit: _handleExit,
-    );
+    _updateAnnotations();
   }
+
+  final Key _annotationKey;
 
   /// Whether this object should prevent [RenderMouseRegion]s visually behind it
   /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
@@ -2665,10 +2673,6 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerEnterEventListener _onEnter;
-  void _handleEnter(PointerEnterEvent event) {
-    if (_onEnter != null)
-      _onEnter(event);
-  }
 
   /// Called when a pointer changes position without buttons pressed and the end
   /// position is within the region.
@@ -2680,10 +2684,6 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerHoverEventListener _onHover;
-  void _handleHover(PointerHoverEvent event) {
-    if (_onHover != null)
-      _onHover(event);
-  }
 
   /// Called when a pointer leaves the region (with or without buttons pressed)
   /// and the annotation is still attached.
@@ -2695,10 +2695,6 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerExitEventListener _onExit;
-  void _handleExit(PointerExitEvent event) {
-    if (_onExit != null)
-      _onExit(event);
-  }
 
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;
@@ -2710,24 +2706,35 @@ class RenderMouseRegion extends RenderProxyBox {
   @visibleForTesting
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
+  MouseTrackerAnnotation _buildAnnotation() {
+    if ((_onEnter != null ||
+         _onHover != null ||
+         _onExit != null ||
+         opaque
+        ) &&
+        RendererBinding.instance.mouseTracker.mouseIsConnected) {
+      return MouseTrackerAnnotation(
+        onEnter: _onEnter,
+        onHover: _onHover,
+        onExit: _onExit,
+        key: _annotationKey,
+      );
+    }
+    return null;
+  }
+
   void _updateAnnotations() {
     final bool annotationWasActive = _annotationIsActive;
-    final bool annotationWillBeActive = (
-        _onEnter != null ||
-        _onHover != null ||
-        _onExit != null ||
-        opaque
-      ) &&
-      RendererBinding.instance.mouseTracker.mouseIsConnected;
-    if (annotationWasActive != annotationWillBeActive) {
-      markNeedsPaint();
+    final MouseTrackerAnnotation lastAnnotation = _hoverAnnotation;
+    _hoverAnnotation = _buildAnnotation();
+    markNeedsPaint();
+    if (annotationWasActive != _annotationIsActive) {
       markNeedsCompositingBitsUpdate();
-      if (annotationWillBeActive) {
+      if (_annotationIsActive) {
         RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
       } else {
-        RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+        RendererBinding.instance.mouseTracker.detachAnnotation(lastAnnotation);
       }
-      _annotationIsActive = annotationWillBeActive;
     }
   }
 
@@ -2771,7 +2778,7 @@ class RenderMouseRegion extends RenderProxyBox {
     super.detach();
   }
 
-  bool _annotationIsActive;
+  bool get _annotationIsActive => _hoverAnnotation != null;
 
   @override
   bool get needsCompositing => super.needsCompositing || _annotationIsActive;

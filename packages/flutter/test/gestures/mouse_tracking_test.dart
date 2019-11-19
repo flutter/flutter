@@ -102,13 +102,19 @@ void main() {
     );
     expect(
       annotation1.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: enter hover exit)'),
+      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: [enter, hover, exit])'),
     );
 
     const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();
     expect(
       annotation2.toString(),
       equals('MouseTrackerAnnotation#${shortHash(annotation2)}(callbacks: <none>)'),
+    );
+
+    const MouseTrackerAnnotation annotation3 = MouseTrackerAnnotation(key: ValueKey<int>(10));
+    expect(
+      annotation3.toString(),
+      equals('MouseTrackerAnnotation#${shortHash(annotation3)}(callbacks: <none>, key: [<10>])'),
     );
   });
 
