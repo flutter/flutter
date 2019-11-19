@@ -176,7 +176,7 @@ class FlutterDevice {
           restart: restart,
           compileExpression: compileExpression,
         );
-      } catch (exception) {
+      } on Exception catch (exception) {
         printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {
           completer.completeError('failed to connect to $observatoryUri');
