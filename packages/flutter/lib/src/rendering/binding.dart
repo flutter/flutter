@@ -298,22 +298,23 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   bool get sendFramesToEngine => _firstFrameSent || _firstFrameDeferredCount == 0;
 
-  /// Tell the framework to not render the first frames until there is a
-  /// corresponding call to [allowFirstFrame].
+  /// Tell the framework to not send the first frames to the engine until there
+  /// is a corresponding call to [allowFirstFrame].
   ///
-  /// Calling this allows a [Widget] to perform asynchronous initialisation work
-  /// before the first frame is rendered (which will take down the splash
-  /// screen).
+  /// Call this to perform asynchronous initialisation work before the first
+  /// frame is rendered (which takes down the splash screen). The framework
+  /// will still do all the work to produce frames, but those frames are never
+  /// send to the engine and will not appear on screen.
   ///
-  /// Calling this has no effect after the first frame has already been
-  /// rendered.
+  /// Calling this has no effect after the first frame has been send to the
+  /// engine.
   void deferFirstFrame() {
     assert(_firstFrameDeferredCount >= 0);
     _firstFrameDeferredCount += 1;
   }
 
   /// Called after [deferFirstFrame] to tell the framework that it is ok to
-  /// render the first frame now.
+  /// send the first frame to the engine now.
   ///
   /// For best performance, this method should only be called while the
   /// [schedulerPhase] is [SchedulerPhase.idle].
