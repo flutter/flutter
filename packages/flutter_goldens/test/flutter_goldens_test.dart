@@ -83,11 +83,12 @@ void main() {
       });
     });
 
-    test('Gets commit count for pre-submit tryjobs', () async {
-      final SkiaGoldClient separateClient = SkiaGoldClient(workDirectory);
-      await separateClient.getBranchCommitCount();
-      expect(false, isTrue);
-    });
+//    test('Gets commit count for pre-submit tryjobs', () async {
+//      // Troubleshooting Cirrus environment response
+//      final SkiaGoldClient separateClient = SkiaGoldClient(workDirectory);
+//      await separateClient.getBranchCommitCount();
+//      expect(false, isTrue);
+//    });
 
     group('Request Handling', () {
       String testName;
