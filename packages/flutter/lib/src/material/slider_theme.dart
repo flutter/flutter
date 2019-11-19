@@ -996,10 +996,13 @@ abstract class SliderComponentShape {
   ///
   /// [textScaleFactor] can be used to determine whether the component should
   /// paint larger or smaller, depending on whether [textScaleFactor] is greater
-  /// than or less than 1.
+  /// than 1 for larger, and between 0 and 1 for smaller. It usually comes from
+  /// [MediaQueryData.textScaleFactor].
   ///
-  /// [sizeWithOverflow] can be used to determine the absolute bounds when the
-  /// component is painted outside of the slider's bounds.
+  /// [sizeWithOverflow] can be used to determine the bounds the drawing of the
+  /// components that are outside of the regular slider bounds. It's the size of
+  /// the box, whose center is aligned with the slider's bounds, that the value
+  /// indicators must be drawn within. Typically, it is bigger than the slider.
   void paint(
     PaintingContext context,
     Offset center, {
@@ -1269,9 +1272,10 @@ abstract class RangeSliderValueIndicatorShape {
   /// [labelPainter] helps determine the width of the shape. It is variable
   /// width because it is derived from a formatted string.
   ///
-  /// [textScaleFactor] can be used to determine whether this shape should
+  /// [textScaleFactor] can be used to determine whether the component should
   /// paint larger or smaller, depending on whether [textScaleFactor] is greater
-  /// than or less than 1.
+  /// than 1 for larger, and between 0 and 1 for smaller. It usually comes from
+  /// [MediaQueryData.textScaleFactor].
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
@@ -1291,6 +1295,7 @@ abstract class RangeSliderValueIndicatorShape {
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
+    assert(!sizeWithOverflow.isEmpty);
     return 0;
   }
 
@@ -1311,12 +1316,15 @@ abstract class RangeSliderValueIndicatorShape {
   /// the default case, this is used to paint a stroke around the top indicator
   /// for better visibility between the two indicators.
   ///
-  /// [textScaleFactor] can be used to determine whether this shape should
+  /// [textScaleFactor] can be used to determine whether the component should
   /// paint larger or smaller, depending on whether [textScaleFactor] is greater
-  /// than or less than 1.
+  /// than 1 for larger, and between 0 and 1 for smaller. It usually comes from
+  /// [MediaQueryData.textScaleFactor].
   ///
-  /// [sizeWithOverflow] can be used to determine the absolute bounds when the
-  /// component is painted outside of the slider's bounds.
+  /// [sizeWithOverflow] can be used to determine the bounds the drawing of the
+  /// components that are outside of the regular slider bounds. It's the size of
+  /// the box, whose center is aligned with the slider's bounds, that the value
+  /// indicators must be drawn within. Typically, it is bigger than the slider.
   ///
   /// {@macro flutter.material.rangeSlider.shape.parentBox}
   ///
@@ -1604,9 +1612,9 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     assert(thumbCenter != null);
     assert(isEnabled != null);
     assert(isDiscrete != null);
-    // If the slider track height is less than or equal to 0, then it makes no
-    // difference whether the track is painted or not, therefore the painting
-    // can be a no-op.
+    // If the slider [SliderThemeData.trackHeight] is less than or equal to 0,
+    // then it makes no difference whether the track is painted or not,
+    // therefore the painting can be a no-op.
     if (sliderTheme.trackHeight <= 0) {
       return;
     }
@@ -1697,9 +1705,9 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     assert(enableAnimation != null);
     assert(textDirection != null);
     assert(thumbCenter != null);
-    // If the slider track height is less than or equal to 0, then it makes no
-    // difference whether the track is painted or not, therefore the painting
-    // can be a no-op.
+    // If the slider [SliderThemeData.trackHeight] is less than or equal to 0,
+    // then it makes no difference whether the track is painted or not,
+    // therefore the painting  can be a no-op.
     if (sliderTheme.trackHeight <= 0) {
       return;
     }
@@ -2064,7 +2072,8 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 
   /// The preferred radius of the round tick mark.
   ///
-  /// If it is not provided, then 1/4 of the track height is used.
+  /// If it is not provided, then 1/4 of the [SliderThemeData.trackHeight] is
+  /// used.
   final double tickMarkRadius;
 
   @override
@@ -2076,8 +2085,8 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     assert(sliderTheme.trackHeight != null);
     assert(isEnabled != null);
     // The tick marks are tiny circles. If no radius is provided, then the
-    // radius is defaulted to be 1/4 of the track height, or a diameter of half
-    // the track height.
+    // radius is defaulted to be 1/4 of the [SliderThemeData.trackHeight], or a
+    // diameter of half the [SliderThemeData.trackHeight].
     return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / 4);
   }
 
@@ -2157,7 +2166,8 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
 
   /// The preferred radius of the round tick mark.
   ///
-  /// If it is not provided, then 1/4 of the track height is used.
+  /// If it is not provided, then 1/4 of the [SliderThemeData.trackHeight] is
+  /// used.
   final double tickMarkRadius;
 
   @override
@@ -2298,7 +2308,10 @@ class RoundSliderThumbShape extends SliderComponentShape {
     this.disabledThumbRadius,
     this.elevation = 1.0,
     this.pressedElevation = 6.0,
-  });
+  }) : assert(enabledThumbRadius >= 0),
+       assert(disabledThumbRadius >= 0),
+       assert(elevation >= 0),
+       assert(pressedElevation >= 0),
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
@@ -2315,11 +2328,17 @@ class RoundSliderThumbShape extends SliderComponentShape {
   /// The resting elevation adds shadow to the unpressed thumb.
   ///
   /// The default is 1.
+  ///
+  /// Use 0 for no shadow. The higher the value, the larger the shadow. For
+  /// example, a value of 12 will create a very large shadow.
   final double elevation;
 
   /// The pressed elevation adds shadow to the pressed thumb.
   ///
   /// The default is 6.
+  ///
+  /// Use 0 for no shadow. The higher the value, the larger the shadow. For
+  /// example, a value of 12 will create a very large shadow.
   final double pressedElevation;
 
   @override
@@ -2348,6 +2367,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     assert(sliderTheme != null);
     assert(sliderTheme.disabledThumbColor != null);
     assert(sliderTheme.thumbColor != null);
+    assert(!sizeWithOverflow.isEmpty);
 
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
@@ -2539,7 +2559,8 @@ class RoundSliderOverlayShape extends SliderComponentShape {
 
   /// The preferred radius of the round thumb shape when enabled.
   ///
-  /// If it is not provided, then half of the track height is used.
+  /// If it is not provided, then half of the [SliderThemeData.trackHeight] is
+  /// used.
   final double overlayRadius;
 
   @override
@@ -2605,7 +2626,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
     @required double textScaleFactor,
   }) {
     assert(labelPainter != null);
-    assert(textScaleFactor != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
     return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
   }
 
@@ -2624,6 +2645,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
+    assert(!sizeWithOverflow.isEmpty);
     final Canvas canvas = context.canvas;
     final double scale = activationAnimation.value;
     _pathPainter.paint(
@@ -2660,7 +2682,7 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     @required double textScaleFactor,
   }) {
     assert(labelPainter != null);
-    assert(textScaleFactor != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
     return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
   }
 
@@ -2673,6 +2695,7 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
+    assert(!sizeWithOverflow.isEmpty);
     return _pathPainter.getHorizontalShift(
       parentBox: parentBox,
       center: center,
@@ -2700,6 +2723,7 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     double value,
     Thumb thumb,
   }) {
+    assert(!sizeWithOverflow.isEmpty);
     final Canvas canvas = context.canvas;
     final double scale = activationAnimation.value;
     _pathPainter.paint(
@@ -2748,6 +2772,7 @@ class _RectangularSliderValueIndicatorPathPainter {
     Size sizeWithOverflow,
     double scale,
   }) {
+    assert(!sizeWithOverflow.isEmpty);
     const double edgePadding = 8.0;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
 
@@ -2780,6 +2805,7 @@ class _RectangularSliderValueIndicatorPathPainter {
       // Zero scale essentially means "do not draw anything", so it's safe to just return.
       return;
     }
+    assert(!sizeWithOverflow.isEmpty);
 
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
     final double horizontalShift = getHorizontalShift(
@@ -2853,7 +2879,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     @required double textScaleFactor,
   }) {
     assert(labelPainter != null);
-    assert(textScaleFactor != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
     return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
   }
 
@@ -2879,6 +2905,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     assert(labelPainter != null);
     assert(parentBox != null);
     assert(sliderTheme != null);
+    assert(!sizeWithOverflow.isEmpty);
     final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
@@ -2918,7 +2945,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     @required double textScaleFactor,
   }) {
     assert(labelPainter != null);
-    assert(textScaleFactor != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
     return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
   }
 
@@ -2931,6 +2958,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
+    assert(!sizeWithOverflow.isEmpty);
     return _pathPainter.getHorizontalShift(
       parentBox: parentBox,
       center: center,
@@ -2965,6 +2993,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     assert(labelPainter != null);
     assert(parentBox != null);
     assert(sliderTheme != null);
+    assert(!sizeWithOverflow.isEmpty);
     final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
@@ -3031,7 +3060,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     double textScaleFactor,
   ) {
     assert(labelPainter != null);
-    assert(textScaleFactor != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
     final double width = math.max(_minLabelWidth * textScaleFactor, labelPainter.width) + _labelPadding * 2 * textScaleFactor;
     return Size(width, _preferredHeight * textScaleFactor);
   }
@@ -3052,6 +3081,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
+    assert(!sizeWithOverflow.isEmpty);
     final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
     final double labelHalfWidth = labelPainter.width / 2.0;
     final double halfWidthNeeded = math.max(
@@ -3120,6 +3150,7 @@ class _PaddleSliderValueIndicatorPathPainter {
       // our math below will attempt to divide by zero and send needless NaNs to the engine.
       return;
     }
+    assert(!sizeWithOverflow.isEmpty);
 
     // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.
