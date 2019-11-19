@@ -62,7 +62,7 @@ abstract class WidgetController {
   /// * Use [widgetList] if you expect to match several widgets and want all of them.
   T widget<T extends Widget>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().single.widget;
+    return finder.evaluate().single.widget as T;
   }
 
   /// The first matching widget according to a depth-first pre-order
@@ -73,7 +73,7 @@ abstract class WidgetController {
   /// * Use [widget] if you only expect to match one widget.
   T firstWidget<T extends Widget>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().first.widget;
+    return finder.evaluate().first.widget as T;
   }
 
   /// The matching widgets in the widget tree.
@@ -83,7 +83,7 @@ abstract class WidgetController {
   Iterable<T> widgetList<T extends Widget>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final T result = element.widget;
+      final T result = element.widget as T;
       return result;
     });
   }
@@ -107,7 +107,7 @@ abstract class WidgetController {
   /// * Use [elementList] if you expect to match several elements and want all of them.
   T element<T extends Element>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().single;
+    return finder.evaluate().single as T;
   }
 
   /// The first matching element according to a depth-first pre-order
@@ -118,7 +118,7 @@ abstract class WidgetController {
   /// * Use [element] if you only expect to match one element.
   T firstElement<T extends Element>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().first;
+    return finder.evaluate().first as T;
   }
 
   /// The matching elements in the widget tree.
@@ -127,7 +127,7 @@ abstract class WidgetController {
   /// * Use [firstElement] if you expect to match several but only want the first.
   Iterable<T> elementList<T extends Element>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate();
+    return finder.evaluate().cast<T>();
   }
 
   /// All states currently in the widget tree (lazy pre-order traversal).
@@ -179,7 +179,7 @@ abstract class WidgetController {
   T _stateOf<T extends State>(Element element, Finder finder) {
     TestAsyncUtils.guardSync();
     if (element is StatefulElement)
-      return element.state;
+      return element.state as T;
     throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
 
@@ -204,7 +204,7 @@ abstract class WidgetController {
   /// * Use [renderObjectList] if you expect to match several render objects and want all of them.
   T renderObject<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().single.renderObject;
+    return finder.evaluate().single.renderObject as T;
   }
 
   /// The render object of the first matching widget according to a
@@ -215,7 +215,7 @@ abstract class WidgetController {
   /// * Use [renderObject] if you only expect to match one render object.
   T firstRenderObject<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().first.renderObject;
+    return finder.evaluate().first.renderObject as T;
   }
 
   /// The render objects of the matching widgets in the widget tree.
@@ -225,7 +225,7 @@ abstract class WidgetController {
   Iterable<T> renderObjectList<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final T result = element.renderObject;
+      final T result = element.renderObject as T;
       return result;
     });
   }
@@ -644,7 +644,7 @@ abstract class WidgetController {
   Offset _getElementPoint(Finder finder, Offset sizeToPoint(Size size)) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject;
+    final RenderBox box = element.renderObject as RenderBox;
     assert(box != null);
     return box.localToGlobal(sizeToPoint(box.size));
   }
@@ -654,7 +654,7 @@ abstract class WidgetController {
   Size getSize(Finder finder) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject;
+    final RenderBox box = element.renderObject as RenderBox;
     assert(box != null);
     return box.size;
   }

@@ -17,8 +17,10 @@
 .idea/
 
 # Visual Studio Code related
-.vscode/
+.classpath
 .project
+.settings/
+.vscode/
 
 # Flutter repo-specific
 /bin/cache/

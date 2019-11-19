@@ -428,7 +428,7 @@ class FlutterPlatform extends PlatformPlugin {
             webSocket.complete(WebSocketTransformer.upgrade(request));
           }
         },
-        onError: (dynamic error, dynamic stack) {
+        onError: (dynamic error, StackTrace stack) {
           // If you reach here, it's unlikely we're going to be able to really handle this well.
           printTrace('test $ourTestCount: test harness socket server experienced an unexpected error: $error');
           if (!controllerSinkClosed) {
@@ -595,7 +595,7 @@ class FlutterPlatform extends PlatformPlugin {
               testSocket.add(json.encode(event));
             },
             onDone: harnessDone.complete,
-            onError: (dynamic error, dynamic stack) {
+            onError: (dynamic error, StackTrace stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test harness controller stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
@@ -611,12 +611,11 @@ class FlutterPlatform extends PlatformPlugin {
           final Completer<void> testDone = Completer<void>();
           final StreamSubscription<dynamic> testToHarness = testSocket.listen(
             (dynamic encodedEvent) {
-              assert(encodedEvent
-                  is String); // we shouldn't ever get binary messages
-              controller.sink.add(json.decode(encodedEvent));
+              assert(encodedEvent is String); // we shouldn't ever get binary messages
+              controller.sink.add(json.decode(encodedEvent as String));
             },
             onDone: testDone.complete,
-            onError: (dynamic error, dynamic stack) {
+            onError: (dynamic error, StackTrace stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test socket stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
@@ -970,10 +969,11 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
       (List<dynamic> futureResults) {
         assert(futureResults.length == 2);
         assert(futureResults.first == null);
-        if (futureResults.last is _AsyncError) {
-          _done.completeError(futureResults.last.error, futureResults.last.stack);
+        final dynamic lastResult = futureResults.last;
+        if (lastResult is _AsyncError) {
+          _done.completeError(lastResult.error, lastResult.stack);
         } else {
-          assert(futureResults.last == null);
+          assert(lastResult == null);
           _done.complete();
         }
       },

@@ -116,7 +116,7 @@ class AssembleCommand extends FlutterCommand {
   /// The environmental configuration for a build invocation.
   Environment get environment {
     final FlutterProject flutterProject = FlutterProject.current();
-    String output = argResults['output'];
+    String output = stringArg('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
@@ -130,7 +130,7 @@ class AssembleCommand extends FlutterCommand {
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
-      defines: _parseDefines(argResults['define']),
+      defines: _parseDefines(stringsArg('define')),
     );
     return result;
   }
@@ -152,23 +152,27 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
-      resourcePoolSize: argResults['resource-pool-size'],
+      resourcePoolSize: argResults.wasParsed('resource-pool-size') ? int.parse(stringArg('resource-pool-size')) : null,
     ));
     if (!result.success) {
-      for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
-        printError('Target ${data.key} failed: ${data.value.exception}', stackTrace: data.value.stackTrace);
+      for (ExceptionMeasurement measurement in result.exceptions.values) {
+        printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
       }
       throwToolExit('build failed.');
     }
     printTrace('build succeeded.');
     if (argResults.wasParsed('build-inputs')) {
-      writeListIfChanged(result.inputFiles, argResults['build-inputs']);
+      writeListIfChanged(result.inputFiles, stringArg('build-inputs'));
     }
     if (argResults.wasParsed('build-outputs')) {
-      writeListIfChanged(result.outputFiles, argResults['build-outputs']);
+      writeListIfChanged(result.outputFiles, stringArg('build-outputs'));
     }
     if (argResults.wasParsed('depfile')) {
-      final File depfileFile = fs.file(argResults['depfile']);
+      final File depfileFile = fs.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       depfile.writeToFile(fs.file(depfileFile));
     }

@@ -12,6 +12,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
@@ -167,15 +168,15 @@ class WebAssetServer {
     final List<String> modules = <String>[];
     final Uint8List codeBytes = codeFile.readAsBytesSync();
     final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
-    final Map<String, Object> manifest = json.decode(manifestFile.readAsStringSync());
+    final Map<String, dynamic> manifest = castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
     for (String filePath in manifest.keys) {
       if (filePath == null) {
         printTrace('Invalid manfiest file: $filePath');
         continue;
       }
-      final Map<String, Object> offsets = manifest[filePath];
-      final List<Object> codeOffsets = offsets['code'];
-      final List<Object> sourcemapOffsets = offsets['sourcemap'];
+      final Map<String, dynamic> offsets = castStringKeyedMap(manifest[filePath]);
+      final List<int> codeOffsets = (offsets['code'] as List<dynamic>).cast<int>();
+      final List<int> sourcemapOffsets = (offsets['sourcemap'] as List<dynamic>).cast<int>();
       if (codeOffsets.length != 2 || sourcemapOffsets.length != 2) {
         printTrace('Invalid manifest byte offsets: $offsets');
         continue;
