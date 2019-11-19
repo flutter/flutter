@@ -27,7 +27,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     environment['FLUTTER_TARGET'] = target;
   }
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     environment['FLUTTER_ENGINE'] = fs.path.dirname(fs.path.dirname(engineOutPath));
     environment['LOCAL_ENGINE'] = fs.path.basename(engineOutPath);
