@@ -4,9 +4,12 @@
 
 import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
+
+import 'environment.dart';
 
 /// The port number for debugging.
 const int kDevtoolsPort = 12345;
@@ -122,6 +125,36 @@ class BrowserInstallation {
 
   /// Path the the browser executable.
   final String executable;
+}
+
+abstract class BrowserArgParser {
+  const BrowserArgParser();
+
+  /// Populate options specific to a browser to the [ArgParser].
+  void populateOptions(ArgParser argParser);
+
+  /// Populate browser with results of the arguments passed.
+  void parseOptions(ArgResults argResults);
+
+  String get version;
+}
+
+/// Provides access to the contents of the `browser_lock.yaml` file.
+class BrowserLock {
+  /// Initializes the [BrowserLock] singleton.
+  static final BrowserLock _singletonInstance = BrowserLock._();
+
+  /// The [Keyboard] singleton.
+  static BrowserLock get instance => _singletonInstance;
+
+  YamlMap _configuration = YamlMap();
+  YamlMap get configuration => _configuration;
+
+  BrowserLock._() {
+    final io.File lockFile = io.File(
+        path.join(environment.webUiRootDir.path, 'dev', 'browser_lock.yaml'));
+    this._configuration = loadYaml(lockFile.readAsStringSync());
+  }
 }
 
 /// A string sink that swallows all input.

@@ -14,8 +14,7 @@ import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_im
 import 'package:test_core/src/executable.dart'
     as test; // ignore: implementation_imports
 
-import 'chrome.dart';
-import 'chrome_installer.dart';
+import 'supported_browsers.dart';
 import 'test_platform.dart';
 import 'environment.dart';
 import 'utils.dart';
@@ -32,12 +31,20 @@ class TestCommand extends Command<bool> {
       ..addFlag(
         'update-screenshot-goldens',
         defaultsTo: false,
-        help: 'When running screenshot tests writes them to the file system into '
+        help:
+            'When running screenshot tests writes them to the file system into '
             '.dart_tool/goldens. Use this option to bulk-update all screenshots, '
             'for example, when a new browser version affects pixels.',
+      )
+      ..addOption(
+        'browser',
+        defaultsTo: 'chrome',
+        help: 'An option to choose a browser to run the tests. Tests only work '
+            ' on Chrome for now.',
       );
 
-    addChromeVersionOption(argParser);
+    SupportedBrowsers.instance.argParsers
+        .forEach((t) => t.populateOptions(argParser));
   }
 
   @override
@@ -48,7 +55,8 @@ class TestCommand extends Command<bool> {
 
   @override
   Future<bool> run() async {
-    Chrome.version = chromeVersion;
+    SupportedBrowsers.instance
+      ..argParsers.forEach((t) => t.parseOptions(argResults));
 
     _copyTestFontsIntoWebUi();
     await _buildHostPage();
@@ -73,8 +81,7 @@ class TestCommand extends Command<bool> {
   /// Paths to targets to run, e.g. a single test.
   List<String> get targets => argResults.rest;
 
-  /// See [ChromeInstallerCommand.chromeVersion].
-  String get chromeVersion => argResults['chrome-version'];
+  String get browser => argResults['browser'];
 
   /// When running screenshot tests writes them to the file system into
   /// ".dart_tool/goldens".
@@ -161,7 +168,8 @@ class TestCommand extends Command<bool> {
       '$hostDartPath.js.timestamp',
     ));
 
-    final String timestamp = hostDartFile.statSync().modified.millisecondsSinceEpoch.toString();
+    final String timestamp =
+        hostDartFile.statSync().modified.millisecondsSinceEpoch.toString();
     if (timestampFile.existsSync()) {
       final String lastBuildTimestamp = timestampFile.readAsStringSync();
       if (lastBuildTimestamp == timestamp) {
@@ -195,7 +203,7 @@ class TestCommand extends Command<bool> {
     timestampFile.writeAsStringSync(timestamp);
   }
 
-  Future<void> _buildTests({ List<FilePath> targets }) async {
+  Future<void> _buildTests({List<FilePath> targets}) async {
     final int exitCode = await runProcess(
       environment.pubExecutable,
       <String>[
@@ -206,11 +214,10 @@ class TestCommand extends Command<bool> {
         '-o',
         'build',
         if (targets != null)
-          for (FilePath path in targets)
-            ...[
-              '--build-filter=${path.relativeToWebUi}.js',
-              '--build-filter=${path.relativeToWebUi}.browser_test.dart.js',
-            ],
+          for (FilePath path in targets) ...[
+            '--build-filter=${path.relativeToWebUi}.js',
+            '--build-filter=${path.relativeToWebUi}.browser_test.dart.js',
+          ],
       ],
       workingDirectory: environment.webUiRootDir.path,
     );
@@ -234,13 +241,17 @@ class TestCommand extends Command<bool> {
       ...<String>['-r', 'compact'],
       '--concurrency=$concurrency',
       if (isDebug) '--pause-after-load',
-      '--platform=chrome',
+      '--platform=$browser',
       '--precompiled=${environment.webUiRootDir.path}/build',
       '--',
       ...testFiles.map((f) => f.relativeToWebUi).toList(),
     ];
-    hack.registerPlatformPlugin(<Runtime>[Runtime.chrome], () {
+
+    hack.registerPlatformPlugin(<Runtime>[
+      SupportedBrowsers.instance.supportedBrowsersToRuntimes[browser]
+    ], () {
       return BrowserPlatform.start(
+        browser,
         root: io.Directory.current.path,
         // It doesn't make sense to update a screenshot for a test that is expected to fail.
         doUpdateScreenshotGoldens: !expectFailure && doUpdateScreenshotGoldens,
@@ -280,7 +291,8 @@ void _copyTestFontsIntoWebUi() {
 
   for (String fontFile in _kTestFonts) {
     final io.File sourceTtf = io.File(path.join(fontsPath, fontFile));
-    final String destinationTtfPath = path.join(environment.webUiRootDir.path, 'lib', 'assets', fontFile);
+    final String destinationTtfPath =
+        path.join(environment.webUiRootDir.path, 'lib', 'assets', fontFile);
     sourceTtf.copySync(destinationTtfPath);
   }
 }

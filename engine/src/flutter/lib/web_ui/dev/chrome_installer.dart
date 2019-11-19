@@ -13,23 +13,42 @@ import 'package:yaml/yaml.dart';
 import 'common.dart';
 import 'environment.dart';
 
-void addChromeVersionOption(ArgParser argParser) {
-  final io.File lockFile = io.File(
-      path.join(environment.webUiRootDir.path, 'dev', 'browser_lock.yaml'));
-  final YamlMap lock = loadYaml(lockFile.readAsStringSync());
-  final int pinnedChromeVersion = PlatformBinding.instance.getChromeBuild(lock);
+class ChromeArgParser extends BrowserArgParser {
+  static final ChromeArgParser _singletonInstance = ChromeArgParser._();
 
-  argParser
-    ..addOption(
-      'chrome-version',
-      defaultsTo: '$pinnedChromeVersion',
-      help: 'The Chrome version to use while running tests. If the requested '
-          'version has not been installed, it will be downloaded and installed '
-          'automatically. A specific Chrome build version number, such as 695653 '
-          'this use that version of Chrome. Value "latest" will use the latest '
-          'available build of Chrome, installing it if necessary. Value "system" '
-          'will use the manually installed version of Chrome on this computer.',
-    );
+  /// The [ChromeArgParser] singleton.
+  static ChromeArgParser get instance => _singletonInstance;
+
+  String _version;
+
+  ChromeArgParser._();
+
+  @override
+  void populateOptions(ArgParser argParser) {
+    final YamlMap browserLock = BrowserLock.instance.configuration;
+    final int pinnedChromeVersion =
+        PlatformBinding.instance.getChromeBuild(browserLock);
+
+    argParser
+      ..addOption(
+        'chrome-version',
+        defaultsTo: '$pinnedChromeVersion',
+        help: 'The Chrome version to use while running tests. If the requested '
+            'version has not been installed, it will be downloaded and installed '
+            'automatically. A specific Chrome build version number, such as 695653, '
+            'will use that version of Chrome. Value "latest" will use the latest '
+            'available build of Chrome, installing it if necessary. Value "system" '
+            'will use the manually installed version of Chrome on this computer.',
+      );
+  }
+
+  @override
+  void parseOptions(ArgResults argResults) {
+    _version = argResults['chrome-version'];
+  }
+
+  @override
+  String get version => _version;
 }
 
 /// Returns the installation of Chrome, installing it if necessary.
@@ -180,6 +199,7 @@ class ChromeInstaller {
     if (unzipResult.exitCode != 0) {
       throw BrowserInstallerException(
           'Failed to unzip the downloaded Chrome archive ${downloadedFile.path}.\n'
+          'With the version path ${versionDir.path}\n'
           'The unzip process exited with code ${unzipResult.exitCode}.');
     }
 

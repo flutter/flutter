@@ -32,6 +32,8 @@ class Chrome extends Browser {
   /// Starts a new instance of Chrome open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Chrome(Uri url, {bool debug = false}) {
+    version = ChromeArgParser.instance.version;
+
     assert(version != null);
     var remoteDebuggerCompleter = Completer<Uri>.sync();
     return Chrome._(() async {
@@ -50,13 +52,16 @@ class Chrome extends Browser {
       // --disable-gpu
       // --disallow-non-exact-resource-reuse
       // --disable-font-subpixel-positioning
-      final bool isChromeNoSandbox = Platform.environment['CHROME_NO_SANDBOX'] == 'true';
+      final bool isChromeNoSandbox =
+          Platform.environment['CHROME_NO_SANDBOX'] == 'true';
       var dir = createTempDir();
       var args = [
         '--user-data-dir=$dir',
         url.toString(),
-        if (!debug) '--headless',
-        if (isChromeNoSandbox) '--no-sandbox',
+        if (!debug)
+          '--headless',
+        if (isChromeNoSandbox)
+          '--no-sandbox',
         '--window-size=$kMaxScreenshotWidth,$kMaxScreenshotHeight', // When headless, this is the actual size of the viewport
         '--disable-extensions',
         '--disable-popup-blocking',
@@ -69,10 +74,11 @@ class Chrome extends Browser {
         '--remote-debugging-port=$kDevtoolsPort',
       ];
 
-      final Process process = await Process.start(installation.executable, args);
+      final Process process =
+          await Process.start(installation.executable, args);
 
-      remoteDebuggerCompleter.complete(getRemoteDebuggerUrl(
-          Uri.parse('http://localhost:${kDevtoolsPort}')));
+      remoteDebuggerCompleter.complete(
+          getRemoteDebuggerUrl(Uri.parse('http://localhost:${kDevtoolsPort}')));
 
       unawaited(process.exitCode
           .then((_) => Directory(dir).deleteSync(recursive: true)));

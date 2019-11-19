@@ -38,19 +38,22 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip;
 
 import 'browser.dart';
-import 'chrome.dart';
 import 'common.dart';
 import 'environment.dart' as env;
 import 'goldens.dart';
+import 'supported_browsers.dart';
 
 class BrowserPlatform extends PlatformPlugin {
   /// Starts the server.
   ///
   /// [root] is the root directory that the server should serve. It defaults to
   /// the working directory.
-  static Future<BrowserPlatform> start({String root, bool doUpdateScreenshotGoldens: false}) async {
+  static Future<BrowserPlatform> start(String name,
+      {String root, bool doUpdateScreenshotGoldens: false}) async {
+    assert(SupportedBrowsers.instance.supportedBrowserNames.contains(name));
     var server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return BrowserPlatform._(
+      name,
       server,
       Configuration.current,
       p.fromUri(await Isolate.resolvePackageUri(
@@ -65,6 +68,9 @@ class BrowserPlatform extends PlatformPlugin {
 
   /// The underlying server.
   final shelf.Server _server;
+
+  /// Name for the running browser. Not final on purpose can be mutated later.
+  String browserName;
 
   /// A randomly-generated secret.
   ///
@@ -97,9 +103,11 @@ class BrowserPlatform extends PlatformPlugin {
   /// Whether to update screenshot golden files.
   final bool doUpdateScreenshotGoldens;
 
-  BrowserPlatform._(this._server, Configuration config, String faviconPath,
+  BrowserPlatform._(
+      String name, this._server, Configuration config, String faviconPath,
       {String root, this.doUpdateScreenshotGoldens})
-      : _config = config,
+      : this.browserName = name,
+        _config = config,
         _root = root == null ? p.current : root,
         _http = config.pubServeUrl == null ? null : HttpClient() {
     var cascade = shelf.Cascade().add(_webSocketHandler.handler);
@@ -109,7 +117,6 @@ class BrowserPlatform extends PlatformPlugin {
       final String staticFilePath =
           config.suiteDefaults.precompiledPath ?? _root;
       cascade = cascade
-          .add(_screeshotHandler)
           .add(packagesDirHandler())
           .add(_jsHandler.handler)
           .add(createStaticHandler(staticFilePath,
@@ -117,6 +124,10 @@ class BrowserPlatform extends PlatformPlugin {
               serveFilesOutsidePath:
                   config.suiteDefaults.precompiledPath != null))
           .add(_wrapperHandler);
+      // Screenshot tests are only enabled in chrome for now.
+      if (name == 'chrome') {
+        cascade = cascade.add(_screeshotHandler);
+      }
     }
 
     var pipeline = shelf.Pipeline()
@@ -130,6 +141,10 @@ class BrowserPlatform extends PlatformPlugin {
   }
 
   Future<shelf.Response> _screeshotHandler(shelf.Request request) async {
+    if (browserName != 'chrome') {
+      throw Exception('Screenshots tests are only available in Chrome.');
+    }
+
     if (!request.requestedUri.path.endsWith('/screenshot')) {
       return shelf.Response.notFound(
           'This request is not handled by the screenshot handler');
@@ -141,11 +156,14 @@ class BrowserPlatform extends PlatformPlugin {
     final bool write = requestData['write'];
     final double maxDiffRate = requestData['maxdiffrate'];
     final Map<String, dynamic> region = requestData['region'];
-    final String result = await _diffScreenshot(filename, write, maxDiffRate ?? kMaxDiffRateFailure, region);
+    final String result = await _diffScreenshot(
+        filename, write, maxDiffRate ?? kMaxDiffRateFailure, region);
     return shelf.Response.ok(json.encode(result));
   }
 
-  Future<String> _diffScreenshot(String filename, bool write, double maxDiffRateFailure, [ Map<String, dynamic> region ]) async {
+  Future<String> _diffScreenshot(
+      String filename, bool write, double maxDiffRateFailure,
+      [Map<String, dynamic> region]) async {
     if (doUpdateScreenshotGoldens) {
       write = true;
     }
@@ -195,7 +213,8 @@ To automatically create this file call matchGoldenFile('$filename', write: true)
           'y': region['y'],
           'width': region['width'],
           'height': region['height'],
-          'scale': 1, // This is NOT the DPI of the page, instead it's the "zoom level".
+          'scale':
+              1, // This is NOT the DPI of the page, instead it's the "zoom level".
         },
       };
     }
@@ -208,8 +227,8 @@ To automatically create this file call matchGoldenFile('$filename', write: true)
       'deviceScaleFactor': 1,
       'mobile': false,
     });
-    final wip.WipResponse response =
-        await wipConnection.sendCommand('Page.captureScreenshot', captureScreenshotParameters);
+    final wip.WipResponse response = await wipConnection.sendCommand(
+        'Page.captureScreenshot', captureScreenshotParameters);
 
     // Compare screenshots
     final Image screenshot = decodePng(base64.decode(response.result['data']));
@@ -226,31 +245,37 @@ To automatically create this file call matchGoldenFile('$filename', write: true)
       }
     }
 
-    ImageDiff diff = ImageDiff(golden: decodeNamedImage(file.readAsBytesSync(), filename), other: screenshot);
+    ImageDiff diff = ImageDiff(
+        golden: decodeNamedImage(file.readAsBytesSync(), filename),
+        other: screenshot);
 
-    if (diff.rate > 0) { // Images are different, so produce some debug info
+    if (diff.rate > 0) {
+      // Images are different, so produce some debug info
       final String testResultsPath = isCirrus
-        ? p.join(
-            Platform.environment['CIRRUS_WORKING_DIR'],
-            'test_results',
-          )
-        : p.join(
-            env.environment.webUiDartToolDir.path,
-            'test_results',
-          );
+          ? p.join(
+              Platform.environment['CIRRUS_WORKING_DIR'],
+              'test_results',
+            )
+          : p.join(
+              env.environment.webUiDartToolDir.path,
+              'test_results',
+            );
       Directory(testResultsPath).createSync(recursive: true);
       final String basename = p.basenameWithoutExtension(file.path);
 
-      final File actualFile = File(p.join(testResultsPath, '$basename.actual.png'));
+      final File actualFile =
+          File(p.join(testResultsPath, '$basename.actual.png'));
       actualFile.writeAsBytesSync(encodePng(screenshot), flush: true);
 
       final File diffFile = File(p.join(testResultsPath, '$basename.diff.png'));
-      diffFile.writeAsBytesSync(encodePng(diff.diff), flush:true);
+      diffFile.writeAsBytesSync(encodePng(diff.diff), flush: true);
 
-      final File expectedFile = File(p.join(testResultsPath, '$basename.expected.png'));
+      final File expectedFile =
+          File(p.join(testResultsPath, '$basename.expected.png'));
       file.copySync(expectedFile.path);
 
-      final File reportFile = File(p.join(testResultsPath, '$basename.report.html'));
+      final File reportFile =
+          File(p.join(testResultsPath, '$basename.report.html'));
       reportFile.writeAsStringSync('''
 Golden file $filename did not match the image generated by the test.
 
@@ -275,16 +300,19 @@ Golden file $filename did not match the image generated by the test.
 ''');
 
       final StringBuffer message = StringBuffer();
-      message.writeln('Golden file $filename did not match the image generated by the test.');
+      message.writeln(
+          'Golden file $filename did not match the image generated by the test.');
       message.writeln(getPrintableDiffFilesInfo(diff.rate, maxDiffRateFailure));
-      message.writeln('You can view the test report in your browser by opening:');
+      message
+          .writeln('You can view the test report in your browser by opening:');
 
       // Cirrus cannot serve HTML pages generated by build jobs, so we
       // archive all the files so that they can be downloaded and inspected
       // locally.
       if (isCirrus) {
         final String taskId = Platform.environment['CIRRUS_TASK_ID'];
-        final String baseArtifactsUrl = 'https://api.cirrus-ci.com/v1/artifact/task/$taskId/web_engine_test/test_results';
+        final String baseArtifactsUrl =
+            'https://api.cirrus-ci.com/v1/artifact/task/$taskId/web_engine_test/test_results';
         final String cirrusReportUrl = '$baseArtifactsUrl/$basename.report.zip';
         message.writeln(cirrusReportUrl);
 
@@ -304,7 +332,8 @@ Golden file $filename did not match the image generated by the test.
         message.writeln(localReportPath);
       }
 
-      message.writeln('To update the golden file call matchGoldenFile(\'$filename\', write: true).');
+      message.writeln(
+          'To update the golden file call matchGoldenFile(\'$filename\', write: true).');
       message.writeln('Golden file: ${expectedFile.path}');
       message.writeln('Actual file: ${actualFile.path}');
 
@@ -649,8 +678,9 @@ class BrowserManager {
   /// Starts the browser identified by [browser] using [settings] and has it load [url].
   ///
   /// If [debug] is true, starts the browser in debug mode.
-  static Browser _newBrowser(Uri url, Runtime browser, {bool debug = false}) {
-    return Chrome(url, debug: debug);
+  static Browser _newBrowser(Uri url, Runtime browser,
+      {bool debug = false}) {
+    return SupportedBrowsers.instance.getBrowser(browser, url, debug: debug);
   }
 
   /// Creates a new BrowserManager that communicates with [browser] over
