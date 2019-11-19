@@ -5,6 +5,7 @@
 #include <array>
 
 #include <gtest/gtest.h>
+#include <lib/async-loop/default.h>
 #include <lib/zx/event.h>
 #include <zircon/syscalls.h>
 
@@ -53,7 +54,7 @@ TEST_F(VsyncWaiterTest, AwaitVsync) {
     thread.reset(new flutter_runner::Thread());
   }
 
-  async::Loop loop(&kAsyncLoopConfigAttachToThread);
+  async::Loop loop(&kAsyncLoopConfigAttachToCurrentThread);
 
   const flutter::TaskRunners task_runners(
       "VsyncWaiterTests",  // Dart thread labels
