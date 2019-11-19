@@ -64,6 +64,12 @@ void main(List<String> arguments) {
         'automatically removed at the end of execution.',
   );
   argParser.addFlag(
+    'verbose',
+    defaultsTo: false,
+    negatable: false,
+    help: 'Print verbose output for the analysis process.',
+  );
+  argParser.addFlag(
     'help',
     defaultsTo: false,
     negatable: false,
@@ -100,7 +106,7 @@ void main(List<String> arguments) {
     tempDirectory.createSync();
   }
   try {
-    exitCode = SampleChecker(flutterPackage, tempDirectory: tempDirectory).checkSamples();
+    exitCode = SampleChecker(flutterPackage, tempDirectory: tempDirectory, verbose: parsedArguments['verbose']).checkSamples();
   } on SampleCheckerException catch (e) {
     stderr.write(e);
     exit(1);
@@ -140,7 +146,7 @@ class SampleCheckerException implements Exception {
 /// don't necessarily match. It does, however, print the source of the
 /// problematic line.
 class SampleChecker {
-  SampleChecker(this._flutterPackage, {Directory tempDirectory})
+  SampleChecker(this._flutterPackage, {Directory tempDirectory, this.verbose = false})
       : _tempDirectory = tempDirectory,
         _keepTmp = tempDirectory != null {
     _tempDirectory ??= Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
@@ -153,7 +159,7 @@ class SampleChecker {
   static const String _dartDocPrefixWithSpace = '$_dartDocPrefix ';
 
   /// A RegExp that matches the beginning of a dartdoc snippet or sample.
-  static final RegExp _dartDocSampleBeginRegex = RegExp(r'{@tool (sample|snippet)(?:| ([^}]*))}');
+  static final RegExp _dartDocSampleBeginRegex = RegExp(r'{@tool (sample|snippet|dartpad)(?:| ([^}]*))}');
 
   /// A RegExp that matches the end of a dartdoc snippet or sample.
   static final RegExp _dartDocSampleEndRegex = RegExp(r'{@end-tool}');
@@ -166,6 +172,9 @@ class SampleChecker {
 
   /// A RegExp that matches a Dart constructor.
   static final RegExp _constructorRegExp = RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
+
+  /// Whether or not to print verbose output.
+  final bool verbose;
 
   /// Whether or not to keep the temp directory around after running.
   ///
@@ -313,6 +322,9 @@ class SampleChecker {
     ];
     print('Generating snippet for ${snippet.start?.filename}:${snippet.start?.line}');
     final ProcessResult process = _runSnippetsScript(args);
+    if (verbose) {
+      stderr.write('${process.stderr}');
+    }
     if (process.exitCode != 0) {
       throw SampleCheckerException(
         'Unable to create snippet for ${snippet.start.filename}:${snippet.start.line} '
@@ -427,7 +439,7 @@ class SampleChecker {
             startLine = Line('', filename: relativeFilePath, line: lineNumber + 1, indent: 3);
             inPreamble = true;
           } else if (sampleMatch != null) {
-            inSnippet = sampleMatch != null && sampleMatch[1] == 'snippet';
+            inSnippet = sampleMatch != null && (sampleMatch[1] == 'snippet' || sampleMatch[1] == 'dartpad');
             if (inSnippet) {
               startLine = Line(
                 '',
