@@ -439,8 +439,8 @@ class SkiaGoldClient {
 
   /// Returns the number of commits made on the current branch.
   Future<String> getBranchCommitCount() async {
-    final String branch = platform.environment['CIRRUS_BRANCH'];
-    final String masterBranch = platform.environment['CIRRUS_BASE_BRANCH'];
+//    final String branch = platform.environment['CIRRUS_BRANCH'];
+//    final String masterBranch = platform.environment['CIRRUS_BASE_BRANCH'];
 
 //    // This git wizardry does not appear to work as intended on Cirrus.
 //    final io.ProcessResult revList = await process.run(
