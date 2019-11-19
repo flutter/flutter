@@ -2308,10 +2308,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     this.disabledThumbRadius,
     this.elevation = 1.0,
     this.pressedElevation = 6.0,
-  }) : assert(enabledThumbRadius >= 0),
-       assert(disabledThumbRadius >= 0),
-       assert(elevation >= 0),
-       assert(pressedElevation >= 0),
+  });
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
