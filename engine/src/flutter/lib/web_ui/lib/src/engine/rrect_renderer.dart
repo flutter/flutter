@@ -222,3 +222,27 @@ class _RRectToPathRenderer extends _RRectRenderer {
         antiClockwise ? startAngle - endAngle : endAngle - startAngle);
   }
 }
+
+typedef RRectRendererEllipseCallback = void Function(double centerX, double centerY, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, bool antiClockwise);
+typedef RRectRendererCallback = void Function(double x, double y);
+
+/// Converts RRect to path primitives with callbacks.
+class RRectMetricsRenderer extends _RRectRenderer {
+  RRectMetricsRenderer({this.moveToCallback, this.lineToCallback, this.ellipseCallback});
+
+  final RRectRendererEllipseCallback ellipseCallback;
+  final RRectRendererCallback lineToCallback;
+  final RRectRendererCallback moveToCallback;
+  @override
+  void beginPath() {}
+
+  @override
+  void ellipse(double centerX, double centerY, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, bool antiClockwise) => ellipseCallback(
+      centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle, antiClockwise);
+
+  @override
+  void lineTo(double x, double y) => lineToCallback(x, y);
+
+  @override
+  void moveTo(double x, double y) => moveToCallback(x, y);
+}
