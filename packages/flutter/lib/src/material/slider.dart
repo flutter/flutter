@@ -1196,7 +1196,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           textDirection: _textDirection,
           value: _value,
           textScaleFactor: textScaleFactor,
-          sizeWithOverflow: sizeWithOverflow,
+          sizeWithOverflow: sizeWithOverflow.isEmpty ? size : sizeWithOverflow,
         );
       }
     }
@@ -1211,7 +1211,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       parentBox: this,
       sliderTheme: _sliderTheme,
       textDirection: _textDirection,
-      sizeWithOverflow: sizeWithOverflow,
+      sizeWithOverflow: sizeWithOverflow.isEmpty ? size : sizeWithOverflow,
       value: _value,
     );
   }

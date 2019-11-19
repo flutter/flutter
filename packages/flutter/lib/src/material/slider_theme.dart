@@ -2363,9 +2363,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     assert(sliderTheme != null);
     assert(sliderTheme.disabledThumbColor != null);
     assert(sliderTheme.thumbColor != null);
-    if (sizeWithOverflow.isEmpty) {
-      sizeWithOverflow = parentBox.size;
-    }
+    assert(!sizeWithOverflow.isEmpty);
 
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
@@ -2767,9 +2765,7 @@ class _RectangularSliderValueIndicatorPathPainter {
     Size sizeWithOverflow,
     double scale,
   }) {
-    if (sizeWithOverflow.isEmpty) {
-      sizeWithOverflow = parentBox.size;
-    }
+    assert(!sizeWithOverflow.isEmpty);
     const double edgePadding = 8.0;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
 
@@ -2802,9 +2798,7 @@ class _RectangularSliderValueIndicatorPathPainter {
       // Zero scale essentially means "do not draw anything", so it's safe to just return.
       return;
     }
-    if (sizeWithOverflow.isEmpty) {
-      sizeWithOverflow = parentBox.size;
-    }
+    assert(!sizeWithOverflow.isEmpty);
 
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
     final double horizontalShift = getHorizontalShift(
@@ -2904,9 +2898,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     assert(labelPainter != null);
     assert(parentBox != null);
     assert(sliderTheme != null);
-    if (sizeWithOverflow.isEmpty) {
-      sizeWithOverflow = parentBox.size;
-    }
+    assert(!sizeWithOverflow.isEmpty);
     final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
@@ -2993,9 +2985,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     assert(labelPainter != null);
     assert(parentBox != null);
     assert(sliderTheme != null);
-    if (sizeWithOverflow.isEmpty) {
-      sizeWithOverflow = parentBox.size;
-    }
+    assert(!sizeWithOverflow.isEmpty);
     final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
@@ -3083,9 +3073,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     double textScaleFactor,
     Size sizeWithOverflow,
   }) {
-    if (sizeWithOverflow.isEmpty) {
-      sizeWithOverflow = parentBox.size;
-    }
+    assert(!sizeWithOverflow.isEmpty);
     final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
     final double labelHalfWidth = labelPainter.width / 2.0;
     final double halfWidthNeeded = math.max(
@@ -3154,9 +3142,7 @@ class _PaddleSliderValueIndicatorPathPainter {
       // our math below will attempt to divide by zero and send needless NaNs to the engine.
       return;
     }
-    if (sizeWithOverflow.isEmpty) {
-      sizeWithOverflow = parentBox.size;
-    }
+    assert(!sizeWithOverflow.isEmpty);
 
     // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.

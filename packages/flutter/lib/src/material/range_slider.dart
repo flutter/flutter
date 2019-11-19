@@ -1306,6 +1306,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final double bottomValue = isLastThumbStart ? endValue : startValue;
     final double topValue = isLastThumbStart ? startValue : endValue;
     final bool shouldPaintValueIndicators = isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
+    final Size resolvedSizeWithOverflow = sizeWithOverflow.isEmpty ? size : sizeWithOverflow;
 
     if (shouldPaintValueIndicators) {
       _sliderTheme.rangeValueIndicatorShape.paint(
@@ -1322,7 +1323,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         thumb: bottomThumb,
         value: bottomValue,
         textScaleFactor: textScaleFactor,
-        sizeWithOverflow: sizeWithOverflow,
+        sizeWithOverflow: resolvedSizeWithOverflow,
       );
     }
 
@@ -1346,7 +1347,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         labelPainter: _startLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
         textScaleFactor: textScaleFactor,
-        sizeWithOverflow: sizeWithOverflow,
+        sizeWithOverflow: resolvedSizeWithOverflow,
       );
       final double endOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
         parentBox: this,
@@ -1354,7 +1355,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         labelPainter: _endLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
         textScaleFactor: textScaleFactor,
-        sizeWithOverflow: sizeWithOverflow,
+        sizeWithOverflow: resolvedSizeWithOverflow,
       );
       final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(
         isEnabled,
@@ -1394,7 +1395,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         thumb: topThumb,
         value: topValue,
         textScaleFactor: textScaleFactor,
-        sizeWithOverflow: sizeWithOverflow
+        sizeWithOverflow: resolvedSizeWithOverflow,
       );
     }
 
