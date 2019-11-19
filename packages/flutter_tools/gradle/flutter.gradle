@@ -544,38 +544,36 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             String variantBuildMode = buildModeFor(variant.buildType)
-            List<FlutterTask> compileTasks = targetPlatforms.collect { targetArch ->
-                String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name, targetArch.replace('android-', '')])
-                project.tasks.create(name: taskName, type: FlutterTask) {
-                    flutterRoot this.flutterRoot
-                    flutterExecutable this.flutterExecutable
-                    buildMode variantBuildMode
-                    localEngine this.localEngine
-                    localEngineSrcPath this.localEngineSrcPath
-                    abi PLATFORM_ARCH_MAP[targetArch]
-                    targetPath target
-                    verbose isVerbose()
-                    fileSystemRoots fileSystemRootsValue
-                    fileSystemScheme fileSystemSchemeValue
-                    trackWidgetCreation trackWidgetCreationValue
-                    targetPlatform targetArch
-                    sourceDir project.file(project.flutter.source)
-                    intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${targetArch}")
-                    extraFrontEndOptions extraFrontEndOptionsValue
-                    extraGenSnapshotOptions extraGenSnapshotOptionsValue
-                }
+            String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
+            FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
+                flutterRoot this.flutterRoot
+                flutterExecutable this.flutterExecutable
+                buildMode variantBuildMode
+                localEngine this.localEngine
+                localEngineSrcPath this.localEngineSrcPath
+                targetPath target
+                verbose isVerbose()
+                fileSystemRoots fileSystemRootsValue
+                fileSystemScheme fileSystemSchemeValue
+                trackWidgetCreation trackWidgetCreationValue
+                targetPlatformValues = targetPlatforms
+                sourceDir project.file(project.flutter.source)
+                intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
+                extraFrontEndOptions extraFrontEndOptionsValue
+                extraGenSnapshotOptions extraGenSnapshotOptionsValue
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
-                dependsOn compileTasks
-                compileTasks.each { compileTask ->
-                    from(compileTask.intermediateDir) {
-                        include '*.so'
+                dependsOn compileTask
+                targetPlatforms.each { targetPlatform ->
+                    String abi = PLATFORM_ARCH_MAP[targetPlatform]
+                    from("${compileTask.intermediateDir}/${abi}") {
+                        include "*.so"
                         // Move `app.so` to `lib/<abi>/libapp.so`
                         rename { String filename ->
-                            return "lib/${compileTask.abi}/lib${filename}"
+                            return "lib/${abi}/lib${filename}"
                         }
                     }
                 }
@@ -594,11 +592,8 @@ class FlutterPlugin implements Plugin<Project> {
                 name: "copyFlutterAssets${variant.name.capitalize()}",
                 type: Copy,
             ) {
-                dependsOn compileTasks
-                compileTasks.each { flutterTask ->
-                    // Add flutter_assets.
-                    with flutterTask.assets
-                }
+                dependsOn compileTask
+                with compileTask.assets
                 if (isUsedAsSubproject) {
                     dependsOn packageAssets
                     dependsOn cleanPackageAssets
@@ -687,9 +682,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Input
     Boolean trackWidgetCreation
     @Optional @Input
-    String targetPlatform
-    @Input
-    String abi
+    List<String> targetPlatformValues
     File sourceDir
     File intermediateDir
     @Optional @Input
@@ -713,6 +706,16 @@ abstract class BaseFlutterTask extends DefaultTask {
 
         intermediateDir.mkdirs()
 
+        // Compute the rule name for flutter assemble. To speed up builds that contain
+        // multiple ABIs, the target name is used to communicate which ones are required
+        // rather than the TargetPlatform. This allows multiple builds to share the same
+        // cache.
+        String[] ruleNames;
+        if (buildMode == "debug") {
+          ruleNames = ["debug_android_application"]
+        } else {
+          ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
+        }
         project.exec {
             executable flutterExecutable.absolutePath
             workingDir sourceDir
@@ -729,7 +732,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "--depfile", "${intermediateDir}/flutter_build.d"
             args "--output", "${intermediateDir}"
             args "-dTargetFile=${targetPath}"
-            args "-dTargetPlatform=${targetPlatform}"
+            args "-dTargetPlatform=android"
             args "-dBuildMode=${buildMode}"
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
@@ -737,15 +740,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraGenSnapshotOptions != null) {
                 args "-dExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
-            if (buildMode == "profile") {
-                args "profile_android_application"
-            }
-            if (buildMode == "release") {
-                args "release_android_application"
-            }
-            if (buildMode == "debug") {
-                args "debug_android_application"
-            }
+            args ruleNames
         }
     }
 }
@@ -768,7 +763,9 @@ class FlutterTask extends BaseFlutterTask {
             from "${intermediateDir}"
 
             if (buildMode == 'release' || buildMode == 'profile') {
-                include "app.so"
+                targetPlatformValues.each {
+                    include "${PLATFORM_ARCH_MAP[targetArch]}/app.so"
+                }
             }
         }
     }
