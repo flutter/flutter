@@ -193,6 +193,81 @@ class SkiaGoldClient {
     return true;
   }
 
+  /// Executes the `imgtest init` command in the goldctl tool for tryjobs.
+  ///
+  /// The `imgtest` command collects and uploads test results to the Skia Gold
+  /// backend, the `init` argument initializes the current tryjob.
+  Future<void> tryjobInit() async {
+    final File keys = workDirectory.childFile('keys.json');
+    final File failures = workDirectory.childFile('failures.json');
+
+    await keys.writeAsString(_getKeysJSON());
+    await failures.create();
+    final String commitHash = await _getCurrentCommit();
+    final String nthCommit = await getBranchCommitCount();
+    final String pullRequest = platform.environment['CIRRUS_PR'];
+    final String cirrusTaskID = platform.environment['CIRRUS_TASK_ID'];
+
+
+    final List<String> imgtestInitArguments = <String>[
+      'imgtest', 'init',
+      '--instance', 'flutter',
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+      '--commit', commitHash,
+      '--keys-file', keys.path,
+      '--failure-file', failures.path,
+      '--passfail',
+      '--crs', 'github',
+      '--changelist', pullRequest,
+      '--cis', 'cirrus',
+      '--jobid', cirrusTaskID,
+      '--patchset', nthCommit,
+    ];
+
+    if (imgtestInitArguments.contains(null)) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Null argument for Skia Gold imgtest init:');
+      imgtestInitArguments.forEach(buf.writeln);
+      throw NonZeroExitCode(1, buf.toString());
+    }
+
+    await io.Process.run(
+      _goldctl,
+      imgtestInitArguments,
+    );
+  }
+
+  /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
+  ///
+  /// The `imgtest` command collects and uploads test results to the Skia Gold
+  /// backend, the `add` argument uploads the current image test. A response is
+  /// returned from the invocation of this command that indicates a pass or fail
+  /// result for the tryjob.
+  ///
+  /// The testName and goldenFile parameters reference the current comparison
+  /// being evaluated by the [FlutterSkiaGoldFileComparator].
+  Future<bool> tryjobAdd(String testName, File goldenFile) async {
+    assert(testName != null);
+    assert(goldenFile != null);
+
+    final List<String> imgtestArguments = <String>[
+      'imgtest', 'add',
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+      '--test-name', cleanTestName(testName),
+      '--png-file', goldenFile.path,
+    ];
+
+    final io.ProcessResult result = await io.Process.run(
+      _goldctl,
+      imgtestArguments,
+    );
+    return result.exitCode == 0;
+  }
+
   /// Requests and sets the [_expectations] known to Flutter Gold at head.
   Future<void> getExpectations() async {
     _expectations = <String, List<String>>{};
@@ -367,16 +442,12 @@ class SkiaGoldClient {
     final String branch = platform.environment['CIRRUS_BRANCH'];
     final String masterBranch = platform.environment['CIRRUS_BASE_BRANCH'];
 
+    // This git wizardry does not appear to work as intended on Cirrus.
     final io.ProcessResult revList = await process.run(
       <String>['git', 'rev-list', branch, '^$masterBranch', '--count'],
       workingDirectory: _flutterRoot.path,
     );
-    print('***');
-    print('branch: $branch');
-    print('masterBranch: $masterBranch');
-    print('stdout: ${revList.stdout}');
-    print('***');
-    return revList.exitCode == 0 ? revList.stdout.trim() : null;
+    return '1';//revList.exitCode == 0 ? revList.stdout.trim() : null;
   }
 
   /// Returns a JSON String with keys value pairs used to uniquely identify the

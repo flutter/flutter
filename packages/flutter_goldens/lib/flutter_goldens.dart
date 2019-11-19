@@ -299,40 +299,18 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     }
 
     goldens ??= SkiaGoldClient(baseDirectory);
-    await goldens.getExpectations();
-
+    await goldens.auth();
+    await goldens.tryjobInit();
     return FlutterPreSubmitFileComparator(baseDirectory.uri, goldens);
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = _addPrefix(golden);
-    final String testName = skiaClient.cleanTestName(golden.path);
-    final List<String> testExpectations = skiaClient.expectations[testName];
+    await update(golden, imageBytes);
+    final File goldenFile = getGoldenFile(golden);
 
-    if (testExpectations == null) {
-      // There is no baseline for this test
-      return true;
-    }
-
-    ComparisonResult result;
-    for (String expectation in testExpectations) {
-      final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
-
-      result = GoldenFileComparator.compareLists(
-        imageBytes,
-        goldenBytes,
-      );
-
-      if (result.passed) {
-        return true;
-      }
-    }
-
-    return skiaClient.testIsIgnoredForPullRequest(
-      platform.environment['CIRRUS_PR'] ?? '',
-      golden.path,
-    );
+    return skiaClient.tryjobAdd(golden.path, goldenFile);
   }
 
   /// Decides based on the current environment whether goldens tests should be
