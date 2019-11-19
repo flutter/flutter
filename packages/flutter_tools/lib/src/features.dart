@@ -53,7 +53,7 @@ class FeatureFlags {
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = Config.instance.getValue(feature.configSetting);
+      final bool configOverride = Config.instance.getValue(feature.configSetting) as bool;
       if (configOverride != null) {
         isEnabled = configOverride;
       }

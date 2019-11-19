@@ -153,11 +153,11 @@ class SourceVisitor implements ResolvedFiles {
       } else if (wildcardSegments.length == 1) {
         if (filename.startsWith(wildcardSegments[0]) ||
             filename.endsWith(wildcardSegments[0])) {
-          sources.add(entity.absolute);
+          sources.add(fs.file(entity.absolute));
         }
       } else if (filename.startsWith(wildcardSegments[0])) {
         if (filename.substring(wildcardSegments[0].length).endsWith(wildcardSegments[1])) {
-          sources.add(entity.absolute);
+          sources.add(fs.file(entity.absolute));
         }
       }
     }
