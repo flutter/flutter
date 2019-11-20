@@ -894,14 +894,14 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     mySetState(() { moved = true; });
-    // The first frame is for the widget movement to take effect
+    // The first frame is for the widget movement to take effect.
     await tester.pump();
     expect(find.text('unhover inner'), findsOneWidget);
     expect(find.text('unhover outer'), findsOneWidget);
     expect(logHovered, <bool>[true]);
     logHovered.clear();
 
-    // The second frame is for the mouse hover to take effect
+    // The second frame is for the mouse hover to take effect.
     await tester.pump();
     expect(find.text('hover inner'), findsOneWidget);
     expect(find.text('hover outer'), findsOneWidget);
@@ -990,37 +990,37 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pumpAndSettle();
 
-      // Move to the overlapping area
+      // Move to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>['enterA', 'enterB', 'enterC']);
       logs.clear();
 
-      // Move to the B only area
+      // Move to the B only area.
       await gesture.moveTo(const Offset(25, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>['exitC']);
       logs.clear();
 
-      // Move back to the overlapping area
+      // Move back to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>['enterC']);
       logs.clear();
 
-      // Move to the C only area
+      // Move to the C only area.
       await gesture.moveTo(const Offset(125, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>['exitB']);
       logs.clear();
 
-      // Move back to the overlapping area
+      // Move back to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>['enterB']);
       logs.clear();
 
-      // Move out
+      // Move out.
       await gesture.moveTo(const Offset(160, 160));
       await tester.pumpAndSettle();
       expect(logs, <String>['exitC', 'exitB', 'exitA']);
@@ -1038,37 +1038,37 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pumpAndSettle();
 
-      // Move to the overlapping area
+      // Move to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>['enterA', 'enterC']);
       logs.clear();
 
-      // Move to the B only area
+      // Move to the B only area.
       await gesture.moveTo(const Offset(25, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>['exitC', 'enterB']);
       logs.clear();
 
-      // Move back to the overlapping area
+      // Move back to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>['exitB', 'enterC']);
       logs.clear();
 
-      // Move to the C only area
+      // Move to the C only area.
       await gesture.moveTo(const Offset(125, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>[]);
       logs.clear();
 
-      // Move back to the overlapping area
+      // Move back to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>[]);
       logs.clear();
 
-      // Move out
+      // Move out.
       await gesture.moveTo(const Offset(160, 160));
       await tester.pumpAndSettle();
       expect(logs, <String>['exitC', 'exitA']);
@@ -1086,13 +1086,13 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pumpAndSettle();
 
-      // Move to the overlapping area
+      // Move to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>['enterA', 'enterC']);
       logs.clear();
 
-      // Move out
+      // Move out.
       await gesture.moveTo(const Offset(160, 160));
       await tester.pumpAndSettle();
       expect(logs, <String>['exitC', 'exitA']);
@@ -1202,7 +1202,7 @@ void main() {
   });
 }
 
-// This widget allows you to send a callback that is called during `onPaint.
+// This widget allows you to send a callback that is called during `onPaint`.
 @immutable
 class _PaintDelegateWidget extends SingleChildRenderObjectWidget {
   const _PaintDelegateWidget({

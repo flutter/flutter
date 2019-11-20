@@ -48,7 +48,10 @@ class MouseTrackerAnnotation {
   ///  * A new pointer has been added to somewhere within an annotated region.
   ///  * An existing pointer has moved into an annotated region.
   ///
-  /// This callback is not always matched by an [onExit].
+  /// This callback is not always matched by an [onExit]. If the render object
+  /// that owns the annotation is disposed while being hovered by a pointer,
+  /// the [onExit] callback of that annotation will never called, despite
+  /// the earlier call of [onEnter]. For more details, see [onExit].
   ///
   /// See also:
   ///
@@ -59,8 +62,17 @@ class MouseTrackerAnnotation {
   /// Triggered when a pointer has moved within the annotated region without
   /// buttons pressed.
   ///
-  /// This is not triggered if the region under the pointer moves without
-  /// the pointer moving.
+  /// This callback is triggered when:
+  ///
+  ///  * An annotation that did not contain the pointer has moved to under a
+  ///    pointer that has no buttons pressed.
+  ///  * A pointer has moved onto, or moved within an annotation without buttons
+  ///    pressed.
+  ///
+  /// This callback is not triggered when
+  ///
+  ///  * An annotation that is containing the pointer has moved, and still
+  ///    contains the pointer.
   final PointerHoverEventListener onHover;
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
@@ -79,12 +91,23 @@ class MouseTrackerAnnotation {
   ///
   ///  * An annotated region that used to contain a pointer has disappeared.
   ///
-  /// The last case is when [onExit] does not match an earlier [onEnter].
-  /// This design is because the last case is very likely to be handled
-  /// improperly and cause exceptions (such as calling `setState` of the disposed
-  /// widget). Also, the last case can already be achieved by using the event
-  /// that causes the removal, or simply overriding [Widget.dispose] or
-  /// [RenderObject.detach].
+  /// The last case is the only case when [onExit] does not match an earlier
+  /// [onEnter].
+  /// {@template flutter.mouseTracker.onExit}
+  /// This design is because the last case is very likely to be
+  /// handled improperly and cause exceptions (such as calling `setState` of the
+  /// disposed widget). There are a few ways to mitigate this limit:
+  ///
+  ///  * If the state of hovering is contained within a widget that
+  ///    unconditionally attaches the annotation (as long as a mouse is
+  ///    connected), then this will not be a concern, since when the annotation
+  ///    is disposed the state is no longer used.
+  ///  * If you're accessible to the condition that controls whether the
+  ///    annotation is attached, then you can call the callback when that
+  ///    condition goes from true to false.
+  ///  * In the cases where the solutions above won't work, you can always
+  ///    override [Widget.dispose] or [RenderObject.detach].
+  /// {@endtemplate}
   ///
   /// Technically, whether [onExit] will be called is controlled by
   /// [MouseTracker.attachAnnotation] and [MouseTracker.detachAnnotation].
@@ -119,22 +142,14 @@ typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation> Functio
 
 typedef _UpdatedDeviceHandler = void Function(_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations);
 
-// Various states of each connected mouse device.
-//
-// It is used by [MouseTracker] to record the current state, as well as the
-// unresolved data to be used in the upcoming collection. For more details on
-// collection, see [MouseTracker].
+// Various states of a connected mouse device used by [MouseTracker].
 class _MouseState {
   _MouseState({
     @required PointerAddedEvent initialEvent,
   }) : assert(initialEvent != null),
        _latestEvent = initialEvent;
 
-  // The list of annotations that contains this device during the last completed
-  // collection.
-  //
-  // It is updated at the end of every collection, right before dispatching
-  // callbacks.
+  // The list of annotations that contains this device.
   //
   // It uses [LinkedHashSet] to keep the insertion order.
   LinkedHashSet<MouseTrackerAnnotation> get annotations => _annotations;
@@ -146,7 +161,7 @@ class _MouseState {
     return previous;
   }
 
-  // The most recent processed mouse event observed from this device.
+  // The most recently processed mouse event observed from this device.
   PointerEvent get latestEvent => _latestEvent;
   PointerEvent _latestEvent;
   set latestEvent(PointerEvent value) {
@@ -181,7 +196,7 @@ class _MouseState {
 ///
 /// The state of [MouseTracker] consists of 3 parts:
 ///
-///  * The mouse that are connected.
+///  * The mouse devices that are connected.
 ///  * The annotations that are attached, i.e. whose owner render object is
 ///    painted on the screen.
 ///  * In which annotations each device is contained.
@@ -192,7 +207,7 @@ class _MouseState {
 ///  * An eligible [PointerEvent] has been observed, e.g. a device is added,
 ///    removed, or moved. In this case, the state related to this device will
 ///    be immediately updated.
-///  * A frame has been painted. In this case, a callback will be scheduled to
+///  * A frame has been painted. In this case, a callback will be scheduled for
 ///    the upcoming post-frame phase to update all devices.
 class MouseTracker extends ChangeNotifier {
   /// Creates a mouse tracker to keep track of mouse locations.
@@ -249,10 +264,10 @@ class MouseTracker extends ChangeNotifier {
     final PointerEvent lastEvent = state.latestEvent;
     assert(value.device == lastEvent.device);
     // An Added can only follow a Removed, and a Removed can only be followed
-    // by an Added
+    // by an Added.
     assert((value is PointerAddedEvent) == (lastEvent is PointerRemovedEvent));
 
-    // Ignore events that are unrelated to mouse tracking
+    // Ignore events that are unrelated to mouse tracking.
     if (value is PointerSignalEvent)
       return false;
     return lastEvent is PointerAddedEvent
