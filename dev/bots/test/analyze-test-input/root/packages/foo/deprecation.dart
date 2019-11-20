@@ -52,3 +52,9 @@ void test8() { }
  'This feature was deprecated after v1.2.3.'
 )
 void test10() { }
+
+@Deprecated(
+  'URLs are allowed. '
+  'This feature was deprecated after v2.0.0. See: https://flutter.dev/foo'
+)
+void test11() { }
