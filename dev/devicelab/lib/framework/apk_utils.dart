@@ -396,7 +396,7 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 String validateSnapshotDependency(FlutterProject project, String expectedTarget) {
   final File snapshotBlob = File(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
-          'flutter', 'debug', 'android-arm', 'flutter_build.d'));
+          'flutter', 'debug', 'flutter_build.d'));
 
   assert(snapshotBlob.existsSync());
   final String contentSnapshot = snapshotBlob.readAsStringSync();

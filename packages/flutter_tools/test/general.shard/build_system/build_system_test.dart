@@ -319,8 +319,7 @@ void main() {
       fs.file('a.txt').writeAsStringSync('a');
       called += 1;
     })
-      ..inputs = const <Source>[Source.depfile('example.d')]
-      ..outputs = const <Source>[Source.depfile('example.d')];
+      ..depfiles = <String>['example.d'];
     fs.file('b.txt').writeAsStringSync('b');
 
     await buildSystem.build(target, environment);
@@ -356,8 +355,7 @@ void main() {
       }
       called += 1;
     })
-      ..inputs = const <Source>[Source.depfile('example.d')]
-      ..outputs = const <Source>[Source.depfile('example.d')];
+      ..depfiles = const <String>['example.d'];
     fs.file('b.txt').writeAsStringSync('b');
 
     await buildSystem.build(target, environment);
@@ -394,6 +392,9 @@ class TestTarget extends Target {
 
   @override
   List<Source> inputs = <Source>[];
+
+  @override
+  List<String> depfiles = <String>[];
 
   @override
   String name = 'test';

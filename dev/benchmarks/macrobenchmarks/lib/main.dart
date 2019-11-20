@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:macrobenchmarks/src/picture_cache.dart';
 
 import 'common.dart';
 import 'src/backdrop_filter.dart';
@@ -26,6 +27,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
+        kPictureCacheRouteName: (BuildContext conttext) => PictureCachePage(),
       },
     );
   }
@@ -64,6 +66,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Simple Animation'),
             onPressed: () {
               Navigator.pushNamed(context, kSimpleAnimationRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kPictureCacheRouteName),
+            child: const Text('Picture Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPictureCacheRouteName);
             },
           ),
         ],

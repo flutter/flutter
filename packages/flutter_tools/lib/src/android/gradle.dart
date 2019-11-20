@@ -281,7 +281,7 @@ Future<void> buildGradleApp({
     command.add('-q');
   }
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
       engineOutPath: localEngineArtifacts.engineOutPath,
       androidBuildInfo: androidBuildInfo,
@@ -526,7 +526,7 @@ Future<void> buildGradleAar({
     command.add('-Ptarget-platform=$targetPlatforms');
   }
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
       engineOutPath: localEngineArtifacts.engineOutPath,
       androidBuildInfo: androidBuildInfo,

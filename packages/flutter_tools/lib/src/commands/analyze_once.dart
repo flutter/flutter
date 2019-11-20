@@ -52,16 +52,16 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     }
 
-    if (argResults['flutter-repo']) {
+    if (argResults['flutter-repo'] as bool) {
       // check for conflicting dependencies
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       directories.addAll(repoRoots);
-      if (argResults.wasParsed('current-package') && argResults['current-package']) {
+      if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
         directories.add(currentDirectory);
       }
     } else {
-      if (argResults['current-package']) {
+      if (argResults['current-package'] as bool) {
         directories.add(currentDirectory);
       }
     }
@@ -74,7 +74,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
-    final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
+    final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,
@@ -109,7 +109,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final String message = directories.length > 1
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
         : fs.path.basename(directories.first);
-    final Status progress = argResults['preamble']
+    final Status progress = argResults['preamble'] as bool
         ? logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
         : null;
 
@@ -121,7 +121,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final int undocumentedMembers = errors.where((AnalysisError error) {
       return error.code == 'public_member_api_docs';
     }).length;
-    if (!argResults['dartdocs']) {
+    if (!(argResults['dartdocs'] as bool)) {
       errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
     }
 
@@ -134,7 +134,7 @@ class AnalyzeOnce extends AnalyzeBase {
     dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
     // report errors
-    if (errors.isNotEmpty && argResults['preamble']) {
+    if (errors.isNotEmpty && (argResults['preamble'] as bool)) {
       printStatus('');
     }
     errors.sort();
@@ -166,7 +166,7 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Server error(s) occurred. (ran in ${seconds}s)');
     }
 
-    if (argResults['congratulate']) {
+    if (argResults['congratulate'] as bool) {
       if (undocumentedMembers > 0) {
         printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
       } else {

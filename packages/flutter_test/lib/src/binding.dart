@@ -1335,7 +1335,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  _LiveTestRenderView get renderView => super.renderView;
+  _LiveTestRenderView get renderView => super.renderView as _LiveTestRenderView;
 
   void _handleViewNeedsPaint() {
     _viewNeedsPaint = true;
@@ -1577,7 +1577,7 @@ class _LiveTestRenderView extends RenderView {
   }) : super(configuration: configuration, window: window);
 
   @override
-  TestViewConfiguration get configuration => super.configuration;
+  TestViewConfiguration get configuration => super.configuration as TestViewConfiguration;
   @override
   set configuration(covariant TestViewConfiguration value) { super.configuration = value; }
 

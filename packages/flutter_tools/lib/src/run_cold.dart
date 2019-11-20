@@ -83,7 +83,7 @@ class ColdRunner extends ResidentRunner {
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(DebugConnectionInfo(
-        httpUri: flutterDevices.first.observatoryUris.first,
+        httpUri: flutterDevices.first.vmServices.first.httpAddress,
         wsUri: flutterDevices.first.vmServices.first.wsAddress,
       ));
     }
@@ -184,9 +184,8 @@ class ColdRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       if (device.observatoryUris != null) {
-        for (Uri uri in device.observatoryUris) {
-          printStatus('An Observatory debugger and profiler on $dname is available at $uri');
-          haveAnything = true;
+        for (VMService vm in device.vmServices) {
+          printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.wsAddress}');
         }
       }
     }

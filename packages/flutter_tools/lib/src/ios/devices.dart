@@ -158,7 +158,7 @@ class IOSDevice extends Device {
   @override
   final String name;
 
-  Map<ApplicationPackage, DeviceLogReader> _logReaders;
+  Map<IOSApp, DeviceLogReader> _logReaders;
 
   DevicePortForwarder _portForwarder;
 
@@ -202,7 +202,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async {
+  Future<bool> isAppInstalled(IOSApp app) async {
     RunResult apps;
     try {
       apps = await processUtils.run(
@@ -219,12 +219,11 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
+  Future<bool> isLatestBuildInstalled(IOSApp app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async {
-    final IOSApp iosApp = app;
-    final Directory bundle = fs.directory(iosApp.deviceBundlePath);
+  Future<bool> installApp(IOSApp app) async {
+    final Directory bundle = fs.directory(app.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
@@ -232,7 +231,7 @@ class IOSDevice extends Device {
 
     try {
       await processUtils.run(
-        <String>[_installerPath, '-i', iosApp.deviceBundlePath],
+        <String>[_installerPath, '-i', app.deviceBundlePath],
         throwOnError: true,
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry],
@@ -246,7 +245,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async {
+  Future<bool> uninstallApp(IOSApp app) async {
     try {
       await processUtils.run(
         <String>[_installerPath, '-U', app.id],
@@ -267,7 +266,7 @@ class IOSDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    IOSApp package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -295,7 +294,7 @@ class IOSDevice extends Device {
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
-          app: package,
+          app: package as BuildableIOSApp,
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
           buildForDevice: true,
@@ -317,8 +316,7 @@ class IOSDevice extends Device {
     packageId ??= package.id;
 
     // Step 2: Check that the application exists at the specified path.
-    final IOSApp iosApp = package;
-    final Directory bundle = fs.directory(iosApp.deviceBundlePath);
+    final Directory bundle = fs.directory(package.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
       return LaunchResult.failed();
@@ -347,7 +345,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
-      if (platformArgs['trace-startup'] ?? false) '--trace-startup',
+      if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
     final Status installStatus = logger.startProgress(
@@ -426,7 +424,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage app) async {
+  Future<bool> stopApp(IOSApp app) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
   }
@@ -438,14 +436,14 @@ class IOSDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion';
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
-    _logReaders ??= <ApplicationPackage, DeviceLogReader>{};
+  DeviceLogReader getLogReader({ IOSApp app }) {
+    _logReaders ??= <IOSApp, DeviceLogReader>{};
     return _logReaders.putIfAbsent(app, () => IOSDeviceLogReader(this, app));
   }
 
   @visibleForTesting
-  void setLogReader(ApplicationPackage app, DeviceLogReader logReader) {
-    _logReaders ??= <ApplicationPackage, DeviceLogReader>{};
+  void setLogReader(IOSApp app, DeviceLogReader logReader) {
+    _logReaders ??= <IOSApp, DeviceLogReader>{};
     _logReaders[app] = logReader;
   }
 
@@ -475,7 +473,7 @@ class IOSDevice extends Device {
 
   @override
   void dispose() {
-    _logReaders.forEach((ApplicationPackage application, DeviceLogReader logReader) {
+    _logReaders.forEach((IOSApp application, DeviceLogReader logReader) {
       logReader.dispose();
     });
     _portForwarder?.dispose();
@@ -544,7 +542,7 @@ String decodeSyslog(String line) {
 
 @visibleForTesting
 class IOSDeviceLogReader extends DeviceLogReader {
-  IOSDeviceLogReader(this.device, ApplicationPackage app) {
+  IOSDeviceLogReader(this.device, IOSApp app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _listenToSysLog,
       onCancel: dispose,
@@ -637,7 +635,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // any specific prefix. To properly capture those, we enter "printing" mode
   // after matching a log line from the runner. When in printing mode, we print
   // all lines until we find the start of another log message (from any app).
-  Function _newSyslogLineHandler() {
+  void Function(String line) _newSyslogLineHandler() {
     bool printing = false;
 
     return (String line) {

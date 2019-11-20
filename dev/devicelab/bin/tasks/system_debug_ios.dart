@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 import 'service_extensions_test.dart';
@@ -23,7 +22,6 @@ Future<void> main() async {
         dir('${flutterDirectory.path}/dev/integration_tests/ui');
     await inDirectory<void>(testDirectory, () async {
       await flutter('packages', options: <String>['get']);
-      await prepareProvisioningCertificates(testDirectory.path);
 
       await checkNoWarningHostLaunch(deviceId);
       await checkNoWarningXcodeLaunch(deviceId);

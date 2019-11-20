@@ -72,8 +72,7 @@ class BuildAarCommand extends BuildSubCommand {
     } else {
       usage[CustomDimensions.commandBuildAarProjectType] = 'app';
     }
-    usage[CustomDimensions.commandBuildAarTargetPlatform] =
-        (argResults['target-platform'] as List<String>).join(',');
+    usage[CustomDimensions.commandBuildAarTargetPlatform] = stringsArg('target-platform').join(',');
     return usage;
   }
 
@@ -87,14 +86,14 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
-    final Iterable<AndroidArch> targetArchitectures = argResults['target-platform']
+    final Iterable<AndroidArch> targetArchitectures = stringsArg('target-platform')
       .map<AndroidArch>(getAndroidArchForName);
 
     for (String buildMode in const <String>['debug', 'profile', 'release']) {
-      if (argResults[buildMode]) {
+      if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
-            BuildInfo(BuildMode.fromName(buildMode), argResults['flavor']),
+            BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor')),
             targetArchs: targetArchitectures,
           )
         );
@@ -107,7 +106,7 @@ class BuildAarCommand extends BuildSubCommand {
       project: _getProject(),
       target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,
-      outputDirectoryPath: argResults['output-dir'],
+      outputDirectoryPath: stringArg('output-dir'),
     );
     return null;
   }

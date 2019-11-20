@@ -143,7 +143,7 @@ class IMobileDevice {
       ],
       environment: executionEnv,
     )).processResult;
-    if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
+    if ((ideviceResult.stdout as String).contains('Usage: ideviceinfo')) {
       _isWorking = false;
       return _isWorking;
     }
@@ -156,7 +156,7 @@ class IMobileDevice {
       ],
       environment: executionEnv,
     )).processResult;
-    if (result.exitCode == 0 && result.stdout.isEmpty) {
+    if (result.exitCode == 0 && (result.stdout as String).isEmpty) {
       _isWorking = true;
     } else {
       // Check that we can look up the names of any attached devices.
@@ -183,7 +183,7 @@ class IMobileDevice {
       if (result.exitCode != 0) {
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
       }
-      return result.stdout;
+      return result.stdout as String;
     } on ProcessException {
       throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
     }
@@ -203,17 +203,19 @@ class IMobileDevice {
           <MapEntry<String, String>>[cache.dyLdLibEntry]
         ),
       );
-      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found')) {
-        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}. Try unlocking attached devices.');
+      final String stdout = result.stdout as String;
+      final String stderr = result.stderr as String;
+      if (result.exitCode == 255 && stdout != null && stdout.contains('No device found')) {
+        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n$stdout. Try unlocking attached devices.');
       }
-      if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
-        if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
+      if (result.exitCode == 255 && stderr != null && stderr.contains('Could not connect to lockdownd')) {
+        if (stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
           throw const IOSDeviceNotTrustedError(
             'Device info unavailable. Is the device asking to "Trust This Computer?"',
             LockdownReturnCode.pairingDialogResponsePending,
           );
         }
-        if (result.stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
+        if (stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
           throw const IOSDeviceNotTrustedError(
             'Device info unavailable. Device pairing "trust" may have been revoked.',
             LockdownReturnCode.invalidHostId,
@@ -221,9 +223,9 @@ class IMobileDevice {
         }
       }
       if (result.exitCode != 0) {
-        throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
+        throw ToolExit('ideviceinfo returned an error:\n$stderr');
       }
-      return result.stdout.trim();
+      return stdout.trim();
     } on ProcessException {
       throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
     }

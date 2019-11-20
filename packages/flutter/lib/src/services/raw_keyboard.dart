@@ -276,8 +276,7 @@ abstract class RawKeyEvent extends Diagnosticable {
       case 'macos':
         data = RawKeyEventDataMacOs(
             characters: message['characters'] ?? '',
-            charactersIgnoringModifiers:
-                message['charactersIgnoringModifiers'] ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] ?? '',
             keyCode: message['keyCode'] ?? 0,
             modifiers: message['modifiers'] ?? 0);
         break;
@@ -287,7 +286,8 @@ abstract class RawKeyEvent extends Diagnosticable {
             unicodeScalarValues: message['unicodeScalarValues'] ?? 0,
             keyCode: message['keyCode'] ?? 0,
             scanCode: message['scanCode'] ?? 0,
-            modifiers: message['modifiers'] ?? 0);
+            modifiers: message['modifiers'] ?? 0,
+            isDown: message['type'] == 'keydown');
         break;
       case 'web':
         data = RawKeyEventDataWeb(
