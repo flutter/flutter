@@ -428,9 +428,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _setFallbackAffinity(
     TextAffinity affinity,
   ) {
+    assert(affinity != null);
     // Engine-computed selections will always compute affinity when necessary.
-    // We cache this affinity in the case we use a platform supplied selection
-    // that does not provide an affinity.
+    // Cache this affinity in the case where the platform supplied selection
+    // does not provide an affinity.
     _fallbackAffinity = affinity;
   }
 
@@ -979,8 +980,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   set selection(TextSelection value) {
     if (_selection == value)
       return;
-    // We use the _fallbackAffinity when the set selection has a null
-    // affinity. This happense when the platform does not supply affinity,
+    // Use the _fallbackAffinity when the set selection has a null
+    // affinity. This happens when the platform does not supply affinity,
     // in which case using the fallback affinity computed from dart:ui will
     // be superior to simply defaulting to TextAffinity.downstream.
     if (value.affinity == null) {
