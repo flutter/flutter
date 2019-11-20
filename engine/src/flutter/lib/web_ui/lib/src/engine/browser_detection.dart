@@ -16,6 +16,9 @@ enum BrowserEngine {
   /// The engine that powers Firefox.
   firefox,
 
+  /// The engine that powers Edge.
+  edge,
+
   /// We were unable to detect the current browser engine.
   unknown,
 }
@@ -30,10 +33,13 @@ BrowserEngine get browserEngine => _browserEngine ??= _detectBrowserEngine();
 
 BrowserEngine _detectBrowserEngine() {
   final String vendor = html.window.navigator.vendor;
+  final String agent = html.window.navigator.userAgent;
   if (vendor == 'Google Inc.') {
     return BrowserEngine.blink;
   } else if (vendor == 'Apple Computer, Inc.') {
     return BrowserEngine.webkit;
+  } else if (agent.contains('Edge/')) {
+    return BrowserEngine.edge;
   } else if (vendor == '') {
     // An empty string means firefox:
     // https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vendor
