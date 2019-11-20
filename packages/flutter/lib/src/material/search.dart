@@ -121,6 +121,7 @@ abstract class SearchDelegate<T> {
     this.searchFieldLabel,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
+    this.maintainState = false,
   });
 
   /// Suggestions shown in the body of the search page while the user types a
@@ -275,6 +276,11 @@ abstract class SearchDelegate<T> {
   /// Defaults to [TextInputAction.search].
   final TextInputAction textInputAction;
 
+  /// Sets the maintainState property on the delegate's PageRoute.
+  ///
+  /// Defaults to false;
+  final bool maintainState;
+  
   /// [Animation] triggered when the search pages fades in or out.
   ///
   /// This animation is commonly used to animate [AnimatedIcon]s of
@@ -341,7 +347,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
-  bool get maintainState => false;
+  bool get maintainState => delegate.maintainState;
 
   @override
   Widget buildTransitions(
