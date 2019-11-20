@@ -567,7 +567,7 @@ tasks:
     required_agent_capabilities: ["mac-catalina/android"]
 
   # macOS target platform tests
-  smoke_catalina_hot_mode_dev_cycle_macos_target_benchmark:
+  hot_mode_dev_cycle_macos_target_benchmark:
     description: >
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
