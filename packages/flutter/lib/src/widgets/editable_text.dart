@@ -511,7 +511,7 @@ class EditableText extends StatefulWidget {
   final bool showCursor;
 
   /// {@template flutter.widgets.editableText.autocorrect}
-  /// Whether to enable auto-correction.
+  /// Whether to enable autocorrection.
   ///
   /// Defaults to true. Cannot be null.
   /// {@endtemplate}

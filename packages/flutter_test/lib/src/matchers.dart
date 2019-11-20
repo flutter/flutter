@@ -142,7 +142,7 @@ Matcher isSameColorAs(Color color) => _ColorMatcher(targetColor: color);
 /// empty, and does not contain the default `Instance of ...` string.
 const Matcher hasOneLineDescription = _HasOneLineDescription();
 
-/// Asserts that an object's toStringDeep() is a plausible multi-line
+/// Asserts that an object's toStringDeep() is a plausible multiline
 /// description.
 ///
 /// Specifically, this matcher checks that an object's
@@ -812,7 +812,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
   ) {
     if (matchState.containsKey(_mismatchedValueKey)) {
       final String actualValue = matchState[_mismatchedValueKey] as String;
-      // Leading whitespace is added so that lines in the multi-line
+      // Leading whitespace is added so that lines in the multiline
       // description returned by addDescriptionOf are all indented equally
       // which makes the output easier to read for this case.
       return mismatchDescription

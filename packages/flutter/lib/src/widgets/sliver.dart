@@ -78,7 +78,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///
 ///  * Letting [KeepAlive] be the root widget of the sliver child widget subtree
 ///    that needs to be preserved. The [KeepAlive] widget marks the child
-///    subtree's top render object child for keep-alive. When the associated top
+///    subtree's top render object child for keepalive. When the associated top
 ///    render object is scrolled out of view, the sliver keeps the child's
 ///    render object (and by extension, its associated elements and states) in a
 ///    cache list instead of destroying them. When scrolled back into view, the
@@ -98,7 +98,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///
 ///    As an example, the [EditableText] widget signals its sliver child element
 ///    subtree to stay alive while its text field has input focus. If it doesn't
-///    have focus and no other descendants signaled for keep-alive via a
+///    have focus and no other descendants signaled for keepalive via a
 ///    [KeepAliveNotification], the sliver child element subtree will be
 ///    destroyed when scrolled away.
 ///

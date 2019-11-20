@@ -106,7 +106,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// widgets when this happens.
   ///
   /// Objects that show text and/or measure text (e.g. via [TextPainter] or
-  /// [Paragraph]) should listen to this and redraw/re-measure.
+  /// [Paragraph]) should listen to this and redraw/remeasure.
   Listenable get systemFonts => _systemFonts;
   final _SystemFontsNotifier _systemFonts = _SystemFontsNotifier();
 

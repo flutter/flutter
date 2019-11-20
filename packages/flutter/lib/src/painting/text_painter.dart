@@ -83,7 +83,7 @@ class PlaceholderDimensions {
 ///
 /// See [Text.textWidthBasis], for example.
 enum TextWidthBasis {
-  /// Multi-line text will take up the full width given by the parent. For single
+  /// multiline text will take up the full width given by the parent. For single
   /// line text, only the minimum amount of width needed to contain the text
   /// will be used. A common use case for this is a standard series of
   /// paragraphs.

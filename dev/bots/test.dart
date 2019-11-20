@@ -32,7 +32,7 @@ final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 
 /// The arguments to pass to `flutter test` (typically the local engine
-/// configuration) -- pre-filled with the arguments passed to test.dart.
+/// configuration) -- prefilled with the arguments passed to test.dart.
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';

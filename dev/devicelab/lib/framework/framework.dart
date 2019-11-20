@@ -143,7 +143,7 @@ class _TaskRunner {
     });
   }
 
-  /// Disables the keep-alive port, allowing the VM to exit.
+  /// Disables the keepalive port, allowing the VM to exit.
   void _closeKeepAlivePort() {
     _startTaskTimeout?.cancel();
     _keepAlivePort?.close();
