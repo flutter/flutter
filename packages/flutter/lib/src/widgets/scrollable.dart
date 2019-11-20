@@ -20,6 +20,7 @@ import 'notification_listener.dart';
 import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
+import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
@@ -158,16 +159,17 @@ class Scrollable extends StatefulWidget {
   ///    slivers and sizes itself based on the size of the slivers.
   final ViewportBuilder viewportBuilder;
 
-  /// An optional function that should calculate the distance to scroll when the
-  /// scrollable is asked to scroll via the keyboard.
+  /// An optional function that will be called to calculate the distance to
+  /// scroll when the scrollable is asked to scroll via the keyboard using a
+  /// [ScrollAction].
   ///
   /// If not supplied, the [Scrollable] will scroll a default amount when a
   /// keyboard navigation key is pressed (e.g. pageUp/pageDown, control-upArrow,
-  /// etc.).
+  /// etc.), or otherwise invoked by a [ScrollAction].
   ///
-  /// For [ScrollIncrementType.page], the default is 80% of the size of the
-  /// scroll window, and for [ScrollIncrementType.line], the default is 50
-  /// logical pixels.
+  /// If [incrementCalculator] is null, the default for
+  /// [ScrollIncrementType.page] is 80% of the size of the scroll window, and
+  /// for [ScrollIncrementType.line], 50 logical pixels.
   final ScrollIncrementCalculator incrementCalculator;
 
   /// Whether the scroll actions introduced by this [Scrollable] are exposed
@@ -302,72 +304,6 @@ class _ScrollableScope extends InheritedWidget {
   }
 }
 
-/// A typedef for a function that can calculate the offset for a type of scroll
-/// increment given a [ScrollIncrementDetails].
-typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails details);
-
-/// Describes the type of scroll increment that will be performed by
-/// [ScrollAction] on a [Scrollable].
-///
-/// This is used to configure a [ScrollIncrementDetails] object to pass to a
-/// [ScrollIncrementCalculator] function on a [Scrollable].
-enum ScrollIncrementType {
-  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
-  /// distance it should move when the user requests to scroll by a "line".
-  ///
-  /// The distance a "line" scrolls is really refers to what should happen when
-  /// the key binding for "scroll down/up by a line" is triggered. It's up to
-  /// the [ScrollIncrementCalculator] function to decide what that means for a
-  /// particular scrollable.
-  line,
-
-  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
-  /// distance it should move when the user requests to scroll by a "page".
-  ///
-  /// The distance a "page" scrolls is really refers to what should happen when
-  /// the key binding for "scroll down/up by a page" is triggered. It's up to
-  /// the [ScrollIncrementCalculator] function to decide what that means for a
-  /// particular scrollable.
-  page,
-}
-
-/// A details object that describes the type of scroll increment being requested
-/// of a [ScrollIncrementCalculator] function.
-class ScrollIncrementDetails {
-  /// A const constructor for a [ScrollIncrementDetails].
-  ///
-  /// All of the arguments must not be null.
-  const ScrollIncrementDetails({
-    @required this.type,
-    @required this.position,
-    @required this.minScrollExtent,
-    @required this.maxScrollExtent,
-    @required this.viewportDimension,
-  })  : assert(type != null),
-        assert(position != null),
-        assert(minScrollExtent != null),
-        assert(maxScrollExtent != null),
-        assert(viewportDimension != null);
-
-  /// The type of scroll this is (e.g. line, page, etc.).
-  final ScrollIncrementType type;
-
-  /// The current position of the scrollable that is being scrolled.
-  final double position;
-
-  /// The minimum scroll extent of the current [ScrollPosition] of the
-  /// scrollable being scrolled.
-  final double minScrollExtent;
-
-  /// The maximum scroll extent of the current [ScrollPosition] of the
-  /// scrollable being scrolled.
-  final double maxScrollExtent;
-
-  /// The max dimension of the viewport in the [ScrollPosition] of the
-  /// scrollable being scrolled.
-  final double viewportDimension;
-}
-
 /// State object for a [Scrollable] widget.
 ///
 /// To manipulate a [Scrollable] widget's scroll position, use the object
@@ -387,39 +323,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   /// [ScrollPosition] in its [ScrollController.createScrollPosition] method.
   ScrollPosition get position => _position;
   ScrollPosition _position;
-
-  /// Returns the scroll increment for a single scroll request, for use when
-  /// scrolling using a hardware keyboard.
-  ///
-  /// Must not be called when the position is null, or when any of the position
-  /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
-  /// null. The `type` argument must not be null.
-  double calculateIncrement({ ScrollIncrementType type = ScrollIncrementType.line }) {
-    assert(type != null);
-    assert(position != null);
-    assert(position.pixels != null);
-    assert(position.viewportDimension != null);
-    assert(position.maxScrollExtent != null);
-    assert(position.minScrollExtent != null);
-    if (widget.incrementCalculator != null) {
-      return widget.incrementCalculator(
-        ScrollIncrementDetails(
-          type: type,
-          position: position.pixels,
-          minScrollExtent: position.minScrollExtent,
-          maxScrollExtent: position.maxScrollExtent,
-          viewportDimension: position.viewportDimension,
-        ),
-      );
-    }
-    switch (type) {
-      case ScrollIncrementType.line:
-        return 50.0;
-      case ScrollIncrementType.page:
-        return 0.8 * position.viewportDimension;
-    }
-    return 0.0;
-  }
 
   @override
   AxisDirection get axisDirection => widget.axisDirection;
@@ -882,12 +785,80 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }
 }
 
-/// An [Intent] that represents scrolling the nearest scrollable by the amount
+/// A typedef for a function that can calculate the offset for a type of scroll
+/// increment given a [ScrollIncrementDetails].
+///
+/// This function is used as the type for [Scrollable.incrementCalculator],
+/// which is called from a [ScrollAction].
+typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails details);
+
+/// Describes the type of scroll increment that will be performed by a
+/// [ScrollAction] on a [Scrollable].
+///
+/// This is used to configure a [ScrollIncrementDetails] object to pass to a
+/// [ScrollIncrementCalculator] function on a [Scrollable].
+///
+/// {@template flutter.widgets.scrollable.scroll_increment_type.intent}
+/// This indicates the *intent* of the scroll, not necessarily the size. Not all
+/// scrollable areas will have the concept of a "line" or "page", but they can
+/// respond to the different standard key bindings that cause scrolling, which
+/// are bound to keys that people use to indicate a "line" scroll (e.g.
+/// control-arrowDown keys) or a "page" scroll (e.g. pageDown key). It is
+/// recommended that at least the relative magnitudes of the scrolls match
+/// expectations.
+/// {@endtemplate}
+enum ScrollIncrementType {
+  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
+  /// distance it should move when the user requests to scroll by a "line".
+  ///
+  /// The distance a "line" scrolls is really refers to what should happen when
+  /// the key binding for "scroll down/up by a line" is triggered. It's up to
+  /// the [ScrollIncrementCalculator] function to decide what that means for a
+  /// particular scrollable.
+  line,
+
+  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
+  /// distance it should move when the user requests to scroll by a "page".
+  ///
+  /// The distance a "page" scrolls is really refers to what should happen when
+  /// the key binding for "scroll down/up by a page" is triggered. It's up to
+  /// the [ScrollIncrementCalculator] function to decide what that means for a
+  /// particular scrollable.
+  page,
+}
+
+/// A details object that describes the type of scroll increment being requested
+/// of a [ScrollIncrementCalculator] function, as well as the current metrics
+/// for the scrollable.
+class ScrollIncrementDetails {
+  /// A const constructor for a [ScrollIncrementDetails].
+  ///
+  /// All of the arguments must not be null, and are required.
+  const ScrollIncrementDetails({
+    @required this.type,
+    @required this.metrics,
+  })  : assert(type != null),
+        assert(metrics != null);
+
+  /// The type of scroll this is (e.g. line, page, etc.).
+  ///
+  /// {@macro flutter.widgets.scrollable.scroll_increment_type.intent}
+  final ScrollIncrementType type;
+
+  /// The current metrics of the scrollable that is being scrolled.
+  final ScrollMetrics metrics;
+}
+
+/// An [Intent] that represents scrolling the nearest scrollable by an amount
 /// appropriate for the [type] specified.
+///
+/// The actual amount of the scroll is determined by the
+/// [Scrollable.incrementCalculator], or by its defaults if that is not
+/// specified.
 class ScrollIntent extends Intent {
-  /// Creates a const [ScrollIntent] in the given [axis], with the given [type].
-  /// If [reversed] is specified, then the scroll will happen in the opposite
-  /// direction from the natural scroll direction.
+  /// Creates a const [ScrollIntent] that requests scrolling in the given
+  /// [axis], with the given [type]. If [reversed] is specified, then the scroll
+  /// will happen in the opposite direction from the normal scroll direction.
   const ScrollIntent({
     @required this.axis,
     this.reversed = false,
@@ -915,6 +886,11 @@ class ScrollIntent extends Intent {
 
 /// An [Action] that scrolls the [Scrollable] that encloses the current
 /// [primaryFocus] by the amount configured in the [ScrollIntent] given to it.
+///
+/// If [Scrollable.incrementCalculator] is null for the scrollable, the default
+/// for a [ScrollIntent.type] set to [ScrollIncrementType.page] is 80% of the
+/// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
+/// pixels.
 class ScrollAction extends Action {
   /// Creates a const [ScrollAction].
   ScrollAction() : super(key);
@@ -922,10 +898,41 @@ class ScrollAction extends Action {
   /// The [LocalKey] that uniquely connects this action to a [ScrollIntent].
   static const LocalKey key = ValueKey<Type>(ScrollAction);
 
+  // Returns the scroll increment for a single scroll request, for use when
+  // scrolling using a hardware keyboard.
+  //
+  // Must not be called when the position is null, or when any of the position
+  // metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
+  // null. The type and state arguments must not be null, and the widget must
+  // have already been laid out so that the position fields are valid.
+  double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
+    assert(type != null);
+    assert(state.position != null);
+    assert(state.position.pixels != null);
+    assert(state.position.viewportDimension != null);
+    assert(state.position.maxScrollExtent != null);
+    assert(state.position.minScrollExtent != null);
+    if (state.widget.incrementCalculator != null) {
+      return state.widget.incrementCalculator(
+        ScrollIncrementDetails(
+          type: type,
+          metrics: state.position,
+        ),
+      );
+    }
+    switch (type) {
+      case ScrollIncrementType.line:
+        return 50.0;
+      case ScrollIncrementType.page:
+        return 0.8 * state.position.viewportDimension;
+    }
+    return 0.0;
+  }
+
   // Find out how much of an increment to move by, taking the different
   // directions into account.
   double _getIncrement(ScrollableState state, ScrollIntent intent) {
-    final double increment = state.calculateIncrement(type: intent.type);
+    final double increment = _calculateScrollIncrement(state, type: intent.type);
     final AxisDirection resolvedDirection = getAxisDirectionFromAxisReverseAndDirectionality(state.context, intent.axis, intent.reversed);
     switch (resolvedDirection) {
       case AxisDirection.down:
@@ -988,12 +995,11 @@ class ScrollAction extends Action {
   void invoke(FocusNode node, ScrollIntent intent) {
     final ScrollableState state = Scrollable.of(node.context);
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
-    if (state.position == null || state.position.pixels == null ||
-        state.position.viewportDimension == null || state.position.maxScrollExtent == null ||
-        state.position.minScrollExtent == null) {
-      // If invoked before the first layout, don't do anything.
-      return;
-    }
+    assert(state.position.pixels != null, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
+    assert(state.position.viewportDimension != null);
+    assert(state.position.maxScrollExtent != null);
+    assert(state.position.minScrollExtent != null);
+
     final double increment = _getIncrement(state, intent);
     if (increment == 0.0) {
       return;
