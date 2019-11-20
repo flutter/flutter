@@ -121,7 +121,7 @@ void recursiveCopy(Directory source, Directory target) {
 
   for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
-    if (entity is Directory)
+    if (entity is Directory && !entity.path.contains('.dart_tool'))
       recursiveCopy(entity, Directory(path.join(target.path, name)));
     else if (entity is File) {
       final File dest = File(path.join(target.path, name));
