@@ -254,8 +254,8 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
 
   flutter::SemanticsNodeUpdates update;
 
-  const int32_t child_nodes = fuchsia::accessibility::semantics::MAX_FAN_OUT;
-  const int32_t leaf_nodes = fuchsia::accessibility::semantics::MAX_FAN_OUT;
+  const int32_t child_nodes = 100;
+  const int32_t leaf_nodes = 100;
   for (int32_t i = 1; i < child_nodes + 1; i++) {
     flutter::SemanticsNode node;
     node.id = i;
@@ -276,7 +276,7 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
   RunLoopUntilIdle();
 
   EXPECT_EQ(0, semantics_manager_.DeleteCount());
-  EXPECT_EQ(13, semantics_manager_.UpdateCount());
+  EXPECT_EQ(4, semantics_manager_.UpdateCount());
   EXPECT_EQ(1, semantics_manager_.CommitCount());
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
@@ -289,7 +289,7 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
   RunLoopUntilIdle();
 
   EXPECT_EQ(1, semantics_manager_.DeleteCount());
-  EXPECT_EQ(14, semantics_manager_.UpdateCount());
+  EXPECT_EQ(5, semantics_manager_.UpdateCount());
   EXPECT_EQ(2, semantics_manager_.CommitCount());
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
