@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 
@@ -79,11 +80,17 @@ class WebAssetServer {
       await response.close();
       return;
     }
+    // TODO(jonahwilliams): better path normalization in frontend_server to remove
+    // this workaround.
+    String requestPath = request.uri.path;
+    if (requestPath.startsWith('/C:/')) {
+      requestPath = requestPath.substring(3);
+    }
 
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
-    if (_files.containsKey(request.uri.path)) {
-      final List<int> bytes = _files[request.uri.path];
+    if (_files.containsKey(requestPath)) {
+      final List<int> bytes = _files[requestPath];
       response.headers
         ..add('Content-Length', bytes.length)
         ..add('Content-Type', 'application/javascript');
@@ -93,8 +100,8 @@ class WebAssetServer {
     }
     // If this is a sourcemap file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
-    if (_sourcemaps.containsKey(request.uri.path)) {
-      final List<int> bytes = _sourcemaps[request.uri.path];
+    if (_sourcemaps.containsKey(requestPath)) {
+      final List<int> bytes = _sourcemaps[requestPath];
       response.headers
         ..add('Content-Length', bytes.length)
         ..add('Content-Type', 'application/json');
@@ -193,7 +200,7 @@ class WebAssetServer {
         codeStart,
         codeEnd - codeStart,
       );
-      _files[filePath] = byteView;
+      _files[_filePathToUriFragment(filePath)] = byteView;
 
       final int sourcemapStart = sourcemapOffsets[0];
       final int sourcemapEnd = sourcemapOffsets[1];
@@ -206,7 +213,7 @@ class WebAssetServer {
         sourcemapStart,
         sourcemapEnd - sourcemapStart ,
       );
-      _sourcemaps['$filePath.map'] = sourcemapView;
+      _sourcemaps['${_filePathToUriFragment(filePath)}.map'] = sourcemapView;
 
       modules.add(filePath);
     }
@@ -303,15 +310,18 @@ class WebDevFS implements DevFS {
         'dart_stack_trace_mapper.js',
       ));
       _webAssetServer.writeFile('/main.dart.js', generateBootstrapScript(
-        requireUrl: requireJS.path,
-        mapperUrl: stackTraceMapper.path,
-        entrypoint: '$mainPath.js',
+        requireUrl: _filePathToUriFragment(requireJS.path),
+        mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
+        entrypoint: '${_filePathToUriFragment(mainPath)}.js',
       ));
       _webAssetServer.writeFile('/main_module.js', generateMainModule(
-        entrypoint: '$mainPath.js',
+        entrypoint: '${_filePathToUriFragment(mainPath)}.js',
       ));
       _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
       _webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
+      // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
+      // be shared.
+      await writeBundle(fs.directory(getAssetBuildDirectory()), bundle.entries);
     }
     final DateTime candidateCompileTime = DateTime.now();
     if (fullRestart) {
@@ -344,6 +354,20 @@ class WebDevFS implements DevFS {
     }
     return UpdateFSReport(success: true, syncedBytes: codeFile.lengthSync(),
       invalidatedSourcesCount: invalidatedFiles.length)
-        ..invalidatedModules = modules;
+        ..invalidatedModules = modules.map(_filePathToUriFragment).toList();
   }
+}
+
+String _filePathToUriFragment(String path) {
+  if (platform.isWindows) {
+    final bool startWithSlash = path.startsWith('/');
+    final String partial = fs.path
+      .split(path)
+      .skip(startWithSlash ? 2 : 1).join('/');
+    if (partial.startsWith('/')) {
+      return partial;
+    }
+    return '/$partial';
+  }
+  return path;
 }

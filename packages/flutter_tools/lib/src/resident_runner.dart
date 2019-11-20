@@ -88,7 +88,9 @@ class FlutterDevice {
         fileSystemScheme: fileSystemScheme,
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
-        platformDill: artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode),
+        platformDill: fs.file(artifacts
+          .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode))
+          .absolute.uri.toString(),
         dartDefines: dartDefines,
       );
     } else if (flutterProject.hasBuilders) {
