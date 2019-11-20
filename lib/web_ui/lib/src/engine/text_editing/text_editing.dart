@@ -179,13 +179,15 @@ class InputConfiguration {
     @required this.inputType,
     @required this.inputAction,
     @required this.obscureText,
+    @required this.autocorrect,
   });
 
   InputConfiguration.fromFlutter(Map<String, dynamic> flutterInputConfiguration)
       : inputType = EngineInputType.fromName(
             flutterInputConfiguration['inputType']['name']),
         inputAction = flutterInputConfiguration['inputAction'],
-        obscureText = flutterInputConfiguration['obscureText'];
+        obscureText = flutterInputConfiguration['obscureText'],
+        autocorrect = flutterInputConfiguration['autocorrect'];
 
   /// The type of information being edited in the input control.
   final EngineInputType inputType;
@@ -195,6 +197,15 @@ class InputConfiguration {
 
   /// Whether to hide the text being edited.
   final bool obscureText;
+
+  /// Whether to enable autocorrection.
+  ///
+  /// Definition of autocorrect can be found in:
+  /// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+  ///
+  /// For future manual tests, note that autocorrect is an attribute only
+  /// supported by Safari.
+  final bool autocorrect;
 }
 
 typedef _OnChangeCallback = void Function(EditingState editingState);
@@ -372,6 +383,10 @@ class TextEditingElement {
     if (inputConfig.obscureText) {
       domElement.setAttribute('type', 'password');
     }
+
+    final String autocorrectValue = inputConfig.autocorrect ? 'on' : 'off';
+    domElement.setAttribute('autocorrect', autocorrectValue);
+
     _setStaticStyleAttributes(domElement);
     owner._setDynamicStyleAttributes(domElement);
     domRenderer.glassPaneElement.append(domElement);
