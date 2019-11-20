@@ -566,6 +566,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac-catalina/android"]
 
+  # macOS target platform tests
+  hot_mode_dev_cycle_macos_target__benchmark:
+    description: >
+      Checks the functionality and performance of hot reload on a macOS target platform
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
+
   # Tests running on Windows host
 
   flavors_test_win:
