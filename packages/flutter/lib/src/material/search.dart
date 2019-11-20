@@ -280,7 +280,7 @@ abstract class SearchDelegate<T> {
   ///
   /// Defaults to false;
   final bool maintainState;
-  
+
   /// [Animation] triggered when the search pages fades in or out.
   ///
   /// This animation is commonly used to animate [AnimatedIcon]s of
