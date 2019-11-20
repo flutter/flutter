@@ -53,11 +53,11 @@ void main() {
         interface: interface,
         sshConfigPath: '/whatever',
       );
-      when<String>(mockProcessResult.stdout).thenReturn('somestuff');
+      when<dynamic>(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(captureAny)).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single as List<String>;
       expect(passedCommand, contains('$ipV6Addr%$interface'));
     });
 
@@ -67,11 +67,11 @@ void main() {
         mockProcessManager,
         address: ipV6Addr,
       );
-      when<String>(mockProcessResult.stdout).thenReturn('somestuff');
+      when<dynamic>(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(captureAny)).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single as List<String>;
       expect(passedCommand, contains(ipV6Addr));
     });
 
@@ -79,7 +79,7 @@ void main() {
       const String addr = '192.168.1.1';
       runner = SshCommandRunner.withProcessManager(mockProcessManager,
           address: addr);
-      when<String>(mockProcessResult.stdout).thenReturn('''this
+      when<dynamic>(mockProcessResult.stdout).thenReturn('''this
           has
           four
           lines''');
@@ -92,7 +92,7 @@ void main() {
       const String addr = '192.168.1.1';
       runner = SshCommandRunner.withProcessManager(mockProcessManager,
           address: addr);
-      when<String>(mockProcessResult.stdout).thenReturn('whatever');
+      when<dynamic>(mockProcessResult.stdout).thenReturn('whatever');
       when(mockProcessResult.exitCode).thenReturn(1);
       Future<void> failingFunction() async {
         await runner.run('oihaw');
@@ -109,11 +109,11 @@ void main() {
         address: addr,
         sshConfigPath: config,
       );
-      when<String>(mockProcessResult.stdout).thenReturn('somestuff');
+      when<dynamic>(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(captureAny)).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single as List<String>;
       expect(passedCommand, contains('-F'));
       final int indexOfFlag = passedCommand.indexOf('-F');
       final String passedConfig = passedCommand[indexOfFlag + 1];
@@ -126,11 +126,11 @@ void main() {
         mockProcessManager,
         address: addr,
       );
-      when<String>(mockProcessResult.stdout).thenReturn('somestuff');
+      when<dynamic>(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(captureAny)).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single as List<String>;
       final int indexOfFlag = passedCommand.indexOf('-F');
       expect(indexOfFlag, equals(-1));
     });
