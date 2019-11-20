@@ -95,9 +95,7 @@ void main() {
     when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
     when(mockFlutterView.runFromSource(any, any, any)).thenAnswer((Invocation invocation) async {});
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
-    when(mockFlutterDevice.observatoryUris).thenReturn(<Uri>[
-      testUri,
-    ]);
+    when(mockFlutterDevice.observatoryUris).thenAnswer((_) => Stream<Uri>.value(testUri));
     when(mockFlutterDevice.connect(
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
@@ -636,7 +634,7 @@ void main() {
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
       <FlutterView>[],
-      observatoryUris: <Uri>[ testUri ]
+      observatoryUris: Stream<Uri>.value(testUri),
     );
 
     await flutterDevice.connect();
@@ -657,7 +655,7 @@ class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(Device device, this.views, { List<Uri> observatoryUris })
+  TestFlutterDevice(Device device, this.views, { Stream<Uri> observatoryUris })
     : super(device, buildMode: BuildMode.debug, trackWidgetCreation: false) {
     _observatoryUris = observatoryUris;
   }
@@ -666,8 +664,8 @@ class TestFlutterDevice extends FlutterDevice {
   final List<FlutterView> views;
 
   @override
-  List<Uri> get observatoryUris => _observatoryUris;
-  List<Uri> _observatoryUris;
+  Stream<Uri> get observatoryUris => _observatoryUris;
+  Stream<Uri> _observatoryUris;
 }
 
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
