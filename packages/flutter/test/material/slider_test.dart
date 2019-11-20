@@ -984,13 +984,18 @@ void main() {
     TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // The first 2 rrects are track segments and the third is the value indicator.
     expect(
       tester.renderObject(find.byType(Slider)),
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect(rrect: RRect.fromLTRBR(-164.0, 0.0, -104.0, 30.0, const Radius.circular(4)))
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(0.0, -38.0),
+            Offset(-30.0, -16.0),
+            Offset(30.0, -16.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        ),
     );
 
     await gesture.up();
@@ -1001,13 +1006,18 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // The first 2 rrects are track segments and the third is the value indicator.
     expect(
       tester.renderObject(find.byType(Slider)),
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect(rrect: RRect.fromLTRBR(-192.0, 0.0, -104.0, 44.0, const Radius.circular(4)))
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(0.0, -52.0),
+            Offset(-44.0, -16.0),
+            Offset(44.0, -16.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        ),
     );
 
     await gesture.up();
@@ -1023,12 +1033,17 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // The first 2 rrects are track segments and the third is the value indicator.
     expect(tester.renderObject(find.byType(Slider)),
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect(rrect: RRect.fromLTRBR(-164.0, 0.0, -104.0, 30.0, const Radius.circular(4)))
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(0.0, -38.0),
+            Offset(-30.0, -16.0),
+            Offset(30.0, -16.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        ),
     );
 
     await gesture.up();
@@ -1043,13 +1058,18 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // The first 2 rrects are track segments and the third is the value indicator.
     expect(
         tester.renderObject(find.byType(Slider)),
         paints
-          ..rrect()
-          ..rrect()
-          ..rrect(rrect: RRect.fromLTRBR(-192.0, 0.0, -104.0, 44.0, const Radius.circular(4)))
+          ..path(
+            includes: const <Offset>[
+              Offset(0.0, 0.0),
+              Offset(0.0, -52.0),
+              Offset(-44.0, -16.0),
+              Offset(44.0, -16.0),
+            ],
+            color: const Color(0xf55f5f5f),
+          ),
     );
 
     await gesture.up();
