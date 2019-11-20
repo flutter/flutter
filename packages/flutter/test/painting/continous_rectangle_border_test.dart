@@ -82,7 +82,7 @@ void main() {
         shape: const ContinuousRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(28.0),
-            bottomRight: Radius.circular(14.0),
+            bottomLeft: Radius.circular(14.0),
           ),
         ),
       ),
