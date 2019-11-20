@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
 import 'package:build_daemon/client.dart';
 import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
@@ -405,33 +404,6 @@ class DebugAssetServer extends AssetServer {
         'dart_stack_trace_mapper.js',
       ));
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
-    } else if (request.url.path.endsWith('part.js')) {
-      // Lazily unpack any deferred imports in release/profile mode. These are
-      // placed into an archive by build_runner, and are named based on the main
-      // entrypoint + a "part" suffix (Though the actual names are arbitrary).
-      // To make this easier to deal with they are copied into a temp directory.
-      if (partFiles == null) {
-        final File dart2jsArchive = fs.file(fs.path.join(
-          flutterProject.dartTool.path,
-          'build',
-          'flutter_web',
-          '${flutterProject.manifest.appName}',
-          'lib',
-          '${targetBaseName}_web_entrypoint.dart.js.tar.gz',
-        ));
-        if (dart2jsArchive.existsSync()) {
-          final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
-          partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
-            ..createSync();
-          for (ArchiveFile file in archive) {
-            partFiles.childFile(file.name).writeAsBytesSync(file.content as List<int>);
-          }
-        }
-      }
-      final String fileName = fs.path.basename(request.url.path);
-      return Response.ok(partFiles.childFile(fileName).readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/javascript',
       });
     } else if (request.url.path.contains('require.js')) {

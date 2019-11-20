@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:archive/archive.dart';
-
 import '../base/file_system.dart';
+import '../base/os.dart';
 import '../base/version.dart';
-import '../convert.dart';
 import '../doctor.dart';
+import '../globals.dart';
 
 class IntelliJPlugins {
   IntelliJPlugins(this.pluginsPath);
@@ -56,18 +55,25 @@ class IntelliJPlugins {
     final String jarPath = packageName.endsWith('.jar')
         ? fs.path.join(pluginsPath, packageName)
         : fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
-    // TODO(danrubel): look for a better way to extract a single 2K file from the zip
-    // rather than reading the entire file into memory.
     try {
-      final Archive archive =
-          ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
-      final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
-      final String content = utf8.decode(file.content as List<int>);
+      final Directory tempDirectory = fs.systemTempDirectory
+        .createTempSync('flutter_tools_intellij.')
+        ..createSync(recursive: true);
+      os.unzip(fs.file(jarPath), tempDirectory);
+      final File file = tempDirectory
+        .childDirectory('META-INF')
+        .childFile('plugin.xml');
+      final String content = file.readAsStringSync();
       const String versionStartTag = '<version>';
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);
+      try {
+        tempDirectory.deleteSync(recursive: true);
+      } on Exception catch (_) {
+        printTrace('Failed to delete temp directory: ${tempDirectory?.path}');
+      }
       return content.substring(start + versionStartTag.length, end);
-    } catch (_) {
+    } on Exception catch (_) {
       return null;
     }
   }
