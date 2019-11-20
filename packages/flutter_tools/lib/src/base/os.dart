@@ -249,7 +249,6 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    // TODO(jonahwilliams): investigate whether we can remove this dependency with https://github.com/flutter/flutter/issues/45278
     final Archive archive = Archive();
     for (FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {
