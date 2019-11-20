@@ -325,7 +325,6 @@ class Focus extends StatefulWidget {
 class _FocusState extends State<Focus> {
   FocusNode _internalNode;
   FocusNode get focusNode => widget.focusNode ?? _internalNode;
-  bool _hasFocus;
   bool _hasPrimaryFocus;
   bool _canRequestFocus;
   bool _didAutofocus = false;
@@ -347,7 +346,6 @@ class _FocusState extends State<Focus> {
     _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
     focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
-    _hasFocus = focusNode.hasFocus;
     _canRequestFocus = focusNode.canRequestFocus;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
 
@@ -425,22 +423,19 @@ class _FocusState extends State<Focus> {
   }
 
   void _handleFocusChanged() {
-    if (_hasFocus != focusNode.hasFocus) {
-      setState(() {
-        _hasFocus = focusNode.hasFocus;
-      });
-      if (widget.onFocusChange != null) {
-        widget.onFocusChange(focusNode.hasFocus);
-      }
+    final bool hasPrimaryFocus = focusNode.hasPrimaryFocus;
+    final bool canRequestFocus = focusNode.canRequestFocus;
+    if (widget.onFocusChange != null) {
+      widget.onFocusChange(focusNode.hasFocus);
     }
-    if (_hasPrimaryFocus != focusNode.hasPrimaryFocus) {
+    if (_hasPrimaryFocus != hasPrimaryFocus) {
       setState(() {
-        _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+        _hasPrimaryFocus = hasPrimaryFocus;
       });
     }
-    if (_canRequestFocus != focusNode.canRequestFocus) {
+    if (_canRequestFocus != canRequestFocus) {
       setState(() {
-        _canRequestFocus = focusNode.canRequestFocus;
+        _canRequestFocus = canRequestFocus;
       });
     }
   }

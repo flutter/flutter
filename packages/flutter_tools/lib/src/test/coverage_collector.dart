@@ -12,6 +12,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../vmservice.dart';
@@ -22,7 +23,7 @@ import 'watcher.dart';
 class CoverageCollector extends TestWatcher {
   CoverageCollector({this.libraryPredicate});
 
-  Map<String, dynamic> _globalHitmap;
+  Map<String, Map<int, int>> _globalHitmap;
   bool Function(String) libraryPredicate;
 
   @override
@@ -31,7 +32,7 @@ class CoverageCollector extends TestWatcher {
     await collectCoverage(event.process, event.observatoryUri);
   }
 
-  void _addHitmap(Map<String, dynamic> hitmap) {
+  void _addHitmap(Map<String, Map<int, int>> hitmap) {
     if (_globalHitmap == null) {
       _globalHitmap = hitmap;
     } else {
@@ -55,7 +56,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     print('($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage']));
+    _addHitmap(coverage.createHitmap(data['coverage'] as List<dynamic>));
     print('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -87,7 +88,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage']));
+    _addHitmap(coverage.createHitmap(data['coverage'] as List<dynamic>));
     printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -205,10 +206,10 @@ Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(St
       continue;
     }
     for (Map<String, dynamic> script in scriptList['scripts']) {
-      if (!libraryPredicate(script['uri'])) {
+      if (!libraryPredicate(script['uri'] as String)) {
         continue;
       }
-      final String scriptId = script['id'];
+      final String scriptId = script['id'] as String;
       futures.add(
         isolateRef.invokeRpcRaw('getSourceReport', params: <String, dynamic>{
           'forceCompile': true,
@@ -246,19 +247,19 @@ void _buildCoverageMap(
   for (String scriptId in scripts.keys) {
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
     for (Map<String, dynamic> range in sourceReport['ranges']) {
-      final Map<String, dynamic> coverage = range['coverage'];
+      final Map<String, dynamic> coverage = castStringKeyedMap(range['coverage']);
       // Coverage reports may sometimes be null for a Script.
       if (coverage == null) {
         continue;
       }
-      final Map<String, dynamic> scriptRef = sourceReport['scripts'][range['scriptIndex']];
-      final String uri = scriptRef['uri'];
+      final Map<String, dynamic> scriptRef = castStringKeyedMap(sourceReport['scripts'][range['scriptIndex']]);
+      final String uri = scriptRef['uri'] as String;
 
       hitMaps[uri] ??= <int, int>{};
       final Map<int, int> hitMap = hitMaps[uri];
-      final List<dynamic> hits = coverage['hits'];
-      final List<dynamic> misses = coverage['misses'];
-      final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'];
+      final List<int> hits = (coverage['hits'] as List<dynamic>).cast<int>();
+      final List<int> misses = (coverage['misses'] as List<dynamic>).cast<int>();
+      final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'] as List<dynamic>;
       // The token positions can be null if the script has no coverable lines.
       if (tokenPositions == null) {
         continue;
@@ -291,7 +292,7 @@ List<int> _lineAndColumn(int position, List<dynamic> tokenPositions) {
   int max = tokenPositions.length;
   while (min < max) {
     final int mid = min + ((max - min) >> 1);
-    final List<dynamic> row = tokenPositions[mid];
+    final List<int> row = (tokenPositions[mid] as List<dynamic>).cast<int>();
     if (row[1] > position) {
       max = mid;
     } else {

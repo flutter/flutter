@@ -151,7 +151,7 @@ class _PosixUtils extends OperatingSystemUtils {
     if (result.exitCode != 0) {
       return const <File>[];
     }
-    final String stdout = result.stdout;
+    final String stdout = result.stdout as String;
     return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
   }
 
@@ -240,7 +240,7 @@ class _WindowsUtils extends OperatingSystemUtils {
     if (result.exitCode != 0) {
       return const <File>[];
     }
-    final List<String> lines = result.stdout.trim().split('\n');
+    final List<String> lines = (result.stdout as String).trim().split('\n');
     if (all) {
       return lines.map<File>((String path) => fs.file(path.trim())).toList();
     }
@@ -249,12 +249,13 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
+    // TODO(jonahwilliams): investigate whether we can remove this dependency with https://github.com/flutter/flutter/issues/45278
     final Archive archive = Archive();
     for (FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {
         continue;
       }
-      final File file = entity;
+      final File file = entity as File;
       final String path = file.fileSystem.path.relative(file.path, from: data.path);
       final List<int> bytes = file.readAsBytesSync();
       archive.addFile(ArchiveFile(path, bytes.length, bytes));
@@ -311,7 +312,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
       }
-      destFile.writeAsBytesSync(archiveFile.content);
+      destFile.writeAsBytesSync(archiveFile.content as List<int>);
     }
   }
 
@@ -328,7 +329,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       final ProcessResult result = processManager.runSync(
           <String>['ver'], runInShell: true);
       if (result.exitCode == 0) {
-        _name = result.stdout.trim();
+        _name = (result.stdout as String).trim();
       } else {
         _name = super.name;
       }

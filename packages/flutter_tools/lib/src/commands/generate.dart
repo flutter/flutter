@@ -42,8 +42,8 @@ class GenerateCommand extends FlutterCommand {
     }
     // Check for errors output in the build_runner cache.
     final Directory buildDirectory = flutterProject.dartTool.childDirectory('build');
-    final Directory errorCacheParent = buildDirectory.listSync().firstWhere((FileSystemEntity entity) {
-      return entity is Directory && entity.childDirectory('error_cache').existsSync();
+    final Directory errorCacheParent = buildDirectory.listSync().whereType<Directory>().firstWhere((Directory dir) {
+      return dir.childDirectory('error_cache').existsSync();
     }, orElse: () => null);
     if (errorCacheParent == null) {
       return null;
@@ -51,12 +51,12 @@ class GenerateCommand extends FlutterCommand {
     final Directory errorCache = errorCacheParent.childDirectory('error_cache');
     for (File errorFile in errorCache.listSync(recursive: true).whereType<File>()) {
       try {
-        final List<Object> errorData = json.decode(errorFile.readAsStringSync());
-        final List<Object> stackData = errorData[1];
-        printError(errorData.first);
-        printError(stackData[0]);
-        printError(stackData[1]);
-        printError(StackTrace.fromString(stackData[2]).toString());
+        final List<Object> errorData = json.decode(errorFile.readAsStringSync()) as List<Object>;
+        final List<Object> stackData = errorData[1] as List<Object>;
+        printError(errorData.first as String);
+        printError(stackData[0] as String);
+        printError(stackData[1] as String);
+        printError(StackTrace.fromString(stackData[2] as String).toString());
       } catch (err) {
         printError('Error reading error in ${errorFile.path}');
       }

@@ -159,7 +159,7 @@ void main() {
       real_test.expect(information[3], isInstanceOf<DiagnosticsProperty<void>>());
       real_test.expect(information[4], isInstanceOf<DiagnosticsProperty<void>>());
       real_test.expect(information[5], isInstanceOf<DiagnosticsStackTrace>());
-      final DiagnosticsStackTrace stackTraceProperty = information[5];
+      final DiagnosticsStackTrace stackTraceProperty = information[5] as DiagnosticsStackTrace;
       real_test.expect(stackTraceProperty.name, '\nWhen the first method was called, this was the stack');
       real_test.expect(stackTraceProperty.value, isInstanceOf<StackTrace>());
     }

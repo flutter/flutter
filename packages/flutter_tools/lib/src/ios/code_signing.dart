@@ -208,7 +208,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
   }
 
   if (validCodeSigningIdentities.length > 1) {
-    final String savedCertChoice = config.getValue('ios-signing-cert');
+    final String savedCertChoice = config.getValue('ios-signing-cert') as String;
 
     if (savedCertChoice != null) {
       if (validCodeSigningIdentities.contains(savedCertChoice)) {

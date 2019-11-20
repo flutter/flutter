@@ -64,12 +64,14 @@ class CopyAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d'
   ];
 
   @override

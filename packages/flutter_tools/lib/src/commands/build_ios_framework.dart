@@ -94,13 +94,13 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   List<BuildMode> get buildModes {
     final List<BuildMode> buildModes = <BuildMode>[];
 
-    if (argResults['debug']) {
+    if (boolArg('debug')) {
       buildModes.add(BuildMode.debug);
     }
-    if (argResults['profile']) {
+    if (boolArg('profile')) {
       buildModes.add(BuildMode.profile);
     }
-    if (argResults['release']) {
+    if (boolArg('release')) {
       buildModes.add(BuildMode.release);
     }
 
@@ -119,10 +119,10 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
-    if (!argResults['universal'] && !argResults['xcframework']) {
+    if (!boolArg('universal') && !boolArg('xcframework')) {
       throwToolExit('--universal or --xcframework is required.');
     }
-    if (argResults['xcframework'] && xcode.majorVersion < 11) {
+    if (boolArg('xcframework') && xcode.majorVersion < 11) {
       throwToolExit('--xcframework requires Xcode 11.');
     }
     if (buildModes.isEmpty) {
@@ -134,14 +134,14 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
-    final String outputArgument = argResults['output']
+    final String outputArgument = stringArg('output')
         ?? fs.path.join(fs.currentDirectory.path, 'build', 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
     }
 
-    final BuildableIOSApp iosProject = await applicationPackages.getPackageForPlatform(TargetPlatform.ios);
+    final BuildableIOSApp iosProject = await applicationPackages.getPackageForPlatform(TargetPlatform.ios) as BuildableIOSApp;
 
     if (iosProject == null) {
       throwToolExit("Module's iOS folder missing");
@@ -201,7 +201,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     final Directory fatFlutterFrameworkCopy = modeDirectory.childDirectory(flutterFrameworkFileName);
     copyDirectorySync(fs.directory(engineCacheFlutterFrameworkDirectory), fatFlutterFrameworkCopy);
 
-    if (argResults['xcframework']) {
+    if (boolArg('xcframework')) {
       // Copy universal framework to variant directory.
       final Directory armFlutterFrameworkDirectory = iPhoneBuildOutput.childDirectory(flutterFrameworkFileName);
       final File armFlutterFrameworkBinary = armFlutterFrameworkDirectory.childFile('Flutter');
@@ -249,7 +249,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       );
     }
 
-    if (!argResults['universal']) {
+    if (!boolArg('universal')) {
       fatFlutterFrameworkCopy.deleteSync(recursive: true);
     }
     status.stop();
@@ -359,8 +359,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         final String podFrameworkName = podProduct.basename;
         if (fs.path.extension(podFrameworkName) == '.framework') {
           final String binaryName = fs.path.basenameWithoutExtension(podFrameworkName);
-          if (argResults['universal']) {
-            copyDirectorySync(podProduct, modeDirectory.childDirectory(podFrameworkName));
+          if (boolArg('universal')) {
+            copyDirectorySync(podProduct as Directory, modeDirectory.childDirectory(podFrameworkName));
             final List<String> lipoCommand = <String>[
               'xcrun',
               'lipo',
@@ -378,7 +378,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
             );
           }
 
-          if (argResults['xcframework']) {
+          if (boolArg('xcframework')) {
             final List<String> xcframeworkCommand = <String>[
               'xcrun',
               'xcodebuild',
