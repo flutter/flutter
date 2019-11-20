@@ -710,7 +710,7 @@ void main() {
     kToolbarHeight - 9,
     420,
     1000,
-    1e4
+    1e4,
   ]) {
     testWidgets(
         'NestedScrollViewState exposed scroll controllers work properly with a scroll extent of $scrollExtent',
