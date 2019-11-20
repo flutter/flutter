@@ -720,12 +720,13 @@ void main() {
   group('AlertDialog.scrollable: ', () {
     testWidgets('Title is scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
-      final AlertDialog dialog = AlertDialog.scrollable(
+      final AlertDialog dialog = AlertDialog(
         title: Container(
           key: titleKey,
           color: Colors.green,
           height: 1000,
         ),
+        scrollable: true,
       );
       await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
       await tester.tap(find.text('X'));
@@ -739,12 +740,13 @@ void main() {
 
     testWidgets('Content is scrollable', (WidgetTester tester) async {
       final Key contentKey = UniqueKey();
-      final AlertDialog dialog = AlertDialog.scrollable(
+      final AlertDialog dialog = AlertDialog(
         content: Container(
           key: contentKey,
           color: Colors.orange,
           height: 1000,
         ),
+        scrollable: true,
       );
       await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
       await tester.tap(find.text('X'));
@@ -759,7 +761,7 @@ void main() {
     testWidgets('Title and content are scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final Key contentKey = UniqueKey();
-      final AlertDialog dialog = AlertDialog.scrollable(
+      final AlertDialog dialog = AlertDialog(
         title: Container(
           key: titleKey,
           color: Colors.green,
@@ -770,6 +772,7 @@ void main() {
           color: Colors.orange,
           height: 400,
         ),
+        scrollable: true,
       );
       await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
       await tester.tap(find.text('X'));

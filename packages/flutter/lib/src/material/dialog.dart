@@ -216,38 +216,8 @@ class AlertDialog extends StatelessWidget {
     this.elevation,
     this.semanticLabel,
     this.shape,
+    this.scrollable = false,
   }) : assert(contentPadding != null),
-       _scrollable = false,
-       super(key: key);
-
-  /// Creates an alert dialog with scrollable [title] and [content].
-  ///
-  /// In contrast with a typical alert dialog, this configuration
-  /// is used when the [title] and [content] is expected to overflow.
-  /// Both [title] and [content] is wrapped in a scroll view, allowing
-  /// all overflowed content to be visible while still showing the button
-  /// bar.
-  ///
-  /// Typically used in conjunction with [showDialog].
-  ///
-  /// The [contentPadding] must not be null. The [titlePadding] defaults to
-  /// null, which implies a default that depends on the values of the other
-  /// properties. See the documentation of [titlePadding] for details.
-  const AlertDialog.scrollable({
-    Key key,
-    this.title,
-    this.titlePadding,
-    this.titleTextStyle,
-    this.content,
-    this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
-    this.contentTextStyle,
-    this.actions,
-    this.backgroundColor,
-    this.elevation,
-    this.semanticLabel,
-    this.shape,
-  }) : assert(contentPadding != null),
-       _scrollable = true,
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -335,7 +305,12 @@ class AlertDialog extends StatelessWidget {
 
   /// Determines whether the [title] and [content] widgets are wrapped in a
   /// scrollable.
-  final bool _scrollable;
+  ///
+  /// This configuration is used when the [title] and [content] is expected
+  /// to overflow. Both [title] and [content] is wrapped in a scroll view,
+  /// allowing all overflowed content to be visible while still showing the
+  /// button bar.
+  final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
@@ -355,8 +330,32 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
+    Widget titleWidget;
+    Widget contentWidget;
+    if (title != null)
+     titleWidget = Padding(
+        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+        child: DefaultTextStyle(
+          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
+          child: Semantics(
+            child: title,
+            namesRoute: true,
+            container: true,
+          ),
+        ),
+      );
+
+    if (content != null)
+      contentWidget = Padding(
+        padding: contentPadding,
+        child: DefaultTextStyle(
+          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+          child: content,
+        ),
+      );
+
     List<Widget> columnChildren;
-    if (_scrollable) {
+    if (scrollable) {
       columnChildren = <Widget>[
         if (title != null || content != null)
           Flexible(
@@ -366,25 +365,9 @@ class AlertDialog extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   if (title != null)
-                    Padding(
-                      padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
-                      child: DefaultTextStyle(
-                        style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
-                        child: Semantics(
-                          child: title,
-                          namesRoute: true,
-                          container: true,
-                        ),
-                      ),
-                    ),
+                    titleWidget,
                   if (content != null)
-                    Padding(
-                      padding: contentPadding,
-                      child: DefaultTextStyle(
-                        style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
-                        child: content,
-                      ),
-                    ),
+                    contentWidget,
                 ],
               ),
             ),
@@ -395,27 +378,9 @@ class AlertDialog extends StatelessWidget {
     } else {
       columnChildren = <Widget>[
         if (title != null)
-          Padding(
-            padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
-            child: DefaultTextStyle(
-              style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
-              child: Semantics(
-                child: title,
-                namesRoute: true,
-                container: true,
-              ),
-            ),
-          ),
+          titleWidget,
         if (content != null)
-          Flexible(
-            child: Padding(
-              padding: contentPadding,
-              child: DefaultTextStyle(
-                style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
-                child: content,
-              ),
-            ),
-          ),
+          Flexible(child: contentWidget),
         if (actions != null)
           ButtonBar(children: actions),
       ];
