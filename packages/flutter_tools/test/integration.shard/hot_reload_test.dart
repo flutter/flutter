@@ -108,7 +108,7 @@ void main() {
   });
 
   test('hot reload doesn\'t reassemble if paused', () async {
-    await _flutter.run(withDebugger: true);
+    final Future<void> setup = _flutter.run(withDebugger: true);
     final Completer<void> sawTick1 = Completer<void>();
     final Completer<void> sawTick2 = Completer<void>();
     final Completer<void> sawTick3 = Completer<void>();
@@ -134,6 +134,7 @@ void main() {
         }
       },
     );
+    await setup;
     await sawTick1.future;
     await _flutter.addBreakpoint(
       _project.buildBreakpointUri,
