@@ -1701,8 +1701,8 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
     this.alwaysIncludeSemantics = false,
     Widget sliver,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-      assert(alwaysIncludeSemantics != null),
-      super(key: key, child: sliver);
+       assert(alwaysIncludeSemantics != null),
+       super(key: key, child: sliver);
 
   /// The fraction to scale the sliver child's alpha value.
   ///
@@ -1745,11 +1745,7 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<double>('opacity', opacity));
-    properties.add(FlagProperty(
-      'alwaysIncludeSemantics',
-      value: alwaysIncludeSemantics,
-      ifTrue: 'alwaysIncludeSemantics',
-    ));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics',));
   }
 }
 

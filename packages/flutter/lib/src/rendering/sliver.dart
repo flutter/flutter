@@ -1838,10 +1838,10 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
     bool alwaysIncludeSemantics = false,
     RenderSliver sliver,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-      assert(alwaysIncludeSemantics != null),
-      _opacity = opacity,
-      _alwaysIncludeSemantics = alwaysIncludeSemantics,
-      _alpha = ui.Color.getAlphaFromOpacity(opacity) {
+       assert(alwaysIncludeSemantics != null),
+       _opacity = opacity,
+       _alwaysIncludeSemantics = alwaysIncludeSemantics,
+       _alpha = ui.Color.getAlphaFromOpacity(opacity) {
     child = sliver;
   }
 
@@ -1874,7 +1874,7 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
     markNeedsPaint();
-    if (wasVisible != (_alpha != 0))
+    if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
 
@@ -1925,6 +1925,7 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    void _paintWithOpacity(PaintingContext context, Offset offset) => context.paintChild(child, offset);
     if (child != null && child.geometry.visible) {
       if (_alpha == 0) {
         // No need to keep the layer. We'll create a new one if necessary.
@@ -1947,8 +1948,6 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
     }
   }
 
-  void _paintWithOpacity(PaintingContext context, Offset offset) => context.paintChild(child, offset);
-
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
@@ -1966,10 +1965,6 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('opacity', opacity));
-    properties.add(FlagProperty(
-      'alwaysIncludeSemantics',
-      value: alwaysIncludeSemantics,
-      ifTrue: 'alwaysIncludeSemantics',
-    ));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics',));
   }
 }
