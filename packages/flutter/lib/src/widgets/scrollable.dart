@@ -390,8 +390,17 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   /// Returns the scroll increment for a single scroll request, for use when
   /// scrolling using a hardware keyboard.
+  ///
+  /// Must not be called when the position is null, or when any of the position
+  /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
+  /// null. The `type` argument must not be null.
   double calculateIncrement({ ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(type != null);
+    assert(position != null);
+    assert(position.pixels != null);
+    assert(position.viewportDimension != null);
+    assert(position.maxScrollExtent != null);
+    assert(position.minScrollExtent != null);
     if (widget.incrementCalculator != null) {
       return widget.incrementCalculator(
         ScrollIncrementDetails(
@@ -979,6 +988,12 @@ class ScrollAction extends Action {
   void invoke(FocusNode node, ScrollIntent intent) {
     final ScrollableState state = Scrollable.of(node.context);
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
+    if (state.position == null || state.position.pixels == null ||
+        state.position.viewportDimension == null || state.position.maxScrollExtent == null ||
+        state.position.minScrollExtent == null) {
+      // If invoked before the first layout, don't do anything.
+      return;
+    }
     final double increment = _getIncrement(state, intent);
     if (increment == 0.0) {
       return;
