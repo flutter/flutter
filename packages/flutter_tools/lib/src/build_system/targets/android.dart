@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../../artifacts.dart';
+import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../globals.dart';
@@ -124,3 +125,150 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
     AotAndroidAssetBundle(),
   ];
 }
+
+/// Generate an ELF binary from a dart kernel file in release mode.
+///
+/// This rule implementation outputs the generated so to a unique location
+/// based on the Android ABI. This allows concurrent invocations of gen_snapshot
+/// to run simultaneously.
+///
+/// The name of an instance of this rule would be 'android_aot_profile_android-x64'
+/// and is relied upon by flutter.gradle to match the correct rule.
+///
+/// It will produce an 'app.so` in the build directory under a folder named with
+/// the matching Android ABI.
+class AndroidAot extends AotElfBase {
+  /// Create an [AndroidAot] implementation for a given [targetPlatform] and [buildMode].
+  const AndroidAot(this.targetPlatform, this.buildMode);
+
+  /// The name of the produced Android ABI.
+  String get _androidAbiName {
+    return getNameForAndroidArch(
+      getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
+  }
+
+  @override
+  String get name => 'android_aot_${getNameForBuildMode(buildMode)}_'
+    '${getNameForTargetPlatform(targetPlatform)}';
+
+  /// The specific Android ABI we are building for.
+  final TargetPlatform targetPlatform;
+
+  /// The selected build mode.
+  ///
+  /// This is restricted to [BuildMode.profile] or [BuildMode.relese].
+  final BuildMode buildMode;
+
+  @override
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.pattern('{PROJECT_DIR}/.packages'),
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.artifact(Artifact.skyEnginePath),
+    Source.artifact(Artifact.genSnapshot,
+      mode: buildMode,
+      platform: targetPlatform,
+     ),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    Source.pattern('{BUILD_DIR}/$_androidAbiName/app.so'),
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
+    final Directory output = environment.buildDir.childDirectory(_androidAbiName);
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'aot_elf');
+    }
+    if (!output.existsSync()) {
+      output.createSync(recursive: true);
+    }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final int snapshotExitCode = await snapshotter.build(
+      platform: targetPlatform,
+      buildMode: buildMode,
+      mainPath: environment.buildDir.childFile('app.dill').path,
+      packagesPath: environment.projectDir.childFile('.packages').path,
+      outputPath: output.path,
+      bitcode: false,
+    );
+    if (snapshotExitCode != 0) {
+      throw Exception('AOT snapshotter exited with code $snapshotExitCode');
+    }
+  }
+}
+
+// AndroidAot instances used by the bundle rules below.
+const Target androidArmProfile = AndroidAot(TargetPlatform.android_arm,  BuildMode.profile);
+const Target androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
+const Target androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
+const Target androidArmRelease = AndroidAot(TargetPlatform.android_arm,  BuildMode.release);
+const Target androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+const Target androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
+
+/// A rule paired with [AndroidAot] that copies the produced so files into the output directory.
+class AndroidAotBundle extends Target {
+  /// Create an [AndroidAotBundle] implementation for a given [targetPlatform] and [buildMode].
+  const AndroidAotBundle(this.dependency);
+
+  /// The [AndroidAot] instance this bundle rule depends on.
+  final AndroidAot dependency;
+
+  /// The name of the produced Android ABI.
+  String get _androidAbiName {
+    return getNameForAndroidArch(
+      getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)));
+  }
+
+  @override
+  String get name => 'android_aot_bundle_${getNameForBuildMode(dependency.buildMode)}_'
+    '${getNameForTargetPlatform(dependency.targetPlatform)}';
+
+  @override
+  List<Source> get inputs => <Source>[
+   Source.pattern('{BUILD_DIR}/$_androidAbiName/app.so'),
+  ];
+
+  // flutter.gradle has been updated to correctly consume it.
+  @override
+  List<Source> get outputs => <Source>[
+    Source.pattern('{OUTPUT_DIR}/$_androidAbiName/app.so'),
+  ];
+
+  @override
+  List<Target> get dependencies => <Target>[
+    dependency,
+    const AotAndroidAssetBundle(),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final File outputFile = environment.buildDir
+      .childDirectory(_androidAbiName)
+      .childFile('app.so');
+    final Directory outputDirectory = environment.outputDir
+      .childDirectory(_androidAbiName);
+    if (!outputDirectory.existsSync()) {
+      outputDirectory.createSync(recursive: true);
+    }
+    outputFile.copySync(outputDirectory.childFile('app.so').path);
+  }
+}
+
+// AndroidBundleAot instances.
+const Target androidArmProfileBundle = AndroidAotBundle(androidArmProfile);
+const Target androidArm64ProfileBundle = AndroidAotBundle(androidArm64Profile);
+const Target androidx64ProfileBundle = AndroidAotBundle(androidx64Profile);
+const Target androidArmReleaseBundle = AndroidAotBundle(androidArmRelease);
+const Target androidArm64ReleaseBundle = AndroidAotBundle(androidArm64Release);
+const Target androidx64ReleaseBundle = AndroidAotBundle(androidx64Release);
+

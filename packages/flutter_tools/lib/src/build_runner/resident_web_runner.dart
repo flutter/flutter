@@ -96,12 +96,15 @@ abstract class ResidentWebRunner extends ResidentRunner {
 
   // Only the debug builds of the web support the service protocol.
   @override
-  bool get supportsServiceProtocol =>
-      isRunningDebug && device.device is! WebServerDevice;
+  bool get supportsServiceProtocol => isRunningDebug && deviceIsDebuggable;
 
   @override
-  bool get debuggingEnabled =>
-      isRunningDebug && device.device is! WebServerDevice;
+  bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
+
+  /// WebServer device is debuggable when running with --start-paused.
+  bool get deviceIsDebuggable => device.device is! WebServerDevice || debuggingOptions.startPaused;
+
+  bool get _enableDwds => debuggingEnabled;
 
   WebFs _webFs;
   ConnectionResult _connectionResult;
@@ -602,14 +605,14 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           initializePlatform: debuggingOptions.initializePlatform,
           hostname: debuggingOptions.hostname,
           port: debuggingOptions.port,
-          skipDwds: device.device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
+          skipDwds: !_enableDwds,
           dartDefines: dartDefines,
         );
         // When connecting to a browser, update the message with a seemsSlow notification
         // to handle the case where we fail to connect.
         buildStatus.stop();
         statusActive = false;
-        if (debuggingOptions.browserLaunch && supportsServiceProtocol) {
+        if (supportsServiceProtocol) {
           buildStatus = logger.startProgress(
             'Attempting to connect to browser instance..',
             timeout: const Duration(seconds: 30),
@@ -624,8 +627,9 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
             'uri': _webFs.uri,
           },
         );
-        if (supportsServiceProtocol) {
-          _connectionResult = await _webFs.connect(debuggingOptions);
+        if (_enableDwds) {
+          final bool useDebugExtension = device.device is WebServerDevice && debuggingOptions.startPaused;
+          _connectionResult = await _webFs.connect(useDebugExtension);
           unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
         }
         if (statusActive) {
@@ -741,7 +745,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
       }
     }
     // Allows browser refresh hot restart on non-debug builds.
-    if (device is ChromeDevice && debuggingOptions.browserLaunch) {
+    if (device.device is ChromeDevice && !isRunningDebug) {
       try {
         final Chrome chrome = await ChromeLauncher.connectedInstance;
         final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {

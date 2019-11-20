@@ -506,7 +506,6 @@ class DebuggingOptions {
     this.initializePlatform = true,
     this.hostname,
     this.port,
-    this.browserLaunch = true,
     this.vmserviceOutFile,
    }) : debuggingEnabled = true;
 
@@ -524,7 +523,6 @@ class DebuggingOptions {
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
-      browserLaunch = true,
       vmserviceOutFile = null;
 
   final bool debuggingEnabled;
@@ -547,7 +545,6 @@ class DebuggingOptions {
   final int deviceVmServicePort;
   final String port;
   final String hostname;
-  final bool browserLaunch;
   /// A file where the vmservice uri should be written after the application is started.
   final String vmserviceOutFile;
 

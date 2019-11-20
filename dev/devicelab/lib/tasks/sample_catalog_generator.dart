@@ -7,7 +7,6 @@ import 'dart:io';
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
-import '../framework/ios.dart';
 import '../framework/utils.dart';
 import 'save_catalog_screenshots.dart' show saveCatalogScreenshots;
 
@@ -20,10 +19,6 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
   final Directory catalogDirectory = dir('${flutterDirectory.path}/examples/catalog');
   await inDirectory<void>(catalogDirectory, () async {
     await flutter('packages', options: <String>['get']);
-
-    final bool isIosDevice = deviceOperatingSystem == DeviceOperatingSystem.ios;
-    if (isIosDevice)
-      await prepareProvisioningCertificates(catalogDirectory.path);
 
     final String commit = await getCurrentFlutterRepoCommit();
 
@@ -40,7 +35,7 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
       directory: dir('${flutterDirectory.path}/examples/catalog/.generated'),
       commit: commit,
       token: authorizationToken, // TODO(fujino): workaround auth token for local runs
-      prefix: isIosDevice ? 'ios_' : '',
+      prefix: deviceOperatingSystem == DeviceOperatingSystem.ios ? 'ios_' : '',
     );
   });
 
