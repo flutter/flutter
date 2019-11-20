@@ -337,7 +337,7 @@ class CreateCommand extends FlutterCommand {
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
     }
 
-    await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
+    await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal }); // TODO is this needed?
 
     final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
 

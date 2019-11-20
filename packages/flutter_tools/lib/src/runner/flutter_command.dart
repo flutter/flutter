@@ -621,10 +621,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The set of development artifacts required for this command.
   ///
-  /// Defaults to [DevelopmentArtifact.universal].
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
+  /// Defaults to an empty set. Including DevelopmentArtifact.universal is not
+  /// required as it is always updated.
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   /// Subclasses must implement this to execute the command.
   /// Optionally provide a [FlutterCommandResult] to send more details about the
@@ -762,9 +761,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
       return super.requiredArtifacts;
     }
 
-    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{
-      DevelopmentArtifact.universal,
-    };
+    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{};
     final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
     if (developmentArtifact != null) {
       artifacts.add(developmentArtifact);

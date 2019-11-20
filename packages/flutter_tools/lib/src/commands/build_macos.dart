@@ -30,7 +30,6 @@ class BuildMacosCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.macOS,
-    DevelopmentArtifact.universal,
   };
 
   @override

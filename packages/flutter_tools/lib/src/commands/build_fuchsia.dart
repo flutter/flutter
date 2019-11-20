@@ -47,7 +47,6 @@ class BuildFuchsiaCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.fuchsia,
-    DevelopmentArtifact.universal,
   };
 
   @override
