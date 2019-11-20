@@ -137,7 +137,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a985f7f63ac8ec8dae436523ec338516951ec3ff',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'db6869d0d1c3eed7c065c60a566aa063fbcb5b45',
 
    # Fuchsia compatibility
    #
@@ -420,7 +420,7 @@ deps = {
    Var('github_git') + '/KhronosGroup/Vulkan-Docs.git' + '@' + 'v1.1.91',
 
    'src/third_party/swiftshader':
-   Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'd70129a3d3409dac58e14f819b62620393afb652',
+   Var('swiftshader_git') + '/SwiftShader.git' + '@' + '5d1e8540407c138f47028d64684f3da599430aa4',
 
    'src/third_party/angle':
    Var('github_git') + '/google/angle.git' + '@' + '3ea90d609720b7b9b9d05ca094860382f2425294',
