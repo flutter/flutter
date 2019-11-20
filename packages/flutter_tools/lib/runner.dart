@@ -15,10 +15,14 @@ import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/base/terminal.dart';
 import 'src/base/utils.dart';
 import 'src/context_runner.dart';
+import 'src/convert.dart';
 import 'src/doctor.dart';
+import 'src/flutter_manifest.dart';
 import 'src/globals.dart';
+import 'src/project.dart';
 import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -128,18 +132,12 @@ Future<int> _handleToolError(
       command: args.join(' '),
     );
 
-    if (error is String) {
-      stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
-    } else {
-      stderr.writeln('Oops; flutter has exited unexpectedly.');
-    }
+    final String errorString = error.toString();
+    printError(errorString);
 
     try {
-      final File file = await _createLocalCrashReport(args, error, stackTrace);
-      stderr.writeln(
-        'Crash report written to ${file.path};\n'
-            'please let us know at https://github.com/flutter/flutter/issues.',
-      );
+      await _informUserOfCrash(args, error, stackTrace, errorString);
+
       return _exit(1);
     } catch (error) {
       stderr.writeln(
@@ -155,6 +153,92 @@ Future<int> _handleToolError(
   }
 }
 
+Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace stackTrace, String errorString) async {
+  final String doctorText = await _doctorText();
+  final File file = await _createLocalCrashReport(args, error, stackTrace, doctorText);
+
+  printError('A crash report has been written to ${file.path}.');
+  printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
+
+  printStatus('https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}\n', wrap: false);
+  printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
+  printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
+  printStatus('Create a new GitHub issue. Paste this link into your browser and complete the template. Thank you!', emphasis: true);
+
+  final String title = '[tool_crash] $errorString';
+  final String command = _crashCommand(args);
+  final String body = '''## Command
+  ```
+  $command
+  ```
+
+  ## Steps to Reproduce
+  1. ...
+  2. ...
+  3. ...
+
+  ## Logs
+  ${_crashException(error)}
+  ```
+  ${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
+  ```
+  ```
+  $doctorText
+  ```
+
+  ## Flutter Application Metadata
+  ${_projectMetadataInformation()}
+  ''';
+  printStatus('https://github.com/flutter/flutter/issues/new?title=${Uri.encodeQueryComponent(title)}'
+    '&body=${Uri.encodeQueryComponent(body)}'
+    '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}\n', wrap: false);
+
+  printStatus('Oops; flutter has exited unexpectedly.', emphasis: true, color: TerminalColor.red);
+}
+
+String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
+
+String _projectMetadataInformation() {
+  FlutterProject project;
+  try {
+    project = FlutterProject.current();
+  } on Exception catch (exception) {
+    // pubspec may be malformed.
+    return exception.toString();
+  }
+  final FlutterManifest manifest = project?.manifest;
+  if (project == null || manifest == null || manifest.isEmpty) {
+    return 'No pubspec in working directory.';
+  }
+  String description = '';
+  if (manifest != null) {
+    description += '''
+**Version**: ${manifest.appVersion}
+**Material**: ${manifest.usesMaterialDesign}
+**Android X**: ${manifest.usesAndroidX}
+**Module**: ${manifest.isModule}
+**Plugin**: ${manifest.isPlugin}
+**Android package**: ${manifest.androidPackage}
+**iOS bundle identifier**: ${manifest.iosBundleIdentifier}
+''';
+  }
+  final File file = project.flutterPluginsFile;
+  if (file.existsSync()) {
+    description += '### Plugins\n';
+    for (String plugin in project.flutterPluginsFile.readAsLinesSync()) {
+      final List<String> pluginParts = plugin.split('=');
+      if (pluginParts.length != 2) {
+        continue;
+      }
+      description += pluginParts.first;
+    }
+  }
+
+  return description;
+}
+
+String _crashException(dynamic error) => '${error.runtimeType}: $error';
+
 /// File system used by the crash reporting logic.
 ///
 /// We do not want to use the file system stored in the context because it may
@@ -164,7 +248,7 @@ Future<int> _handleToolError(
 FileSystem crashFileSystem = const LocalFileSystem();
 
 /// Saves the crash report to a local file.
-Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace) async {
+Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace, String doctorText) async {
   File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
 
   final StringBuffer buffer = StringBuffer();
@@ -172,14 +256,14 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
   buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
 
   buffer.writeln('## command\n');
-  buffer.writeln('flutter ${args.join(' ')}\n');
+  buffer.writeln('${_crashCommand(args)}\n');
 
   buffer.writeln('## exception\n');
-  buffer.writeln('${error.runtimeType}: $error\n');
+  buffer.writeln('${_crashException(error)}\n');
   buffer.writeln('```\n$stackTrace```\n');
 
   buffer.writeln('## flutter doctor\n');
-  buffer.writeln('```\n${await _doctorText()}```');
+  buffer.writeln('```\n$doctorText```');
 
   try {
     crashFile.writeAsStringSync(buffer.toString());
@@ -202,7 +286,7 @@ Future<String> _doctorText() async {
     final BufferLogger logger = BufferLogger();
 
     await context.run<bool>(
-      body: () => doctor.diagnose(verbose: true),
+      body: () => doctor.diagnose(verbose: true, showColor: false),
       overrides: <Type, Generator>{
         Logger: () => logger,
       },
