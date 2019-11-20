@@ -97,7 +97,6 @@ abstract class Action extends Diagnosticable {
   /// null `node`. If the information available from a focus node is
   /// needed in the action, use [ActionDispatcher.invokeFocusedAction] instead.
   @protected
-  @mustCallSuper
   void invoke(FocusNode node, covariant Intent intent);
 
   @override
