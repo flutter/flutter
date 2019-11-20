@@ -503,6 +503,7 @@ FILE: ../../../flutter/shell/common/canvas_spy_unittests.cc
 FILE: ../../../flutter/shell/common/engine.cc
 FILE: ../../../flutter/shell/common/engine.h
 FILE: ../../../flutter/shell/common/fixtures/shell_test.dart
+FILE: ../../../flutter/shell/common/fixtures/shelltest_screenshot.png
 FILE: ../../../flutter/shell/common/input_events_unittests.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.h

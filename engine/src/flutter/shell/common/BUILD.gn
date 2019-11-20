@@ -153,6 +153,8 @@ if (current_toolchain == host_toolchain) {
 
   test_fixtures("shell_unittests_fixtures") {
     dart_main = "fixtures/shell_test.dart"
+
+    fixtures = [ "fixtures/shelltest_screenshot.png" ]
   }
 
   shell_host_executable("shell_unittests") {

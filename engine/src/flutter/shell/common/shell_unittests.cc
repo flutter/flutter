@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/flow/layers/picture_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/make_copyable.h"
@@ -950,6 +951,67 @@ TEST_F(ShellTest, IsolateCanAccessPersistentIsolateData) {
 
   message_latch.Wait();
   DestroyShell(std::move(shell), std::move(task_runners));
+}
+
+TEST_F(ShellTest, Screenshot) {
+  auto settings = CreateSettingsForFixture();
+  fml::AutoResetWaitableEvent firstFrameLatch;
+  settings.frame_rasterized_callback =
+      [&firstFrameLatch](const FrameTiming& t) { firstFrameLatch.Signal(); };
+
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  LayerTreeBuilder builder = [&](std::shared_ptr<ContainerLayer> root) {
+    SkPictureRecorder recorder;
+    SkCanvas* recording_canvas =
+        recorder.beginRecording(SkRect::MakeXYWH(0, 0, 80, 80));
+    recording_canvas->drawRect(SkRect::MakeXYWH(0, 0, 80, 80),
+                               SkPaint(SkColor4f::FromColor(SK_ColorRED)));
+    auto sk_picture = recorder.finishRecordingAsPicture();
+    fml::RefPtr<SkiaUnrefQueue> queue = fml::MakeRefCounted<SkiaUnrefQueue>(
+        this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
+    auto picture_layer = std::make_shared<PictureLayer>(
+        SkPoint::Make(10, 10),
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
+    root->Add(picture_layer);
+  };
+
+  PumpOneFrame(shell.get(), 100, 100, builder);
+  firstFrameLatch.Wait();
+
+  std::promise<Rasterizer::Screenshot> screenshot_promise;
+  auto screenshot_future = screenshot_promise.get_future();
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetGPUTaskRunner(),
+      [&screenshot_promise, &shell]() {
+        auto rasterizer = shell->GetRasterizer();
+        screenshot_promise.set_value(rasterizer->ScreenshotLastLayerTree(
+            Rasterizer::ScreenshotType::CompressedImage, false));
+      });
+
+  auto fixtures_dir =
+      fml::OpenDirectory(GetFixturesPath(), false, fml::FilePermission::kRead);
+
+  auto reference_png = fml::FileMapping::CreateReadOnly(
+      fixtures_dir, "shelltest_screenshot.png");
+
+  // Use MakeWithoutCopy instead of MakeWithCString because we don't want to
+  // encode the null sentinel
+  sk_sp<SkData> reference_data = SkData::MakeWithoutCopy(
+      reference_png->GetMapping(), reference_png->GetSize());
+
+  ASSERT_TRUE(reference_data->equals(screenshot_future.get().data.get()));
+
+  DestroyShell(std::move(shell));
 }
 
 }  // namespace testing
