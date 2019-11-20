@@ -708,8 +708,8 @@ void main() {
   // to ensure that the inner scroll controller is not scrolled in that case.
   for (final double scrollExtent in const <double>[
     kToolbarHeight - 9,
-    4.2e2,
-    1e3,
+    420,
+    1000,
     1e4
   ]) {
     testWidgets(
@@ -814,7 +814,8 @@ void main() {
       expect(globalKey.currentState.outerController.position.pixels, 0);
       expect(globalKey.currentState.innerController.position.pixels, 0);
 
-      const double innerPosition = 0e0, outerPosition = kToolbarHeight;
+      const double innerPosition = 0;
+      const double outerPosition = kToolbarHeight;
 
       testModifyingInnerController(globalKey, innerPosition, outerPosition);
       testModifyingOuterController(globalKey, innerPosition, outerPosition);
@@ -828,7 +829,8 @@ void main() {
       expect(globalKey.currentState.outerController.position.pixels, 0);
       expect(globalKey.currentState.innerController.position.pixels, 0);
 
-      const double innerPosition = 1e3, outerPosition = kToolbarHeight;
+      const double innerPosition = 1000;
+      const double outerPosition = kToolbarHeight;
 
       testModifyingInnerController(globalKey, innerPosition, outerPosition);
       testModifyingOuterController(globalKey, innerPosition, outerPosition);
@@ -842,7 +844,8 @@ void main() {
       expect(globalKey.currentState.outerController.position.pixels, 0);
       expect(globalKey.currentState.innerController.position.pixels, 0);
 
-      const double innerPosition = 0e0, outerPosition = 0e0;
+      const double innerPosition = 0;
+      const double outerPosition = 0;
 
       testModifyingInnerController(globalKey, innerPosition, outerPosition);
       testModifyingOuterController(globalKey, innerPosition, outerPosition);
@@ -856,7 +859,8 @@ void main() {
       expect(globalKey.currentState.outerController.position.pixels, 0);
       expect(globalKey.currentState.innerController.position.pixels, 0);
 
-      const double innerPosition = 1e3, outerPosition = 0e0;
+      const double innerPosition = 1000;
+      const double outerPosition = 0;
 
       testModifyingInnerController(globalKey, innerPosition, outerPosition);
       testModifyingOuterController(globalKey, innerPosition, outerPosition);
@@ -870,7 +874,8 @@ void main() {
       expect(globalKey.currentState.outerController.position.pixels, 0);
       expect(globalKey.currentState.innerController.position.pixels, 0);
 
-      const double innerPosition = 0e3, outerPosition = kToolbarHeight / 3;
+      const double innerPosition = 0;
+      const double outerPosition = kToolbarHeight / 3;
 
       testModifyingInnerController(globalKey, innerPosition, outerPosition);
       testModifyingOuterController(globalKey, innerPosition, outerPosition);
@@ -884,7 +889,8 @@ void main() {
       expect(globalKey.currentState.outerController.position.pixels, 0);
       expect(globalKey.currentState.innerController.position.pixels, 0);
 
-      const double innerPosition = 1e3, outerPosition = kToolbarHeight / 3;
+      const double innerPosition = 1000;
+      const double outerPosition = kToolbarHeight / 3;
 
       testModifyingInnerController(globalKey, innerPosition, outerPosition);
       testModifyingOuterController(globalKey, innerPosition, outerPosition);

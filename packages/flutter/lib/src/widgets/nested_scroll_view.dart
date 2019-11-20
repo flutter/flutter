@@ -327,10 +327,6 @@ class NestedScrollView extends StatefulWidget {
 /// ```
 ///
 /// {@end-tool}
-///
-/// Alternatively, you could also visit child elements of your parent widget to obtain
-/// the state if you know exactly that the widget is a direct descendant
-/// (see [BuildContext.visitChildElements] or [Element.visitChildren]).
 class NestedScrollViewState extends State<NestedScrollView> {
   final SliverOverlapAbsorberHandle _absorberHandle = SliverOverlapAbsorberHandle();
 
@@ -339,7 +335,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
   /// Manipulating the [ScrollPosition] of this controller fully pushes the header sliver up,
   /// i.e. the position of the [outerController] will be set to [ScrollPosition.maxScrollExtent],
   /// unless you use [ScrollPosition.setPixels].
-  /// Visually, the header sliver will be not be visible, i.e. it is "pushed" up out of view.
+  /// Visually, the header sliver will not be visible, i.e. it is "pushed" up out of view.
   ///
   /// See also:
   ///
