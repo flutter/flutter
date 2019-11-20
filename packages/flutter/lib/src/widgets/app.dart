@@ -687,12 +687,10 @@ class WidgetsApp extends StatefulWidget {
   /// The default map of keyboard shortcuts to intents for the application.
   ///
   /// By default, this is the output of [defaultShortcuts], called with
-  /// [defaultTargetPlatform]. Specifying [shortcuts] for an app overrides the
-  /// default, so if you wish to modify the default [shortcuts], you can call
-  /// [defaultShortcuts] and modify the resulting map, passing it as the
-  /// [shortcuts] for this app. You may also add to the bindings, or override
-  /// specific bindings for a widget subtree, by adding your own [Shortcuts]
-  /// widget.
+  /// [defaultTargetPlatform]. If you wish to modify the default [shortcuts],
+  /// call [defaultShortcuts] and modify the resulting map, passing it as the
+  /// [shortcuts] for this app. Add to the bindings, or override specific
+  /// bindings for a widget subtree, by adding your own [Shortcuts] widget.
   ///
   /// See also:
   ///

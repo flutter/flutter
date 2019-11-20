@@ -709,6 +709,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 /// Creates the default map of actions used by [WidgetsApp] to define the set
 /// of available actions for an application.
 Map<LocalKey, ActionFactory> defaultActions(TargetPlatform targetPlatform) {
+  // At the moment, all platforms have the same set of available actions.
   return <LocalKey, ActionFactory>{
     DoNothingAction.key: () => const DoNothingAction(),
     RequestFocusAction.key: () => RequestFocusAction(),
@@ -746,4 +747,17 @@ abstract class ActivateAction extends Action {
 
   /// The [LocalKey] that uniquely identifies this action.
   static const LocalKey key = ValueKey<Type>(ActivateAction);
+}
+
+/// An action that selects the currently focused control.
+///
+/// This is an abstract class that serves as a base class for actions that
+/// select something, like a checkbox or a radio button. By default, it is bound
+/// to [LogicalKeyboardKey.space] in the default keyboard map in [WidgetsApp].
+abstract class SelectAction extends Action {
+  /// Creates a [SelectAction] with a fixed [key];
+  const SelectAction() : super(key);
+
+  /// The [LocalKey] that uniquely identifies this action.
+  static const LocalKey key = ValueKey<Type>(SelectAction);
 }
