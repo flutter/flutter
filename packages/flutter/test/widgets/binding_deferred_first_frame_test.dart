@@ -12,7 +12,6 @@ import 'package:flutter/widgets.dart';
 const String _actualContent = 'Actual Content';
 const String _loading = 'Loading...';
 
-
 void main() {
   testWidgets('deferFirstFrame/allowFirstFrame stops sending frames to engine', (WidgetTester tester) async {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
@@ -51,7 +50,6 @@ void main() {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
   });
 }
-
 
 class _DeferringWidget extends StatefulWidget {
   const _DeferringWidget({Key key, this.loader}) : super(key: key);
