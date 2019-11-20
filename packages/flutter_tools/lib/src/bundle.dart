@@ -126,8 +126,11 @@ Future<void> buildWithAssemble({
 
   if (!result.success) {
     for (ExceptionMeasurement measurement in result.exceptions.values) {
-      printError(measurement.exception.toString());
-      printError(measurement.stackTrace.toString());
+        printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
     }
     throwToolExit('Failed to build bundle.');
   }

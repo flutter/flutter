@@ -12,6 +12,8 @@ import 'basic.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'scroll_position.dart';
+import 'scrollable.dart';
 
 /// A direction along either the horizontal or vertical axes.
 ///
@@ -144,6 +146,12 @@ abstract class FocusTraversalPolicy {
   ///
   /// All arguments must not be null.
   bool inDirection(FocusNode currentNode, TraversalDirection direction);
+}
+
+@protected
+void _focusAndEnsureVisible(FocusNode node, {ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit}) {
+  node.requestFocus();
+  Scrollable.ensureVisible(node.context, alignment: 1.0, alignmentPolicy: alignmentPolicy);
 }
 
 /// A policy data object for use by the [DirectionalFocusTraversalPolicyMixin]
@@ -327,6 +335,32 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         invalidateScopeData(nearestScope);
         return false;
       }
+
+      // Returns true if successfully popped the history.
+      bool popOrInvalidate(TraversalDirection direction) {
+        final FocusNode lastNode = policyData.history.removeLast().node;
+        if (Scrollable.of(lastNode.context) != Scrollable.of(primaryFocus.context)) {
+          invalidateScopeData(nearestScope);
+          return false;
+        }
+        ScrollPositionAlignmentPolicy alignmentPolicy;
+        switch(direction) {
+          case TraversalDirection.up:
+          case TraversalDirection.left:
+            alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtStart;
+            break;
+          case TraversalDirection.right:
+          case TraversalDirection.down:
+          alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
+            break;
+        }
+        _focusAndEnsureVisible(
+          lastNode,
+          alignmentPolicy: alignmentPolicy,
+        );
+        return true;
+      }
+
       switch (direction) {
         case TraversalDirection.down:
         case TraversalDirection.up:
@@ -338,8 +372,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
               break;
             case TraversalDirection.up:
             case TraversalDirection.down:
-              policyData.history.removeLast().node.requestFocus();
-              return true;
+              if (popOrInvalidate(direction)) {
+                return true;
+              }
+              break;
           }
           break;
         case TraversalDirection.left:
@@ -347,8 +383,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           switch (policyData.history.first.direction) {
             case TraversalDirection.left:
             case TraversalDirection.right:
-              policyData.history.removeLast().node.requestFocus();
-              return true;
+              if (popOrInvalidate(direction)) {
+                return true;
+              }
+              break;
             case TraversalDirection.up:
             case TraversalDirection.down:
               // Reset the policy data if we change directions.
@@ -358,7 +396,6 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       }
     }
     if (policyData != null && policyData.history.isEmpty) {
-      // Reset the policy data if we change directions.
       invalidateScopeData(nearestScope);
     }
     return false;
@@ -400,22 +437,44 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     final FocusScopeNode nearestScope = currentNode.nearestScope;
     final FocusNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      final FocusNode firstFocus = findFirstFocusInDirection(currentNode, direction);
-      (firstFocus ?? currentNode).requestFocus();
+      final FocusNode firstFocus = findFirstFocusInDirection(currentNode, direction) ?? currentNode;
+      switch (direction) {
+        case TraversalDirection.up:
+        case TraversalDirection.left:
+          _focusAndEnsureVisible(
+            firstFocus,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+          );
+          break;
+        case TraversalDirection.right:
+        case TraversalDirection.down:
+          _focusAndEnsureVisible(
+            firstFocus,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+          );
+          break;
+      }
       return true;
     }
     if (_popPolicyDataIfNeeded(direction, nearestScope, focusedChild)) {
       return true;
     }
     FocusNode found;
+    final ScrollableState focusedScrollable = Scrollable.of(focusedChild.context);
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:
-        final Iterable<FocusNode> eligibleNodes = _sortAndFilterVertically(
+        Iterable<FocusNode> eligibleNodes = _sortAndFilterVertically(
           direction,
           focusedChild.rect,
           nearestScope.traversalDescendants,
         );
+        if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
+          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes.where((FocusNode node) => Scrollable.of(node.context) == focusedScrollable);
+          if (filteredEligibleNodes.isNotEmpty) {
+            eligibleNodes = filteredEligibleNodes;
+          }
+        }
         if (eligibleNodes.isEmpty) {
           break;
         }
@@ -439,7 +498,13 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         break;
       case TraversalDirection.right:
       case TraversalDirection.left:
-        final Iterable<FocusNode> eligibleNodes = _sortAndFilterHorizontally(direction, focusedChild.rect, nearestScope);
+        Iterable<FocusNode> eligibleNodes = _sortAndFilterHorizontally(direction, focusedChild.rect, nearestScope);
+        if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
+          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes.where((FocusNode node) => Scrollable.of(node.context) == focusedScrollable);
+          if (filteredEligibleNodes.isNotEmpty) {
+            eligibleNodes = filteredEligibleNodes;
+          }
+        }
         if (eligibleNodes.isEmpty) {
           break;
         }
@@ -464,7 +529,22 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     }
     if (found != null) {
       _pushPolicyData(direction, nearestScope, focusedChild);
-      found.requestFocus();
+      switch (direction) {
+        case TraversalDirection.up:
+        case TraversalDirection.left:
+          _focusAndEnsureVisible(
+            found,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+          );
+          break;
+        case TraversalDirection.down:
+        case TraversalDirection.right:
+        _focusAndEnsureVisible(
+          found,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        );
+          break;
+      }
       return true;
     }
     return false;
@@ -525,7 +605,12 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     if (focusedChild == null) {
       final FocusNode firstFocus = findFirstFocus(currentNode);
       if (firstFocus != null) {
-        firstFocus.requestFocus();
+        _focusAndEnsureVisible(
+            firstFocus,
+            alignmentPolicy: forward
+                ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+                : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+        );
         return true;
       }
     }
@@ -540,12 +625,12 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
         }
         if (forward) {
           if (previousNode == focusedChild) {
-            visited.requestFocus();
+            _focusAndEnsureVisible(visited, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
             return false; // short circuit the traversal.
           }
         } else {
           if (previousNode != null && visited == focusedChild) {
-            previousNode.requestFocus();
+            _focusAndEnsureVisible(previousNode, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
             return false; // short circuit the traversal.
           }
         }
@@ -558,12 +643,12 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     if (visit(nearestScope)) {
       if (forward) {
         if (firstNode != null) {
-          firstNode.requestFocus();
+          _focusAndEnsureVisible(firstNode, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
           return true;
         }
       } else {
         if (lastNode != null) {
-          lastNode.requestFocus();
+          _focusAndEnsureVisible(lastNode, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
           return true;
         }
       }
@@ -694,17 +779,22 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     if (focusedChild == null) {
       final FocusNode firstFocus = findFirstFocus(currentNode);
       if (firstFocus != null) {
-        firstFocus.requestFocus();
+        _focusAndEnsureVisible(
+          firstFocus,
+          alignmentPolicy: forward
+              ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+              : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+        );
         return true;
       }
     }
     final List<FocusNode> sortedNodes = _sortByGeometry(nearestScope).toList();
     if (forward && focusedChild == sortedNodes.last) {
-      sortedNodes.first.requestFocus();
+      _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
       return true;
     }
     if (!forward && focusedChild == sortedNodes.first) {
-      sortedNodes.last.requestFocus();
+      _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
       return true;
     }
 
@@ -712,7 +802,12 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     FocusNode previousNode;
     for (FocusNode node in maybeFlipped) {
       if (previousNode == focusedChild) {
-        node.requestFocus();
+        _focusAndEnsureVisible(
+          node,
+          alignmentPolicy: forward
+            ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+            : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+        );
         return true;
       }
       previousNode = node;
@@ -846,10 +941,7 @@ class RequestFocusAction extends _RequestFocusActionBase {
   static const LocalKey key = ValueKey<Type>(RequestFocusAction);
 
   @override
-  void invoke(FocusNode node, Intent intent) {
-    super.invoke(node, intent);
-    node.requestFocus();
-  }
+  void invoke(FocusNode node, Intent intent) => _focusAndEnsureVisible(node);
 }
 
 /// An [Action] that moves the focus to the next focusable node in the focus
@@ -865,10 +957,7 @@ class NextFocusAction extends _RequestFocusActionBase {
   static const LocalKey key = ValueKey<Type>(NextFocusAction);
 
   @override
-  void invoke(FocusNode node, Intent intent) {
-    super.invoke(node, intent);
-    node.nextFocus();
-  }
+  void invoke(FocusNode node, Intent intent) => node.nextFocus();
 }
 
 /// An [Action] that moves the focus to the previous focusable node in the focus
@@ -885,10 +974,7 @@ class PreviousFocusAction extends _RequestFocusActionBase {
   static const LocalKey key = ValueKey<Type>(PreviousFocusAction);
 
   @override
-  void invoke(FocusNode node, Intent intent) {
-    super.invoke(node, intent);
-    node.previousFocus();
-  }
+  void invoke(FocusNode node, Intent intent) => node.previousFocus();
 }
 
 /// An [Intent] that represents moving to the next focusable node in the given
@@ -935,7 +1021,6 @@ class DirectionalFocusAction extends _RequestFocusActionBase {
 
   @override
   void invoke(FocusNode node, DirectionalFocusIntent intent) {
-    super.invoke(node, intent);
     if (!intent.ignoreTextFields || node.context.widget is! EditableText) {
       node.focusInDirection(intent.direction);
     }

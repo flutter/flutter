@@ -32,7 +32,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
   final Config _config;
 
   @override
-  bool get redisplayWelcomeMessage => _config.getValue(_kRedisplayWelcomeMessage);
+  bool get redisplayWelcomeMessage => _config.getValue(_kRedisplayWelcomeMessage) as bool;
 
   @override
   set redisplayWelcomeMessage(bool value) {

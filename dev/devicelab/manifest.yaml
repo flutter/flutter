@@ -135,13 +135,6 @@ tasks:
 
   # Android on-device tests
 
-  web_incremental_test:
-    description: >
-      Verify that the experimental frontend server support is functional.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-    flaky: true
-
   complex_layout_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of the Complex Layout sample app on
@@ -171,6 +164,12 @@ tasks:
   cull_opacity_perf__timeline_summary:
     description: >
       Measures the runtime performance of culling opacity widgets on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  picture_cache_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of raster caching many pictures on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -566,6 +565,14 @@ tasks:
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
     stage: devicelab
     required_agent_capabilities: ["mac-catalina/android"]
+
+  # macOS target platform tests
+  hot_mode_dev_cycle_macos_target__benchmark:
+    description: >
+      Checks the functionality and performance of hot reload on a macOS target platform
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   # Tests running on Windows host
 

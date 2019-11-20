@@ -75,7 +75,6 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
@@ -83,7 +82,11 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
-    Source.depfile('flutter_assets.d'),
+  ];
+
+  @override
+  List<String> get depfiles => <String>[
+    'flutter_assets.d'
   ];
 
   @override
@@ -123,13 +126,14 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   String get name => 'release_flutter_bundle';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
-  ];
+  List<Source> get inputs => const <Source>[];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
   ];
 
   @override
@@ -151,12 +155,14 @@ class KernelSnapshot extends Target {
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
-    Source.depfile('kernel_snapshot.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('kernel_snapshot.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => <String>[
+    'kernel_snapshot.d',
   ];
 
   @override
@@ -193,6 +199,19 @@ class KernelSnapshot extends Target {
         targetPlatform == TargetPlatform.fuchsia_arm64) {
       targetModel = TargetModel.flutterRunner;
     }
+    // Force linking of the platform for desktop embedder targets since these
+    // do not correctly load the core snapshots in debug mode.
+    // See https://github.com/flutter/flutter/issues/44724
+    bool forceLinkPlatform;
+    switch (targetPlatform) {
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.linux_x64:
+        forceLinkPlatform = true;
+        break;
+      default:
+        forceLinkPlatform = false;
+    }
 
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(
@@ -206,7 +225,7 @@ class KernelSnapshot extends Target {
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
-      linkPlatformKernelIn: buildMode.isPrecompiled,
+      linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
       extraFrontEndOptions: extraFrontEndOptions,
@@ -371,7 +390,7 @@ List<String> parseDartDefines(Environment environment) {
 
   final String dartDefinesJson = environment.defines[kDartDefines];
   try {
-    final List<Object> parsedDefines = jsonDecode(dartDefinesJson);
+    final List<Object> parsedDefines = jsonDecode(dartDefinesJson) as List<Object>;
     return parsedDefines.cast<String>();
   } on FormatException catch (_) {
     throw Exception(
