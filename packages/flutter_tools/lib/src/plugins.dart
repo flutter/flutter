@@ -163,7 +163,8 @@ class Plugin {
     if (usesOldPluginFormat && usesNewPluginFormat) {
       const String errorMessage =
           'The flutter.plugin.platforms key cannot be used in combination with the old'
-          'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys.';
+          'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys.'
+          'See: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin';
       return <String>[errorMessage];
     }
 
