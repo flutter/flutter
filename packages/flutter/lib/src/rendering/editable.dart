@@ -210,6 +210,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     double devicePixelRatio = 1.0,
     bool enableInteractiveSelection,
     EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
+    TextRange promptRectRange,
+    Color promptRectColor,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -266,10 +268,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _endHandleLayerLink = endHandleLayerLink,
        _obscureText = obscureText,
        _readOnly = readOnly,
-       _forceLine = forceLine {
+       _forceLine = forceLine,
+       _promptRectRange = promptRectRange {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     this.hasFocus = hasFocus ?? false;
+    if (promptRectColor != null)
+      _promptRectPaint.color = promptRectColor;
   }
 
   /// Character used to obscure text if [obscureText] is true.
@@ -1113,6 +1118,34 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return enableInteractiveSelection ?? !obscureText;
   }
 
+  /// The color used to paint the prompt rectange.
+  Color get promptRectColor => _promptRectPaint.color;
+  set promptRectColor(Color newValue) {
+    // Painter.color can not be null.
+    if (newValue == null) {
+      setPromptRectRange(null);
+      return;
+    }
+
+    if (promptRectColor == newValue)
+      return;
+
+    _promptRectPaint.color = newValue;
+    if (_promptRectRange != null)
+      markNeedsPaint();
+  }
+
+  TextRange _promptRectRange;
+  /// Display a prompt rectangle over [ewRange] in [promptRectColor], and remove
+  /// the currently shown prompt rectange.
+  void setPromptRectRange(TextRange newRange) {
+    if (_promptRectRange == newRange)
+      return;
+
+    _promptRectRange = newRange;
+    markNeedsPaint();
+  }
+
   /// The maximum amount the text is allowed to scroll.
   ///
   /// This value is only valid after layout and can change as additional
@@ -1702,6 +1735,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _caretPrototype = _getCaretPrototype;
     _selectionRects = null;
+
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
     // _textPainter's layout because the intrinsic size calculations are
@@ -1910,6 +1944,24 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
 
+  final Paint _promptRectPaint = Paint();
+  void _paintPromptRectIfNeeded(Canvas canvas, Offset effectiveOffset) {
+    if (_promptRectRange == null || promptRectColor == null) {
+      return;
+    }
+
+    final List<TextBox> boxes = _textPainter.getBoxesForSelection(
+      TextSelection(
+        baseOffset: _promptRectRange.start,
+        extentOffset: _promptRectRange.end,
+      ),
+    );
+
+    for (TextBox box in boxes) {
+      canvas.drawRect(box.toRect().shift(effectiveOffset), _promptRectPaint);
+    }
+  }
+
   void _paintContents(PaintingContext context, Offset offset) {
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
            _textLayoutLastMinWidth == constraints.minWidth,
@@ -1931,6 +1983,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
       _paintSelection(context.canvas, effectiveOffset);
     }
+
+    _paintPromptRectIfNeeded(context.canvas, effectiveOffset);
 
     // On iOS, the cursor is painted over the text, on Android, it's painted
     // under it.
