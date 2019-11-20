@@ -347,6 +347,22 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
+      registerServiceExtension(
+        name: 'reassembleElements',
+        callback: (Map<String, dynamic> params) async {
+          final String classId = params['reloadClass'];
+          int count = 0;
+          print('checking for $classId in ${Element.debugActiveElements.length}');
+          for (Element element in Element.debugActiveElements) {
+            if (element.widget.runtimeType.toString() == classId) {
+              element.markNeedsBuild();
+              count += 1;
+            }
+          }
+          print('marked $count');
+          return <String, Object>{'result': count};
+      });
+
       // This service extension is deprecated and will be removed by 12/1/2018.
       // Use ext.flutter.inspector.show instead.
       registerBoolServiceExtension(

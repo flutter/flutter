@@ -434,7 +434,7 @@ class Text extends StatelessWidget {
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       text: TextSpan(
         style: effectiveTextStyle,
-        text: data,
+        text: data + '!',
         children: textSpan != null ? <TextSpan>[textSpan] : null,
       ),
     );

@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
 import 'focus_manager.dart';
-import 'widget_inspector.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
@@ -2607,6 +2606,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   bool operator ==(Object other) => identical(this, other);
 
+  static Set<Element> debugActiveElements = <Element>{};
+
   // Custom implementation of hash code optimized for the ".of" pattern used
   // with `InheritedWidgets`.
   //
@@ -2935,6 +2936,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _updateInheritance();
     assert(() {
       _debugLifecycleState = _ElementLifecycle.active;
+      debugActiveElements.add(this);
       return true;
     }());
   }
@@ -3209,7 +3211,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _updateInheritance();
     assert(() {
       _debugLifecycleState = _ElementLifecycle.active;
-      WidgetInspectorService.instance.activateElement(this);
+      debugActiveElements.add(this);
       return true;
     }());
     if (_dirty)
@@ -3249,7 +3251,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _inheritedWidgets = null;
     _active = false;
     assert(() {
-      WidgetInspectorService.instance.activateElement(this);
+      debugActiveElements.remove(this);
       _debugLifecycleState = _ElementLifecycle.inactive;
       return true;
     }());

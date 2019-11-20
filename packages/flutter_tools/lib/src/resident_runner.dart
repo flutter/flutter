@@ -706,6 +706,7 @@ abstract class ResidentRunner {
     String classId,
     String methodId,
     String methodBody,
+    @required String reloadClassId,
   }) {
     throw UnsupportedError('Not currently supported');
   }
@@ -1242,6 +1243,7 @@ class TerminalHandler {
           libraryId: source['library'],
           methodId: source['method'],
           methodBody: source['methodBody'],
+          reloadClassId: source['reloadClass'],
         );
         return true;
     }

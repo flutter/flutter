@@ -1164,19 +1164,6 @@ mixin WidgetInspectorService {
         };
       },
     );
-     _registerServiceExtensionCallback(
-        name: 'reassembleElements',
-        callback: (Map<String, dynamic> params) async {
-          final String classId = params['class'];
-          int count = 0;
-          for (Element element in _activeElements) {
-            if (element.widget.runtimeType.toString() == classId) {
-              element.markNeedsBuild();
-              count += 1;
-            }
-          }
-          return <String, Object>{'result': count};
-      });
   }
 
   void _clearStats() {

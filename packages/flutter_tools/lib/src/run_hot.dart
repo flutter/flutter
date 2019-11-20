@@ -134,6 +134,7 @@ class HotRunner extends ResidentRunner {
     String classId,
     String methodId,
     String methodBody,
+    String reloadClassId,
   }) async {
     final Stopwatch sw = Stopwatch()..start();
     final FlutterDevice flutterDevice = flutterDevices.single;
@@ -182,13 +183,14 @@ class HotRunner extends ResidentRunner {
         printError('response: ${response.statusCode}');
         return;
       }
+      await response.drain<void>();
     } on SocketException catch (err) {
       printError(err.toString());
       return;
     }
     final FlutterView view = flutterDevice.views.single;
     final Uri devicePackagesUri = flutterDevice.devFS.baseUri.resolve('.packages');
-    final Map<String, Object> response = await view.uiIsolate.reloadSources(
+    await view.uiIsolate.reloadSources(
       rootLibUri: deviceEntryUri,
       packagesUri: devicePackagesUri,
       pause: false,
@@ -196,7 +198,7 @@ class HotRunner extends ResidentRunner {
     current = sw.elapsedMilliseconds - current;
     printStatus('Reloaded Sources: $current');
     //await view.uiIsolate.flutterReassemble();
-    final int count = await view.uiIsolate.flutterReassembleElements(classId);
+    final int count = await view.uiIsolate.flutterReassembleElements(reloadClassId);
     current = sw.elapsedMilliseconds - current;
     printStatus('Reassemble $count: $current');
     printStatus('Hot UI Complete: ${sw.elapsedMilliseconds}');
