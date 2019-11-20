@@ -81,8 +81,10 @@ void main() {
         color: Colors.greenAccent[400],
         shape: const ContinuousRectangleBorder(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(28.0),
-            bottomLeft: Radius.circular(14.0),
+            topLeft: Radius.circular(50.0),
+            topRight: Radius.circular(40.0),
+            bottomLeft: Radius.circular(30.0),
+            bottomRight: Radius.circular(20.0),
           ),
         ),
       ),
