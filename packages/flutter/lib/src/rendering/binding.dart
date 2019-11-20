@@ -290,9 +290,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// If false the framework will do all the work to produce a frame,
   /// but the frame is never send to the engine to actually appear on screen.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [deferFirstFrame], which defers when the first frame is send to the
   ///    engine.
   bool get sendFramesToEngine => _firstFrameSent || _firstFrameDeferredCount == 0;
