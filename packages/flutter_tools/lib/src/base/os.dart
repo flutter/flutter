@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// package:archive is used to provide zip/unzip only on Windows host machines. Since
-// Windows 8 and powershell 3, the native zip/unzip functionality has been exposed
-// and should be preferred over the dart implementation.
-//
-// see https://stackoverflow.com/questions/17546016/how-can-you-zip-or-unzip-from-the-script-using-only-windows-built-in-capabiliti/26843122#26843122
 import 'package:archive/archive.dart';
 
 import '../globals.dart';
@@ -254,6 +249,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
+    // TODO(jonahwilliams): investigate whether we can remove this dependency with https://github.com/flutter/flutter/issues/45278
     final Archive archive = Archive();
     for (FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {
