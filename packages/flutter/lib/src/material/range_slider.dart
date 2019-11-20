@@ -519,12 +519,12 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     return null;
   };
 
-  static const double _defaultTrackHeight = 4;
+  static const double _defaultTrackHeight = 2;
   static const RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape();
   static const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape();
-  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
+  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = PaddleRangeSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
   static const double _defaultMinThumbSeparation = 8;
 
@@ -542,19 +542,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // colors come from the ThemeData.colorScheme. These colors, along with
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
-
-    // The value indicator color is not the same as the thumb and active track
-    // (which can be defined by activeColor) if the
-    // RectangularSliderValueIndicatorShape is used. In all other cases, the
-    // value indicator is assumed to be the same as the active color.
-    final RangeSliderValueIndicatorShape valueIndicatorShape = sliderTheme.rangeValueIndicatorShape ?? _defaultValueIndicatorShape;
-    Color valueIndicatorColor;
-    if (valueIndicatorShape is RectangularRangeSliderValueIndicatorShape) {
-      valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
-    } else {
-      valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
-    }
-
     sliderTheme = sliderTheme.copyWith(
       trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
@@ -569,13 +556,12 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       overlappingShapeStrokeColor: sliderTheme.overlappingShapeStrokeColor ?? theme.colorScheme.surface,
       disabledThumbColor: sliderTheme.disabledThumbColor ?? theme.colorScheme.onSurface.withOpacity(0.38),
       overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
-      valueIndicatorColor: valueIndicatorColor,
-      surfaceColor: sliderTheme.surfaceColor ?? theme.colorScheme.surface,
+      valueIndicatorColor: widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary,
       rangeTrackShape: sliderTheme.rangeTrackShape ?? _defaultTrackShape,
       rangeTickMarkShape: sliderTheme.rangeTickMarkShape ?? _defaultTickMarkShape,
       rangeThumbShape: sliderTheme.rangeThumbShape ?? _defaultThumbShape,
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
-      rangeValueIndicatorShape: valueIndicatorShape,
+      rangeValueIndicatorShape: sliderTheme.rangeValueIndicatorShape ?? _defaultValueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
       valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2.copyWith(
         color: theme.colorScheme.onPrimary,
@@ -584,18 +570,12 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       thumbSelector: sliderTheme.thumbSelector ?? _defaultRangeThumbSelector,
     );
 
-    // This size is used as the max bounds for the painting of the value
-    // indicators It must be kept in sync with the function with the same name
-    // in slider.dart.
-    Size _sizeWithOverflow() => MediaQuery.of(context).size;
-
     return _RangeSliderRenderObjectWidget(
       values: _unlerpRangeValues(widget.values),
       divisions: widget.divisions,
       labels: widget.labels,
       sliderTheme: sliderTheme,
       textScaleFactor: MediaQuery.of(context).textScaleFactor,
-      sizeWithOverflow: _sizeWithOverflow(),
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -613,7 +593,6 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.labels,
     this.sliderTheme,
     this.textScaleFactor,
-    this.sizeWithOverflow,
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -626,7 +605,6 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final RangeLabels labels;
   final SliderThemeData sliderTheme;
   final double textScaleFactor;
-  final Size sizeWithOverflow;
   final ValueChanged<RangeValues> onChanged;
   final ValueChanged<RangeValues> onChangeStart;
   final ValueChanged<RangeValues> onChangeEnd;
@@ -642,7 +620,6 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       sliderTheme: sliderTheme,
       theme: Theme.of(context),
       textScaleFactor: textScaleFactor,
-      sizeWithOverflow: sizeWithOverflow,
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -662,7 +639,6 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..sliderTheme = sliderTheme
       ..theme = Theme.of(context)
       ..textScaleFactor = textScaleFactor
-      ..sizeWithOverflow = sizeWithOverflow
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -680,7 +656,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     SliderThemeData sliderTheme,
     ThemeData theme,
     double textScaleFactor,
-    Size sizeWithOverflow,
     TargetPlatform platform,
     ValueChanged<RangeValues> onChanged,
     RangeSemanticFormatterCallback semanticFormatterCallback,
@@ -701,7 +676,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         _sliderTheme = sliderTheme,
         _theme = theme,
         _textScaleFactor = textScaleFactor,
-        _sizeWithOverflow = sizeWithOverflow,
         _onChanged = onChanged,
         _state = state,
         _textDirection = textDirection {
@@ -872,15 +846,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       return;
     _textScaleFactor = value;
     _updateLabelPainters();
-  }
-
-  Size get sizeWithOverflow => _sizeWithOverflow;
-  Size _sizeWithOverflow;
-  set sizeWithOverflow(Size value) {
-    if (value == sizeWithOverflow)
-      return;
-    _sizeWithOverflow = value;
-    markNeedsPaint();
   }
 
   ValueChanged<RangeValues> get onChanged => _onChanged;
@@ -1230,11 +1195,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         isEnabled: isEnabled,
     );
 
-    final bool startThumbSelected = _lastThumbSelection == Thumb.start;
-    final bool endThumbSelected = _lastThumbSelection == Thumb.end;
-
     if (!_overlayAnimation.isDismissed) {
-      if (startThumbSelected) {
+      if (_lastThumbSelection == Thumb.start) {
         _sliderTheme.overlayShape.paint(
           context,
           startThumbCenter,
@@ -1248,7 +1210,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           value: startValue,
         );
       }
-      if (endThumbSelected) {
+      if (_lastThumbSelection == Thumb.end) {
         _sliderTheme.overlayShape.paint(
           context,
           endThumbCenter,
@@ -1269,7 +1231,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         isEnabled: isEnabled,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - trackRect.height;
+      final double adjustedTrackWidth = trackRect.width - tickMarkWidth;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1277,7 +1239,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + trackRect.height / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth + tickMarkWidth / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.rangeTickMarkShape.paint(
             context,
@@ -1306,7 +1268,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final double bottomValue = isLastThumbStart ? endValue : startValue;
     final double topValue = isLastThumbStart ? startValue : endValue;
     final bool shouldPaintValueIndicators = isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
-    final Size resolvedSizeWithOverflow = sizeWithOverflow.isEmpty ? size : sizeWithOverflow;
 
     if (shouldPaintValueIndicators) {
       _sliderTheme.rangeValueIndicatorShape.paint(
@@ -1322,8 +1283,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         textDirection: _textDirection,
         thumb: bottomThumb,
         value: bottomValue,
-        textScaleFactor: textScaleFactor,
-        sizeWithOverflow: resolvedSizeWithOverflow,
       );
     }
 
@@ -1337,7 +1296,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: bottomThumb,
-      isPressed: bottomThumb == Thumb.start ? startThumbSelected : endThumbSelected,
     );
 
     if (shouldPaintValueIndicators) {
@@ -1346,29 +1304,15 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         center: startThumbCenter,
         labelPainter: _startLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
-        textScaleFactor: textScaleFactor,
-        sizeWithOverflow: resolvedSizeWithOverflow,
       );
       final double endOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
         parentBox: this,
         center: endThumbCenter,
         labelPainter: _endLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
-        textScaleFactor: textScaleFactor,
-        sizeWithOverflow: resolvedSizeWithOverflow,
       );
-      final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(
-        isEnabled,
-        isDiscrete,
-        labelPainter: _startLabelPainter,
-        textScaleFactor: textScaleFactor,
-      ).width / 2;
-      final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(
-        isEnabled,
-        isDiscrete,
-        labelPainter: _endLabelPainter,
-        textScaleFactor: textScaleFactor,
-      ).width / 2;
+      final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _startLabelPainter).width / 2;
+      final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _endLabelPainter).width / 2;
       double innerOverflow = startHalfWidth + endHalfWidth;
       switch (textDirection) {
         case TextDirection.ltr:
@@ -1394,22 +1338,19 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         textDirection: _textDirection,
         thumb: topThumb,
         value: topValue,
-        textScaleFactor: textScaleFactor,
-        sizeWithOverflow: resolvedSizeWithOverflow,
       );
     }
 
     _sliderTheme.rangeThumbShape.paint(
       context,
       topThumbCenter,
-      activationAnimation: _overlayAnimation,
+      activationAnimation: _valueIndicatorAnimation,
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
       isOnTop: thumbDelta < sliderTheme.rangeThumbShape.getPreferredSize(isEnabled, isDiscrete).width,
       textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: topThumb,
-      isPressed: topThumb == Thumb.start ? startThumbSelected : endThumbSelected,
     );
   }
 
