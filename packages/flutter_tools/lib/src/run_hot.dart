@@ -265,15 +265,17 @@ class HotRunner extends ResidentRunner {
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
     for (FlutterDevice device in flutterDevices) {
-      startupTasks.add(
-        device.generator.recompile(
-          mainPath,
-          <Uri>[],
-          outputPath: dillOutputPath ??
-            getDefaultApplicationKernelPath(trackWidgetCreation: device.trackWidgetCreation),
-          packagesFilePath : packagesFilePath,
-        ).then((CompilerOutput output) => output?.errorCount == 0)
-      );
+      if (device.generator != null) {
+        startupTasks.add(
+          device.generator.recompile(
+            mainPath,
+            <Uri>[],
+            outputPath: dillOutputPath ??
+              getDefaultApplicationKernelPath(trackWidgetCreation: device.trackWidgetCreation),
+            packagesFilePath : packagesFilePath,
+          ).then((CompilerOutput output) => output?.errorCount == 0)
+        );
+      }
       startupTasks.add(device.runHot(
         hotRunner: this,
         route: route,
