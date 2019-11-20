@@ -1360,6 +1360,94 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
   }
 }
 
+/// Animated version of [SliverOpacity] which automatically transitions the
+/// sliver child's opacity over a given duration whenever the given opacity
+/// changes.
+///
+/// Animating an opacity is relatively expensive because it requires painting
+/// the sliver child into an intermediate buffer.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
+///
+/// See also:
+///
+///  * [SliverFadeTransition], an explicitly animated version of this widget, where
+///    an [Animation] is provided by the caller instead of being built in.
+class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that animates its opacity implicitly.
+  ///
+  /// The [opacity] argument must not be null and must be between 0.0 and 1.0,
+  /// inclusive. The [curve] and [duration] arguments must not be null.
+  const SliverAnimatedOpacity({
+    Key key,
+    this.sliver,
+    @required this.opacity,
+    Curve curve = Curves.linear,
+    @required Duration duration,
+    VoidCallback onEnd,
+    this.alwaysIncludeSemantics = false,
+  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+      super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+
+  /// The sliver below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget sliver;
+
+  /// The target opacity.
+  ///
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e., invisible).
+  ///
+  /// The opacity must not be null.
+  final double opacity;
+
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the sliver child's semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
+  @override
+  _SliverAnimatedOpacityState createState() => _SliverAnimatedOpacityState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('opacity', opacity));
+  }
+}
+
+class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacity> {
+  Tween<double> _opacity;
+  Animation<double> _opacityAnimation;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => Tween<double>(begin: value));
+  }
+
+  @override
+  void didUpdateTweens() {
+    _opacityAnimation = animation.drive(_opacity);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverFadeTransition(
+      opacity: _opacityAnimation,
+      child: widget.child,
+      alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
+    );
+  }
+}
+
 /// Animated version of [DefaultTextStyle] which automatically transitions the
 /// default text style (the text style to apply to descendant [Text] widgets
 /// without explicit style) over a given duration whenever the given style
