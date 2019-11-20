@@ -17,6 +17,8 @@ void main() {
     ProtocolDiscovery discoverer;
 
     group('no port forwarding', () {
+      int devicePort;
+
       /// Performs test set-up functionality that must be performed as part of
       /// the `test()` pass and not part of the `setUp()` pass.
       ///
@@ -35,7 +37,7 @@ void main() {
       /// See also: [runZoned]
       void initialize() {
         logReader = MockDeviceLogReader();
-        discoverer = ProtocolDiscovery.observatory(logReader);
+        discoverer = ProtocolDiscovery.observatory(logReader, ipv6: false, hostPort: null, devicePort: devicePort);
       }
 
       tearDown(() {
@@ -119,6 +121,28 @@ void main() {
         expect(uri.port, 54804);
         expect('$uri', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
       });
+
+      testUsingContext('skips uri if port does not match the requested vmservice - requested last', () async {
+        devicePort = 12346;
+        initialize();
+        final Future<Uri> uriFuture = discoverer.uri;
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        final Uri uri = await uriFuture;
+        expect(uri.port, 12346);
+        expect('$uri', 'http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+      });
+
+      testUsingContext('skips uri if port does not match the requested vmservice - requested first', () async {
+        devicePort = 12346;
+        initialize();
+        final Future<Uri> uriFuture = discoverer.uri;
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+        final Uri uri = await uriFuture;
+        expect(uri.port, 12346);
+        expect('$uri', 'http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+      });
     });
 
     group('port forwarding', () {
@@ -127,6 +151,9 @@ void main() {
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
+          hostPort: null,
+          devicePort: null,
+          ipv6: false,
         );
 
         // Get next port future.
@@ -146,6 +173,8 @@ void main() {
           logReader,
           portForwarder: MockPortForwarder(99),
           hostPort: 1243,
+          devicePort: null,
+          ipv6: false,
         );
 
         // Get next port future.
@@ -165,6 +194,8 @@ void main() {
           logReader,
           portForwarder: MockPortForwarder(99),
           hostPort: 0,
+          devicePort: null,
+          ipv6: false,
         );
 
         // Get next port future.
@@ -185,6 +216,7 @@ void main() {
           portForwarder: MockPortForwarder(99),
           hostPort: 54777,
           ipv6: true,
+          devicePort: null,
         );
 
         // Get next port future.
@@ -205,6 +237,7 @@ void main() {
           portForwarder: MockPortForwarder(99),
           hostPort: 54777,
           ipv6: true,
+          devicePort: null,
         );
 
         // Get next port future.

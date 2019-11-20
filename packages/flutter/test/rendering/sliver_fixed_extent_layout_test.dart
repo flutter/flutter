@@ -24,7 +24,7 @@ void main() {
       offset: ViewportOffset.zero(),
       cacheExtent: 0,
       children: <RenderSliver>[
-        childManager.createRenderSliverFixedExtentList(),
+        childManager.createRenderSliverFillViewport(),
       ],
     );
     layout(root);
@@ -52,11 +52,10 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   RenderSliverMultiBoxAdaptor _renderObject;
   List<RenderBox> children;
 
-  RenderSliverFixedExtentList createRenderSliverFixedExtentList() {
+  RenderSliverFillViewport createRenderSliverFillViewport() {
     assert(_renderObject == null);
-    _renderObject = RenderSliverFixedExtentList(
+    _renderObject = RenderSliverFillViewport(
       childManager: this,
-      itemExtent: 600,
     );
     return _renderObject;
   }

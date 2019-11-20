@@ -58,7 +58,7 @@ class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
   final FileSystemEntity file;
-  FileSystemEntity _linkTarget;
+  File _linkTarget;
   FileStat _fileStat;
 
   File _getFile() {
@@ -69,7 +69,7 @@ class DevFSFileContent extends DevFSContent {
       // The link target.
       return fs.file(file.resolveSymbolicLinksSync());
     }
-    return file;
+    return file as File;
   }
 
   void _stat() {
@@ -88,7 +88,7 @@ class DevFSFileContent extends DevFSContent {
     if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
-      final FileSystemEntity linkTarget = fs.file(resolved);
+      final File linkTarget = fs.file(resolved);
       // Stat the link target.
       final FileStat fileStat = linkTarget.statSync();
       if (fileStat.type == FileSystemEntityType.notFound) {
@@ -224,7 +224,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   @override
   Future<Uri> create(String fsName) async {
     final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
-    return Uri.parse(response['uri']);
+    return Uri.parse(response['uri'] as String);
   }
 
   @override
@@ -349,12 +349,19 @@ class UpdateFSReport {
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
 
+  /// JavaScript modules produced by the incremental compiler in `dartdevc`
+  /// mode.
+  ///
+  /// Only used for JavaScript compilation.
+  List<String> invalidatedModules;
+
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
       _success = false;
     }
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
+    invalidatedModules ??= report.invalidatedModules;
   }
 
   bool _success;

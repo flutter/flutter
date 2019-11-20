@@ -27,7 +27,7 @@ class VisualStudio {
   /// The name of the Visual Studio install.
   ///
   /// For instance: "Visual Studio Community 2017".
-  String get displayName => _bestVisualStudioDetails[_displayNameKey];
+  String get displayName => _bestVisualStudioDetails[_displayNameKey] as String;
 
   /// The user-friendly version number of the Visual Studio install.
   ///
@@ -36,16 +36,16 @@ class VisualStudio {
     if (_bestVisualStudioDetails[_catalogKey] == null) {
       return null;
     }
-    return _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey];
+    return _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey] as String;
   }
 
   /// The directory where Visual Studio is installed.
-  String get installLocation => _bestVisualStudioDetails[_installationPathKey];
+  String get installLocation => _bestVisualStudioDetails[_installationPathKey] as String;
 
   /// The full version of the Visual Studio install.
   ///
   /// For instance: "15.4.27004.2002".
-  String get fullVersion => _bestVisualStudioDetails[_fullVersionKey];
+  String get fullVersion => _bestVisualStudioDetails[_fullVersionKey] as String;
 
   // Properties that determine the status of the installation. There might be
   // Visual Studio versions that don't include them, so default to a "valid" value to
@@ -58,7 +58,7 @@ class VisualStudio {
     if (_bestVisualStudioDetails.isEmpty) {
       return false;
     }
-    return _bestVisualStudioDetails[_isCompleteKey] ?? true;
+    return _bestVisualStudioDetails[_isCompleteKey] as bool ?? true;
   }
 
   /// True if Visual Studio is launchable.
@@ -68,14 +68,14 @@ class VisualStudio {
     if (_bestVisualStudioDetails.isEmpty) {
       return false;
     }
-    return _bestVisualStudioDetails[_isLaunchableKey] ?? true;
+    return _bestVisualStudioDetails[_isLaunchableKey] as bool ?? true;
   }
 
     /// True if the Visual Studio installation is as pre-release version.
-  bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] ?? false;
+  bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] as bool ?? false;
 
   /// True if a reboot is required to complete the Visual Studio installation.
-  bool get isRebootRequired => _bestVisualStudioDetails[_isRebootRequiredKey] ?? false;
+  bool get isRebootRequired => _bestVisualStudioDetails[_isRebootRequiredKey] as bool ?? false;
 
   /// The name of the recommended Visual Studio installer workload.
   String get workloadDescription => 'Desktop development with C++';
@@ -97,7 +97,7 @@ class VisualStudio {
       return null;
     }
     return fs.path.join(
-      _usableVisualStudioDetails[_installationPathKey],
+      _usableVisualStudioDetails[_installationPathKey] as String,
       'VC',
       'Auxiliary',
       'Build',
@@ -199,7 +199,7 @@ class VisualStudio {
       ]);
       if (whereResult.exitCode == 0) {
         final List<Map<String, dynamic>> installations =
-            json.decode(whereResult.stdout).cast<Map<String, dynamic>>();
+            (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
         if (installations.isNotEmpty) {
           return installations[0];
         }
@@ -220,15 +220,15 @@ class VisualStudio {
   /// of Visual Studio might not include them.
   bool installationHasIssues(Map<String, dynamic>installationDetails) {
     assert(installationDetails != null);
-    if (installationDetails[_isCompleteKey] != null && !installationDetails[_isCompleteKey]) {
+    if (installationDetails[_isCompleteKey] != null && !(installationDetails[_isCompleteKey] as bool)) {
       return true;
     }
 
-    if (installationDetails[_isLaunchableKey] != null && !installationDetails[_isLaunchableKey]) {
+    if (installationDetails[_isLaunchableKey] != null && !(installationDetails[_isLaunchableKey] as bool)) {
       return true;
     }
 
-    if (installationDetails[_isRebootRequiredKey] != null && installationDetails[_isRebootRequiredKey]) {
+    if (installationDetails[_isRebootRequiredKey] != null && installationDetails[_isRebootRequiredKey] as bool) {
       return true;
     }
 

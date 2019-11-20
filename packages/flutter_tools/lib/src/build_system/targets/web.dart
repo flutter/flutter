@@ -113,12 +113,14 @@ class Dart2JSTarget extends Target {
     Source.artifact(Artifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.depfile('dart2js.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('dart2js.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2js.d',
   ];
 
   @override
@@ -130,6 +132,7 @@ class Dart2JSTarget extends Target {
       ? PackageMap.globalGeneratedPackagesPath
       : PackageMap.globalPackagesPath;
     final File outputFile = environment.buildDir.childFile('main.dart.js');
+
     final ProcessResult result = await processManager.run(<String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
@@ -147,6 +150,8 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
+      for (String dartDefine in parseDartDefines(environment))
+        '-D$dartDefine',
       environment.buildDir.childFile('main.dart').path,
     ]);
     if (result.exitCode != 0) {
@@ -184,14 +189,17 @@ class WebReleaseBundle extends Target {
     Source.pattern('{BUILD_DIR}/main.dart.js'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.pattern('{PROJECT_DIR}/web/index.html'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.js'),
     Source.pattern('{OUTPUT_DIR}/index.html'),
-    Source.depfile('flutter_assets.d'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2js.d',
   ];
 
   @override

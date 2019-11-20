@@ -135,7 +135,7 @@ class Daemon {
     }
 
     try {
-      final String method = request['method'];
+      final String method = request['method'] as String;
       if (!method.contains('.')) {
         throw 'method not understood: $method';
       }
@@ -146,7 +146,7 @@ class Daemon {
         throw 'no domain for method: $method';
       }
 
-      _domainMap[prefix].handleCommand(name, id, request['params'] ?? const <String, dynamic>{});
+      _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request['params']) ?? const <String, dynamic>{});
     } catch (error, trace) {
       _send(<String, dynamic>{
         'id': id,
@@ -228,7 +228,7 @@ abstract class Domain {
     if (val != null && val is! String) {
       throw '$name is not a String';
     }
-    return val;
+    return val as String;
   }
 
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required = false }) {
@@ -239,7 +239,7 @@ abstract class Domain {
     if (val != null && val is! bool) {
       throw '$name is not a bool';
     }
-    return val;
+    return val as bool;
   }
 
   int _getIntArg(Map<String, dynamic> args, String name, { bool required = false }) {
@@ -250,7 +250,7 @@ abstract class Domain {
     if (val != null && val is! int) {
       throw '$name is not an int';
     }
-    return val;
+    return val as int;
   }
 
   void dispose() { }
@@ -424,18 +424,20 @@ class AppDomain extends Domain {
       viewFilter: isolateFilter,
       target: target,
       buildMode: options.buildInfo.mode,
+      dartDefines: command?.dartDefines,
     );
 
     ResidentRunner runner;
 
     if (await device.targetPlatform == TargetPlatform.web_javascript) {
       runner = webRunnerFactory.createWebRunner(
-        device,
+        flutterDevice,
         flutterProject: flutterProject,
         target: target,
         debuggingOptions: options,
         ipv6: ipv6,
         stayResident: true,
+        dartDefines: command?.dartDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -679,8 +681,8 @@ class DeviceDomain extends Domain {
       return;
     }
 
-    _discoverers.add(discoverer);
     if (discoverer is PollingDeviceDiscovery) {
+      _discoverers.add(discoverer);
       discoverer.onAdded.listen(_onDeviceEvent('device.added'));
       discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
     }
@@ -784,7 +786,7 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
   .map<Map<String, dynamic>>((String line) {
     line = line.substring(1, line.length - 1);
-    return json.decode(line);
+    return castStringKeyedMap(json.decode(line));
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
@@ -898,7 +900,7 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 /// A running application, started by this daemon.
@@ -922,7 +924,7 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, dynamic method()) {
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) {
     _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
     return context.run<T>(
@@ -1111,13 +1113,12 @@ class _AppRunLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) {
-    final int id = _nextProgressId++;
-    _sendProgressEvent(<String, dynamic>{
-      'id': id.toString(),
-      'progressId': progressId,
-      'finished': true,
-    });
+  void sendEvent(String name, [Map<String, dynamic> args]) {
+    if (domain == null) {
+      printStatus('event sent after app closed: $name');
+    } else {
+      domain.sendEvent(name, args);
+    }
   }
 }
 

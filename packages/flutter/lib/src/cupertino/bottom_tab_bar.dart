@@ -16,10 +16,7 @@ const Color _kDefaultTabBarBorderColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x4C000000),
   darkColor: Color(0x29000000),
 );
-const Color _kDefaultTabBarInactiveColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF999999),
-  darkColor: Color(0xFF757575),
-);
+const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 
 /// An iOS-styled bottom navigation tab bar.
 ///

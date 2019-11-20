@@ -523,7 +523,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
-        child: const MouseRegion(),
+        child: const MouseRegion(opaque: false),
       ),
     );
     final RenderMouseRegion listener = tester.renderObject(find.byType(MouseRegion));
@@ -534,10 +534,12 @@ void main() {
     // transform.)
     expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
 
+    // Test that needsCompositing updates correctly with callback change
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
         child: MouseRegion(
+          opaque: false,
           onHover: (PointerHoverEvent _) {},
         ),
       ),
@@ -550,13 +552,27 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
-        child: const MouseRegion(),
+        child: const MouseRegion(opaque: false),
       ),
     );
     expect(listener.needsCompositing, isFalse);
     // TransformLayer for `Transform.scale` is removed again as transform is
     // executed directly on the canvas.
     expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
+
+    // Test that needsCompositing updates correctly with `opaque` change
+    await tester.pumpWidget(
+      Transform.scale(
+        scale: 2.0,
+        child: const MouseRegion(
+          opaque: true,
+        ),
+      ),
+    );
+    expect(listener.needsCompositing, isTrue);
+    // Compositing is required, therefore a dedicated TransformLayer for
+    // `Transform.scale` is added.
+    expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
   });
 
   testWidgets("Callbacks aren't called during build", (WidgetTester tester) async {
@@ -940,6 +956,42 @@ void main() {
       await tester.pumpAndSettle();
       expect(logs, <String>['exitC', 'exitA']);
     });
+  });
+
+  testWidgets('an empty opaque MouseRegion is effective', (WidgetTester tester) async {
+    bool bottomRegionIsHovered = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.topLeft,
+              child: MouseRegion(
+                  onEnter: (_) { bottomRegionIsHovered = true; },
+                  onHover: (_) { bottomRegionIsHovered = true; },
+                  onExit: (_) { bottomRegionIsHovered = true; },
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                ),
+              ),
+            ),
+            const MouseRegion(opaque: true),
+          ],
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(20, 20));
+    addTearDown(gesture.removePointer);
+
+    await gesture.moveTo(const Offset(5, 5));
+    await tester.pump();
+    await gesture.moveTo(const Offset(20, 20));
+    await tester.pump();
+    expect(bottomRegionIsHovered, isFalse);
   });
 
   testWidgets('RenderMouseRegion\'s debugFillProperties when default', (WidgetTester tester) async {

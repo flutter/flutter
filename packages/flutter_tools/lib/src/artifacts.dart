@@ -28,7 +28,7 @@ enum Artifact {
   platformLibrariesJson,
   flutterPatchedSdkPath,
   frontendServerSnapshotForEngineDartSdk,
-  /// The root directory of the dartk SDK.
+  /// The root directory of the dart SDK.
   engineDartSdkPath,
   /// The dart binary used to execute any of the required snapshots.
   engineDartBinary,
@@ -393,6 +393,9 @@ class CachedArtifacts extends Artifacts {
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
         return fs.path.join(engineDir, platformName + suffix);
+      case TargetPlatform.android:
+        assert(false, 'cannot use TargetPlatform.android to look up artifacts');
+        return null;
     }
     assert(false, 'Invalid platform $platform.');
     return null;

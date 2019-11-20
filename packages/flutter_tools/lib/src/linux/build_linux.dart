@@ -23,7 +23,7 @@ export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
 ''');
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     buffer.writeln('export FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
     buffer.writeln('export LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');

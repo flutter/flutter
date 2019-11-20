@@ -33,7 +33,6 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
-import '../device.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -81,6 +80,7 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required bool initializePlatform,
   @required String hostname,
   @required String port,
+  @required List<String> dartDefines,
 });
 
 /// The dev filesystem responsible for building and serving  web applications.
@@ -97,6 +97,7 @@ class WebFs {
     this._target,
     this._buildInfo,
     this._initializePlatform,
+    this._dartDefines,
   );
 
   /// The server uri.
@@ -111,6 +112,7 @@ class WebFs {
   final String _target;
   final BuildInfo _buildInfo;
   final bool _initializePlatform;
+  final List<String> _dartDefines;
   StreamSubscription<void> _connectedApps;
 
   static const String _kHostName = 'localhost';
@@ -128,12 +130,12 @@ class WebFs {
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
   /// Only calls [AppConnection.runMain] on the subsequent connections.
-  Future<ConnectionResult> connect(DebuggingOptions debuggingOptions) {
+  Future<ConnectionResult> connect(bool useDebugExtension) {
     final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
-      final DebugConnection debugConnection = debuggingOptions.browserLaunch
-        ? await _dwds.debugConnection(appConnection)
-        : await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first);
+      final DebugConnection debugConnection = useDebugExtension
+        ? await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first)
+        : await _dwds.debugConnection(appConnection);
       if (!firstConnection.isCompleted) {
         firstConnection.complete(ConnectionResult(appConnection, debugConnection));
       } else {
@@ -146,7 +148,7 @@ class WebFs {
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
     if (!_useBuildRunner) {
-      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform);
+      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform, _dartDefines);
       return true;
     }
     _client.startBuild();
@@ -173,6 +175,7 @@ class WebFs {
     @required bool initializePlatform,
     @required String hostname,
     @required String port,
+    @required List<String> dartDefines,
   }) async {
     // workaround for https://github.com/flutter/flutter/issues/38290
     if (!flutterProject.dartTool.existsSync()) {
@@ -302,7 +305,7 @@ class WebFs {
         handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
       }
     } else {
-      await buildWeb(flutterProject, target, buildInfo, initializePlatform);
+      await buildWeb(flutterProject, target, buildInfo, initializePlatform, dartDefines);
       firstBuildCompleter.complete(true);
     }
 
@@ -325,6 +328,7 @@ class WebFs {
       target,
       buildInfo,
       initializePlatform,
+      dartDefines,
     );
     if (!await firstBuildCompleter.future) {
       throw const BuildException();
@@ -422,7 +426,7 @@ class DebugAssetServer extends AssetServer {
           partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
           for (ArchiveFile file in archive) {
-            partFiles.childFile(file.name).writeAsBytesSync(file.content);
+            partFiles.childFile(file.name).writeAsBytesSync(file.content as List<int>);
           }
         }
       }

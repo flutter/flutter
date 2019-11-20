@@ -254,11 +254,13 @@ class Shortcuts extends StatefulWidget {
   /// [shortcuts] change materially.
   final ShortcutManager manager;
 
-  /// The map of shortcuts that the [manager] will be given to manage.
+  /// {@template flutter.widgets.shortcuts.shortcuts}
+  /// The map of shortcuts that the [ShortcutManager] will be given to manage.
   ///
   /// For performance reasons, it is recommended that a pre-built map is passed
   /// in here (e.g. a final variable from your widget class) instead of defining
   /// it inline in the build function.
+  /// {@endtemplate}
   final Map<LogicalKeySet, Intent> shortcuts;
 
   /// The child widget for this [Shortcuts] widget.

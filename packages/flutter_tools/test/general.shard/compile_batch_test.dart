@@ -25,6 +25,8 @@ void main() {
   MockStdIn mockFrontendServerStdIn;
   MockStream mockFrontendServerStdErr;
 
+  List<String> latestCommand;
+
   setUp(() {
     mockProcessManager = MockProcessManager();
     mockFrontendServer = MockProcess();
@@ -38,7 +40,10 @@ void main() {
     when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
     when(mockProcessManager.canRun(any)).thenReturn(true);
     when(mockProcessManager.start(any)).thenAnswer(
-        (Invocation invocation) => Future<Process>.value(mockFrontendServer));
+        (Invocation invocation) {
+          latestCommand = invocation.positionalArguments.first;
+          return Future<Process>.value(mockFrontendServer);
+        });
     when(mockFrontendServer.exitCode).thenAnswer((_) async => 0);
   });
 
@@ -55,6 +60,7 @@ void main() {
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
+      dartDefines: const <String>[],
     );
 
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
@@ -66,7 +72,39 @@ void main() {
     Platform: kNoColorTerminalPlatform,
   });
 
-  testUsingContext('passes no-gen-bytecode to kernel compiler in aot/release mode', () async {
+  testUsingContext('passes correct AOT config to kernel compiler in aot/profile mode', () async {
+    when(mockFrontendServer.stdout)
+      .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+        Future<List<int>>.value(utf8.encode(
+          'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
+        ))
+      ));
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
+    await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      buildMode: BuildMode.profile,
+      trackWidgetCreation: false,
+      aot: true,
+      dartDefines: const <String>[],
+    );
+
+    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
+    final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
+    expect(argVerification.captured.single, containsAll(<String>[
+      '--aot',
+      '--tfa',
+      '-Ddart.vm.profile=true',
+      '-Ddart.vm.product=false',
+      '--bytecode-options=source-positions',
+    ]));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => mockProcessManager,
+    OutputPreferences: () => OutputPreferences(showColor: false),
+    Platform: kNoColorTerminalPlatform,
+  });
+
+
+  testUsingContext('passes correct AOT config to kernel compiler in aot/release mode', () async {
     when(mockFrontendServer.stdout)
       .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
         Future<List<int>>.value(utf8.encode(
@@ -79,11 +117,18 @@ void main() {
       buildMode: BuildMode.release,
       trackWidgetCreation: false,
       aot: true,
+      dartDefines: const <String>[],
     );
 
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
-    expect(argVerification.captured.single, contains('--no-gen-bytecode'));
+    expect(argVerification.captured.single, containsAll(<String>[
+      '--aot',
+      '--tfa',
+      '-Ddart.vm.profile=false',
+      '-Ddart.vm.product=true',
+      '--bytecode-options=source-positions',
+    ]));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
@@ -103,6 +148,7 @@ void main() {
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
+      dartDefines: const <String>[],
     );
 
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
@@ -130,10 +176,32 @@ void main() {
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
+      dartDefines: const <String>[],
     );
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     expect(bufferLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
     expect(output, equals(null));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => mockProcessManager,
+    OutputPreferences: () => OutputPreferences(showColor: false),
+    Platform: kNoColorTerminalPlatform,
+  });
+
+  testUsingContext('passes dartDefines to the kernel compiler', () async {
+    // Use unsuccessful result because it's easier to setup in test. We only care about arguments passed to the compiler.
+    when(mockFrontendServer.exitCode).thenAnswer((_) async => 255);
+    when(mockFrontendServer.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+      Future<List<int>>.value(<int>[])
+    ));
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
+    await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      buildMode: BuildMode.debug,
+      trackWidgetCreation: false,
+      dartDefines: const <String>['FOO=bar', 'BAZ=qux'],
+    );
+
+    expect(latestCommand, containsAllInOrder(<String>['-DFOO=bar', '-DBAZ=qux']));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),

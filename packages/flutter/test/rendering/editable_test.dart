@@ -179,6 +179,30 @@ void main() {
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   }, skip: isBrowser);
 
+  test('Can change textAlign', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+
+    final RenderEditable editable = RenderEditable(
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(text: 'test'),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    layout(editable);
+
+    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    expect(editable.textAlign, TextAlign.start);
+    expect(editable.debugNeedsLayout, isFalse);
+
+    editable.textAlign = TextAlign.center;
+    expect(editable.textAlign, TextAlign.center);
+    expect(editable.debugNeedsLayout, isTrue);
+  });
+
   test('Cursor with ideographic script', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);

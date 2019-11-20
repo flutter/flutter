@@ -23,7 +23,7 @@ import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
-import 'package:test_core/backend.dart';
+import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 const String ddcBootstrapExtension = '.dart.bootstrap.js';
 const String jsEntrypointExtension = '.dart.js';
@@ -118,12 +118,12 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       'flutter_tools:ddc',
       <Builder Function(BuilderOptions)>[
         (BuilderOptions builderOptions) => KernelBuilder(
-              platformSdk: builderOptions.config['flutterWebSdk'],
+              platformSdk: builderOptions.config['flutterWebSdk'] as String,
               summaryOnly: true,
               sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
               outputExtension: ddcKernelExtension,
               platform: flutterWebPlatform,
-              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
+              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'] as String, 'libraries.json')),
               kernelTargetName: 'ddc',
               useIncrementalCompiler: true,
               trackUnusedInputs: true,
@@ -132,9 +132,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               useIncrementalCompiler: true,
               trackUnusedInputs: true,
               platform: flutterWebPlatform,
-              platformSdk: builderOptions.config['flutterWebSdk'],
+              platformSdk: builderOptions.config['flutterWebSdk'] as String,
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
-              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
+              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'] as String, 'libraries.json')),
             ),
       ],
       core.toAllPackages(),
@@ -145,9 +145,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     'flutter_tools:entrypoint',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebEntrypointBuilder(
-          options.config[kReleaseFlag] ?? false,
-          options.config[kProfileFlag] ?? false,
-          options.config['flutterWebSdk'],
+          options.config[kReleaseFlag] as bool ?? false,
+          options.config[kProfileFlag] as bool ?? false,
+          options.config['flutterWebSdk'] as String,
       ),
     ],
     core.toRoot(),

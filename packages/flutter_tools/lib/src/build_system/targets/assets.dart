@@ -34,7 +34,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
     assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = fs.file(fs.path.join(outputDirectory.path, entry.key));
+        final File file = fs.file(outputDirectory.uri.resolve(entry.key));
         outputs.add(file);
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
@@ -64,12 +64,14 @@ class CopyAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d'
   ];
 
   @override

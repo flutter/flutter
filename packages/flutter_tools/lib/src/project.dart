@@ -231,12 +231,12 @@ class FlutterProject {
     if (!pubspecFile.existsSync()) {
       return null;
     }
-    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
+    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
     // If the pubspec file is empty, this will be null.
     if (pubspec == null) {
       return null;
     }
-    return pubspec['builders'];
+    return pubspec['builders'] as YamlMap;
   }
 
   /// Whether there are any builders used by this package.
@@ -645,6 +645,11 @@ class AndroidProject {
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {
+    if (isModule) {
+      // A module type's Android project is used in add-to-app scenarios and
+      // only supports the V2 embedding.
+      return AndroidEmbeddingVersion.v2;
+    }
     if (appManifestFile == null || !appManifestFile.existsSync()) {
       return AndroidEmbeddingVersion.v1;
     }

@@ -79,10 +79,13 @@ enum _ContextMenuLocation {
 /// This sample shows a very simple CupertinoContextMenu for an empty red
 /// 100x100 Container. Simply long press on it to open.
 ///
+/// ```dart imports
+/// import 'package:flutter/cupertino.dart';
+/// ```
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     key: scaffoldKey,
 ///     body: Center(
 ///       child: Container(
 ///         width: 100,
@@ -867,8 +870,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   static const double _kPadding = 20.0;
   static const double _kDamping = 400.0;
   static const Duration _kMoveControllerDuration = Duration(milliseconds: 600);
-
-  final GlobalKey _childGlobalKey = GlobalKey();
 
   Offset _dragOffset;
   double _lastScale = 1.0;

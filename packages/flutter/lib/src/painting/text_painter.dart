@@ -816,8 +816,15 @@ class TextPainter {
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   TextRange getWordBoundary(TextPosition position) {
     assert(!_needsLayout);
-    final List<int> indices = _paragraph.getWordBoundary(position.offset);
-    return TextRange(start: indices[0], end: indices[1]);
+    return _paragraph.getWordBoundary(position);
+  }
+
+  /// Returns the text range of the line at the given offset.
+  ///
+  /// The newline, if any, is included in the range.
+  TextRange getLineBoundary(TextPosition position) {
+    assert(!_needsLayout);
+    return _paragraph.getLineBoundary(position);
   }
 
   /// Returns the full list of [LineMetrics] that describe in detail the various

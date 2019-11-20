@@ -94,6 +94,7 @@ class AOTSnapshotter {
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
+    bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
       printError('Bitcode is only supported for iOS.');
@@ -157,11 +158,11 @@ class AOTSnapshotter {
 
     genSnapshotArgs.add(mainPath);
 
-    // Verify that all required inputs exist.
+    // TODO(jonahwilliams): fully remove input checks once all callers are
+    // using assemble.
     final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
     if (missingInputs.isNotEmpty) {
-      printError('Missing input files: $missingInputs from $inputPaths');
-      return 1;
+      printTrace('Missing input files: $missingInputs from $inputPaths');
     }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
@@ -196,6 +197,7 @@ class AOTSnapshotter {
 
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
+    // TODO(jonahwilliams): remove when all callers are using assemble.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
     outputDir.childFile('gen_snapshot.d').writeAsStringSync('gen_snapshot.d: $genSnapshotPath\n');
 
@@ -208,6 +210,7 @@ class AOTSnapshotter {
         assemblyPath: stripSymbols ? '$assembly.stripped.S' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
+        quiet: quiet,
       );
       if (result.exitCode != 0) {
         return result.exitCode;
@@ -224,9 +227,12 @@ class AOTSnapshotter {
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
+    @required bool quiet
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
-    printStatus('Building App.framework for $targetArch...');
+    if (!quiet) {
+      printStatus('Building App.framework for $targetArch...');
+    }
 
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
@@ -280,6 +286,7 @@ class AOTSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required bool trackWidgetCreation,
+    @required List<String> dartDefines,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final FlutterProject flutterProject = FlutterProject.current();
@@ -310,6 +317,7 @@ class AOTSnapshotter {
       aot: true,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
+      dartDefines: dartDefines,
     ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
