@@ -68,7 +68,7 @@ class IntelliJPlugins {
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);
       try {
-        tempDirectory?.deleteSync(recursive: true);
+        tempDirectory.deleteSync(recursive: true);
       } on Exception catch (_) {
         printTrace('Failed to delete temp directory: ${tempDirectory?.path}');
       }
