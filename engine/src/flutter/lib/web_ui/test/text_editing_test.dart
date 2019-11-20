@@ -26,6 +26,7 @@ final InputConfiguration singlelineConfig = InputConfiguration(
   inputType: EngineInputType.text,
   obscureText: false,
   inputAction: 'TextInputAction.done',
+  autocorrect: true,
 );
 final Map<String, dynamic> flutterSinglelineConfig =
     createFlutterConfig('text');
@@ -34,6 +35,7 @@ final InputConfiguration multilineConfig = InputConfiguration(
   inputType: EngineInputType.multiline,
   obscureText: false,
   inputAction: 'TextInputAction.newline',
+  autocorrect: true,
 );
 final Map<String, dynamic> flutterMultilineConfig =
     createFlutterConfig('multiline');
@@ -105,6 +107,7 @@ void main() {
         inputType: EngineInputType.text,
         inputAction: 'TextInputAction.done',
         obscureText: true,
+        autocorrect: true,
       );
       editingElement.enable(
         config,
@@ -115,6 +118,46 @@ void main() {
       final InputElement input = document.getElementsByTagName('input')[0];
       expect(editingElement.domElement, input);
       expect(input.getAttribute('type'), 'password');
+
+      editingElement.disable();
+    });
+
+    test('Knows to turn autocorrect off', () {
+      final InputConfiguration config = InputConfiguration(
+        inputType: EngineInputType.text,
+        inputAction: 'TextInputAction.done',
+        obscureText: false,
+        autocorrect: false,
+      );
+      editingElement.enable(
+        config,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      expect(document.getElementsByTagName('input'), hasLength(1));
+      final InputElement input = document.getElementsByTagName('input')[0];
+      expect(editingElement.domElement, input);
+      expect(input.getAttribute('autocorrect'), 'off');
+
+      editingElement.disable();
+    });
+
+    test('Knows to turn autocorrect on', () {
+      final InputConfiguration config = InputConfiguration(
+        inputType: EngineInputType.text,
+        inputAction: 'TextInputAction.done',
+        obscureText: false,
+        autocorrect: true,
+      );
+      editingElement.enable(
+        config,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      expect(document.getElementsByTagName('input'), hasLength(1));
+      final InputElement input = document.getElementsByTagName('input')[0];
+      expect(editingElement.domElement, input);
+      expect(input.getAttribute('autocorrect'), 'on');
 
       editingElement.disable();
     });
@@ -263,6 +306,7 @@ void main() {
         inputType: EngineInputType.text,
         obscureText: false,
         inputAction: 'TextInputAction.done',
+        autocorrect: true,
       );
       editingElement.enable(
         config,
@@ -286,6 +330,7 @@ void main() {
         inputType: EngineInputType.multiline,
         obscureText: false,
         inputAction: 'TextInputAction.done',
+        autocorrect: true,
       );
       editingElement.enable(
         config,
@@ -1129,6 +1174,7 @@ class PlatformMessagesSpy {
 Map<String, dynamic> createFlutterConfig(
   String inputType, {
   bool obscureText = false,
+  bool autocorrect = true,
   String inputAction,
 }) {
   return <String, dynamic>{
@@ -1136,6 +1182,7 @@ Map<String, dynamic> createFlutterConfig(
       'name': 'TextInputType.$inputType',
     },
     'obscureText': obscureText,
+    'autocorrect': autocorrect,
     'inputAction': inputAction ?? 'TextInputAction.done',
   };
 }
