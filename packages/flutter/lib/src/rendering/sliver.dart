@@ -1831,15 +1831,15 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
 class RenderSliverIgnorePointer extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
   /// Creates a render object that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics], this
-  /// render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
+  /// this render object will be ignored for semantics if [ignoring] is true.
   RenderSliverIgnorePointer({
     RenderSliver sliver,
     bool ignoring = true,
     bool ignoringSemantics,
   }) : assert(ignoring != null),
-      _ignoring = ignoring,
-      _ignoringSemantics = ignoringSemantics {
+       _ignoring = ignoring,
+       _ignoringSemantics = ignoringSemantics {
     child = sliver;
   }
 
@@ -1854,7 +1854,7 @@ class RenderSliverIgnorePointer extends RenderSliver with RenderObjectWithChildM
     if (value == _ignoring)
       return;
     _ignoring = value;
-    if (ignoringSemantics == null)
+    if (_ignoringSemantics == null || !_ignoringSemantics)
       markNeedsSemanticsUpdate();
   }
 

@@ -1638,15 +1638,15 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
 class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a sliver widget that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics], this
-  /// render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
+  /// this render object will be ignored for semantics if [ignoring] is true.
   const SliverIgnorePointer({
     Key key,
     this.ignoring = true,
     this.ignoringSemantics,
     Widget sliver,
   }) : assert(ignoring != null),
-      super(key: key, child: sliver);
+       super(key: key, child: sliver);
 
   /// Whether this sliver is ignored during hit testing.
   ///
