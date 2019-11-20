@@ -545,7 +545,7 @@ class DebuggingOptions {
   final int deviceVmServicePort;
   final String port;
   final String hostname;
-  /// A file where the vmservice URI should be written after the application is started.
+  /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
 
   bool get hasObservatoryPort => hostVmServicePort != null;

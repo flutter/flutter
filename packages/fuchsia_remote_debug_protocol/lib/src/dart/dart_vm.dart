@@ -137,7 +137,7 @@ class DartVm {
 
   final json_rpc.Peer _peer;
 
-  /// The URI through which this DartVM instance is connected.
+  /// The URL through which this DartVM instance is connected.
   final Uri uri;
 
   /// Attempts to connect to the given [Uri].

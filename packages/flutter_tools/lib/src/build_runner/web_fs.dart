@@ -100,7 +100,7 @@ class WebFs {
     this._dartDefines,
   );
 
-  /// The server URI.
+  /// The server URL.
   final String uri;
 
   final HttpServer _server;

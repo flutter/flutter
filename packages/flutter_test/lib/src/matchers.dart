@@ -308,7 +308,7 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// treated as the image for the widget. As such, you may choose to wrap a test
 /// widget in a [RepaintBoundary] to specify a particular focus for the test.
 ///
-/// The [key] may be either a [Uri] or a [String] representation of a URI.
+/// The [key] may be either a [Uri] or a [String] representation of a URL.
 ///
 /// The [version] is a number that can be used to differentiate historical
 /// golden files. This parameter is optional.
