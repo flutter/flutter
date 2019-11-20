@@ -171,8 +171,8 @@ void main() {
 
             final TestHotRunnerFactory testHotRunnerFactory = TestHotRunnerFactory();
             final Future<void> task = createTestCommandRunner(
-              AttachCommand(hotRunnerFactory: testHotRunnerFactory)
-            ).run(<String>['attach']);
+                AttachCommand(hotRunnerFactory: testHotRunnerFactory)
+              ).run(<String>['attach']);
 
             // First iteration of the attach loop.
             mockLogReader.addLine('Observatory listening on http://127.0.0.1:0001');
@@ -182,9 +182,6 @@ void main() {
 
             compilerStdoutController
               .add(utf8.encode('result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'));
-            time.flushMicrotasks();
-
-            testHotRunnerFactory.fakeAppFinishedUnexpectedly();
             time.flushMicrotasks();
 
             // Second iteration of the attach loop.
@@ -752,11 +749,6 @@ class TestHotRunnerFactory extends HotRunnerFactory {
       ipv6: ipv6,
     );
     return _runner;
-  }
-
-  void fakeAppFinishedUnexpectedly() {
-    assert(_runner != null);
-    _runner.appFinished();
   }
 
   Future<void> exitApp() async {
