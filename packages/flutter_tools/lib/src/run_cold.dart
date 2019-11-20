@@ -183,7 +183,7 @@ class ColdRunner extends ResidentRunner {
     bool haveAnything = false;
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
-      if (device.observatoryUris != null) {
+      if (device.vmServices != null) {
         for (VMService vm in device.vmServices) {
           printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.wsAddress}');
         }
