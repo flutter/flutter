@@ -477,12 +477,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
   }
 
-  static const double _defaultTrackHeight = 2;
+  static const double _defaultTrackHeight = 4;
   static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
   static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
-  static const SliderComponentShape _defaultValueIndicatorShape = PaddleSliderValueIndicatorShape();
+  static const SliderComponentShape _defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
   @override
@@ -520,6 +520,19 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // colors come from the ThemeData.colorScheme. These colors, along with
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
+
+    // The value indicator color is not the same as the thumb and active track
+    // (which can be defined by activeColor) if the
+    // RectangularSliderValueIndicatorShape is used. In all other cases, the
+    // value indicator is assumed to be the same as the active color.
+    final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape;
+    Color valueIndicatorColor;
+    if (valueIndicatorShape is RectangularSliderValueIndicatorShape) {
+      valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
+    } else {
+      valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
+    }
+
     sliderTheme = sliderTheme.copyWith(
       trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
@@ -533,24 +546,31 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       thumbColor: widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
       disabledThumbColor: sliderTheme.disabledThumbColor ?? theme.colorScheme.onSurface.withOpacity(0.38),
       overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
-      valueIndicatorColor: widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary,
+      valueIndicatorColor: valueIndicatorColor,
+      surfaceColor: sliderTheme.surfaceColor ?? theme.colorScheme.surface,
       trackShape: sliderTheme.trackShape ?? _defaultTrackShape,
       tickMarkShape: sliderTheme.tickMarkShape ?? _defaultTickMarkShape,
       thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
-      valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
+      valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
       valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
     );
 
+    // This size is used as the max bounds for the painting of the value
+    // indicators It must be kept in sync with the function with the same name
+    // in range_slider.dart.
+    Size _sizeWithOverflow() => MediaQuery.of(context).size;
+
     return _SliderRenderObjectWidget(
       value: _unlerp(widget.value),
       divisions: widget.divisions,
       label: widget.label,
       sliderTheme: sliderTheme,
-      mediaQueryData: MediaQuery.of(context),
+      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+      sizeWithOverflow: _sizeWithOverflow(),
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -586,7 +606,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.label,
     this.sliderTheme,
-    this.mediaQueryData,
+    this.textScaleFactor,
+    this.sizeWithOverflow,
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -598,7 +619,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final String label;
   final SliderThemeData sliderTheme;
-  final MediaQueryData mediaQueryData;
+  final double textScaleFactor;
+  final Size sizeWithOverflow;
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
@@ -612,7 +634,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       label: label,
       sliderTheme: sliderTheme,
-      mediaQueryData: mediaQueryData,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -631,7 +654,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..label = label
       ..sliderTheme = sliderTheme
       ..theme = Theme.of(context)
-      ..mediaQueryData = mediaQueryData
+      ..textScaleFactor = textScaleFactor
+      ..sizeWithOverflow = sizeWithOverflow
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -649,7 +673,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     int divisions,
     String label,
     SliderThemeData sliderTheme,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size sizeWithOverflow,
     TargetPlatform platform,
     ValueChanged<double> onChanged,
     SemanticFormatterCallback semanticFormatterCallback,
@@ -666,7 +691,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _value = value,
        _divisions = divisions,
        _sliderTheme = sliderTheme,
-       _mediaQueryData = mediaQueryData,
+       _textScaleFactor = textScaleFactor,
+       _sizeWithOverflow = sizeWithOverflow,
        _onChanged = onChanged,
        _state = state,
        _textDirection = textDirection {
@@ -821,16 +847,26 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsPaint();
   }
 
-  MediaQueryData get mediaQueryData => _mediaQueryData;
-  MediaQueryData _mediaQueryData;
-  set mediaQueryData(MediaQueryData value) {
-    if (value == _mediaQueryData) {
+  double get textScaleFactor => _textScaleFactor;
+  double _textScaleFactor;
+  set textScaleFactor(double value) {
+    if (value == _textScaleFactor) {
       return;
     }
-    _mediaQueryData = value;
+    _textScaleFactor = value;
     // Media query data includes the textScaleFactor, so we need to update the
     // label painter.
     _updateLabelPainter();
+  }
+
+  Size get sizeWithOverflow => _sizeWithOverflow;
+  Size _sizeWithOverflow;
+  set sizeWithOverflow(Size value) {
+    if (value == _sizeWithOverflow) {
+      return;
+    }
+    _sizeWithOverflow = value;
+    markNeedsPaint();
   }
 
   ValueChanged<double> get onChanged => _onChanged;
@@ -906,7 +942,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           text: label,
         )
         ..textDirection = textDirection
-        ..textScaleFactor = _mediaQueryData.textScaleFactor
+        ..textScaleFactor = textScaleFactor
         ..layout();
     } else {
       _labelPainter.text = null;
@@ -1087,7 +1123,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
+    final Offset thumbCenter = Offset(
+        trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
 
     _sliderTheme.trackShape.paint(
       context,
@@ -1121,7 +1158,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - tickMarkWidth;
+      final double adjustedTrackWidth = trackRect.width - trackRect.height;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1129,7 +1166,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + tickMarkWidth / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth + trackRect.height / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.tickMarkShape.paint(
             context,
@@ -1158,6 +1195,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           sliderTheme: _sliderTheme,
           textDirection: _textDirection,
           value: _value,
+          textScaleFactor: textScaleFactor,
+          sizeWithOverflow: sizeWithOverflow.isEmpty ? size : sizeWithOverflow,
         );
       }
     }
@@ -1165,13 +1204,14 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _sliderTheme.thumbShape.paint(
       context,
       thumbCenter,
-      activationAnimation: _valueIndicatorAnimation,
+      activationAnimation: _overlayAnimation,
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
       labelPainter: _labelPainter,
       parentBox: this,
       sliderTheme: _sliderTheme,
       textDirection: _textDirection,
+      sizeWithOverflow: sizeWithOverflow.isEmpty ? size : sizeWithOverflow,
       value: _value,
     );
   }
