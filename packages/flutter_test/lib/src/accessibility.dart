@@ -196,7 +196,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   Future<Evaluation> evaluate(WidgetTester tester) async {
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.debugLayer;
+    final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
     ui.Image image;
     final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
@@ -231,7 +231,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       Rect paintBounds;
       if (elements.length == 1) {
         final Element element = elements.single;
-        final RenderBox renderObject = element.renderObject;
+        final RenderBox renderObject = element.renderObject as RenderBox;
         element.renderObject.paintBounds;
         paintBounds = Rect.fromPoints(
           renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
@@ -406,15 +406,15 @@ class _ContrastReport {
     if (r <= 0.03928)
       r /= 12.92;
     else
-      r = math.pow((r + 0.055)/ 1.055, 2.4);
+      r = math.pow((r + 0.055)/ 1.055, 2.4).toDouble();
     if (g <= 0.03928)
       g /= 12.92;
     else
-      g = math.pow((g + 0.055)/ 1.055, 2.4);
+      g = math.pow((g + 0.055)/ 1.055, 2.4).toDouble();
     if (b <= 0.03928)
       b /= 12.92;
     else
-      b = math.pow((b + 0.055)/ 1.055, 2.4);
+      b = math.pow((b + 0.055)/ 1.055, 2.4).toDouble();
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 }

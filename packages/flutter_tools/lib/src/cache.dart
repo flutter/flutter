@@ -379,7 +379,7 @@ class Cache {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     bool allAvailible = true;
     cache.includeAllPlatforms = includeAllPlatforms;
-    for (CachedArtifact cachedArtifact in _artifacts) {
+    for (ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
         allAvailible &= await cachedArtifact.checkForArtifacts(engineVersion);
       }

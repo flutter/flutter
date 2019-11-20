@@ -51,5 +51,5 @@ Future<ReplayProcessManager> getReplayProcessManager(String location) async {
     throwToolExit('Invalid replay-from: $error');
   }
 
-  return manager;
+  return manager as ReplayProcessManager;
 }

@@ -10,6 +10,7 @@ import 'package:crypto/crypto.dart';
 import 'package:pool/pool.dart';
 
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../globals.dart';
 import 'build_system.dart';
@@ -19,9 +20,9 @@ class FileStorage {
   FileStorage(this.version, this.files);
 
   factory FileStorage.fromBuffer(Uint8List buffer) {
-    final Map<String, Object> json = jsonDecode(utf8.decode(buffer));
-    final int version = json['version'];
-    final List<Object> rawCachedFiles = json['files'];
+    final Map<String, dynamic> json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
+    final int version = json['version'] as int;
+    final List<Map<String, Object>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, Object>>();
     final List<FileHash> cachedFiles = <FileHash>[
       for (Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
     ];
@@ -47,7 +48,7 @@ class FileHash {
   FileHash(this.path, this.hash);
 
   factory FileHash.fromJson(Map<String, Object> json) {
-    return FileHash(json['path'], json['hash']);
+    return FileHash(json['path'] as String, json['hash'] as String);
   }
 
   final String path;
@@ -92,7 +93,7 @@ class FileHashStore {
     if (!cacheFile.existsSync()) {
       return;
     }
-    List<int> data;
+    Uint8List data;
     try {
       data = cacheFile.readAsBytesSync();
     } on FileSystemException catch (err) {
@@ -138,7 +139,7 @@ class FileHashStore {
       _kVersion,
       fileHashes,
     );
-    final Uint8List buffer = fileStorage.toBuffer();
+    final List<int> buffer = fileStorage.toBuffer();
     try {
       cacheFile.writeAsBytesSync(buffer);
     } on FileSystemException catch (err) {

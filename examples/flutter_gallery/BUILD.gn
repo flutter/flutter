@@ -31,6 +31,7 @@ flutter_app("flutter_gallery") {
     "//third_party/dart-pkg/pub/flutter_gallery_assets",
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/path",
+    "//third_party/dart-pkg/pub/rally_assets",
     "//third_party/dart-pkg/pub/scoped_model",
     "//third_party/dart-pkg/pub/shrine_images",
     "//third_party/dart-pkg/pub/source_span",

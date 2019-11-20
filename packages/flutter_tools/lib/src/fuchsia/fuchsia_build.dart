@@ -10,6 +10,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
@@ -87,7 +88,7 @@ Future<void> _buildAssets(
 }
 
 void _rewriteCmx(BuildMode mode, String runnerPackageSource, File src, File dst) {
-  final Map<String, dynamic> cmx = json.decode(src.readAsStringSync());
+  final Map<String, dynamic> cmx = castStringKeyedMap(json.decode(src.readAsStringSync()));
   // If the app author has already specified the runner in the cmx file, then
   // do not override it with something else.
   if (cmx.containsKey('runner')) {

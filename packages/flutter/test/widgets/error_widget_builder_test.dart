@@ -5,6 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
   testWidgets('ErrorWidget.builder', (WidgetTester tester) async {
     final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
@@ -22,6 +24,25 @@ void main() {
     );
     expect(tester.takeException().toString(), 'test');
     expect(find.text('oopsie!'), findsOneWidget);
+    ErrorWidget.builder = oldBuilder;
+  });
+
+  testWidgets('ErrorWidget.builder', (WidgetTester tester) async {
+    final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+      return ErrorWidget('');
+    };
+    await tester.pumpWidget(
+      SizedBox(
+        child: Builder(
+          builder: (BuildContext context) {
+            throw 'test';
+          },
+        ),
+      ),
+    );
+    expect(tester.takeException().toString(), 'test');
+    expect(find.byType(ErrorWidget), isNot(paints..paragraph()));
     ErrorWidget.builder = oldBuilder;
   });
 }

@@ -23,7 +23,7 @@ import 'package:test_api/test_api.dart';
 
 Declarer _localDeclarer;
 Declarer get _declarer {
-  final Declarer declarer = Zone.current[#test.declarer];
+  final Declarer declarer = Zone.current[#test.declarer] as Declarer;
   if (declarer != null) {
     return declarer;
   }
@@ -58,9 +58,9 @@ Future<void> _runGroup(Suite suiteConfig, Group group, List<Group> parents, _Rep
         if (entry is Group) {
           await _runGroup(suiteConfig, entry, parents, reporter);
         } else if (entry.metadata.skip) {
-          await _runSkippedTest(suiteConfig, entry, parents, reporter);
+          await _runSkippedTest(suiteConfig, entry as Test, parents, reporter);
         } else {
-          final Test test = entry;
+          final Test test = entry as Test;
           await _runLiveTest(suiteConfig, test.load(suiteConfig, groups: parents), reporter);
         }
       }
@@ -154,7 +154,7 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 @isTest
 void test(
   Object description,
-  Function body, {
+  dynamic Function() body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
@@ -163,7 +163,8 @@ void test(
   int retry,
 }) {
   _declarer.test(
-    description.toString(), body,
+    description.toString(),
+    body,
     testOn: testOn,
     timeout: timeout,
     skip: skip,
@@ -221,7 +222,7 @@ void test(
 /// If multiple platforms match, the annotations apply in order as through
 /// they were in nested groups.
 @isTestGroup
-void group(Object description, Function body, { dynamic skip }) {
+void group(Object description, void Function() body, { dynamic skip }) {
   _declarer.group(description.toString(), body, skip: skip);
 }
 
@@ -236,7 +237,7 @@ void group(Object description, Function body, { dynamic skip }) {
 ///
 /// Each callback at the top level or in a given group will be run in the order
 /// they were declared.
-void setUp(Function body) {
+void setUp(dynamic Function() body) {
   _declarer.setUp(body);
 }
 
@@ -253,7 +254,7 @@ void setUp(Function body) {
 /// reverse of the order they were declared.
 ///
 /// See also [addTearDown], which adds tear-downs to a running test.
-void tearDown(Function body) {
+void tearDown(dynamic Function() body) {
   _declarer.tearDown(body);
 }
 
@@ -270,7 +271,7 @@ void tearDown(Function body) {
 /// dependencies between tests that should be isolated. In general, you should
 /// prefer [setUp], and only use [setUpAll] if the callback is prohibitively
 /// slow.
-void setUpAll(Function body) {
+void setUpAll(dynamic Function() body) {
   _declarer.setUpAll(body);
 }
 
@@ -285,7 +286,7 @@ void setUpAll(Function body) {
 /// dependencies between tests that should be isolated. In general, you should
 /// prefer [tearDown], and only use [tearDownAll] if the callback is
 /// prohibitively slow.
-void tearDownAll(Function body) {
+void tearDownAll(dynamic Function() body) {
   _declarer.tearDownAll(body);
 }
 

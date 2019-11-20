@@ -139,6 +139,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: PestoDemo.routeName,
       buildRoute: (BuildContext context) => const PestoDemo(),
     ),
+    GalleryDemo(
+      title: 'Rally',
+      subtitle: 'A personal finance app',
+      icon: GalleryIcons.data_table,
+      category: _kDemos,
+      routeName: RallyDemo.routeName,
+      buildRoute: (BuildContext context) => const RallyDemo(),
+    ),
 
     // Style
     GalleryDemo(

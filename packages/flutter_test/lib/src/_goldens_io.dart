@@ -135,7 +135,7 @@ class LocalComparisonOutput {
     if (result.diffs != null) {
       additionalFeedback = '\nFailure feedback can be found at '
         '${path.join(basedir.path, 'failures')}';
-      final Map<String, Image> diffs = result.diffs;
+      final Map<String, Image> diffs = result.diffs.cast<String, Image>();
       diffs.forEach((String name, Image image) {
         final File output = getFailureFile(
           key.isEmpty ? name : name + '_' + key,
