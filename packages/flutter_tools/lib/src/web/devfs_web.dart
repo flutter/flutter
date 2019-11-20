@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 
@@ -13,6 +12,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
