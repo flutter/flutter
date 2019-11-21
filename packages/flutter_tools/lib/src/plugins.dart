@@ -81,7 +81,7 @@ class Plugin {
 
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
 
-      if (_providesImplementationForPlatform(platformsYaml, AndroidPlugin.kConfigKey)) {
+    if (_providesImplementationForPlatform(platformsYaml, AndroidPlugin.kConfigKey)) {
       platforms[AndroidPlugin.kConfigKey] = AndroidPlugin.fromYaml(
         name,
         platformsYaml[AndroidPlugin.kConfigKey] as YamlMap,
