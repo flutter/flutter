@@ -544,7 +544,7 @@ class LocalizationsGenerator {
 
   /// Scans [l10nDirectory] for arb files and parses them for language and locale
   /// information.
-  void setLanguageAndLocalesByArbFiles() {
+  void parseArbFiles() {
     final List<FileSystemEntity> sortedFileSystemEntityList = l10nDirectory
       .listSync()
       .toList()

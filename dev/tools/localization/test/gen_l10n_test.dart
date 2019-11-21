@@ -221,7 +221,7 @@ void main() {
     });
   });
 
-  group('LocalizationsGenerator.setLanguageAndLocalesByArbFiles:', () {
+  group('LocalizationsGenerator.parseArbFiles:', () {
     test('correctly initializes supportedLocales and supportedLanguageCodes properties', () {
       _standardFlutterDirectoryL10nSetup(fs);
 
@@ -234,7 +234,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.setLanguageAndLocalesByArbFiles();
+        generator.parseArbFiles();
       } on L10nException catch (e) {
         fail('Setting language and locales should not fail $e');
       }
@@ -256,7 +256,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.setLanguageAndLocalesByArbFiles();
+        generator.parseArbFiles();
       } on L10nException catch (e) {
         expect(e.message, contains('locale could not be determined'));
         return;
@@ -289,7 +289,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.setLanguageAndLocalesByArbFiles();
+        generator.parseArbFiles();
       } on L10nException catch (e) {
         expect(e.message, contains('Multiple arb files with the same locale detected'));
         return;
