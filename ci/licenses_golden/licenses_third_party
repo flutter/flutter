@@ -1,4 +1,4 @@
-Signature: a5920f76e5510b35459f38e8498a85cc
+Signature: 7da493d646e9f99c5b1b71762f1fe64d
 
 UNUSED LICENSES:
 
@@ -8059,7 +8059,6 @@ FILE: ../../../third_party/dart/samples/sample_extension/test_sample_synchronous
 FILE: ../../../third_party/dart/samples/samples.status
 FILE: ../../../third_party/dart/sdk/lib/_http/crypto.dart
 FILE: ../../../third_party/dart/sdk/lib/_http/http_date.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/libraries.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/core_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/isolate_patch.dart
@@ -8185,7 +8184,6 @@ FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/crypto.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http_date.dart
-FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/libraries.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/async_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/core_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/isolate_patch.dart
