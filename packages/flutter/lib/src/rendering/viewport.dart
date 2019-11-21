@@ -75,6 +75,7 @@ abstract class RenderAbstractViewport extends RenderObject {
   ///
   ///  * [RenderViewportBase.cacheExtent] for a definition of the cache extent.
   @protected
+  @visibleForTesting
   static const double defaultCacheExtent = 250.0;
 }
 
@@ -160,14 +161,17 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
     double cacheExtent,
+    bool autoCache = false,
   }) : assert(axisDirection != null),
        assert(crossAxisDirection != null),
        assert(offset != null),
        assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
+       assert(autoCache != null),
        _axisDirection = axisDirection,
        _crossAxisDirection = crossAxisDirection,
        _offset = offset,
-       _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent;
+       _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
+       _autoCache = autoCache;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -261,6 +265,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// viewport to an invisible item in the cache area, the framework will bring
   /// that item into view with an (implicit) scroll action.
   /// {@endtemplate}
+  ///
+  /// This value will be mutated during layout if [autoCache] is set to true.
+  /// Other attempts to mutate it will be over-written during the next layout
+  /// pass.
   double get cacheExtent => _cacheExtent;
   double _cacheExtent;
   set cacheExtent(double value) {
@@ -269,6 +277,22 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (value == _cacheExtent)
       return;
     _cacheExtent = value;
+    // When auto-caching, this value is computed during layout.
+    if (!autoCache) {
+      markNeedsLayout();
+    }
+  }
+
+  /// Whether layout should calculate the cache extent automatically from the
+  /// main axis extent.
+  bool get autoCache => _autoCache;
+  bool _autoCache;
+  set autoCache(bool value) {
+    assert(value != null);
+    if (value == _autoCache) {
+      return;
+    }
+    _autoCache = value;
     markNeedsLayout();
   }
 
@@ -1076,11 +1100,18 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     List<RenderSliver> children,
     RenderSliver center,
     double cacheExtent,
+    bool autoCache = false,
   }) : assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
        _anchor = anchor,
        _center = center,
-       super(axisDirection: axisDirection, crossAxisDirection: crossAxisDirection, offset: offset, cacheExtent: cacheExtent) {
+       super(
+         axisDirection: axisDirection,
+         crossAxisDirection: crossAxisDirection,
+         offset: offset,
+         cacheExtent: cacheExtent,
+         autoCache: autoCache,
+       ) {
     addAll(children);
     if (center == null && firstChild != null)
       _center = firstChild;
@@ -1336,6 +1367,10 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     final double centerOffset = mainAxisExtent * anchor - correctedOffset;
     final double reverseDirectionRemainingPaintExtent = centerOffset.clamp(0.0, mainAxisExtent);
     final double forwardDirectionRemainingPaintExtent = (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
+
+    if (autoCache) {
+      cacheExtent = mainAxisExtent;
+    }
 
     final double fullCacheExtent = mainAxisExtent + 2 * cacheExtent;
     final double centerCacheOffset = centerOffset + cacheExtent;

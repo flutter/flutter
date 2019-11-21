@@ -61,7 +61,36 @@ class Viewport extends MultiChildRenderObjectWidget {
   }) : assert(offset != null),
        assert(slivers != null),
        assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
+       _autoCache = false,
        super(key: key, children: slivers);
+
+  /// Creates a widget that is bigger on the inside.
+  ///
+  /// The viewport listens to the [offset], which means you do not need to
+  /// rebuild this widget when the [offset] changes.
+  ///
+  /// The [offset] argument must not be null.
+  ///
+  /// A cache extent for this viewport will be automatically calculated during
+  /// layout as triple the main axis extent.
+  Viewport.autoCaching({
+    Key key,
+    this.axisDirection = AxisDirection.down,
+    this.crossAxisDirection,
+    this.anchor = 0.0,
+    @required this.offset,
+    this.center,
+    List<Widget> slivers = const <Widget>[],
+  }) : assert(offset != null),
+       assert(slivers != null),
+       assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
+       cacheExtent = null,
+       _autoCache = true,
+       super(key: key, children: slivers);
+
+  /// Whether or not this Viewport should determine a cache extent equal to its
+  /// own viewport dimensions.
+  final bool _autoCache;
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///
@@ -140,6 +169,7 @@ class Viewport extends MultiChildRenderObjectWidget {
       anchor: anchor,
       offset: offset,
       cacheExtent: cacheExtent,
+      autoCache: _autoCache,
     );
   }
 
@@ -150,7 +180,8 @@ class Viewport extends MultiChildRenderObjectWidget {
       ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..anchor = anchor
       ..offset = offset
-      ..cacheExtent = cacheExtent;
+      ..cacheExtent = cacheExtent
+      ..autoCache = _autoCache;
   }
 
   @override
@@ -168,6 +199,7 @@ class Viewport extends MultiChildRenderObjectWidget {
     } else if (children.isNotEmpty && children.first.key != null) {
       properties.add(DiagnosticsProperty<Key>('center', children.first.key, tooltip: 'implicit'));
     }
+    properties.add(DiagnosticsProperty<bool>('autoCache', _autoCache));
   }
 }
 
