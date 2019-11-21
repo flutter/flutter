@@ -59,7 +59,6 @@ class BuildInfo {
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null);
   static const BuildInfo release = BuildInfo(BuildMode.release, null);
 
   /// Returns whether a debug build is requested.
@@ -69,21 +68,13 @@ class BuildInfo {
 
   /// Returns whether a profile build is requested.
   ///
-  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
-  /// or [isRelease] is true.
+  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
   bool get isProfile => mode == BuildMode.profile;
 
   /// Returns whether a release build is requested.
   ///
-  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
-  /// or [isRelease] is true.
+  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
   bool get isRelease => mode == BuildMode.release;
-
-  /// Returns whether a JIT release build is requested.
-  ///
-  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
-  /// or [isRelease] is true.
-  bool get isJitRelease => mode == BuildMode.jitRelease;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
