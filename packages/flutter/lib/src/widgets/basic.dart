@@ -2122,6 +2122,8 @@ class SizedBox extends SingleChildRenderObjectWidget {
 /// pixels, you could use `const BoxConstraints(minHeight: 50.0)` as the
 /// [constraints].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=o2KveVr7adg}
+///
 /// {@tool sample}
 ///
 /// This snippet makes the child widget (a [Card] with some [Text]) fill the
@@ -2269,6 +2271,8 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
 /// For more details about the layout algorithm, see
 /// [RenderFractionallySizedOverflowBox].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=PEsY654EGZ0}
+///
 /// See also:
 ///
 ///  * [Align], which sizes itself based on its child's size and positions
@@ -2374,6 +2378,8 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
 /// This is useful when composing widgets that normally try to match their
 /// parents' size, so that they behave reasonably in lists (which are
 /// unbounded).
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=uVki2CIzBTs}
 ///
 /// See also:
 ///
@@ -3064,6 +3070,8 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// way, for example having some text and an image, overlaid with a gradient and
 /// a button attached to the bottom.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=liEGSeD3Zt8}
+///
 /// Each child of a [Stack] widget is either _positioned_ or _non-positioned_.
 /// Positioned children are those wrapped in a [Positioned] widget that has at
 /// least one non-null property. The stack sizes itself to contain all the
@@ -3261,6 +3269,8 @@ class Stack extends MultiChildRenderObjectWidget {
 /// always as big as the largest child.
 ///
 /// If value is null, then nothing is displayed.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=_O0PPD1Xfbk}
 ///
 /// See also:
 ///
@@ -4963,6 +4973,8 @@ class Flow extends MultiChildRenderObjectWidget {
 
 /// A paragraph of rich text.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=rykDVh-QFfw}
+///
 /// The [RichText] widget displays text that uses multiple different styles. The
 /// text to display is described using a tree of [TextSpan] objects, each of
 /// which has an associated style that is used for that subtree. The text might
@@ -6178,6 +6190,8 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///
 /// Used by accessibility tools, search engines, and other semantic analysis
 /// software to determine the meaning of the application.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=NvtMt_DtFrQ}
 ///
 /// See also:
 ///

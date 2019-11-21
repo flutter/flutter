@@ -32,6 +32,8 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// A container for a [Scrollable] that responds to drag gestures by resizing
 /// the scrollable until a limit is reached, and then scrolling.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Hgw819mL_78}
+///
 /// This widget can be dragged along the vertical axis between its
 /// [minChildSize], which defaults to `0.25` and [maxChildSize], which defaults
 /// to `1.0`. These sizes are percentages of the height of the parent container.
