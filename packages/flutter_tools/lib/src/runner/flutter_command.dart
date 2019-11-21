@@ -337,6 +337,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('release',
       negatable: false,
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    argParser.addFlag('jit-release',
+      negatable: false,
+      hide: !verboseHelp,
+      help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
   void addShrinkingFlag() {
@@ -374,10 +378,18 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
+    // No debug when _excludeDebug is true.
+    // If debug is not excluded, then take the command line flag.
     final bool debugResult = !_excludeDebug && boolArg('debug');
-    final List<bool> modeFlags = <bool>[debugResult, boolArg('profile'), boolArg('release')];
+    final List<bool> modeFlags = <bool>[
+      debugResult,
+      boolArg('jit-release'),
+      boolArg('profile'),
+      boolArg('release'),
+    ];
     if (modeFlags.where((bool flag) => flag).length > 1) {
-      throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
+      throw UsageException('Only one of --debug, --profile, --jit-release, '
+                           'or --release can be specified.', null);
     }
     if (debugResult) {
       return BuildMode.debug;
@@ -387,6 +399,9 @@ abstract class FlutterCommand extends Command<void> {
     }
     if (boolArg('release')) {
       return BuildMode.release;
+    }
+    if (boolArg('jit-release')) {
+      return BuildMode.jitRelease;
     }
     return _defaultBuildMode;
   }
