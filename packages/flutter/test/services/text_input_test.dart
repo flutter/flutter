@@ -72,6 +72,10 @@ void main() {
   });
 
   group('TextInputConfiguration', () {
+    tearDown(() {
+      TextInputConnection.debugResetId();
+    });
+
     test('sets expected defaults', () {
       const TextInputConfiguration configuration = TextInputConfiguration();
       expect(configuration.inputType, TextInputType.text);
@@ -183,8 +187,7 @@ void main() {
 
       // Send onConnectionClosed message.
       final ByteData messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-        // client id 1 is still occupied by the previous client.
-        'args': <dynamic>[2, 0, 1],
+        'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.showAutocorrectionPromptRect',
       });
       await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
