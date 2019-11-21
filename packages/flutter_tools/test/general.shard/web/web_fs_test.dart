@@ -109,6 +109,7 @@ void main() {
           LogWriter logWriter,
           bool verbose,
           bool enableDebugExtension,
+          UrlEncoder urlEncoder,
         }) async {
           return mockDwds;
         },
