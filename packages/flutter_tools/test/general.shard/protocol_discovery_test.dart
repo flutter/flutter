@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -16,38 +17,45 @@ void main() {
     MockDeviceLogReader logReader;
     ProtocolDiscovery discoverer;
 
+    /// Performs test set-up functionality that must be performed as part of
+    /// the `test()` pass and not part of the `setUp()` pass.
+    ///
+    /// This exists to make sure we're not creating an error that tries to
+    /// cross an error-zone boundary. Our use of `testUsingContext()` runs the
+    /// test code inside an error zone, but the `setUp()` code is not run in
+    /// any zone. This creates the potential for errors that try to cross
+    /// error-zone boundaries, which are considered uncaught.
+    ///
+    /// This also exists for cases where our initialization requires access to
+    /// a `Context` object, which is only set up inside the zone.
+    ///
+    /// These issues do not pertain to real code and are a test-only concern,
+    /// because in real code, the zone is set up in `main()`.
+    ///
+    /// See also: [runZoned]
+    void initialize({
+      int devicePort,
+      Duration throttleDuration = const Duration(milliseconds: 200),
+    }) {
+      logReader = MockDeviceLogReader();
+      discoverer = ProtocolDiscovery.observatory(
+        logReader,
+        ipv6: false,
+        hostPort: null,
+        devicePort: devicePort,
+        throttleDuration: throttleDuration,
+      );
+    }
+
+    testUsingContext('returns non-null uri future', () async {
+      initialize();
+      expect(discoverer.uri, isNotNull);
+    });
+
     group('no port forwarding', () {
-      int devicePort;
-
-      /// Performs test set-up functionality that must be performed as part of
-      /// the `test()` pass and not part of the `setUp()` pass.
-      ///
-      /// This exists to make sure we're not creating an error that tries to
-      /// cross an error-zone boundary. Our use of `testUsingContext()` runs the
-      /// test code inside an error zone, but the `setUp()` code is not run in
-      /// any zone. This creates the potential for errors that try to cross
-      /// error-zone boundaries, which are considered uncaught.
-      ///
-      /// This also exists for cases where our initialization requires access to
-      /// a `Context` object, which is only set up inside the zone.
-      ///
-      /// These issues do not pertain to real code and are a test-only concern,
-      /// because in real code, the zone is set up in `main()`.
-      ///
-      /// See also: [runZoned]
-      void initialize() {
-        logReader = MockDeviceLogReader();
-        discoverer = ProtocolDiscovery.observatory(logReader, ipv6: false, hostPort: null, devicePort: devicePort);
-      }
-
       tearDown(() {
         discoverer.cancel();
         logReader.dispose();
-      });
-
-      testUsingContext('returns non-null uri future', () async {
-        initialize();
-        expect(discoverer.uri, isNotNull);
       });
 
       testUsingContext('discovers uri if logs already produced output', () async {
@@ -57,6 +65,28 @@ void main() {
         final Uri uri = await discoverer.uri;
         expect(uri.port, 9999);
         expect('$uri', 'http://127.0.0.1:9999');
+      });
+
+      testUsingContext('discovers uri if logs already produced output and no listener is attached', () async {
+        initialize();
+        logReader.addLine('HELLO WORLD');
+        logReader.addLine('Observatory listening on http://127.0.0.1:9999');
+
+        await Future<void>.delayed(Duration.zero);
+
+        final Uri uri = await discoverer.uri;
+        expect(uri, isNotNull);
+        expect(uri.port, 9999);
+        expect('$uri', 'http://127.0.0.1:9999');
+      });
+
+      testUsingContext('uri throws if logs produce bad line and no listener is attached', () async {
+        initialize();
+        logReader.addLine('Observatory listening on http://127.0.0.1:apple');
+
+        await Future<void>.delayed(Duration.zero);
+
+        expect(discoverer.uri, throwsA(isFormatException));
       });
 
       testUsingContext('discovers uri if logs not yet produced output', () async {
@@ -78,9 +108,7 @@ void main() {
 
       testUsingContext('uri throws if logs produce bad line', () async {
         initialize();
-        Timer.run(() {
-          logReader.addLine('Observatory listening on http://127.0.0.1:apple');
-        });
+        logReader.addLine('Observatory listening on http://127.0.0.1:apple');
         expect(discoverer.uri, throwsA(isFormatException));
       });
 
@@ -123,8 +151,7 @@ void main() {
       });
 
       testUsingContext('skips uri if port does not match the requested vmservice - requested last', () async {
-        devicePort = 12346;
-        initialize();
+        initialize(devicePort: 12346);
         final Future<Uri> uriFuture = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
@@ -134,14 +161,93 @@ void main() {
       });
 
       testUsingContext('skips uri if port does not match the requested vmservice - requested first', () async {
-        devicePort = 12346;
-        initialize();
+        initialize(devicePort: 12346);
         final Future<Uri> uriFuture = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
         final Uri uri = await uriFuture;
         expect(uri.port, 12346);
         expect('$uri', 'http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+      });
+
+      testUsingContext('first uri in the stream is the last one from the log', () async {
+        initialize();
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+        final Uri uri = await discoverer.uris.first;
+        expect(uri.port, 12345);
+        expect('$uri', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+      });
+
+      testUsingContext('first uri in the stream is the last one from the log that matches the port', () async {
+        initialize(devicePort: 12345);
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12344/PTwjm8Ii8qg=/');
+        final Uri uri = await discoverer.uris.first;
+        expect(uri.port, 12345);
+        expect('$uri', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+      });
+
+      testUsingContext('uris in the stream are throttled', () async {
+        const Duration kThrottleDuration = Duration(milliseconds: 10);
+
+        FakeAsync().run((FakeAsync time) {
+          initialize(throttleDuration: kThrottleDuration);
+
+          final List<Uri> discoveredUris = <Uri>[];
+          discoverer.uris.listen((Uri uri) {
+            discoveredUris.add(uri);
+          });
+
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+
+          time.elapse(kThrottleDuration);
+
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12344/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12343/PTwjm8Ii8qg=/');
+
+          time.elapse(kThrottleDuration);
+
+          expect(discoveredUris.length, 2);
+          expect(discoveredUris[0].port, 12345);
+          expect('${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+          expect(discoveredUris[1].port, 12343);
+          expect('${discoveredUris[1]}', 'http://127.0.0.1:12343/PTwjm8Ii8qg=/');
+        });
+      });
+
+      testUsingContext('uris in the stream are throttled when they match the port', () async {
+        const Duration kThrottleTimeInMilliseconds = Duration(milliseconds: 10);
+
+        FakeAsync().run((FakeAsync time) {
+          initialize(
+            devicePort: 12345,
+            throttleDuration: kThrottleTimeInMilliseconds,
+          );
+
+          final List<Uri> discoveredUris = <Uri>[];
+          discoverer.uris.listen((Uri uri) {
+            discoveredUris.add(uri);
+          });
+
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+
+          time.elapse(kThrottleTimeInMilliseconds);
+
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qc=/');
+          logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12344/PTwjm8Ii8qf=/');
+
+          time.elapse(kThrottleTimeInMilliseconds);
+
+          expect(discoveredUris.length, 2);
+          expect(discoveredUris[0].port, 12345);
+          expect('${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+          expect(discoveredUris[1].port, 12345);
+          expect('${discoveredUris[1]}', 'http://127.0.0.1:12345/PTwjm8Ii8qc=/');
+        });
       });
     });
 
@@ -164,7 +270,7 @@ void main() {
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
 
         await discoverer.cancel();
-        logReader.dispose();
+        await logReader.dispose();
       });
 
       testUsingContext('specified port', () async {
@@ -185,7 +291,7 @@ void main() {
         expect('$uri', 'http://127.0.0.1:1243/PTwjm8Ii8qg=/');
 
         await discoverer.cancel();
-        logReader.dispose();
+        await logReader.dispose();
       });
 
       testUsingContext('specified port zero', () async {
@@ -206,7 +312,7 @@ void main() {
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
 
         await discoverer.cancel();
-        logReader.dispose();
+        await logReader.dispose();
       });
 
       testUsingContext('ipv6', () async {
@@ -227,7 +333,7 @@ void main() {
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
 
         await discoverer.cancel();
-        logReader.dispose();
+        await logReader.dispose();
       });
 
       testUsingContext('ipv6 with Ascii Escape code', () async {
@@ -248,7 +354,7 @@ void main() {
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
 
         await discoverer.cancel();
-        logReader.dispose();
+        await logReader.dispose();
       });
     });
   });
