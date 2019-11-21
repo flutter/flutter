@@ -1812,7 +1812,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  // if any of the three is null, no promptRect will be shown.
+  // null if no promptRect should be shown.
   TextRange _currentPromptRectRange;
 
   @override

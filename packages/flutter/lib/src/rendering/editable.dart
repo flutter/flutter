@@ -1136,8 +1136,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   TextRange _promptRectRange;
-  /// Display a prompt rectangle over [ewRange] in [promptRectColor], and remove
-  /// the currently shown prompt rectange.
+  /// Dismisses the currently shown prompt rectange and displays a new prompt rectangle
+  /// over [newRange] in the given color [promptRectColor].
+  ///
+  /// When set to null, the currently shown prompt rectangle (if any) will be dismissed.
   void setPromptRectRange(TextRange newRange) {
     if (_promptRectRange == newRange)
       return;
