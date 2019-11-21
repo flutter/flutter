@@ -85,13 +85,7 @@ def main():
   else:
     manifest_file = GenerateManifest(args.package_dir)
 
-  strace_out = os.path.join(output_dir, 'strace_out')
-
   pm_command_base = [
-      'strace',
-      '-f',
-      '-o',
-      strace_out,
       args.pm_bin,
       '-o',
       output_dir,
@@ -109,9 +103,7 @@ def main():
         ['archive', '--output='+ os.path.join(os.path.dirname(output_dir), args.far_name + "-0")],
     ]
     for pm_command in pm_commands:
-      pm_command_args = pm_command_base + pm_command
-      sys.stderr.write("===== Running %s\n" % pm_command_args)
-      subprocess.check_output(pm_command_args)
+      subprocess.check_output(pm_command_base + pm_command)
   except subprocess.CalledProcessError as e:
     print('==================== Manifest contents =========================================')
     with open(manifest_file, 'r') as manifest:
@@ -123,10 +115,6 @@ def main():
       with open(meta_contents_path, 'r') as meta_contents:
         sys.stdout.write(meta_contents.read())
       print('==================== End meta/contents =========================================')
-    print('==================== Strace output =============================================')
-    with open(strace_out, 'r') as strace:
-      sys.stdout.write(strace.read())
-    print('==================== End strace output =========================================')
     raise
 
   return 0
