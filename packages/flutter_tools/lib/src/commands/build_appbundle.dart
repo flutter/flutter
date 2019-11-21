@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../android/android_builder.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -25,14 +26,20 @@ class BuildAppBundleCommand extends BuildSubCommand {
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
       ..addMultiOption('target-platform',
         splitCommas: true,
-        defaultsTo: <String>['android-arm', 'android-arm64'],
-        allowed: <String>['android-arm', 'android-arm64'],
+        defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
+        allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
       );
   }
 
   @override
   final String name = 'appbundle';
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.androidGenSnapshot,
+    DevelopmentArtifact.universal,
+  };
 
   @override
   final String description =
@@ -46,13 +53,13 @@ class BuildAppBundleCommand extends BuildSubCommand {
     final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
 
     usage[CustomDimensions.commandBuildAppBundleTargetPlatform] =
-        (argResults['target-platform'] as List<String>).join(',');
+        stringsArg('target-platform').join(',');
 
-    if (argResults['release']) {
+    if (boolArg('release')) {
       usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'release';
-    } else if (argResults['debug']) {
+    } else if (boolArg('debug')) {
       usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'debug';
-    } else if (argResults['profile']) {
+    } else if (boolArg('profile')) {
       usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'profile';
     } else {
       // The build defaults to release.
@@ -64,8 +71,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
-      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
-      shrink: argResults['shrink'],
+      targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      shrink: boolArg('shrink'),
     );
     await androidBuilder.buildAab(
       project: FlutterProject.current(),

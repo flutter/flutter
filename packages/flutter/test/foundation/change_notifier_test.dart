@@ -315,4 +315,24 @@ void main() {
     expect(b.result, isTrue);
     expect(notifications, 1);
   });
+
+  test('Throws FlutterError when disposed and called', () {
+    final TestNotifier testNotifier = TestNotifier();
+    testNotifier.dispose();
+    FlutterError error;
+    try {
+      testNotifier.dispose();
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error, isFlutterError);
+    expect(error.toStringDeep(), equalsIgnoringHashCodes(
+      'FlutterError\n'
+      '   A TestNotifier was used after being disposed.\n'
+      '   Once you have called dispose() on a TestNotifier, it can no\n'
+      '   longer be used.\n'
+    ));
+  });
+
 }

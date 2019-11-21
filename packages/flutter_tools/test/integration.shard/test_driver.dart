@@ -127,8 +127,12 @@ abstract class FlutterTestDriver {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
     _vmService.onSend.listen((String s) => _debugPrint(s, topic: '=vm=>'));
     _vmService.onReceive.listen((String s) => _debugPrint(s, topic: '<=vm='));
+
+    final Completer<void> isolateStarted = Completer<void>();
     _vmService.onIsolateEvent.listen((Event event) {
-      if (event.kind == EventKind.kIsolateExit && event.isolate.id == _flutterIsolateId) {
+      if (event.kind == EventKind.kIsolateStart) {
+        isolateStarted.complete();
+      } else if (event.kind == EventKind.kIsolateExit && event.isolate.id == _flutterIsolateId) {
         // Hot restarts cause all the isolates to exit, so we need to refresh
         // our idea of what the Flutter isolate ID is.
         _flutterIsolateId = null;
@@ -139,6 +143,10 @@ abstract class FlutterTestDriver {
       _vmService.streamListen('Isolate'),
       _vmService.streamListen('Debug'),
     ]);
+
+    if ((await _vmService.getVM()).isolates.isEmpty) {
+      await isolateStarted.future;
+    }
 
     await waitForPause();
     if (pauseOnExceptions) {
@@ -478,29 +486,50 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       pidFile: pidFile,
     );
 
-    // Stash the PID so that we can terminate the VM more reliably than using
-    // _process.kill() (`flutter` is a shell script so _process itself is a
-    // shell, not the flutter tool's Dart process).
-    final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
-    _processPid = connected['params']['pid'];
+    final Completer<void> prematureExitGuard = Completer<void>();
 
-    // Set this up now, but we don't wait it yet. We want to make sure we don't
-    // miss it while waiting for debugPort below.
-    final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started', timeout: appStartTimeout);
-
-    if (withDebugger) {
-      final Map<String, dynamic> debugPort = await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
-      final String wsUriString = debugPort['params']['wsUri'];
-      _vmServiceWsUri = Uri.parse(wsUriString);
-      await connectToVmService(pauseOnExceptions: pauseOnExceptions);
-      if (!startPaused) {
-        await resume(waitForNextPause: false);
+    // If the process exits before all of the `await`s below are done, then it
+    // exited prematurely. This causes the currently suspended `await` to
+    // deadlock until the test times out. Instead, this causes the test to fail
+    // fast.
+    unawaited(_process.exitCode.then((_) {
+      if (!prematureExitGuard.isCompleted) {
+        prematureExitGuard.completeError('Process existed prematurely: ${args.join(' ')}');
       }
-    }
+    }));
 
-    // Now await the started event; if it had already happened the future will
-    // have already completed.
-    _currentRunningAppId = (await started)['params']['appId'];
+    unawaited(() async {
+      try {
+        // Stash the PID so that we can terminate the VM more reliably than using
+        // _process.kill() (`flutter` is a shell script so _process itself is a
+        // shell, not the flutter tool's Dart process).
+        final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
+        _processPid = connected['params']['pid'];
+
+        // Set this up now, but we don't wait it yet. We want to make sure we don't
+        // miss it while waiting for debugPort below.
+        final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started', timeout: appStartTimeout);
+
+        if (withDebugger) {
+          final Map<String, dynamic> debugPort = await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
+          final String wsUriString = debugPort['params']['wsUri'];
+          _vmServiceWsUri = Uri.parse(wsUriString);
+          await connectToVmService(pauseOnExceptions: pauseOnExceptions);
+          if (!startPaused) {
+            await resume(waitForNextPause: false);
+          }
+        }
+
+        // Now await the started event; if it had already happened the future will
+        // have already completed.
+        _currentRunningAppId = (await started)['params']['appId'];
+        prematureExitGuard.complete();
+      } catch(error, stackTrace) {
+        prematureExitGuard.completeError(error, stackTrace);
+      }
+    }());
+
+    return prematureExitGuard.future;
   }
 
   Future<void> hotRestart({ bool pause = false }) => _restart(fullRestart: true, pause: pause);
@@ -620,11 +649,11 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     Future<void> Function() beforeStart,
   }) async {
     await _setupProcess(<String>[
-        'test',
-        '--disable-service-auth-codes',
-        '--machine',
-        '-d',
-        'flutter-tester',
+      'test',
+      '--disable-service-auth-codes',
+      '--machine',
+      '-d',
+      'flutter-tester',
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile, beforeStart: beforeStart);
   }
 

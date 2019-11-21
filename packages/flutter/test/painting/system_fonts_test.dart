@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Text('text widget'),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -33,7 +33,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: SelectableText('text widget'),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -54,8 +54,7 @@ void main() {
         location: BannerLocation.topStart,
         textDirection: TextDirection.ltr,
         layoutDirection: TextDirection.ltr,
-
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -74,8 +73,8 @@ void main() {
       CupertinoApp(
         home: CupertinoDatePicker(
           onDateTimeChanged: (DateTime dateTime) { },
-        )
-      )
+        ),
+      ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     final Map<int, double> cache = state.estimatedColumnWidths;
@@ -92,7 +91,7 @@ void main() {
     expect(cache.isEmpty, isTrue);
     final Element element = tester.element(find.byType(CupertinoDatePicker));
     expect(element.dirty, isTrue);
-  });
+  }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
   testWidgets('CupertinoDatePicker reset cache upon system fonts change - date mode', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -100,8 +99,8 @@ void main() {
         home: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.date,
           onDateTimeChanged: (DateTime dateTime) { },
-        )
-      )
+        ),
+      ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     final Map<int, double> cache = state.estimatedColumnWidths;
@@ -119,15 +118,15 @@ void main() {
     expect(cache.isNotEmpty, isTrue);
     final Element element = tester.element(find.byType(CupertinoDatePicker));
     expect(element.dirty, isTrue);
-  });
+  }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
   testWidgets('CupertinoDatePicker reset cache upon system fonts change - time mode', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTimerPicker(
           onTimerDurationChanged: (Duration d) { },
-        )
-      )
+        ),
+      ),
     );
     final dynamic state = tester.state(find.byType(CupertinoTimerPicker));
     // Simulates wrong metrics due to font missing.
@@ -148,7 +147,7 @@ void main() {
     expect(state.numberLabelBaseline - 18.400070190429688 < precisionErrorTolerance, isTrue);
     final Element element = tester.element(find.byType(CupertinoTimerPicker));
     expect(element.dirty, isTrue);
-  });
+  }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
   testWidgets('RangeSlider relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -159,7 +158,7 @@ void main() {
             onChanged: (RangeValues values) { },
           ),
         ),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -182,7 +181,7 @@ void main() {
             onChanged: (double value) { },
           ),
         ),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -223,7 +222,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -239,7 +238,7 @@ void main() {
       find.descendant(
         of: find.byKey(const Key('parent')),
         matching: find.byType(CustomPaint),
-      ).first
+      ).first,
     );
     expect(renderObject.debugNeedsPaint, isTrue);
   });

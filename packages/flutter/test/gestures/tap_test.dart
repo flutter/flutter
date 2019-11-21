@@ -140,7 +140,7 @@ void main() {
     tap.dispose();
   });
 
-  testGesture('Should not recognize two overlapping taps', (GestureTester tester) {
+  testGesture('Should not recognize two overlapping taps (FIFO)', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
     int tapsRecognized = 0;
@@ -169,6 +169,40 @@ void main() {
     tester.route(up2);
     expect(tapsRecognized, 1);
     GestureBinding.instance.gestureArena.sweep(2);
+    expect(tapsRecognized, 1);
+
+    tap.dispose();
+  });
+
+  testGesture('Should not recognize two overlapping taps (FILO)', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    int tapsRecognized = 0;
+    tap.onTap = () {
+      tapsRecognized++;
+    };
+
+    tap.addPointer(down1);
+    tester.closeArena(1);
+    expect(tapsRecognized, 0);
+    tester.route(down1);
+    expect(tapsRecognized, 0);
+
+    tap.addPointer(down2);
+    tester.closeArena(2);
+    expect(tapsRecognized, 0);
+    tester.route(down1);
+    expect(tapsRecognized, 0);
+
+
+    tester.route(up2);
+    expect(tapsRecognized, 0);
+    GestureBinding.instance.gestureArena.sweep(2);
+    expect(tapsRecognized, 0);
+
+    tester.route(up1);
+    expect(tapsRecognized, 1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
     tap.dispose();
@@ -340,6 +374,32 @@ void main() {
     expect(gotError, isFalse);
 
     tester.route(up1);
+    expect(gotError, isTrue);
+
+    FlutterError.onError = previousErrorHandler;
+    tap.dispose();
+  });
+
+  testGesture('onTapCancel should show reason in the proper format', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    tap.onTapCancel = () {
+      throw Exception(test);
+    };
+
+    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    bool gotError = false;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      expect(details.toString().contains('"spontaneous onTapCancel"') , isTrue);
+      gotError = true;
+    };
+
+    const int pointer = 1;
+    tap.addPointer(const PointerDownEvent(pointer: pointer));
+    tester.closeArena(pointer);
+    tester.async.elapse(const Duration(milliseconds: 500));
+    tester.route(const PointerCancelEvent(pointer: pointer));
+
     expect(gotError, isTrue);
 
     FlutterError.onError = previousErrorHandler;

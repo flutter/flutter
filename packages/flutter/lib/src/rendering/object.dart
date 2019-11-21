@@ -1429,7 +1429,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   static bool debugCheckingIntrinsics = false;
   bool _debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout() {
     if (_relayoutBoundary == null)
-      return true; // we haven't yet done layout even once, so there's nothing for us to do
+      return true; // we don't know where our relayout boundary is yet
     RenderObject node = this;
     while (node != _relayoutBoundary) {
       assert(node._relayoutBoundary == _relayoutBoundary);
@@ -1677,6 +1677,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     }
     _constraints = constraints;
+    if (_relayoutBoundary != null && relayoutBoundary != _relayoutBoundary) {
+      // The local relayout boundary has changed, must notify children in case
+      // they also need updating. Otherwise, they will be confused about what
+      // their actual relayout boundary is later.
+      visitChildren((RenderObject child) {
+        child._cleanRelayoutBoundary();
+      });
+    }
     _relayoutBoundary = relayoutBoundary;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);

@@ -11,6 +11,7 @@ import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/net.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'compile.dart';
@@ -58,7 +59,7 @@ class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
   final FileSystemEntity file;
-  FileSystemEntity _linkTarget;
+  File _linkTarget;
   FileStat _fileStat;
 
   File _getFile() {
@@ -69,7 +70,7 @@ class DevFSFileContent extends DevFSContent {
       // The link target.
       return fs.file(file.resolveSymbolicLinksSync());
     }
-    return file;
+    return file as File;
   }
 
   void _stat() {
@@ -88,7 +89,7 @@ class DevFSFileContent extends DevFSContent {
     if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
-      final FileSystemEntity linkTarget = fs.file(resolved);
+      final File linkTarget = fs.file(resolved);
       // Stat the link target.
       final FileStat fileStat = linkTarget.statSync();
       if (fileStat.type == FileSystemEntityType.notFound) {
@@ -224,7 +225,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   @override
   Future<Uri> create(String fsName) async {
     final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
-    return Uri.parse(response['uri']);
+    return Uri.parse(response['uri'] as String);
   }
 
   @override
@@ -265,17 +266,20 @@ class DevFSException implements Exception {
 
 class _DevFSHttpWriter {
   _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
-    : httpAddress = serviceProtocol.httpAddress;
+    : httpAddress = serviceProtocol.httpAddress,
+      _client = (context.get<HttpClientFactory>() == null)
+        ? HttpClient()
+        : context.get<HttpClientFactory>()();
 
   final String fsName;
   final Uri httpAddress;
+  final HttpClient _client;
 
   static const int kMaxInFlight = 6;
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
   Completer<void> _completer;
-  final HttpClient _client = HttpClient();
 
   Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client.maxConnectionsPerHost = kMaxInFlight;
@@ -289,7 +293,7 @@ class _DevFSHttpWriter {
     while ((_inFlight < kMaxInFlight) && (!_completer.isCompleted) && _outstanding.isNotEmpty) {
       final Uri deviceUri = _outstanding.keys.first;
       final DevFSContent content = _outstanding.remove(deviceUri);
-      _startWrite(deviceUri, content);
+      _startWrite(deviceUri, content, retry: 10);
       _inFlight += 1;
     }
     if ((_inFlight == 0) && (!_completer.isCompleted) && _outstanding.isEmpty) {
@@ -299,22 +303,33 @@ class _DevFSHttpWriter {
 
   Future<void> _startWrite(
     Uri deviceUri,
-    DevFSContent content, [
+    DevFSContent content, {
     int retry = 0,
-  ]) async {
-    try {
-      final HttpClientRequest request = await _client.putUrl(httpAddress);
-      request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
-      request.headers.add('dev_fs_name', fsName);
-      request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
-      final Stream<List<int>> contents = content.contentsAsCompressedStream();
-      await request.addStream(contents);
-      final HttpClientResponse response = await request.close();
-      await response.drain<void>();
-    } catch (error, trace) {
-      if (!_completer.isCompleted) {
-        printTrace('Error writing "$deviceUri" to DevFS: $error');
-        _completer.completeError(error, trace);
+  }) async {
+    while(true) {
+      try {
+        final HttpClientRequest request = await _client.putUrl(httpAddress);
+        request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
+        request.headers.add('dev_fs_name', fsName);
+        request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
+        final Stream<List<int>> contents = content.contentsAsCompressedStream();
+        await request.addStream(contents);
+        final HttpClientResponse response = await request.close();
+        response.listen((_) => null,
+            onError: (dynamic error) { printTrace('error: $error'); },
+            cancelOnError: true);
+        break;
+      } catch (error, trace) {
+        if (!_completer.isCompleted) {
+          printTrace('Error writing "$deviceUri" to DevFS: $error');
+          if (retry > 0) {
+            retry--;
+            printTrace('trying again in a few - $retry more attempts left');
+            await Future<void>.delayed(const Duration(milliseconds: 500));
+            continue;
+          }
+          _completer.completeError(error, trace);
+        }
       }
     }
     _inFlight -= 1;
@@ -338,12 +353,19 @@ class UpdateFSReport {
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
 
+  /// JavaScript modules produced by the incremental compiler in `dartdevc`
+  /// mode.
+  ///
+  /// Only used for JavaScript compilation.
+  List<String> invalidatedModules;
+
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
       _success = false;
     }
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
+    invalidatedModules ??= report.invalidatedModules;
   }
 
   bool _success;
@@ -434,6 +456,7 @@ class DevFS {
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
+    final DateTime candidateCompileTime = DateTime.now();
 
     // Update modified files
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
@@ -465,7 +488,6 @@ class DevFS {
       generator.reset();
     }
     printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-    lastCompiled = DateTime.now();
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
@@ -475,6 +497,8 @@ class DevFS {
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }
+    // Only update the last compiled time if we successfully compiled.
+    lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
     //

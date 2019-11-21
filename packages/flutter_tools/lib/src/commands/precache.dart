@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../cache.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -43,6 +44,8 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts required for any development platform.');
     argParser.addFlag('flutter_runner', negatable: true, defaultsTo: false,
         help: 'Precache the flutter runner artifacts.', hide: true);
+    argParser.addFlag('use-unsigned-mac-binaries', negatable: true, defaultsTo: false,
+        help: 'Precache the unsigned mac binaries when available.', hide: true);
   }
 
   @override
@@ -56,8 +59,11 @@ class PrecacheCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['all-platforms']) {
+    if (boolArg('all-platforms')) {
       cache.includeAllPlatforms = true;
+    }
+    if (boolArg('use-unsigned-mac-binaries')) {
+      cache.useUnsignedMacBinaries = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
@@ -65,15 +71,18 @@ class PrecacheCommand extends FlutterCommand {
       if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
       }
-      if (argResults[artifact.name]) {
+      if (artifact.feature != null && !featureFlags.isEnabled(artifact.feature)) {
+        continue;
+      }
+      if (boolArg(artifact.name)) {
         requiredArtifacts.add(artifact);
       }
       // The `android` flag expands to android_gen_snapshot, android_maven, android_internal_build.
-      if (artifact.name.startsWith('android_') && argResults['android']) {
+      if (artifact.name.startsWith('android_') && boolArg('android')) {
         requiredArtifacts.add(artifact);
       }
     }
-    final bool forceUpdate = argResults['force'];
+    final bool forceUpdate = boolArg('force');
     if (forceUpdate || !cache.isUpToDate()) {
       await cache.updateAll(requiredArtifacts);
     } else {

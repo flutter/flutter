@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -34,16 +35,21 @@ import '../../src/context.dart';
 import '../../src/mocks.dart';
 
 class MockIOSApp extends Mock implements IOSApp {}
+class MockApplicationPackage extends Mock implements ApplicationPackage {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockDirectory extends Mock implements Directory {}
 class MockFileSystem extends Mock implements FileSystem {}
+class MockForwardedPort extends Mock implements ForwardedPort {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
+class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
+class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
 class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
+class MockUsage extends Mock implements Usage {}
 
 void main() {
   final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
@@ -62,6 +68,16 @@ void main() {
       Platform: () => macPlatform,
     });
 
+    testUsingContext('parses major version', () {
+      expect(IOSDevice('device-123', sdkVersion: '1.0.0').majorSdkVersion, 1);
+      expect(IOSDevice('device-123', sdkVersion: '13.1.1').majorSdkVersion, 13);
+      expect(IOSDevice('device-123', sdkVersion: '10').majorSdkVersion, 10);
+      expect(IOSDevice('device-123', sdkVersion: '0').majorSdkVersion, 0);
+      expect(IOSDevice('device-123', sdkVersion: 'bogus').majorSdkVersion, 0);
+    }, overrides: <Type, Generator>{
+      Platform: () => macPlatform,
+    });
+
     for (Platform platform in unsupportedPlatforms) {
       testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
@@ -72,6 +88,65 @@ void main() {
         Platform: () => platform,
       });
     }
+
+    group('.dispose()', () {
+      IOSDevice device;
+      MockIOSApp appPackage1;
+      MockIOSApp appPackage2;
+      IOSDeviceLogReader logReader1;
+      IOSDeviceLogReader logReader2;
+      MockProcess mockProcess1;
+      MockProcess mockProcess2;
+      MockProcess mockProcess3;
+      IOSDevicePortForwarder portForwarder;
+      ForwardedPort forwardedPort;
+
+      IOSDevicePortForwarder createPortForwarder(
+          ForwardedPort forwardedPort,
+          IOSDevice device) {
+        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
+        portForwarder.addForwardedPorts(<ForwardedPort>[forwardedPort]);
+        return portForwarder;
+      }
+
+      IOSDeviceLogReader createLogReader(
+          IOSDevice device,
+          ApplicationPackage appPackage,
+          Process process) {
+        final IOSDeviceLogReader logReader = IOSDeviceLogReader(device, appPackage);
+        logReader.idevicesyslogProcess = process;
+        return logReader;
+      }
+
+      setUp(() {
+        appPackage1 = MockIOSApp();
+        appPackage2 = MockIOSApp();
+        when(appPackage1.name).thenReturn('flutterApp1');
+        when(appPackage2.name).thenReturn('flutterApp2');
+        mockProcess1 = MockProcess();
+        mockProcess2 = MockProcess();
+        mockProcess3 = MockProcess();
+        forwardedPort = ForwardedPort.withContext(123, 456, mockProcess3);
+      });
+
+      testUsingContext(' kills all log readers & port forwarders', () async {
+        device = IOSDevice('123');
+        logReader1 = createLogReader(device, appPackage1, mockProcess1);
+        logReader2 = createLogReader(device, appPackage2, mockProcess2);
+        portForwarder = createPortForwarder(forwardedPort, device);
+        device.setLogReader(appPackage1, logReader1);
+        device.setLogReader(appPackage2, logReader2);
+        device.portForwarder = portForwarder;
+
+        device.dispose();
+
+        verify(mockProcess1.kill());
+        verify(mockProcess2.kill());
+        verify(mockProcess3.kill());
+      }, overrides: <Type, Generator>{
+        Platform: () => macPlatform,
+      });
+    });
 
     group('startApp', () {
       MockIOSApp mockApp;
@@ -84,6 +159,7 @@ void main() {
       MockPortForwarder mockPortForwarder;
       MockIMobileDevice mockIMobileDevice;
       MockIOSDeploy mockIosDeploy;
+      MockUsage mockUsage;
 
       Directory tempDir;
       Directory projectDir;
@@ -92,7 +168,7 @@ void main() {
       const int hostPort = 42;
       const String installerPath = '/path/to/ideviceinstaller';
       const String iosDeployPath = '/path/to/iosdeploy';
-      // const String appId = '789';
+      const String iproxyPath = '/path/to/iproxy';
       const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
           'DYLD_LIBRARY_PATH',
           '/path/to/libraries',
@@ -115,6 +191,7 @@ void main() {
         mockPortForwarder = MockPortForwarder();
         mockIMobileDevice = MockIMobileDevice();
         mockIosDeploy = MockIOSDeploy();
+        mockUsage = MockUsage();
 
         tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
         projectDir = tempDir.childDirectory('flutter_project');
@@ -123,15 +200,22 @@ void main() {
             mockArtifacts.getArtifactPath(
                 Artifact.ideviceinstaller,
                 platform: anyNamed('platform'),
-            )
+            ),
         ).thenReturn(installerPath);
 
         when(
             mockArtifacts.getArtifactPath(
                 Artifact.iosDeploy,
                 platform: anyNamed('platform'),
-            )
+            ),
         ).thenReturn(iosDeployPath);
+
+        when(
+            mockArtifacts.getArtifactPath(
+                Artifact.iproxy,
+                platform: anyNamed('platform'),
+            ),
+        ).thenReturn(iproxyPath);
 
         when(mockPortForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
           .thenAnswer((_) async => hostPort);
@@ -165,6 +249,22 @@ void main() {
         Cache.enableLocking();
       });
 
+      testUsingContext('returns failed if the IOSDevice is not found', () async {
+        final IOSDevice device = IOSDevice('123');
+        when(mockIMobileDevice.getInfoForDevice(any, 'CPUArchitecture')).thenThrow(
+          const IOSDeviceNotFoundError(
+            'ideviceinfo could not find device:\n'
+            'No device found with udid 123, is it plugged in?\n'
+            'Try unlocking attached devices.'
+          )
+        );
+        final LaunchResult result = await device.startApp(mockApp);
+        expect(result.started, false);
+      }, overrides: <Type, Generator>{
+        IMobileDevice: () => mockIMobileDevice,
+        Platform: () => macPlatform,
+      });
+
       testUsingContext(' succeeds in debug mode via mDNS', () async {
         final IOSDevice device = IOSDevice('123');
         device.portForwarder = mockPortForwarder;
@@ -175,7 +275,7 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -183,6 +283,7 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
           platformArgs: <String, dynamic>{},
         );
+        verify(mockUsage.sendEvent('ios-mdns', 'success')).called(1);
         expect(launchResult.started, isTrue);
         expect(launchResult.hasObservatory, isTrue);
         expect(await device.stopApp(mockApp), isFalse);
@@ -193,6 +294,46 @@ void main() {
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
         Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
+      });
+
+      // By default, the .forward() method will try every port between 1024
+      // and 65535; this test verifies we are killing iproxy processes when
+      // we timeout on a port
+      testUsingContext(' .forward() will kill iproxy processes before invoking a second', () async {
+        const String deviceId = '123';
+        const int devicePort = 456;
+        final IOSDevice device = IOSDevice(deviceId);
+        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
+        bool firstRun = true;
+        final MockProcess successProcess = MockProcess(
+          exitCode: Future<int>.value(0),
+          stdout: Stream<List<int>>.fromIterable(<List<int>>['Hello'.codeUnits]),
+        );
+        final MockProcess failProcess = MockProcess(
+          exitCode: Future<int>.value(1),
+          stdout: const Stream<List<int>>.empty(),
+        );
+
+        final ProcessFactory factory = (List<String> command) {
+          if (!firstRun) {
+            return successProcess;
+          }
+          firstRun = false;
+          return failProcess;
+        };
+        mockProcessManager.processFactory = factory;
+        final int hostPort = await portForwarder.forward(devicePort);
+        // First port tried (1024) should fail, then succeed on the next
+        expect(hostPort, 1024 + 1);
+        verifyNever(successProcess.kill());
+        verify(failProcess.kill());
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
       });
 
       testUsingContext(' succeeds in debug mode when mDNS fails by falling back to manual protocol discovery', () async {
@@ -204,7 +345,7 @@ void main() {
           mockLogReader.addLine('Foo');
           mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
         });
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(null));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -212,6 +353,8 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
           platformArgs: <String, dynamic>{},
         );
+        verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
+        verify(mockUsage.sendEvent('ios-mdns', 'fallback-success')).called(1);
         expect(launchResult.started, isTrue);
         expect(launchResult.hasObservatory, isTrue);
         expect(await device.stopApp(mockApp), isFalse);
@@ -222,6 +365,7 @@ void main() {
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
         Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
       });
 
       testUsingContext(' fails in debug mode when mDNS fails and when Observatory URI is malformed', () async {
@@ -234,7 +378,7 @@ void main() {
           mockLogReader.addLine('Foo');
           mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
         });
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(null));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -242,6 +386,8 @@ void main() {
             debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
             platformArgs: <String, dynamic>{},
         );
+        verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
+        verify(mockUsage.sendEvent('ios-mdns', 'fallback-failure')).called(1);
         expect(launchResult.started, isFalse);
         expect(launchResult.hasObservatory, isFalse);
       }, overrides: <Type, Generator>{
@@ -251,6 +397,7 @@ void main() {
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
         Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
       });
 
       testUsingContext(' succeeds in release mode', () async {
@@ -269,6 +416,50 @@ void main() {
         FileSystem: () => mockFileSystem,
         Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
+      });
+
+      testUsingContext(' succeeds with --cache-sksl', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.setLogReader(mockApp, mockLogReader);
+        final Uri uri = Uri(
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: 1234,
+          path: 'observatory',
+        );
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
+            .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
+
+        List<String> args;
+        when(mockIosDeploy.runApp(
+          deviceId: anyNamed('deviceId'),
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation inv) {
+          args = inv.namedArguments[const Symbol('launchArguments')];
+          return Future<int>.value(0);
+        });
+
+        final LaunchResult launchResult = await device.startApp(mockApp,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(
+              const BuildInfo(BuildMode.debug, null),
+              cacheSkSL: true,
+          ),
+          platformArgs: <String, dynamic>{},
+        );
+        expect(launchResult.started, isTrue);
+        expect(args, contains('--cache-sksl'));
+        expect(await device.stopApp(mockApp), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
+        FileSystem: () => mockFileSystem,
+        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
+        IOSDeploy: () => mockIosDeploy,
       });
 
       void testNonPrebuilt({
@@ -399,7 +590,7 @@ void main() {
             mockArtifacts.getArtifactPath(
                 Artifact.ideviceinstaller,
                 platform: anyNamed('platform'),
-            )
+            ),
         ).thenReturn(installerPath);
       });
 
@@ -642,6 +833,7 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     Platform: () => macPlatform,
   });
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
@@ -653,6 +845,7 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     Platform: () => macPlatform,
   });
 
@@ -664,6 +857,7 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     Platform: () => macPlatform,
   });
 }

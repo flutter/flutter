@@ -61,7 +61,7 @@ class SnippetGenerator {
   /// Injects the [injections] into the [template], and turning the
   /// "description" injection into a comment. Only used for
   /// [SnippetType.application] snippets.
-  String interpolateTemplate(List<_ComponentTuple> injections, String template) {
+  String interpolateTemplate(List<_ComponentTuple> injections, String template, Map<String, Object> metadata) {
     final RegExp moustacheRegExp = RegExp('{{([^}]+)}}');
     return template.replaceAllMapped(moustacheRegExp, (Match match) {
       if (match[1] == 'description') {
@@ -86,9 +86,9 @@ class SnippetGenerator {
         // mustache reference, since we want to allow the sections to be
         // "optional" in the input: users shouldn't be forced to add an empty
         // "```dart preamble" section if that section would be empty.
-        return injections
-            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1], orElse: () => null)
-            ?.mergedContent ?? '';
+        final _ComponentTuple result = injections
+            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1], orElse: () => null);
+        return result?.mergedContent ?? (metadata[match[1]] ?? '').toString();
       }
     }).trim();
   }
@@ -130,6 +130,7 @@ class SnippetGenerator {
       'language': language ?? 'dart',
       'serial': '',
       'id': metadata['id'],
+      'element': metadata['element'] ?? '',
       'app': '',
     };
     if (type == SnippetType.application) {
@@ -242,7 +243,7 @@ class SnippetGenerator {
           exit(1);
         }
         final String templateContents = _loadFileAsUtf8(templateFile);
-        String app = interpolateTemplate(snippetData, templateContents);
+        String app = interpolateTemplate(snippetData, templateContents, metadata);
 
         try {
           app = formatter.format(app);

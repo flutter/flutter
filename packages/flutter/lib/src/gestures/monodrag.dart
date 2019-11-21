@@ -68,10 +68,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   /// Configure the behavior of offsets sent to [onStart].
   ///
-  /// If set to [DragStartBehavior.start], the [onStart] callback will be called at the time and
-  /// position when the gesture detector wins the arena. If [DragStartBehavior.down],
-  /// [onStart] will be called at the time and position when a down event was
-  /// first detected.
+  /// If set to [DragStartBehavior.start], the [onStart] callback will be called
+  /// at the time and position when this gesture recognizer wins the arena. If
+  /// [DragStartBehavior.down], [onStart] will be called at the time and
+  /// position when a down event was first detected.
   ///
   /// For more information about the gesture arena:
   /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
@@ -80,9 +80,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// ## Example:
   ///
-  /// A finger presses down on the screen with offset (500.0, 500.0),
-  /// and then moves to position (510.0, 500.0) before winning the arena.
-  /// With [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
+  /// A finger presses down on the screen with offset (500.0, 500.0), and then
+  /// moves to position (510.0, 500.0) before winning the arena. With
+  /// [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
   /// callback will be called at the time corresponding to the touch's position
   /// at (500.0, 500.0). If it is instead set to [DragStartBehavior.start],
   /// [onStart] will be called at the time corresponding to the touch's position

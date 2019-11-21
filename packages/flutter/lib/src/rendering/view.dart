@@ -112,7 +112,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Deprecated. Call [prepareInitialFrame] followed by a call to
   /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
-  @Deprecated('Call prepareInitialFrame followed by owner.requestVisualUpdate() instead.')
+  @Deprecated(
+    'Call prepareInitialFrame followed by owner.requestVisualUpdate() instead. '
+    'This feature was deprecated after v1.10.0.'
+  )
   void scheduleInitialFrame() {
     prepareInitialFrame();
     owner.requestVisualUpdate();
@@ -190,13 +193,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// See also:
   ///
-  /// * [Layer.findAll], which is used by this method to find all
+  /// * [Layer.findAllAnnotations], which is used by this method to find all
   ///   [AnnotatedRegionLayer]s annotated for mouse tracking.
   Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels
     // here.
-    return layer.findAll<MouseTrackerAnnotation>(position * configuration.devicePixelRatio);
+    return layer.findAllAnnotations<MouseTrackerAnnotation>(
+      position * configuration.devicePixelRatio
+    ).annotations;
   }
 
   @override

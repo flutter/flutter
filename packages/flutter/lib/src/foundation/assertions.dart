@@ -25,18 +25,18 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// interactive display of errors.
   _ErrorDiagnostic(
     String message, {
-      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
-      DiagnosticLevel level = DiagnosticLevel.info,
-    }) : assert(message != null),
-         super(
-           null,
-           <Object>[message],
-           showName: false,
-           showSeparator: false,
-           defaultValue: null,
-           style: style,
-           level: level,
-         );
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
+    DiagnosticLevel level = DiagnosticLevel.info,
+  }) : assert(message != null),
+       super(
+         null,
+         <Object>[message],
+         showName: false,
+         showSeparator: false,
+         defaultValue: null,
+         style: style,
+         level: level,
+       );
 
   /// In debug builds, a kernel transformer rewrites calls to the default
   /// constructors for [ErrorSummary], [ErrorDetails], and [ErrorHint] to use
@@ -479,6 +479,11 @@ class FlutterErrorDetails extends Diagnosticable {
 
 /// Error class used to report Flutter-specific assertion failures and
 /// contract violations.
+///
+/// See also:
+///
+///  * <https://flutter.dev/docs/testing/errors>, more information about error
+///    handling in Flutter.
 class FlutterError extends Error with DiagnosticableTreeMixin implements AssertionError {
   /// Create an error message from a string.
   ///
@@ -644,7 +649,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           wrapWidth: wrapWidth,
           wrapWidthProperties: wrapWidth,
           maxDescendentsTruncatableNode: 5,
-        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight()
+        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
       );
     } else {
       debugPrint('Another exception was thrown: ${details.summary}');

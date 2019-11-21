@@ -3810,11 +3810,69 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 /// where the problem lies. Exceptions are also logged to the console, which you
 /// can read using `flutter logs`. The console will also include additional
 /// information such as the stack trace for the exception.
+///
+/// It is possible to override this widget.
+///
+/// {@tool snippet --template=freeform}
+/// ```dart
+/// import 'package:flutter/material.dart';
+///
+/// void main() {
+///   ErrorWidget.builder = (FlutterErrorDetails details) {
+///     bool inDebug = false;
+///     assert(() { inDebug = true; return true; }());
+///     // In debug mode, use the normal error widget which shows
+///     // the error message:
+///     if (inDebug)
+///       return ErrorWidget(details.exception);
+///     // In release builds, show a yellow-on-blue message instead:
+///     return Container(
+///       alignment: Alignment.center,
+///       child: Text(
+///         'Error!',
+///         style: TextStyle(color: Colors.yellow),
+///         textDirection: TextDirection.ltr,
+///       ),
+///     );
+///   };
+///   // Here we would normally runApp() the root widget, but to demonstrate
+///   // the error handling we artificially fail:
+///   return runApp(Builder(
+///     builder: (BuildContext context) {
+///       throw 'oh no, an error';
+///     },
+///   ));
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [FlutterError.onError], which can be set to a method that exits the
+///    application if that is preferable to showing an error message.
+///  * <https://flutter.dev/docs/testing/errors>, more information about error
+///    handling in Flutter.
 class ErrorWidget extends LeafRenderObjectWidget {
-  /// Creates a widget that displays the given error message.
+  /// Creates a widget that displays the given exception.
+  ///
+  /// The message will be the stringification of the given exception, unless
+  /// computing that value itself throws an exception, in which case it will
+  /// be the string "Error".
+  ///
+  /// If this object is inspected from an IDE or the devtools, and the original
+  /// exception is a [FlutterError] object, the original exception itself will
+  /// be shown in the inspection output.
   ErrorWidget(Object exception)
     : message = _stringify(exception),
       _flutterError = exception is FlutterError ? exception : null,
+      super(key: UniqueKey());
+
+  /// Creates a widget that displays the given error message.
+  ///
+  /// An explicit [FlutterError] can be provided to be reported to inspection
+  /// tools. It need not match the message.
+  ErrorWidget.withDetails({ this.message = '', FlutterError error })
+    : _flutterError = error,
       super(key: UniqueKey());
 
   /// The configurable factory for [ErrorWidget].
@@ -3835,17 +3893,28 @@ class ErrorWidget extends LeafRenderObjectWidget {
   /// corresponds to a [RenderBox] that can handle the most absurd of incoming
   /// constraints. The default constructor maps to a [RenderErrorBox].
   ///
+  /// The default behavior is to show the exception's message in debug mode,
+  /// and to show nothing but a gray background in release builds.
+  ///
   /// See also:
   ///
   ///  * [FlutterError.onError], which is typically called with the same
   ///    [FlutterErrorDetails] object immediately prior to this callback being
   ///    invoked, and which can also be configured to control how errors are
   ///    reported.
-  static ErrorWidgetBuilder builder = (FlutterErrorDetails details) => ErrorWidget(details.exception);
+  ///  * <https://flutter.dev/docs/testing/errors>, more information about error
+  ///    handling in Flutter.
+  static ErrorWidgetBuilder builder = _defaultErrorWidgetBuilder;
 
-  /// The message to display.
-  final String message;
-  final FlutterError _flutterError;
+  static Widget _defaultErrorWidgetBuilder(FlutterErrorDetails details) {
+    String message = '';
+    assert(() {
+      message = _stringify(details.exception) + '\nSee also: https://flutter.dev/docs/testing/errors';
+      return true;
+    }());
+    final Object exception = details.exception;
+    return ErrorWidget.withDetails(message: message, error: exception is FlutterError ? exception : null);
+  }
 
   static String _stringify(Object exception) {
     try {
@@ -3855,6 +3924,10 @@ class ErrorWidget extends LeafRenderObjectWidget {
     }
     return 'Error';
   }
+
+  /// The message to display.
+  final String message;
+  final FlutterError _flutterError;
 
   @override
   RenderBox createRenderObject(BuildContext context) => RenderErrorBox(message);
@@ -3966,7 +4039,7 @@ abstract class ComponentElement extends Element {
           informationCollector: () sync* {
             yield DiagnosticsDebugCreator(DebugCreator(this));
           },
-        )
+        ),
       );
     } finally {
       // We delay marking the element as clean until after calling build() so
@@ -3986,7 +4059,7 @@ abstract class ComponentElement extends Element {
           informationCollector: () sync* {
             yield DiagnosticsDebugCreator(DebugCreator(this));
           },
-        )
+        ),
       );
       _child = updateChild(null, built, slot);
     }
@@ -4055,7 +4128,12 @@ class StatefulElement extends ComponentElement {
     }());
     assert(_state._element == null);
     _state._element = this;
-    assert(_state._widget == null);
+    assert(
+      _state._widget == null,
+      'The createState function for $widget returned an old or invalid state '
+      'instance: ${_state._widget}, which is not null, violating the contract '
+      'for createState.',
+    );
     _state._widget = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
   }

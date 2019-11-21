@@ -157,8 +157,8 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => mockProcessManager,
     });
 
     // This verifies that bug https://github.com/flutter/flutter/issues/21134
@@ -218,8 +218,8 @@ void main() {
       expect(testLogger.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => mockProcessManager,
     });
   });
 }

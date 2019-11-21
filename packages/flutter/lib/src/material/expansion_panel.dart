@@ -488,7 +488,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           child: InkWell(
             onTap: () => _handlePressed(_isChildExpanded(index), index),
             child: header,
-          )
+          ),
         );
       }
       items.add(

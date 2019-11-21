@@ -215,4 +215,20 @@ void main() {
     expect(iconColor(expandedIconKey), _unselectedWidgetColor);
     expect(iconColor(collapsedIconKey), _accentColor);
   });
+
+  testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ExpansionTile(
+            title: Text('Title'),
+            subtitle: Text('Subtitle'),
+            children: <Widget>[ListTile(title: Text('0'))],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Subtitle'), findsOneWidget);
+  });
 }

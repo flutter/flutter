@@ -289,7 +289,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Widget trailing;
 
-  // TODO(xster): implement support for double row navigation bars.
+  // TODO(xster): https://github.com/flutter/flutter/issues/10469 implement
+  // support for double row navigation bars.
 
   /// {@template flutter.cupertino.navBar.backgroundColor}
   /// The background color of the navigation bar. If it contains transparency, the
@@ -331,7 +332,10 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   ///
   /// The default color for text in the [middle] slot is always black, as per
   /// iOS standard design.
-  @Deprecated('Use CupertinoTheme and primaryColor to propagate color')
+  @Deprecated(
+    'Use CupertinoTheme and primaryColor to propagate color. '
+    'This feature was deprecated after v1.1.2.'
+  )
   final Color actionsForegroundColor;
 
   /// {@template flutter.cupertino.navBar.transitionBetweenRoutes}
@@ -626,7 +630,10 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///
   /// The default color for text in the [largeTitle] slot is always black, as per
   /// iOS standard design.
-  @Deprecated('Use CupertinoTheme and primaryColor to propagate color')
+  @Deprecated(
+    'Use CupertinoTheme and primaryColor to propagate color. '
+    'This feature was deprecated after v1.1.2.'
+  )
   final Color actionsForegroundColor;
 
   /// {@macro flutter.cupertino.navBar.transitionBetweenRoutes}

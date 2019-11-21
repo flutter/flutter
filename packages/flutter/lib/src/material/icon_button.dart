@@ -151,6 +151,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
+    this.enableFeedback = true,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
@@ -269,6 +270,16 @@ class IconButton extends StatelessWidget {
   /// used for accessibility.
   final String tooltip;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool enableFeedback;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -309,22 +320,21 @@ class IconButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: onPressed != null,
-      child: Focus(
+      child: InkResponse(
         focusNode: focusNode,
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
-        child: InkResponse(
-          onTap: onPressed,
-          child: result,
-          focusColor: focusColor ?? Theme.of(context).focusColor,
-          hoverColor: hoverColor ?? Theme.of(context).hoverColor,
-          highlightColor: highlightColor ?? Theme.of(context).highlightColor,
-          splashColor: splashColor ?? Theme.of(context).splashColor,
-          radius: math.max(
-            Material.defaultSplashRadius,
-            (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
-            // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
-          ),
+        onTap: onPressed,
+        enableFeedback: enableFeedback,
+        child: result,
+        focusColor: focusColor ?? Theme.of(context).focusColor,
+        hoverColor: hoverColor ?? Theme.of(context).hoverColor,
+        highlightColor: highlightColor ?? Theme.of(context).highlightColor,
+        splashColor: splashColor ?? Theme.of(context).splashColor,
+        radius: math.max(
+          Material.defaultSplashRadius,
+          (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+          // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
       ),
     );

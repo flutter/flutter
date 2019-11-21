@@ -494,7 +494,7 @@ void main() {
       final Map<String, Object> response = await extension.call(arguments);
 
       expect(response['isError'], true);
-      expect(response['response'], contains('Bad state: Too many elements'));
+      expect(response['response'], contains('Bad state: Found more than one element with the same ID'));
       semantics.dispose();
     });
   });

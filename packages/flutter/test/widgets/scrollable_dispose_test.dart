@@ -84,7 +84,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Container(),
-      )
+      ),
     );
     await tester.pumpAndSettle();
     expect(controller.hasClients, isFalse);

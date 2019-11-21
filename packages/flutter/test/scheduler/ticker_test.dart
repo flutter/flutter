@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,7 +25,26 @@ void main() {
     expect(ticker.isActive, isTrue);
     expect(tickCount, equals(0));
 
-    expect(ticker.start, throwsFlutterError);
+    FlutterError error;
+    try {
+      ticker.start();
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.diagnostics.length, 3);
+    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
+    expect(
+      error.toStringDeep(),
+      startsWith(
+        'FlutterError\n'
+        '   A ticker was started twice.\n'
+        '   A ticker that is already active cannot be started again without\n'
+        '   first stopping it.\n'
+        '   The affected ticker was:\n'
+        '     Ticker()\n',
+      ),
+    );
 
     await tester.pump(const Duration(milliseconds: 10));
 

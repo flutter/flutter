@@ -41,7 +41,7 @@ void main() {
                 color: Colors.red,
               ),
           ),
-        )
+        ),
     );
 
     await tester.longPressAt(tester.getCenter(find.byKey(redContainer)));
@@ -90,7 +90,7 @@ void main() {
                 ),
             ),
           ),
-        )
+        ),
     );
 
     TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(redContainer)));
@@ -165,7 +165,7 @@ void main() {
                 ),
             ),
           ),
-        )
+        ),
     );
 
     TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(redContainer)));

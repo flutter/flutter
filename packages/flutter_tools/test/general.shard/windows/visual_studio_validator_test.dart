@@ -128,7 +128,7 @@ void main() {
         userMessages.visualStudioMissing(
           visualStudio.workloadDescription,
           visualStudio.necessaryComponentDescriptions(validator.majorVersion),
-        )
+        ),
       );
       expect(result.messages.contains(expectedMessage), true);
       expect(result.type, ValidationType.missing);

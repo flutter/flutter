@@ -26,7 +26,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
     data: <ui.PointerData>[
       ui.PointerData(change: ui.PointerChange.down),
       ui.PointerData(change: ui.PointerChange.up),
-    ]
+    ],
   );
 
   Future<void> test(VoidCallback callback) {

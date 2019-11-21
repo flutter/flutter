@@ -26,7 +26,7 @@ class FakeImageProvider extends ImageProvider<FakeImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(FakeImageProvider key) {
+  ImageStreamCompleter load(FakeImageProvider key, DecoderCallback decode) {
     assert(key == this);
     return MultiFrameImageStreamCompleter(
       codec: SynchronousFuture<ui.Codec>(_codec),

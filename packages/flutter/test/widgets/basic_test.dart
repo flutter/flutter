@@ -17,7 +17,7 @@ void main() {
           elevation: 2.0,
           color: Color(0xFF0000FF),
           shadowColor: Color(0xFF00FF00),
-        )
+        ),
       );
       final RenderPhysicalShape renderObject = tester.renderObject(find.byType(PhysicalShape));
       expect(renderObject.clipper, const ShapeBorderClipper(shape: CircleBorder()));
@@ -34,7 +34,7 @@ void main() {
           color: const Color(0xFF0000FF),
           shadowColor: const Color(0xFF00FF00),
           child: Container(color: const Color(0xFF0000FF)),
-        )
+        ),
       );
 
       final RenderPhysicalShape renderPhysicalShape =
@@ -79,7 +79,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
       );
       expect(_pointerDown, isFalse);
       await tester.tap(find.byKey(key1));
@@ -109,7 +109,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
       );
       expect(_pointerDown, isFalse);
       await tester.tap(find.byKey(key1));
@@ -139,7 +139,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
       );
       expect(_pointerDown, isFalse);
       await tester.tap(find.byKey(key1));

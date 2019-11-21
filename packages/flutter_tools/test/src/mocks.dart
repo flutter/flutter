@@ -192,12 +192,12 @@ class MockProcessManager extends Mock implements ProcessManager {
 /// a given number of times before succeeding. The returned processes will
 /// fail after a delay if one is supplied.
 ProcessFactory flakyProcessFactory({
-    int flakes,
-    bool Function(List<String> command) filter,
-    Duration delay,
-    Stream<List<int>> Function() stdout,
-    Stream<List<int>> Function() stderr,
-  }) {
+  int flakes,
+  bool Function(List<String> command) filter,
+  Duration delay,
+  Stream<List<int>> Function() stdout,
+  Stream<List<int>> Function() stderr,
+}) {
   int flakesLeft = flakes;
   stdout ??= () => const Stream<List<int>>.empty();
   stderr ??= () => const Stream<List<int>>.empty();
@@ -534,6 +534,12 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
   bool isSupported() => true;
 
   @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsFlutterExit => false;
+
+  @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
@@ -563,15 +569,33 @@ class MockDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'MockLogReader';
 
-  final StreamController<String> _linesController = StreamController<String>.broadcast();
+  StreamController<String> _cachedLinesController;
+
+  final List<String> _lineQueue = <String>[];
+  StreamController<String> get _linesController {
+    _cachedLinesController ??= StreamController<String>
+      .broadcast(onListen: () {
+        _lineQueue.forEach(_linesController.add);
+        _lineQueue.clear();
+     });
+    return _cachedLinesController;
+  }
 
   @override
   Stream<String> get logLines => _linesController.stream;
 
-  void addLine(String line) => _linesController.add(line);
+  void addLine(String line) {
+    if (_linesController.hasListener) {
+      _linesController.add(line);
+    } else {
+      _lineQueue.add(line);
+    }
+  }
 
-  void dispose() {
-    _linesController.close();
+  @override
+  Future<void> dispose() async {
+    _lineQueue.clear();
+    await _linesController.close();
   }
 }
 

@@ -537,7 +537,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               mainAxis: widget.mainAxis,
               children: slices,
             ),
-          )
+          ),
         );
         slices = <Widget>[];
 
@@ -545,7 +545,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           SizedBox(
             width: widget.mainAxis == Axis.horizontal ? _getGapSize(i) : null,
             height: widget.mainAxis == Axis.vertical ? _getGapSize(i) : null,
-          )
+          ),
         );
       } else {
         final MaterialSlice slice = _children[i];
@@ -591,7 +591,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           Material(
             type: MaterialType.transparency,
             child: child,
-          )
+          ),
         );
       }
     }
@@ -608,7 +608,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             mainAxis: widget.mainAxis,
             children: slices,
           ),
-        )
+        ),
       );
       slices = <Widget>[];
     }

@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:macrobenchmarks/src/picture_cache.dart';
 
 import 'common.dart';
 import 'src/backdrop_filter.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/simple_animation.dart';
 
 const String kMacrobenchmarks ='Macrobenchmarks';
 
@@ -24,6 +26,8 @@ class MacrobenchmarksApp extends StatelessWidget {
         kCullOpacityRouteName: (BuildContext context) => CullOpacityPage(),
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
+        kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
+        kPictureCacheRouteName: (BuildContext conttext) => PictureCachePage(),
       },
     );
   }
@@ -39,22 +43,36 @@ class HomePage extends StatelessWidget {
           RaisedButton(
             key: const Key(kCullOpacityRouteName),
             child: const Text('Cull opacity'),
-            onPressed: (){
+            onPressed: () {
               Navigator.pushNamed(context, kCullOpacityRouteName);
             },
           ),
           RaisedButton(
             key: const Key(kCubicBezierRouteName),
             child: const Text('Cubic Bezier'),
-            onPressed: (){
+            onPressed: () {
               Navigator.pushNamed(context, kCubicBezierRouteName);
             },
           ),
           RaisedButton(
             key: const Key(kBackdropFilterRouteName),
             child: const Text('Backdrop Filter'),
-            onPressed: (){
+            onPressed: () {
               Navigator.pushNamed(context, kBackdropFilterRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kSimpleAnimationRouteName),
+            child: const Text('Simple Animation'),
+            onPressed: () {
+              Navigator.pushNamed(context, kSimpleAnimationRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kPictureCacheRouteName),
+            child: const Text('Picture Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPictureCacheRouteName);
             },
           ),
         ],

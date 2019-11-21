@@ -120,8 +120,7 @@ void main() {
       1, 2,
       3, 4, 5, // visible
       6, 7,
-    ]
-    ));
+    ]));
     callbackTracker.clear();
   });
 
@@ -459,7 +458,7 @@ void main() {
                   ),
               ),
             ),
-        )
+        ),
     );
 
     final RenderSliverList list = tester.renderObject(find.byType(SliverList));
@@ -490,7 +489,7 @@ void main() {
                     ),
                 ),
             ),
-        )
+        ),
     );
 
     final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
@@ -516,7 +515,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
     );
 
     final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));

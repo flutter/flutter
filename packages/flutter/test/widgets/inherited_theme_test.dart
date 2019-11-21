@@ -188,7 +188,7 @@ void main() {
             ),
           );
         },
-      )
+      ),
     );
 
     TextStyle getIconStyle(Key key) {

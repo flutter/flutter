@@ -221,6 +221,17 @@ class SystemChrome {
   /// The `orientation` argument is a list of [DeviceOrientation] enum values.
   /// The empty list causes the application to defer to the operating system
   /// default.
+  ///
+  /// ## Limitations
+  ///
+  /// This setting will only be respected on iPad if multitasking is disabled.
+  ///
+  /// You can decide to opt out of multitasking on iPad, then
+  /// setPreferredOrientations will work but your app will not
+  /// support Slide Over and Split View multitasking anymore.
+  ///
+  /// Should you decide to opt out of multitasking you can do this by
+  /// setting "Requires full screen" to true in the Xcode Deployment Info.
   static Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setPreferredOrientations',

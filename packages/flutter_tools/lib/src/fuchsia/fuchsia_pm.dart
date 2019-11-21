@@ -58,8 +58,7 @@ class FuchsiaPM {
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
   /// is set up to be the file `meta/package` created by [init].
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,
@@ -178,6 +177,9 @@ class FuchsiaPM {
 /// }
 class FuchsiaPackageServer {
   FuchsiaPackageServer(this._repo, this.name, this._host, this._port);
+
+  static const String deviceHost = 'fuchsia.com';
+  static const String toolHost = 'flutter_tool';
 
   final String _repo;
   final String _host;

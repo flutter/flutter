@@ -182,6 +182,20 @@ class ThemeData extends Diagnosticable {
   ///    ([accentColorBrightness]), so that the right contrasting text
   ///    color will be used over the accent color.
   ///
+  /// Most of these parameters map to the [ThemeData] field with the same name,
+  /// all of which are described in more detail on the fields themselves. The
+  /// exceptions are:
+  ///
+  ///  * [primarySwatch] - used to configure default values for several fields,
+  ///    including: [primaryColor], [primaryColorBrightness], [primaryColorLight],
+  ///    [primaryColorDark], [toggleableActiveColor], [accentColor], [colorScheme],
+  ///    [secondaryHeaderColor], [textSelectionColor], [backgroundColor], and
+  ///    [buttonColor].
+  ///
+  ///  * [fontFamily] - sets the default fontFamily for any
+  ///    [TextStyle.fontFamily] that isn't set directly in the [textTheme],
+  ///    [primaryTextTheme], or [accentTextTheme].
+  ///
   /// See <https://material.io/design/color/> for
   /// more discussion on how to pick the right colors.
   factory ThemeData({
@@ -301,19 +315,19 @@ class ThemeData extends Diagnosticable {
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
     typography ??= Typography(platform: platform);
-    final TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
+    TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
+    if (fontFamily != null) {
+      defaultTextTheme = defaultTextTheme.apply(fontFamily: fontFamily);
+      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
+      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamily: fontFamily);
+    }
     textTheme = defaultTextTheme.merge(textTheme);
-    final TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    final TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     materialTapTargetSize ??= MaterialTapTargetSize.padded;
     applyElevationOverlayColor ??= false;
-    if (fontFamily != null) {
-      textTheme = textTheme.apply(fontFamily: fontFamily);
-      primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
-      accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
-    }
 
     // Used as the default color (fill color) for RaisedButtons. Computing the
     // default for ButtonThemeData for the sake of backwards compatibility.
@@ -562,8 +576,8 @@ class ThemeData extends Diagnosticable {
   ///
   /// If [colorScheme.brightness] is [Brightness.dark] then
   /// [ThemeData.applyElevationOverlayColor] will be set to true to support
-  /// the Material dark theme method for indicating elevation by overlaying
-  /// a semi-transparent white color on top of the surface color.
+  /// the Material dark theme method for indicating elevation by applying
+  /// a semi-transparent onSurface color on top of the surface color.
   ///
   /// This is the recommended method to theme your application. As we move
   /// forward we will be converting all the widget implementations to only use
@@ -603,6 +617,7 @@ class ThemeData extends Diagnosticable {
       accentColor: colorScheme.secondary,
       accentColorBrightness: ThemeData.estimateBrightnessForColor(colorScheme.secondary),
       scaffoldBackgroundColor: colorScheme.background,
+      bottomAppBarColor: colorScheme.surface,
       cardColor: colorScheme.surface,
       dividerColor: colorScheme.onSurface.withOpacity(0.12),
       backgroundColor: colorScheme.background,
@@ -866,19 +881,19 @@ class ThemeData extends Diagnosticable {
   /// Configures the hit test size of certain Material widgets.
   final MaterialTapTargetSize materialTapTargetSize;
 
-  /// Apply a semi-transparent white overlay on Material surfaces to indicate
+  /// Apply a semi-transparent overlay color on Material surfaces to indicate
   /// elevation for dark themes.
   ///
   /// Material drop shadows can be difficult to see in a dark theme, so the
   /// elevation of a surface should be portrayed with an "overlay" in addition
-  /// to the shadow. As the elevation of the component increases, the white
+  /// to the shadow. As the elevation of the component increases, the
   /// overlay increases in opacity. [applyElevationOverlayColor] turns the
   /// application of this overlay on or off.
   ///
-  /// If [true] a semi-transparent white overlay will be applied to the color
-  /// of [Material] widgets when their [Material.color] is [colorScheme.surface].
-  /// The level of transparency is based on [Material.elevation] as per the
-  /// Material Dark theme specification.
+  /// If [true] a semi-transparent version of [colorScheme.onSurface] will be
+  /// applied on top of the color of [Material] widgets when their [Material.color]
+  /// is [colorScheme.surface]. The level of transparency is based on
+  /// [Material.elevation] as per the Material Dark theme specification.
   ///
   /// If [false] the surface color will be used unmodified.
   ///
@@ -988,7 +1003,7 @@ class ThemeData extends Diagnosticable {
     Color unselectedWidgetColor,
     Color disabledColor,
     ButtonThemeData buttonTheme,
-    ToggleButtonsTheme toggleButtonsTheme,
+    ToggleButtonsThemeData toggleButtonsTheme,
     Color buttonColor,
     Color secondaryHeaderColor,
     Color textSelectionColor,
@@ -1483,7 +1498,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   ///
   /// The [materialTheme] parameter must not be null.
   MaterialBasedCupertinoThemeData({
-      @required ThemeData materialTheme,
+    @required ThemeData materialTheme,
   }) : this._(
     materialTheme,
     (materialTheme.cupertinoOverrideTheme ?? const CupertinoThemeData()).noDefault(),

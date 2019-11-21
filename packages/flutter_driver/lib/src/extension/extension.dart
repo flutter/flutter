@@ -232,7 +232,10 @@ class FlutterDriverExtension {
   }
 
   // This can be used to wait for the first frame being rasterized during app launch.
-  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
+  @Deprecated(
+    'This method has been deprecated in favor of _waitForCondition. '
+    'This feature was deprecated after v1.9.3.'
+  )
   Future<Result> _waitUntilFirstFrameRasterized(Command command) async {
     await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
     return null;
@@ -390,7 +393,10 @@ class FlutterDriverExtension {
     return null;
   }
 
-  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
+  @Deprecated(
+    'This method has been deprecated in favor of _waitForCondition. '
+    'This feature was deprecated after v1.9.3.'
+  )
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
@@ -416,7 +422,10 @@ class FlutterDriverExtension {
   /// test author to use some other method to avoid flakiness.
   ///
   /// This method has been deprecated in favor of [_waitForCondition].
-  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
+  @Deprecated(
+    'This method has been deprecated in favor of _waitForCondition. '
+    'This feature was deprecated after v1.9.3.'
+  )
   Future<Result> _waitUntilNoPendingFrame(Command command) async {
     await _waitUntilFrame(() {
       return SchedulerBinding.instance.transientCallbackCount == 0
@@ -428,7 +437,11 @@ class FlutterDriverExtension {
   Future<GetSemanticsIdResult> _getSemanticsId(Command command) async {
     final GetSemanticsId semanticsCommand = command;
     final Finder target = await _waitForElement(_createFinder(semanticsCommand.finder));
-    final Element element = target.evaluate().single;
+    final Iterable<Element> elements = target.evaluate();
+    if (elements.length > 1) {
+      throw StateError('Found more than one element with the same ID: $elements');
+    }
+    final Element element = elements.single;
     RenderObject renderObject = element.renderObject;
     SemanticsNode node;
     while (renderObject != null && node == null) {

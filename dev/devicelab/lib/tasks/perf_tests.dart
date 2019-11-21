@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -54,11 +54,29 @@ TaskFunction createCubicBezierPerfTest() {
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfTest() {
+TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/backdrop_filter_perf.dart',
     'backdrop_filter_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
+TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/simple_animation_perf.dart',
+    'simple_animation_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
+TaskFunction createPictureCachePerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/picture_cache_perf.dart',
+    'picture_cache_perf',
   ).run;
 }
 
@@ -142,9 +160,6 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
-
       await flutter('run', options: <String>[
         '--verbose',
         '--profile',
@@ -168,11 +183,17 @@ class StartupTest {
 /// Measures application runtime performance, specifically per-frame
 /// performance.
 class PerfTest {
-  const PerfTest(this.testDirectory, this.testTarget, this.timelineFileName);
+  const PerfTest(
+      this.testDirectory,
+      this.testTarget,
+      this.timelineFileName,
+      {this.needsMeasureCpuGPu = false});
 
   final String testDirectory;
   final String testTarget;
   final String timelineFileName;
+
+  final bool needsMeasureCpuGPu;
 
   Future<TaskResult> run() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -180,9 +201,6 @@ class PerfTest {
       await device.unlock();
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
 
       await flutter('drive', options: <String>[
         '-v',
@@ -202,6 +220,12 @@ class PerfTest {
         );
       }
 
+      if (needsMeasureCpuGPu) {
+        await inDirectory<void>('$testDirectory/build', () async {
+          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
+        });
+      }
+
       return TaskResult.success(data, benchmarkScoreKeys: <String>[
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',
@@ -213,6 +237,8 @@ class PerfTest {
         'missed_frame_rasterizer_budget_count',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
+        if (needsMeasureCpuGPu) 'cpu_percentage',
+        if (needsMeasureCpuGPu) 'gpu_percentage',
       ]);
     });
   }
@@ -360,7 +386,6 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        await prepareProvisioningCertificates(cwd);
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -405,7 +430,6 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        await prepareProvisioningCertificates(cwd);
         break;
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
@@ -516,9 +540,6 @@ class MemoryTest {
       _device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(project);
 
       final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {
@@ -661,9 +682,6 @@ class ReportedDurationTest {
       _device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(project);
 
       final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {

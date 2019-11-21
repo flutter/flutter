@@ -65,7 +65,7 @@ import 'theme_data.dart';
 /// {@endtemplate}
 ///
 /// {@template flutter.material.slider.seeAlso.roundSliderTickMarkShape}
-///  * [RoundSliderTickMarkShape], which is the the default [Slider]'s tick mark
+///  * [RoundSliderTickMarkShape], which is the default [Slider]'s tick mark
 ///    shape that paints a solid circle.
 /// {@endtemplate}
 ///
@@ -508,7 +508,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundRangeSliderTickMarkShape], which is the the default tick mark
+  ///  * [RoundRangeSliderTickMarkShape], which is the default tick mark
   ///    shape for the range slider.
   final SliderTickMarkShape tickMarkShape;
 
@@ -518,7 +518,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundRangeSliderThumbShape], which is the the default thumb shape for
+  ///  * [RoundRangeSliderThumbShape], which is the default thumb shape for
   ///    the [RangeSlider].
   final SliderComponentShape thumbShape;
 
@@ -533,7 +533,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundedRectRangeSliderTrackShape], which is the the default track
+  ///  * [RoundedRectRangeSliderTrackShape], which is the default track
   ///    shape for the [RangeSlider].
   final SliderTrackShape trackShape;
 
@@ -544,7 +544,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [PaddleRangeSliderValueIndicatorShape], which is the the default value
+  ///  * [PaddleRangeSliderValueIndicatorShape], which is the default value
   ///    indicator shape for the [RangeSlider].
   final SliderComponentShape valueIndicatorShape;
 
@@ -558,7 +558,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundSliderTickMarkShape], which is the the default tick mark shape
+  ///  * [RoundSliderTickMarkShape], which is the default tick mark shape
   ///    for the [Slider].
   final RangeSliderTickMarkShape rangeTickMarkShape;
 
@@ -572,7 +572,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundSliderThumbShape], which is the the default thumb shape for the
+  ///  * [RoundSliderThumbShape], which is the default thumb shape for the
   ///    [Slider].
   final RangeSliderThumbShape rangeThumbShape;
 
@@ -587,7 +587,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundedRectSliderTrackShape], which is the the default track
+  ///  * [RoundedRectSliderTrackShape], which is the default track
   ///    shape for the [Slider].
   final RangeSliderTrackShape rangeTrackShape;
 
@@ -602,7 +602,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [PaddleSliderValueIndicatorShape], which is the the default value
+  ///  * [PaddleSliderValueIndicatorShape], which is the default value
   ///    indicator shape for the [Slider].
   final RangeSliderValueIndicatorShape rangeValueIndicatorShape;
 
@@ -1626,16 +1626,16 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 
   @override
   void paint(
-      PaintingContext context,
-      Offset offset, {
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required Animation<double> enableAnimation,
-      @required TextDirection textDirection,
-      @required Offset thumbCenter,
-      bool isDiscrete = false,
-      bool isEnabled = false,
-    }) {
+    PaintingContext context,
+    Offset offset, {
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required Animation<double> enableAnimation,
+    @required TextDirection textDirection,
+    @required Offset thumbCenter,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+  }) {
     assert(context != null);
     assert(offset != null);
     assert(parentBox != null);
@@ -2620,6 +2620,7 @@ class _PaddleSliderTrackShapePathPainter {
   // Adds an arc to the path that has the attributes passed in. This is
   // a convenience to make adding arcs have less boilerplate.
   static void _addArc(Path path, Offset center, double radius, double startAngle, double endAngle) {
+    assert(center.isFinite);
     final Rect arcRect = Rect.fromCircle(center: center, radius: radius);
     path.arcTo(arcRect, startAngle, endAngle - startAngle, false);
   }
@@ -2692,6 +2693,12 @@ class _PaddleSliderTrackShapePathPainter {
     TextPainter labelPainter,
     Color strokePaintColor,
   ) {
+    if (scale == 0.0) {
+      // Zero scale essentially means "do not draw anything", so it's safe to just return. Otherwise,
+      // our math below will attempt to divide by zero and send needless NaNs to the engine.
+      return;
+    }
+
     // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.
     final double textScaleFactor = labelPainter.height / _labelTextDesignSize;

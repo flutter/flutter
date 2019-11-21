@@ -23,15 +23,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
-  'test': '1.6.3',         //  | Tests are timing out at 1.6.4
-  'test_api': '0.2.5',     //  |
-  'test_core': '0.2.5',    //  |
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'build_runner_core': '3.1.1',    //  | Temporarily prevent the test web_tests-linux from failing.
-  'build_daemon': '2.0.0',         //  | See https://github.com/flutter/flutter/issues/40989
-  'build_web_compilers': '2.3.0',  //  |
-  'build_resolvers': '1.0.7',      //  |
-  'build_runner': '1.6.9',         //  |
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -91,6 +83,9 @@ class UpdatePackagesCommand extends FlutterCommand {
   final String description = 'Update the packages inside the Flutter repo.';
 
   @override
+  final List<String> aliases = <String>['upgrade-packages'];
+
+  @override
   final bool hidden;
 
   @override
@@ -119,11 +114,11 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner.getRepoPackages();
 
-    final bool upgrade = argResults['force-upgrade'];
-    final bool isPrintPaths = argResults['paths'];
-    final bool isPrintTransitiveClosure = argResults['transitive-closure'];
-    final bool isVerifyOnly = argResults['verify-only'];
-    final bool isConsumerOnly = argResults['consumer-only'];
+    final bool upgrade = boolArg('force-upgrade');
+    final bool isPrintPaths = boolArg('paths');
+    final bool isPrintTransitiveClosure = boolArg('transitive-closure');
+    final bool isVerifyOnly = boolArg('verify-only');
+    final bool isConsumerOnly = boolArg('consumer-only');
 
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
     if (isConsumerOnly) {
@@ -258,7 +253,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First we run "pub upgrade" on this generated package:
-        await pubGet(
+        await pub.get(
           context: PubContext.updatePackages,
           directory: tempDir.path,
           upgrade: true,
@@ -269,7 +264,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         // of all the dependencies so that we can figure out the transitive
         // dependencies later. It also remembers which version was selected for
         // each package.
-        await pub(
+        await pub.batch(
           <String>['deps', '--style=compact'],
           context: PubContext.updatePackages,
           directory: tempDir.path,
@@ -303,7 +298,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
 
       if (isPrintPaths) {
-        showDependencyPaths(from: argResults['from'], to: argResults['to'], tree: tree);
+        showDependencyPaths(from: stringArg('from'), to: stringArg('to'), tree: tree);
         return null;
       }
 
@@ -329,7 +324,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     int count = 0;
 
     for (Directory dir in packages) {
-      await pubGet(context: PubContext.updatePackages, directory: dir.path, checkLastModified: false);
+      await pub.get(context: PubContext.updatePackages, directory: dir.path, checkLastModified: false);
       count += 1;
     }
 
@@ -1155,7 +1150,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
     printStatus('WARNING: the following packages use hard-coded version constraints:');
     final Set<String> allTransitive = <String>{
       for (PubspecDependency dependency in dependencies)
-        dependency.name
+        dependency.name,
     };
     for (String package in _kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.

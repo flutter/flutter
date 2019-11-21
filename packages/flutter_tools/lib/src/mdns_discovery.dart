@@ -50,8 +50,9 @@ class MDnsObservatoryDiscovery {
   /// If it is null and there is only one available instance of Observatory,
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
-  Future<MDnsObservatoryDiscoveryResult> query({String applicationId}) async {
-    printStatus('Checking for advertised Dart observatories...');
+  // TODO(jonahwilliams): use `deviceVmservicePort` to filter mdns results.
+  Future<MDnsObservatoryDiscoveryResult> query({String applicationId, int deviceVmservicePort}) async {
+    printTrace('Checking for advertised Dart observatories...');
     try {
       await client.start();
       final List<PtrResourceRecord> pointerRecords = await client
@@ -60,6 +61,7 @@ class MDnsObservatoryDiscovery {
           )
           .toList();
       if (pointerRecords.isEmpty) {
+        printTrace('No pointer records found.');
         return null;
       }
       // We have no guarantee that we won't get multiple hits from the same
@@ -92,7 +94,7 @@ class MDnsObservatoryDiscovery {
       } else {
         domainName = pointerRecords[0].domainName;
       }
-      printStatus('Checking for available port on $domainName');
+      printTrace('Checking for available port on $domainName');
       // Here, if we get more than one, it should just be a duplicate.
       final List<SrvResourceRecord> srv = await client
           .lookup<SrvResourceRecord>(
@@ -106,7 +108,7 @@ class MDnsObservatoryDiscovery {
         printError('Unexpectedly found more than one observatory report for $domainName '
                    '- using first one (${srv.first.port}).');
       }
-      printStatus('Checking for authentication code for $domainName');
+      printTrace('Checking for authentication code for $domainName');
       final List<TxtResourceRecord> txt = await client
         .lookup<TxtResourceRecord>(
             ResourceRecordQuery.text(domainName),
@@ -115,22 +117,19 @@ class MDnsObservatoryDiscovery {
       if (txt == null || txt.isEmpty) {
         return MDnsObservatoryDiscoveryResult(srv.first.port, '');
       }
-      String authCode = '';
       const String authCodePrefix = 'authCode=';
-      String raw = txt.first.text;
-      // TXT has a format of [<length byte>, text], so if the length is 2,
-      // that means that TXT is empty.
-      if (raw.length > 2) {
-        // Remove length byte from raw txt.
-        raw = raw.substring(1);
-        if (raw.startsWith(authCodePrefix)) {
-          authCode = raw.substring(authCodePrefix.length);
-          // The Observatory currently expects a trailing '/' as part of the
-          // URI, otherwise an invalid authentication code response is given.
-          if (!authCode.endsWith('/')) {
-            authCode += '/';
-          }
-        }
+      final String raw = txt.first.text.split('\n').firstWhere(
+        (String s) => s.startsWith(authCodePrefix),
+        orElse: () => null,
+      );
+      if (raw == null) {
+        return MDnsObservatoryDiscoveryResult(srv.first.port, '');
+      }
+      String authCode = raw.substring(authCodePrefix.length);
+      // The Observatory currently expects a trailing '/' as part of the
+      // URI, otherwise an invalid authentication code response is given.
+      if (!authCode.endsWith('/')) {
+        authCode += '/';
       }
       return MDnsObservatoryDiscoveryResult(srv.first.port, authCode);
     } finally {
@@ -138,14 +137,27 @@ class MDnsObservatoryDiscovery {
     }
   }
 
-  Future<Uri> getObservatoryUri(String applicationId, Device device, [bool usesIpv6 = false, int observatoryPort]) async {
-    final MDnsObservatoryDiscoveryResult result = await query(applicationId: applicationId);
+  Future<Uri> getObservatoryUri(String applicationId, Device device, {
+    bool usesIpv6 = false,
+    int hostVmservicePort,
+    int deviceVmservicePort,
+  }) async {
+    final MDnsObservatoryDiscoveryResult result = await query(
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+    );
     Uri observatoryUri;
     if (result != null) {
       final String host = usesIpv6
         ? InternetAddress.loopbackIPv6.address
         : InternetAddress.loopbackIPv4.address;
-      observatoryUri = await buildObservatoryUri(device, host, result.port, observatoryPort, result.authCode);
+      observatoryUri = await buildObservatoryUri(
+        device,
+        host,
+        result.port,
+        hostVmservicePort,
+        result.authCode,
+      );
     }
     return observatoryUri;
   }
@@ -157,8 +169,13 @@ class MDnsObservatoryDiscoveryResult {
   final String authCode;
 }
 
-Future<Uri> buildObservatoryUri(Device device,
-    String host, int devicePort, [int observatoryPort, String authCode]) async {
+Future<Uri> buildObservatoryUri(
+  Device device,
+  String host,
+  int devicePort, [
+  int hostVmservicePort,
+  String authCode,
+]) async {
   String path = '/';
   if (authCode != null) {
     path = authCode;
@@ -168,7 +185,7 @@ Future<Uri> buildObservatoryUri(Device device,
   if (!path.endsWith('/')) {
     path += '/';
   }
-  final int localPort = observatoryPort
-      ?? await device.portForwarder.forward(devicePort);
-  return Uri(scheme: 'http', host: host, port: localPort, path: path);
+  final int actualHostPort = hostVmservicePort ?? await device
+    .portForwarder.forward(devicePort);
+  return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

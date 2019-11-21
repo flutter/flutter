@@ -5,13 +5,13 @@
 import '../convert.dart';
 import 'context.dart';
 import 'file_system.dart';
-import 'platform.dart';
+import 'utils.dart';
 
 class Config {
   Config([File configFile]) {
-    _configFile = configFile ?? fs.file(fs.path.join(_userHomeDir(), '.flutter_settings'));
+    _configFile = configFile ?? fs.file(fs.path.join(userHomePath(), '.flutter_settings'));
     if (_configFile.existsSync()) {
-      _values = json.decode(_configFile.readAsStringSync());
+      _values = castStringKeyedMap(json.decode(_configFile.readAsStringSync()));
     }
   }
 
@@ -43,9 +43,4 @@ class Config {
     json = '$json\n';
     _configFile.writeAsStringSync(json);
   }
-}
-
-String _userHomeDir() {
-  final String envKey = platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  return platform.environment[envKey] ?? '.';
 }

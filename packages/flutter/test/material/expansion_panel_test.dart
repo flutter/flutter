@@ -194,6 +194,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       hasTapAction: true,
     ));
 
@@ -937,6 +938,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       hasTapAction: true,
       onTapHint: localizations.expandedIconTapHint,
     ));
@@ -960,6 +962,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       hasTapAction: true,
       onTapHint: localizations.collapsedIconTapHint,
     ));
@@ -1011,6 +1014,7 @@ void main() {
     expect(tester.getSemantics(find.byKey(expandedKey)), matchesSemantics(
       label: 'Expanded',
       isButton: true,
+      isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
     ));
@@ -1018,6 +1022,7 @@ void main() {
     expect(tester.getSemantics(find.byKey(collapsedKey)), matchesSemantics(
       label: 'Collapsed',
       isButton: true,
+      isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
     ));

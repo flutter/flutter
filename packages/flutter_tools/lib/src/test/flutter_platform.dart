@@ -21,6 +21,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
@@ -86,6 +87,7 @@ FlutterPlatform installHook({
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
+  @required BuildMode buildMode,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   bool buildTestAssets = false,
@@ -119,6 +121,7 @@ FlutterPlatform installHook({
     port: port,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
+    buildMode: buildMode,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,
@@ -258,6 +261,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.port,
     this.precompiledDillPath,
     this.precompiledDillFiles,
+    @required this.buildMode,
     this.trackWidgetCreation,
     this.updateGoldens,
     this.buildTestAssets,
@@ -277,6 +281,7 @@ class FlutterPlatform extends PlatformPlugin {
   final int port;
   final String precompiledDillPath;
   final Map<String, String> precompiledDillFiles;
+  final BuildMode buildMode;
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final bool buildTestAssets;
@@ -423,7 +428,7 @@ class FlutterPlatform extends PlatformPlugin {
             webSocket.complete(WebSocketTransformer.upgrade(request));
           }
         },
-        onError: (dynamic error, dynamic stack) {
+        onError: (dynamic error, StackTrace stack) {
           // If you reach here, it's unlikely we're going to be able to really handle this well.
           printTrace('test $ourTestCount: test harness socket server experienced an unexpected error: $error');
           if (!controllerSinkClosed) {
@@ -451,7 +456,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(trackWidgetCreation, flutterProject);
+        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
@@ -590,7 +595,7 @@ class FlutterPlatform extends PlatformPlugin {
               testSocket.add(json.encode(event));
             },
             onDone: harnessDone.complete,
-            onError: (dynamic error, dynamic stack) {
+            onError: (dynamic error, StackTrace stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test harness controller stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
@@ -606,12 +611,11 @@ class FlutterPlatform extends PlatformPlugin {
           final Completer<void> testDone = Completer<void>();
           final StreamSubscription<dynamic> testToHarness = testSocket.listen(
             (dynamic encodedEvent) {
-              assert(encodedEvent
-                  is String); // we shouldn't ever get binary messages
-              controller.sink.add(json.decode(encodedEvent));
+              assert(encodedEvent is String); // we shouldn't ever get binary messages
+              controller.sink.add(json.decode(encodedEvent as String));
             },
             onDone: testDone.complete,
-            onError: (dynamic error, dynamic stack) {
+            onError: (dynamic error, StackTrace stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test socket stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
@@ -965,10 +969,11 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
       (List<dynamic> futureResults) {
         assert(futureResults.length == 2);
         assert(futureResults.first == null);
-        if (futureResults.last is _AsyncError) {
-          _done.completeError(futureResults.last.error, futureResults.last.stack);
+        final dynamic lastResult = futureResults.last;
+        if (lastResult is _AsyncError) {
+          _done.completeError(lastResult.error, lastResult.stack);
         } else {
-          assert(futureResults.last == null);
+          assert(lastResult == null);
           _done.complete();
         }
       },

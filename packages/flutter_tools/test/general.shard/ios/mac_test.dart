@@ -246,7 +246,9 @@ void main() {
       );
 
       await diagnoseXcodeBuildFailure(buildResult);
-      verify(mockUsage.sendEvent('build', 'xcode-bitcode-failure',
+      verify(mockUsage.sendEvent('build',
+        any,
+        label: 'xcode-bitcode-failure',
         parameters: <String, String>{
           cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
           cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),

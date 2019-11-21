@@ -139,7 +139,7 @@ void main() {
 
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
-        devicePixelRatio: 3.0)
+        devicePixelRatio: 3.0),
       ).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, mainAssetPath);
         expect(bundleKey.scale, 1.0);
@@ -172,7 +172,7 @@ void main() {
       // we have 1.0 and 3.0, asking for 1.5 should give
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
-        devicePixelRatio: deviceRatio)
+        devicePixelRatio: deviceRatio),
       ).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, expectedAssetPath);
         expect(bundleKey.scale, chosenAssetRatio);

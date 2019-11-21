@@ -120,14 +120,14 @@ class FlutterVersion {
   }
 
   Map<String, Object> toJson() => <String, Object>{
-        'frameworkVersion': frameworkVersion ?? 'unknown',
-        'channel': channel,
-        'repositoryUrl': repositoryUrl ?? 'unknown source',
-        'frameworkRevision': frameworkRevision,
-        'frameworkCommitDate': frameworkCommitDate,
-        'engineRevision': engineRevision,
-        'dartSdkVersion': dartSdkVersion,
-      };
+    'frameworkVersion': frameworkVersion ?? 'unknown',
+    'channel': channel,
+    'repositoryUrl': repositoryUrl ?? 'unknown source',
+    'frameworkRevision': frameworkRevision,
+    'frameworkCommitDate': frameworkCommitDate,
+    'engineRevision': engineRevision,
+    'dartSdkVersion': dartSdkVersion,
+  };
 
   /// A date String describing the last framework commit.
   String get frameworkCommitDate => _latestGitCommitDate();
@@ -434,7 +434,7 @@ class VersionCheckStamp {
       // Attempt to parse stamp JSON.
       try {
         final dynamic jsonObject = json.decode(versionCheckStamp);
-        if (jsonObject is Map) {
+        if (jsonObject is Map<String, dynamic>) {
           return fromJson(jsonObject);
         } else {
           printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
@@ -452,7 +452,7 @@ class VersionCheckStamp {
   static VersionCheckStamp fromJson(Map<String, dynamic> jsonObject) {
     DateTime readDateTime(String property) {
       return jsonObject.containsKey(property)
-          ? DateTime.parse(jsonObject[property])
+          ? DateTime.parse(jsonObject[property] as String)
           : null;
     }
 
@@ -536,7 +536,7 @@ String _runSync(List<String> command, { bool lenient = true }) {
   final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) {
-    return results.stdout.trim();
+    return (results.stdout as String).trim();
   }
 
   if (!lenient) {
@@ -564,7 +564,7 @@ Future<String> _run(List<String> command) async {
   final ProcessResult results = await processManager.run(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) {
-    return results.stdout.trim();
+    return (results.stdout as String).trim();
   }
 
   throw VersionCheckError(

@@ -35,13 +35,13 @@ String originalWorkingDirectory;
 
 Future<void> main(List<String> args) async {
   final ArgResults argResults = parser.parse(args);
-  final bool verbose = argResults['verbose'];
-  final String target = argResults['target'];
+  final bool verbose = argResults['verbose'] as bool;
+  final String target = argResults['target'] as String;
   final List<String> targetParts = _extractPathAndName(target);
   final String path = targetParts[0];
   final String name = targetParts[1];
   final File dartSdk = fs.file(argResults['dart-sdk']);
-  final String buildDirectory = argResults['build-dir'];
+  final String buildDirectory = argResults['build-dir'] as String;
   final File frontendServer = fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
   final File devFinder = fs.file(argResults['dev-finder']);
@@ -69,13 +69,13 @@ Future<void> main(List<String> args) async {
   }
 
   // Check for a package with a lib directory.
-  final String entrypoint = argResults['entrypoint'];
+  final String entrypoint = argResults['entrypoint'] as String;
   String targetFile = 'lib/$entrypoint';
   if (!fs.file(targetFile).existsSync()) {
     // Otherwise assume the package is flat.
     targetFile = entrypoint;
   }
-  final String deviceName = argResults['device'];
+  final String deviceName = argResults['device'] as String;
   final List<String> command = <String>[
     'attach',
     '--module',

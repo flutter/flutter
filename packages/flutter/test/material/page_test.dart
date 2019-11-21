@@ -19,7 +19,7 @@ void main() {
             return const Material(child: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
@@ -81,7 +81,7 @@ void main() {
             );
           },
         },
-      )
+      ),
     );
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
@@ -151,7 +151,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: const Material(child: Text('Page 1')),
-      )
+      ),
     );
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
@@ -217,7 +217,7 @@ void main() {
             return const Scaffold(body: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
@@ -248,7 +248,7 @@ void main() {
             return const Scaffold(body: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
@@ -342,7 +342,7 @@ void main() {
     expect(helloPosition3.dy, helloPosition4.dy);
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 3);
     expect(find.text('PUSH'), findsOneWidget);
     expect(find.text('HELLO'), findsNothing);
   });
@@ -352,7 +352,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: const Scaffold(body: Text('Page 1')),
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(MaterialPageRoute<void>(
@@ -388,7 +388,7 @@ void main() {
             return const Material(child: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
@@ -423,7 +423,7 @@ void main() {
             return const Material(child: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
@@ -468,7 +468,13 @@ void main() {
         ));
     await tester.pumpAndSettle();
     // An exception should've been thrown because the `builder` returned null.
-    expect(tester.takeException(), isInstanceOf<FlutterError>());
+    final dynamic exception = tester.takeException();
+    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception.toStringDeep(), equalsIgnoringHashCodes(
+      'FlutterError\n'
+      '   The builder for route "broken" returned null.\n'
+      '   Route builders must never return null.\n'
+    ));
   });
 
   testWidgets('test iOS edge swipe then drop back at starting point works', (WidgetTester tester) async {

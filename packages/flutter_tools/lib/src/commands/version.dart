@@ -72,7 +72,7 @@ class VersionCommand extends FlutterCommand {
 
     bool withForce = false;
     if (targetVersion < minSupportedVersion) {
-      if (!argResults['force']) {
+      if (!boolArg('force')) {
         printError(
           'Version command is not supported in $targetVersion and it is supported since version $minSupportedVersion'
           'which means if you switch to version $minSupportedVersion then you can not use version command.'
@@ -119,7 +119,7 @@ class VersionCommand extends FlutterCommand {
     final String projectRoot = findProjectRoot();
     if (projectRoot != null) {
       printStatus('');
-      await pubGet(
+      await pub.get(
         context: PubContext.pubUpgrade,
         directory: projectRoot,
         upgrade: true,

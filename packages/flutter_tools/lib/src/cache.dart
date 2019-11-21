@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'android/gradle.dart';
+import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -16,20 +16,24 @@ import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'features.dart';
 import 'globals.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
 
-  const DevelopmentArtifact._(this.name, {this.unstable = false});
+  const DevelopmentArtifact._(this.name, {this.unstable = false, this.feature});
 
   /// The name of the artifact.
   ///
   /// This should match the flag name in precache.dart
   final String name;
 
-  /// Whether this artifact should be unavailable on stable branches.
+  /// Whether this artifact should be unavailable on master branch only.
   final bool unstable;
+
+  /// A feature to control the visibility of this artifact.
+  final Feature feature;
 
   /// Artifacts required for Android development.
   static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot');
@@ -41,7 +45,7 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
   /// Artifacts required for web development.
-  static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
+  static const DevelopmentArtifact web = DevelopmentArtifact._('web', feature: flutterWebFeature);
 
   /// Artifacts required for desktop macOS.
   static const DevelopmentArtifact macOS = DevelopmentArtifact._('macos', unstable: true);
@@ -75,6 +79,9 @@ class DevelopmentArtifact {
     universal,
     flutterRunner,
   ];
+
+  @override
+  String toString() => 'Artifact($name, $unstable)';
 }
 
 /// A wrapper around the `bin/cache/` directory.
@@ -99,6 +106,7 @@ class Cache {
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
       _artifacts.add(FlutterRunnerSDKArtifacts(this));
+      _artifacts.add(FlutterRunnerDebugSymbols(this));
       for (String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
@@ -120,6 +128,9 @@ class Cache {
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
   bool includeAllPlatforms = false;
+
+  // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
+  bool useUnsignedMacBinaries = false;
 
   static RandomAccessFile _lock;
   static bool _lockEnabled = true;
@@ -368,7 +379,7 @@ class Cache {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     bool allAvailible = true;
     cache.includeAllPlatforms = includeAllPlatforms;
-    for (CachedArtifact cachedArtifact in _artifacts) {
+    for (ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
         allAvailible &= await cachedArtifact.checkForArtifacts(engineVersion);
       }
@@ -421,7 +432,8 @@ abstract class CachedArtifact extends ArtifactSet {
   /// can delete them after completion. We don't delete them right after
   /// extraction in case [update] is interrupted, so we can restart without
   /// starting from scratch.
-  final List<File> _downloadedFiles = <File>[];
+  @visibleForTesting
+  final List<File> downloadedFiles = <File>[];
 
   @override
   bool isUpToDate() {
@@ -454,8 +466,13 @@ abstract class CachedArtifact extends ArtifactSet {
 
   /// Clear any zip/gzip files downloaded.
   void _removeDownloadedFiles() {
-    for (File f in _downloadedFiles) {
-      f.deleteSync();
+    for (File f in downloadedFiles) {
+      try {
+        f.deleteSync();
+      } on FileSystemException catch (e) {
+        printError('Failed to delete "${f.path}". Please delete manually. $e');
+        continue;
+      }
       for (Directory d = f.parent; d.absolute.path != cache.getDownloadDir().absolute.path; d = d.parent) {
         if (d.listSync().isEmpty) {
           d.deleteSync();
@@ -472,16 +489,23 @@ abstract class CachedArtifact extends ArtifactSet {
   /// Template method to perform artifact update.
   Future<void> updateInner();
 
-  String get _storageBaseUrl {
+  @visibleForTesting
+  String get storageBaseUrl {
     final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
     if (overrideUrl == null) {
       return 'https://storage.googleapis.com';
+    }
+    // verify that this is a valid URI.
+    try {
+      Uri.parse(overrideUrl);
+    } on FormatException catch (err) {
+      throwToolExit('"FLUTTER_STORAGE_BASE_URL" contains an invalid URI:\n$err');
     }
     _maybeWarnAboutStorageOverride(overrideUrl);
     return overrideUrl;
   }
 
-  Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
+  Uri _toStorageUri(String path) => Uri.parse('$storageBaseUrl/$path');
 
   /// Download an archive from the given [url] and unzip it to [location].
   Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
@@ -514,10 +538,10 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
-  /// argument, then add the temporary file to the [_downloadedFiles].
+  /// argument, then add the temporary file to the [downloadedFiles].
   Future<void> _withDownloadFile(String name, Future<void> onTemporaryFile(File file)) async {
     final File tempFile = fs.file(fs.path.join(cache.getDownloadDir().path, name));
-    _downloadedFiles.add(tempFile);
+    downloadedFiles.add(tempFile);
     await onTemporaryFile(tempFile);
   }
 }
@@ -577,7 +601,7 @@ class FlutterWebSdk extends CachedArtifact {
     } else if (platform.isWindows) {
       platformName += 'windows-x64';
     }
-    final Uri url = Uri.parse('$_storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
+    final Uri url = Uri.parse('$storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
     await _downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
     for (FileSystemEntity entity in location.listSync(recursive: true)) {
@@ -642,7 +666,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   @override
   Future<void> updateInner() async {
-    final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
+    final String url = '$storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in getPackageDirs()) {
@@ -677,7 +701,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   Future<bool> checkForArtifacts(String engineVersion) async {
     engineVersion ??= version;
-    final String url = '$_storageBaseUrl/flutter_infra/flutter/$engineVersion/';
+    final String url = '$storageBaseUrl/flutter_infra/flutter/$engineVersion/';
 
     bool exists = false;
     for (String pkgName in getPackageDirs()) {
@@ -732,12 +756,11 @@ class FlutterSdk extends EngineCachedArtifact {
     return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
-      if (cache.includeAllPlatforms)
-        ...<List<String>>[
-          <String>['windows-x64', 'windows-x64/artifacts.zip'],
-          <String>['linux-x64', 'linux-x64/artifacts.zip'],
-          <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-        ]
+      if (cache.includeAllPlatforms) ...<List<String>>[
+        <String>['windows-x64', 'windows-x64/artifacts.zip'],
+        <String>['linux-x64', 'linux-x64/artifacts.zip'],
+        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+      ]
       else if (platform.isWindows)
         <String>['windows-x64', 'windows-x64/artifacts.zip']
       else if (platform.isMacOS)
@@ -831,25 +854,17 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     return <List<String>>[
-      if (cache.includeAllPlatforms)
-        ...<List<String>>[
-          ..._osxBinaryDirs,
-          ..._linuxBinaryDirs,
-          ..._windowsBinaryDirs,
-          ..._dartSdks,
-        ]
-      else if (platform.isWindows)
-        ...<List<String>>[
-          ..._windowsBinaryDirs,
-        ]
+      if (cache.includeAllPlatforms) ...<List<String>>[
+        ..._osxBinaryDirs,
+        ..._linuxBinaryDirs,
+        ..._windowsBinaryDirs,
+        ..._dartSdks,
+      ] else if (platform.isWindows)
+        ..._windowsBinaryDirs
       else if (platform.isMacOS)
-        ...<List<String>>[
-          ..._osxBinaryDirs,
-        ]
+        ..._osxBinaryDirs
       else if (platform.isLinux)
-        ...<List<String>>[
-          ..._linuxBinaryDirs,
-        ]
+        ..._linuxBinaryDirs,
     ];
   }
 
@@ -885,7 +900,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
   @override
   Future<void> update() async {
     final Directory tempDir =
-        fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+        fs.systemTempDirectory.createTempSync('flutter_gradle_wrapper.');
     injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...',
@@ -906,7 +921,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
           '--project-cache-dir', tempDir.path,
           'resolveDependencies',
         ],
-        environment: gradleEnv);
+        environment: gradleEnvironment);
       if (processResult.exitCode != 0) {
         printError('Failed to download the Android dependencies');
       }
@@ -1050,6 +1065,62 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
   }
 }
 
+/// Implementations of this class can resolve URLs for packages that are versioned.
+///
+/// See also [CipdArchiveResolver].
+abstract class VersionedPackageResolver {
+  const VersionedPackageResolver();
+
+  /// Returns the URL for the artifact.
+  String resolveUrl(String packageName, String version);
+}
+
+/// Resolves the CIPD archive URL for a given package and version.
+class CipdArchiveResolver extends VersionedPackageResolver {
+  const CipdArchiveResolver();
+
+  @override
+  String resolveUrl(String packageName, String version) {
+    return '$_cipdBaseUrl/flutter/$packageName/+/git_revision:$version';
+  }
+}
+
+/// The debug symbols for flutter runner for Fuchsia development.
+class FlutterRunnerDebugSymbols extends CachedArtifact {
+  FlutterRunnerDebugSymbols(Cache cache, {this.packageResolver = const CipdArchiveResolver(), this.dryRun = false})
+      : super('flutter_runner_debug_symbols', cache, DevelopmentArtifact.flutterRunner);
+
+  final VersionedPackageResolver packageResolver;
+
+  final bool dryRun;
+
+  @override
+  Directory get location => cache.getArtifactDirectory(name);
+
+  @override
+  String get version => cache.getVersionFor('engine');
+
+  Future<void> _downloadDebugSymbols(String targetArch) async {
+    final String packageName = 'fuchsia-debug-symbols-$targetArch';
+    final String url = packageResolver.resolveUrl(packageName, version);
+    if (!dryRun) {
+      await _downloadZipArchive(
+          'Downloading debug symbols for flutter runner - arch:$targetArch...',
+          Uri.parse(url),
+          location);
+    }
+  }
+
+  @override
+  Future<void> updateInner() async {
+    if (!platform.isLinux && !platform.isMacOS) {
+      return Future<void>.value();
+    }
+    await _downloadDebugSymbols('x64');
+    await _downloadDebugSymbols('arm64');
+  }
+}
+
 /// The Fuchsia core SDK for Linux.
 class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   LinuxFuchsiaSDKArtifacts(Cache cache) : super(cache, 'linux');
@@ -1092,7 +1163,19 @@ class IosUsbArtifacts extends CachedArtifact {
     'openssl',
     'ideviceinstaller',
     'ios-deploy',
+    'libzip',
   ];
+
+  // For unknown reasons, users are getting into bad states where libimobiledevice is
+  // downloaded but some executables are missing from the zip. The names here are
+  // used for additional download checks below, so we can redownload if they are
+  // missing.
+  static const Map<String, List<String>> _kExecutables = <String, List<String>>{
+    'libimobiledevice': <String>[
+      'idevice_id',
+      'ideviceinfo',
+    ],
+  };
 
   @override
   Map<String, String> get environment {
@@ -1102,13 +1185,32 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @override
+  bool isUpToDateInner() {
+    final List<String> executables =_kExecutables[name];
+    if (executables == null) {
+      return true;
+    }
+    for (String executable in executables) {
+      if (!location.childFile(executable).existsSync()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
   Future<void> updateInner() {
-    if (!platform.isMacOS) {
+    if (!platform.isMacOS && !cache.includeAllPlatforms) {
       return Future<void>.value();
     }
-    final Uri archiveUri = Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies/$name/$version/$name.zip');
+    if (location.existsSync()) {
+      location.deleteSync(recursive: true);
+    }
     return _downloadZipArchive('Downloading $name...', archiveUri, location);
   }
+
+  @visibleForTesting
+  Uri get archiveUri => Uri.parse('$storageBaseUrl/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
 }
 
 // Many characters are problematic in filenames, especially on Windows.
@@ -1146,8 +1248,7 @@ String flattenNameSubdirs(Uri url) {
 /// Download a file from the given [url] and write it to [location].
 Future<void> _downloadFile(Uri url, File location) async {
   _ensureExists(location.parent);
-  final List<int> fileBytes = await fetchUrl(url);
-  location.writeAsBytesSync(fileBytes, flush: true);
+  await fetchUrl(url, destFile: location);
 }
 
 Future<bool> _doesRemoteExist(String message, Uri url) async {
@@ -1190,6 +1291,8 @@ const List<List<String>> _osxBinaryDirs = <List<String>>[
   <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
   <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
   <String>['android-arm64-release/darwin-x64', 'android-arm64-release/darwin-x64.zip'],
+  <String>['android-x64-profile/darwin-x64', 'android-x64-profile/darwin-x64.zip'],
+  <String>['android-x64-release/darwin-x64', 'android-x64-release/darwin-x64.zip'],
 ];
 
 const List<List<String>> _linuxBinaryDirs = <List<String>>[
@@ -1197,6 +1300,8 @@ const List<List<String>> _linuxBinaryDirs = <List<String>>[
   <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
   <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
   <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
+  <String>['android-x64-profile/linux-x64', 'android-x64-profile/linux-x64.zip'],
+  <String>['android-x64-release/linux-x64', 'android-x64-release/linux-x64.zip'],
 ];
 
 const List<List<String>> _windowsBinaryDirs = <List<String>>[
@@ -1204,6 +1309,8 @@ const List<List<String>> _windowsBinaryDirs = <List<String>>[
   <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
   <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
   <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
+  <String>['android-x64-profile/windows-x64', 'android-x64-profile/windows-x64.zip'],
+  <String>['android-x64-release/windows-x64', 'android-x64-release/windows-x64.zip'],
 ];
 
 const List<List<String>> _iosBinaryDirs = <List<String>>[
@@ -1221,6 +1328,9 @@ const List<List<String>> _androidBinaryDirs = <List<String>>[
   <String>['android-arm64', 'android-arm64/artifacts.zip'],
   <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
   <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
+  <String>['android-x64-profile', 'android-x64-profile/artifacts.zip'],
+  <String>['android-x64-release', 'android-x64-release/artifacts.zip'],
+  <String>['android-x86-jit-release', 'android-x86-jit-release/artifacts.zip'],
 ];
 
 const List<List<String>> _dartSdks = <List<String>> [
