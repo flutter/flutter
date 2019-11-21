@@ -1444,7 +1444,7 @@ class Navigator extends StatefulWidget {
   }
 
   /// Immediately remove a route from the navigator that most tightly encloses
-  /// the given context, and [Route.dispose] it. The route to be replaced is the
+  /// the given context, and [Route.dispose] it. The route to be removed is the
   /// one below the given `anchorRoute`.
   ///
   /// {@template flutter.widgets.navigator.removeRouteBelow}
@@ -2201,7 +2201,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The
-  /// route to be replaced is the one below the given `anchorRoute`.
+  /// route to be removed is the one below the given `anchorRoute`.
   ///
   /// {@macro flutter.widgets.navigator.removeRouteBelow}
   void removeRouteBelow(Route<dynamic> anchorRoute) {
