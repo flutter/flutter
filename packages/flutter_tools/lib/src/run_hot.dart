@@ -988,7 +988,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       for (VMService vm in device.vmServices) {
-        printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.wsAddress}');
+        printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.httpAddress}');
       }
     }
     final String quitMessage = _didAttach
