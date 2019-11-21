@@ -472,6 +472,9 @@ TextAffinity _toTextAffinity(String affinity) {
     case 'TextAffinity.upstream':
       return TextAffinity.upstream;
   }
+  // Null affinity indicates that the platform did not provide a valid
+  // affinity. Set it to null here to allow the framework to supply
+  // a fallback affinity.
   return null;
 }
 
@@ -533,7 +536,7 @@ class TextEditingValue {
       selection: TextSelection(
         baseOffset: encoded['selectionBase'] ?? -1,
         extentOffset: encoded['selectionExtent'] ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
+        affinity: _toTextAffinity(encoded['selectionAffinity']),
         isDirectional: encoded['selectionIsDirectional'] ?? false,
       ),
       composing: TextRange(

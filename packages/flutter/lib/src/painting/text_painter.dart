@@ -819,9 +819,14 @@ class TextPainter {
     return _paragraph.getWordBoundary(position);
   }
 
-  /// Returns the text range of the line at the given offset.
+  /// Returns the [TextRange] of the line at the given [TextPosition].
   ///
-  /// The newline, if any, is included in the range.
+  /// The newline, if any, is returned as part of the range.
+  ///
+  /// Not valid until after layout.
+  ///
+  /// This can potentially be expensive, since it needs to compute the full
+  /// layout before it is available.
   TextRange getLineBoundary(TextPosition position) {
     assert(!_needsLayout);
     return _paragraph.getLineBoundary(position);
