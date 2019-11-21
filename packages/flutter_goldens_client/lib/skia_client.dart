@@ -241,9 +241,18 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
-        ..writeln('exit code: ${result.exitCode}')
         ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}\n');
+        ..writeln('stderr: ${result.stderr}\n')
+        ..writeln('\nArguments: ');
+      imgtestInitArguments.forEach(buf.writeln);
+      final File resultState = workDirectory?.childFile(fs.path.join(
+        'temp',
+        'result-state.json',
+      ));
+      final String contents = await resultState.readAsString();
+      buf
+        ..writeln('\nresult-state.json contents:')
+        ..writeln('$contents\n');
       throw NonZeroExitCode(1, buf.toString());
     }
   }
@@ -278,9 +287,18 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobAdd failure.')
-        ..writeln('exit code: ${result.exitCode}')
         ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}\n');
+        ..writeln('stderr: ${result.stderr}\n')
+        ..writeln('\nArguments: ');
+      imgtestArguments.forEach(buf.writeln);
+      final File resultState = workDirectory?.childFile(fs.path.join(
+        'temp',
+        'result-state.json',
+      ));
+      final String contents = await resultState.readAsString();
+      buf
+        ..writeln('\nresult-state.json contents:')
+        ..writeln('$contents\n');
       throw NonZeroExitCode(1, buf.toString());
     }
     return result.exitCode == 0;
