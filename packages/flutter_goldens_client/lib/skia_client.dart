@@ -450,6 +450,8 @@ class SkiaGoldClient {
   /// Returns a boolean value to prevent the client from re-authorizing itself
   /// for multiple tests.
   bool _clientIsAuthorized() {
+    if (tempDirectory == null)
+      return false;
     final File authFile = workDirectory?.childFile(fs.path.join(
       tempDirectory,
       'auth_opt.json',
