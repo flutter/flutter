@@ -220,7 +220,8 @@ class DomRenderer {
     _styleElement = html.StyleElement();
     html.document.head.append(_styleElement);
     final html.CssStyleSheet sheet = _styleElement.sheet;
-
+    final bool isWebKit = browserEngine == BrowserEngine.webkit;
+    final bool isFirefox = browserEngine == BrowserEngine.firefox;
     // TODO(butterfly): use more efficient CSS selectors; descendant selectors
     //                  are slow. More info:
     //
@@ -228,10 +229,19 @@ class DomRenderer {
 
     // This undoes browser's default layout attributes for paragraphs. We
     // compute paragraph layout ourselves.
-    sheet.insertRule('''
-flt-ruler-host p, flt-scene p {
-  margin: 0;
-}''', sheet.cssRules.length);
+    if (isFirefox) {
+      // For firefox set line-height, otherwise textx at same font-size will
+      // measure differently in ruler.
+      sheet.insertRule(
+          'flt-ruler-host p, flt-scene p '
+          '{ margin: 0; line-height: 100%;}',
+          sheet.cssRules.length);
+    } else {
+      sheet.insertRule(
+          'flt-ruler-host p, flt-scene p '
+          '{ margin: 0; }',
+          sheet.cssRules.length);
+    }
 
     // This undoes browser's default painting and layout attributes of range
     // input, which is used in semantics.
@@ -248,7 +258,7 @@ flt-semantics input[type=range] {
   left: 0;
 }''', sheet.cssRules.length);
 
-    if (browserEngine == BrowserEngine.webkit) {
+    if (isWebKit) {
       sheet.insertRule(
           'flt-semantics input[type=range]::-webkit-slider-thumb {'
           '  -webkit-appearance: none;'
@@ -256,7 +266,7 @@ flt-semantics input[type=range] {
           sheet.cssRules.length);
     }
 
-    if (browserEngine == BrowserEngine.firefox) {
+    if (isFirefox) {
       sheet.insertRule(
           'input::-moz-selection {'
           '  background-color: transparent;'
@@ -292,7 +302,7 @@ flt-semantics [contentEditable="true"] {
 
     // By default on iOS, Safari would highlight the element that's being tapped
     // on using gray background. This CSS rule disables that.
-    if (browserEngine == BrowserEngine.webkit) {
+    if (isWebKit) {
       sheet.insertRule('''
 flt-glass-pane * {
   -webkit-tap-highlight-color: transparent;
@@ -393,8 +403,7 @@ flt-glass-pane * {
     // is 1.0.
     window.debugOverrideDevicePixelRatio(1.0);
 
-    if (html.window.visualViewport == null &&
-        browserEngine == BrowserEngine.webkit) {
+    if (html.window.visualViewport == null && isWebKit) {
       // Safari sometimes gives us bogus innerWidth/innerHeight values when the
       // page loads. When it changes the values to correct ones it does not
       // notify of the change via `onResize`. As a workaround, we setup a
