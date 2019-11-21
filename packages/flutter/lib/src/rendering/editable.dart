@@ -1735,7 +1735,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _caretPrototype = _getCaretPrototype;
     _selectionRects = null;
-
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
     // _textPainter's layout because the intrinsic size calculations are
