@@ -393,7 +393,6 @@ class EditableText extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
-    this.multistageTextInputRectColor,
     this.toolbarOptions = const ToolbarOptions(
       copy: true,
       cut: true,
@@ -629,11 +628,6 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to null, which disables autocorrection Rect painting.
   final Color autocorrectionTextRectColor;
-
-  /// The color to use when painting the multistage input text Rect.
-  ///
-  /// Defaults to null, which disables multistage input text Rect painting.
-  final Color multistageTextInputRectColor;
 
   /// The color to use when painting the background cursor aligned with the text
   /// while rendering the floating cursor.

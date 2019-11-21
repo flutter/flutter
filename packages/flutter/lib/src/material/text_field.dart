@@ -920,7 +920,6 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     Offset cursorOffset;
     Color cursorColor = widget.cursorColor;
     Color autocorrectionTextRectColor;
-    Color multistageTextInputRectColor;
     Radius cursorRadius = widget.cursorRadius;
 
     switch (themeData.platform) {
@@ -933,7 +932,6 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         autocorrectionTextRectColor = themeData.textSelectionColor;
-        multistageTextInputRectColor = CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemFill, context);
         break;
 
       case TargetPlatform.android:
@@ -992,7 +990,6 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         scrollController: widget.scrollController,
         scrollPhysics: widget.scrollPhysics,
         autocorrectionTextRectColor: autocorrectionTextRectColor,
-        multistageTextInputRectColor: multistageTextInputRectColor,
       ),
     );
 
