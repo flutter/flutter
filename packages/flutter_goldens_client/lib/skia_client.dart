@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -65,6 +66,8 @@ class SkiaGoldClient {
   /// be null.
   final Directory workDirectory;
 
+  String tempDirectory;
+
   /// A map of known golden file tests and their associated positive image
   /// hashes.
   ///
@@ -110,6 +113,8 @@ class SkiaGoldClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
+    tempDirectory = 'temp${math.Random().nextInt(10000)}';
+
     final File authorization = workDirectory.childFile('serviceAccount.json');
     await authorization.writeAsString(_serviceAccount);
 
@@ -117,7 +122,7 @@ class SkiaGoldClient {
       'auth',
       '--service-account', authorization.path,
       '--work-dir', workDirectory
-        .childDirectory('temp')
+        .childDirectory(tempDirectory)
         .path,
     ];
 
@@ -143,7 +148,7 @@ class SkiaGoldClient {
       'imgtest', 'init',
       '--instance', 'flutter',
       '--work-dir', workDirectory
-        .childDirectory('temp')
+        .childDirectory(tempDirectory)
         .path,
       '--commit', commitHash,
       '--keys-file', keys.path,
@@ -180,7 +185,7 @@ class SkiaGoldClient {
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
       '--work-dir', workDirectory
-        .childDirectory('temp')
+        .childDirectory(tempDirectory)
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
@@ -213,7 +218,7 @@ class SkiaGoldClient {
       'imgtest', 'init',
       '--instance', 'flutter',
       '--work-dir', workDirectory
-        .childDirectory('temp')
+        .childDirectory(tempDirectory)
         .path,
       '--commit', commitHash,
       '--keys-file', keys.path,
@@ -246,7 +251,7 @@ class SkiaGoldClient {
         ..writeln('\nArguments: ');
       imgtestInitArguments.forEach(buf.writeln);
       final File resultState = workDirectory?.childFile(fs.path.join(
-        'temp',
+        tempDirectory,
         'result-state.json',
       ));
       final String contents = await resultState.readAsString();
@@ -273,7 +278,7 @@ class SkiaGoldClient {
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
       '--work-dir', workDirectory
-        .childDirectory('temp')
+        .childDirectory(tempDirectory)
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
@@ -292,7 +297,7 @@ class SkiaGoldClient {
         ..writeln('\nArguments: ');
       imgtestArguments.forEach(buf.writeln);
       final File resultState = workDirectory?.childFile(fs.path.join(
-        'temp',
+        tempDirectory,
         'result-state.json',
       ));
       final String contents = await resultState.readAsString();
@@ -420,7 +425,7 @@ class SkiaGoldClient {
 //      <String>['git', 'rev-list', branch, '^$masterBranch', '--count'],
 //      workingDirectory: _flutterRoot.path,
 //    );
-    return '1';//revList.exitCode == 0 ? revList.stdout.trim() : null;
+    return '2';//revList.exitCode == 0 ? revList.stdout.trim() : null;
   }
 
   /// Returns a JSON String with keys value pairs used to uniquely identify the
@@ -446,7 +451,7 @@ class SkiaGoldClient {
   /// for multiple tests.
   bool _clientIsAuthorized() {
     final File authFile = workDirectory?.childFile(fs.path.join(
-      'temp',
+      tempDirectory,
       'auth_opt.json',
     ));
     return authFile.existsSync();
