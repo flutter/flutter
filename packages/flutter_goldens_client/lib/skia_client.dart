@@ -433,7 +433,7 @@ class SkiaGoldDigest {
   /// Validates a given digest against the current testing conditions.
   bool isValid(Platform platform, String name, String expectation) {
     return imageHash == expectation
-      && (paramSet['Platform'] as String).contains(platform.operatingSystem)
+      && (paramSet['Platform'] as List<dynamic>).contains(platform.operatingSystem)
       && testName == name
       && status == 'positive';
     }
