@@ -328,7 +328,7 @@ public class FlutterFragmentActivity extends FragmentActivity
     try {
       ActivityInfo activityInfo = getPackageManager().getActivityInfo(
           getComponentName(),
-          PackageManager.GET_META_DATA|PackageManager.GET_ACTIVITIES
+          PackageManager.GET_META_DATA
       );
       Bundle metadata = activityInfo.metaData;
       Integer splashScreenId = metadata != null ? metadata.getInt(SPLASH_SCREEN_META_DATA_KEY) : null;
@@ -609,7 +609,7 @@ public class FlutterFragmentActivity extends FragmentActivity
     try {
       ActivityInfo activityInfo = getPackageManager().getActivityInfo(
           getComponentName(),
-          PackageManager.GET_META_DATA|PackageManager.GET_ACTIVITIES
+          PackageManager.GET_META_DATA
       );
       Bundle metadata = activityInfo.metaData;
       String desiredDartEntrypoint = metadata != null ? metadata.getString(DART_ENTRYPOINT_META_DATA_KEY) : null;
@@ -647,7 +647,7 @@ public class FlutterFragmentActivity extends FragmentActivity
     try {
       ActivityInfo activityInfo = getPackageManager().getActivityInfo(
           getComponentName(),
-          PackageManager.GET_META_DATA|PackageManager.GET_ACTIVITIES
+          PackageManager.GET_META_DATA
       );
       Bundle metadata = activityInfo.metaData;
       String desiredInitialRoute = metadata != null ? metadata.getString(INITIAL_ROUTE_META_DATA_KEY) : null;
