@@ -7,11 +7,9 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 
@@ -58,35 +56,31 @@ class FuchsiaKernelCompiler {
       '--filesystem-root', fsRoot,
       '--packages', '$multiRootScheme:///$relativePackagesFile',
       '--output', fs.path.join(outDir, '$appName.dil'),
-      // TODO(zra): Add back when this is supported again.
-      // See: https://github.com/flutter/flutter/issues/44925
-      // '--no-link-platform',
-      '--split-output-by-packages',
-      '--manifest', manifestPath,
       '--component-name', appName,
-    ];
 
-    if (buildInfo.isDebug) {
-      flags += <String>[
-        '--embed-sources',
-      ];
-    } else if (buildInfo.isProfile) {
-      flags += <String>[
-        '--no-embed-sources',
-        '-Ddart.vm.profile=true',
+      // AOT/JIT:
+      if (buildInfo.usesAot) ...<String>['--aot', '--tfa']
+      else ...<String>[
+        // TODO(zra): Add back when this is supported again.
+        // See: https://github.com/flutter/flutter/issues/44925
+        // '--no-link-platform',
+        '--split-output-by-packages',
+        '--manifest', manifestPath
+      ],
+
+      // debug, profile, jit release, release:
+      if (buildInfo.isDebug) '--embed-sources'
+      else '--no-embed-sources',
+
+      if (buildInfo.isProfile) '-Ddart.vm.profile=true',
+      if (buildInfo.mode.isRelease) '-Ddart.vm.release=true',
+
+      // Use bytecode and drop the ast in JIT release mode.
+      if (buildInfo.isJitRelease) ...<String>[
         '--gen-bytecode',
         '--drop-ast',
-      ];
-    } else if (buildInfo.isRelease) {
-      flags += <String>[
-        '--no-embed-sources',
-        '-Ddart.vm.release=true',
-        '--gen-bytecode',
-        '--drop-ast',
-      ];
-    } else {
-      throwToolExit('Expected build type to be debug, profile, or release');
-    }
+      ],
+    ];
 
     flags += <String>[
       '$multiRootScheme:///$target',
@@ -97,22 +91,13 @@ class FuchsiaKernelCompiler {
       kernelCompiler,
       ...flags,
     ];
-    final Process process = await processUtils.start(command);
     final Status status = logger.startProgress(
       'Building Fuchsia application...',
       timeout: null,
     );
     int result;
     try {
-      process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printError);
-      process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printTrace);
-      result = await process.exitCode;
+      result = await processUtils.stream(command, trace: true);
     } finally {
       status.cancel();
     }
