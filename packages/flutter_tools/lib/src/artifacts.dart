@@ -61,7 +61,7 @@ enum Artifact {
 
   // Fuchsia artifacts from the engine prebuilts.
   fuchsiaKernelCompiler,
-  fuchsiaFlutterRunner,
+  fuchsiaFlutterJitRunner,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -136,10 +136,11 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'flutter_ddc_sdk.dill';
     case Artifact.fuchsiaKernelCompiler:
       return 'kernel_compiler.snapshot';
-    case Artifact.fuchsiaFlutterRunner:
-      final String jitOrAot = mode.isJit ? '_jit' : '_aot';
-      final String productOrNo = mode.isRelease ? '_product' : '';
-      return 'flutter$jitOrAot${productOrNo}_runner-0.far';
+    case Artifact.fuchsiaFlutterJitRunner:
+      if (mode == BuildMode.debug || mode == BuildMode.profile) {
+        return 'flutter_jit_runner-0.far';
+      }
+      return 'flutter_jit_product_runner-0.far';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -277,25 +278,21 @@ class CachedArtifacts extends Artifacts {
       cache.getArtifactDirectory('flutter_runner').path,
       'flutter',
       fuchsiaArchForTargetPlatform(platform),
-      mode.isRelease ? 'release' : mode.toString(),
+      getNameForBuildMode(mode),
     );
-    final String runtime = mode.isJit ? 'jit' : 'aot';
     switch (artifact) {
-      case Artifact.genSnapshot:
-        final String genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
-        return fs.path.join(root, runtime, 'dart_binaries', genSnapshot);
       case Artifact.flutterPatchedSdkPath:
         const String artifactFileName = 'flutter_runner_patched_sdk';
-        return fs.path.join(root, runtime, artifactFileName);
+        return fs.path.join(root, 'jit', artifactFileName);
       case Artifact.platformKernelDill:
         final String artifactFileName = _artifactToFileName(artifact, platform, mode);
-        return fs.path.join(root, runtime, 'flutter_runner_patched_sdk', artifactFileName);
+        return fs.path.join(root, 'jit', 'flutter_runner_patched_sdk', artifactFileName);
       case Artifact.fuchsiaKernelCompiler:
         final String artifactFileName = _artifactToFileName(artifact, platform, mode);
-        return fs.path.join(root, runtime, 'dart_binaries', artifactFileName);
-      case Artifact.fuchsiaFlutterRunner:
+        return fs.path.join(root, 'jit', 'dart_binaries', artifactFileName);
+      case Artifact.fuchsiaFlutterJitRunner:
         final String artifactFileName = _artifactToFileName(artifact, platform, mode);
-        return fs.path.join(root, runtime, artifactFileName);
+        return fs.path.join(root, 'jit', artifactFileName);
       default:
         return _getHostArtifactPath(artifact, platform, mode);
     }
@@ -416,7 +413,7 @@ class LocalEngineArtifacts extends Artifacts {
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
     platform ??= _currentHostPlatform;
-    final String artifactFileName = _artifactToFileName(artifact, platform, mode);
+    final String artifactFileName = _artifactToFileName(artifact, platform);
     switch (artifact) {
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', artifactFileName);
@@ -485,13 +482,13 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.fuchsiaKernelCompiler:
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
-        final String modeName = mode.isRelease ? 'release' : mode.toString();
-        final String dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
+        final String dartBinaries = 'dart_binaries-$mode-$hostPlatform';
         return fs.path.join(engineOutPath, 'host_bundle', dartBinaries, 'kernel_compiler.dart.snapshot');
-      case Artifact.fuchsiaFlutterRunner:
-        final String jitOrAot = mode.isJit ? '_jit' : '_aot';
-        final String productOrNo = mode.isRelease ? '_product' : '';
-        return fs.path.join(engineOutPath, 'flutter$jitOrAot${productOrNo}_runner-0.far');
+      case Artifact.fuchsiaFlutterJitRunner:
+        if (mode == BuildMode.debug || mode == BuildMode.profile) {
+          return fs.path.join(engineOutPath, 'flutter_jit_runner-0.far');
+        }
+        return fs.path.join(engineOutPath, 'flutter_jit_product_runner-0.far');
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

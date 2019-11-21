@@ -230,17 +230,13 @@ class FuchsiaDevice extends Device {
   }) async {
     if (!prebuiltApplication) {
       await buildFuchsia(fuchsiaProject: FlutterProject.current().fuchsia,
-                         targetPlatform: await targetPlatform,
                          target: mainPath,
                          buildInfo: debuggingOptions.buildInfo);
     }
     // Stop the app if it's currently running.
     await stopApp(package);
     // Find out who the device thinks we are.
-    final String host = await fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-      local: true,
-    );
+    final String host = await fuchsiaSdk.fuchsiaDevFinder.resolve(name);
     if (host == null) {
       printError('Failed to resolve host for Fuchsia device');
       return LaunchResult.failed();
@@ -305,7 +301,7 @@ class FuchsiaDevice extends Device {
 
       // Serve the flutter_runner.
       final File flutterRunnerArchive = fs.file(artifacts.getArtifactPath(
-        Artifact.fuchsiaFlutterRunner,
+        Artifact.fuchsiaFlutterJitRunner,
         platform: await targetPlatform,
         mode: debuggingOptions.buildInfo.mode,
       ));
@@ -322,19 +318,10 @@ class FuchsiaDevice extends Device {
       serverRegistered = true;
 
       // Tell the package controller to prefetch the flutter_runner.
-      String flutterRunnerName;
-      if (debuggingOptions.buildInfo.usesAot) {
-        if (debuggingOptions.buildInfo.mode.isRelease) {
-          flutterRunnerName = 'flutter_aot_product_runner';
-        } else {
-          flutterRunnerName = 'flutter_aot_runner';
-        }
-      } else {
-        if (debuggingOptions.buildInfo.mode.isRelease) {
-          flutterRunnerName = 'flutter_jit_product_runner';
-        } else {
-          flutterRunnerName = 'flutter_jit_runner';
-        }
+      String flutterRunnerName = 'flutter_jit_runner';
+      if (!debuggingOptions.buildInfo.isDebug &&
+          !debuggingOptions.buildInfo.isProfile) {
+        flutterRunnerName = 'flutter_jit_product_runner';
       }
       if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
           this, fuchsiaPackageServer, flutterRunnerName)) {
@@ -380,15 +367,14 @@ class FuchsiaDevice extends Device {
       status.cancel();
     }
 
-    if (debuggingOptions.buildInfo.mode.isRelease) {
-      printTrace('App succesfully started in a release mode.');
+    if (!debuggingOptions.buildInfo.isDebug &&
+        !debuggingOptions.buildInfo.isProfile) {
       return LaunchResult.succeeded();
     }
-    printTrace('App started in a non-release mode. Setting up vmservice connection.');
 
     // In a debug or profile build, try to find the observatory uri.
     final FuchsiaIsolateDiscoveryProtocol discovery =
-      getIsolateDiscoveryProtocol(appName);
+        getIsolateDiscoveryProtocol(appName);
     try {
       final Uri observatoryUri = await discovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -466,9 +452,9 @@ class FuchsiaDevice extends Device {
   @override
   bool get supportsScreenshot => false;
 
-  Future<bool> get ipv6 async {
+  bool get ipv6 {
     // Workaround for https://github.com/dart-lang/sdk/issues/29456
-    final String fragment = (await _resolvedIp).split('%').first;
+    final String fragment = id.split('%').first;
     try {
       Uri.parseIPv6Address(fragment);
       return true;
@@ -482,7 +468,7 @@ class FuchsiaDevice extends Device {
     const String findCommand = 'find /hub -name vmservice-port';
     final RunResult findResult = await shell(findCommand);
     if (findResult.exitCode != 0) {
-      throwToolExit("'$findCommand' on device $name failed. stderr: '${findResult.stderr}'");
+      throwToolExit("'$findCommand' on device $id failed. stderr: '${findResult.stderr}'");
       return null;
     }
     final String findOutput = findResult.stdout;
@@ -499,7 +485,7 @@ class FuchsiaDevice extends Device {
       final String lsCommand = 'ls $path';
       final RunResult lsResult = await shell(lsCommand);
       if (lsResult.exitCode != 0) {
-        throwToolExit("'$lsCommand' on device $name failed");
+        throwToolExit("'$lsCommand' on device $id failed");
         return null;
       }
       final String lsOutput = lsResult.stdout;
@@ -516,15 +502,6 @@ class FuchsiaDevice extends Device {
     return ports;
   }
 
-  String _cachedResolvedIp;
-
-  Future<String> get _resolvedIp async {
-    return _cachedResolvedIp ??= await fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-      local: false,
-    );
-  }
-
   /// Run `command` on the Fuchsia device shell.
   Future<RunResult> shell(String command) async {
     if (fuchsiaArtifacts.sshConfig == null) {
@@ -535,7 +512,7 @@ class FuchsiaDevice extends Device {
       'ssh',
       '-F',
       fuchsiaArtifacts.sshConfig.absolute.path,
-      await _resolvedIp,
+      id,
       command,
     ]);
   }
@@ -656,7 +633,7 @@ class FuchsiaIsolateDiscoveryProtocol {
         }
         final Uri address = flutterView.owner.vmService.httpAddress;
         if (flutterView.uiIsolate.name.contains(_isolateName)) {
-          _foundUri.complete(await _device.ipv6
+          _foundUri.complete(_device.ipv6
               ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
               : Uri.parse('http://$_ipv4Loopback:${address.port}/'));
           _status.stop();
@@ -697,7 +674,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-f',
       '-L',
       '$hostPort:$_ipv4Loopback:$devicePort',
-      await device._resolvedIp,
+      device.id,
       'true',
     ];
     final Process process = await processManager.start(command);
@@ -729,7 +706,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-vvv',
       '-L',
       '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}',
-      await device._resolvedIp,
+      device.id,
     ];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {

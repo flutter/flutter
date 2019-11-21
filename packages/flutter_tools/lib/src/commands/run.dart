@@ -295,7 +295,7 @@ class RunCommand extends RunCommandBase {
 
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
-    if (buildInfo.mode.isRelease) {
+    if (buildInfo.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         initializePlatform: boolArg('web-initialize-platform'),
