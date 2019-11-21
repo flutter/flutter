@@ -31,6 +31,11 @@ class BuildFuchsiaCommand extends BuildSubCommand {
       ],
       defaultsTo: FuchsiaPackageServer.toolHost,
     );
+    argParser.addOption('target-platform',
+      defaultsTo: 'fuchsia-x64',
+      allowed: <String>['fuchsia-arm64', 'fuchsia-x64'],
+      help: 'The target platform for which the app is compiled.',
+    );
   }
 
   @override
@@ -69,6 +74,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     await buildFuchsia(
       fuchsiaProject: flutterProject.fuchsia,
       target: targetFile,
+      targetPlatform: getTargetPlatformForName(argResults['target-platform']),
       buildInfo: buildInfo,
       runnerPackageSource: stringArg('runner-source'),
     );
