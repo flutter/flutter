@@ -1,4 +1,4 @@
-Signature: 49f79b16acb1fa261c6f3f57173f65d0
+Signature: 133a4e09cdde49c76ccd02af36114e69
 
 UNUSED LICENSES:
 
@@ -1294,6 +1294,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/ssh.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/storage.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/test.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/common.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/drm_fps.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/flutter_frame_stats.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/scenic_frame_stats.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics_results.dart
@@ -2847,7 +2848,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/account/account.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent/agent.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent/agent_context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent/agent_controller/agent_controller.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/clipboard/clipboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/component/component_context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/config/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/entity/entity.fidl
