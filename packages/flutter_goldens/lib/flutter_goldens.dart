@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
@@ -125,7 +126,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// Calculate the appropriate basedir for the current test context.
   @protected
   @visibleForTesting
-  static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform) {
+  static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform, {bool randomize = false}) {
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     final Directory comparisonRoot = flutterRoot.childDirectory(
@@ -133,7 +134,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
         'bin',
         'cache',
         'pkg',
-        'skia_goldens',
+        'skia_goldens${randomize ? math.Random().nextInt(10000) : ''}',
       )
     );
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
@@ -209,6 +210,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
+      randomize: true,
     );
 
     if(!baseDirectory.existsSync()) {
@@ -292,6 +294,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
+      randomize: true,
     );
 
     if(!baseDirectory.existsSync()) {
