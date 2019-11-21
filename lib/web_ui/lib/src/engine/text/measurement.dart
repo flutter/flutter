@@ -184,7 +184,7 @@ abstract class TextMeasurementService {
   ///
   /// This is only used for testing at the moment. Once the implementation is
   /// complete and production-ready, we'll get rid of this flag.
-  static bool enableExperimentalCanvasImplementation = false;
+  static bool enableExperimentalCanvasImplementation = const bool.fromEnvironment('FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_TEXT', defaultValue: false);
 
   /// Gets the appropriate [TextMeasurementService] instance for the given
   /// [paragraph].
