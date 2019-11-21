@@ -47,7 +47,25 @@ class ThreadChecker final {
   // Returns true if the current thread is the thread this object was created
   // on and false otherwise.
   bool IsCreationThreadCurrent() const {
-    return !!pthread_equal(pthread_self(), self_);
+    pthread_t current_thread = pthread_self();
+    bool is_creation_thread_current = !!pthread_equal(current_thread, self_);
+#ifdef __APPLE__
+    // TODO(https://github.com/flutter/flutter/issues/45272): Implement for
+    // other platforms.
+    if (!is_creation_thread_current) {
+      static const int buffer_length = 128;
+      char expected_thread[buffer_length];
+      char actual_thread[buffer_length];
+      if (0 == pthread_getname_np(current_thread, actual_thread,
+                                  buffer_length) &&
+          0 == pthread_getname_np(self_, actual_thread, buffer_length)) {
+        FML_DLOG(ERROR) << "IsCreationThreadCurrent expected thread: '"
+                        << expected_thread << "' actual thread:'"
+                        << actual_thread << "'";
+      }
+    }
+#endif  // __APPLE__
+    return is_creation_thread_current;
   }
 
  private:
