@@ -203,10 +203,7 @@ class AttachCommand extends FlutterCommand {
           stdoutCommandResponse,
           notifyingLogger: NotifyingLogger(),
           logToStdout: true,
-          // Since the application was compiled and launched by other means
-          // there's no point in passing Dart defines, we won't be compiling
-          // anything.
-          dartDefines: const <String>[],
+          dartDefines: dartDefines,
         )
       : null;
 
