@@ -125,5 +125,28 @@ void main() {
       expect(webPlugin.fileName, 'web_plugin.dart');
       expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
     });
+
+    test('A default_package field is allowed', () {
+      const String pluginYamlRaw =
+          'platforms:\n'
+          ' android:\n'
+          '  default_package: sample_package_android\n'
+          ' ios:\n'
+          '  default_package: sample_package_ios\n'
+          ' linux:\n'
+          '  default_package: sample_package_linux\n'
+          ' macos:\n'
+          '  default_package: sample_package_macos\n'
+          ' web:\n'
+          '  default_package: sample_package_web\n'
+          ' windows:\n'
+          '  default_package: sample_package_windows\n';
+
+      final dynamic pluginYaml = loadYaml(pluginYamlRaw);
+      final Plugin plugin =
+      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
+
+      expect(plugin.platforms, <String, PluginPlatform> {});
+    });
   });
 }
