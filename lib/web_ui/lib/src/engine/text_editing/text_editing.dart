@@ -12,6 +12,16 @@ const int _kReturnKeyCode = 13;
 
 void _emptyCallback(dynamic _) {}
 
+/// Indicates whether virtual keyboard shifts the location of input element.
+///
+/// Value decided using the operating system and the browser engine.
+///
+/// In iOS, the virtual keyboard might shifts the screen up to make input
+/// visible depending on the location of the focused input element.
+bool get _doesKeyboardShiftInput =>
+    browserEngine == BrowserEngine.webkit &&
+    operatingSystem == OperatingSystem.iOs;
+
 /// These style attributes are constant throughout the life time of an input
 /// element.
 ///
@@ -48,6 +58,7 @@ void _setStaticStyleAttributes(html.HtmlElement domElement) {
 }
 
 /// The current text and selection state of a text field.
+@visibleForTesting
 class EditingState {
   EditingState({this.text, this.baseOffset = 0, this.extentOffset = 0});
 
@@ -249,33 +260,30 @@ class TextEditingElement {
   InputConfiguration _inputConfiguration;
   EditingState _lastEditingState;
 
+  /// Styles associated with the editable text.
+  _EditingStyle _style;
+
+  /// Size and transform of the editable text on the page.
+  _GeometricInfo _geometricInfo;
+
   _OnChangeCallback _onChange;
   _OnActionCallback _onAction;
 
   final List<StreamSubscription<html.Event>> _subscriptions =
       <StreamSubscription<html.Event>>[];
 
-  /// On iOS, sets the location of the input element after focusing on it.
+  /// Whether or not the input element can be positioned at this point in time.
   ///
-  /// On iOS, keyboard causes scrolling in the UI. This scrolling does not
-  /// trigger an event. In order not to trigger a shift on the page, it is
-  /// important we set it's final location after focusing on it (after keyboard
-  /// is up).
+  /// This is currently only used in iOS. It's set to false before focusing the
+  /// input field, and set back to true after a short timer. We do this because
+  /// if the input field is positioned before focus, it could be pushed to an
+  /// incorrect position by the virtual keyboard.
   ///
-  /// This method is called after a delay.
-  /// See [_positionInputElementTimer].
-  void configureInputElementForIOS() {
-    if (browserEngine != BrowserEngine.webkit ||
-        operatingSystem != OperatingSystem.iOs) {
-      // Only relevant on Safari-based on iOS.
-      return;
-    }
-
-    if (domElement != null) {
-      owner.setStyle(domElement);
-      owner.inputPositioned = true;
-    }
-  }
+  /// See:
+  ///
+  /// * [_delayBeforePositioning] which controls how long to wait before
+  ///   positioning the input field.
+  bool _canPosition = true;
 
   /// Enables the element so it can be used to edit text.
   ///
@@ -315,7 +323,7 @@ class TextEditingElement {
       }));
     }
 
-    if (owner.doesKeyboardShiftInput) {
+    if (_doesKeyboardShiftInput) {
       _preventShiftDuringFocus();
     }
     domElement.focus();
@@ -366,6 +374,8 @@ class TextEditingElement {
 
     isEnabled = false;
     _lastEditingState = null;
+    _style = null;
+    _geometricInfo = null;
 
     for (int i = 0; i < _subscriptions.length; i++) {
       _subscriptions[i].cancel();
@@ -373,7 +383,6 @@ class TextEditingElement {
     _subscriptions.clear();
     _positionInputElementTimer?.cancel();
     _positionInputElementTimer = null;
-    owner.inputPositioned = false;
     _removeDomElement();
   }
 
@@ -388,7 +397,7 @@ class TextEditingElement {
     domElement.setAttribute('autocorrect', autocorrectValue);
 
     _setStaticStyleAttributes(domElement);
-    owner._setDynamicStyleAttributes(domElement);
+    applyAllStyles();
     domRenderer.glassPaneElement.append(domElement);
   }
 
@@ -401,19 +410,38 @@ class TextEditingElement {
     domElement.focus();
   }
 
+  /// Set style to the native DOM element used for text editing.
+  ///
+  /// It will be located exactly in the same place with the editable widgets,
+  /// however it's contents and cursor will be invisible.
+  ///
+  /// Users can interact with the element and use the functionalities of the
+  /// right-click menu. Such as copy,paste, cut, select, translate...
+  void applyAllStyles() {
+    _style?.applyToDomElement(domElement);
+    _positionElement();
+  }
+
+  void _positionElement() {
+    if (_canPosition && _geometricInfo != null) {
+      _geometricInfo.applyToDomElement(domElement);
+    }
+  }
+
   void _preventShiftDuringFocus() {
     // Position the element outside of the page before focusing on it.
     //
     // See [_positionInputElementTimer].
     owner.setStyleOutsideOfScreen(domElement);
+    _canPosition = false;
 
+    // TODO(mdebbar): Should we remove this listener after the first invocation?
     _subscriptions.add(domElement.onFocus.listen((_) {
       // Cancel previous timer if exists.
       _positionInputElementTimer?.cancel();
       _positionInputElementTimer = Timer(_delayBeforePositioning, () {
-        if (textEditing.inputElementNeedsToBePositioned) {
-          configureInputElementForIOS();
-        }
+        _canPosition = true;
+        _positionElement();
       });
 
       // When the virtual keyboard is closed on iOS, onBlur is triggered.
@@ -435,15 +463,26 @@ class TextEditingElement {
 
     _lastEditingState.applyToDomElement(domElement);
 
-    if (owner.inputElementNeedsToBePositioned) {
-      _preventShiftDuringFocus();
-    }
-
     // Re-focuses when setting editing state.
     domElement.focus();
   }
 
+  void setGeometricInfo(_GeometricInfo geometricInfo) {
+    _geometricInfo = geometricInfo;
+    if (isEnabled) {
+      _positionElement();
+    }
+  }
+
+  void setStyle(_EditingStyle style) {
+    _style = style;
+    if (isEnabled) {
+      _style.applyToDomElement(domElement);
+    }
+  }
+
   void _handleChange(html.Event event) {
+    assert(isEnabled);
     assert(domElement != null);
 
     EditingState newEditingState = EditingState.fromDomElement(domElement);
@@ -587,17 +626,6 @@ class HybridTextEditing {
   @visibleForTesting
   bool isEditing = false;
 
-  /// Indicates whether the input element needs to be positioned.
-  ///
-  /// See [TextEditingElement._delayBeforePositioning].
-  bool get inputElementNeedsToBePositioned =>
-      !inputPositioned && isEditing && doesKeyboardShiftInput;
-
-  /// Flag indicating whether the input element's position is set.
-  ///
-  /// See [inputElementNeedsToBePositioned].
-  bool inputPositioned = false;
-
   InputConfiguration _configuration;
 
   /// All "flutter/textinput" platform messages should be sent to this method.
@@ -626,11 +654,12 @@ class HybridTextEditing {
         break;
 
       case 'TextInput.setEditableSizeAndTransform':
-        _setLocation(call.arguments);
+        editingElement
+            .setGeometricInfo(_GeometricInfo.fromFlutter(call.arguments));
         break;
 
       case 'TextInput.setStyle':
-        _setFontStyle(call.arguments);
+        editingElement.setStyle(_EditingStyle.fromFlutter(call.arguments));
         break;
 
       case 'TextInput.clearClient':
@@ -656,58 +685,6 @@ class HybridTextEditing {
     assert(isEditing);
     isEditing = false;
     editingElement.disable();
-  }
-
-  _EditingStyle _editingStyle;
-  _EditingStyle get editingStyle => _editingStyle;
-
-  /// Use the font size received from Flutter if set.
-  String font() {
-    assert(_editingStyle != null);
-    return '${_editingStyle.fontWeight} ${_editingStyle.fontSize}px ${_editingStyle.fontFamily}';
-  }
-
-  void _setFontStyle(Map<String, dynamic> style) {
-    assert(style.containsKey('fontSize'));
-    assert(style.containsKey('fontFamily'));
-    assert(style.containsKey('textAlignIndex'));
-    assert(style.containsKey('textDirectionIndex'));
-
-    final int textAlignIndex = style['textAlignIndex'];
-    final int textDirectionIndex = style['textDirectionIndex'];
-
-    /// Converts integer value coming as fontWeightIndex from TextInput.setStyle
-    /// to its CSS equivalent value.
-    /// Converts index of TextAlign to enum value.
-    _editingStyle = _EditingStyle(
-        textDirection: ui.TextDirection.values[textDirectionIndex],
-        fontSize: style['fontSize'],
-        textAlign: ui.TextAlign.values[textAlignIndex],
-        fontFamily: style['fontFamily'],
-        fontWeightIndex: style['fontWeightIndex']);
-  }
-
-  /// Size and transform of the editable text on the page.
-  _EditableSizeAndTransform _editingLocationAndSize;
-  _EditableSizeAndTransform get editingLocationAndSize =>
-      _editingLocationAndSize;
-
-  void _setLocation(Map<String, dynamic> editingLocationAndSize) {
-    assert(editingLocationAndSize.containsKey('width'));
-    assert(editingLocationAndSize.containsKey('height'));
-    assert(editingLocationAndSize.containsKey('transform'));
-
-    final List<double> transformList =
-        List<double>.from(editingLocationAndSize['transform']);
-    _editingLocationAndSize = _EditableSizeAndTransform(
-      width: editingLocationAndSize['width'],
-      height: editingLocationAndSize['height'],
-      transform: Float64List.fromList(transformList),
-    );
-
-    if (editingElement.domElement != null) {
-      _setDynamicStyleAttributes(editingElement.domElement);
-    }
   }
 
   void _syncEditingStateToFlutter(EditingState editingState) {
@@ -736,52 +713,6 @@ class HybridTextEditing {
     );
   }
 
-  /// Positioning of input element is only done if we are not expecting input
-  /// to be shifted by a virtual keyboard or if the input is already positioned.
-  ///
-  /// Otherwise positioning will be done after focusing on the input.
-  /// See [TextEditingElement._delayBeforePositioning].
-  bool get _canPositionInput => inputPositioned || !doesKeyboardShiftInput;
-
-  /// Indicates whether virtual keyboard shifts the location of input element.
-  ///
-  /// Value decided using the operating system and the browser engine.
-  ///
-  /// In iOS, the virtual keyboard might shifts the screen up to make input
-  /// visible depending on the location of the focused input element.
-  bool get doesKeyboardShiftInput =>
-      browserEngine == BrowserEngine.webkit &&
-      operatingSystem == OperatingSystem.iOs;
-
-  /// These style attributes are dynamic throughout the life time of an input
-  /// element.
-  ///
-  /// They are changed depending on the messages coming from method calls:
-  /// "TextInput.setStyle", "TextInput.setEditableSizeAndTransform".
-  void _setDynamicStyleAttributes(html.HtmlElement domElement) {
-    if (_editingLocationAndSize != null && _canPositionInput) {
-      setStyle(domElement);
-    }
-  }
-
-  /// Set style to the native DOM element used for text editing.
-  ///
-  /// It will be located exactly in the same place with the editable widgets,
-  /// however it's contents and cursor will be invisible.
-  ///
-  /// Users can interact with the element and use the functionalities of the
-  /// right-click menu. Such as copy,paste, cut, select, translate...
-  void setStyle(html.HtmlElement domElement) {
-    final String transformCss =
-        float64ListToCssTransform(_editingLocationAndSize.transform);
-    domElement.style
-      ..width = '${_editingLocationAndSize.width}px'
-      ..height = '${_editingLocationAndSize.height}px'
-      ..textAlign = _editingStyle.align
-      ..font = font()
-      ..transform = transformCss;
-  }
-
   // TODO(flutter_web): After the browser closes and re-opens the virtual
   // shifts the page in iOS. Call this method from visibility change listener
   // attached to body.
@@ -805,10 +736,35 @@ class _EditingStyle {
     @required this.fontSize,
     @required this.textAlign,
     @required this.fontFamily,
-    @required fontWeightIndex,
-  }) : this.fontWeight = (fontWeightIndex != null)
-            ? fontWeightIndexToCss(fontWeightIndex: fontWeightIndex)
-            : 'normal';
+    @required this.fontWeight,
+  });
+
+  factory _EditingStyle.fromFlutter(Map<String, dynamic> flutterStyle) {
+    assert(flutterStyle.containsKey('fontSize'));
+    assert(flutterStyle.containsKey('fontFamily'));
+    assert(flutterStyle.containsKey('textAlignIndex'));
+    assert(flutterStyle.containsKey('textDirectionIndex'));
+
+    final int textAlignIndex = flutterStyle['textAlignIndex'];
+    final int textDirectionIndex = flutterStyle['textDirectionIndex'];
+    final int fontWeightIndex = flutterStyle['fontWeightIndex'];
+
+    // Convert [fontWeightIndex] to its CSS equivalent value.
+    final String fontWeight = fontWeightIndex != null
+        ? fontWeightIndexToCss(fontWeightIndex: fontWeightIndex)
+        : 'normal';
+
+    // Also convert [textAlignIndex] and [textDirectionIndex] to their
+    // corresponding enum values in [ui.TextAlign] and [ui.TextDirection]
+    // respectively.
+    return _EditingStyle(
+      fontSize: flutterStyle['fontSize'],
+      fontFamily: flutterStyle['fontFamily'],
+      textAlign: ui.TextAlign.values[textAlignIndex],
+      textDirection: ui.TextDirection.values[textDirectionIndex],
+      fontWeight: fontWeight,
+    );
+  }
 
   /// This information will be used for changing the style of the hidden input
   /// element, which will match it's size to the size of the editable widget.
@@ -819,20 +775,53 @@ class _EditingStyle {
   final ui.TextDirection textDirection;
 
   String get align => textAlignToCssValue(textAlign, textDirection);
+
+  String get cssFont => '${fontWeight} ${fontSize}px ${fontFamily}';
+
+  void applyToDomElement(html.HtmlElement domElement) {
+    domElement.style
+      ..textAlign = align
+      ..font = cssFont;
+  }
 }
 
 /// Information on the location and size of the editing element.
 ///
 /// This information is received via "TextInput.setEditableSizeAndTransform"
 /// message. Framework currently sends this information on paint.
-class _EditableSizeAndTransform {
-  _EditableSizeAndTransform({
+class _GeometricInfo {
+  _GeometricInfo({
     @required this.width,
     @required this.height,
     @required this.transform,
   });
 
+  factory _GeometricInfo.fromFlutter(
+    Map<String, dynamic> flutterMap,
+  ) {
+    assert(flutterMap.containsKey('width'));
+    assert(flutterMap.containsKey('height'));
+    assert(flutterMap.containsKey('transform'));
+
+    final List<double> transformList =
+        List<double>.from(flutterMap['transform']);
+    return _GeometricInfo(
+      width: flutterMap['width'],
+      height: flutterMap['height'],
+      transform: Float64List.fromList(transformList),
+    );
+  }
+
   final double width;
   final double height;
   final Float64List transform;
+
+  String get cssTransform => float64ListToCssTransform(transform);
+
+  void applyToDomElement(html.HtmlElement domElement) {
+    domElement.style
+      ..width = '${width}px'
+      ..height = '${height}px'
+      ..transform = cssTransform;
+  }
 }

@@ -681,7 +681,7 @@ void main() {
     });
 
     test(
-        'setClient, setLocationSize, setStyle, setEditingState, show, clearClient',
+        'setClient, setEditableSizeAndTransform, setStyle, setEditingState, show, clearClient',
         () {
       final MethodCall setClient = MethodCall(
           'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
@@ -727,6 +727,64 @@ void main() {
       // Confirm that [HybridTextEditing] didn't send any messages.
       expect(spy.messages, isEmpty);
     });
+
+    test(
+      'setClient, show, setEditableSizeAndTransform, setStyle, setEditingState, clearClient',
+      () {
+        final MethodCall setClient = MethodCall(
+            'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+        textEditing.handleTextInput(codec.encodeMethodCall(setClient));
+
+        const MethodCall show = MethodCall('TextInput.show');
+        textEditing.handleTextInput(codec.encodeMethodCall(show));
+
+        final MethodCall setSizeAndTransform =
+            configureSetSizeAndTransformMethodCall(
+                150,
+                50,
+                Matrix4.translationValues(
+                  10.0,
+                  20.0,
+                  30.0,
+                ).storage.toList());
+        textEditing
+            .handleTextInput(codec.encodeMethodCall(setSizeAndTransform));
+
+        final MethodCall setStyle =
+            configureSetStyleMethodCall(12, 'sans-serif', 4, 4, 1);
+        textEditing.handleTextInput(codec.encodeMethodCall(setStyle));
+
+        const MethodCall setEditingState =
+            MethodCall('TextInput.setEditingState', <String, dynamic>{
+          'text': 'abcd',
+          'selectionBase': 2,
+          'selectionExtent': 3,
+        });
+        textEditing.handleTextInput(codec.encodeMethodCall(setEditingState));
+
+        final HtmlElement domElement = textEditing.editingElement.domElement;
+
+        checkInputEditingState(domElement, 'abcd', 2, 3);
+
+        // Check if the position is correct.
+        expect(
+          domElement.getBoundingClientRect(),
+          Rectangle<double>.fromPoints(const Point<double>(10.0, 20.0),
+              const Point<double>(160.0, 70.0)),
+        );
+        expect(
+          domElement.style.transform,
+          'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1)',
+        );
+        expect(
+          textEditing.editingElement.domElement.style.font,
+          '500 12px sans-serif',
+        );
+
+        const MethodCall clearClient = MethodCall('TextInput.clearClient');
+        textEditing.handleTextInput(codec.encodeMethodCall(clearClient));
+      },
+    );
 
     test('input font set succesfully with null fontWeightIndex', () {
       final MethodCall setClient = MethodCall(
