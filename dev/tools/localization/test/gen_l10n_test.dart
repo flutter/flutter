@@ -8,12 +8,12 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import '../gen_l10n.dart';
+import '../localizations_utils.dart';
 
 final String defaultArbPathString = path.join('lib', 'l10n');
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file';
 const String defaultClassNameString = 'AppLocalizations';
-
 const String singleMessageArbFileString = '''{
   "title": "Stocks",
   "@title": {
@@ -21,11 +21,18 @@ const String singleMessageArbFileString = '''{
   }
 }''';
 
+const String esArbFileName = 'app_es.arb';
+const String singleEsMessageArbFileString = '''{
+  "title": "Acciones"
+}''';
+
 void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
-  fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-    ..createSync(recursive: true)
-    ..childFile(defaultTemplateArbFileName)
+  final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+    ..createSync(recursive: true);
+  l10nDirectory.childFile(defaultTemplateArbFileName)
     .writeAsStringSync(singleMessageArbFileString);
+  l10nDirectory.childFile(esArbFileName)
+    .writeAsStringSync(singleEsMessageArbFileString);
 }
 
 void main() {
@@ -40,10 +47,12 @@ void main() {
 
       try {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        generator.setL10nDirectory(defaultArbPathString);
-        generator.setTemplateArbFile(defaultTemplateArbFileName);
-        generator.setOutputFile(defaultOutputFileString);
-        generator.setClassName(defaultClassNameString);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
       } on FileSystemException catch (e) {
         fail('Setters should not fail $e');
       }
@@ -209,6 +218,87 @@ void main() {
           'the input string is not a valid Dart class name.'
         );
       });
+    });
+  });
+
+  group('LocalizationsGenerator.setLanguageAndLocalesByArbFiles:', () {
+    test('correctly initializes supportedLocales and supportedLanguageCodes properties', () {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.setLanguageAndLocalesByArbFiles();
+      } on L10nException catch (e) {
+        fail('Setting language and locales should not fail $e');
+      }
+
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), true);
+    });
+
+    test('throws when arb file\'s locale could not be determined', () {
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true)
+        ..childFile('app.arb')
+        .writeAsStringSync(singleMessageArbFileString);
+      try {
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: 'app.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.setLanguageAndLocalesByArbFiles();
+      } on L10nException catch (e) {
+        expect(e.message, contains('locale could not be determined'));
+        return;
+      }
+      fail(
+        'Since locale is not specified, setting languages and locales '
+        'should fail'
+      );
+    });
+    test('throws when the same locale is detected more than once', () {
+      const String secondMessageArbFileString = '''{
+  "market": "MARKET",
+  "@market": {
+    "description": "Label for the Market tab"
+  }
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_en.arb')
+        .writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile('app2_en.arb')
+        .writeAsStringSync(secondMessageArbFileString);
+
+      try {
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.setLanguageAndLocalesByArbFiles();
+      } on L10nException catch (e) {
+        expect(e.message, contains('Multiple arb files with the same locale detected'));
+        return;
+      }
+
+      fail(
+        'Since en locale is specified twice, setting languages and locales '
+        'should fail'
+      );
     });
   });
 }

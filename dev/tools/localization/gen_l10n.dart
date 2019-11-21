@@ -367,64 +367,20 @@ Future<void> main(List<String> arguments) async {
 
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
   try {
-    localizationsGenerator.setL10nDirectory(arbPathString);
-    localizationsGenerator.setTemplateArbFile(templateArbFileName);
-    localizationsGenerator.setOutputFile(outputFileString);
-    localizationsGenerator.setClassName(classNameString);
+    localizationsGenerator.initialize(
+      l10nDirectoryPath: arbPathString,
+      templateArbFileName: templateArbFileName,
+      outputFileString: outputFileString,
+      classNameString: classNameString,
+    );
+    localizationsGenerator.setLanguageAndLocalesByArbFiles();
   } on FileSystemException catch (e) {
+    exitWithError(e.message);
+  } on L10nException catch (e) {
     exitWithError(e.message);
   }
 
-  final List<String> arbFilenames = <String>[];
-  final Set<String> supportedLanguageCodes = <String>{};
-  final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
-
-  final List<FileSystemEntity> sortedFileSystemEntityList = localizationsGenerator
-    .l10nDirectory
-    .listSync()
-    .toList()
-    ..sort(sortFilesByPath);
-
-  for (FileSystemEntity entity in sortedFileSystemEntityList) {
-    final String entityPath = entity.path;
-
-    if (fs.isFileSync(entityPath)) {
-      final RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
-      if (arbFilenameRE.hasMatch(entityPath)) {
-        final File arbFile = fs.file(entityPath);
-        final Map<String, dynamic> arbContents = json.decode(arbFile.readAsStringSync());
-        String localeString = arbContents['@@locale'];
-
-        if (localeString == null) {
-          final RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
-          final RegExpMatch arbFileMatch = arbFilenameLocaleRE.firstMatch(entityPath);
-          if (arbFileMatch == null) {
-            exitWithError(
-              "The following .arb file's locale could not be determined: \n"
-              '$entityPath \n'
-              "Make sure that the locale is specified in the '@@locale' "
-              'property or as part of the filename (ie. file_en.arb)'
-            );
-          }
-
-          localeString = arbFilenameLocaleRE.firstMatch(entityPath)[1];
-        }
-
-        arbFilenames.add(entityPath);
-        final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
-        if (supportedLocales.contains(localeInfo))
-          exitWithError(
-            'Multiple arb files with the same locale detected. \n'
-            'Ensure that there is exactly one arb file for each locale.'
-          );
-        supportedLocales.add(localeInfo);
-        supportedLanguageCodes.add('\'${localeInfo.languageCode}\'');
-      }
-    }
-  }
-
   final List<String> classMethods = <String>[];
-
   Map<String, dynamic> bundle;
   try {
     bundle = json.decode(localizationsGenerator.templateArbFile.readAsStringSync());
@@ -455,8 +411,8 @@ Future<void> main(List<String> arguments) async {
       .replaceAll('@className', classNameString)
       .replaceAll('@classMethods', classMethods.join('\n'))
       .replaceAll('@importFile', _importFilePath(arbPathString, outputFileString))
-      .replaceAll('@supportedLocales', genSupportedLocaleProperty(supportedLocales))
-      .replaceAll('@supportedLanguageCodes', supportedLanguageCodes.toList().join(', '))
+      .replaceAll('@supportedLocales', genSupportedLocaleProperty(localizationsGenerator.supportedLocales))
+      .replaceAll('@supportedLanguageCodes', localizationsGenerator.supportedLanguageCodes.toList().join(', '))
   );
 
   final ProcessResult pubGetResult = await Process.run('flutter', <String>['pub', 'get']);
@@ -473,7 +429,7 @@ Future<void> main(List<String> arguments) async {
     '--output-dir=${localizationsGenerator.l10nDirectory.path}',
     '--no-use-deferred-loading',
     localizationsGenerator.outputFile.path,
-    ...arbFilenames,
+    ...localizationsGenerator.arbFilenames,
   ]);
   if (generateFromArbResult.exitCode != 0) {
     stderr.write(generateFromArbResult.stderr);
@@ -516,6 +472,22 @@ class LocalizationsGenerator {
   /// class will be created with a [LocalizationsDelegate] named
   /// _AppLocalizationsDelegate.
   String className;
+
+  final List<String> arbFilenames = <String>[];
+  final Set<String> supportedLanguageCodes = <String>{};
+  final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
+
+  void initialize({
+    String l10nDirectoryPath,
+    String templateArbFileName,
+    String outputFileString,
+    String classNameString,
+  }) {
+    setL10nDirectory(l10nDirectoryPath);
+    setTemplateArbFile(templateArbFileName);
+    setOutputFile(outputFileString);
+    setClassName(classNameString);
+  }
 
   /// Sets the reference [Directory] for [l10nDirectory].
   void setL10nDirectory(String arbPathString) {
@@ -568,6 +540,51 @@ class LocalizationsGenerator {
         "The 'output-class', $classNameString, is not a valid Dart class name.\n"
       );
     className = classNameString;
+  }
+
+  /// Scans [l10nDirectory] for arb files and parses them for language and locale
+  /// information.
+  void setLanguageAndLocalesByArbFiles() {
+    final List<FileSystemEntity> sortedFileSystemEntityList = l10nDirectory
+      .listSync()
+      .toList()
+      ..sort(sortFilesByPath);
+
+    for (FileSystemEntity entity in sortedFileSystemEntityList) {
+      final String entityPath = entity.path;
+      if (entity is File) {
+        final RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
+        if (arbFilenameRE.hasMatch(entityPath)) {
+          final Map<String, dynamic> arbContents = json.decode(entity.readAsStringSync());
+          String localeString = arbContents['@@locale'];
+          if (localeString == null) {
+            final RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
+            final RegExpMatch arbFileMatch = arbFilenameLocaleRE.firstMatch(entityPath);
+            if (arbFileMatch == null) {
+              throw L10nException(
+                "The following .arb file's locale could not be determined: \n"
+                '$entityPath \n'
+                "Make sure that the locale is specified in the '@@locale' "
+                'property or as part of the filename (ie. file_en.arb)'
+              );
+            }
+
+            localeString = arbFilenameLocaleRE.firstMatch(entityPath)[1];
+          }
+
+          arbFilenames.add(entityPath);
+          final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
+          if (supportedLocales.contains(localeInfo))
+            throw L10nException(
+              'Multiple arb files with the same locale detected. \n'
+              'Ensure that there is exactly one arb file for each locale.'
+            );
+          supportedLocales.add(localeInfo);
+          supportedLanguageCodes.add('\'${localeInfo.languageCode}\'');
+        }
+      }
+    }
+    print(supportedLocales);
   }
 }
 
