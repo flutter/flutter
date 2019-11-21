@@ -151,15 +151,25 @@ class Plugin {
   }
 
   static List<String> validatePluginYaml(YamlMap yaml) {
-    if (yaml.containsKey('platforms')) {
-      final int numKeys = yaml.keys.toSet().length;
-      if (numKeys != 1) {
-        return <String>[
-          'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}',
-        ];
-      } else {
-        return _validateMultiPlatformYaml(yaml['platforms'] as YamlMap);
-      }
+
+    final bool usesOldPluginFormat = const <String>{
+      'androidPackage',
+      'iosPrefix',
+      'pluginClass',
+    }.any(yaml.containsKey);
+
+    final bool usesNewPluginFormat = yaml.containsKey('platforms');
+
+    if (usesOldPluginFormat && usesNewPluginFormat) {
+      const String errorMessage =
+          'The flutter.plugin.platforms key cannot be used in combination with the old'
+          'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys.'
+          'See: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin';
+      return <String>[errorMessage];
+    }
+
+    if (usesNewPluginFormat) {
+      return _validateMultiPlatformYaml(yaml['platforms'] as YamlMap);
     } else {
       return _validateLegacyYaml(yaml);
     }
