@@ -168,7 +168,7 @@ flags to `bin/run.dart`:
   --local-engine=[local_engine_architecture]
 ```
 
-An example of of a local engine architecture is `android_debug_unopt_x86`.
+An example of a local engine architecture is `android_debug_unopt_x86`.
 
 # Reproducing broken builds locally
 
