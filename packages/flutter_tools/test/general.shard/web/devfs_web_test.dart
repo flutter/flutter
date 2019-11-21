@@ -127,6 +127,8 @@ void main() {
     verify(headers.add('Content-Length', source.lengthSync())).called(1);
     verify(headers.add('Content-Type', 'application/javascript')).called(1);
     verify(response.add(source.readAsBytesSync())).called(1);
+  }, overrides: <Type, Generator>{
+    Platform: () => linux,
   }));
 
   test('serves JavaScript files from in memory cache on Windows', () => testbed.run(() async {
