@@ -380,7 +380,7 @@ class RunCommand extends RunCommandBase {
         overrides: <Type, Generator>{
           UrlTunneller: boolArg('web-allow-expose-url')
             ? () => daemon.daemonDomain.exposeUrl
-            : (String url) => url,
+            : () => (String url) => Future<String>.value(url),
         },
       );
       return FlutterCommandResult(
