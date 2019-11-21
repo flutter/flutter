@@ -61,6 +61,8 @@ class WebAssetServer {
   // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
+  
+  final RegExp _drivePath = RegExp(r'\/[A-Z]:\/');
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   Future<void> _handleRequest(HttpRequest request) async {
@@ -83,7 +85,7 @@ class WebAssetServer {
     // TODO(jonahwilliams): better path normalization in frontend_server to remove
     // this workaround.
     String requestPath = request.uri.path;
-    if (requestPath.startsWith('/C:/')) {
+    if (requestPath.startsWith(_drivePath) {
       requestPath = requestPath.substring(3);
     }
 
