@@ -172,6 +172,29 @@ void main() {
 
       expect(client.latestMethodCall, 'connectionClosed');
     });
+
+    test('TextInputClient showAutocorrectionPromptRect method is called', () async {
+      // Assemble a TextInputConnection so we can verify its change in state.
+      final FakeTextInputClient client = FakeTextInputClient();
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send onConnectionClosed message.
+      final ByteData messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        // client id 1 is still occupied by the previous client.
+        'args': <dynamic>[2, 0, 1],
+        'method': 'TextInputClient.showAutocorrectionPromptRect',
+      });
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData _) {},
+      );
+
+      expect(client.latestMethodCall, 'showAutocorrectionPromptRect');
+    });
   });
 }
 
@@ -196,6 +219,11 @@ class FakeTextInputClient implements TextInputClient {
   @override
   void connectionClosed() {
     latestMethodCall = 'connectionClosed';
+  }
+
+  @override
+  void showAutocorrectionPromptRect(int start, int end) {
+    latestMethodCall = 'showAutocorrectionPromptRect';
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration();
