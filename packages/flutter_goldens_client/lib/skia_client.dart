@@ -25,7 +25,7 @@ const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
   SkiaGoldClient(
-    this.workDirectory, {
+    Directory workDirectory, {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
@@ -64,9 +64,15 @@ class SkiaGoldClient {
   ///
   /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
   /// be null.
-  final Directory workDirectory;
+  Directory get workDirectory => _workDirectory;
+  Directory _workDirectory;
+  set workDirectory(Directory value) {
+    assert(value.existsSync());
+    _workDirectory = workDirectory
+      .childDirectory('workDirectory${math.Random().nextInt(10000)}');
+  }
 
-  String tempDirectory;
+//  String tempDirectory;
 
   /// A map of known golden file tests and their associated positive image
   /// hashes.
@@ -113,16 +119,16 @@ class SkiaGoldClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    tempDirectory = 'temp${math.Random().nextInt(10000)}';
+    //tempDirectory = 'temp${math.Random().nextInt(10000)}';
 
-    final File authorization = workDirectory.childFile('serviceAccount.json');
+    final File authorization = _workDirectory.childFile('serviceAccount.json');
     await authorization.writeAsString(_serviceAccount);
 
     final List<String> authArguments = <String>[
       'auth',
       '--service-account', authorization.path,
-      '--work-dir', workDirectory
-        .childDirectory(tempDirectory)
+      '--work-dir', _workDirectory
+        .childDirectory('temp')
         .path,
     ];
 
@@ -137,8 +143,8 @@ class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current test.
   Future<void> imgtestInit() async {
-    final File keys = workDirectory.childFile('keys.json');
-    final File failures = workDirectory.childFile('failures.json');
+    final File keys = _workDirectory.childFile('keys.json');
+    final File failures = _workDirectory.childFile('failures.json');
 
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
@@ -147,8 +153,8 @@ class SkiaGoldClient {
     final List<String> imgtestInitArguments = <String>[
       'imgtest', 'init',
       '--instance', 'flutter',
-      '--work-dir', workDirectory
-        .childDirectory(tempDirectory)
+      '--work-dir', _workDirectory
+        .childDirectory('temp')
         .path,
       '--commit', commitHash,
       '--keys-file', keys.path,
@@ -184,8 +190,8 @@ class SkiaGoldClient {
 
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
-      '--work-dir', workDirectory
-        .childDirectory(tempDirectory)
+      '--work-dir', _workDirectory
+        .childDirectory('temp')
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
@@ -203,8 +209,8 @@ class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current tryjob.
   Future<void> tryjobInit() async {
-    final File keys = workDirectory.childFile('keys.json');
-    final File failures = workDirectory.childFile('failures.json');
+    final File keys = _workDirectory.childFile('keys.json');
+    final File failures = _workDirectory.childFile('failures.json');
 
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
@@ -217,8 +223,8 @@ class SkiaGoldClient {
     final List<String> imgtestInitArguments = <String>[
       'imgtest', 'init',
       '--instance', 'flutter',
-      '--work-dir', workDirectory
-        .childDirectory(tempDirectory)
+      '--work-dir', _workDirectory
+        .childDirectory('temp')
         .path,
       '--commit', commitHash,
       '--keys-file', keys.path,
@@ -250,8 +256,8 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}\n')
         ..writeln('\nArguments: ');
       imgtestInitArguments.forEach(buf.writeln);
-      final File resultState = workDirectory?.childFile(fs.path.join(
-        tempDirectory,
+      final File resultState = _workDirectory?.childFile(fs.path.join(
+        'temp',
         'result-state.json',
       ));
       final String contents = await resultState.readAsString();
@@ -277,8 +283,8 @@ class SkiaGoldClient {
 
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
-      '--work-dir', workDirectory
-        .childDirectory(tempDirectory)
+      '--work-dir', _workDirectory
+        .childDirectory('temp')
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
@@ -296,8 +302,8 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}\n')
         ..writeln('\nArguments: ');
       imgtestArguments.forEach(buf.writeln);
-      final File resultState = workDirectory?.childFile(fs.path.join(
-        tempDirectory,
+      final File resultState = _workDirectory?.childFile(fs.path.join(
+        'temp',
         'result-state.json',
       ));
       final String contents = await resultState.readAsString();
@@ -450,10 +456,8 @@ class SkiaGoldClient {
   /// Returns a boolean value to prevent the client from re-authorizing itself
   /// for multiple tests.
   bool _clientIsAuthorized() {
-    if (tempDirectory == null)
-      return false;
-    final File authFile = workDirectory?.childFile(fs.path.join(
-      tempDirectory,
+    final File authFile = _workDirectory?.childFile(fs.path.join(
+      'temp',
       'auth_opt.json',
     ));
     return authFile.existsSync();
