@@ -85,7 +85,7 @@ class WebAssetServer {
     // TODO(jonahwilliams): better path normalization in frontend_server to remove
     // this workaround.
     String requestPath = request.uri.path;
-    if (requestPath.startsWith(_drivePath) {
+    if (requestPath.startsWith(_drivePath)) {
       requestPath = requestPath.substring(3);
     }
 
