@@ -243,6 +243,10 @@ void main() {
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), true);
     });
 
+    // TODO: add test to check that @@locale is properly parsed
+
+    // TODO: add test to check verify that @@locale is used over file name as preference
+
     test('throws when arb file\'s locale could not be determined', () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true)
