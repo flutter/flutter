@@ -78,7 +78,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2019 The Chromium Authors',
+///              applicationLegalese: '© 2014 The Flutter Authors',
 ///              aboutBoxChildren: aboutBoxChildren,
 ///            ),
 ///          ),
@@ -93,7 +93,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2019 The Chromium Authors',
+///              applicationLegalese: '© 2014 The Flutter Authors',
 ///              children: aboutBoxChildren,
 ///            );
 ///          },

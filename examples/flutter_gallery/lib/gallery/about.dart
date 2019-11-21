@@ -41,7 +41,7 @@ void showGalleryAboutDialog(BuildContext context) {
     context: context,
     applicationVersion: 'January 2019',
     applicationIcon: const FlutterLogo(),
-    applicationLegalese: '© 2019 The Chromium Authors',
+    applicationLegalese: '© 2014 The Flutter Authors',
     children: <Widget>[
       Padding(
         padding: const EdgeInsets.only(top: 24.0),

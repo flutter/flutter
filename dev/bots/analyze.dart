@@ -212,7 +212,31 @@ Future<void> verifyDeprecations(String workingDirectory) async {
   }
 }
 
+String _generateLicense(String prefix) {
+  assert(prefix != null);
+  return '${prefix}Copyright 2014 The Flutter Authors. All rights reserved.\n'
+         '${prefix}Use of this source code is governed by a BSD-style license that can be\n'
+         '${prefix}found in the LICENSE file.';
+}
+
 Future<void> verifyNoMissingLicense(String workingDirectory) async {
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', '#!/usr/bin/env bash\n' + _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', '@ECHO off\n' + _generateLicense('REM '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', '<!-- ${_generateLicense('')} -->');
+}
+
+Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, String license, { bool trailingBlank = true }) async {
+  assert(!license.endsWith('\n'));
+  final String licensePattern = license + '\n' + (trailingBlank ? '\n' : '');
   final List<String> errors = <String>[];
   for (FileSystemEntity entity in _dartFiles(workingDirectory)) {
     final File file = entity;

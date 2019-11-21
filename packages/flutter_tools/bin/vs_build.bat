@@ -1,9 +1,10 @@
-:: Copyright 2018 The Chromium Authors. All rights reserved.
-:: Use of this source code is governed by a BSD-style license that can be
-:: found in the LICENSE file.
+@ECHO off
+REM Copyright 2014 The Flutter Authors. All rights reserved.
+REM Use of this source code is governed by a BSD-style license that can be
+REM found in the LICENSE file.
 
-:: Calls vcvars64.bat to configure a command-line build environment, then builds
-:: a project with msbuild.
+REM Calls vcvars64.bat to configure a command-line build environment, then builds
+REM a project with msbuild.
 @echo off
 
 set VCVARS=%~1
