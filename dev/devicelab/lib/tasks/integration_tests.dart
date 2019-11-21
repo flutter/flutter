@@ -107,6 +107,13 @@ TaskFunction createAndroidSplashScreenKitchenSinkTest() {
   );
 }
 
+TaskFunction createFlutterDriverScreenshotTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/flutter_driver_screenshot_test',
+    'lib/main.dart',
+  );
+}
+
 class DriverTest {
 
   DriverTest(
