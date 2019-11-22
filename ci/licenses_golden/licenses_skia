@@ -1,4 +1,4 @@
-Signature: a15ff6749fc2a8cff5e4d7e15f8d5dfb
+Signature: c8ea729af1431890557e325f934d9a17
 
 UNUSED LICENSES:
 
@@ -1421,7 +1421,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-Metal.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Release-MoltenVK_Vulkan.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Ubuntu18-GCC-x86_64-Release-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-arm64-Release-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-x86-Debug-Exceptions.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-x86_64-Debug-OpenCL.json
@@ -1658,7 +1657,6 @@ FILE: ../../../third_party/skia/infra/cts/whitelist_devices.json
 FILE: ../../../third_party/skia/infra/gcc/Debian10-mips64el/Dockerfile
 FILE: ../../../third_party/skia/infra/gcc/Debian10-x86/Dockerfile
 FILE: ../../../third_party/skia/infra/gcc/Debian10/Dockerfile
-FILE: ../../../third_party/skia/infra/gcc/Ubuntu18/Dockerfile
 FILE: ../../../third_party/skia/infra/lottiecap/docker/gold-lottie-web-puppeteer/Dockerfile
 FILE: ../../../third_party/skia/infra/lottiecap/docker/lottie-web-puppeteer/Dockerfile
 FILE: ../../../third_party/skia/infra/project-config/cr-buildbucket.cfg
@@ -2759,8 +2757,6 @@ FILE: ../../../third_party/skia/src/codec/SkBmpStandardCodec.h
 FILE: ../../../third_party/skia/src/codec/SkCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkCodecImageGenerator.cpp
 FILE: ../../../third_party/skia/src/codec/SkCodecImageGenerator.h
-FILE: ../../../third_party/skia/src/codec/SkGifCodec.cpp
-FILE: ../../../third_party/skia/src/codec/SkGifCodec.h
 FILE: ../../../third_party/skia/src/codec/SkIcoCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkIcoCodec.h
 FILE: ../../../third_party/skia/src/codec/SkJpegCodec.cpp
@@ -6086,36 +6082,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/src/codec/SkGifCodec.cpp
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/src/codec/SkGifCodec.cpp
-----------------------------------------------------------------------------------------------------
-Copyright (C) 2006 Apple Computer, Inc.  All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY APPLE COMPUTER, INC. ``AS IS'' AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
 ORIGIN: ../../../third_party/skia/src/core/SkBitmapProcState_matrixProcs.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_matrixProcs.cpp
@@ -6602,4 +6568,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ====================================================================================================
-Total license count: 52
+Total license count: 51
