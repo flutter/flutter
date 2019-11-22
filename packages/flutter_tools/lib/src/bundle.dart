@@ -10,6 +10,7 @@ import 'package:pool/pool.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
@@ -173,9 +174,18 @@ Future<AssetBundle> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
+  { Logger loggerOverride }
 ) async {
+  loggerOverride ??= logger;
   if (bundleDir.existsSync()) {
-    bundleDir.deleteSync(recursive: true);
+    try {
+      bundleDir.deleteSync(recursive: true);
+    } on FileSystemException catch (err) {
+      loggerOverride.printError(
+        'Failed to clean up asset directory ${bundleDir.path}: $err\n'
+        'To clean build artifacts, use the command "flutter clean".'
+      );
+    }
   }
   bundleDir.createSync(recursive: true);
 
