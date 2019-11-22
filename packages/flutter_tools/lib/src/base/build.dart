@@ -242,8 +242,16 @@ class AOTSnapshotter {
 
     const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
+    List<String> isysrootArgs;
+    if (isIOS) {
+      final String iPhoneSDKLocation = await xcode.iPhoneSdkLocation();
+      if (iPhoneSDKLocation != null) {
+        isysrootArgs = <String>['-isysroot', iPhoneSDKLocation];
+      }
+    }
     final RunResult compileResult = await xcode.cc(<String>[
       '-arch', targetArch,
+      if (isysrootArgs != null) ...isysrootArgs,
       if (bitcode) embedBitcodeArg,
       '-c',
       assemblyPath,
@@ -265,7 +273,7 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
       if (bitcode) embedBitcodeArg,
-      if (bitcode && isIOS) ...<String>[embedBitcodeArg, '-isysroot', await xcode.iPhoneSdkLocation()],
+      if (isysrootArgs != null) ...isysrootArgs,
       '-o', appLib,
       assemblyO,
     ];
