@@ -17,7 +17,12 @@ class Config {
       try {
         _values = castStringKeyedMap(json.decode(_configFile.readAsStringSync()));
       } on FormatException {
-        loggerInstance.printError('Failed to decode preferences in ${_configFile.path}.');
+        loggerInstance
+          ..printError('Failed to decode preferences in ${_configFile.path}.')
+          ..printError(
+              'You may need to reapply any previously saved configuration '
+              'with the "flutter config" command.',
+          );
         _configFile.deleteSync();
       }
     }
