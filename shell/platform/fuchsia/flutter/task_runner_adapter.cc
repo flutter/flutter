@@ -19,18 +19,20 @@ class CompatTaskRunner : public fml::TaskRunner {
     FML_DCHECK(forwarding_target_);
   }
 
-  void PostTask(fml::closure task) override {
-    async::PostTask(forwarding_target_, std::move(task));
+  void PostTask(const fml::closure& task) override {
+    async::PostTask(forwarding_target_, task);
   }
 
-  void PostTaskForTime(fml::closure task, fml::TimePoint target_time) override {
+  void PostTaskForTime(const fml::closure& task,
+                       fml::TimePoint target_time) override {
     async::PostTaskForTime(
-        forwarding_target_, std::move(task),
+        forwarding_target_, task,
         zx::time(target_time.ToEpochDelta().ToNanoseconds()));
   }
 
-  void PostDelayedTask(fml::closure task, fml::TimeDelta delay) override {
-    async::PostDelayedTask(forwarding_target_, std::move(task),
+  void PostDelayedTask(const fml::closure& task,
+                       fml::TimeDelta delay) override {
+    async::PostDelayedTask(forwarding_target_, task,
                            zx::duration(delay.ToNanoseconds()));
   }
 

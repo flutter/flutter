@@ -38,7 +38,8 @@ class EmbedderTestCompositor {
   using PlatformViewRendererCallback =
       std::function<sk_sp<SkImage>(const FlutterLayer& layer,
                                    GrContext* context)>;
-  void SetPlatformViewRendererCallback(PlatformViewRendererCallback callback);
+  void SetPlatformViewRendererCallback(
+      const PlatformViewRendererCallback& callback);
 
   using PresentCallback =
       std::function<void(const FlutterLayer** layers, size_t layers_count)>;
@@ -49,10 +50,10 @@ class EmbedderTestCompositor {
   ///
   /// @param[in]  next_present_callback  The next present callback
   ///
-  void SetNextPresentCallback(PresentCallback next_present_callback);
+  void SetNextPresentCallback(const PresentCallback& next_present_callback);
 
   using NextSceneCallback = std::function<void(sk_sp<SkImage> image)>;
-  void SetNextSceneCallback(NextSceneCallback next_scene_callback);
+  void SetNextSceneCallback(const NextSceneCallback& next_scene_callback);
 
   sk_sp<SkImage> GetLastComposition();
 

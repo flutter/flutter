@@ -85,7 +85,8 @@ class PlatformView {
     ///
     /// @param[in]  closure  The callback to execute on the next frame.
     ///
-    virtual void OnPlatformViewSetNextFrameCallback(fml::closure closure) = 0;
+    virtual void OnPlatformViewSetNextFrameCallback(
+        const fml::closure& closure) = 0;
 
     //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate the viewport metrics of the platform
@@ -469,7 +470,7 @@ class PlatformView {
   /// @param[in]  closure  The callback to execute on the render thread when the
   ///                      next frame gets rendered.
   ///
-  void SetNextFrameCallback(fml::closure closure);
+  void SetNextFrameCallback(const fml::closure& closure);
 
   //----------------------------------------------------------------------------
   /// @brief      Dispatches pointer events from the embedder to the

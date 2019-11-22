@@ -51,7 +51,7 @@ namespace flutter {
 void ViewHolder::Create(zx_koid_t id,
                         fml::RefPtr<fml::TaskRunner> ui_task_runner,
                         fuchsia::ui::views::ViewHolderToken view_holder_token,
-                        BindCallback on_bind_callback) {
+                        const BindCallback& on_bind_callback) {
   // This GPU thread contains at least 1 ViewHolder.  Initialize the per-thread
   // bindings.
   if (tls_view_holder_bindings.get() == nullptr) {
@@ -64,7 +64,7 @@ void ViewHolder::Create(zx_koid_t id,
 
   auto view_holder = std::make_unique<ViewHolder>(std::move(ui_task_runner),
                                                   std::move(view_holder_token),
-                                                  std::move(on_bind_callback));
+                                                  on_bind_callback);
   bindings->emplace(id, std::move(view_holder));
 }
 
@@ -91,10 +91,10 @@ ViewHolder* ViewHolder::FromId(zx_koid_t id) {
 
 ViewHolder::ViewHolder(fml::RefPtr<fml::TaskRunner> ui_task_runner,
                        fuchsia::ui::views::ViewHolderToken view_holder_token,
-                       BindCallback on_bind_callback)
+                       const BindCallback& on_bind_callback)
     : ui_task_runner_(std::move(ui_task_runner)),
       pending_view_holder_token_(std::move(view_holder_token)),
-      pending_bind_callback_(std::move(on_bind_callback)) {
+      pending_bind_callback_(on_bind_callback) {
   FML_DCHECK(ui_task_runner_);
   FML_DCHECK(pending_view_holder_token_.value);
 }

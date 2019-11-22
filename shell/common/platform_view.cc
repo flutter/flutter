@@ -129,12 +129,12 @@ std::unique_ptr<Surface> PlatformView::CreateRenderingSurface() {
   return nullptr;
 }
 
-void PlatformView::SetNextFrameCallback(fml::closure closure) {
+void PlatformView::SetNextFrameCallback(const fml::closure& closure) {
   if (!closure) {
     return;
   }
 
-  delegate_.OnPlatformViewSetNextFrameCallback(std::move(closure));
+  delegate_.OnPlatformViewSetNextFrameCallback(closure);
 }
 
 }  // namespace flutter

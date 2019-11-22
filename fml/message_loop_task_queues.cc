@@ -75,13 +75,13 @@ void MessageLoopTaskQueues::DisposeTasks(TaskQueueId queue_id) {
 }
 
 void MessageLoopTaskQueues::RegisterTask(TaskQueueId queue_id,
-                                         fml::closure task,
+                                         const fml::closure& task,
                                          fml::TimePoint target_time) {
   std::scoped_lock queue_lock(GetMutex(queue_id));
 
   size_t order = order_++;
   const auto& queue_entry = queue_entries_[queue_id];
-  queue_entry->delayed_tasks.push({order, std::move(task), target_time});
+  queue_entry->delayed_tasks.push({order, task, target_time});
   TaskQueueId loop_to_wake = queue_id;
   if (queue_entry->subsumed_by != _kUnmerged) {
     loop_to_wake = queue_entry->subsumed_by;
@@ -157,7 +157,7 @@ size_t MessageLoopTaskQueues::GetNumPendingTasks(TaskQueueId queue_id) const {
 
 void MessageLoopTaskQueues::AddTaskObserver(TaskQueueId queue_id,
                                             intptr_t key,
-                                            fml::closure callback) {
+                                            const fml::closure& callback) {
   std::scoped_lock queue_lock(GetMutex(queue_id));
 
   FML_DCHECK(callback != nullptr) << "Observer callback must be non-null.";

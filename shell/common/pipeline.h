@@ -78,7 +78,7 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     Continuation continuation_;
     size_t trace_id_;
 
-    ProducerContinuation(Continuation continuation, size_t trace_id)
+    ProducerContinuation(const Continuation& continuation, size_t trace_id)
         : continuation_(continuation), trace_id_(trace_id) {
       TRACE_FLOW_BEGIN("flutter", "PipelineItem", trace_id_);
       TRACE_EVENT_ASYNC_BEGIN0("flutter", "PipelineItem", trace_id_);
@@ -127,8 +127,9 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
 
   using Consumer = std::function<void(ResourcePtr)>;
 
+  /// @note Procedure doesn't copy all closures.
   FML_WARN_UNUSED_RESULT
-  PipelineConsumeResult Consume(Consumer consumer) {
+  PipelineConsumeResult Consume(const Consumer& consumer) {
     if (consumer == nullptr) {
       return PipelineConsumeResult::NoneAvailable;
     }

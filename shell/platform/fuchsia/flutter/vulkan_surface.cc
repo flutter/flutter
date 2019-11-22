@@ -451,7 +451,7 @@ bool VulkanSurface::FlushSessionAcquireAndReleaseEvents() {
 }
 
 void VulkanSurface::SignalWritesFinished(
-    std::function<void(void)> on_writes_committed) {
+    const std::function<void(void)>& on_writes_committed) {
   FML_DCHECK(on_writes_committed);
 
   if (!valid_) {

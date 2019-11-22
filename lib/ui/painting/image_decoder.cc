@@ -188,7 +188,8 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
   return {texture_image, queue};
 }
 
-void ImageDecoder::Decode(ImageDescriptor descriptor, ImageResult callback) {
+void ImageDecoder::Decode(ImageDescriptor descriptor,
+                          const ImageResult& callback) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   fml::tracing::TraceFlow flow(__FUNCTION__);
 

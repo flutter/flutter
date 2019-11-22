@@ -354,7 +354,7 @@ class Rasterizer final : public SnapshotDelegate {
   /// @param[in]  callback  The callback to execute when the next layer tree is
   ///                       rendered on-screen.
   ///
-  void SetNextFrameCallback(fml::closure callback);
+  void SetNextFrameCallback(const fml::closure& callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Returns a pointer to the compositor context used by this

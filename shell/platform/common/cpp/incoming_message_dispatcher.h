@@ -39,8 +39,8 @@ class IncomingMessageDispatcher {
   // NotImplemented response to the engine.
   void HandleMessage(
       const FlutterDesktopMessage& message,
-      std::function<void(void)> input_block_cb = [] {},
-      std::function<void(void)> input_unblock_cb = [] {});
+      const std::function<void(void)>& input_block_cb = [] {},
+      const std::function<void(void)>& input_unblock_cb = [] {});
 
   // Registers a message callback for incoming messages from the Flutter
   // side on the specified channel. |callback| will be called with the message

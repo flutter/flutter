@@ -44,8 +44,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     TaskRunners task_runners,
     Settings settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
-    Shell::CreateCallback<PlatformView> on_create_platform_view,
-    Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
+    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) {
   if (!task_runners.IsValid()) {
     FML_LOG(ERROR) << "Task runners to run the shell were invalid.";
     return nullptr;
@@ -221,8 +221,8 @@ static void PerformInitializationTasks(const Settings& settings) {
 std::unique_ptr<Shell> Shell::Create(
     TaskRunners task_runners,
     Settings settings,
-    Shell::CreateCallback<PlatformView> on_create_platform_view,
-    Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
+    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) {
   PerformInitializationTasks(settings);
   PersistentCache::SetCacheSkSL(settings.cache_sksl);
 
@@ -233,12 +233,12 @@ std::unique_ptr<Shell> Shell::Create(
 
   auto vm_data = vm->GetVMData();
 
-  return Shell::Create(std::move(task_runners),             //
-                       std::move(settings),                 //
-                       vm_data->GetIsolateSnapshot(),       // isolate snapshot
-                       std::move(on_create_platform_view),  //
-                       std::move(on_create_rasterizer),     //
-                       std::move(vm)                        //
+  return Shell::Create(std::move(task_runners),        //
+                       std::move(settings),            //
+                       vm_data->GetIsolateSnapshot(),  // isolate snapshot
+                       on_create_platform_view,        //
+                       on_create_rasterizer,           //
+                       std::move(vm)                   //
   );
 }
 
@@ -246,8 +246,8 @@ std::unique_ptr<Shell> Shell::Create(
     TaskRunners task_runners,
     Settings settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
-    Shell::CreateCallback<PlatformView> on_create_platform_view,
-    Shell::CreateCallback<Rasterizer> on_create_rasterizer,
+    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
     DartVMRef vm) {
   PerformInitializationTasks(settings);
   PersistentCache::SetCacheSkSL(settings.cache_sksl);
@@ -404,8 +404,9 @@ void Shell::RunEngine(RunConfiguration run_configuration) {
   RunEngine(std::move(run_configuration), nullptr);
 }
 
-void Shell::RunEngine(RunConfiguration run_configuration,
-                      std::function<void(Engine::RunStatus)> result_callback) {
+void Shell::RunEngine(
+    RunConfiguration run_configuration,
+    const std::function<void(Engine::RunStatus)>& result_callback) {
   auto result = [platform_runner = task_runners_.GetPlatformTaskRunner(),
                  result_callback](Engine::RunStatus run_result) {
     if (!result_callback) {
@@ -862,12 +863,12 @@ void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
 }
 
 // |PlatformView::Delegate|
-void Shell::OnPlatformViewSetNextFrameCallback(fml::closure closure) {
+void Shell::OnPlatformViewSetNextFrameCallback(const fml::closure& closure) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
   task_runners_.GetGPUTaskRunner()->PostTask(
-      [rasterizer = rasterizer_->GetWeakPtr(), closure = std::move(closure)]() {
+      [rasterizer = rasterizer_->GetWeakPtr(), closure = closure]() {
         if (rasterizer) {
           rasterizer->SetNextFrameCallback(std::move(closure));
         }

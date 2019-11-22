@@ -60,7 +60,8 @@ class PointerDataDispatcher {
     ///
     ///           This callback is used to provide the vsync signal needed by
     ///           `SmoothPointerDataDispatcher`.
-    virtual void ScheduleSecondaryVsyncCallback(fml::closure callback) = 0;
+    virtual void ScheduleSecondaryVsyncCallback(
+        const fml::closure& callback) = 0;
   };
 
   //----------------------------------------------------------------------------

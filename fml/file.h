@@ -107,7 +107,8 @@ using FileVisitor = std::function<bool(const fml::UniqueFD& directory,
 /// use our helper method `VisitFilesRecursively`.
 ///
 /// @see `VisitFilesRecursively`.
-bool VisitFiles(const fml::UniqueFD& directory, FileVisitor visitor);
+/// @note Procedure doesn't copy all closures.
+bool VisitFiles(const fml::UniqueFD& directory, const FileVisitor& visitor);
 
 /// Recursively call `visitor` on all files inside the `directory`. Return false
 /// if and only if the visitor returns false during the traversal.
@@ -119,7 +120,9 @@ bool VisitFiles(const fml::UniqueFD& directory, FileVisitor visitor);
 /// compute the relative path between the root directory and the visited file.
 ///
 /// @see `VisitFiles`.
-bool VisitFilesRecursively(const fml::UniqueFD& directory, FileVisitor visitor);
+/// @note Procedure doesn't copy all closures.
+bool VisitFilesRecursively(const fml::UniqueFD& directory,
+                           const FileVisitor& visitor);
 
 class ScopedTemporaryDirectory {
  public:

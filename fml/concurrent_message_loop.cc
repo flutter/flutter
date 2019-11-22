@@ -43,7 +43,7 @@ std::shared_ptr<ConcurrentTaskRunner> ConcurrentMessageLoop::GetTaskRunner() {
   return std::make_shared<ConcurrentTaskRunner>(weak_from_this());
 }
 
-void ConcurrentMessageLoop::PostTask(fml::closure task) {
+void ConcurrentMessageLoop::PostTask(const fml::closure& task) {
   if (!task) {
     return;
   }
@@ -107,7 +107,7 @@ ConcurrentTaskRunner::ConcurrentTaskRunner(
 
 ConcurrentTaskRunner::~ConcurrentTaskRunner() = default;
 
-void ConcurrentTaskRunner::PostTask(fml::closure task) {
+void ConcurrentTaskRunner::PostTask(const fml::closure& task) {
   if (!task) {
     return;
   }

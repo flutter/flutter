@@ -181,7 +181,7 @@ void EmbedderConfigBuilder::SetRenderTaskRunner(
 }
 
 void EmbedderConfigBuilder::SetPlatformMessageCallback(
-    std::function<void(const FlutterPlatformMessage*)> callback) {
+    const std::function<void(const FlutterPlatformMessage*)>& callback) {
   context_.SetPlatformMessageCallback(callback);
 }
 

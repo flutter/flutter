@@ -61,7 +61,7 @@ fml::RefPtr<MessageLoopImpl> MessageLoop::GetLoopImpl() const {
   return loop_;
 }
 
-void MessageLoop::AddTaskObserver(intptr_t key, fml::closure callback) {
+void MessageLoop::AddTaskObserver(intptr_t key, const fml::closure& callback) {
   loop_->AddTaskObserver(key, callback);
 }
 

@@ -41,8 +41,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     Dart_IsolateFlags* flags,
-    fml::closure isolate_create_callback,
-    fml::closure isolate_shutdown_callback) {
+    const fml::closure& isolate_create_callback,
+    const fml::closure& isolate_shutdown_callback) {
   TRACE_EVENT0("flutter", "DartIsolate::CreateRootIsolate");
   Dart_Isolate vm_isolate = nullptr;
   std::weak_ptr<DartIsolate> embedder_isolate;
@@ -113,9 +113,9 @@ DartIsolate::DartIsolate(const Settings& settings,
                          fml::WeakPtr<ImageDecoder> image_decoder,
                          std::string advisory_script_uri,
                          std::string advisory_script_entrypoint,
-                         ChildIsolatePreparer child_isolate_preparer,
-                         fml::closure isolate_create_callback,
-                         fml::closure isolate_shutdown_callback,
+                         const ChildIsolatePreparer& child_isolate_preparer,
+                         const fml::closure& isolate_create_callback,
+                         const fml::closure& isolate_shutdown_callback,
                          bool is_root_isolate,
                          bool is_group_root_isolate)
     : UIDartState(std::move(task_runners),
@@ -481,10 +481,11 @@ static bool InvokeMainEntrypoint(Dart_Handle user_entrypoint_function,
   return true;
 }
 
+/// @note Procedure doesn't copy all closures.
 FML_WARN_UNUSED_RESULT
 bool DartIsolate::Run(const std::string& entrypoint_name,
                       const std::vector<std::string>& args,
-                      fml::closure on_run) {
+                      const fml::closure& on_run) {
   TRACE_EVENT0("flutter", "DartIsolate::Run");
   if (phase_ != Phase::Ready) {
     return false;
@@ -510,11 +511,12 @@ bool DartIsolate::Run(const std::string& entrypoint_name,
   return true;
 }
 
+/// @note Procedure doesn't copy all closures.
 FML_WARN_UNUSED_RESULT
 bool DartIsolate::RunFromLibrary(const std::string& library_name,
                                  const std::string& entrypoint_name,
                                  const std::vector<std::string>& args,
-                                 fml::closure on_run) {
+                                 const fml::closure& on_run) {
   TRACE_EVENT0("flutter", "DartIsolate::RunFromLibrary");
   if (phase_ != Phase::Ready) {
     return false;
@@ -901,9 +903,8 @@ std::weak_ptr<DartIsolate> DartIsolate::GetWeakIsolatePtr() {
   return std::static_pointer_cast<DartIsolate>(shared_from_this());
 }
 
-void DartIsolate::AddIsolateShutdownCallback(fml::closure closure) {
-  shutdown_callbacks_.emplace_back(
-      std::make_unique<AutoFireClosure>(std::move(closure)));
+void DartIsolate::AddIsolateShutdownCallback(const fml::closure& closure) {
+  shutdown_callbacks_.emplace_back(std::make_unique<AutoFireClosure>(closure));
 }
 
 void DartIsolate::OnShutdownCallback() {
@@ -921,8 +922,8 @@ void DartIsolate::OnShutdownCallback() {
   }
 }
 
-DartIsolate::AutoFireClosure::AutoFireClosure(fml::closure closure)
-    : closure_(std::move(closure)) {}
+DartIsolate::AutoFireClosure::AutoFireClosure(const fml::closure& closure)
+    : closure_(closure) {}
 
 DartIsolate::AutoFireClosure::~AutoFireClosure() {
   if (closure_) {

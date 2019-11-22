@@ -8,7 +8,7 @@
 
 namespace flutter {
 
-SkiaConcurrentExecutor::SkiaConcurrentExecutor(OnWorkCallback on_work)
+SkiaConcurrentExecutor::SkiaConcurrentExecutor(const OnWorkCallback& on_work)
     : on_work_(on_work) {}
 
 SkiaConcurrentExecutor::~SkiaConcurrentExecutor() = default;

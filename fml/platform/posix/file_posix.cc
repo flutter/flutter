@@ -222,7 +222,7 @@ bool WriteAtomically(const fml::UniqueFD& base_directory,
                     base_directory.get(), file_name) == 0;
 }
 
-bool VisitFiles(const fml::UniqueFD& directory, FileVisitor visitor) {
+bool VisitFiles(const fml::UniqueFD& directory, const FileVisitor& visitor) {
   fml::UniqueFD dup_fd(dup(directory.get()));
   if (!dup_fd.is_valid()) {
     FML_DLOG(ERROR) << "Can't dup the directory fd. Error: " << strerror(errno);

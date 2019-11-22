@@ -12,8 +12,8 @@
 namespace flutter {
 
 EmbedderExternalViewEmbedder::EmbedderExternalViewEmbedder(
-    CreateRenderTargetCallback create_render_target_callback,
-    PresentCallback present_callback)
+    const CreateRenderTargetCallback& create_render_target_callback,
+    const PresentCallback& present_callback)
     : create_render_target_callback_(create_render_target_callback),
       present_callback_(present_callback) {
   FML_DCHECK(create_render_target_callback_);

@@ -29,7 +29,7 @@ VsyncWaiter::VsyncWaiter(TaskRunners task_runners)
 VsyncWaiter::~VsyncWaiter() = default;
 
 // Public method invoked by the animator.
-void VsyncWaiter::AsyncWaitForVsync(Callback callback) {
+void VsyncWaiter::AsyncWaitForVsync(const Callback& callback) {
   if (!callback) {
     return;
   }
@@ -55,7 +55,7 @@ void VsyncWaiter::AsyncWaitForVsync(Callback callback) {
   AwaitVSync();
 }
 
-void VsyncWaiter::ScheduleSecondaryCallback(fml::closure callback) {
+void VsyncWaiter::ScheduleSecondaryCallback(const fml::closure& callback) {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
   if (!callback) {

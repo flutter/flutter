@@ -76,7 +76,7 @@ class EmbedderEngine {
 
   bool ReloadSystemFonts();
 
-  bool PostRenderThreadTask(fml::closure task);
+  bool PostRenderThreadTask(const fml::closure& task);
 
   bool RunTask(const FlutterTask* task);
 

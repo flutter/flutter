@@ -18,7 +18,7 @@ class EmbedderExternalTextureGL : public flutter::Texture {
       sk_sp<SkImage>(int64_t texture_identifier, GrContext*, const SkISize&)>;
 
   EmbedderExternalTextureGL(int64_t texture_identifier,
-                            ExternalTextureCallback callback);
+                            const ExternalTextureCallback& callback);
 
   ~EmbedderExternalTextureGL();
 

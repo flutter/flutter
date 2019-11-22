@@ -21,7 +21,7 @@ class GLFWEventLoop {
  public:
   using TaskExpiredCallback = std::function<void(const FlutterTask*)>;
   GLFWEventLoop(std::thread::id main_thread_id,
-                TaskExpiredCallback on_task_expired);
+                const TaskExpiredCallback& on_task_expired);
 
   ~GLFWEventLoop();
 

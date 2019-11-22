@@ -10,7 +10,7 @@ namespace flutter {
 
 EmbedderPlatformMessageResponse::EmbedderPlatformMessageResponse(
     fml::RefPtr<fml::TaskRunner> runner,
-    Callback callback)
+    const Callback& callback)
     : runner_(std::move(runner)), callback_(callback) {}
 
 EmbedderPlatformMessageResponse::~EmbedderPlatformMessageResponse() = default;

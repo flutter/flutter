@@ -399,7 +399,7 @@ bool WriteAtomically(const fml::UniqueFD& base_directory,
   return true;
 }
 
-bool VisitFiles(const fml::UniqueFD& directory, FileVisitor visitor) {
+bool VisitFiles(const fml::UniqueFD& directory, const FileVisitor& visitor) {
   std::string search_pattern = GetFullHandlePath(directory) + "\\*";
   WIN32_FIND_DATA find_file_data;
   HANDLE find_handle = ::FindFirstFile(

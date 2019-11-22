@@ -306,19 +306,19 @@ bool EmbedderTestCompositor::CreateSoftwareRenderSurface(
 }
 
 void EmbedderTestCompositor::SetNextPresentCallback(
-    PresentCallback next_present_callback) {
+    const PresentCallback& next_present_callback) {
   FML_CHECK(!next_present_callback_);
   next_present_callback_ = next_present_callback;
 }
 
 void EmbedderTestCompositor::SetNextSceneCallback(
-    NextSceneCallback next_scene_callback) {
+    const NextSceneCallback& next_scene_callback) {
   FML_CHECK(!next_scene_callback_);
   next_scene_callback_ = next_scene_callback;
 }
 
 void EmbedderTestCompositor::SetPlatformViewRendererCallback(
-    PlatformViewRendererCallback callback) {
+    const PlatformViewRendererCallback& callback) {
   platform_view_renderer_callback_ = callback;
 }
 

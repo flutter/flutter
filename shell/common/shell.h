@@ -122,8 +122,8 @@ class Shell final : public PlatformView::Delegate,
   static std::unique_ptr<Shell> Create(
       TaskRunners task_runners,
       Settings settings,
-      CreateCallback<PlatformView> on_create_platform_view,
-      CreateCallback<Rasterizer> on_create_rasterizer);
+      const CreateCallback<PlatformView>& on_create_platform_view,
+      const CreateCallback<Rasterizer>& on_create_rasterizer);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a shell instance using the provided settings. The
@@ -161,8 +161,8 @@ class Shell final : public PlatformView::Delegate,
       TaskRunners task_runners,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      CreateCallback<PlatformView> on_create_platform_view,
-      CreateCallback<Rasterizer> on_create_rasterizer,
+      const CreateCallback<PlatformView>& on_create_platform_view,
+      const CreateCallback<Rasterizer>& on_create_rasterizer,
       DartVMRef vm);
 
   //----------------------------------------------------------------------------
@@ -184,7 +184,7 @@ class Shell final : public PlatformView::Delegate,
   ///             operation.
   ///
   void RunEngine(RunConfiguration run_configuration,
-                 std::function<void(Engine::RunStatus)> result_callback);
+                 const std::function<void(Engine::RunStatus)>& result_callback);
 
   //------------------------------------------------------------------------------
   /// @return     The settings used to launch this shell.
@@ -367,8 +367,8 @@ class Shell final : public PlatformView::Delegate,
       TaskRunners task_runners,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      Shell::CreateCallback<PlatformView> on_create_platform_view,
-      Shell::CreateCallback<Rasterizer> on_create_rasterizer);
+      const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer);
 
   bool Setup(std::unique_ptr<PlatformView> platform_view,
              std::unique_ptr<Engine> engine,
@@ -420,7 +420,7 @@ class Shell final : public PlatformView::Delegate,
   void OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) override;
 
   // |PlatformView::Delegate|
-  void OnPlatformViewSetNextFrameCallback(fml::closure closure) override;
+  void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override;
 
   // |Animator::Delegate|
   void OnAnimatorBeginFrame(fml::TimePoint frame_time) override;

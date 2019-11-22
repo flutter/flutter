@@ -69,7 +69,7 @@ class VulkanSurface final
   // Note: It is safe for the caller to collect the surface in the
   // |on_writes_committed| callback.
   void SignalWritesFinished(
-      std::function<void(void)> on_writes_committed) override;
+      const std::function<void(void)>& on_writes_committed) override;
 
   // |flutter::SceneUpdateContext::SurfaceProducerSurface|
   scenic::Image* GetImage() override;

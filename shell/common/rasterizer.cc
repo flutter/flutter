@@ -483,7 +483,7 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
   return Rasterizer::Screenshot{data, layer_tree->frame_size()};
 }
 
-void Rasterizer::SetNextFrameCallback(fml::closure callback) {
+void Rasterizer::SetNextFrameCallback(const fml::closure& callback) {
   next_frame_callback_ = callback;
 }
 

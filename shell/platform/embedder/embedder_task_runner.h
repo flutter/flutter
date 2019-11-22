@@ -80,13 +80,14 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
   fml::TaskQueueId placeholder_id_;
 
   // |fml::TaskRunner|
-  void PostTask(fml::closure task) override;
+  void PostTask(const fml::closure& task) override;
 
   // |fml::TaskRunner|
-  void PostTaskForTime(fml::closure task, fml::TimePoint target_time) override;
+  void PostTaskForTime(const fml::closure& task,
+                       fml::TimePoint target_time) override;
 
   // |fml::TaskRunner|
-  void PostDelayedTask(fml::closure task, fml::TimeDelta delay) override;
+  void PostDelayedTask(const fml::closure& task, fml::TimeDelta delay) override;
 
   // |fml::TaskRunner|
   bool RunsTasksOnCurrentThread() override;

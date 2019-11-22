@@ -55,7 +55,7 @@ class ImageDecoder {
   // concurrently. Texture upload is done on the IO thread and the result
   // returned back on the UI thread. On error, the texture is null but the
   // callback is guaranteed to return on the UI thread.
-  void Decode(ImageDescriptor descriptor, ImageResult result);
+  void Decode(ImageDescriptor descriptor, const ImageResult& result);
 
   fml::WeakPtr<ImageDecoder> GetWeakPtr() const;
 
