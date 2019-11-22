@@ -95,6 +95,7 @@ action("package_incremental_compiler") {
     "$root_gen_dir/dart-pkg/front_end/pubspec.yaml",
     "$root_gen_dir/dart-pkg/kernel/pubspec.yaml",
     "$root_gen_dir/dart-pkg/dev_compiler/pubspec.yaml",
+    "$root_gen_dir/dart-pkg/frontend_server/pubspec.yaml",
   ]
 
   args = [
