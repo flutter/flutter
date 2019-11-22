@@ -1023,7 +1023,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   }
 }
 
-/// A sliver that contains a multiple box children that each fill the viewport.
+/// A sliver that contains a multiple box children that each fills the viewport.
 ///
 /// [SliverFillViewport] places its children in a linear array along the main
 /// axis. Each child is sized to fill the viewport, both in the main and cross
@@ -1039,13 +1039,14 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 class SliverFillViewport extends StatelessWidget {
+  /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
       Key key,
       @required this.delegate,
       this.viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
-  assert(viewportFraction > 0.0),
-  super(key: key);
+       assert(viewportFraction > 0.0),
+       super(key: key);
 
   /// The fraction of the viewport that each child should fill in the main axis.
   ///
@@ -1070,14 +1071,16 @@ class SliverFillViewport extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SliverFractionalPadding(
       viewportFraction: (1 - viewportFraction).clamp(0, 1) / 2,
-      sliver: _SliverFillViewport(delegate: delegate, viewportFraction: viewportFraction),
+      sliver: _SliverFillViewportRenderObjectWidget(
+        viewportFraction: viewportFraction,
+        delegate: delegate,
+      ),
     );
   }
 }
 
-class _SliverFillViewport extends SliverMultiBoxAdaptorWidget {
-  /// Creates a sliver whose box children that each fill the viewport.
-  const _SliverFillViewport({
+class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
+  const _SliverFillViewportRenderObjectWidget({
     Key key,
     @required SliverChildDelegate delegate,
     this.viewportFraction = 1.0,
@@ -1085,11 +1088,6 @@ class _SliverFillViewport extends SliverMultiBoxAdaptorWidget {
        assert(viewportFraction > 0.0),
        super(key: key, delegate: delegate);
 
-  /// The fraction of the viewport that each child should fill in the main axis.
-  ///
-  /// If this fraction is less than 1.0, more than one child will be visible at
-  /// once. If this fraction is greater than 1.0, each child will be larger than
-  /// the viewport in the main axis.
   final double viewportFraction;
 
   @override
@@ -1106,10 +1104,12 @@ class _SliverFillViewport extends SliverMultiBoxAdaptorWidget {
 
 class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   const _SliverFractionalPadding({
-    Key key,
-    this.viewportFraction,
+    this.viewportFraction = 0,
     Widget sliver,
-  }): super(key: key, child: sliver);
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction >= 0),
+       assert(viewportFraction <= 0.5),
+       super(child: sliver);
 
   final double viewportFraction;
 
@@ -1118,7 +1118,6 @@ class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFractionalPadding renderObject) {
-    super.updateRenderObject(context, renderObject);
     renderObject.setViewportFraction(viewportFraction);
   }
 }
@@ -1127,15 +1126,15 @@ class _RenderSliverFractionalPadding extends RenderSliverPadding {
   _RenderSliverFractionalPadding({
     double viewportFraction = 0,
   }) : assert(viewportFraction != null),
-       assert(viewportFraction >= 0),
        assert(viewportFraction <= 0.5),
+       assert(viewportFraction >= 0),
        _viewportFraction = viewportFraction,
        super(padding: EdgeInsets.zero);
 
   double _viewportFraction;
   void setViewportFraction(double newValue) {
     assert(newValue != null);
-    if (newValue == _viewportFraction)
+    if (_viewportFraction == newValue)
       return;
     _viewportFraction = newValue;
     markNeedsLayout();
@@ -1143,16 +1142,17 @@ class _RenderSliverFractionalPadding extends RenderSliverPadding {
 
   @override
   EdgeInsetsGeometry get padding {
-    final double padding = constraints.viewportMainAxisExtent * _viewportFraction;
+    assert(constraints.axis != null);
+    final double paddingValue = constraints.viewportMainAxisExtent * _viewportFraction;
     switch (constraints.axis) {
       case Axis.horizontal:
-        return EdgeInsets.symmetric(horizontal: padding);
+        return EdgeInsets.symmetric(horizontal: paddingValue);
       case Axis.vertical:
-        return EdgeInsets.symmetric(vertical: padding);
+        return EdgeInsets.symmetric(vertical: paddingValue);
     }
 
-    assert(false, 'Should be unreachable');
-    return EdgeInsets.symmetric(horizontal: padding);
+    assert(false, 'Unreachable');
+    return EdgeInsets.symmetric(vertical: paddingValue);
   }
 }
 

@@ -345,8 +345,16 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       forcePixels(getPixelsFromPage(oldPage));
   }
 
+  // The amount of offset that will be added to [minScrollExtent] and subtracted
+  // from [maxScrollExtent], such that every page will properly snap to the center
+  // of the viewport when viewportFraction is greater than 1.
+  //
+  // The value is 0 if viewportFraction is less than or equal to 1, larger than 0
+  // otherwise.
+  double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);
+
   double getPageFromPixels(double pixels, double viewportDimension) {
-    final double actual = math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double actual = math.max(0.0, pixels - _initialPageOffset) / math.max(1.0, viewportDimension * viewportFraction);
     final double round = actual.roundToDouble();
     if ((actual - round).abs() < precisionErrorTolerance) {
       return round;
@@ -355,7 +363,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   double getPixelsFromPage(double page) {
-    return page * viewportDimension * viewportFraction;
+    return page * viewportDimension * viewportFraction + _initialPageOffset;
   }
 
   @override
@@ -394,6 +402,15 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       return false;
     }
     return result;
+  }
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    final double newMinScrollExtent = minScrollExtent + _initialPageOffset;
+    return super.applyContentDimensions(
+      newMinScrollExtent,
+      math.max(newMinScrollExtent, maxScrollExtent - _initialPageOffset),
+    );
   }
 
   @override
