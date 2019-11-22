@@ -151,8 +151,7 @@ static sk_sp<SkImage> ImageFromCompressedData(
 
 static SkiaGPUObject<SkImage> UploadRasterImage(
     sk_sp<SkImage> image,
-    fml::WeakPtr<GrContext> context,
-    fml::RefPtr<flutter::SkiaUnrefQueue> queue,
+    fml::WeakPtr<IOManager> io_manager,
     const fml::tracing::TraceFlow& flow) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   flow.Step(__FUNCTION__);
@@ -161,7 +160,7 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
   // the this method.
   FML_DCHECK(!image->isTextureBacked());
 
-  if (!context || !queue) {
+  if (!io_manager->GetResourceContext() || !io_manager->GetSkiaUnrefQueue()) {
     FML_LOG(ERROR)
         << "Could not acquire context of release queue for texture upload.";
     return {};
@@ -173,19 +172,36 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
     return {};
   }
 
-  auto texture_image =
-      SkImage::MakeCrossContextFromPixmap(context.get(),  // context
-                                          pixmap,         // pixmap
-                                          true,           // buildMips,
-                                          true  // limitToMaxTextureSize
-      );
+  SkiaGPUObject<SkImage> result;
+  io_manager->GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfTrue([&result, &pixmap, &image] {
+            SkSafeRef(image.get());
+            sk_sp<SkImage> texture_image = SkImage::MakeFromRaster(
+                pixmap,
+                [](const void* pixels, SkImage::ReleaseContext context) {
+                  SkSafeUnref(static_cast<SkImage*>(context));
+                },
+                image.get());
+            result = {texture_image, nullptr};
+          })
+          .SetIfFalse([&result, context = io_manager->GetResourceContext(),
+                       &pixmap, queue = io_manager->GetSkiaUnrefQueue()] {
+            sk_sp<SkImage> texture_image = SkImage::MakeCrossContextFromPixmap(
+                context.get(),  // context
+                pixmap,         // pixmap
+                true,           // buildMips,
+                true            // limitToMaxTextureSize
+            );
+            if (!texture_image) {
+              FML_LOG(ERROR) << "Could not make x-context image.";
+              result = {};
+            } else {
+              result = {texture_image, queue};
+            }
+          }));
 
-  if (!texture_image) {
-    FML_LOG(ERROR) << "Could not make x-context image.";
-    return {};
-  }
-
-  return {texture_image, queue};
+  return result;
 }
 
 void ImageDecoder::Decode(ImageDescriptor descriptor,
@@ -265,9 +281,8 @@ void ImageDecoder::Decode(ImageDescriptor descriptor,
             return;
           }
 
-          auto uploaded = UploadRasterImage(
-              std::move(decompressed), io_manager->GetResourceContext(),
-              io_manager->GetSkiaUnrefQueue(), flow);
+          auto uploaded =
+              UploadRasterImage(std::move(decompressed), io_manager, flow);
 
           if (!uploaded.get()) {
             FML_LOG(ERROR) << "Could not upload image to the GPU.";

@@ -18,6 +18,7 @@
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/status.h"
+#include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
@@ -305,6 +306,10 @@ class Shell final : public PlatformView::Delegate,
   ///
   bool EngineHasLivePorts() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief     Accessor for the disable GPU SyncSwitch
+  std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const;
+
  private:
   using ServiceProtocolHandler =
       std::function<bool(const ServiceProtocol::Handler::ServiceProtocolMap&,
@@ -317,6 +322,7 @@ class Shell final : public PlatformView::Delegate,
   std::unique_ptr<Engine> engine_;               // on UI task runner
   std::unique_ptr<Rasterizer> rasterizer_;       // on GPU task runner
   std::unique_ptr<ShellIOManager> io_manager_;   // on IO task runner
+  std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch_;
 
   fml::WeakPtr<Engine> weak_engine_;          // to be shared across threads
   fml::WeakPtr<Rasterizer> weak_rasterizer_;  // to be shared across threads

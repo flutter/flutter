@@ -57,7 +57,7 @@ class SkiaGPUObject {
 
   SkiaGPUObject(sk_sp<SkiaObjectType> object, fml::RefPtr<SkiaUnrefQueue> queue)
       : object_(std::move(object)), queue_(std::move(queue)) {
-    FML_DCHECK(queue_ && object_);
+    FML_DCHECK(object_);
   }
 
   SkiaGPUObject(SkiaGPUObject&&) = default;
@@ -69,7 +69,7 @@ class SkiaGPUObject {
   sk_sp<SkiaObjectType> get() const { return object_; }
 
   void reset() {
-    if (object_) {
+    if (object_ && queue_) {
       queue_->Unref(object_.release());
     }
     queue_ = nullptr;

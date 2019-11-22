@@ -302,6 +302,13 @@ FLUTTER_EXPORT
  */
 @property(nonatomic, readonly, copy, nullable) NSString* isolateId;
 
+/**
+ * Whether or not GPU calls are allowed.
+ *
+ * Typically this is set when the app is backgrounded and foregrounded.
+ */
+@property(nonatomic, assign) BOOL isGpuDisabled;
+
 @end
 
 NS_ASSUME_NONNULL_END

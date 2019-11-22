@@ -29,7 +29,8 @@ class TestIOManager final : public IOManager {
             task_runner,
             fml::TimeDelta::FromNanoseconds(0))),
         runner_(task_runner),
-        weak_factory_(this) {
+        weak_factory_(this),
+        is_gpu_disabled_sync_switch_(std::make_shared<fml::SyncSwitch>()) {
     FML_CHECK(task_runner->RunsTasksOnCurrentThread())
         << "The IO manager must be initialized its primary task runner. The "
            "test harness may not be setup correctly/safely.";
@@ -62,6 +63,14 @@ class TestIOManager final : public IOManager {
     return unref_queue_;
   }
 
+  // |IOManager|
+  std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() override {
+    did_access_is_gpu_disabled_sync_switch_ = true;
+    return is_gpu_disabled_sync_switch_;
+  }
+
+  bool did_access_is_gpu_disabled_sync_switch_ = false;
+
  private:
   TestGLSurface gl_surface_;
   sk_sp<GrContext> gl_context_;
@@ -70,6 +79,7 @@ class TestIOManager final : public IOManager {
   fml::WeakPtr<TestIOManager> weak_prototype_;
   fml::RefPtr<fml::TaskRunner> runner_;
   fml::WeakPtrFactory<TestIOManager> weak_factory_;
+  std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TestIOManager);
 };
@@ -167,7 +177,7 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
 
   fml::AutoResetWaitableEvent latch;
 
-  std::unique_ptr<IOManager> io_manager;
+  std::unique_ptr<TestIOManager> io_manager;
 
   auto release_io_manager = [&]() {
     io_manager.reset();
@@ -187,8 +197,10 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
     ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
       ASSERT_TRUE(image.get());
+      EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
+    EXPECT_FALSE(io_manager->did_access_is_gpu_disabled_sync_switch_);
     image_decoder->Decode(std::move(image_descriptor), callback);
   };
 
@@ -198,7 +210,6 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
   };
 
   runners.GetIOTaskRunner()->PostTask(setup_io_manager_and_decode);
-
   latch.Wait();
 }
 
