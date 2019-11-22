@@ -272,7 +272,7 @@ class MockProcess extends Mock implements Process {
   final Stream<List<int>> stderr;
 }
 
-/// A fake process implemenation which can be provided all necessary values.
+/// A fake process implementation which can be provided all necessary values.
 class FakeProcess implements Process {
   FakeProcess({
     this.pid = 1,

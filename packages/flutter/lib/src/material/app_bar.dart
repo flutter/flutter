@@ -253,7 +253,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// If leading widget is not null, this parameter has no effect.
   final bool automaticallyImplyLeading;
 
-  /// The primary widget displayed in the appbar.
+  /// The primary widget displayed in the app bar.
   ///
   /// Typically a [Text] widget containing a description of the current contents
   /// of the app.
@@ -952,7 +952,7 @@ class SliverAppBar extends StatefulWidget {
   /// If leading widget is not null, this parameter has no effect.
   final bool automaticallyImplyLeading;
 
-  /// The primary widget displayed in the appbar.
+  /// The primary widget displayed in the app bar.
   ///
   /// Typically a [Text] widget containing a description of the current contents
   /// of the app.
@@ -997,7 +997,7 @@ class SliverAppBar extends StatefulWidget {
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
 
-  /// This widget appears across the bottom of the appbar.
+  /// This widget appears across the bottom of the app bar.
   ///
   /// Typically a [TabBar]. Only widgets that implement [PreferredSizeWidget] can
   /// be used at the bottom of an app bar.
@@ -1155,7 +1155,7 @@ class SliverAppBar extends StatefulWidget {
   /// a scroll dismisses the app bar, the animation will slide the app bar
   /// completely out of view.
   ///
-  /// Snapping only applies when the app bar is floating, not when the appbar
+  /// Snapping only applies when the app bar is floating, not when the app bar
   /// appears at the top of its scroll view.
   ///
   /// ## Animated Examples

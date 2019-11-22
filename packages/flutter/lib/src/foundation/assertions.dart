@@ -772,7 +772,7 @@ void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
   debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));
 }
 
-/// Diagnostic with a [StackTrace] [value] suitable for displaying stacktraces
+/// Diagnostic with a [StackTrace] [value] suitable for displaying stack traces
 /// as part of a [FlutterError] object.
 ///
 /// See also:

@@ -440,7 +440,7 @@ enum ListTileControlAffinity {
 ///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
-/// Here is an example of an article list item with multi-line titles and
+/// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
 /// [AspectRatio] widgets to organize its layout.
 ///

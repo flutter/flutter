@@ -277,7 +277,7 @@ class CupertinoThemeData extends Diagnosticable {
     );
   }
 
-  /// Returns a new `CupertinoThemeData` with all its colors resolved aginst the
+  /// Returns a new `CupertinoThemeData` with all its colors resolved against the
   /// given [BuildContext].
   ///
   /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved
