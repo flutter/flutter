@@ -64,7 +64,7 @@ class FakeCommand {
 
   /// The process' exit code.
   ///
-  /// To simulate a never-ending process, set [duration] to a value greated than
+  /// To simulate a never-ending process, set [duration] to a value greater than
   /// 15 minutes (the timeout for our tests).
   ///
   /// To simulate a crash, subtract the crash signal number from 256. For example,

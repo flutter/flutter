@@ -66,9 +66,9 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = argResults['target-platform'];
+    final String targetPlatform = stringArg('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
+    final String outputPath = stringArg('output-dir') ?? getAotBuildDirectory();
     final BuildMode buildMode = getBuildMode();
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
@@ -81,12 +81,12 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       outputPath: outputPath,
       buildMode: buildMode,
       mainDartFile: findMainDartFile(targetFile),
-      bitcode: argResults['bitcode'],
-      quiet: argResults['quiet'],
-      reportTimings: argResults['report-timings'],
-      iosBuildArchs: argResults['ios-arch'].map<DarwinArch>(getIOSArchForName),
-      extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
-      extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+      bitcode: boolArg('bitcode'),
+      quiet: boolArg('quiet'),
+      reportTimings: boolArg('report-timings'),
+      iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
+      extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
+      extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       dartDefines: dartDefines,
     );
     return null;

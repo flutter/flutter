@@ -275,7 +275,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
+        final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
         assert(
           settings != null,
           'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().',

@@ -71,7 +71,7 @@ class NoAndroidStudioValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    final String cfgAndroidStudio = config.getValue('android-studio-dir');
+    final String cfgAndroidStudio = config.getValue('android-studio-dir') as String;
     if (cfgAndroidStudio != null) {
       messages.add(ValidationMessage.error(userMessages.androidStudioMissing(cfgAndroidStudio)));
     }

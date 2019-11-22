@@ -125,14 +125,9 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     final Set<String> manifest = <String>{};
-    final List<FileSystemEntity> flutterFiles = _flutterRoot.listSync(recursive: true);
-    for (FileSystemEntity entity in flutterFiles) {
-      final String relativePath = fs.path.relative(entity.path, from: _flutterRoot.absolute.path);
-      if (entity is! File) {
-        continue;
-      }
-
-      final File srcFile = entity;
+    final Iterable<File> flutterFiles = _flutterRoot.listSync(recursive: true).whereType<File>();
+    for (File srcFile in flutterFiles) {
+      final String relativePath = fs.path.relative(srcFile.path, from: _flutterRoot.absolute.path);
 
       // Skip template files in both the ide_templates and templates
       // directories to avoid copying onto themselves.
@@ -163,7 +158,7 @@ class IdeConfigCommand extends FlutterCommand {
           manifest.add('$relativePath${Template.copyTemplateExtension}');
           continue;
         }
-        if (argResults['overwrite']) {
+        if (boolArg('overwrite')) {
           finalDestinationFile.deleteSync();
           printStatus('  $relativeDestination (overwritten)');
         } else {
@@ -184,18 +179,14 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     // If we're not overwriting, then we're not going to remove missing items either.
-    if (!argResults['overwrite']) {
+    if (!boolArg('overwrite')) {
       return;
     }
 
     // Look for any files under the template dir that don't exist in the manifest and remove
     // them.
-    final List<FileSystemEntity> templateFiles = _templateDirectory.listSync(recursive: true);
-    for (FileSystemEntity entity in templateFiles) {
-      if (entity is! File) {
-        continue;
-      }
-      final File templateFile = entity;
+    final Iterable<File> templateFiles = _templateDirectory.listSync(recursive: true).whereType<File>();
+    for (File templateFile in templateFiles) {
       final String relativePath = fs.path.relative(
         templateFile.absolute.path,
         from: _templateDirectory.absolute.path,
@@ -228,7 +219,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
 
-    if (argResults['update-templates']) {
+    if (boolArg('update-templates')) {
       _handleTemplateUpdate();
       return null;
     }
@@ -246,7 +237,7 @@ class IdeConfigCommand extends FlutterCommand {
     printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
     generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
-      'withRootModule': argResults['with-root-module'],
+      'withRootModule': boolArg('with-root-module'),
     });
 
     printStatus('Wrote $generatedCount files.');
@@ -262,7 +253,7 @@ class IdeConfigCommand extends FlutterCommand {
     return template.render(
       fs.directory(dirPath),
       context,
-      overwriteExisting: argResults['overwrite'],
+      overwriteExisting: boolArg('overwrite'),
     );
   }
 }

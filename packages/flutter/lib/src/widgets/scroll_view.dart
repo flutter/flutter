@@ -565,6 +565,8 @@ abstract class BoxScrollView extends ScrollView {
 
 /// A scrollable list of widgets arranged linearly.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=KJpkjHGiI5A}
+///
 /// [ListView] is the most commonly used scrolling widget. It displays its
 /// children one after another in the scroll direction. In the cross axis, the
 /// children are required to fill the [ListView].
@@ -719,7 +721,7 @@ abstract class BoxScrollView extends ScrollView {
 ///
 ///  * Letting [KeepAlive] be the root widget of the list child widget subtree
 ///    that needs to be preserved. The [KeepAlive] widget marks the child
-///    subtree's top render object child for keep-alive. When the associated top
+///    subtree's top render object child for keepalive. When the associated top
 ///    render object is scrolled out of view, the list keeps the child's render
 ///    object (and by extension, its associated elements and states) in a cache
 ///    list instead of destroying them. When scrolled back into view, the render
@@ -737,7 +739,7 @@ abstract class BoxScrollView extends ScrollView {
 ///
 ///    As an example, the [EditableText] widget signals its list child element
 ///    subtree to stay alive while its text field has input focus. If it doesn't
-///    have focus and no other descendants signaled for keep-alive via a
+///    have focus and no other descendants signaled for keepalive via a
 ///    [KeepAliveNotification], the list child element subtree will be destroyed
 ///    when scrolled away.
 ///

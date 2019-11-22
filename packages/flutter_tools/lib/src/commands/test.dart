@@ -109,7 +109,7 @@ class TestCommand extends FastFlutterCommand {
     final Set<DevelopmentArtifact> results = <DevelopmentArtifact>{
       DevelopmentArtifact.universal,
     };
-    if (argResults['platform'] == 'chrome') {
+    if (stringArg('platform') == 'chrome') {
       results.add(DevelopmentArtifact.web);
     }
     return results;
@@ -134,18 +134,18 @@ class TestCommand extends FastFlutterCommand {
     if (shouldRunPub) {
       await pub.get(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
-    final bool buildTestAssets = argResults['test-assets'];
-    final List<String> names = argResults['name'];
-    final List<String> plainNames = argResults['plain-name'];
+    final bool buildTestAssets = boolArg('test-assets');
+    final List<String> names = stringsArg('name');
+    final List<String> plainNames = stringsArg('plain-name');
     final FlutterProject flutterProject = FlutterProject.current();
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
     }
 
-    Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
+    List<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
-    final bool startPaused = argResults['start-paused'];
+    final bool startPaused = boolArg('start-paused');
     if (startPaused && files.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
@@ -153,7 +153,7 @@ class TestCommand extends FastFlutterCommand {
       );
     }
 
-    final int jobs = int.tryParse(argResults['concurrency']);
+    final int jobs = int.tryParse(stringArg('concurrency'));
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
@@ -186,14 +186,14 @@ class TestCommand extends FastFlutterCommand {
     }
 
     CoverageCollector collector;
-    if (argResults['coverage'] || argResults['merge-coverage']) {
+    if (boolArg('coverage') || boolArg('merge-coverage')) {
       final String projectName = FlutterProject.current().manifest.appName;
       collector = CoverageCollector(
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
       );
     }
 
-    final bool machine = argResults['machine'];
+    final bool machine = boolArg('machine');
     if (collector != null && machine) {
       throwToolExit("The test command doesn't support --machine and coverage together");
     }
@@ -222,7 +222,7 @@ class TestCommand extends FastFlutterCommand {
     }
 
     final bool disableServiceAuthCodes =
-      argResults['disable-service-auth-codes'];
+      boolArg('disable-service-auth-codes');
 
     final int result = await runTests(
       files,
@@ -233,21 +233,21 @@ class TestCommand extends FastFlutterCommand {
       enableObservatory: collector != null || startPaused,
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
-      ipv6: argResults['ipv6'],
+      ipv6: boolArg('ipv6'),
       machine: machine,
       buildMode: BuildMode.debug,
-      trackWidgetCreation: argResults['track-widget-creation'],
-      updateGoldens: argResults['update-goldens'],
+      trackWidgetCreation: boolArg('track-widget-creation'),
+      updateGoldens: boolArg('update-goldens'),
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
-      web: argResults['platform'] == 'chrome',
+      web: stringArg('platform') == 'chrome',
     );
 
     if (collector != null) {
       final bool collectionResult = await collector.collectCoverageData(
-        argResults['coverage-path'],
-        mergeCoverageData: argResults['merge-coverage'],
+        stringArg('coverage-path'),
+        mergeCoverageData: boolArg('merge-coverage'),
       );
       if (!collectionResult) {
         throwToolExit(null);
