@@ -868,7 +868,7 @@ class DefaultFocusTraversal extends InheritedWidget {
   /// The [context] argument must not be null.
   static FocusTraversalPolicy of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
-    final DefaultFocusTraversal inherited = context.inheritFromWidgetOfExactType(DefaultFocusTraversal);
+    final DefaultFocusTraversal inherited = context.dependOnInheritedWidgetOfExactType<DefaultFocusTraversal>();
     assert(() {
       if (nullOk) {
         return true;

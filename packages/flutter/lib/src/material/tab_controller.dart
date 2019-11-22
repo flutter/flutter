@@ -342,7 +342,7 @@ class DefaultTabController extends StatefulWidget {
   /// TabController controller = DefaultTabBarController.of(context);
   /// ```
   static TabController of(BuildContext context) {
-    final _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
+    final _TabControllerScope scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
     return scope?.controller;
   }
 

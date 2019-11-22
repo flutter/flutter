@@ -388,7 +388,7 @@ class AnimatedList extends StatefulWidget {
   static AnimatedListState of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final AnimatedListState result = context.ancestorStateOfType(const TypeMatcher<AnimatedListState>());
+    final AnimatedListState result = context.findAncestorStateOfType<AnimatedListState>();
     if (nullOk || result != null)
       return result;
     throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -774,7 +774,7 @@ class SliverAnimatedList extends StatefulWidget {
   static SliverAnimatedListState of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
     assert(nullOk != null);
-    final SliverAnimatedListState result = context.ancestorStateOfType(const TypeMatcher<SliverAnimatedListState>());
+    final SliverAnimatedListState result = context.findAncestorStateOfType<SliverAnimatedListState>();
     if (nullOk || result != null)
       return result;
     throw FlutterError(

@@ -118,7 +118,7 @@ void main() {
 
     final Iterable<double> opacities = titles.map<double>((Element element) {
       final RenderAnimatedOpacity renderOpacity =
-          element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
+          element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
       return renderOpacity.opacity.value;
     });
 

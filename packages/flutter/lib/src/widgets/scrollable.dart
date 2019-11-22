@@ -229,7 +229,7 @@ class Scrollable extends StatefulWidget {
   /// ScrollableState scrollable = Scrollable.of(context);
   /// ```
   static ScrollableState of(BuildContext context) {
-    final _ScrollableScope widget = context.inheritFromWidgetOfExactType(_ScrollableScope);
+    final _ScrollableScope widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
   }
 
