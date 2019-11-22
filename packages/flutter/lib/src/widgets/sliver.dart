@@ -1625,6 +1625,108 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A sliver widget that makes its sliver child partially transparent.
+///
+/// This class paints its sliver child into an intermediate buffer and then
+/// blends the sliver back into the scene partially transparent.
+///
+/// For values of opacity other than 0.0 and 1.0, this class is relatively
+/// expensive because it requires painting the sliver child into an intermediate
+/// buffer. For the value 0.0, the sliver child is simply not painted at all.
+/// For the value 1.0, the sliver child is painted immediately without an
+/// intermediate buffer.
+///
+/// {@tool sample}
+///
+/// This example shows a [SliverList] when the `_visible` member field is true,
+/// and hides it when it is false:
+///
+/// ```dart
+/// bool _visible = true;
+/// List<Widget> listItems = <Widget>[
+///   Text('Now you see me,'),
+///   Text('Now you don\'t!'),
+/// ];
+///
+/// SliverOpacity(
+///   opacity: _visible ? 1.0 : 0.0,
+///   sliver: SliverList(
+///     delegate: SliverChildListDelegate(listItems),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// This is more efficient than adding and removing the sliver child widget
+/// from the tree on demand.
+///
+/// See also:
+///
+///  * [Opacity], which can apply a uniform alpha effect to its child using the
+///    RenderBox layout protocol.
+///  * [AnimatedOpacity], which uses an animation internally to efficiently
+///    animate [Opacity].
+class SliverOpacity extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that makes its sliver child partially transparent.
+  ///
+  /// The [opacity] argument must not be null and must be between 0.0 and 1.0
+  /// (inclusive).
+  const SliverOpacity({
+    Key key,
+    @required this.opacity,
+    this.alwaysIncludeSemantics = false,
+    Widget sliver,
+  })
+    : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+      assert(alwaysIncludeSemantics != null),
+      super(key: key, child: sliver);
+
+  /// The fraction to scale the sliver child's alpha value.
+  ///
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e. invisible).
+  ///
+  /// The opacity must not be null.
+  ///
+  /// Values 1.0 and 0.0 are painted with a fast path. Other values
+  /// require painting the sliver child into an intermediate buffer, which is
+  /// expensive.
+  final double opacity;
+
+  /// Whether the semantic information of the sliver child is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings, the sliver child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
+  @override
+  RenderSliverOpacity createRenderObject(BuildContext context) {
+    return RenderSliverOpacity(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context,
+    RenderSliverOpacity renderObject) {
+    renderObject
+      ..opacity = opacity
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<double>('opacity', opacity));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics',));
+  }
+}
+
 /// A sliver widget that is invisible during hit testing.
 ///
 /// When [ignoring] is true, this widget (and its subtree) is invisible
