@@ -552,7 +552,7 @@ include ':app'
       fs = MemoryFileSystem();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
-      android = fakePlatform('android') as FakePlatform;
+      android = fakePlatform('android');
     });
 
     void testUsingAndroidContext(String description, dynamic testMethod()) {
@@ -1083,7 +1083,7 @@ plugin2=${plugin2.path}
       mockAndroidStudio = MockAndroidStudio();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
-      android = fakePlatform('android') as FakePlatform;
+      android = fakePlatform('android');
 
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_artifacts_test.');
       cache = Cache(rootOverride: tempDir);
@@ -2041,7 +2041,7 @@ FlutterProject generateFakeAppBundle(String directoryName, String fileName) {
   return project;
 }
 
-Platform fakePlatform(String name) {
+FakePlatform fakePlatform(String name) {
   return FakePlatform.fromPlatform(const LocalPlatform())
     ..operatingSystem = name
     ..stdoutSupportsAnsi = false;
