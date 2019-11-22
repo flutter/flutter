@@ -281,7 +281,7 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
     name,
     packageRootPath,
     flutterConfig['plugin'] as YamlMap,
-    dependencies == null ? <String>[] : dependencies.keys.toList(),
+    dependencies == null ? <String>[] : <String>[...dependencies.keys],
   );
 }
 

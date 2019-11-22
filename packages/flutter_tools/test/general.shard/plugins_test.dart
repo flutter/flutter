@@ -221,7 +221,6 @@ dependencies:
         );
     }
 
-
     // Creates the files that would indicate that pod install has run for the
     // given project.
     void simulatePodInstallRun(XcodeBasedProject project) {
