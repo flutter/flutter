@@ -32,7 +32,7 @@ void main() {
     setUp(() {
       mockProcessManager = mocks.MockProcessManager();
       xcodeProjectInterpreter = XcodeProjectInterpreter();
-      macOS = fakePlatform('macos') as FakePlatform;
+      macOS = fakePlatform('macos');
       fs = MemoryFileSystem();
       fs.file(xcodebuild).createSync(recursive: true);
     });
@@ -229,7 +229,7 @@ void main() {
 
     setUp(() {
       mockProcessManager = mocks.MockProcessManager();
-      macOS = fakePlatform('macos') as FakePlatform;
+      macOS = fakePlatform('macos');
       fs = MemoryFileSystem();
       fs.file(xcodebuild).createSync(recursive: true);
     });
@@ -390,7 +390,7 @@ Information about project "Runner":
     FakePlatform platform;
 
     setUp(() {
-      platform = fakePlatform('ignored') as FakePlatform;
+      platform = fakePlatform('ignored');
     });
 
     testUsingContext('environment variables as Xcode build settings', () {
@@ -417,7 +417,7 @@ Information about project "Runner":
       fs = MemoryFileSystem();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
-      macOS = fakePlatform('macos') as FakePlatform;
+      macOS = fakePlatform('macos');
       fs.file(xcodebuild).createSync(recursive: true);
     });
 
@@ -722,7 +722,7 @@ flutter:
   });
 }
 
-Platform fakePlatform(String name) {
+FakePlatform fakePlatform(String name) {
   return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 
