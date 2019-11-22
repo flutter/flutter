@@ -198,8 +198,13 @@ class AttachCommand extends FlutterCommand {
     final int devicePort = await getDevicePort();
 
     final Daemon daemon = boolArg('machine')
-      ? Daemon(stdinCommandStream, stdoutCommandResponse,
-            notifyingLogger: NotifyingLogger(), logToStdout: true)
+      ? Daemon(
+          stdinCommandStream,
+          stdoutCommandResponse,
+          notifyingLogger: NotifyingLogger(),
+          logToStdout: true,
+          dartDefines: dartDefines,
+        )
       : null;
 
     Stream<Uri> observatoryUri;
