@@ -58,7 +58,7 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
-  double get _padding => (1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5;
+  double get _padding => math.min((1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5, 0);
 
   @override
   double indexToLayoutOffset(double itemExtent, int index) {
