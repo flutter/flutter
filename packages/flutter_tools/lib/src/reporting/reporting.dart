@@ -21,6 +21,7 @@ import '../base/utils.dart';
 import '../doctor.dart';
 import '../features.dart';
 import '../globals.dart';
+import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 

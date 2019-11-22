@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show lerpDouble, ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/animation.dart' show Curves;
 
 import 'colors.dart';
+import 'interface_level.dart';
 
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
@@ -793,11 +794,15 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
 class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   _CupertinoModalPopupRoute({
-    this.builder,
-    this.barrierLabel,
     this.barrierColor,
+    this.barrierLabel,
+    this.builder,
+    ImageFilter filter,
     RouteSettings settings,
-  }) : super(settings: settings);
+  }) : super(
+         filter: filter,
+         settings: settings,
+       );
 
   final WidgetBuilder builder;
 
@@ -840,7 +845,10 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return builder(context);
+    return CupertinoUserInterfaceLevel(
+      data: CupertinoUserInterfaceLevelData.elevated,
+      child: Builder(builder: builder),
+    );
   }
 
   @override
@@ -886,14 +894,16 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 Future<T> showCupertinoModalPopup<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  ImageFilter filter,
   bool useRootNavigator = true,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
     _CupertinoModalPopupRoute<T>(
-      builder: builder,
-      barrierLabel: 'Dismiss',
       barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+      barrierLabel: 'Dismiss',
+      builder: builder,
+      filter: filter,
     ),
   );
 }

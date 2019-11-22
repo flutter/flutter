@@ -173,12 +173,12 @@ void main() {
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },
-            child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x000001),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.color, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.black, index: 0x000100),
           trailing: CupertinoButton(
             onPressed: () { },
-            child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x010000),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.color, index: 0x010000),
           ),
         ),
       ),
@@ -328,7 +328,7 @@ void main() {
         });
 
     Iterable<double> opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
       return renderOpacity.opacity.value;
     });
 
@@ -353,7 +353,7 @@ void main() {
         });
 
     opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
       return renderOpacity.opacity.value;
     });
 
@@ -461,7 +461,7 @@ void main() {
     expect(find.text('Different title'), findsOneWidget);
 
     RenderAnimatedOpacity largeTitleOpacity =
-        tester.element(find.text('Title')).ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
     // Large title initially visible.
     expect(
       largeTitleOpacity.opacity.value,
@@ -469,7 +469,7 @@ void main() {
     );
     // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
     expect(
-      tester.element(find.text('Different title')).ancestorRenderObjectOfType(const TypeMatcher<RenderOpacity>()),
+      tester.element(find.text('Different title')).findAncestorRenderObjectOfType<RenderOpacity>(),
       isNull,
     );
 
@@ -480,7 +480,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     largeTitleOpacity =
-        tester.element(find.text('Title')).ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
     // Large title no longer visible.
     expect(
       largeTitleOpacity.opacity.value,

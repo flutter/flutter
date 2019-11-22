@@ -126,8 +126,11 @@ Future<void> buildWithAssemble({
 
   if (!result.success) {
     for (ExceptionMeasurement measurement in result.exceptions.values) {
-      printError(measurement.exception.toString());
-      printError(measurement.stackTrace.toString());
+        printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
     }
     throwToolExit('Failed to build bundle.');
   }
@@ -182,7 +185,7 @@ Future<void> writeBundle(
     assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
+        final File file = fs.file(bundleDir.uri.resolve(entry.key));
         file.parent.createSync(recursive: true);
         await file.writeAsBytes(await entry.value.contentsAsBytes());
       } finally {

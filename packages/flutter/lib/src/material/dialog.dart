@@ -65,16 +65,20 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.material.material.elevation}
   final double elevation;
 
+  /// {@template flutter.material.dialog.insetAnimationDuration}
   /// The duration of the animation to show when the system keyboard intrudes
   /// into the space that the dialog is placed in.
   ///
   /// Defaults to 100 milliseconds.
+  /// {@endtemplate}
   final Duration insetAnimationDuration;
 
+  /// {@template flutter.material.dialog.insetAnimationCurve}
   /// The curve to use for the animation shown when the system keyboard intrudes
   /// into the space that the dialog is placed in.
   ///
   /// Defaults to [Curves.decelerate].
+  /// {@endtemplate}
   final Curve insetAnimationCurve;
 
   /// {@template flutter.material.dialog.shape}
@@ -132,6 +136,8 @@ class Dialog extends StatelessWidget {
 /// acknowledgement. An alert dialog has an optional title and an optional list
 /// of actions. The title is displayed above the content and the actions are
 /// displayed below the content.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
 ///
 /// If the content is too large to fit on the screen vertically, the dialog will
 /// display the title and the actions and let the content overflow, which is
@@ -690,8 +696,10 @@ Future<T> showDialog<T>({
   @Deprecated(
     'Instead of using the "child" argument, return the child from a closure '
     'provided to the "builder" argument. This will ensure that the BuildContext '
-    'is appropriate for widgets built in the dialog.'
-  ) Widget child,
+    'is appropriate for widgets built in the dialog. '
+    'This feature was deprecated after v0.2.3.'
+  )
+  Widget child,
   WidgetBuilder builder,
   bool useRootNavigator = true,
 }) {

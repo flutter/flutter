@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui' show window;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -21,6 +23,10 @@ void main() {
     expect(binding.hasScheduledFrame, isFalse);
     expect(window.onBeginFrame, isNull);
     expect(window.onDrawFrame, isNull);
+
+    // Framework starts with detached statue. Sends resumed signal to enable frame.
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
 
     // Frame callbacks are registered lazily when a frame is scheduled.
     binding.scheduleFrame();

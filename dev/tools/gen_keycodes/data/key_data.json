@@ -66,33 +66,6 @@
       "glfw": null
     }
   },
-  "fn": {
-    "names": {
-      "domkey": "Fn",
-      "android": [
-        "FUNCTION"
-      ],
-      "english": "Fn",
-      "chromium": "fn",
-      "glfw": null
-    },
-    "scanCodes": {
-      "android": [
-        464
-      ],
-      "usb": 18,
-      "linux": null,
-      "xkb": null,
-      "windows": null,
-      "macos": null
-    },
-    "keyCodes": {
-      "android": [
-        119
-      ],
-      "glfw": null
-    }
-  },
   "fnLock": {
     "names": {
       "domkey": "FnLock",
@@ -7219,6 +7192,33 @@
     "keyCodes": {
       "android": [
         101
+      ],
+      "glfw": null
+    }
+  },
+  "fn": {
+    "names": {
+      "domkey": "Fn",
+      "android": [
+        "FUNCTION"
+      ],
+      "english": "Fn",
+      "chromium": "fn",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        464
+      ],
+      "usb": 18,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": 63
+    },
+    "keyCodes": {
+      "android": [
+        119
       ],
       "glfw": null
     }

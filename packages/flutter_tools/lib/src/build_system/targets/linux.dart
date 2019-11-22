@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:pool/pool.dart';
-
 import '../../artifacts.dart';
-import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../devfs.dart';
 import '../../globals.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -37,12 +33,14 @@ class UnpackLinuxDebug extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    Source.depfile('linux_engine_sources.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('linux_engine_sources.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => <String>[
+    'linux_engine_sources.d'
   ];
 
   @override
@@ -120,16 +118,17 @@ class DebugBundleLinuxAssets extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    Source.behavior(AssetOutputBehavior('flutter_assets')),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.behavior(AssetOutputBehavior('flutter_assets')),
     Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
-    Source.pattern('{OUTPUT_DIR}/flutter_assets/AssetManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/flutter_assets/FontManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/flutter_assets/LICENSE'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
   ];
 
   @override
@@ -149,25 +148,7 @@ class DebugBundleLinuxAssets extends Target {
       environment.buildDir.childFile('app.dill')
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    await assetBundle.build();
-    final Pool pool = Pool(kMaxOpenFiles);
-    await Future.wait<void>(
-      assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-        final PoolResource resource = await pool.request();
-        try {
-          final File file = fs.file(fs.path.join(outputDirectory.path, entry.key));
-          file.parent.createSync(recursive: true);
-          final DevFSContent content = entry.value;
-          if (content is DevFSFileContent && content.file is File) {
-            await (content.file as File).copy(file.path);
-          } else {
-            await file.writeAsBytes(await entry.value.contentsAsBytes());
-          }
-        } finally {
-          resource.release();
-        }
-      }));
+    final Depfile depfile = await copyAssets(environment, outputDirectory);
+    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 }

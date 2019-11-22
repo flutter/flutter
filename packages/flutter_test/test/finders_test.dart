@@ -128,7 +128,7 @@ void main() {
     final Text text = find.descendant(
       of: find.byKey(key1),
       matching: find.byType(Text),
-    ).last.evaluate().single.widget;
+    ).last.evaluate().single.widget as Text;
 
     expect(text.data, '1');
   });

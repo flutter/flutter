@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'dart:ui' as ui show ImageFilter, Gradient, Image;
+import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -713,8 +713,6 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 
 }
 
-int _getAlphaFromOpacity(double opacity) => (opacity * 255).round();
-
 /// Makes its child partially transparent.
 ///
 /// This class paints its child into an intermediate buffer and then blends the
@@ -737,7 +735,7 @@ class RenderOpacity extends RenderProxyBox {
        assert(alwaysIncludeSemantics != null),
        _opacity = opacity,
        _alwaysIncludeSemantics = alwaysIncludeSemantics,
-       _alpha = _getAlphaFromOpacity(opacity),
+       _alpha = ui.Color.getAlphaFromOpacity(opacity),
        super(child);
 
   @override
@@ -765,11 +763,11 @@ class RenderOpacity extends RenderProxyBox {
     final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
-    _alpha = _getAlphaFromOpacity(_opacity);
+    _alpha = ui.Color.getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
     markNeedsPaint();
-    if (wasVisible != (_alpha != 0))
+    if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
 
@@ -895,7 +893,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
 
   void _updateOpacity() {
     final int oldAlpha = _alpha;
-    _alpha = _getAlphaFromOpacity(_opacity.value.clamp(0.0, 1.0));
+    _alpha = ui.Color.getAlphaFromOpacity(_opacity.value);
     if (oldAlpha != _alpha) {
       final bool didNeedCompositing = _currentlyNeedsCompositing;
       _currentlyNeedsCompositing = _alpha > 0 && _alpha < 255;
@@ -2615,12 +2613,13 @@ class RenderMouseRegion extends RenderProxyBox {
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
-    this.opaque = true,
+    bool opaque = true,
     RenderBox child,
   }) : assert(opaque != null),
        _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
+       _opaque = opaque,
        _annotationIsActive = false,
        super(child) {
     _hoverAnnotation = MouseTrackerAnnotation(
@@ -2644,7 +2643,14 @@ class RenderMouseRegion extends RenderProxyBox {
   /// pointer is within their areas.
   ///
   /// This defaults to true.
-  bool opaque;
+  bool get opaque => _opaque;
+  bool _opaque;
+  set opaque(bool value) {
+    if (_opaque != value) {
+      _opaque = value;
+      _updateAnnotations();
+    }
+  }
 
   /// Called when a mouse pointer enters the region (with or without buttons
   /// pressed).
@@ -2705,7 +2711,8 @@ class RenderMouseRegion extends RenderProxyBox {
     final bool annotationWillBeActive = (
         _onEnter != null ||
         _onHover != null ||
-        _onExit != null
+        _onExit != null ||
+        opaque
       ) &&
       RendererBinding.instance.mouseTracker.mouseIsConnected;
     if (annotationWasActive != annotationWillBeActive) {
@@ -3007,8 +3014,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
 class RenderIgnorePointer extends RenderProxyBox {
   /// Creates a render object that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics], this
-  /// render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
+  /// this render object will be ignored for semantics if [ignoring] is true.
   RenderIgnorePointer({
     RenderBox child,
     bool ignoring = true,
@@ -3030,7 +3037,7 @@ class RenderIgnorePointer extends RenderProxyBox {
     if (value == _ignoring)
       return;
     _ignoring = value;
-    if (ignoringSemantics == null)
+    if (_ignoringSemantics == null || !_ignoringSemantics)
       markNeedsSemanticsUpdate();
   }
 

@@ -61,8 +61,8 @@ const int kWebBatchSize = 20;
 //
 // TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileBlacklist = <String>[
+  // This test doesn't compile because it depends on code outside the flutter package.
   'test/examples/sector_layout_test.dart',
-  'test/widgets/text_test.dart',
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
@@ -265,9 +265,7 @@ Future<void> _runToolTests() async {
         testPath: path.join(kTest, '$subshard$kDotShard'),
         useBuildRunner: canUseBuildRunner,
         tableData: bigqueryApi?.tabledata,
-        // TODO(ianh): The integration tests fail to start on Windows if asserts are enabled.
-        // See https://github.com/flutter/flutter/issues/36476
-        enableFlutterToolAsserts: !(subshard == 'integration' && Platform.isWindows),
+        enableFlutterToolAsserts: true,
       );
     },
   );
@@ -415,6 +413,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
@@ -754,13 +753,12 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment),
 
-    () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: false),
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
-    if (!Platform.isMacOS) () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: false),
-    if (!Platform.isMacOS) () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
 
     // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
     // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
+    if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
   ]..shuffle(math.Random(0));
@@ -963,7 +961,7 @@ Future<String> verifyVersion(File file) async {
 }
 
 /// If the CIRRUS_TASK_NAME environment variable exists, we use that to determine
-/// the shard and subshard (parsing it in the form shard-subshard-platform, ignoring
+/// the shard and sub-shard (parsing it in the form shard-subshard-platform, ignoring
 /// the platform).
 ///
 /// However, for local testing you can just set the SHARD and SUBSHARD

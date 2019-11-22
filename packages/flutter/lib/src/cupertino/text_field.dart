@@ -68,13 +68,13 @@ enum OverlayVisibilityMode {
 
   /// Overlay will only appear when the current text entry is not empty.
   ///
-  /// This includes pre-filled text that the user did not type in manually. But
+  /// This includes prefilled text that the user did not type in manually. But
   /// does not include text in placeholders.
   editing,
 
   /// Overlay will only appear when the current text entry is empty.
   ///
-  /// This also includes not having pre-filled text that the user did not type
+  /// This also includes not having prefilled text that the user did not type
   /// in manually. Texts in placeholders are ignored.
   notEditing,
 
@@ -178,7 +178,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
   ///
-  /// To provide a pre-filled text entry, pass in a [TextEditingController] with
+  /// To provide a prefilled text entry, pass in a [TextEditingController] with
   /// an initial value to the [controller] parameter.
   ///
   /// To provide a hint placeholder text that appears when the text entry is
@@ -573,7 +573,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
-    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
+    properties.add(createCupertinoColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));

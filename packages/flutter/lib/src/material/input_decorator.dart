@@ -907,7 +907,13 @@ class _RenderDecoration extends RenderBox {
       return 0.0;
     }
     box.layout(constraints, parentUsesSize: true);
-    final double baseline = box.getDistanceToBaseline(textBaseline);
+    // Since internally, all layout is performed against the alphabetic baseline,
+    // (eg, ascents/descents are all relative to alphabetic, even if the font is
+    // an ideographic or hanging font), we should always obtain the reference
+    // baseline from the alphabetic baseline. The ideographic baseline is for
+    // use post-layout and is derived from the alphabetic baseline combined with
+    // the font metrics.
+    final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
     assert(baseline != null && baseline >= 0.0);
     return baseline;
   }
@@ -1842,7 +1848,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// [TextField] renders ink splashes within the container.
   static RenderBox containerOf(BuildContext context) {
-    final _RenderDecoration result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderDecoration>());
+    final _RenderDecoration result = context.findAncestorRenderObjectOfType<_RenderDecoration>();
     return result?.container;
   }
 
@@ -2965,7 +2971,7 @@ class InputDecoration {
   /// If provided, this replaces the semantic label of the [counterText].
   final String semanticCounterText;
 
-  /// Typically set to true when the [InputDecorator] contains a multi-line
+  /// Typically set to true when the [InputDecorator] contains a multiline
   /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
   /// behavior of aligning the label with the center of the [TextField].
   ///
@@ -3579,7 +3585,7 @@ class InputDecorationTheme extends Diagnosticable {
   ///    rounded rectangle around the input decorator's container.
   final InputBorder border;
 
-  /// Typically set to true when the [InputDecorator] contains a multi-line
+  /// Typically set to true when the [InputDecorator] contains a multiline
   /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
   /// behavior of aligning the label with the center of the [TextField].
   final bool alignLabelWithHint;

@@ -319,8 +319,7 @@ void main() {
       fs.file('a.txt').writeAsStringSync('a');
       called += 1;
     })
-      ..inputs = const <Source>[Source.depfile('example.d')]
-      ..outputs = const <Source>[Source.depfile('example.d')];
+      ..depfiles = <String>['example.d'];
     fs.file('b.txt').writeAsStringSync('b');
 
     await buildSystem.build(target, environment);
@@ -338,6 +337,40 @@ void main() {
     final Environment environmentB = Environment(projectDir: fs.currentDirectory, outputDir: fs.directory('b'));
 
     expect(environmentA.buildDir.path, isNot(environmentB.buildDir.path));
+  }));
+
+  test('A target with depfile dependencies can delete stale outputs on the first run',  () => testbed.run(() async {
+    int called = 0;
+    final TestTarget target = TestTarget((Environment environment) async {
+      if (called == 0) {
+        environment.buildDir.childFile('example.d')
+          .writeAsStringSync('a.txt c.txt: b.txt');
+        fs.file('a.txt').writeAsStringSync('a');
+        fs.file('c.txt').writeAsStringSync('a');
+      } else {
+        // On second run, we no longer claim c.txt as an output.
+        environment.buildDir.childFile('example.d')
+          .writeAsStringSync('a.txt: b.txt');
+        fs.file('a.txt').writeAsStringSync('a');
+      }
+      called += 1;
+    })
+      ..depfiles = const <String>['example.d'];
+    fs.file('b.txt').writeAsStringSync('b');
+
+    await buildSystem.build(target, environment);
+
+    expect(fs.file('a.txt').existsSync(), true);
+    expect(fs.file('c.txt').existsSync(), true);
+    expect(called, 1);
+
+    // rewrite an input to force a rerun, espect that the old c.txt is deleted.
+    fs.file('b.txt').writeAsStringSync('ba');
+    await buildSystem.build(target, environment);
+
+    expect(fs.file('a.txt').existsSync(), true);
+    expect(fs.file('c.txt').existsSync(), false);
+    expect(called, 2);
   }));
 }
 
@@ -359,6 +392,9 @@ class TestTarget extends Target {
 
   @override
   List<Source> inputs = <Source>[];
+
+  @override
+  List<String> depfiles = <String>[];
 
   @override
   String name = 'test';

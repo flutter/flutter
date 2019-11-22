@@ -790,7 +790,7 @@ class MediaQuery extends InheritedWidget {
   static MediaQueryData of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
+    final MediaQuery query = context.dependOnInheritedWidgetOfExactType<MediaQuery>();
     if (query != null)
       return query.data;
     if (nullOk)

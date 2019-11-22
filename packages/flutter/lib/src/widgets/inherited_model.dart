@@ -80,7 +80,7 @@ import 'framework.dart';
 ///
 /// In the previous example the dependencies checked by
 /// [updateShouldNotifyDependent] are just the aspect strings passed to
-/// `inheritFromWidgetOfExactType`. They're represented as a [Set] because
+/// `dependOnInheritedWidgetOfExactType`. They're represented as a [Set] because
 /// one Widget can depend on more than one aspect of the model.
 /// If a widget depends on the model but doesn't specify an aspect,
 /// then changes in the model will cause the widget to be rebuilt
@@ -119,12 +119,12 @@ abstract class InheritedModel<T> extends InheritedWidget {
 
   // The [result] will be a list of all of context's type T ancestors concluding
   // with the one that supports the specified model [aspect].
-  static Iterable<InheritedElement> _findModels<T extends InheritedModel<Object>>(BuildContext context, Object aspect) sync* {
-    final InheritedElement model = context.ancestorInheritedElementForWidgetOfExactType(T);
+  static void _findModels<T extends InheritedModel<Object>>(BuildContext context, Object aspect, List<InheritedElement> results) {
+    final InheritedElement model = context.getElementForInheritedWidgetOfExactType<T>();
     if (model == null)
       return;
 
-    yield model;
+    results.add(model);
 
     assert(model.widget is T);
     final T modelWidget = model.widget;
@@ -139,7 +139,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
     if (modelParent == null)
       return;
 
-    yield* _findModels<T>(modelParent, aspect);
+    _findModels<T>(modelParent, aspect, results);
   }
 
   /// Makes [context] dependent on the specified [aspect] of an [InheritedModel]
@@ -154,23 +154,24 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// returns true.
   ///
   /// If [aspect] is null this method is the same as
-  /// `context.inheritFromWidgetOfExactType(T)`.
+  /// `context.dependOnInheritedWidgetOfExactType<T>()`.
   ///
   /// If no ancestor of type T exists, null is returned.
   static T inheritFrom<T extends InheritedModel<Object>>(BuildContext context, { Object aspect }) {
     if (aspect == null)
-      return context.inheritFromWidgetOfExactType(T);
+      return context.dependOnInheritedWidgetOfExactType<T>();
 
     // Create a dependency on all of the type T ancestor models up until
     // a model is found for which isSupportedAspect(aspect) is true.
-    final List<InheritedElement> models = _findModels<T>(context, aspect).toList();
+    final List<InheritedElement> models = <InheritedElement>[];
+    _findModels<T>(context, aspect, models);
     if (models.isEmpty) {
       return null;
     }
 
     final InheritedElement lastModel = models.last;
     for (InheritedElement model in models) {
-      final T value = context.inheritFromElement(model, aspect: aspect);
+      final T value = context.dependOnInheritedElement(model, aspect: aspect);
       if (model == lastModel)
         return value;
     }

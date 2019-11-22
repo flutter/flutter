@@ -68,7 +68,10 @@ abstract class PlaceholderSpan extends InlineSpan {
   // TODO(garyq): Remove this after next stable release.
   /// The [visitTextSpan] method is invalid on [PlaceholderSpan]s
   @override
-  @Deprecated('Use to visitChildren instead')
+  @Deprecated(
+    'Use to visitChildren instead. '
+    'This feature was deprecated after v1.7.3.'
+  )
   bool visitTextSpan(bool visitor(TextSpan span)) {
     assert(false, 'visitTextSpan is deprecated. Use visitChildren to support InlineSpans');
     return false;

@@ -106,6 +106,7 @@ class Cache {
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
       _artifacts.add(FlutterRunnerSDKArtifacts(this));
+      _artifacts.add(FlutterRunnerDebugSymbols(this));
       for (String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
@@ -378,7 +379,7 @@ class Cache {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     bool allAvailible = true;
     cache.includeAllPlatforms = includeAllPlatforms;
-    for (CachedArtifact cachedArtifact in _artifacts) {
+    for (ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
         allAvailible &= await cachedArtifact.checkForArtifacts(engineVersion);
       }
@@ -431,7 +432,8 @@ abstract class CachedArtifact extends ArtifactSet {
   /// can delete them after completion. We don't delete them right after
   /// extraction in case [update] is interrupted, so we can restart without
   /// starting from scratch.
-  final List<File> _downloadedFiles = <File>[];
+  @visibleForTesting
+  final List<File> downloadedFiles = <File>[];
 
   @override
   bool isUpToDate() {
@@ -464,8 +466,13 @@ abstract class CachedArtifact extends ArtifactSet {
 
   /// Clear any zip/gzip files downloaded.
   void _removeDownloadedFiles() {
-    for (File f in _downloadedFiles) {
-      f.deleteSync();
+    for (File f in downloadedFiles) {
+      try {
+        f.deleteSync();
+      } on FileSystemException catch (e) {
+        printError('Failed to delete "${f.path}". Please delete manually. $e');
+        continue;
+      }
       for (Directory d = f.parent; d.absolute.path != cache.getDownloadDir().absolute.path; d = d.parent) {
         if (d.listSync().isEmpty) {
           d.deleteSync();
@@ -531,10 +538,10 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
-  /// argument, then add the temporary file to the [_downloadedFiles].
+  /// argument, then add the temporary file to the [downloadedFiles].
   Future<void> _withDownloadFile(String name, Future<void> onTemporaryFile(File file)) async {
     final File tempFile = fs.file(fs.path.join(cache.getDownloadDir().path, name));
-    _downloadedFiles.add(tempFile);
+    downloadedFiles.add(tempFile);
     await onTemporaryFile(tempFile);
   }
 }
@@ -1058,6 +1065,62 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
   }
 }
 
+/// Implementations of this class can resolve URLs for packages that are versioned.
+///
+/// See also [CipdArchiveResolver].
+abstract class VersionedPackageResolver {
+  const VersionedPackageResolver();
+
+  /// Returns the URL for the artifact.
+  String resolveUrl(String packageName, String version);
+}
+
+/// Resolves the CIPD archive URL for a given package and version.
+class CipdArchiveResolver extends VersionedPackageResolver {
+  const CipdArchiveResolver();
+
+  @override
+  String resolveUrl(String packageName, String version) {
+    return '$_cipdBaseUrl/flutter/$packageName/+/git_revision:$version';
+  }
+}
+
+/// The debug symbols for flutter runner for Fuchsia development.
+class FlutterRunnerDebugSymbols extends CachedArtifact {
+  FlutterRunnerDebugSymbols(Cache cache, {this.packageResolver = const CipdArchiveResolver(), this.dryRun = false})
+      : super('flutter_runner_debug_symbols', cache, DevelopmentArtifact.flutterRunner);
+
+  final VersionedPackageResolver packageResolver;
+
+  final bool dryRun;
+
+  @override
+  Directory get location => cache.getArtifactDirectory(name);
+
+  @override
+  String get version => cache.getVersionFor('engine');
+
+  Future<void> _downloadDebugSymbols(String targetArch) async {
+    final String packageName = 'fuchsia-debug-symbols-$targetArch';
+    final String url = packageResolver.resolveUrl(packageName, version);
+    if (!dryRun) {
+      await _downloadZipArchive(
+          'Downloading debug symbols for flutter runner - arch:$targetArch...',
+          Uri.parse(url),
+          location);
+    }
+  }
+
+  @override
+  Future<void> updateInner() async {
+    if (!platform.isLinux && !platform.isMacOS) {
+      return Future<void>.value();
+    }
+    await _downloadDebugSymbols('x64');
+    await _downloadDebugSymbols('arm64');
+  }
+}
+
 /// The Fuchsia core SDK for Linux.
 class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   LinuxFuchsiaSDKArtifacts(Cache cache) : super(cache, 'linux');
@@ -1185,8 +1248,7 @@ String flattenNameSubdirs(Uri url) {
 /// Download a file from the given [url] and write it to [location].
 Future<void> _downloadFile(Uri url, File location) async {
   _ensureExists(location.parent);
-  final List<int> fileBytes = await fetchUrl(url);
-  location.writeAsBytesSync(fileBytes, flush: true);
+  await fetchUrl(url, destFile: location);
 }
 
 Future<bool> _doesRemoteExist(String message, Uri url) async {

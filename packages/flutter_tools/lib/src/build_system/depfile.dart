@@ -56,9 +56,13 @@ class Depfile {
 
   /// Given an [depfile] File, write the depfile contents.
   ///
-  /// If either [inputs] or [outputs] is empty, does not write to the file.
+  /// If either [inputs] or [outputs] is empty, ensures the file does not
+  /// exist.
   void writeToFile(File depfile) {
     if (inputs.isEmpty || outputs.isEmpty) {
+      if (depfile.existsSync()) {
+        depfile.deleteSync();
+      }
       return;
     }
     final StringBuffer buffer = StringBuffer();

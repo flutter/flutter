@@ -19,14 +19,12 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../services.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
@@ -145,7 +143,7 @@ class IMobileDevice {
       ],
       environment: executionEnv,
     )).processResult;
-    if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
+    if ((ideviceResult.stdout as String).contains('Usage: ideviceinfo')) {
       _isWorking = false;
       return _isWorking;
     }
@@ -158,7 +156,7 @@ class IMobileDevice {
       ],
       environment: executionEnv,
     )).processResult;
-    if (result.exitCode == 0 && result.stdout.isEmpty) {
+    if (result.exitCode == 0 && (result.stdout as String).isEmpty) {
       _isWorking = true;
     } else {
       // Check that we can look up the names of any attached devices.
@@ -185,7 +183,7 @@ class IMobileDevice {
       if (result.exitCode != 0) {
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
       }
-      return result.stdout;
+      return result.stdout as String;
     } on ProcessException {
       throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
     }
@@ -205,17 +203,19 @@ class IMobileDevice {
           <MapEntry<String, String>>[cache.dyLdLibEntry]
         ),
       );
-      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found')) {
-        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}. Try unlocking attached devices.');
+      final String stdout = result.stdout as String;
+      final String stderr = result.stderr as String;
+      if (result.exitCode == 255 && stdout != null && stdout.contains('No device found')) {
+        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n$stdout. Try unlocking attached devices.');
       }
-      if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
-        if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
+      if (result.exitCode == 255 && stderr != null && stderr.contains('Could not connect to lockdownd')) {
+        if (stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
           throw const IOSDeviceNotTrustedError(
             'Device info unavailable. Is the device asking to "Trust This Computer?"',
             LockdownReturnCode.pairingDialogResponsePending,
           );
         }
-        if (result.stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
+        if (stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
           throw const IOSDeviceNotTrustedError(
             'Device info unavailable. Device pairing "trust" may have been revoked.',
             LockdownReturnCode.invalidHostId,
@@ -223,9 +223,9 @@ class IMobileDevice {
         }
       }
       if (result.exitCode != 0) {
-        throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
+        throw ToolExit('ideviceinfo returned an error:\n$stderr');
       }
-      return result.stdout.trim();
+      return stdout.trim();
     } on ProcessException {
       throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
     }
@@ -347,10 +347,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (codesign && buildForDevice) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
   }
-
-  // Before the build, all service definitions must be updated and the dylibs
-  // copied over to a location that is suitable for Xcodebuild to find them.
-  await _addServicesToBundle(app.project.hostAppRoot);
 
   final FlutterProject project = FlutterProject.current();
   await updateGeneratedXcodeProperties(
@@ -684,56 +680,6 @@ bool _checkXcodeVersion() {
     return false;
   }
   return true;
-}
-
-Future<void> _addServicesToBundle(Directory bundle) async {
-  final List<Map<String, String>> services = <Map<String, String>>[];
-  printTrace('Trying to resolve native pub services.');
-
-  // Step 1: Parse the service configuration yaml files present in the service
-  //         pub packages.
-  await parseServiceConfigs(services);
-  printTrace('Found ${services.length} service definition(s).');
-
-  // Step 2: Copy framework dylibs to the correct spot for xcodebuild to pick up.
-  final Directory frameworksDirectory = fs.directory(fs.path.join(bundle.path, 'Frameworks'));
-  await _copyServiceFrameworks(services, frameworksDirectory);
-
-  // Step 3: Copy the service definitions manifest at the correct spot for
-  //         xcodebuild to pick up.
-  final File manifestFile = fs.file(fs.path.join(bundle.path, 'ServiceDefinitions.json'));
-  _copyServiceDefinitionsManifest(services, manifestFile);
-}
-
-Future<void> _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
-  printTrace("Copying service frameworks to '${fs.path.absolute(frameworksDirectory.path)}'.");
-  frameworksDirectory.createSync(recursive: true);
-  for (Map<String, String> service in services) {
-    final String dylibPath = await getServiceFromUrl(service['ios-framework'], service['root'], service['name']);
-    final File dylib = fs.file(dylibPath);
-    printTrace('Copying ${dylib.path} into bundle.');
-    if (!dylib.existsSync()) {
-      printError("The service dylib '${dylib.path}' does not exist.");
-      continue;
-    }
-    // Shell out so permissions on the dylib are preserved.
-    await processUtils.run(
-      <String>['/bin/cp', dylib.path, frameworksDirectory.path],
-      throwOnError: true,
-    );
-  }
-}
-
-void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File manifest) {
-  printTrace("Creating service definitions manifest at '${manifest.path}'");
-  final List<Map<String, String>> jsonServices = services.map<Map<String, String>>((Map<String, String> service) => <String, String>{
-    'name': service['name'],
-    // Since we have already moved it to the Frameworks directory. Strip away
-    // the directory and basenames.
-    'framework': fs.path.basenameWithoutExtension(service['ios-framework']),
-  }).toList();
-  final Map<String, dynamic> jsonObject = <String, dynamic>{'services': jsonServices};
-  manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
 bool upgradePbxProjWithFlutterAssets(IosProject project) {

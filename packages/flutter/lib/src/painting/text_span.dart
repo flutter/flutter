@@ -246,7 +246,10 @@ class TextSpan extends InlineSpan {
   /// When `visitor` returns true, the walk will continue. When `visitor`
   /// returns false, then the walk will end.
   @override
-  @Deprecated('Use to visitChildren instead')
+  @Deprecated(
+    'Use to visitChildren instead. '
+    'This feature was deprecated after v1.7.3.'
+  )
   bool visitTextSpan(bool visitor(TextSpan span)) {
     if (text != null) {
       if (!visitor(this))

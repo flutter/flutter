@@ -18,6 +18,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesTargetOption();
     usesPubOption();
     addBuildModeFlags(excludeDebug: true);
+    usesDartDefines();
     argParser.addFlag('web-initialize-platform',
         defaultsTo: true,
         negatable: true,
@@ -48,12 +49,18 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported.');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final String target = argResults['target'];
+    final String target = stringArg('target');
     final BuildInfo buildInfo = getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    await buildWeb(flutterProject, target, buildInfo, argResults['web-initialize-platform']);
+    await buildWeb(
+      flutterProject,
+      target,
+      buildInfo,
+      boolArg('web-initialize-platform'),
+      dartDefines,
+    );
     return null;
   }
 }
