@@ -144,7 +144,7 @@ void main() {
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
-      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
+      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       expect(plugin.platforms, <String, PluginPlatform> {});
     });
