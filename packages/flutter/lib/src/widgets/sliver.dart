@@ -1625,6 +1625,66 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A sliver widget that is invisible during hit testing.
+///
+/// When [ignoring] is true, this widget (and its subtree) is invisible
+/// to hit testing. It still consumes space during layout and paints its sliver
+/// child as usual. It just cannot be the target of located events, because it
+/// returns false from [RenderSliver.hitTest].
+///
+/// When [ignoringSemantics] is true, the subtree will be invisible to
+/// the semantics layer (and thus e.g. accessibility tools). If
+/// [ignoringSemantics] is null, it uses the value of [ignoring].
+class SliverIgnorePointer extends SingleChildRenderObjectWidget {
+  /// Creates a sliver widget that is invisible to hit testing.
+  ///
+  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
+  /// this render object will be ignored for semantics if [ignoring] is true.
+  const SliverIgnorePointer({
+    Key key,
+    this.ignoring = true,
+    this.ignoringSemantics,
+    Widget sliver,
+  }) : assert(ignoring != null),
+       super(key: key, child: sliver);
+
+  /// Whether this sliver is ignored during hit testing.
+  ///
+  /// Regardless of whether this sliver is ignored during hit testing, it will
+  /// still consume space during layout and be visible during painting.
+  final bool ignoring;
+
+  /// Whether the semantics of this sliver is ignored when compiling the
+  /// semantics tree.
+  ///
+  /// If null, defaults to value of [ignoring].
+  ///
+  /// See [SemanticsNode] for additional information about the semantics tree.
+  final bool ignoringSemantics;
+
+  @override
+  RenderSliverIgnorePointer createRenderObject(BuildContext context) {
+    return RenderSliverIgnorePointer(
+      ignoring: ignoring,
+      ignoringSemantics: ignoringSemantics,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverIgnorePointer renderObject) {
+    renderObject
+      ..ignoring = ignoring
+      ..ignoringSemantics = ignoringSemantics;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
+    properties.add(DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null));
+  }
+}
+
 /// Mark a child as needing to stay alive even when it's in a lazy list that
 /// would otherwise remove it.
 ///
