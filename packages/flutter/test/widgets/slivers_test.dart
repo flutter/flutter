@@ -7,10 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
-<<<<<<< HEAD
-=======
 import '../rendering/mock_canvas.dart';
->>>>>>> e2cf2f0fa257dcea97ce4eb425cb19d665d471a6
 import 'semantics_tester.dart';
 
 Future<void> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {

@@ -1804,7 +1804,7 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
     this.offstage = true,
     Widget sliver,
   }) : assert(offstage != null),
-      super(key: key, child: sliver);
+       super(key: key, child: sliver);
 
   /// Whether the sliver child is hidden from the rest of the tree.
   ///

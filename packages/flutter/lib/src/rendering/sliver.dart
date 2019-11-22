@@ -2189,8 +2189,7 @@ class RenderSliverOffstage extends RenderSliver with RenderObjectWithChildMixin<
     return <DiagnosticsNode>[
       child.toDiagnosticsNode(
         name: 'child',
-        style: offstage ? DiagnosticsTreeStyle.offstage : DiagnosticsTreeStyle
-          .sparse,
+        style: offstage ? DiagnosticsTreeStyle.offstage : DiagnosticsTreeStyle.sparse,
       ),
     ];
   }
