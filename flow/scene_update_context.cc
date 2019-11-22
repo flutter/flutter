@@ -71,6 +71,13 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode entity_node,
   if (rrect.isEmpty())
     return;
 
+  // isEmpty should account for this, but we are adding these experimental
+  // checks to validate if this is the root cause for b/144933519.
+  if (std::isnan(rrect.width()) || std::isnan(rrect.height())) {
+    FML_LOG(ERROR) << "Invalid RoundedRectangle";
+    return;
+  }
+
   // Add a part which represents the frame's geometry for clipping purposes
   // and possibly for its texture.
   // TODO(SCN-137): Need to be able to express the radii as vectors.
