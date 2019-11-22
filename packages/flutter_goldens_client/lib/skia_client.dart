@@ -222,7 +222,7 @@ class SkiaGoldClient {
       '--changelist', pullRequest,
       '--cis', 'cirrus',
       '--jobid', cirrusTaskID,
-      '--patchset', commitHash,
+      '--patchset_id', commitHash,
     ];
 
     if (imgtestInitArguments.contains(null)) {
