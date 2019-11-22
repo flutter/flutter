@@ -335,7 +335,14 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   }
 }
 
-/// This class is a work-around for the "is" operator not accepting a variable value as its right operand
+/// This class is a work-around for the "is" operator not accepting a variable value as its right operand.
+///
+/// This class is deprecated. It will be deleted soon.
+// TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+@Deprecated(
+  'TypeMatcher has been deprecated because it is no longer used in framework(only in deprecated methods). '
+  'This feature was deprecated after v1.12.1.'
+)
 @optionalTypeArgs
 class TypeMatcher<T> {
   /// Creates a type matcher for the given type parameter.
@@ -594,7 +601,7 @@ abstract class StatelessWidget extends Widget {
   /// * the fields of the widget, which themselves must not change over time,
   ///   and
   /// * any ambient state obtained from the `context` using
-  ///   [BuildContext.inheritFromWidgetOfExactType].
+  ///   [BuildContext.dependOnInheritedWidgetOfExactType].
   ///
   /// If a widget's [build] method is to depend on anything else, use a
   /// [StatefulWidget] instead.
@@ -877,7 +884,7 @@ typedef StateSetter = void Function(VoidCallback fn);
 ///    called.
 ///  * The framework calls [didChangeDependencies]. Subclasses of [State] should
 ///    override [didChangeDependencies] to perform initialization involving
-///    [InheritedWidget]s. If [BuildContext.inheritFromWidgetOfExactType] is
+///    [InheritedWidget]s. If [BuildContext.dependOnInheritedWidgetOfExactType] is
 ///    called, the [didChangeDependencies] method will be called again if the
 ///    inherited widgets subsequently change or if the widget moves in the tree.
 ///  * At this point, the [State] object is fully initialized and the framework
@@ -1005,9 +1012,9 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///
   /// {@endtemplate}
   ///
-  /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
+  /// You cannot use [BuildContext.dependOnInheritedWidgetOfExactType] from this
   /// method. However, [didChangeDependencies] will be called immediately
-  /// following this method, and [BuildContext.inheritFromWidgetOfExactType] can
+  /// following this method, and [BuildContext.dependOnInheritedWidgetOfExactType] can
   /// be used there.
   ///
   /// If you override this, make sure your method starts with a call to
@@ -1323,7 +1330,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// method to notify this object about the change.
   ///
   /// This method is also called immediately after [initState]. It is safe to
-  /// call [BuildContext.inheritFromWidgetOfExactType] from this method.
+  /// call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.
   ///
   /// Subclasses rarely override this method because the framework always
   /// calls [build] after a dependency changes. Some subclasses do override
@@ -1517,7 +1524,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 /// Base class for widgets that efficiently propagate information down the tree.
 ///
 /// To obtain the nearest instance of a particular type of inherited widget from
-/// a build context, use [BuildContext.inheritFromWidgetOfExactType].
+/// a build context, use [BuildContext.dependOnInheritedWidgetOfExactType].
 ///
 /// Inherited widgets, when referenced in this way, will cause the consumer to
 /// rebuild when the inherited widget itself changes state.
@@ -1541,7 +1548,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///   final Color color;
 ///
 ///   static FrogColor of(BuildContext context) {
-///     return context.inheritFromWidgetOfExactType(FrogColor) as FrogColor;
+///     return context.dependOnInheritedWidgetOfExactType<FrogColor>();
 ///   }
 ///
 ///   @override
@@ -1551,7 +1558,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 /// {@end-tool}
 ///
 /// The convention is to provide a static method `of` on the [InheritedWidget]
-/// which does the call to [BuildContext.inheritFromWidgetOfExactType]. This
+/// which does the call to [BuildContext.dependOnInheritedWidgetOfExactType]. This
 /// allows the class to define its own fallback logic in case there isn't
 /// a widget in scope. In the example above, the value returned will be
 /// null in that case, but it could also have defaulted to a value.
@@ -1564,7 +1571,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 /// class, and is therefore private. The `of` method in that case is typically
 /// put on the public class instead. For example, [Theme] is implemented as a
 /// [StatelessWidget] that builds a private inherited widget; [Theme.of] looks
-/// for that inherited widget using [BuildContext.inheritFromWidgetOfExactType]
+/// for that inherited widget using [BuildContext.dependOnInheritedWidgetOfExactType]
 /// and then returns the [ThemeData].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=1t-8rBCGBYw}
@@ -1920,17 +1927,42 @@ abstract class BuildContext {
   /// Registers this build context with [ancestor] such that when
   /// [ancestor]'s widget changes this build context is rebuilt.
   ///
+  /// This method is deprecated. Please use [dependOnInheritedElement] instead.
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedElement instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
+
+  /// Registers this build context with [ancestor] such that when
+  /// [ancestor]'s widget changes this build context is rebuilt.
+  ///
   /// Returns `ancestor.widget`.
   ///
   /// This method is rarely called directly. Most applications should use
-  /// [inheritFromWidgetOfExactType], which calls this method after finding
+  /// [dependOnInheritedWidgetOfExactType], which calls this method after finding
   /// the appropriate [InheritedElement] ancestor.
   ///
-  /// All of the qualifications about when [inheritFromWidgetOfExactType] can
+  /// All of the qualifications about when [dependOnInheritedWidgetOfExactType] can
   /// be called apply to this method as well.
-  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object aspect });
 
   /// Obtains the nearest widget of the given type, which must be the type of a
+  /// concrete [InheritedWidget] subclass, and registers this build context with
+  /// that widget such that when that widget changes (or a new widget of that
+  /// type is introduced, or the widget goes away), this build context is
+  /// rebuilt so that it can obtain new values from that widget.
+  ///
+  /// This method is deprecated. Please use [dependOnInheritedWidgetOfExactType] instead.
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
+
+  /// Obtains the nearest widget of the given type [T], which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
   /// that widget such that when that widget changes (or a new widget of that
   /// type is introduced, or the widget goes away), this build context is
@@ -1965,32 +1997,54 @@ abstract class BuildContext {
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
   ///
-  /// The [aspect] parameter is only used when [targetType] is an
+  /// The [aspect] parameter is only used when [T] is an
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
+  T dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object aspect });
 
   /// Obtains the element corresponding to the nearest widget of the given type,
+  /// which must be the type of a concrete [InheritedWidget] subclass.
+  ///
+  /// This method is deprecated. Please use [getElementForInheritedWidgetOfExactType] instead.
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use getElementForInheritedWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
+
+  /// Obtains the element corresponding to the nearest widget of the given type [T],
   /// which must be the type of a concrete [InheritedWidget] subclass.
   ///
   /// Calling this method is O(1) with a small constant factor.
   ///
   /// This method does not establish a relationship with the target in the way
-  /// that [inheritFromWidgetOfExactType] does.
+  /// that [dependOnInheritedWidgetOfExactType] does.
   ///
   /// This method should not be called from [State.dispose] because the element
   /// tree is no longer stable at that time. To refer to an ancestor from that
   /// method, save a reference to the ancestor by calling
-  /// [inheritFromWidgetOfExactType] in [State.didChangeDependencies]. It is
+  /// [dependOnInheritedWidgetOfExactType] in [State.didChangeDependencies]. It is
   /// safe to use this method from [State.deactivate], which is called whenever
   /// the widget is removed from the tree.
-  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
+  InheritedElement getElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
 
   /// Returns the nearest ancestor widget of the given type, which must be the
   /// type of a concrete [Widget] subclass.
   ///
-  /// In general, [inheritFromWidgetOfExactType] is more useful, since inherited
+  /// This method is deprecated. Please use [findAncestorWidgetOfExactType] instead.
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  Widget ancestorWidgetOfExactType(Type targetType);
+
+  /// Returns the nearest ancestor widget of the given type [T], which must be the
+  /// type of a concrete [Widget] subclass.
+  ///
+  /// In general, [dependOnInheritedWidgetOfExactType] is more useful, since inherited
   /// widgets will trigger consumers to rebuild when they change. This method is
   /// appropriate when used in interaction event handlers (e.g. gesture
   /// callbacks) or for performing one-off tasks such as asserting that you have
@@ -2007,15 +2061,26 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [ancestorWidgetOfExactType] in [State.didChangeDependencies].
-  Widget ancestorWidgetOfExactType(Type targetType);
+  /// by calling [findAncestorWidgetOfExactType] in [State.didChangeDependencies].
+  T findAncestorWidgetOfExactType<T extends Widget>();
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
   /// that matches the given [TypeMatcher].
   ///
+  /// This method is deprecated. Please use [findAncestorStateOfType] instead.
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorStateOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  State ancestorStateOfType(TypeMatcher matcher);
+
+  /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
+  /// that is an instance of the given type [T].
+  ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
-  /// In general, [inheritFromWidgetOfExactType] is more appropriate for such
+  /// In general, [dependOnInheritedWidgetOfExactType] is more appropriate for such
   /// cases. This method is useful for changing the state of an ancestor widget in
   /// a one-off manner, for example, to cause an ancestor scrolling list to
   /// scroll this build context's widget into view, or to move the focus in
@@ -2033,35 +2098,55 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [ancestorStateOfType] in [State.didChangeDependencies].
+  /// by calling [findAncestorStateOfType] in [State.didChangeDependencies].
   ///
   /// {@tool sample}
   ///
   /// ```dart
-  /// ScrollableState scrollable = context.ancestorStateOfType(
-  ///   const TypeMatcher<ScrollableState>(),
-  /// );
+  /// ScrollableState scrollable = context.findAncestorStateOfType<ScrollableState>();
   /// ```
   /// {@end-tool}
-  State ancestorStateOfType(TypeMatcher matcher);
+  T findAncestorStateOfType<T extends State>();
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
   /// that matches the given [TypeMatcher].
   ///
-  /// Functions the same way as [ancestorStateOfType] but keeps visiting subsequent
-  /// ancestors until there are none of the type matching [TypeMatcher] remaining.
+  /// This method is deprecated. Please use [findRootAncestorStateOfType] instead.
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findRootAncestorStateOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  State rootAncestorStateOfType(TypeMatcher matcher);
+
+  /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
+  /// that is an instance of the given type [T].
+  ///
+  /// Functions the same way as [findAncestorStateOfType] but keeps visiting subsequent
+  /// ancestors until there are none of the type instance of [T] remaining.
   /// Then returns the last one found.
   ///
   /// This operation is O(N) as well though N is the entire widget tree rather than
   /// a subtree.
-  State rootAncestorStateOfType(TypeMatcher matcher);
+  T findRootAncestorStateOfType<T extends State>();
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
   /// that matches the given [TypeMatcher].
   ///
+  /// This method is deprecated. Please use [findAncestorRenderObjectOfType] instead.
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorRenderObjectOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
+
+  /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
+  /// that is an instance of the given type [T].
+  ///
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
-  /// In general, [inheritFromWidgetOfExactType] is more appropriate for such
+  /// In general, [dependOnInheritedWidgetOfExactType] is more appropriate for such
   /// cases. This method is useful only in esoteric cases where a widget needs
   /// to cause an ancestor to change its layout or paint behavior. For example,
   /// it is used by [Material] so that [InkWell] widgets can trigger the ink
@@ -2074,8 +2159,8 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [ancestorRenderObjectOfType] in [State.didChangeDependencies].
-  RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
+  /// by calling [findAncestorRenderObjectOfType] in [State.didChangeDependencies].
+  T findAncestorRenderObjectOfType<T extends RenderObject>();
 
   /// Walks the ancestor chain, starting with the parent of this build context's
   /// widget, invoking the argument for each ancestor. The callback is given a
@@ -2609,7 +2694,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   // Custom implementation of hash code optimized for the ".of" pattern used
   // with `InheritedWidgets`.
   //
-  // `Element.inheritFromWidgetOfExactType` relies heavily on hash-based
+  // `Element.dependOnInheritedWidgetOfExactType` relies heavily on hash-based
   // `Set` look-ups, putting this getter on the performance critical path.
   //
   // The value is designed to fit within the SMI representation. This makes
@@ -3428,7 +3513,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           ),
           ErrorHint(
             'To safely refer to a widget\'s ancestor in its dispose() method, '
-            'save a reference to the ancestor by calling inheritFromWidgetOfExactType() '
+            'save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() '
             'in the widget\'s didChangeDependencies() method.'
           ),
         ]);
@@ -3438,8 +3523,18 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return true;
   }
 
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedElement instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect }) {
+    return dependOnInheritedElement(ancestor, aspect: aspect);
+  }
+
+  @override
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object aspect }) {
     assert(ancestor != null);
     _dependencies ??= HashSet<InheritedElement>();
     _dependencies.add(ancestor);
@@ -3447,6 +3542,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor.widget;
   }
 
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3460,9 +3560,33 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
+  T dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object aspect}) {
+    assert(_debugCheckStateIsActiveForAncestorLookup());
+    final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[T];
+    if (ancestor != null) {
+      assert(ancestor is InheritedElement);
+      return dependOnInheritedElement(ancestor, aspect: aspect);
+    }
+    _hadUnsatisfiedDependencies = true;
+    return null;
+  }
+
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use getElementForInheritedWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  @override
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
+    return ancestor;
+  }
+
+  @override
+  InheritedElement getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
+    assert(_debugCheckStateIsActiveForAncestorLookup());
+    final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[T];
     return ancestor;
   }
 
@@ -3471,6 +3595,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorWidgetOfExactType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   Widget ancestorWidgetOfExactType(Type targetType) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3480,6 +3609,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor?.widget;
   }
 
+  @override
+  T findAncestorWidgetOfExactType<T extends Widget>() {
+    assert(_debugCheckStateIsActiveForAncestorLookup());
+    Element ancestor = _parent;
+    while (ancestor != null && ancestor.widget.runtimeType != T)
+      ancestor = ancestor._parent;
+    return ancestor?.widget;
+  }
+
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorStateOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   State ancestorStateOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -3494,6 +3637,24 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
+  T findAncestorStateOfType<T extends State<StatefulWidget>>() {
+    assert(_debugCheckStateIsActiveForAncestorLookup());
+    Element ancestor = _parent;
+    while (ancestor != null) {
+      if (ancestor is StatefulElement && ancestor.state is T)
+        break;
+      ancestor = ancestor._parent;
+    }
+    final StatefulElement statefulAncestor = ancestor;
+    return statefulAncestor?.state;
+  }
+
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findRootAncestorStateOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  @override
   State rootAncestorStateOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
@@ -3507,11 +3668,42 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
+  T findRootAncestorStateOfType<T extends State<StatefulWidget>>() {
+    assert(_debugCheckStateIsActiveForAncestorLookup());
+    Element ancestor = _parent;
+    StatefulElement statefulAncestor;
+    while (ancestor != null) {
+      if (ancestor is StatefulElement && ancestor.state is T)
+        statefulAncestor = ancestor;
+      ancestor = ancestor._parent;
+    }
+    return statefulAncestor?.state;
+  }
+
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use findAncestorRenderObjectOfType instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
+  @override
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is RenderObjectElement && matcher.check(ancestor.renderObject))
+        break;
+      ancestor = ancestor._parent;
+    }
+    final RenderObjectElement renderObjectAncestor = ancestor;
+    return renderObjectAncestor?.renderObject;
+  }
+
+  @override
+  T findAncestorRenderObjectOfType<T extends RenderObject>() {
+    assert(_debugCheckStateIsActiveForAncestorLookup());
+    Element ancestor = _parent;
+    while (ancestor != null) {
+      if (ancestor is RenderObjectElement && ancestor.renderObject is T)
         break;
       ancestor = ancestor._parent;
     }
@@ -3529,7 +3721,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// Called when a dependency of this element changes.
   ///
-  /// The [inheritFromWidgetOfExactType] registers this element as depending on
+  /// The [dependOnInheritedWidgetOfExactType] registers this element as depending on
   /// inherited information of the given type. When the information of that type
   /// changes at this location in the tree (e.g., because the [InheritedElement]
   /// updated to a new [InheritedWidget] and
@@ -4256,14 +4448,24 @@ class StatefulElement extends ComponentElement {
     _state = null;
   }
 
+  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
+  @Deprecated(
+    'Use dependOnInheritedElement instead. '
+    'This feature was deprecated after v1.12.1.'
+  )
   @override
   InheritedWidget inheritFromElement(Element ancestor, { Object aspect }) {
+    return dependOnInheritedElement(ancestor, aspect: aspect);
+  }
+
+  @override
+  InheritedWidget dependOnInheritedElement(Element ancestor, { Object aspect }) {
     assert(ancestor != null);
     assert(() {
       final Type targetType = ancestor.widget.runtimeType;
       if (state._debugLifecycleState == _StateLifecycle.created) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('inheritFromWidgetOfExactType($targetType) or inheritFromElement() was called before ${_state.runtimeType}.initState() completed.'),
+          ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called before ${_state.runtimeType}.initState() completed.'),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
             'its dependent widgets are rebuilt. If the dependent widget\'s reference to '
@@ -4280,24 +4482,24 @@ class StatefulElement extends ComponentElement {
       }
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('inheritFromWidgetOfExactType($targetType) or inheritFromElement() was called after dispose(): $this'),
+          ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called after dispose(): $this'),
           ErrorDescription(
-            'This error happens if you call inheritFromWidgetOfExactType() on the '
+            'This error happens if you call dependOnInheritedWidgetOfExactType() on the '
             'BuildContext for a widget that no longer appears in the widget tree '
             '(e.g., whose parent widget no longer includes the widget in its '
             'build). This error can occur when code calls '
-            'inheritFromWidgetOfExactType() from a timer or an animation callback.'
+            'dependOnInheritedWidgetOfExactType() from a timer or an animation callback.'
           ),
           ErrorHint(
             'The preferred solution is to cancel the timer or stop listening to the '
             'animation in the dispose() callback. Another solution is to check the '
             '"mounted" property of this object before calling '
-            'inheritFromWidgetOfExactType() to ensure the object is still in the '
+            'dependOnInheritedWidgetOfExactType() to ensure the object is still in the '
             'tree.'
           ),
           ErrorHint(
             'This error might indicate a memory leak if '
-            'inheritFromWidgetOfExactType() is being called because another object '
+            'dependOnInheritedWidgetOfExactType() is being called because another object '
             'is retaining a reference to this State object after it has been '
             'removed from the tree. To avoid memory leaks, consider breaking the '
             'reference to this object during dispose().'
@@ -4306,7 +4508,7 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.inheritFromElement(ancestor, aspect: aspect);
+    return super.dependOnInheritedElement(ancestor, aspect: aspect);
   }
 
   @override
@@ -4519,7 +4721,7 @@ class InheritedElement extends ProxyElement {
   /// See also:
   ///
   ///  * [updateDependencies], which is called each time a dependency is
-  ///    created with [inheritFromWidgetOfExactType].
+  ///    created with [dependOnInheritedWidgetOfExactType].
   ///  * [setDependencies], which sets dependencies value for a dependent
   ///    element.
   ///  * [notifyDependent], which can be overridden to use a dependent's
@@ -4546,7 +4748,7 @@ class InheritedElement extends ProxyElement {
   /// See also:
   ///
   ///  * [updateDependencies], which is called each time a dependency is
-  ///    created with [inheritFromWidgetOfExactType].
+  ///    created with [dependOnInheritedWidgetOfExactType].
   ///  * [getDependencies], which returns the current value for a dependent
   ///    element.
   ///  * [notifyDependent], which can be overridden to use a dependent's
@@ -4558,7 +4760,7 @@ class InheritedElement extends ProxyElement {
     _dependents[dependent] = value;
   }
 
-  /// Called by [inheritFromWidgetOfExactType] when a new [dependent] is added.
+  /// Called by [dependOnInheritedWidgetOfExactType] when a new [dependent] is added.
   ///
   /// Each dependent element can be mapped to a single object value with
   /// [setDependencies]. This method can lookup the existing dependencies with
@@ -4595,7 +4797,7 @@ class InheritedElement extends ProxyElement {
   /// See also:
   ///
   ///  * [updateDependencies], which is called each time a dependency is
-  ///    created with [inheritFromWidgetOfExactType].
+  ///    created with [dependOnInheritedWidgetOfExactType].
   ///  * [getDependencies], which returns the current value for a dependent
   ///    element.
   ///  * [setDependencies], which sets the value for a dependent element.

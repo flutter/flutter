@@ -19,7 +19,7 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 didBuild = true;
-                final Overlay overlay = context.ancestorWidgetOfExactType(Overlay);
+                final Overlay overlay = context.findAncestorWidgetOfExactType<Overlay>();
                 expect(overlay, isNotNull);
                 expect(overlay.key, equals(overlayKey));
                 return Container();

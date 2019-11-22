@@ -1848,7 +1848,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// [TextField] renders ink splashes within the container.
   static RenderBox containerOf(BuildContext context) {
-    final _RenderDecoration result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderDecoration>());
+    final _RenderDecoration result = context.findAncestorRenderObjectOfType<_RenderDecoration>();
     return result?.container;
   }
 

@@ -111,13 +111,13 @@ class ListTileTheme extends InheritedTheme {
   /// ListTileTheme theme = ListTileTheme.of(context);
   /// ```
   static ListTileTheme of(BuildContext context) {
-    final ListTileTheme result = context.inheritFromWidgetOfExactType(ListTileTheme);
+    final ListTileTheme result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
     return result ?? const ListTileTheme();
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ListTileTheme ancestorTheme = context.ancestorWidgetOfExactType(ListTileTheme);
+    final ListTileTheme ancestorTheme = context.findAncestorWidgetOfExactType<ListTileTheme>();
     return identical(this, ancestorTheme) ? child : ListTileTheme(
       dense: dense,
       style: style,

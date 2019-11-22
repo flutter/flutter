@@ -107,7 +107,7 @@ class Directionality extends InheritedWidget {
   /// TextDirection textDirection = Directionality.of(context);
   /// ```
   static TextDirection of(BuildContext context) {
-    final Directionality widget = context.inheritFromWidgetOfExactType(Directionality);
+    final Directionality widget = context.dependOnInheritedWidgetOfExactType<Directionality>();
     return widget?.textDirection;
   }
 
@@ -5444,7 +5444,7 @@ class DefaultAssetBundle extends InheritedWidget {
   /// AssetBundle bundle = DefaultAssetBundle.of(context);
   /// ```
   static AssetBundle of(BuildContext context) {
-    final DefaultAssetBundle result = context.inheritFromWidgetOfExactType(DefaultAssetBundle);
+    final DefaultAssetBundle result = context.dependOnInheritedWidgetOfExactType<DefaultAssetBundle>();
     return result?.bundle ?? rootBundle;
   }
 
