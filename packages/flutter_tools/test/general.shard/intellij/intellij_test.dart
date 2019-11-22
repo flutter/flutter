@@ -69,7 +69,7 @@ void main() {
         expect(message.message, contains('recommended minimum version'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('not found', () async {
@@ -90,7 +90,7 @@ void main() {
         expect(message.message, contains('Flutter plugin not installed'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
       });
     });
   });

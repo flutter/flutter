@@ -49,7 +49,7 @@ void main() {
       expect(WindowsDevice().isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('isSupportedForProject is false with no host app', () async {
@@ -60,7 +60,7 @@ void main() {
       expect(WindowsDevice().isSupportedForProject(flutterProject), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('executablePathForDevice uses the correct package executable', () async {
@@ -77,7 +77,7 @@ void main() {
       expect(WindowsDevice().executablePathForDevice(mockApp, BuildMode.release), releasePath);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }

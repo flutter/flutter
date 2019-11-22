@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:test_api/backend.dart';
+import 'package:test_api/backend.dart'; // ignore: deprecated_member_use
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
@@ -15,6 +15,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
+import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -36,7 +37,7 @@ Future<int> runTests(
   bool machine = false,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
-  bool enableAsserts = false,
+  @required BuildMode buildMode,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   TestWatcher watcher,
@@ -70,6 +71,7 @@ Future<int> runTests(
     final bool result = await webCompilationProxy.initialize(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
+      testFiles: testFiles,
       projectName: flutterProject.manifest.appName,
       initializePlatform: true,
     );
@@ -114,7 +116,7 @@ Future<int> runTests(
     serverType: serverType,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
-    enableAsserts: enableAsserts,
+    buildMode: buildMode,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,

@@ -36,8 +36,11 @@ class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
 
-  /// Whether the new Android embedding is enabled.
-  bool get isNewAndroidEmbeddingEnabled => isEnabled(flutterNewAndroidEmbeddingFeature);
+  /// Whether the Android embedding V2 is enabled.
+  bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
+
+  /// Whether the web incremental compiler is enabled.
+  bool get isWebIncrementalCompilerEnabled => isEnabled(flutterWebIncrementalCompiler);
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -50,7 +53,7 @@ class FeatureFlags {
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = Config.instance.getValue(feature.configSetting);
+      final bool configOverride = Config.instance.getValue(feature.configSetting) as bool;
       if (configOverride != null) {
         isEnabled = configOverride;
       }
@@ -71,7 +74,8 @@ const List<Feature> allFeatures = <Feature>[
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
   flutterBuildPluginAsAarFeature,
-  flutterNewAndroidEmbeddingFeature,
+  flutterAndroidEmbeddingV2Feature,
+  flutterWebIncrementalCompiler,
 ];
 
 /// The [Feature] for flutter web.
@@ -93,7 +97,7 @@ const Feature flutterWebFeature = Feature(
 const Feature flutterMacOSDesktopFeature = Feature(
   name: 'Flutter for desktop on macOS',
   configSetting: 'enable-macos-desktop',
-  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  environmentOverride: 'FLUTTER_MACOS',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -104,7 +108,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 const Feature flutterLinuxDesktopFeature = Feature(
   name: 'Flutter for desktop on Linux',
   configSetting: 'enable-linux-desktop',
-  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  environmentOverride: 'FLUTTER_LINUX',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -115,7 +119,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
 const Feature flutterWindowsDesktopFeature = Feature(
   name: 'Flutter for desktop on Windows',
   configSetting: 'enable-windows-desktop',
-  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  environmentOverride: 'FLUTTER_WINDOWS',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -133,10 +137,26 @@ const Feature flutterBuildPluginAsAarFeature = Feature(
 );
 
 /// The [Feature] for generating projects using the new Android embedding.
-const Feature flutterNewAndroidEmbeddingFeature = Feature(
-  name: 'flutter create generates projects using the new Android embedding',
-  configSetting: 'enable-new-android-embedding',
+const Feature flutterAndroidEmbeddingV2Feature = Feature(
+  name: 'flutter create generates projects using the Android embedding V2',
+  environmentOverride: 'ENABLE_ANDROID_EMBEDDING_V2',
+  configSetting: 'enable-android-embedding-v2',
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+);
+
+/// The [Feature] for using the incremental compiler instead of build runner.
+const Feature flutterWebIncrementalCompiler = Feature(
+  name: 'Enable the incremental compiler for web builds',
+  configSetting: 'enable-web-incremental-compiler',
+  environmentOverride: 'WEB_INCREMENTAL_COMPILER',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),

@@ -238,8 +238,26 @@ void main() {
       vsync: const TestVSync(),
     );
     final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: BogusCurve());
-
-    expect(() { curved.value; }, throwsFlutterError);
+    FlutterError error;
+    try {
+      curved.value;
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.toStringDeep(), matches(
+      // RegExp matcher is required here due to flutter web and flutter mobile generating
+      // slightly different floating point numbers
+      // in Flutter web 0.0 sometimes just appears as 0. or 0
+      RegExp(
+        r'''FlutterError
+   Invalid curve endpoint at \d+(\.\d*)?\.
+   Curves must map 0\.0 to near zero and 1\.0 to near one but
+   BogusCurve mapped \d+(\.\d*)? to \d+(\.\d*)?, which is near \d+(\.\d*)?\.
+''',
+        multiLine: true
+      ),
+    ));
   });
 
   test('CurvedAnimation running with different forward and reverse durations.', () {

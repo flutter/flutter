@@ -67,7 +67,7 @@ void main() {
         expect(versionChecked, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
@@ -79,7 +79,7 @@ void main() {
 
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
@@ -95,7 +95,7 @@ void main() {
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
@@ -105,7 +105,7 @@ void main() {
         await runner.run(<String>['dummy', '--local-engine-src-path=$_kArbitraryEngineRoot/src', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
@@ -115,7 +115,7 @@ void main() {
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
     });
@@ -130,7 +130,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       Platform: () => platform,
     }, initializeFlutterRoot: false);
 
@@ -188,7 +188,7 @@ void main() {
         ]);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
       }, initializeFlutterRoot: false);
     });
@@ -201,7 +201,7 @@ void main() {
         expect(fakeCommand.preferences.wrapText, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(hasFakeTerminal: true),
       }, initializeFlutterRoot: false);
 
@@ -212,7 +212,7 @@ void main() {
         expect(fakeCommand.preferences.wrapText, isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(hasFakeTerminal: false),
       }, initializeFlutterRoot: false);
 
@@ -223,7 +223,7 @@ void main() {
         expect(fakeCommand.preferences.wrapText, isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(hasFakeTerminal: true),
       }, initializeFlutterRoot: false);
 
@@ -234,7 +234,7 @@ void main() {
         expect(fakeCommand.preferences.wrapText, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(hasFakeTerminal: false),
       }, initializeFlutterRoot: false);
     });

@@ -178,10 +178,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile(
-        'opacity_test.offset.png',
-        version: 1,
-      ),
+      matchesGoldenFile('opacity_test.offset.png'),
     );
   }, skip: isBrowser);
 

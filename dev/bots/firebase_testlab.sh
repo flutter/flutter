@@ -8,7 +8,7 @@
 tests=(
   "dev/integration_tests/release_smoke_test"
   "dev/integration_tests/abstract_method_smoke_test"
-  "dev/integration_tests/android_embedding_2"
+  "dev/integration_tests/android_embedding_v2_smoke_test"
 )
 
 # The devices where the tests are run.

@@ -1065,4 +1065,85 @@ void main() {
     await tester.tap(find.byKey(tapTarget));
     expect(tester.takeException(), isNotNull);
   });
+
+  testWidgets('Snackbar calls onVisible once', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    int called = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: const Text('hello'),
+                  duration: const Duration(seconds: 1),
+                  onVisible: () {
+                    called += 1;
+                  },
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pump(); // start animation
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsOneWidget);
+    expect(called, 1);
+  });
+
+  testWidgets('Snackbar does not call onVisible when it is queued', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    int called = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: const Text('hello'),
+                  duration: const Duration(seconds: 1),
+                  onVisible: () {
+                    called += 1;
+                  },
+                ));
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: const Text('hello 2'),
+                  duration: const Duration(seconds: 1),
+                  onVisible: () {
+                    called += 1;
+                  },
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pump(); // start animation
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsOneWidget);
+    expect(called, 1);
+  });
 }

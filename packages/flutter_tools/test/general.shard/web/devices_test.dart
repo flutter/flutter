@@ -42,14 +42,15 @@ void main() {
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
+    expect(chromeDevice.getLogReader(), isInstanceOf<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
   });
 
   test('Server defaults', () async {
     final WebServerDevice device = WebServerDevice();
 
-    expect(device.name, 'Headless Server');
-    expect(device.id, 'headless-server');
+    expect(device.name, 'Web Server');
+    expect(device.id, 'web-server');
     expect(device.supportsHotReload, true);
     expect(device.supportsHotRestart, true);
     expect(device.supportsStartPaused, true);
@@ -100,6 +101,10 @@ void main() {
 
     expect(chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
+
+    // Verify caching works correctly.
+    expect(await chromeDevice.sdkNameAndVersion, 'ABC');
+    verify(mockProcessManager.run(<String>['chrome.foo', '--version'])).called(1);
   }, overrides: <Type, Generator>{
     Platform: () => mockPlatform,
     ProcessManager: () => mockProcessManager,

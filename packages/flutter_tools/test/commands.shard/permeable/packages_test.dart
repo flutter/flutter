@@ -11,12 +11,14 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess;
+import '../../src/testbed.dart';
 
 class AlwaysTrueBotDetector implements BotDetector {
   const AlwaysTrueBotDetector();
@@ -207,7 +209,7 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -220,7 +222,7 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -234,7 +236,7 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesNumberPlugins, '0'));
-    }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -248,7 +250,7 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesProjectModule, 'false'));
-    }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -262,7 +264,37 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesProjectModule, 'true'));
-    }, timeout: allowForCreateFlutterProject, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
+      Pub: () => const Pub(),
+    });
+
+    testUsingContext('indicate that Android project reports v1 in usage value', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub']);
+      removeGeneratedFiles(projectPath);
+
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesAndroidEmbeddingVersion, 'v1'));
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isAndroidEmbeddingV2Enabled: false),
+      Pub: () => const Pub(),
+    });
+
+    testUsingContext('indicate that Android project reports v2 in usage value', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub']);
+      removeGeneratedFiles(projectPath);
+
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesAndroidEmbeddingVersion, 'v2'));
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isAndroidEmbeddingV2Enabled: true),
       Pub: () => const Pub(),
     });
 
@@ -275,7 +307,7 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -288,7 +320,7 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectModulePluginInjected(projectPath);
-    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
 
@@ -309,7 +341,7 @@ void main() {
 
       expectDependenciesResolved(exampleProjectPath);
       expectPluginInjected(exampleProjectPath);
-    }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
     });
   });

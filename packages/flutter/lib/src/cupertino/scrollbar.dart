@@ -15,7 +15,7 @@ const double _kScrollbarMinLength = 36.0;
 const double _kScrollbarMinOverscrollLength = 8.0;
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
-const Duration _kScrollbarResizeDuration = Duration(milliseconds: 150);
+const Duration _kScrollbarResizeDuration = Duration(milliseconds: 100);
 
 // Extracted from iOS 13.1 beta using Debug View Hierarchy.
 const Color _kScrollbarColor = CupertinoDynamicColor.withBrightness(
@@ -42,6 +42,10 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
 /// a [CupertinoScrollbar] widget.
 ///
+/// By default, the CupertinoScrollbar will be draggable (a feature introduced
+/// in iOS 13), it uses the PrimaryScrollController. For multiple scrollbars, or
+/// other more complicated situations, see the [controller] parameter.
+///
 /// See also:
 ///
 ///  * [ListView], which display a linear, scrollable list of children.
@@ -65,39 +69,60 @@ class CupertinoScrollbar extends StatefulWidget {
   /// typically a [Scrollable] widget.
   final Widget child;
 
+  /// {@template flutter.cupertino.cupertinoScrollbar.controller}
   /// The [ScrollController] used to implement Scrollbar dragging.
   ///
-  /// Scrollbar dragging is started with a long press or a drag in from the side
-  /// on top of the scrollbar thumb, which enlarges the thumb and makes it
-  /// interactive. Dragging it then causes the view to scroll. This feature was
   /// introduced in iOS 13.
   ///
-  /// In order to enable this feature, pass an active ScrollController to this
-  /// parameter.  A stateful ancestor of this CupertinoScrollbar needs to
-  /// manage the ScrollController and either pass it to a scrollable descendant
-  /// or use a PrimaryScrollController to share it.
+  /// If nothing is passed to controller, the default behavior is to automatically
+  /// enable scrollbar dragging on the nearest ScrollController using
+  /// [PrimaryScrollController.of].
   ///
-  /// Here is an example of using PrimaryScrollController to enable scrollbar
-  /// dragging:
+  /// If a ScrollController is passed, then scrollbar dragging will be enabled on
+  /// the given ScrollController. A stateful ancestor of this CupertinoScrollbar
+  /// needs to manage the ScrollController and either pass it to a scrollable
+  /// descendant or use a PrimaryScrollController to share it.
+  ///
+  /// Here is an example of using the `controller` parameter to enable
+  /// scrollbar dragging for multiple independent ListViews:
   ///
   /// {@tool sample}
   ///
   /// ```dart
+  /// final ScrollController _controllerOne = ScrollController();
+  /// final ScrollController _controllerTwo = ScrollController();
+  ///
   /// build(BuildContext context) {
-  ///   final ScrollController controller = ScrollController();
-  ///   return PrimaryScrollController(
-  ///     controller: controller,
-  ///     child: CupertinoScrollbar(
-  ///       controller: controller,
-  ///       child: ListView.builder(
-  ///         itemCount: 150,
-  ///         itemBuilder: (BuildContext context, int index) => Text('item $index'),
-  ///       ),
-  ///     ),
+  /// return Column(
+  ///   children: <Widget>[
+  ///     Container(
+  ///        height: 200,
+  ///        child: CupertinoScrollbar(
+  ///          controller: _controllerOne,
+  ///          child: ListView.builder(
+  ///            controller: _controllerOne,
+  ///            itemCount: 120,
+  ///            itemBuilder: (BuildContext context, int index) => Text('item $index'),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///      Container(
+  ///        height: 200,
+  ///        child: CupertinoScrollbar(
+  ///          controller: _controllerTwo,
+  ///          child: ListView.builder(
+  ///            controller: _controllerTwo,
+  ///            itemCount: 120,
+  ///            itemBuilder: (BuildContext context, int index) => Text('list 2 item $index'),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///    ],
   ///   );
   /// }
   /// ```
   /// {@end-tool}
+  /// {@endtemplate}
   final ScrollController controller;
 
   @override
@@ -122,6 +147,10 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   Radius get _radius {
     return Radius.lerp(_kScrollbarRadius, _kScrollbarRadiusDragging, _thicknessAnimationController.value);
   }
+
+  ScrollController _currentController;
+  ScrollController get _controller =>
+      widget.controller ?? PrimaryScrollController.of(context);
 
   @override
   void initState() {
@@ -148,8 +177,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     super.didChangeDependencies();
     if (_painter == null) {
       _painter = _buildCupertinoScrollbarPainter(context);
-    }
-    else {
+    } else {
       _painter
         ..textDirection = Directionality.of(context)
         ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
@@ -175,16 +203,16 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   // Handle a gesture that drags the scrollbar by the given amount.
   void _dragScrollbar(double primaryDelta) {
-    assert(widget.controller != null);
+    assert(_currentController != null);
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
     // time _dragScrollbar was called, into the coordinate space of the scroll
     // position, and create/update the drag event with that position.
     final double scrollOffsetLocal = _painter.getTrackToScroll(primaryDelta);
-    final double scrollOffsetGlobal = scrollOffsetLocal + widget.controller.position.pixels;
+    final double scrollOffsetGlobal = scrollOffsetLocal + _currentController.position.pixels;
 
     if (_drag == null) {
-      _drag = widget.controller.position.drag(
+      _drag = _currentController.position.drag(
         DragStartDetails(
           globalPosition: Offset(0.0, scrollOffsetGlobal),
         ),
@@ -207,64 +235,62 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     });
   }
 
-  void _assertVertical() {
-    assert(
-      widget.controller.position.axis == Axis.vertical,
-      'Scrollbar dragging is only supported for vertical scrolling. Don\'t pass the controller param to a horizontal scrollbar.',
-    );
+  bool _checkVertical() {
+    try {
+      return _currentController.position.axis == Axis.vertical;
+    } catch (_) {
+      // Ignore the gesture if we cannot determine the direction.
+      return false;
+    }
   }
+
+  double _pressStartY = 0.0;
 
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
   void _handleLongPressStart(LongPressStartDetails details) {
-    _assertVertical();
+    _currentController = _controller;
+    if (!_checkVertical()) {
+      return;
+    }
+    _pressStartY = details.localPosition.dy;
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
-    HapticFeedback.mediumImpact();
     _dragScrollbar(details.localPosition.dy);
     _dragScrollbarPositionY = details.localPosition.dy;
   }
 
   void _handleLongPress() {
-    _assertVertical();
+    if (!_checkVertical()) {
+      return;
+    }
     _fadeoutTimer?.cancel();
-    _thicknessAnimationController.forward();
+    _thicknessAnimationController.forward().then<void>(
+          (_) => HapticFeedback.mediumImpact(),
+        );
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    _assertVertical();
+    if (!_checkVertical()) {
+      return;
+    }
     _dragScrollbar(details.localPosition.dy - _dragScrollbarPositionY);
     _dragScrollbarPositionY = details.localPosition.dy;
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
+    if (!_checkVertical()) {
+      return;
+    }
     _handleDragScrollEnd(details.velocity.pixelsPerSecond.dy);
-  }
-
-  // Horizontal drag event callbacks handle the gesture where the user swipes in
-  // from the right on top of the scrollbar thumb and then drags the scrollbar
-  // without releasing.
-  void _handleHorizontalDragStart(DragStartDetails details) {
-    _assertVertical();
-    _fadeoutTimer?.cancel();
-    _thicknessAnimationController.forward();
-    HapticFeedback.mediumImpact();
-    _dragScrollbar(details.localPosition.dy);
-    _dragScrollbarPositionY = details.localPosition.dy;
-  }
-
-  void _handleHorizontalDragUpdate(DragUpdateDetails details) {
-    _assertVertical();
-    _dragScrollbar(details.localPosition.dy - _dragScrollbarPositionY);
-    _dragScrollbarPositionY = details.localPosition.dy;
-  }
-
-  void _handleHorizontalDragEnd(DragEndDetails details) {
-    _handleDragScrollEnd(details.velocity.pixelsPerSecond.dy);
+    if (details.velocity.pixelsPerSecond.dy.abs() < 10 &&
+        (details.localPosition.dy - _pressStartY).abs() > 0) {
+      HapticFeedback.mediumImpact();
+    }
+    _currentController = null;
   }
 
   void _handleDragScrollEnd(double trackVelocityY) {
-    _assertVertical();
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
     _dragScrollbarPositionY = null;
@@ -308,40 +334,23 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   // Get the GestureRecognizerFactories used to detect gestures on the scrollbar
   // thumb.
   Map<Type, GestureRecognizerFactory> get _gestures {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    if (widget.controller == null) {
-      return gestures;
-    }
+    final Map<Type, GestureRecognizerFactory> gestures =
+        <Type, GestureRecognizerFactory>{};
 
-    gestures[_ThumbLongPressGestureRecognizer] =
-      GestureRecognizerFactoryWithHandlers<_ThumbLongPressGestureRecognizer>(
-        () => _ThumbLongPressGestureRecognizer(
-          debugOwner: this,
-          kind: PointerDeviceKind.touch,
-          customPaintKey: _customPaintKey,
-        ),
-        (_ThumbLongPressGestureRecognizer instance) {
-          instance
-            ..onLongPressStart = _handleLongPressStart
-            ..onLongPress = _handleLongPress
-            ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
-            ..onLongPressEnd = _handleLongPressEnd;
-        },
-      );
-    gestures[_ThumbHorizontalDragGestureRecognizer] =
-      GestureRecognizerFactoryWithHandlers<_ThumbHorizontalDragGestureRecognizer>(
-        () => _ThumbHorizontalDragGestureRecognizer(
-          debugOwner: this,
-          kind: PointerDeviceKind.touch,
-          customPaintKey: _customPaintKey,
-        ),
-        (_ThumbHorizontalDragGestureRecognizer instance) {
-          instance
-            ..onStart = _handleHorizontalDragStart
-            ..onUpdate = _handleHorizontalDragUpdate
-            ..onEnd = _handleHorizontalDragEnd;
-        },
-      );
+    gestures[_ThumbPressGestureRecognizer] =
+        GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
+      () => _ThumbPressGestureRecognizer(
+        debugOwner: this,
+        customPaintKey: _customPaintKey,
+      ),
+      (_ThumbPressGestureRecognizer instance) {
+        instance
+          ..onLongPressStart = _handleLongPressStart
+          ..onLongPress = _handleLongPress
+          ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
+          ..onLongPressEnd = _handleLongPressEnd;
+      },
+    );
 
     return gestures;
   }
@@ -375,8 +384,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
 // A longpress gesture detector that only responds to events on the scrollbar's
 // thumb and ignores everything else.
-class _ThumbLongPressGestureRecognizer extends LongPressGestureRecognizer {
-  _ThumbLongPressGestureRecognizer({
+class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
+  _ThumbPressGestureRecognizer({
     double postAcceptSlopTolerance,
     PointerDeviceKind kind,
     Object debugOwner,
@@ -386,6 +395,7 @@ class _ThumbLongPressGestureRecognizer extends LongPressGestureRecognizer {
           postAcceptSlopTolerance: postAcceptSlopTolerance,
           kind: kind,
           debugOwner: debugOwner,
+          duration: const Duration(milliseconds: 100),
         );
 
   final GlobalKey _customPaintKey;
@@ -396,39 +406,6 @@ class _ThumbLongPressGestureRecognizer extends LongPressGestureRecognizer {
       return false;
     }
     return super.isPointerAllowed(event);
-  }
-}
-
-// A horizontal drag gesture detector that only responds to events on the
-// scrollbar's thumb and ignores everything else.
-class _ThumbHorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
-  _ThumbHorizontalDragGestureRecognizer({
-    PointerDeviceKind kind,
-    Object debugOwner,
-    GlobalKey customPaintKey,
-  }) :  _customPaintKey = customPaintKey,
-        super(
-          kind: kind,
-          debugOwner: debugOwner,
-        );
-
-  final GlobalKey _customPaintKey;
-
-  @override
-  bool isPointerAllowed(PointerEvent event) {
-    if (!_hitTestInteractive(_customPaintKey, event.position)) {
-      return false;
-    }
-    return super.isPointerAllowed(event);
-  }
-
-  // Flings are actually in the vertical direction. Even though the event starts
-  // horizontal, the scrolling is tracked vertically.
-  @override
-  bool isFlingGesture(VelocityEstimate estimate) {
-    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? kTouchSlop;
-    return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
   }
 }
 

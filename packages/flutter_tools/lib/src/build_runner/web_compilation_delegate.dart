@@ -30,6 +30,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   Future<bool> initialize({
     Directory projectDirectory,
     String testOutputDir,
+    List<String> testFiles,
     BuildMode mode,
     String projectName,
     bool initializePlatform,
@@ -46,8 +47,15 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       release: mode == BuildMode.release,
       profile: mode == BuildMode.profile,
       hasPlugins: hasWebPlugins,
-      includeTests: true,
       initializePlatform: initializePlatform,
+      testTargets: WebTestTargetManifest(
+        testFiles
+          .map<String>((String absolutePath) {
+            final String relativePath = path.relative(absolutePath, from: projectDirectory.path);
+            return '${path.withoutExtension(relativePath)}.*';
+          })
+          .toList(),
+      ),
     );
     client.startBuild();
     bool success = true;

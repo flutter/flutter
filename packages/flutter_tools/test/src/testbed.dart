@@ -22,8 +22,10 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'common.dart' as tester;
 import 'context.dart';
 import 'fake_process_manager.dart';
 import 'throwing_pub.dart';
@@ -35,7 +37,7 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
   FileSystem: () => MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
-  ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+  ProcessManager: () => FakeProcessManager.any(),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
@@ -64,7 +66,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///           });
 ///         })
 ///
-///         test('Can delete a file', () => testBed.run(() {
+///         test('Can delete a file', () => testbed.run(() {
 ///           expect(fs.file('foo').existsSync(), true);
 ///           fs.file('foo').deleteSync();
 ///           expect(fs.file('foo').existsSync(), false);
@@ -86,11 +88,21 @@ class Testbed {
   final FutureOr<void> Function() _setup;
   final Map<Type, Generator> _overrides;
 
+  /// Runs the `test` within a tool zone.
+  ///
+  /// Unlike [run], this sets up a test group on its own.
+  @isTest
+  void test<T>(String name, FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
+    tester.test(name, () {
+      return run(test, overrides: overrides);
+    });
+  }
+
   /// Runs `test` within a tool zone.
   ///
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
-  FutureOr<T> run<T>(FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
+  Future<T> run<T>(FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
     final Map<Type, Generator> testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
@@ -699,7 +711,8 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isNewAndroidEmbeddingEnabled = false,
+    this.isAndroidEmbeddingV2Enabled = false,
+    this.isWebIncrementalCompilerEnabled = false,
 });
 
   @override
@@ -715,7 +728,10 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowsEnabled;
 
   @override
-  final bool isNewAndroidEmbeddingEnabled;
+  final bool isAndroidEmbeddingV2Enabled;
+
+  @override
+  final bool isWebIncrementalCompilerEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -728,9 +744,164 @@ class TestFeatureFlags implements FeatureFlags {
         return isMacOSEnabled;
       case flutterWindowsDesktopFeature:
         return isWindowsEnabled;
-      case flutterNewAndroidEmbeddingFeature:
-        return isNewAndroidEmbeddingEnabled;
+      case flutterAndroidEmbeddingV2Feature:
+        return isAndroidEmbeddingV2Enabled;
+      case flutterWebIncrementalCompiler:
+        return isWebIncrementalCompilerEnabled;
     }
     return false;
+  }
+}
+
+class DelegateLogger implements Logger {
+  DelegateLogger(this.delegate);
+
+  final Logger delegate;
+  Status status;
+
+  @override
+  bool get quiet => delegate.quiet;
+
+  @override
+  set quiet(bool value) => delegate.quiet;
+
+  @override
+  bool get hasTerminal => delegate.hasTerminal;
+
+  @override
+  bool get isVerbose => delegate.isVerbose;
+
+  @override
+  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
+    delegate.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
+    delegate.printStatus(message,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printTrace(String message) {
+    delegate.printTrace(message);
+  }
+
+  @override
+  void sendEvent(String name, [Map<String, dynamic> args]) {
+    delegate.sendEvent(name, args);
+  }
+
+  @override
+  Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
+    return status;
+  }
+
+  @override
+  bool get supportsColor => delegate.supportsColor;
+}
+
+/// An implementation of the Cache which does not download or require locking.
+class FakeCache implements Cache {
+  @override
+  bool includeAllPlatforms;
+
+  @override
+  bool useUnsignedMacBinaries;
+
+  @override
+  Future<bool> areRemoteArtifactsAvailable({String engineVersion, bool includeAllPlatforms = true}) async {
+    return true;
+  }
+
+  @override
+  String get dartSdkVersion => null;
+
+  @override
+  MapEntry<String, String> get dyLdLibEntry => null;
+
+  @override
+  String get engineRevision => null;
+
+  @override
+  Directory getArtifactDirectory(String name) {
+    return fs.currentDirectory;
+  }
+
+  @override
+  Directory getCacheArtifacts() {
+    return fs.currentDirectory;
+  }
+
+  @override
+  Directory getCacheDir(String name) {
+    return fs.currentDirectory;
+  }
+
+  @override
+  Directory getDownloadDir() {
+    return fs.currentDirectory;
+  }
+
+  @override
+  Directory getRoot() {
+    return fs.currentDirectory;
+  }
+
+  @override
+  File getStampFileFor(String artifactName) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  String getStampFor(String artifactName) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  Future<String> getThirdPartyFile(String urlStr, String serviceName) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  String getVersionFor(String artifactName) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  Directory getWebSdkDirectory() {
+    return fs.currentDirectory;
+  }
+
+  @override
+  bool isOlderThanToolsStamp(FileSystemEntity entity) {
+    return false;
+  }
+
+  @override
+  bool isUpToDate() {
+    return true;
+  }
+
+  @override
+  void setStampFor(String artifactName, String version) {
+    throw UnsupportedError('Not supported in the fake Cache');
+  }
+
+  @override
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
   }
 }

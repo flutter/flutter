@@ -593,6 +593,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                   if (widget.onStepTapped != null)
                     widget.onStepTapped(i);
                 } : null,
+                canRequestFocus: widget.steps[i].state != StepState.disabled,
                 child: _buildVerticalHeader(i),
               ),
               _buildVerticalBody(i),
@@ -610,6 +611,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             if (widget.onStepTapped != null)
               widget.onStepTapped(i);
           } : null,
+          canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
               Container(
@@ -672,8 +674,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(() {
       if (context.ancestorWidgetOfExactType(Stepper) != null)
         throw FlutterError(
-          'Steppers must not be nested. The material specification advises '
-          'that one should avoid embedding steppers within steppers. '
+          'Steppers must not be nested.\n'
+          'The material specification advises that one should avoid embedding '
+          'steppers within steppers. '
           'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
         );
       return true;

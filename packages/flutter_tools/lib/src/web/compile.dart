@@ -12,6 +12,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/dart.dart';
 import '../build_system/targets/web.dart';
+import '../convert.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -21,7 +22,13 @@ import '../reporting/reporting.dart';
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
-Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo, bool initializePlatform) async {
+Future<void> buildWeb(
+  FlutterProject flutterProject,
+  String target,
+  BuildInfo buildInfo,
+  bool initializePlatform,
+  List<String> dartDefines,
+) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
@@ -30,27 +37,36 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   await injectPlugins(flutterProject, checkProjects: true);
   final Status status = logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
-  final BuildResult result = await buildSystem.build(const WebReleaseBundle(), Environment(
-    outputDir: fs.directory(getWebBuildDirectory()),
-    projectDir: fs.currentDirectory,
-    buildDir: flutterProject.directory
-      .childDirectory('.dart_tool')
-      .childDirectory('flutter_build'),
-    defines: <String, String>{
-      kBuildMode: getNameForBuildMode(buildInfo.mode),
-      kTargetFile: target,
-      kInitializePlatform: initializePlatform.toString(),
-      kHasWebPlugins: hasWebPlugins.toString(),
-    },
-  ));
-  if (!result.success) {
-    for (ExceptionMeasurement measurement in result.exceptions.values) {
-      printError(measurement.stackTrace.toString());
-      printError(measurement.exception.toString());
+  try {
+    final BuildResult result = await buildSystem.build(const WebReleaseBundle(), Environment(
+      outputDir: fs.directory(getWebBuildDirectory()),
+      projectDir: fs.currentDirectory,
+      buildDir: flutterProject.directory
+        .childDirectory('.dart_tool')
+        .childDirectory('flutter_build'),
+      defines: <String, String>{
+        kBuildMode: getNameForBuildMode(buildInfo.mode),
+        kTargetFile: target,
+        kInitializePlatform: initializePlatform.toString(),
+        kHasWebPlugins: hasWebPlugins.toString(),
+        kDartDefines: jsonEncode(dartDefines),
+      },
+    ));
+    if (!result.success) {
+      for (ExceptionMeasurement measurement in result.exceptions.values) {
+        printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
+      }
+      throwToolExit('Failed to compile application for the Web.');
     }
-    throwToolExit('Failed to compile application for the Web.');
+  } catch (err) {
+    throwToolExit(err.toString());
+  } finally {
+    status.stop();
   }
-  status.stop();
   flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
@@ -70,6 +86,7 @@ class WebCompilationProxy {
     @required Directory projectDirectory,
     @required String projectName,
     String testOutputDir,
+    List<String> testFiles,
     BuildMode mode,
     bool initializePlatform,
   }) async {

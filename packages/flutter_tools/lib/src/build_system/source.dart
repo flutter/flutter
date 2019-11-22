@@ -9,10 +9,6 @@ import '../globals.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
-/// An input function produces a list of additional input files for an
-/// [Environment].
-typedef InputFunction = List<File> Function(Environment environment);
-
 /// A set of source files.
 abstract class ResolvedFiles {
   /// Whether any of the sources we evaluated contained a missing depfile.
@@ -44,13 +40,6 @@ class SourceVisitor implements ResolvedFiles {
   @override
   bool get containsNewDepfile => _containsNewDepfile;
   bool _containsNewDepfile = false;
-
-  /// Visit a [Source] which contains a function.
-  ///
-  /// The function is expected to produce a list of [FileSystemEntities]s.
-  void visitFunction(InputFunction function) {
-    sources.addAll(function(environment));
-  }
 
   /// Visit a depfile which contains both input and output files.
   ///
@@ -164,22 +153,13 @@ class SourceVisitor implements ResolvedFiles {
       } else if (wildcardSegments.length == 1) {
         if (filename.startsWith(wildcardSegments[0]) ||
             filename.endsWith(wildcardSegments[0])) {
-          sources.add(entity.absolute);
+          sources.add(fs.file(entity.absolute));
         }
       } else if (filename.startsWith(wildcardSegments[0])) {
         if (filename.substring(wildcardSegments[0].length).endsWith(wildcardSegments[1])) {
-          sources.add(entity.absolute);
+          sources.add(fs.file(entity.absolute));
         }
       }
-    }
-  }
-
-  /// Visit a [Source] which contains a [SourceBehavior].
-  void visitBehavior(SourceBehavior sourceBehavior) {
-    if (inputs) {
-      sources.addAll(sourceBehavior.inputs(environment));
-    } else {
-      sources.addAll(sourceBehavior.outputs(environment));
     }
   }
 
@@ -205,27 +185,10 @@ abstract class Source {
   /// This source is a file-uri which contains some references to magic
   /// environment variables.
   const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
-
-  /// This source is produced by invoking the provided function.
-  const factory Source.function(InputFunction function) = _FunctionSource;
-
-  /// This source is produced by the [SourceBehavior] class.
-  const factory Source.behavior(SourceBehavior behavior) = _SourceBehavior;
-
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
   const factory Source.artifact(Artifact artifact, {TargetPlatform platform, BuildMode mode}) = _ArtifactSource;
-
-  /// The source is provided by a depfile generated at runtime.
-  ///
-  /// The `name` is of the file, and is expected to be output relative to the
-  /// build directory.
-  ///
-  /// Before the first build, the depfile is expected to be missing. Its
-  /// absence is interpreted as the build needing to run. Afterwards, both
-  /// input and output file hashes are updated.
-  const factory Source.depfile(String name) = _DepfileSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -236,44 +199,8 @@ abstract class Source {
   /// evaluated before the build.
   ///
   /// For example, [Source.pattern] and [Source.version] are not implicit
-  /// provided they do not use any wildcards. [Source.behavior] and
-  /// [Source.function] are always implicit.
+  /// provided they do not use any wildcards.
   bool get implicit;
-}
-
-/// An interface for describing input and output copies together.
-abstract class SourceBehavior {
-  const SourceBehavior();
-
-  /// The inputs for a particular target.
-  List<File> inputs(Environment environment);
-
-  /// The outputs for a particular target.
-  List<File> outputs(Environment environment);
-}
-
-class _SourceBehavior implements Source {
-  const _SourceBehavior(this.value);
-
-  final SourceBehavior value;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitBehavior(value);
-
-  @override
-  bool get implicit => true;
-}
-
-class _FunctionSource implements Source {
-  const _FunctionSource(this.value);
-
-  final InputFunction value;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitFunction(value);
-
-  @override
-  bool get implicit => true;
 }
 
 class _PatternSource implements Source {
@@ -298,18 +225,6 @@ class _ArtifactSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
-
-  @override
-  bool get implicit => false;
-}
-
-class _DepfileSource implements Source {
-  const _DepfileSource(this.name);
-
-  final String name;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitDepfile(name);
 
   @override
   bool get implicit => false;

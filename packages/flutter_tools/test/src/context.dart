@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -48,7 +49,6 @@ typedef ContextInitializer = void Function(AppContext testContext);
 void testUsingContext(
   String description,
   dynamic testMethod(), {
-  Timeout timeout,
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
@@ -72,11 +72,17 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir = fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    configDir ??= fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     final File settingsFile = fs.file(
       fs.path.join(configDir.path, '.flutter_settings')
     );
     return Config(settingsFile);
+  }
+  PersistentToolState buildPersistentToolState(FileSystem fs) {
+    configDir ??= fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    final File toolStateFile = fs.file(
+      fs.path.join(configDir.path, '.flutter_tool_state'));
+    return PersistentToolState(toolStateFile);
   }
 
   test(description, () async {
@@ -97,6 +103,7 @@ void testUsingContext(
           OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+          PersistentToolState: () => buildPersistentToolState(fs),
           SimControl: () => MockSimControl(),
           Usage: () => FakeUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
@@ -137,8 +144,7 @@ void testUsingContext(
         },
       );
     });
-  }, timeout: timeout ?? const Timeout(Duration(seconds: 60)),
-      testOn: testOn, skip: skip);
+  }, testOn: testOn, skip: skip);
 }
 
 void _printBufferedErrors(AppContext testContext) {

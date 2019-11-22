@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:mustache/mustache.dart' as mustache;
-import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -20,7 +19,7 @@ import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
-     mustache.Template(template).renderString(context);
+     mustache.Template(template, htmlEscapeValues: false).renderString(context);
   final File file = fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
@@ -36,29 +35,32 @@ class Plugin {
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
   /// This currently supports two formats. Legacy and Multi-platform.
+  ///
   /// Example of the deprecated Legacy format.
-  /// flutter:
-  ///  plugin:
-  ///    androidPackage: io.flutter.plugins.sample
-  ///    iosPrefix: FLT
-  ///    pluginClass: SamplePlugin
+  ///
+  ///     flutter:
+  ///      plugin:
+  ///        androidPackage: io.flutter.plugins.sample
+  ///        iosPrefix: FLT
+  ///        pluginClass: SamplePlugin
   ///
   /// Example Multi-platform format.
-  /// flutter:
-  ///  plugin:
-  ///    platforms:
-  ///      android:
-  ///        package: io.flutter.plugins.sample
-  ///        pluginClass: SamplePlugin
-  ///      ios:
-  ///        pluginClass: SamplePlugin
-  ///      linux:
-  ///        pluginClass: SamplePlugin
-  ///      macos:
-  ///        pluginClass: SamplePlugin
-  ///      windows:
-  ///        pluginClass: SamplePlugin
-  factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
+  ///
+  ///     flutter:
+  ///      plugin:
+  ///        platforms:
+  ///          android:
+  ///            package: io.flutter.plugins.sample
+  ///            pluginClass: SamplePlugin
+  ///          ios:
+  ///            pluginClass: SamplePlugin
+  ///          linux:
+  ///            pluginClass: SamplePlugin
+  ///          macos:
+  ///            pluginClass: SamplePlugin
+  ///          windows:
+  ///            pluginClass: SamplePlugin
+  factory Plugin.fromYaml(String name, String path, YamlMap pluginYaml) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
       throwToolExit('Invalid plugin specification.\n${errors.join('\n')}');
@@ -66,50 +68,50 @@ class Plugin {
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
       return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
     }
-    return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
+    return Plugin._fromLegacyYaml(name, path, pluginYaml);
   }
 
   factory Plugin._fromMultiPlatformYaml(String name, String path, dynamic pluginYaml) {
     assert (pluginYaml != null && pluginYaml['platforms'] != null,
             'Invalid multi-platform plugin specification.');
-    final dynamic platformsYaml = pluginYaml['platforms'];
+    final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
 
     assert (_validateMultiPlatformYaml(platformsYaml).isEmpty,
             'Invalid multi-platform plugin specification.');
 
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
 
-    if (platformsYaml[AndroidPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, AndroidPlugin.kConfigKey)) {
       platforms[AndroidPlugin.kConfigKey] = AndroidPlugin.fromYaml(
         name,
-        platformsYaml[AndroidPlugin.kConfigKey],
+        platformsYaml[AndroidPlugin.kConfigKey] as YamlMap,
         path,
       );
     }
 
-    if (platformsYaml[IOSPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, IOSPlugin.kConfigKey)) {
       platforms[IOSPlugin.kConfigKey] =
-          IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey]);
+          IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey] as YamlMap);
     }
 
-    if (platformsYaml[LinuxPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, LinuxPlugin.kConfigKey)) {
       platforms[LinuxPlugin.kConfigKey] =
-          LinuxPlugin.fromYaml(name, platformsYaml[LinuxPlugin.kConfigKey]);
+          LinuxPlugin.fromYaml(name, platformsYaml[LinuxPlugin.kConfigKey] as YamlMap);
     }
 
-    if (platformsYaml[MacOSPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, MacOSPlugin.kConfigKey)) {
       platforms[MacOSPlugin.kConfigKey] =
-          MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey]);
+          MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey] as YamlMap);
     }
 
-    if (platformsYaml[WebPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, WebPlugin.kConfigKey)) {
       platforms[WebPlugin.kConfigKey] =
-          WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey]);
+          WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey] as YamlMap);
     }
 
-    if (platformsYaml[WindowsPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, WindowsPlugin.kConfigKey)) {
       platforms[WindowsPlugin.kConfigKey] =
-          WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey]);
+          WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey] as YamlMap);
     }
 
     return Plugin(
@@ -119,22 +121,21 @@ class Plugin {
     );
   }
 
-  @deprecated
   factory Plugin._fromLegacyYaml(String name, String path, dynamic pluginYaml) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
-    final String pluginClass = pluginYaml['pluginClass'];
+    final String pluginClass = pluginYaml['pluginClass'] as String;
     if (pluginYaml != null && pluginClass != null) {
-      final String androidPackage = pluginYaml['androidPackage'];
+      final String androidPackage = pluginYaml['androidPackage'] as String;
       if (androidPackage != null) {
         platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
           name: name,
-          package: pluginYaml['androidPackage'],
+          package: pluginYaml['androidPackage'] as String,
           pluginClass: pluginClass,
           pluginPath: path,
         );
       }
 
-      final String iosPrefix = pluginYaml['iosPrefix'] ?? '';
+      final String iosPrefix = pluginYaml['iosPrefix'] as String ?? '';
       platforms[IOSPlugin.kConfigKey] =
           IOSPlugin(
             name: name,
@@ -150,40 +151,55 @@ class Plugin {
   }
 
   static List<String> validatePluginYaml(YamlMap yaml) {
-    if (yaml.containsKey('platforms')) {
-      final int numKeys = yaml.keys.toSet().length;
-      if (numKeys != 1) {
-        return <String>[
-          'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}',
-        ];
-      } else {
-        return _validateMultiPlatformYaml(yaml['platforms']);
-      }
+
+    final bool usesOldPluginFormat = const <String>{
+      'androidPackage',
+      'iosPrefix',
+      'pluginClass',
+    }.any(yaml.containsKey);
+
+    final bool usesNewPluginFormat = yaml.containsKey('platforms');
+
+    if (usesOldPluginFormat && usesNewPluginFormat) {
+      const String errorMessage =
+          'The flutter.plugin.platforms key cannot be used in combination with the old'
+          'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys.'
+          'See: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin';
+      return <String>[errorMessage];
+    }
+
+    if (usesNewPluginFormat) {
+      return _validateMultiPlatformYaml(yaml['platforms'] as YamlMap);
     } else {
       return _validateLegacyYaml(yaml);
     }
   }
 
   static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
+    bool isInvalid(String key, bool Function(YamlMap) validate) {
+      final dynamic value = yaml[key];
+      if (!(value is YamlMap)) {
+        return false;
+      }
+      if (value.containsKey('default_package')) {
+        return false;
+      }
+      return !validate(value);
+    }
     final List<String> errors = <String>[];
-    if (yaml.containsKey(AndroidPlugin.kConfigKey) &&
-        !AndroidPlugin.validate(yaml[AndroidPlugin.kConfigKey])) {
+    if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {
       errors.add('Invalid "android" plugin specification.');
     }
-    if (yaml.containsKey(IOSPlugin.kConfigKey) &&
-        !IOSPlugin.validate(yaml[IOSPlugin.kConfigKey])) {
+    if (isInvalid(IOSPlugin.kConfigKey, IOSPlugin.validate)) {
       errors.add('Invalid "ios" plugin specification.');
     }
-    if (yaml.containsKey(LinuxPlugin.kConfigKey) &&
-        !LinuxPlugin.validate(yaml[LinuxPlugin.kConfigKey])) {
+    if (isInvalid(LinuxPlugin.kConfigKey, LinuxPlugin.validate)) {
       errors.add('Invalid "linux" plugin specification.');
     }
-    if (yaml.containsKey(MacOSPlugin.kConfigKey) &&
-        !MacOSPlugin.validate(yaml[MacOSPlugin.kConfigKey])) {
+    if (isInvalid(MacOSPlugin.kConfigKey, MacOSPlugin.validate)) {
       errors.add('Invalid "macos" plugin specification.');
     }
-    if (yaml.containsKey(WindowsPlugin.kConfigKey) &&
-        !WindowsPlugin.validate(yaml[WindowsPlugin.kConfigKey])) {
+    if (isInvalid(WindowsPlugin.kConfigKey, WindowsPlugin.validate)) {
       errors.add('Invalid "windows" plugin specification.');
     }
     return errors;
@@ -203,6 +219,16 @@ class Plugin {
     return errors;
   }
 
+  static bool _providesImplementationForPlatform(YamlMap platformsYaml, String platformKey) {
+    if (!platformsYaml.containsKey(platformKey)) {
+      return false;
+    }
+    if (platformsYaml[platformKey].containsKey('default_package')) {
+      return false;
+    }
+    return true;
+  }
+
   final String name;
   final String path;
 
@@ -220,7 +246,7 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
     return null;
   }
   final dynamic flutterConfig = pubspec['flutter'];
-  if (flutterConfig == null || !flutterConfig.containsKey('plugin')) {
+  if (flutterConfig == null || !(flutterConfig.containsKey('plugin') as bool)) {
     return null;
   }
   final String packageRootPath = fs.path.fromUri(packageRoot);
@@ -228,7 +254,7 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   return Plugin.fromYaml(
     name,
     packageRootPath,
-    flutterConfig['plugin'],
+    flutterConfig['plugin'] as YamlMap,
   );
 }
 
@@ -311,12 +337,14 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-const String _androidPluginRegistryTemplateNewEmbedding = '''package dev.flutter.plugins;
+const String _androidPluginRegistryTemplateNewEmbedding = '''package io.flutter.plugins;
 
 {{#androidX}}
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 {{/androidX}}
 {{^androidX}}
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 {{/androidX}}
 import io.flutter.embedding.engine.FlutterEngine;
@@ -329,18 +357,21 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
  * This file is generated by the Flutter tool based on the
  * plugins that support the Android platform.
  */
+@Keep
 public final class GeneratedPluginRegistrant {
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
 {{#needsShim}}
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
 {{/needsShim}}
 {{#plugins}}
-  {{#usesEmbedding2}}
+  {{#supportsEmbeddingV2}}
     flutterEngine.getPlugins().add(new {{package}}.{{class}}());
-  {{/usesEmbedding2}}
-  {{^usesEmbedding2}}
-    {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
-  {{/usesEmbedding2}}
+  {{/supportsEmbeddingV2}}
+  {{^supportsEmbeddingV2}}
+    {{#supportsEmbeddingV1}}
+      {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
+    {{/supportsEmbeddingV1}}
+  {{/supportsEmbeddingV2}}
 {{/plugins}}
   }
 }
@@ -359,30 +390,10 @@ List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String typ
 
 /// Returns the version of the Android embedding that the current
 /// [project] is using.
-String _getAndroidEmbeddingVersion(FlutterProject project) {
-  if (!featureFlags.isNewAndroidEmbeddingEnabled) {
-    return '1';
-  }
+AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
   assert(project.android != null);
-  final File androidManifest = project.android.appManifestFile;
-  assert(androidManifest.existsSync());
-  xml.XmlDocument document;
-  try {
-    document = xml.parse(androidManifest.readAsStringSync());
-  } on xml.XmlParserException {
-    throwToolExit('Error parsing ${project.android.appManifestFile} '
-                  'Please ensure that the android manifest is a valid XML document and try again.');
-  } on FileSystemException {
-    throwToolExit('Error reading ${project.android.appManifestFile} even though it exists. '
-                  'Please ensure that you have read permission to this file and try again.');
-  }
-  for (xml.XmlElement metaData in document.findAllElements('meta-data')) {
-    final String name = metaData.getAttribute('android:name');
-    if (name == 'flutterEmbedding') {
-      return metaData.getAttribute('android:value');
-    }
-  }
-  return '1';
+
+  return project.android.getEmbeddingVersion();
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -399,43 +410,51 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     'main',
     'java',
   );
-
-  String registryPath;
+  final String registryPath = fs.path.join(
+    javaSourcePath,
+    'io',
+    'flutter',
+    'plugins',
+    'GeneratedPluginRegistrant.java',
+  );
   String templateContent;
-
-  final String appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
+  final AndroidEmbeddingVersion appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
   switch (appEmbeddingVersion) {
-    case '2':
+    case AndroidEmbeddingVersion.v2:
       templateContext['needsShim'] = false;
       // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
-      // then add  shim for the old plugins.
+      // then add shim for the old plugins.
       for (Map<String, dynamic> plugin in androidPlugins) {
-        if (!plugin['usesEmbedding2']) {
+        if (plugin['supportsEmbeddingV1'] as bool && !(plugin['supportsEmbeddingV2'] as bool)) {
           templateContext['needsShim'] = true;
+          if (project.isModule) {
+            printStatus(
+              'The plugin `${plugin['name']}` is built using an older version '
+              "of the Android plugin API which assumes that it's running in a "
+              'full-Flutter environment. It may have undefined behaviors when '
+              'Flutter is integrated into an existing app as a module.\n'
+              'The plugin can be updated to the v2 Android Plugin APIs by '
+              'following https://flutter.dev/go/android-plugin-migration.'
+            );
+          }
           break;
         }
       }
-      registryPath = fs.path.join(
-        javaSourcePath,
-        'dev',
-        'flutter',
-        'plugins',
-        'GeneratedPluginRegistrant.java',
-      );
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
-    break;
-    case '1':
-      registryPath = fs.path.join(
-        javaSourcePath,
-        'io',
-        'flutter',
-        'plugins',
-        'GeneratedPluginRegistrant.java',
-      );
-      templateContent = _androidPluginRegistryTemplateOldEmbedding;
-    break;
+      break;
+    case AndroidEmbeddingVersion.v1:
     default:
-      throwToolExit('Unsupported Android embedding');
+      for (Map<String, dynamic> plugin in androidPlugins) {
+        if (!(plugin['supportsEmbeddingV1'] as bool) && plugin['supportsEmbeddingV2'] as bool) {
+          throwToolExit(
+            'The plugin `${plugin['name']}` requires your app to be migrated to '
+            'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
+            'and re-run this command.'
+          );
+        }
+      }
+      templateContent = _androidPluginRegistryTemplateOldEmbedding;
+      break;
   }
   printTrace('Generating $registryPath');
   _renderTemplateToFile(
@@ -454,10 +473,13 @@ const String _objcPluginRegistryHeaderTemplate = '''//
 
 #import <{{framework}}/{{framework}}.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GeneratedPluginRegistrant : NSObject
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 @end
 
+NS_ASSUME_NONNULL_END
 #endif /* GeneratedPluginRegistrant_h */
 ''';
 
@@ -466,10 +488,15 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 //
 
 #import "GeneratedPluginRegistrant.h"
-{{#plugins}}
-#import <{{name}}/{{class}}.h>
-{{/plugins}}
 
+{{#plugins}}
+#if __has_include(<{{name}}/{{class}}.h>)
+#import <{{name}}/{{class}}.h>
+#else
+@import {{name}};
+#endif
+
+{{/plugins}}
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {

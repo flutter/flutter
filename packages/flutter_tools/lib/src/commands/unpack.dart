@@ -31,15 +31,6 @@ const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatfor
     'icudtl.dat',
     'cpp_client_wrapper/',
   ],
-  TargetPlatform.linux_x64: <String>[
-    'libflutter_linux_glfw.so',
-    'flutter_export.h',
-    'flutter_messenger.h',
-    'flutter_plugin_registrar.h',
-    'flutter_glfw.h',
-    'icudtl.dat',
-    'cpp_client_wrapper_glfw/',
-  ]
 };
 
 /// Copies desktop artifacts to local cache directories.
@@ -54,7 +45,7 @@ class UnpackCommand extends FlutterCommand {
   }
 
   @override
-  String get description => 'unpack desktop artifacts';
+  String get description => '(DEPRECATED) unpack desktop artifacts';
 
   @override
   String get name => 'unpack';
@@ -67,7 +58,7 @@ class UnpackCommand extends FlutterCommand {
     final Set<DevelopmentArtifact> result = <DevelopmentArtifact>{
       DevelopmentArtifact.universal,
     };
-    final TargetPlatform targetPlatform = getTargetPlatformForName(argResults['target-platform']);
+    final TargetPlatform targetPlatform = getTargetPlatformForName(stringArg('target-platform'));
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
         result.add(DevelopmentArtifact.windows);
@@ -82,8 +73,8 @@ class UnpackCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetName = argResults['target-platform'];
-    final String targetDirectory = argResults['cache-dir'];
+    final String targetName = stringArg('target-platform');
+    final String targetDirectory = stringArg('cache-dir');
     if (!fs.directory(targetDirectory).existsSync()) {
       fs.directory(targetDirectory).createSync(recursive: true);
     }
@@ -91,7 +82,7 @@ class UnpackCommand extends FlutterCommand {
     final ArtifactUnpacker flutterArtifactFetcher = ArtifactUnpacker(targetPlatform);
     bool success = true;
     if (artifacts is LocalEngineArtifacts) {
-      final LocalEngineArtifacts localEngineArtifacts = artifacts;
+      final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
       success = flutterArtifactFetcher.copyLocalBuildArtifacts(
         localEngineArtifacts.engineOutPath,
         targetDirectory,
@@ -130,8 +121,7 @@ class ArtifactUnpacker {
         cacheStamp = 'windows-sdk';
         break;
       case TargetPlatform.linux_x64:
-        cacheStamp = 'linux-sdk';
-        break;
+        return true;
       default:
         throwToolExit('Unsupported target platform: $platform');
     }
@@ -213,8 +203,8 @@ class ArtifactUnpacker {
 
       printTrace('Copied artifacts from $sourceDirectory.');
     } catch (e, stackTrace) {
+      printError(e.message as String);
       printError(stackTrace.toString());
-      printError(e.message);
       return false;
     }
     return true;

@@ -23,9 +23,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
-  'test': '1.6.3',         //  | Tests are timing out at 1.6.4
-  'test_api': '0.2.5',     //  |
-  'test_core': '0.2.5',    //  |
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
 };
 
@@ -86,6 +83,9 @@ class UpdatePackagesCommand extends FlutterCommand {
   final String description = 'Update the packages inside the Flutter repo.';
 
   @override
+  final List<String> aliases = <String>['upgrade-packages'];
+
+  @override
   final bool hidden;
 
   @override
@@ -114,11 +114,11 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner.getRepoPackages();
 
-    final bool upgrade = argResults['force-upgrade'];
-    final bool isPrintPaths = argResults['paths'];
-    final bool isPrintTransitiveClosure = argResults['transitive-closure'];
-    final bool isVerifyOnly = argResults['verify-only'];
-    final bool isConsumerOnly = argResults['consumer-only'];
+    final bool upgrade = boolArg('force-upgrade');
+    final bool isPrintPaths = boolArg('paths');
+    final bool isPrintTransitiveClosure = boolArg('transitive-closure');
+    final bool isVerifyOnly = boolArg('verify-only');
+    final bool isConsumerOnly = boolArg('consumer-only');
 
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
     if (isConsumerOnly) {
@@ -298,7 +298,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
 
       if (isPrintPaths) {
-        showDependencyPaths(from: argResults['from'], to: argResults['to'], tree: tree);
+        showDependencyPaths(from: stringArg('from'), to: stringArg('to'), tree: tree);
         return null;
       }
 

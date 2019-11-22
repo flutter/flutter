@@ -740,10 +740,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile(
-        'floating_action_button_test.clip.png',
-        version: 2,
-      ),
+      matchesGoldenFile('floating_action_button_test.clip.png'),
     );
   });
 

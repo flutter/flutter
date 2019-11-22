@@ -41,8 +41,11 @@ class WaitForCondition extends Command {
 /// ```dart
 /// WaitForCondition noTransientCallbacks = WaitForCondition(NoTransientCallbacks());
 /// ```
-@Deprecated('This command has been deprecated in favor of WaitForCondition. '
-            'Use WaitForCondition command with NoTransientCallbacks.')
+@Deprecated(
+  'This command has been deprecated in favor of WaitForCondition. '
+  'Use WaitForCondition command with NoTransientCallbacks. '
+  'This feature was deprecated after v1.9.3.'
+)
 class WaitUntilNoTransientCallbacks extends Command {
   /// Creates a command that waits for there to be no transient callbacks.
   const WaitUntilNoTransientCallbacks({ Duration timeout }) : super(timeout: timeout);
@@ -63,8 +66,11 @@ class WaitUntilNoTransientCallbacks extends Command {
 /// ```dart
 /// WaitForCondition noPendingFrame = WaitForCondition(NoPendingFrame());
 /// ```
-@Deprecated('This command has been deprecated in favor of WaitForCondition. '
-            'Use WaitForCondition command with NoPendingFrame.')
+@Deprecated(
+  'This command has been deprecated in favor of WaitForCondition. '
+  'Use WaitForCondition command with NoPendingFrame. '
+  'This feature was deprecated after v1.9.3.'
+)
 class WaitUntilNoPendingFrame extends Command {
   /// Creates a command that waits until there's no pending frame scheduled.
   const WaitUntilNoPendingFrame({ Duration timeout }) : super(timeout: timeout);
@@ -92,8 +98,11 @@ class WaitUntilNoPendingFrame extends Command {
 /// ```dart
 /// WaitForCondition firstFrameRasterized = WaitForCondition(FirstFrameRasterized());
 /// ```
-@Deprecated('This command has been deprecated in favor of WaitForCondition. '
-            'Use WaitForCondition command with FirstFrameRasterized.')
+@Deprecated(
+  'This command has been deprecated in favor of WaitForCondition. '
+  'Use WaitForCondition command with FirstFrameRasterized. '
+  'This feature was deprecated after v1.9.3.'
+)
 class WaitUntilFirstFrameRasterized extends Command {
   /// Creates this command.
   const WaitUntilFirstFrameRasterized({ Duration timeout }) : super(timeout: timeout);

@@ -48,7 +48,7 @@ void main() {
       inRepo(<String>[]);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }

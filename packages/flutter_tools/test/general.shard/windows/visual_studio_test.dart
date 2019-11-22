@@ -71,6 +71,7 @@ void main() {
     List<String> requiredComponents,
     List<String> additionalArguments,
     Map<String, dynamic> response,
+    String responseOverride,
   ]) {
     fs.file(vswherePath).createSync(recursive: true);
     fs.file(vcvarsPath).createSync(recursive: true);
@@ -78,7 +79,7 @@ void main() {
     final MockProcessResult result = MockProcessResult();
     when(result.exitCode).thenReturn(0);
 
-    final String finalResponse =
+    final String finalResponse = responseOverride ??
         json.encode(<Map<String, dynamic>>[response]);
     when<String>(result.stdout).thenReturn(finalResponse);
     when<String>(result.stderr).thenReturn('');
@@ -116,8 +117,13 @@ void main() {
 
   // Sets whether or not a vswhere query searching for 'all' and 'prerelease'
   // versions will return an installation.
-  void setMockAnyVisualStudioInstallation(Map<String, dynamic>response) {
+  void setMockAnyVisualStudioInstallation(Map<String, dynamic> response) {
     setMockVswhereResponse(null, <String>['-prerelease', '-all'], response);
+  }
+
+  // Set a pre-encoded query result.
+  void setMockEncodedAnyVisualStudioInstallation(String response) {
+    setMockVswhereResponse(null, <String>['-prerelease', '-all'], null, response);
   }
 
   group('Visual Studio', () {
@@ -387,6 +393,19 @@ void main() {
       expect(visualStudio.displayVersion, equals('16.2.5'));
       expect(visualStudio.installLocation, equals(visualStudioPath));
       expect(visualStudio.fullVersion, equals('16.2.29306.81'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFilesystem,
+      ProcessManager: () => mockProcessManager,
+      Platform: () => windowsPlatform,
+    });
+
+    testUsingContext('vcvarsPath returns null when VS is present but when vswhere returns invalid JSON', () {
+      setMockCompatibleVisualStudioInstallation(null);
+      setMockPrereleaseVisualStudioInstallation(null);
+      setMockEncodedAnyVisualStudioInstallation('{');
+
+      visualStudio = VisualStudio();
+      expect(visualStudio.vcvarsPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFilesystem,
       ProcessManager: () => mockProcessManager,

@@ -1,3 +1,6 @@
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;

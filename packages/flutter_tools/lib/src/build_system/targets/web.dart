@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../artifacts.dart';
-import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
@@ -12,6 +11,7 @@ import '../../dart/package_map.dart';
 import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
+import '../depfile.dart';
 import 'assets.dart';
 import 'dart.dart';
 
@@ -108,19 +108,19 @@ class Dart2JSTarget extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
     Source.artifact(Artifact.flutterWebSdk),
     Source.artifact(Artifact.dart2jsSnapshot),
     Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.engineDartSdkPath),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/main.dart.js'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2js.d',
   ];
 
   @override
@@ -131,28 +131,44 @@ class Dart2JSTarget extends Target {
     final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
       ? PackageMap.globalGeneratedPackagesPath
       : PackageMap.globalPackagesPath;
+    final File outputFile = environment.buildDir.childFile('main.dart.js');
+
     final ProcessResult result = await processManager.run(<String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
       if (dart2jsOptimization != null)
         '-$dart2jsOptimization'
-      else if (buildMode == BuildMode.profile)
-        '-O1'
       else
         '-O4',
+      if (buildMode == BuildMode.profile)
+        '--no-minify',
       '-o',
-      environment.buildDir.childFile('main.dart.js').path,
+      outputFile.path,
       '--packages=$packageFile',
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
+      for (String dartDefine in parseDartDefines(environment))
+        '-D$dartDefine',
       environment.buildDir.childFile('main.dart').path,
     ]);
     if (result.exitCode != 0) {
       throw Exception(result.stdout + result.stderr);
     }
+    final File dart2jsDeps = environment.buildDir
+      .childFile('main.dart.js.deps');
+    if (!dart2jsDeps.existsSync()) {
+      printError('Warning: dart2js did not produced expected deps list at '
+        '${dart2jsDeps.path}');
+      return;
+    }
+    final Depfile depfile = Depfile.parseDart2js(
+      environment.buildDir.childFile('main.dart.js.deps'),
+      outputFile,
+    );
+    depfile.writeToFile(environment.buildDir.childFile('dart2js.d'));
   }
 }
 
@@ -171,19 +187,19 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/main.dart.js'),
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
-    Source.behavior(AssetOutputBehavior('assets')),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.pattern('{PROJECT_DIR}/web/index.html'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.js'),
-    Source.pattern('{OUTPUT_DIR}/assets/AssetManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/assets/FontManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/assets/LICENSE'),
     Source.pattern('{OUTPUT_DIR}/index.html'),
-    Source.behavior(AssetOutputBehavior('assets'))
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2js.d',
   ];
 
   @override
@@ -196,12 +212,13 @@ class WebReleaseBundle extends Target {
         environment.outputDir.childFile(fs.path.basename(outputFile.path)).path
       );
     }
+    final Directory outputDirectory = environment.outputDir.childDirectory('assets');
+    outputDirectory.createSync(recursive: true);
     environment.projectDir
       .childDirectory('web')
       .childFile('index.html')
       .copySync(fs.path.join(environment.outputDir.path, 'index.html'));
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    await assetBundle.build();
-    await copyAssets(assetBundle, environment, 'assets');
+    final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
+    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 }

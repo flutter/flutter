@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
@@ -25,7 +26,7 @@ void main() {
           fs.file('test/foo.dart').createSync(recursive: true);
           residentCompiler = MockResidentCompiler();
           testCompiler = FakeTestCompiler(
-            true,
+            BuildMode.debug,
             false,
             FlutterProject.current(),
             residentCompiler,
@@ -76,11 +77,11 @@ void main() {
 /// Override the creation of the Resident Compiler to simplify testing.
 class FakeTestCompiler extends TestCompiler {
   FakeTestCompiler(
-    bool enableAsserts,
+    BuildMode buildMode,
     bool trackWidgetCreation,
     FlutterProject flutterProject,
     this.residentCompiler,
-  ) : super(enableAsserts, trackWidgetCreation, flutterProject);
+  ) : super(buildMode, trackWidgetCreation, flutterProject);
 
   final MockResidentCompiler residentCompiler;
 

@@ -22,7 +22,7 @@ void main() {
       expect(fs.isDirectorySync('foo/bar'), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('throws tool exit on failure to create', () async {
@@ -30,7 +30,7 @@ void main() {
       expect(() => ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -86,7 +86,7 @@ void main() {
       expect(destination.childDirectory('nested').childFile('a.txt').existsSync(), isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 

@@ -10,13 +10,13 @@ import '../rendering/mock_canvas.dart';
 
 const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x59000000),
-  darkColor:Color(0x80FFFFFF),
+  darkColor: Color(0x80FFFFFF),
 );
 
 void main() {
   const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
   const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
-  const Duration _kScrollbarResizeDuration = Duration(milliseconds: 150);
+  const Duration _kScrollbarResizeDuration = Duration(milliseconds: 100);
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -102,9 +102,8 @@ void main() {
           data: const MediaQueryData(),
           child: PrimaryScrollController(
             controller: scrollController,
-            child: CupertinoScrollbar(
-              controller: scrollController,
-              child: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
+            child: const CupertinoScrollbar(
+              child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
             ),
           ),
         ),
@@ -136,86 +135,19 @@ void main() {
       }
     });
 
-    // Longpress on the scrollbar thumb and expect a vibration.
+    // Longpress on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(hapticFeedbackCalls, 1);
-
-    // Drag the thumb down to scroll down.
-    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-    await tester.pump(const Duration(milliseconds: 500));
-    await dragScrollbarGesture.up();
-    await tester.pumpAndSettle();
-
-    // The view has scrolled more than it would have by a swipe gesture of the
-    // same distance.
-    expect(scrollController.offset, greaterThan(scrollAmount * 2));
-    // The scrollbar thumb is still fully visible.
-    expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: _kScrollbarColor.color,
-    ));
-
-    // Let the thumb fade out so all timers have resolved.
-    await tester.pump(_kScrollbarTimeToFade);
-    await tester.pump(_kScrollbarFadeDuration);
-  });
-
-  testWidgets('Scrollbar thumb can be dragged by swiping in from right', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: PrimaryScrollController(
-            controller: scrollController,
-            child: CupertinoScrollbar(
-              controller: scrollController,
-              child: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(scrollController.offset, 0.0);
-
-    // Scroll a bit.
-    const double scrollAmount = 10.0;
-    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
-    // Scroll down by swiping up.
-    await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    // Scrollbar thumb is fully showing and scroll offset has moved by
-    // scrollAmount.
-    expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: _kScrollbarColor.color,
-    ));
-    expect(scrollController.offset, scrollAmount);
-    await scrollGesture.up();
-    await tester.pump();
-
-    int hapticFeedbackCalls = 0;
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'HapticFeedback.vibrate') {
-        hapticFeedbackCalls++;
-      }
-    });
-
-    // Drag in from the right side on top of the scrollbar thumb and expect a
-    // vibration.
+    await tester.pump(const Duration(milliseconds: 100));
     expect(hapticFeedbackCalls, 0);
-    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
-    await tester.pump();
-    await dragScrollbarGesture.moveBy(const Offset(-50.0, 0.0));
     await tester.pump(_kScrollbarResizeDuration);
+    // Allow the haptic feedback some slack.
+    await tester.pump(const Duration(milliseconds: 1));
     expect(hapticFeedbackCalls, 1);
 
     // Drag the thumb down to scroll down.
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 100));
     await dragScrollbarGesture.up();
     await tester.pumpAndSettle();
 

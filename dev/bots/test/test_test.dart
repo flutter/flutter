@@ -29,7 +29,11 @@ void main() {
       ];
       for (String version in valid_versions) {
         when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
-        expect(await verifyVersion(version, file), isTrue, reason: '$version is invalid');
+        expect(
+          await verifyVersion(file),
+          isNull,
+          reason: '$version is valid but verifyVersionFile said it was bad',
+        );
       }
     });
 
@@ -41,10 +45,15 @@ void main() {
         '1.2.3-pre',
         '1.2.3-pre.1+hotfix.1',
         '  1.2.3',
+        '1.2.3-hotfix.1',
       ];
       for (String version in invalid_versions) {
         when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
-        expect(await verifyVersion(version, file), isFalse);
+        expect(
+          await verifyVersion(file),
+          'The version logic generated an invalid version string: "$version".',
+          reason: '$version is invalid but verifyVersionFile said it was fine',
+        );
       }
     });
   });

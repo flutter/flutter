@@ -83,7 +83,7 @@ class ButtonTheme extends InheritedTheme {
     Color hoverColor,
     Color highlightColor,
     Color splashColor,
-    ColorScheme colorScheme = const ColorScheme.light(),
+    ColorScheme colorScheme,
     MaterialTapTargetSize materialTapTargetSize,
     Widget child,
   }) : assert(textTheme != null),
@@ -91,7 +91,6 @@ class ButtonTheme extends InheritedTheme {
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
        assert(layoutBehavior != null),
-       assert(colorScheme != null),
        data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
@@ -165,7 +164,10 @@ class ButtonTheme extends InheritedTheme {
   ///
   /// You can also replace the defaults for all [ButtonBar] widgets by updating
   /// [ThemeData.buttonBarTheme] for your app.
-  @Deprecated('use ButtonBarTheme instead')
+  @Deprecated(
+    'Use ButtonBarTheme instead. '
+    'This feature was deprecated after v1.9.1.'
+  )
   ButtonTheme.bar({
     Key key,
     ButtonTextTheme textTheme = ButtonTextTheme.accent,
@@ -180,14 +182,13 @@ class ButtonTheme extends InheritedTheme {
     Color hoverColor,
     Color highlightColor,
     Color splashColor,
-    ColorScheme colorScheme = const ColorScheme.light(),
+    ColorScheme colorScheme,
     Widget child,
     ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
-       assert(colorScheme != null),
        data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
@@ -219,13 +220,15 @@ class ButtonTheme extends InheritedTheme {
   static ButtonThemeData of(BuildContext context) {
     final ButtonTheme inheritedButtonTheme = context.inheritFromWidgetOfExactType(ButtonTheme);
     ButtonThemeData buttonTheme = inheritedButtonTheme?.data;
-    if (buttonTheme == null) {
+    if (buttonTheme?.colorScheme == null) { // if buttonTheme or buttonTheme.colorScheme is null
       final ThemeData theme = Theme.of(context);
       buttonTheme ??= theme.buttonTheme;
-      buttonTheme = buttonTheme.copyWith(
-        colorScheme: theme.buttonTheme.colorScheme ?? const ColorScheme.light(),
-      );
-      assert(buttonTheme.colorScheme != null);
+      if (buttonTheme.colorScheme == null) {
+        buttonTheme = buttonTheme.copyWith(
+          colorScheme: theme.buttonTheme.colorScheme ?? theme.colorScheme,
+        );
+        assert(buttonTheme.colorScheme != null);
+      }
     }
     return buttonTheme;
   }
@@ -270,14 +273,13 @@ class ButtonThemeData extends Diagnosticable {
     Color hoverColor,
     Color highlightColor,
     Color splashColor,
-    this.colorScheme = const ColorScheme.light(),
+    this.colorScheme,
     MaterialTapTargetSize materialTapTargetSize,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
        assert(layoutBehavior != null),
-       assert(colorScheme != null),
        _buttonColor = buttonColor,
        _disabledColor = disabledColor,
        _focusColor = focusColor,

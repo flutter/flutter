@@ -52,7 +52,7 @@ void main() {
       fs.directory('windows').createSync();
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       Platform: () => platform,
     });
   });

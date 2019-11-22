@@ -36,6 +36,7 @@ class ApplicationPackageFactory {
     File applicationBinary,
   }) async {
     switch (platform) {
+      case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
@@ -48,7 +49,7 @@ class ApplicationPackageFactory {
             : AndroidApk.fromApk(applicationBinary);
       case TargetPlatform.ios:
         return applicationBinary == null
-            ? IOSApp.fromIosProject(FlutterProject.current().ios)
+            ? await IOSApp.fromIosProject(FlutterProject.current().ios)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
@@ -69,7 +70,8 @@ class ApplicationPackageFactory {
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
         return applicationBinary == null
             ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
             : FuchsiaApp.fromPrebuiltApp(applicationBinary);
@@ -224,7 +226,7 @@ class AndroidApk extends ApplicationPackage {
           if (!(node is xml.XmlElement)) {
             continue;
           }
-          final xml.XmlElement xmlElement = node;
+          final xml.XmlElement xmlElement = node as xml.XmlElement;
           final String name = xmlElement.getAttribute('android:name');
           if (name == 'android.intent.action.MAIN') {
             actionName = name;
@@ -261,9 +263,8 @@ class AndroidApk extends ApplicationPackage {
   String get name => file.basename;
 }
 
-/// Tests whether a [FileSystemEntity] is an iOS bundle directory
-bool _isBundleDirectory(FileSystemEntity entity) =>
-    entity is Directory && entity.path.endsWith('.app');
+/// Tests whether a [Directory] is an iOS bundle directory
+bool _isBundleDirectory(Directory dir) => dir.path.endsWith('.app');
 
 abstract class IOSApp extends ApplicationPackage {
   IOSApp({@required String projectBundleId}) : super(id: projectBundleId);
@@ -300,7 +301,7 @@ abstract class IOSApp extends ApplicationPackage {
         return null;
       }
       try {
-        bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
+        bundleDir = payloadDir.listSync().whereType<Directory>().singleWhere(_isBundleDirectory);
       } on StateError {
         printError(
             'Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
@@ -415,6 +416,7 @@ class ApplicationPackageStore {
 
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
+      case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
@@ -424,7 +426,8 @@ class ApplicationPackageStore {
       case TargetPlatform.ios:
         iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
         fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
         return fuchsia;
       case TargetPlatform.darwin_x64:
@@ -467,22 +470,21 @@ class _Element extends _Entry {
   }
 
   _Attribute firstAttribute(String name) {
-    return children.firstWhere(
-        (_Entry e) => e is _Attribute && e.key.startsWith(name),
+    return children.whereType<_Attribute>().firstWhere(
+        (_Attribute e) => e.key.startsWith(name),
         orElse: () => null,
     );
   }
 
   _Element firstElement(String name) {
-    return children.firstWhere(
-        (_Entry e) => e is _Element && e.name.startsWith(name),
+    return children.whereType<_Element>().firstWhere(
+        (_Element e) => e.name.startsWith(name),
         orElse: () => null,
     );
   }
 
-  Iterable<_Entry> allElements(String name) {
-    return children.where(
-            (_Entry e) => e is _Element && e.name.startsWith(name));
+  Iterable<_Element> allElements(String name) {
+    return children.whereType<_Element>().where((_Element e) => e.name.startsWith(name));
   }
 }
 
@@ -508,8 +510,7 @@ class ApkManifestData {
 
   static bool isAttributeWithValuePresent(_Element baseElement,
       String childElement, String attributeName, String attributeValue) {
-    final Iterable<_Element> allElements = baseElement.allElements(
-        childElement).cast<_Element>();
+    final Iterable<_Element> allElements = baseElement.allElements(childElement);
     for (_Element oneElement in allElements) {
       final String elementAttributeValue = oneElement
           ?.firstAttribute(attributeName)
@@ -560,14 +561,12 @@ class ApkManifestData {
     final _Element application = manifest.firstElement('application');
     assert(application != null);
 
-    final Iterable<_Entry> activities = application.allElements('activity');
+    final Iterable<_Element> activities = application.allElements('activity');
 
     _Element launchActivity;
     for (_Element activity in activities) {
       final _Attribute enabled = activity.firstAttribute('android:enabled');
-      final Iterable<_Element> intentFilters = activity
-          .allElements('intent-filter')
-          .cast<_Element>();
+      final Iterable<_Element> intentFilters = activity.allElements('intent-filter');
       final bool isEnabledByDefault = enabled == null;
       final bool isExplicitlyEnabled = enabled != null && enabled.value.contains('0xffffffff');
       if (!(isEnabledByDefault || isExplicitlyEnabled)) {

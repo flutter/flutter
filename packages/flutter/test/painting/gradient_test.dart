@@ -806,20 +806,23 @@ void main() {
           ),
         ),
       ));
-      await expectLater(find.byKey(painterKey), matchesGoldenFile(goldenName));
+      await expectLater(
+        find.byKey(painterKey),
+        matchesGoldenFile(goldenName),
+      );
     }
 
     testWidgets('Gradients - 45 degrees', (WidgetTester tester) async {
       for (Gradient gradient in gradients45) {
         await runTest(tester, gradient, 45);
       }
-    });
+    }, skip: isBrowser); // TODO(yjbanov): web does not support golden tests yet: https://github.com/flutter/flutter/issues/40297
 
     testWidgets('Gradients - 90 degrees', (WidgetTester tester) async {
       for (Gradient gradient in gradients90) {
         await runTest(tester, gradient, 90);
       }
-    });
+    }, skip: isBrowser); // TODO(yjbanov): web does not support golden tests yet: https://github.com/flutter/flutter/issues/40297
   });
 }
 

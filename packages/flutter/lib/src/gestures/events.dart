@@ -874,7 +874,10 @@ class PointerEnterEvent extends PointerEvent {
   /// Creates an enter event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
-  @Deprecated('use PointerEnterEvent.fromMouseEvent instead')
+  @Deprecated(
+    'Use PointerEnterEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
   PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an enter event from a [PointerEvent].
@@ -1017,7 +1020,10 @@ class PointerExitEvent extends PointerEvent {
   /// Creates an exit event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
-  @Deprecated('use PointerExitEvent.fromMouseEvent instead')
+  @Deprecated(
+    'Use PointerExitEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
   PointerExitEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an exit event from a [PointerEvent].

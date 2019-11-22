@@ -400,6 +400,18 @@ flutter:
       expect(flutterManifest.androidPackage, 'com.example');
     });
 
+    testUsingContext('handles an invalid plugin declaration', () async {
+      final BufferLogger bufferLogger = context.get<Logger>();
+      const String manifest = '''
+name: test
+flutter:
+    plugin:
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      expect(flutterManifest, null);
+      expect(bufferLogger.errorText, contains('Expected "plugin" to be an object, but got null'));
+    });
+
 
     Future<void> checkManifestVersion({
       String manifest,
@@ -640,7 +652,7 @@ flutter:
         },
         overrides: <Type, Generator>{
           FileSystem: () => filesystem,
-          ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+          ProcessManager: () => FakeProcessManager.any(),
         },
       );
     }

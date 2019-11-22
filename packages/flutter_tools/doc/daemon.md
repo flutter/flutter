@@ -60,7 +60,7 @@ The `version()` command responds with a String with the protocol version.
 
 The `shutdown()` command will terminate the flutter daemon. It is not necessary to call this before shutting down the daemon; it is perfectly acceptable to just kill the daemon process.
 
-### daemon.getSupportedPlatforms
+#### daemon.getSupportedPlatforms
 
 The `getSupportedPlatforms()` command will enumerate all platforms supported by the project located at the provided `projectRoot`. It returns a Map with the key 'platforms' containing a List of strings which describe the set of all possibly supported platforms. Possible values include:
    - android
@@ -152,6 +152,10 @@ This is sent when an operation starts and again when it stops. When an operation
 #### app.stop
 
 This is sent when an app is stopped or detached from. The `params` field will be a map with the field `appId`.
+
+#### app.webLaunchUrl
+
+This is sent once a web application is being served and available for the user to access. The `params` field will be a map with a string `url` field and a boolean `launched` indicating whether the application has already been launched in a browser (this will generally be true for a browser device unless `--no-web-browser-launch` was used, and false for the headless `web-server` device).
 
 ### device domain
 

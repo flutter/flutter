@@ -529,14 +529,15 @@ void main() {
     // which will change depending on where the test is run.
     expect(lines.length, greaterThan(7));
     expect(
-      lines.take(7).join('\n'),
+      lines.take(8).join('\n'),
       equalsIgnoringHashCodes(
         '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
         'The following assertion was thrown building Stepper(dirty,\n'
         'dependencies: [_LocalizationsScope-[GlobalKey#00000]], state:\n'
         '_StepperState#00000):\n'
-        'Steppers must not be nested. The material specification advises\n'
-        'that one should avoid embedding steppers within steppers.\n'
+        'Steppers must not be nested.\n'
+        'The material specification advises that one should avoid\n'
+        'embedding steppers within steppers.\n'
         'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
       ),
     );
@@ -603,5 +604,57 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Text After Stepper'), findsNothing);
+  });
+
+  testWidgets("Vertical Stepper can't be focused when disabled.", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            currentStep: 0,
+            type: StepperType.vertical,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 0'),
+                state: StepState.disabled,
+                content: Text('Text 0'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true);
+    disabledNode.requestFocus();
+    await tester.pump();
+    expect(disabledNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets("Horizontal Stepper can't be focused when disabled.", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            currentStep: 0,
+            type: StepperType.horizontal,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 0'),
+                state: StepState.disabled,
+                content: Text('Text 0'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true);
+    disabledNode.requestFocus();
+    await tester.pump();
+    expect(disabledNode.hasPrimaryFocus, isFalse);
   });
 }

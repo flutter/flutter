@@ -572,9 +572,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   bool _needToReportFirstFrame = true;
-  int _deferFirstFrameReportCount = 0;
-  bool get _reportFirstFrame => _deferFirstFrameReportCount == 0;
-
 
   final Completer<void> _firstFrameCompleter = Completer<void>();
 
@@ -600,11 +597,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   /// Whether the first frame has finished building.
   ///
-  /// Only useful in profile and debug builds; in release builds, this always
-  /// return false. This can be deferred using [deferFirstFrameReport] and
-  /// [allowFirstFrameReport]. The value is set at the end of the call to
-  /// [drawFrame].
-  ///
   /// This value can also be obtained over the VM service protocol as
   /// `ext.flutter.didSendFirstFrameEvent`.
   ///
@@ -616,27 +608,30 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Tell the framework not to report the frame it is building as a "useful"
   /// first frame until there is a corresponding call to [allowFirstFrameReport].
   ///
-  /// This is used by [WidgetsApp] to avoid reporting frames that aren't useful
-  /// during startup as the "first frame".
+  /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
+  /// first frame.
+  @Deprecated(
+    'Use deferFirstFrame/allowFirstFrame to delay rendering the first frame. '
+    'This feature was deprecated after v1.12.4.'
+  )
   void deferFirstFrameReport() {
     if (!kReleaseMode) {
-      assert(_deferFirstFrameReportCount >= 0);
-      _deferFirstFrameReportCount += 1;
+      deferFirstFrame();
     }
   }
 
   /// When called after [deferFirstFrameReport]: tell the framework to report
   /// the frame it is building as a "useful" first frame.
   ///
-  /// This method may only be called once for each corresponding call
-  /// to [deferFirstFrameReport].
-  ///
-  /// This is used by [WidgetsApp] to report when the first useful frame is
-  /// painted.
+  /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
+  /// first frame.
+  @Deprecated(
+    'Use deferFirstFrame/allowFirstFrame to delay rendering the first frame. '
+    'This feature was deprecated after v1.12.4.'
+  )
   void allowFirstFrameReport() {
     if (!kReleaseMode) {
-      assert(_deferFirstFrameReportCount >= 1);
-      _deferFirstFrameReportCount -= 1;
+      allowFirstFrame();
     }
   }
 
@@ -645,23 +640,27 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     // should not trigger a new frame.
     assert(() {
       if (debugBuildingDirtyElements) {
-        throw FlutterError(
-          'Build scheduled during frame.\n'
-          'While the widget tree was being built, laid out, and painted, '
-          'a new frame was scheduled to rebuild the widget tree. '
-          'This might be because setState() was called from a layout or '
-          'paint callback. '
-          'If a change is needed to the widget tree, it should be applied '
-          'as the tree is being built. Scheduling a change for the subsequent '
-          'frame instead results in an interface that lags behind by one frame. '
-          'If this was done to make your build dependent on a size measured at '
-          'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
-          'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
-          'is the desired effect, for example because this is an '
-          'animation, consider scheduling the frame in a post-frame callback '
-          'using SchedulerBinding.addPostFrameCallback or '
-          'using an AnimationController to trigger the animation.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Build scheduled during frame.'),
+          ErrorDescription(
+            'While the widget tree was being built, laid out, and painted, '
+            'a new frame was scheduled to rebuild the widget tree.'
+          ),
+          ErrorHint(
+            'This might be because setState() was called from a layout or '
+            'paint callback. '
+            'If a change is needed to the widget tree, it should be applied '
+            'as the tree is being built. Scheduling a change for the subsequent '
+            'frame instead results in an interface that lags behind by one frame. '
+            'If this was done to make your build dependent on a size measured at '
+            'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
+            'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
+            'is the desired effect, for example because this is an '
+            'animation, consider scheduling the frame in a post-frame callback '
+            'using SchedulerBinding.addPostFrameCallback or '
+            'using an AnimationController to trigger the animation.',
+          )
+        ]);
       }
       return true;
     }());
@@ -749,27 +748,24 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return true;
     }());
 
-    if (_needToReportFirstFrame && _reportFirstFrame) {
+    TimingsCallback firstFrameCallback;
+    if (_needToReportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
-      // TODO(liyuqian): use a broadcast stream approach
-      // use frameTimings. https://github.com/flutter/flutter/issues/38838
-      // ignore: deprecated_member_use
-      final TimingsCallback oldCallback = WidgetsBinding.instance.window.onReportTimings;
-      // use frameTimings. https://github.com/flutter/flutter/issues/38838
-      // ignore: deprecated_member_use
-      WidgetsBinding.instance.window.onReportTimings = (List<FrameTiming> timings) {
+
+      firstFrameCallback = (List<FrameTiming> timings) {
+        assert(sendFramesToEngine);
         if (!kReleaseMode) {
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
-        if (oldCallback != null) {
-          oldCallback(timings);
-        }
-        // use frameTimings. https://github.com/flutter/flutter/issues/38838
-        // ignore: deprecated_member_use
-        WidgetsBinding.instance.window.onReportTimings = oldCallback;
+        SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
+        firstFrameCallback = null;
         _firstFrameCompleter.complete();
       };
+      // Callback is only invoked when [Window.render] is called. When
+      // [sendFramesToEngine] is set to false during the frame, it will not
+      // be called and we need to remove the callback (see below).
+      SchedulerBinding.instance.addTimingsCallback(firstFrameCallback);
     }
 
     try {
@@ -784,11 +780,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       }());
     }
     if (!kReleaseMode) {
-      if (_needToReportFirstFrame && _reportFirstFrame) {
+      if (_needToReportFirstFrame && sendFramesToEngine) {
         developer.Timeline.instantSync('Widgets built first useful frame');
       }
     }
     _needToReportFirstFrame = false;
+    if (firstFrameCallback != null && !sendFramesToEngine) {
+      SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
+    }
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
@@ -836,12 +835,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return true;
     }());
 
-    deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    return super.performReassemble().then((void value) {
-      allowFirstFrameReport();
-    });
+    return super.performReassemble();
   }
 }
 

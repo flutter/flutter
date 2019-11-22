@@ -126,7 +126,7 @@ $fontsSection
       expect(bundle.entries.containsKey('FontManifest.json'), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('App font uses font file from package', () async {
@@ -155,7 +155,7 @@ $fontsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('App font uses local font file and package font file', () async {
@@ -188,7 +188,7 @@ $fontsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('App uses package font with own font file', () async {
@@ -222,7 +222,7 @@ $fontsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('App uses package font with font file from another package', () async {
@@ -257,7 +257,7 @@ $fontsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('App uses package font with properties and own font file', () async {
@@ -293,7 +293,7 @@ $fontsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('App uses local font and package font with own font file.', () async {
@@ -333,7 +333,7 @@ $fontsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }

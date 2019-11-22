@@ -331,10 +331,12 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   }
 
   void _onTap(T currentKey) {
-    if (currentKey != widget.groupValue && currentKey == _pressedKey) {
+    if (currentKey != _pressedKey)
+      return;
+    if (currentKey != widget.groupValue) {
       widget.onValueChanged(currentKey);
-      _pressedKey = null;
     }
+    _pressedKey = null;
   }
 
   Color getTextColor(int index, T currentKey) {
@@ -472,7 +474,6 @@ class _RenderSegmentedControl<T> extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedControl({
-    List<RenderBox> children,
     @required int selectedIndex,
     @required int pressedIndex,
     @required TextDirection textDirection,
@@ -483,9 +484,7 @@ class _RenderSegmentedControl<T> extends RenderBox
        _selectedIndex = selectedIndex,
        _pressedIndex = pressedIndex,
        _backgroundColors = backgroundColors,
-       _borderColor = borderColor {
-    addAll(children);
-  }
+       _borderColor = borderColor;
 
   int get selectedIndex => _selectedIndex;
   int _selectedIndex;

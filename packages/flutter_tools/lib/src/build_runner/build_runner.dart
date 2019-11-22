@@ -80,14 +80,14 @@ class BuildRunner extends CodeGenerator {
       stringBuffer.writeln('dependencies:');
       final YamlMap builders = flutterProject.builders;
       if (builders != null) {
-        for (String name in builders.keys) {
+        for (String name in builders.keys.cast<String>()) {
           final Object node = builders[name];
           // For relative paths, make sure it is accounted for
           // parent directories.
           if (node is YamlMap && node['path'] != null) {
-            final String path = node['path'];
+            final String path = node['path'] as String;
             if (fs.path.isRelative(path)) {
-              final String convertedPath = fs.path.join('..', '..', node['path']);
+              final String convertedPath = fs.path.join('..', '..', path);
               stringBuffer.writeln('  $name:');
               stringBuffer.writeln('    path: $convertedPath');
             } else {
@@ -139,7 +139,6 @@ class BuildRunner extends CodeGenerator {
     FlutterProject flutterProject, {
     String mainPath,
     bool linkPlatformKernelIn = false,
-    bool targetProductVm = false,
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions = const <String> [],
   }) async {

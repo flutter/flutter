@@ -246,7 +246,10 @@ class TextSpan extends InlineSpan {
   /// When `visitor` returns true, the walk will continue. When `visitor`
   /// returns false, then the walk will end.
   @override
-  @Deprecated('Use to visitChildren instead')
+  @Deprecated(
+    'Use to visitChildren instead. '
+    'This feature was deprecated after v1.7.3.'
+  )
   bool visitTextSpan(bool visitor(TextSpan span)) {
     if (text != null) {
       if (!visitor(this))
@@ -362,12 +365,15 @@ class TextSpan extends InlineSpan {
     assert(() {
       if (children != null) {
         for (InlineSpan child in children) {
-          assert(child != null,
-            'TextSpan contains a null child.\n...'
-            'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
-            'The full text in question was:\n'
-            '${toStringDeep(prefixLineOne: '  ')}'
-          );
+          if (child == null) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('TextSpan contains a null child.'),
+              ErrorDescription(
+                  'A TextSpan object with a non-null child list should not have any nulls in its child list.'),
+              toDiagnosticsNode(name: 'The full text in question was',
+                  style: DiagnosticsTreeStyle.errorProperty),
+            ]);
+          }
           assert(child.debugAssertIsValid());
         }
       }
