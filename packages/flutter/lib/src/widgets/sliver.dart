@@ -1137,7 +1137,8 @@ class _RenderSliverFractionalPadding extends RenderSliverPadding {
     if (_viewportFraction == newValue)
       return;
     _viewportFraction = newValue;
-    markNeedsLayout();
+    // Update the padding using the setter. The setter calls marksNeedsLayout internally.
+    padding = padding;
   }
 
   @override
