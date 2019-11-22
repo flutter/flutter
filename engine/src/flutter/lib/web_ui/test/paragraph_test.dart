@@ -2,9 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
 import 'package:test/test.dart';
+
+void testEachMeasurement(String description, VoidCallback body) {
+  test(description, () async {
+    try {
+      TextMeasurementService.initialize(rulerCacheCapacity: 2);
+      return body();
+    } finally {
+      TextMeasurementService.clearCache();
+    }
+  });
+  test('$description (canvas measurement)', () async {
+    try {
+      TextMeasurementService.initialize(rulerCacheCapacity: 2);
+      TextMeasurementService.enableExperimentalCanvasImplementation = true;
+      return body();
+    } finally {
+      TextMeasurementService.enableExperimentalCanvasImplementation = false;
+      TextMeasurementService.clearCache();
+    }
+  });
+}
 
 void main() async {
   await webOnlyInitializeTestDomRenderer();
@@ -12,7 +34,7 @@ void main() async {
   // Ahem font uses a constant ideographic/alphabetic baseline ratio.
   const double kAhemBaselineRatio = 1.25;
 
-  test('predictably lays out a single-line paragraph', () {
+  testEachMeasurement('predictably lays out a single-line paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
       final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
         fontFamily: 'Ahem',
@@ -36,7 +58,7 @@ void main() async {
     }
   });
 
-  test('predictably lays out a multi-line paragraph', () {
+  testEachMeasurement('predictably lays out a multi-line paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
       final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
         fontFamily: 'Ahem',
@@ -63,41 +85,50 @@ void main() async {
     }
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/37744
-  test('measures heights of multiple multi-span paragraphs', () {
-    const double fontSize = 20.0;
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
-      fontFamily: 'Ahem',
-      fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.normal,
-      fontSize: fontSize,
-    ));
-    builder.addText('1234567890 1234567890 1234567890 1234567890 1234567890');
-    builder.addText('1234567890 1234567890 1234567890 1234567890 1234567890');
-    builder.pushStyle(TextStyle(fontWeight: FontWeight.bold));
-    builder.addText('span0');
-    final Paragraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: fontSize * 5.0));
-    expect(
-        paragraph.height, closeTo(fontSize * 3.0, 0.001)); // because it wraps
+  testEachMeasurement('predictably lays out a single-line rich paragraph', () {
+    for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+        fontFamily: 'Ahem',
+        fontStyle: FontStyle.normal,
+        fontWeight: FontWeight.normal,
+        fontSize: fontSize,
+      ));
+      builder.addText('span1');
+      builder.pushStyle(TextStyle(fontWeight: FontWeight.bold));
+      builder.addText('span2');
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(ParagraphConstraints(width: fontSize * 10.0));
 
-    // Now create another builder with just a single line of text so
-    // it tries to reuse ruler cache but misses.
-    final ParagraphBuilder builder2 = ParagraphBuilder(ParagraphStyle(
-      fontFamily: 'Ahem',
-      fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.normal,
-      fontSize: fontSize,
-    ));
-    builder2.addText('span1');
-    builder2.pushStyle(TextStyle(fontWeight: FontWeight.bold));
-    builder2.addText('span2');
-    final Paragraph paragraph2 = builder2.build();
-    paragraph2.layout(ParagraphConstraints(width: fontSize * 5.0));
-    expect(paragraph2.height, closeTo(fontSize, 0.001)); // because it wraps
+      expect(paragraph.height, fontSize);
+      expect(paragraph.width, fontSize * 10.0);
+      expect(paragraph.minIntrinsicWidth, fontSize * 10.0);
+      expect(paragraph.maxIntrinsicWidth, fontSize * 10.0);
+    }
   });
 
-  test('getBoxesForRange returns a box', () {
+  testEachMeasurement('predictably lays out a multi-line rich paragraph', () {
+    for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+        fontFamily: 'Ahem',
+        fontStyle: FontStyle.normal,
+        fontWeight: FontWeight.normal,
+        fontSize: fontSize,
+      ));
+      builder.addText('12345 ');
+      builder.addText('67890 ');
+      builder.pushStyle(TextStyle(fontWeight: FontWeight.bold));
+      builder.addText('bold');
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(ParagraphConstraints(width: fontSize * 5.0));
+
+      expect(paragraph.height, fontSize * 3.0); // because it wraps
+      expect(paragraph.width, fontSize * 5.0);
+      expect(paragraph.minIntrinsicWidth, fontSize * 5.0);
+      expect(paragraph.maxIntrinsicWidth, fontSize * 16.0);
+    }
+  });
+
+  testEachMeasurement('getBoxesForRange returns a box', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
       fontFamily: 'Ahem',
       fontStyle: FontStyle.normal,
@@ -120,7 +151,8 @@ void main() async {
     );
   });
 
-  test('getBoxesForRange return empty list for zero-length range', () {
+  testEachMeasurement(
+      'getBoxesForRange return empty list for zero-length range', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
       fontFamily: 'Ahem',
       fontStyle: FontStyle.normal,
