@@ -253,6 +253,7 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePlugins() {
         if (!buildPluginAsAar()) {
             getPluginList().each this.&configurePluginProject
+            getPluginDependencies().each this.&configurePluginDependencies
             return
         }
         project.repositories {
@@ -298,10 +299,10 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     // Adds the plugin project dependency to the app project .
-    private void configurePluginProject(String name, String _) {
-        Project pluginProject = project.rootProject.findProject(":$name")
+    private void configurePluginProject(String pluginName, String _) {
+        Project pluginProject = project.rootProject.findProject(":$pluginName")
         if (pluginProject == null) {
-            project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
+            project.logger.error("Plugin project :$pluginName not found. Please update settings.gradle.")
             return
         }
         // Add plugin dependency to the app project.
@@ -337,6 +338,37 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    // Add the dependencies on other plugin projects to the plugin projects.
+    // A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
+    // making the Gradle plugin project A depend on the Gradle plugin project B.
+    private void configurePluginDependencies(String pluginName, String dependencies) {
+        Project pluginProject = project.rootProject.findProject(":$pluginName")
+        if (pluginProject == null) {
+            // Ignore plugins that don't have a project since they most likely
+            // they don't have an android/ directory.
+            return
+        }
+        dependencies.split(',').each { pluginDependencyName ->
+            if (pluginDependencyName.empty) {
+                return
+            }
+            Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
+            if (dependencyProject == null) {
+                return
+            }
+            // Wait for the Android plugin to load and add the dependency to the plugin project.
+            pluginProject.afterEvaluate {
+                pluginProject.dependencies {
+                    if (project.getConfigurations().findByName("implementation")) {
+                        implementation dependencyProject
+                    } else {
+                        compile dependencyProject
+                    }
+                }
+            }
+        }
+    }
+
     private Properties getPluginList() {
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
         Properties allPlugins = readPropertiesIfExist(pluginsFile)
@@ -351,6 +383,21 @@ class FlutterPlugin implements Plugin<Project> {
             // https://github.com/flutter/flutter/issues/40784
         }
         return androidPlugins
+    }
+
+    // Gets the plugins dependencies from `.flutter-plugins-dependencies`.
+    private Properties getPluginDependencies() {
+        // Consider a `.flutter-plugins-dependencies` file with the following content:
+        //
+        //   plugin1=plugin2,plugin3
+        //   plugin2=plugin3
+        //   plugin3=
+        //
+        // This means, `plugin1` depends on `plugin2` and `plugin3`.
+        // `plugin2` depends on `plugin3`.
+        // `plugin3` doesn't depend on anything.
+        File pluginsDependencyFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins-dependencies')
+        return readPropertiesIfExist(pluginsDependencyFile)
     }
 
     private static String toCammelCase(List<String> parts) {

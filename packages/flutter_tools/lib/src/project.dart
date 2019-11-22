@@ -146,6 +146,9 @@ class FlutterProject {
   /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
+  /// The `.flutter-plugins-dependencies` file of this project.
+  File get flutterDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
+
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
 
