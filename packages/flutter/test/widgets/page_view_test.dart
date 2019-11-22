@@ -532,8 +532,7 @@ void main() {
   });
 
   testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
-    final PageController controller =
-        PageController(viewportFraction: 5/4);
+    final PageController controller = PageController(viewportFraction: 5/4);
 
     Widget build(PageController controller) {
       return Directionality(
@@ -599,6 +598,42 @@ void main() {
       await tester.pump();
 
       expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-(4 - 1) * 800 / 2, 0));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/45096.
+  testWidgets(
+    'PageView large viewportFraction can scroll and to the last page and snap',
+    (WidgetTester tester) async {
+      final PageController controller = PageController(viewportFraction: 5/4);
+
+      Widget build(PageController controller) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: 3,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 200.0,
+                color: index % 2 == 0
+                  ? const Color(0xFF0000FF)
+                  : const Color(0xFF00FF00),
+                  child: Text(index.toString()),
+              );
+            },
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(controller));
+
+      expect(tester.getCenter(find.text('0')), const Offset(400, 300));
+
+      controller.jumpToPage(2);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tester.getCenter(find.text('2')), const Offset(400, 300));
   });
 
   testWidgets(

@@ -1041,9 +1041,9 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 class SliverFillViewport extends StatelessWidget {
   /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
-      Key key,
-      @required this.delegate,
-      this.viewportFraction = 1.0,
+    Key key,
+    @required this.delegate,
+    this.viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
        assert(viewportFraction > 0.0),
        super(key: key);
