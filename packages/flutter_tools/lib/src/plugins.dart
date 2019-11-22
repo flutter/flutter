@@ -312,7 +312,7 @@ List<Plugin> findPlugins(FlutterProject project) {
 /// If there aren't any plugins, then the files aren't written to disk.
 ///
 /// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
-/// otherwise returns false.
+/// otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final StringBuffer dependenciesFileBuffer = StringBuffer();
   final StringBuffer flutterPluginsBuffer = StringBuffer();

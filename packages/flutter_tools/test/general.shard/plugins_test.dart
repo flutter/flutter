@@ -262,7 +262,7 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () {
+      testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
         createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
