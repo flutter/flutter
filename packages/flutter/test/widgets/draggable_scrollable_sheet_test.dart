@@ -299,14 +299,14 @@ void main() {
       await tester.flingFrom(const Offset(0, 325), const Offset(0, -325), 200);
       await tester.pumpAndSettle();
 
-      expect(notificationTypes.removeAt(0), ScrollStartNotification);
-      expect(notificationTypes.removeAt(0), UserScrollNotification);
-      expect(notificationTypes.removeLast(), UserScrollNotification);
-      expect(notificationTypes.removeLast(), ScrollEndNotification);
-      expect(
-        notificationTypes.every((Type t) => t == ScrollUpdateNotification),
-        true,
-      );
+      final List<Type> types = <Type>[
+        ScrollStartNotification,
+        UserScrollNotification,
+        ...List<Type>.filled(5, ScrollUpdateNotification),
+        ScrollEndNotification,
+        UserScrollNotification,
+      ];
+      expect(notificationTypes, types);
     });
   }
 }
