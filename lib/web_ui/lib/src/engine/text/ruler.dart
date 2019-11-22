@@ -205,7 +205,7 @@ class TextDimensions {
       // Rich text: deeply copy contents. This is the slow case that should be
       // avoided if fast layout performance is desired.
       final html.Element copy = from._paragraphElement.clone(true);
-      _element.children.addAll(copy.children);
+      _element.nodes.addAll(copy.nodes);
     }
   }
 
@@ -405,6 +405,10 @@ class ParagraphRuler {
       ..border = '0'
       ..padding = '0';
 
+    if (assertionsEnabled) {
+      _singleLineHost.setAttribute('data-ruler', 'single-line');
+    }
+
     singleLineDimensions.applyStyle(style);
 
     // Force single-line (even if wider than screen) and preserve whitespaces.
@@ -426,6 +430,10 @@ class ParagraphRuler {
       ..margin = '0'
       ..border = '0'
       ..padding = '0';
+
+    if (assertionsEnabled) {
+      _minIntrinsicHost.setAttribute('data-ruler', 'min-intrinsic');
+    }
 
     minIntrinsicDimensions.applyStyle(style);
 
@@ -455,6 +463,10 @@ class ParagraphRuler {
       ..margin = '0'
       ..border = '0'
       ..padding = '0';
+
+    if (assertionsEnabled) {
+      _constrainedHost.setAttribute('data-ruler', 'constrained');
+    }
 
     constrainedDimensions.applyStyle(style);
     final html.CssStyleDeclaration elementStyle =
@@ -494,6 +506,10 @@ class ParagraphRuler {
       ..margin = '0'
       ..border = '0'
       ..padding = '0';
+
+    if (assertionsEnabled) {
+      _lineHeightHost.setAttribute('data-ruler', 'line-height');
+    }
 
     lineHeightDimensions.applyStyle(style);
 
