@@ -1501,7 +1501,7 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
     @required this.handle,
     @Deprecated(
       'Use sliver instead. '
-      'This feature was deprecated after v1.10.16'
+      'This feature was deprecated after v1.10.16.'
     )
     Widget child,
     Widget sliver,
