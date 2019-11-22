@@ -1817,3 +1817,125 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
     setChildParentData(child, constraints, geometry);
   }
 }
+
+/// A render object that is invisible during hit testing.
+///
+/// When [ignoring] is true, this render object (and its subtree) is invisible
+/// to hit testing. It still consumes space during layout and paints its sliver
+/// child as usual. It just cannot be the target of located events, because its
+/// render object returns false from [hitTest].
+///
+/// When [ignoringSemantics] is true, the subtree will be invisible to the
+/// semantics layer (and thus e.g. accessibility tools). If [ignoringSemantics]
+/// is null, it uses the value of [ignoring].
+class RenderSliverIgnorePointer extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
+  /// Creates a render object that is invisible to hit testing.
+  ///
+  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
+  /// this render object will be ignored for semantics if [ignoring] is true.
+  RenderSliverIgnorePointer({
+    RenderSliver sliver,
+    bool ignoring = true,
+    bool ignoringSemantics,
+  }) : assert(ignoring != null),
+       _ignoring = ignoring,
+       _ignoringSemantics = ignoringSemantics {
+    child = sliver;
+  }
+
+  /// Whether this render object is ignored during hit testing.
+  ///
+  /// Regardless of whether this render object is ignored during hit testing, it
+  /// will still consume space during layout and be visible during painting.
+  bool get ignoring => _ignoring;
+  bool _ignoring;
+  set ignoring(bool value) {
+    assert(value != null);
+    if (value == _ignoring)
+      return;
+    _ignoring = value;
+    if (_ignoringSemantics == null || !_ignoringSemantics)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// Whether the semantics of this render object is ignored when compiling the
+  /// semantics tree.
+  ///
+  /// If null, defaults to value of [ignoring].
+  ///
+  /// See [SemanticsNode] for additional information about the semantics tree.
+  bool get ignoringSemantics => _ignoringSemantics;
+  bool _ignoringSemantics;
+  set ignoringSemantics(bool value) {
+    if (value == _ignoringSemantics)
+      return;
+    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
+    _ignoringSemantics = value;
+    if (oldEffectiveValue != _effectiveIgnoringSemantics)
+      markNeedsSemanticsUpdate();
+  }
+
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SliverPhysicalParentData)
+      child.parentData = SliverPhysicalParentData();
+  }
+
+  @override
+  void performLayout() {
+    assert(child != null);
+    child.layout(constraints, parentUsesSize: true);
+    geometry = child.geometry;
+  }
+
+  @override
+  bool hitTest(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+    return !ignoring
+      && super.hitTest(
+        result,
+        mainAxisPosition: mainAxisPosition,
+        crossAxisPosition: crossAxisPosition,
+      );
+  }
+
+  @override
+  bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+    return child != null
+      && child.geometry.hitTestExtent > 0
+      && child.hitTest(
+        result,
+        mainAxisPosition: mainAxisPosition,
+        crossAxisPosition: crossAxisPosition,
+      );
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    assert(child != null);
+    final SliverPhysicalParentData childParentData = child.parentData;
+    childParentData.applyPaintTransform(transform);
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null && !_effectiveIgnoringSemantics)
+      visitor(child);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'ignoringSemantics',
+        _effectiveIgnoringSemantics,
+        description: ignoringSemantics == null ?
+          'implicitly $_effectiveIgnoringSemantics' :
+          null,
+      ),
+    );
+  }
+}
