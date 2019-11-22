@@ -339,7 +339,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
     }
   }
 
-  final File dependenciesFile = project.flutterDependenciesFile;
+  final File dependenciesFile = project.flutterPluginsDependenciesFile;
   final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
   final String dependenciesFileContent = dependenciesFileBuffer.toString();
   if (pluginFileContent.isNotEmpty) {
