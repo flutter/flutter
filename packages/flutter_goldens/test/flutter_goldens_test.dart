@@ -53,10 +53,9 @@ void main() {
 
   group('SkiaGoldClient', () {
     SkiaGoldClient skiaClient;
-    Directory workDirectory;
 
     setUp(() {
-      workDirectory = fs.directory('/workDirectory')
+      final Directory workDirectory = fs.directory('/workDirectory')
         ..createSync(recursive: true);
       skiaClient = SkiaGoldClient(
         workDirectory,
@@ -82,13 +81,6 @@ void main() {
         ));
       });
     });
-
-//    test('Gets commit count for pre-submit tryjobs', () async {
-//      // Troubleshooting Cirrus environment response
-//      final SkiaGoldClient separateClient = SkiaGoldClient(workDirectory);
-//      await separateClient.getBranchCommitCount();
-//      expect(false, isTrue);
-//    });
 
     group('Request Handling', () {
       String testName;

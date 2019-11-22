@@ -169,37 +169,6 @@ String digestResponseTemplate({
   ''';
 }
 
-/// Json response template for Skia Gold ignore request:
-/// https://flutter-gold.skia.org/json/ignores
-String ignoreResponseTemplate({
-  String pullRequestNumber = '0000',
-  String testName = 'flutter.golden_test.1',
-  String otherTestName = 'flutter.golden_test.1',
-  String expires = '2019-09-06T21:28:18.815336Z',
-  String otherExpires = '2019-09-06T21:28:18.815336Z',
-}) {
-  return '''
-    [
-      {
-        "id": "7579425228619212078",
-        "name": "contributor@getMail.com",
-        "updatedBy": "contributor@getMail.com",
-        "expires": "$expires",
-        "query": "ext=png&name=$testName",
-        "note": "https://github.com/flutter/flutter/pull/$pullRequestNumber"
-      },
-      {
-        "id": "7579425228619212078",
-        "name": "contributor@getMail.com",
-        "updatedBy": "contributor@getMail.com",
-        "expires": "$otherExpires",
-        "query": "ext=png&name=$otherTestName",
-        "note": "https://github.com/flutter/flutter/pull/99999"
-      }
-    ]
-  ''';
-}
-
 /// Json response template for Skia Gold image request:
 /// https://flutter-gold.skia.org/img/images/[imageHash].png
 List<List<int>> imageResponseTemplate() {

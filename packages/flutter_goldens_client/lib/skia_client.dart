@@ -110,8 +110,6 @@ class SkiaGoldClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    //tempDirectory = 'temp${math.Random().nextInt(10000)}';
-
     final File authorization = workDirectory.childFile('serviceAccount.json');
     await authorization.writeAsString(_serviceAccount);
 
@@ -206,7 +204,6 @@ class SkiaGoldClient {
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
     final String commitHash = await _getCurrentCommit();
-    final String nthCommit = await getBranchCommitCount();
     final String pullRequest = platform.environment['CIRRUS_PR'];
     final String cirrusTaskID = platform.environment['CIRRUS_TASK_ID'];
 
@@ -225,12 +222,12 @@ class SkiaGoldClient {
       '--changelist', pullRequest,
       '--cis', 'cirrus',
       '--jobid', cirrusTaskID,
-      '--patchset', nthCommit,
+      '--patchset', commitHash,
     ];
 
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Null argument for Skia Gold imgtest init:');
+        ..writeln('Null argument for Skia Gold tryjobInit:');
       imgtestInitArguments.forEach(buf.writeln);
       throw NonZeroExitCode(1, buf.toString());
     }
@@ -244,17 +241,7 @@ class SkiaGoldClient {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
         ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}\n')
-        ..writeln('\nArguments: ');
-      imgtestInitArguments.forEach(buf.writeln);
-      final File resultState = workDirectory?.childFile(fs.path.join(
-        'temp',
-        'result-state.json',
-      ));
-      final String contents = await resultState.readAsString();
-      buf
-        ..writeln('\nresult-state.json contents:')
-        ..writeln('$contents\n');
+        ..writeln('stderr: ${result.stderr}');
       throw NonZeroExitCode(1, buf.toString());
     }
   }
@@ -290,17 +277,7 @@ class SkiaGoldClient {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobAdd failure.')
         ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}\n')
-        ..writeln('\nArguments: ');
-      imgtestArguments.forEach(buf.writeln);
-      final File resultState = workDirectory?.childFile(fs.path.join(
-        'temp',
-        'result-state.json',
-      ));
-      final String contents = await resultState.readAsString();
-      buf
-        ..writeln('\nresult-state.json contents:')
-        ..writeln('$contents\n');
+        ..writeln('stderr: ${result.stderr}\n');
       throw NonZeroExitCode(1, buf.toString());
     }
     return result.exitCode == 0;
@@ -410,19 +387,6 @@ class SkiaGoldClient {
       );
       return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
     }
-  }
-
-  /// Returns the number of commits made on the current branch.
-  Future<String> getBranchCommitCount() async {
-//    final String branch = platform.environment['CIRRUS_BRANCH'];
-//    final String masterBranch = platform.environment['CIRRUS_BASE_BRANCH'];
-
-//    // This git wizardry does not appear to work as intended on Cirrus.
-//    final io.ProcessResult revList = await process.run(
-//      <String>['git', 'rev-list', branch, '^$masterBranch', '--count'],
-//      workingDirectory: _flutterRoot.path,
-//    );
-    return '2';//revList.exitCode == 0 ? revList.stdout.trim() : null;
   }
 
   /// Returns a JSON String with keys value pairs used to uniquely identify the
