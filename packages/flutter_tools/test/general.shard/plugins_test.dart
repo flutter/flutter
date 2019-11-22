@@ -279,10 +279,22 @@ dependencies:
           ''
         );
         expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
-          'plugin-a=plugin-b,plugin-c\n'
-          'plugin-b=plugin-c\n'
-          'plugin-c=\n'
-          ''
+          '{'
+            '"dependencyGraph":['
+              '{'
+                '"name":"plugin-a",'
+                '"dependencies":["plugin-b","plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-b",'
+                '"dependencies":["plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-c",'
+                '"dependencies":[]'
+              '}'
+            ']'
+          '}'
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

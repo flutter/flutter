@@ -6,6 +6,7 @@ import static groovy.io.FileType.FILES
 
 import com.android.builder.model.AndroidProject
 import com.android.build.OutputFile
+import groovy.json.JsonSlurper
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.regex.Matcher
@@ -337,14 +338,16 @@ class FlutterPlugin implements Plugin<Project> {
     // Add the dependencies on other plugin projects to the plugin project.
     // A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
     // making the Gradle plugin project A depend on the Gradle plugin project B.
-    private void configurePluginDependencies(String pluginName, String dependencies) {
-        Project pluginProject = project.rootProject.findProject(":$pluginName")
+    private void configurePluginDependencies(Object dependencyObject) {
+        assert dependencyObject.name instanceof String
+        Project pluginProject = project.rootProject.findProject(":${dependencyObject.name}")
         if (pluginProject == null) {
             // Ignore plugins that don't have a project since most likely they don't
             // have an android/ directory.
             return
         }
-        dependencies.split(',').each { pluginDependencyName ->
+        assert dependencyObject.dependencies instanceof List
+        dependencyObject.dependencies.each { pluginDependencyName ->
             if (pluginDependencyName.empty) {
                 return
             }
@@ -378,18 +381,36 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     // Gets the plugins dependencies from `.flutter-plugins-dependencies`.
-    private Properties getPluginDependencies() {
+    private List getPluginDependencies() {
         // Consider a `.flutter-plugins-dependencies` file with the following content:
+        // {
+        //     "dependencyGraph": [
+        //       {
+        //         "name": "plugin-a",
+        //         "dependencies": ["plugin-b","plugin-c"]
+        //       },
+        //       {
+        //         "name": "plugin-b",
+        //         "dependencies": ["plugin-c"]
+        //       },
+        //       {
+        //         "name": "plugin-c",
+        //         "dependencies": []'
+        //       }
+        //     ]
+        //  }
         //
-        //   plugin1=plugin2,plugin3
-        //   plugin2=plugin3
-        //   plugin3=
-        //
-        // This means, `plugin1` depends on `plugin2` and `plugin3`.
-        // `plugin2` depends on `plugin3`.
-        // `plugin3` doesn't depend on anything.
+        // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
+        // `plugin-b` depends on `plugin-c`.
+        // `plugin-c` doesn't depend on anything.
         File pluginsDependencyFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins-dependencies')
-        return readPropertiesIfExist(pluginsDependencyFile)
+        if (pluginsDependencyFile.exists()) {
+            def object = new JsonSlurper().parseText(pluginsDependencyFile.text)
+            assert object instanceof Map
+            assert object.dependencyGraph instanceof List
+            return object.dependencyGraph
+        }
+        return []
     }
 
     private static String toCammelCase(List<String> parts) {

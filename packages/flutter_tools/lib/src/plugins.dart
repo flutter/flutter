@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:mustache/mustache.dart' as mustache;
@@ -314,7 +315,7 @@ List<Plugin> findPlugins(FlutterProject project) {
 /// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
 /// otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
-  final StringBuffer dependenciesFileBuffer = StringBuffer();
+  final List<dynamic> directAppDependencies = <dynamic>[];
   final StringBuffer flutterPluginsBuffer = StringBuffer();
 
   final Set<String> pluginNames = <String>{};
@@ -323,11 +324,12 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   }
   for (Plugin plugin in plugins) {
     flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
-    // Extract the plugin dependencies which happen to be plugins.
-    final Iterable<String> pluginDependencies = plugin.dependencies.where(pluginNames.contains);
-    dependenciesFileBuffer.write('${plugin.name}=${pluginDependencies.join(',')}\n');
+    directAppDependencies.add(<String, dynamic>{
+      'name': plugin.name,
+      // Extract the plugin dependencies which happen to be plugins.
+      'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
+    });
   }
-
   final File pluginsFile = project.flutterPluginsFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
@@ -341,7 +343,9 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
 
   final File dependenciesFile = project.flutterPluginsDependenciesFile;
   final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
-  final String dependenciesFileContent = dependenciesFileBuffer.toString();
+  final String dependenciesFileContent = json.encode(<String, dynamic>{
+      'dependencyGraph': directAppDependencies,
+    });
   if (pluginFileContent.isNotEmpty) {
     dependenciesFile.writeAsStringSync(dependenciesFileContent, flush: true);
   } else {
