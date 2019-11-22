@@ -89,7 +89,10 @@ class ChromeDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async {
+  Future<String> get sdkNameAndVersion async => _sdkNameAndVersion ??= await _computeSdkNameAndVersion();
+
+  String _sdkNameAndVersion;
+  Future<String> _computeSdkNameAndVersion() async {
     if (!isSupported()) {
       return 'unknown';
     }
@@ -100,7 +103,7 @@ class ChromeDevice extends Device {
         r'reg', 'query', 'HKEY_CURRENT_USER\\Software\\Google\\Chrome\\BLBeacon', '/v', 'version',
       ]);
       if (result.exitCode == 0) {
-        final List<String> parts = result.stdout.split(RegExp(r'\s+'));
+        final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
         if (parts.length > 2) {
           version = 'Google Chrome ' + parts[parts.length - 2];
         }
@@ -112,7 +115,7 @@ class ChromeDevice extends Device {
         '--version',
       ]);
       if (result.exitCode == 0) {
-        version = result.stdout;
+        version = result.stdout as String;
       }
     }
     return version.trim();
@@ -130,16 +133,14 @@ class ChromeDevice extends Device {
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
-    final String url = platformArgs['uri'];
-    if (debuggingOptions.browserLaunch) {
-      _chrome = await chromeLauncher.launch(url,
-        dataDir: fs.currentDirectory
-          .childDirectory('.dart_tool')
-          .childDirectory('chrome-device'));
-    } else {
-      printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
-      logger.sendNotification(url, progressId: 'debugExtension');
-    }
+    final String url = platformArgs['uri'] as String;
+    _chrome = await chromeLauncher.launch(url,
+      dataDir: fs.currentDirectory
+        .childDirectory('.dart_tool')
+        .childDirectory('chrome-device'));
+
+    logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': true});
+
     return LaunchResult.succeeded(observatoryUri: null);
   }
 
@@ -248,9 +249,13 @@ class WebServerDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
-    final String url = platformArgs['uri'];
-    printStatus('$mainPath is being served at $url', emphasis: true);
-    logger.sendNotification(url, progressId: 'debugExtension');
+    final String url = platformArgs['uri'] as String;
+    if (debuggingOptions.startPaused) {
+      printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
+    } else {
+      printStatus('$mainPath is being served at $url', emphasis: true);
+    }
+    logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
     return LaunchResult.succeeded(observatoryUri: null);
   }
 

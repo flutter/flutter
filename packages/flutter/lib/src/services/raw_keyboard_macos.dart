@@ -228,7 +228,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   /// This mask is used to check the [modifiers] field to test whether the CAPS
   /// LOCK modifier key is on.
   ///
-  /// {@template flutter.services.logicalKeyboardKey.modifiers}
+  /// {@template flutter.services.rawKeyEventDataMacOs.modifiers}
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
@@ -238,91 +238,91 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// SHIFT modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierShift = 0x20000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// SHIFT modifier key is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierLeftShift = 0x02;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// SHIFT modifier key is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierRightShift = 0x04;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CTRL modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierControl = 0x40000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// CTRL modifier key is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierLeftControl = 0x01;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// CTRL modifier key is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierRightControl = 0x2000;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// ALT modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierOption = 0x80000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// ALT modifier key is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierLeftOption = 0x20;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// ALT modifier key is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierRightOption = 0x40;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CMD modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierCommand = 0x100000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// CMD modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierLeftCommand = 0x08;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// CMD modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierRightCommand = 0x10;
 
   /// This mask is used to check the [modifiers] field to test whether any key in
   /// the numeric keypad is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierNumericPad = 0x200000;
 
   /// This mask is used to check the [modifiers] field to test whether the
   /// HELP modifier key is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierHelp = 0x400000;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// FUNCTION modifier keys is pressed.
   ///
-  /// {@macro flutter.services.logicalKeyboardKey.modifiers}
+  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
   static const int modifierFunction = 0x800000;
 
   /// Used to retrieve only the device-independent modifier flags, allowing

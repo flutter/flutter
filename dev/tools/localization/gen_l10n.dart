@@ -241,7 +241,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
   for(String pluralKey in pluralIds.keys) {
     final RegExp expRE = RegExp('($pluralKey){([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(message);
-    if (match.groupCount == 2) {
+    if (match != null && match.groupCount == 2) {
       String argValue = match.group(2);
       for (String placeholder in placeholders)
         argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');

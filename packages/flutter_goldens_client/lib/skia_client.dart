@@ -58,7 +58,7 @@ class SkiaGoldClient {
   final io.HttpClient httpClient;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
-  /// context. In this directory, the client will create image and json files
+  /// context. In this directory, the client will create image and JSON files
   /// for the goldctl tool to use.
   ///
   /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
@@ -295,10 +295,10 @@ class SkiaGoldClient {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
-        final Map<String, dynamic> skiaJson = json.decode(rawResponse)['master'];
+        final Map<String, dynamic> skiaJson = json.decode(rawResponse)['master'] as Map<String, dynamic>;
 
         skiaJson.forEach((String key, dynamic value) {
-          final Map<String, dynamic> hashesMap = value;
+          final Map<String, dynamic> hashesMap = value as Map<String, dynamic>;
           _expectations[key] = hashesMap.keys.toList();
         });
       } on FormatException catch(_) {
@@ -353,8 +353,8 @@ class SkiaGoldClient {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForDigest);
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
-        final Map<String, dynamic> skiaJson = json.decode(rawResponse);
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        final Map<String, dynamic> skiaJson = json.decode(rawResponse) as Map<String, dynamic>;
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
         isValid = digest.isValid(platform, testName, expectation);
 
       } on FormatException catch(_) {
@@ -385,7 +385,7 @@ class SkiaGoldClient {
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: _flutterRoot.path,
       );
-      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+      return revParse.exitCode == 0 ? (revParse.stdout as String).trim() : null;
     }
   }
 
@@ -431,17 +431,17 @@ class SkiaGoldDigest {
     this.status,
   });
 
-  /// Create a digest from requested json.
+  /// Create a digest from requested JSON.
   factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
     if (json == null)
       return null;
 
     return SkiaGoldDigest(
-      imageHash: json['digest'],
-      paramSet: Map<String, dynamic>.from(json['paramset'] ??
+      imageHash: json['digest'] as String,
+      paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic> ??
         <String, String>{'Platform': 'none'}),
-      testName: json['test'],
-      status: json['status'],
+      testName: json['test'] as String,
+      status: json['status'] as String,
     );
   }
 
@@ -451,16 +451,16 @@ class SkiaGoldDigest {
   /// Parameter set for the given test, e.g. Platform : Windows.
   final Map<String, dynamic> paramSet;
 
-  /// Test name associated with the digest, e.g. positive or untriaged.
+  /// Test name associated with the digest, e.g. positive or un-triaged.
   final String testName;
 
-  /// Status of the given digest, e.g. positive or untriaged.
+  /// Status of the given digest, e.g. positive or un-triaged.
   final String status;
 
   /// Validates a given digest against the current testing conditions.
   bool isValid(Platform platform, String name, String expectation) {
     return imageHash == expectation
-      && paramSet['Platform'].contains(platform.operatingSystem)
+      && (paramSet['Platform'] as List<dynamic>).contains(platform.operatingSystem)
       && testName == name
       && status == 'positive';
     }

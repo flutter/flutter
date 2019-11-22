@@ -107,7 +107,7 @@ void testWidgets(
   Duration initialTimeout,
   bool semanticsEnabled = true,
 }) {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
   test(
     description,
@@ -198,7 +198,7 @@ Future<void> benchmarkWidgets(
     print('└─────────────────────────────────────────────────╌┄┈  🐢');
     return true;
   }());
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle semanticsHandle;
@@ -284,7 +284,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   /// The binding instance used by the testing framework.
   @override
-  TestWidgetsFlutterBinding get binding => super.binding;
+  TestWidgetsFlutterBinding get binding => super.binding as TestWidgetsFlutterBinding;
 
   /// Renders the UI from the given [widget].
   ///
@@ -485,9 +485,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     if (event is PointerDownEvent) {
-      final RenderObject innerTarget = result.path.firstWhere(
-        (HitTestEntry candidate) => candidate.target is RenderObject,
-      ).target;
+      final RenderObject innerTarget = result.path
+        .map((HitTestEntry candidate) => candidate.target)
+        .whereType<RenderObject>()
+        .first;
       final Element innerTargetElement = collectAllElementsFrom(
         binding.renderViewElement,
         skipOffstage: true,
@@ -515,8 +516,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           break;
         totalNumber += 1; // optimistically assume we'll be able to describe it
 
-        if (element.widget is Tooltip) {
-          final Tooltip widget = element.widget;
+        final Widget widget = element.widget;
+        if (widget is Tooltip) {
           final Iterable<Element> matches = find.byTooltip(widget.message).evaluate();
           if (matches.length == 1) {
             debugPrint('  find.byTooltip(\'${widget.message}\')');
@@ -524,9 +525,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
         }
 
-        if (element.widget is Text) {
+        if (widget is Text) {
           assert(descendantText == null);
-          final Text widget = element.widget;
           final Iterable<Element> matches = find.text(widget.data).evaluate();
           descendantText = widget.data;
           if (matches.length == 1) {
@@ -535,13 +535,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
         }
 
-        if (element.widget.key is ValueKey<dynamic>) {
-          final ValueKey<dynamic> key = element.widget.key;
+        final Key key = widget.key;
+        if (key is ValueKey<dynamic>) {
           String keyLabel;
           if (key is ValueKey<int> ||
               key is ValueKey<double> ||
               key is ValueKey<bool>) {
-            keyLabel = 'const ${element.widget.key.runtimeType}(${key.value})';
+            keyLabel = 'const ${key.runtimeType}(${key.value})';
           } else if (key is ValueKey<String>) {
             keyLabel = 'const Key(\'${key.value}\')';
           }
@@ -554,20 +554,20 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
         }
 
-        if (!_isPrivate(element.widget.runtimeType)) {
+        if (!_isPrivate(widget.runtimeType)) {
           if (numberOfTypes < 5) {
-            final Iterable<Element> matches = find.byType(element.widget.runtimeType).evaluate();
+            final Iterable<Element> matches = find.byType(widget.runtimeType).evaluate();
             if (matches.length == 1) {
-              debugPrint('  find.byType(${element.widget.runtimeType})');
+              debugPrint('  find.byType(${widget.runtimeType})');
               numberOfTypes += 1;
               continue;
             }
           }
 
           if (descendantText != null && numberOfWithTexts < 5) {
-            final Iterable<Element> matches = find.widgetWithText(element.widget.runtimeType, descendantText).evaluate();
+            final Iterable<Element> matches = find.widgetWithText(widget.runtimeType, descendantText).evaluate();
             if (matches.length == 1) {
-              debugPrint('  find.widgetWithText(${element.widget.runtimeType}, \'$descendantText\')');
+              debugPrint('  find.widgetWithText(${widget.runtimeType}, \'$descendantText\')');
               numberOfWithTexts += 1;
               continue;
             }
@@ -842,7 +842,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     RenderObject renderObject = element.findRenderObject();
     SemanticsNode result = renderObject.debugSemantics;
     while (renderObject != null && result == null) {
-      renderObject = renderObject?.parent;
+      renderObject = renderObject?.parent as RenderObject;
       result = renderObject?.debugSemantics;
     }
     if (result == null)

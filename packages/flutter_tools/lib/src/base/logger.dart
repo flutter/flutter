@@ -147,13 +147,11 @@ abstract class Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   });
 
-  /// Send a progress notification that is instant.
+  /// Send an event to be emitted.
   ///
   /// Only surfaces a value in machine modes, Loggers may ignore this message in
-  /// non-machine modes. Like [startProgress] but with a single event.
-  void sendNotification(String message, {
-    String progressId,
-  });
+  /// non-machine modes.
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 class StdoutLogger extends Logger {
@@ -260,7 +258,7 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
@@ -354,7 +352,7 @@ class BufferLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 class VerboseLogger extends Logger {
@@ -469,7 +467,7 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 enum _LogType { error, status, trace }

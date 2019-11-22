@@ -91,8 +91,8 @@ void main() {
 
     group('.dispose()', () {
       IOSDevice device;
-      MockApplicationPackage appPackage1;
-      MockApplicationPackage appPackage2;
+      MockIOSApp appPackage1;
+      MockIOSApp appPackage2;
       IOSDeviceLogReader logReader1;
       IOSDeviceLogReader logReader2;
       MockProcess mockProcess1;
@@ -119,8 +119,8 @@ void main() {
       }
 
       setUp(() {
-        appPackage1 = MockApplicationPackage();
-        appPackage2 = MockApplicationPackage();
+        appPackage1 = MockIOSApp();
+        appPackage2 = MockIOSApp();
         when(appPackage1.name).thenReturn('flutterApp1');
         when(appPackage2.name).thenReturn('flutterApp2');
         mockProcess1 = MockProcess();
@@ -247,6 +247,22 @@ void main() {
         tryToDelete(tempDir);
 
         Cache.enableLocking();
+      });
+
+      testUsingContext('returns failed if the IOSDevice is not found', () async {
+        final IOSDevice device = IOSDevice('123');
+        when(mockIMobileDevice.getInfoForDevice(any, 'CPUArchitecture')).thenThrow(
+          const IOSDeviceNotFoundError(
+            'ideviceinfo could not find device:\n'
+            'No device found with udid 123, is it plugged in?\n'
+            'Try unlocking attached devices.'
+          )
+        );
+        final LaunchResult result = await device.startApp(mockApp);
+        expect(result.started, false);
+      }, overrides: <Type, Generator>{
+        IMobileDevice: () => mockIMobileDevice,
+        Platform: () => macPlatform,
       });
 
       testUsingContext(' succeeds in debug mode via mDNS', () async {

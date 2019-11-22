@@ -8,6 +8,7 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../base/version.dart';
 import '../globals.dart';
 import '../ios/plist_parser.dart';
@@ -45,14 +46,14 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     Map<String, dynamic> plistValues = PlistParser.instance.parseFile(plistFile);
     // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
     // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
-    final String jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'];
+    final String jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'] as String;
     if (jetBrainsToolboxAppBundlePath != null) {
       studioPath = fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
       plistFile = fs.path.join(studioPath, 'Info.plist');
       plistValues = PlistParser.instance.parseFile(plistFile);
     }
 
-    final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey];
+    final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String;
 
     Version version;
     if (versionString != null) {
@@ -60,11 +61,11 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     String pathsSelectorValue;
-    final Map<String, dynamic> jvmOptions = plistValues['JVMOptions'];
+    final Map<String, dynamic> jvmOptions = castStringKeyedMap(plistValues['JVMOptions']);
     if (jvmOptions != null) {
-      final Map<String, dynamic> jvmProperties = jvmOptions['Properties'];
+      final Map<String, dynamic> jvmProperties = castStringKeyedMap(jvmOptions['Properties']);
       if (jvmProperties != null) {
-        pathsSelectorValue = jvmProperties['idea.paths.selector'];
+        pathsSelectorValue = jvmProperties['idea.paths.selector'] as String;
       }
     }
     final String presetPluginsPath = pathsSelectorValue == null
@@ -149,7 +150,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   /// Locates the newest, valid version of Android Studio.
   static AndroidStudio latestValid() {
-    final String configuredStudio = config.getValue('android-studio-dir');
+    final String configuredStudio = config.getValue('android-studio-dir') as String;
     if (configuredStudio != null) {
       String configuredStudioPath = configuredStudio;
       if (platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
@@ -201,7 +202,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     _checkForStudio('/Applications');
     _checkForStudio(fs.path.join(homeDirPath, 'Applications'));
 
-    final String configuredStudioDir = config.getValue('android-studio-dir');
+    final String configuredStudioDir = config.getValue('android-studio-dir') as String;
     if (configuredStudioDir != null) {
       FileSystemEntity configuredStudio = fs.file(configuredStudioDir);
       if (configuredStudio.basename == 'Contents') {
@@ -248,7 +249,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
     }
 
-    final String configuredStudioDir = config.getValue('android-studio-dir');
+    final String configuredStudioDir = config.getValue('android-studio-dir') as String;
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
       studios.add(AndroidStudio(configuredStudioDir,
           configured: configuredStudioDir));

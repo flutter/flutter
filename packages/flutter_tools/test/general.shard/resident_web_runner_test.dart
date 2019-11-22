@@ -105,6 +105,7 @@ void main() {
     when(mockWebFs.recompile()).thenAnswer((Invocation _) {
       return Future<bool>.value(false);
     });
+    when(mockWebFs.uri).thenReturn('http://localhost:8765/app/');
     when(mockDebugConnection.vmService).thenReturn(mockVmService);
     when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
       return Completer<void>().future;
@@ -129,7 +130,7 @@ void main() {
     when(mockWipConnection.debugger).thenReturn(mockWipDebugger);
   }
 
-  test('runner with web server device does not support debugging', () => testbed.run(() async {
+  test('runner with web server device does not support debugging without --start-paused', () => testbed.run(() {
     when(mockFlutterDevice.device).thenReturn(WebServerDevice());
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
@@ -143,7 +144,6 @@ void main() {
     expect(profileResidentWebRunner.debuggingEnabled, false);
 
     when(mockFlutterDevice.device).thenReturn(MockChromeDevice());
-
     expect(residentWebRunner.debuggingEnabled, true);
   }));
 
@@ -160,6 +160,45 @@ void main() {
     expect(didSkipDwds, true);
   }));
 
+  test('runner with web server device supports debugging with --start-paused', () => testbed.run(() {
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+    final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
+      ipv6: true,
+      stayResident: true,
+      dartDefines: <String>[],
+    );
+
+    expect(profileResidentWebRunner.debuggingEnabled, true);
+  }));
+
+  test('runner with web server device uses debug extension with --start-paused', () => testbed.run(() async {
+    _setupMocks();
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+    final BufferLogger bufferLogger = logger;
+
+    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
+      ipv6: true,
+      stayResident: true,
+      dartDefines: <String>[],
+    );
+
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+     unawaited(runner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    // Check connect() was told to use the debug extension.
+    verify(mockWebFs.connect(true)).called(1);
+    // And ensure the debug services was started.
+    expect(bufferLogger.statusText, contains('Debug service listening on'));
+  }));
 
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
      when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
@@ -729,6 +768,75 @@ void main() {
     expect(bufferLogger.statusText, contains('Launching ${fs.path.join('lib', 'main.dart')} on Chromez in debug mode'));
   }));
 
+  test('Sends launched app.webLaunchUrl event for Chrome device', () => testbed.run(() async {
+    _setupMocks();
+    when(mockFlutterDevice.device).thenReturn(ChromeDevice());
+
+    final DelegateLogger delegateLogger = logger;
+    final MockStatus mockStatus = MockStatus();
+    delegateLogger.status = mockStatus;
+    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ipv6: true,
+      stayResident: true,
+      dartDefines: const <String>[],
+    );
+
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(runner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    // Ensure we got the URL and that it was already launched.
+    verify(logger.sendEvent(
+      'app.webLaunchUrl',
+      argThat(allOf(
+        containsPair('url', 'http://localhost:8765/app/'),
+        containsPair('launched', true),
+      ))
+    ));
+  }, overrides: <Type, Generator>{
+    Logger: () => DelegateLogger(MockLogger()),
+    ChromeLauncher: () => MockChromeLauncher(),
+  }));
+
+  test('Sends unlaunched app.webLaunchUrl event for Web Server device', () => testbed.run(() async {
+    _setupMocks();
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+
+    final DelegateLogger delegateLogger = logger;
+    final MockStatus mockStatus = MockStatus();
+    delegateLogger.status = mockStatus;
+    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ipv6: true,
+      stayResident: true,
+      dartDefines: const <String>[],
+    );
+
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(runner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    // Ensure we got the URL and that it was not already launched.
+    verify(logger.sendEvent(
+      'app.webLaunchUrl',
+      argThat(allOf(
+        containsPair('url', 'http://localhost:8765/app/'),
+        containsPair('launched', false),
+      ))
+    ));
+  }, overrides: <Type, Generator>{
+    Logger: () => DelegateLogger(MockLogger())
+  }));
+
   test('Successfully turns WebSocketException into ToolExit', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -908,6 +1016,7 @@ void main() {
   }));
 }
 
+class MockChromeLauncher extends Mock implements ChromeLauncher {}
 class MockFlutterUsage extends Mock implements Usage {}
 class MockChromeDevice extends Mock implements ChromeDevice {}
 class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
@@ -924,3 +1033,4 @@ class MockChromeConnection extends Mock implements ChromeConnection {}
 class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
+class MockLogger extends Mock implements Logger {}

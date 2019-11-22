@@ -193,7 +193,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.text('foo', skipOffstage: false), findsOneWidget);
-      } catch (e) {
+      } on TestFailure catch (e) {
         failure = e;
       }
 
@@ -216,7 +216,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.text('foo', skipOffstage: false), findsNothing);
-      } catch (e) {
+      } on TestFailure catch (e) {
         failure = e;
       }
 
@@ -234,7 +234,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.text('foo'), findsNothing);
-      } catch (e) {
+      } on TestFailure catch (e) {
         failure = e;
       }
 
@@ -289,7 +289,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
-      } catch (e) {
+      } on TestFailure catch (e) {
         failure = e;
       }
 
@@ -306,7 +306,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
-      } catch (e) {
+      } on TestFailure catch (e) {
         failure = e;
       }
 
@@ -360,7 +360,7 @@ void main() {
           of: find.widgetWithText(Column, 'foo'),
           matching: find.text('bar'),
         ), findsOneWidget);
-      } catch (e) {
+      } on TestFailure catch (e) {
         failure = e;
       }
 
@@ -422,7 +422,7 @@ void main() {
           of: find.text('bar'),
           matching: find.widgetWithText(Column, 'foo'),
         ), findsOneWidget);
-      } catch (e) {
+      } on TestFailure catch (e) {
         failure = e;
       }
 

@@ -169,7 +169,7 @@ class AnsiTerminal {
     if (!io.stdinHasTerminal) {
       return;
     }
-    final io.Stdin stdin = io.stdin;
+    final io.Stdin stdin = io.stdin as io.Stdin;
     // The order of setting lineMode and echoMode is important on Windows.
     if (value) {
       stdin.echoMode = false;

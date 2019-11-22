@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/android.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
 import '../../../src/testbed.dart';
@@ -84,4 +86,68 @@ void main() {
 
     expect(fs.file(fs.path.join('out', 'app.so')).existsSync(), true);
   });
+
+  testbed.test('AndroidAot can build provided target platform', () async {
+    final Environment environment = Environment(
+      outputDir: fs.directory('out')..createSync(),
+      projectDir: fs.currentDirectory,
+      buildDir: fs.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: 'release',
+      }
+    );
+    when(genSnapshot.run(
+      snapshotType: anyNamed('snapshotType'),
+      darwinArch: anyNamed('darwinArch'),
+      additionalArgs: anyNamed('additionalArgs'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.projectDir.childFile('.packages')
+      .writeAsStringSync('sky_engine:file:///\n');
+    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+
+    await androidAot.build(environment);
+
+    final SnapshotType snapshotType = verify(genSnapshot.run(
+      snapshotType: captureAnyNamed('snapshotType'),
+      darwinArch: anyNamed('darwinArch'),
+      additionalArgs: anyNamed('additionalArgs')
+    )).captured.single;
+
+    expect(snapshotType.platform, TargetPlatform.android_arm64);
+    expect(snapshotType.mode, BuildMode.release);
+  }, overrides: <Type, Generator>{
+    GenSnapshot: () => MockGenSnapshot(),
+  });
+
+  testbed.test('android aot bundle copies so from abi directory', () async {
+    final Environment environment = Environment(
+      outputDir: fs.directory('out')..createSync(),
+      projectDir: fs.currentDirectory,
+      buildDir: fs.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: 'release',
+      }
+    );
+    environment.buildDir.createSync(recursive: true);
+    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
+    // Create required files.
+    environment.buildDir
+      .childDirectory('arm64-v8a')
+      .childFile('app.so')
+      .createSync(recursive: true);
+
+    await androidAotBundle.build(environment);
+
+    expect(environment.outputDir
+      .childDirectory('arm64-v8a')
+      .childFile('app.so').existsSync(), true);
+  });
 }
+
+class MockGenSnapshot extends Mock implements GenSnapshot {}
+

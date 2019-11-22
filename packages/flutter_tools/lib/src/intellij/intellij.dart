@@ -62,7 +62,7 @@ class IntelliJPlugins {
       final Archive archive =
           ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
       final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
-      final String content = utf8.decode(file.content);
+      final String content = utf8.decode(file.content as List<int>);
       const String versionStartTag = '<version>';
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);

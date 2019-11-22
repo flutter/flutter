@@ -214,7 +214,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
               // If mounted is false, we went away as well, so there's nothing to do.
               // If _handles is no longer empty, then another client (or the same
               // client in a new place) registered itself before we had a chance to
-              // turn off keep-alive, so again there's nothing to do.
+              // turn off keepalive, so again there's nothing to do.
               setState(() {
                 assert(!_keepingAlive);
               });
@@ -273,7 +273,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 /// Failure to trigger the [handle] in the manner described above will likely
 /// cause the [AutomaticKeepAlive] to lose track of whether the widget should be
 /// kept alive or not, leading to memory leaks or lost data. For example, if the
-/// widget that requested keep-alive is removed from the subtree but doesn't
+/// widget that requested keepalive is removed from the subtree but doesn't
 /// trigger its [Listenable] on the way out, then the subtree will continue to
 /// be kept alive until the list itself is disposed. Similarly, if the
 /// [Listenable] is triggered while the widget needs to be kept alive, but a new

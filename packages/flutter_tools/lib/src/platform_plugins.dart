@@ -31,8 +31,8 @@ class AndroidPlugin extends PluginPlatform {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
-      package: yaml['package'],
-      pluginClass: yaml['pluginClass'],
+      package: yaml['package'] as String,
+      pluginClass: yaml['pluginClass'] as String,
       pluginPath: pluginPath,
     );
   }
@@ -144,7 +144,7 @@ class IOSPlugin extends PluginPlatform {
     return IOSPlugin(
       name: name,
       classPrefix: '',
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -188,7 +188,7 @@ class MacOSPlugin extends PluginPlatform {
     assert(validate(yaml));
     return MacOSPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -227,7 +227,7 @@ class WindowsPlugin extends PluginPlatform {
     assert(validate(yaml));
     return WindowsPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -267,7 +267,7 @@ class LinuxPlugin extends PluginPlatform {
     assert(validate(yaml));
     return LinuxPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -309,8 +309,8 @@ class WebPlugin extends PluginPlatform {
     assert(validate(yaml));
     return WebPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
-      fileName: yaml['fileName'],
+      pluginClass: yaml['pluginClass'] as String,
+      fileName: yaml['fileName'] as String,
     );
   }
 

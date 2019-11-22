@@ -90,25 +90,25 @@ class Template {
       final Match match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
         final String platform = match.group(1);
-        final String language = context['${platform}Language'];
+        final String language = context['${platform}Language'] as String;
         if (language != match.group(2)) {
           return null;
         }
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
       // Only build a web project if explicitly asked.
-      final bool web = context['web'];
+      final bool web = context['web'] as bool;
       if (relativeDestinationPath.contains('web') && !web) {
         return null;
       }
       // Only build a macOS project if explicitly asked.
-      final bool macOS = context['macos'];
+      final bool macOS = context['macos'] as bool;
       if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
         return null;
       }
-      final String projectName = context['projectName'];
-      final String androidIdentifier = context['androidIdentifier'];
-      final String pluginClass = context['pluginClass'];
+      final String projectName = context['projectName'] as String;
+      final String androidIdentifier = context['androidIdentifier'] as String;
+      final String pluginClass = context['pluginClass'] as String;
       final String destinationDirPath = destination.absolute.path;
       final String pathSeparator = fs.path.separator;
       String finalDestinationPath = fs.path
@@ -130,7 +130,7 @@ class Template {
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
-      final bool withRootModule = context['withRootModule'] ?? false;
+      final bool withRootModule = context['withRootModule'] as bool ?? false;
       if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
         return;
       }

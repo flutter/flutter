@@ -165,6 +165,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// A convenience widget that combines common painting, positioning, and sizing
 /// widgets.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=c1xLMaTUWCY}
+///
 /// A container first surrounds the child with [padding] (inflated by any
 /// borders present in the [decoration]) and then applies additional
 /// [constraints] to the padded extent (incorporating the `width` and `height`
