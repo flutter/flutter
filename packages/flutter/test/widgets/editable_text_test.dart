@@ -756,7 +756,7 @@ void main() {
 
   /// Toolbar is not used in Flutter Web. Skip this check.
   ///
-  /// Web is using native dom elements (it is also used as platform input)
+  /// Web is using native DOM elements (it is also used as platform input)
   /// to enable clipboard functionality of the toolbar: copy, paste, select,
   /// cut. It might also provide additional functionality depending on the
   /// browser (such as translation). Due to this, in browsers, we should not

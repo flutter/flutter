@@ -392,14 +392,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // to select vertically past the end or beginning of the field. If they do,
   // then we need to keep the old cursor location so that we can go back to it
   // if they change their minds. Only used for moving selection up and down in a
-  // multi-line text field when selecting using the keyboard.
+  // multiline text field when selecting using the keyboard.
   int _cursorResetLocation = -1;
 
   // Whether we should reset the location of the cursor in the case the user
   // tries to select vertically past the end or beginning of the field. If they
   // do, then we need to keep the old cursor location so that we can go back to
   // it if they change their minds. Only used for resetting selection up and
-  // down in a multi-line text field when selecting using the keyboard.
+  // down in a multiline text field when selecting using the keyboard.
   bool _wasSelectingVerticallyWithKeyboard = false;
 
   // This is the affinity we use when a platform-supplied value has null

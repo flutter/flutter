@@ -101,7 +101,7 @@ abstract class FocusTraversalPolicy {
   @protected
   void invalidateScopeData(FocusScopeNode node) {}
 
-  /// This is called whenever the given [node] is reparented into a new scope,
+  /// This is called whenever the given [node] is re-parented into a new scope,
   /// so that the policy has a chance to update or invalidate any cached data
   /// that it maintains per scope about the node.
   ///

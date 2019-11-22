@@ -2971,7 +2971,7 @@ class InputDecoration {
   /// If provided, this replaces the semantic label of the [counterText].
   final String semanticCounterText;
 
-  /// Typically set to true when the [InputDecorator] contains a multi-line
+  /// Typically set to true when the [InputDecorator] contains a multiline
   /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
   /// behavior of aligning the label with the center of the [TextField].
   ///
@@ -3585,7 +3585,7 @@ class InputDecorationTheme extends Diagnosticable {
   ///    rounded rectangle around the input decorator's container.
   final InputBorder border;
 
-  /// Typically set to true when the [InputDecorator] contains a multi-line
+  /// Typically set to true when the [InputDecorator] contains a multiline
   /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
   /// behavior of aligning the label with the center of the [TextField].
   final bool alignLabelWithHint;

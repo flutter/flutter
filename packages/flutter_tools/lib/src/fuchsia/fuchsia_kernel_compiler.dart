@@ -16,7 +16,7 @@ import '../project.dart';
 /// This is a simple wrapper around the custom kernel compiler from the Fuchsia
 /// SDK.
 class FuchsiaKernelCompiler {
-  /// Compiles the [fuchsiaProject] with entrypoint [target] to a collection of
+  /// Compiles the [fuchsiaProject] with entry point [target] to a collection of
   /// .dilp files (consisting of the app split along package: boundaries, but
   /// the Flutter tool should make no use of that fact), and a manifest that
   /// refers to them.

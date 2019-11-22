@@ -13,7 +13,7 @@ import 'debug.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
-/// The dart:io implemenation of [image_provider.NetworkImage].
+/// The dart:io implementation of [image_provider.NetworkImage].
 class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage> implements image_provider.NetworkImage {
   /// Creates an object that fetches the image at the given URL.
   ///

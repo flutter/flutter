@@ -81,9 +81,9 @@ class SourceVisitor implements ResolvedFiles {
         .map((String path) => fs.file(path));
   }
 
-  /// Visit a [Source] which contains a file uri.
+  /// Visit a [Source] which contains a file URL.
   ///
-  /// The uri may include constants defined in an [Environment]. If
+  /// The URL may include constants defined in an [Environment]. If
   /// [optional] is true, the file is not required to exist. In this case, it
   /// is never resolved as an input.
   void visitPattern(String pattern, bool optional) {
@@ -182,7 +182,7 @@ class SourceVisitor implements ResolvedFiles {
 
 /// A description of an input or output of a [Target].
 abstract class Source {
-  /// This source is a file-uri which contains some references to magic
+  /// This source is a file URL which contains some references to magic
   /// environment variables.
   const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
   /// The source is provided by an [Artifact].

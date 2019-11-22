@@ -173,7 +173,7 @@ class BuildMode {
   /// other development features.
   bool get isRelease => releaseModes.contains(this);
 
-  /// Whether this mode is using the jit runtime.
+  /// Whether this mode is using the JIT runtime.
   bool get isJit => jitModes.contains(this);
 
   /// Whether this mode is using the precompiled runtime.
