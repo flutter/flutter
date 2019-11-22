@@ -39,6 +39,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.version'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
@@ -56,6 +57,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       printError('daemon.logMessage test');
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
@@ -83,6 +85,7 @@ void main() {
           responses.add,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
+          dartDefines: const <String>[],
         );
         printStatus('daemon.logMessage test');
         // Service the event loop.
@@ -103,6 +106,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
       return daemon.onExit.then<void>((int code) async {
@@ -112,16 +116,13 @@ void main() {
     });
 
     testUsingContext('app.restart without an appId should report an error', () async {
-      final DaemonCommand command = DaemonCommand();
-      applyMocksToCommand(command);
-
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
-        daemonCommand: command,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'app.restart'});
@@ -133,16 +134,13 @@ void main() {
     });
 
     testUsingContext('ext.flutter.debugPaint via service extension without an appId should report an error', () async {
-      final DaemonCommand command = DaemonCommand();
-      applyMocksToCommand(command);
-
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
-        daemonCommand: command,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       commands.add(<String, dynamic>{
@@ -160,16 +158,13 @@ void main() {
     });
 
     testUsingContext('app.stop without appId should report an error', () async {
-      final DaemonCommand command = DaemonCommand();
-      applyMocksToCommand(command);
-
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
-        daemonCommand: command,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'app.stop'});
@@ -187,6 +182,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
@@ -203,6 +199,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -221,9 +218,10 @@ void main() {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
-          commands.stream,
-          responses.add,
-          notifyingLogger: notifyingLogger,
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
@@ -247,16 +245,13 @@ void main() {
     });
 
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
-      final DaemonCommand command = DaemonCommand();
-      applyMocksToCommand(command);
-
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
-        daemonCommand: command,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.launch'});
@@ -274,6 +269,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.getEmulators'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);

@@ -56,7 +56,7 @@ void main() {
       final List<String> loggedMessages = <String>[];
       ServicesBinding.instance.defaultBinaryMessenger
           .setMessageHandler('test_send', (ByteData data) {
-        loggedMessages.add(codec.decodeMessage(data));
+        loggedMessages.add(codec.decodeMessage(data) as String);
         return null;
       });
 

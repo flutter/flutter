@@ -19,7 +19,7 @@ class ColorFiltered extends SingleChildRenderObjectWidget {
       : assert(colorFilter != null),
         super(key: key, child: child);
 
-  /// The color filter to apply to the child of this widvget.
+  /// The color filter to apply to the child of this widget.
   final ColorFilter colorFilter;
 
   @override

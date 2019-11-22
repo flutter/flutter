@@ -15,7 +15,6 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/flags.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -253,9 +252,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
-      Flags: Flags(topLevelResults),
-    };
+    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{};
 
     // Check for verbose.
     if (topLevelResults['verbose'] as bool) {

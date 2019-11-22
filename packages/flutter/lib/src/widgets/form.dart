@@ -91,7 +91,7 @@ class Form extends StatefulWidget {
   /// form.save();
   /// ```
   static FormState of(BuildContext context) {
-    final _FormScope scope = context.inheritFromWidgetOfExactType(_FormScope);
+    final _FormScope scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
   }
 

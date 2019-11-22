@@ -26,7 +26,7 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
-/// Generates an entrypoint for a web target.
+/// Generates an entry point for a web target.
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
 
@@ -94,7 +94,7 @@ Future<void> main() async {
   }
 }
 
-/// Compiles a web entrypoint with dart2js.
+/// Compiles a web entry point with dart2js.
 class Dart2JSTarget extends Target {
   const Dart2JSTarget();
 
