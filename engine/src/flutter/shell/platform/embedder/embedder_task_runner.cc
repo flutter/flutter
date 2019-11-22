@@ -26,11 +26,11 @@ size_t EmbedderTaskRunner::GetEmbedderIdentifier() const {
   return embedder_identifier_;
 }
 
-void EmbedderTaskRunner::PostTask(fml::closure task) {
+void EmbedderTaskRunner::PostTask(const fml::closure& task) {
   PostTaskForTime(task, fml::TimePoint::Now());
 }
 
-void EmbedderTaskRunner::PostTaskForTime(fml::closure task,
+void EmbedderTaskRunner::PostTaskForTime(const fml::closure& task,
                                          fml::TimePoint target_time) {
   if (!task) {
     return;
@@ -48,7 +48,7 @@ void EmbedderTaskRunner::PostTaskForTime(fml::closure task,
   dispatch_table_.post_task_callback(this, baton, target_time);
 }
 
-void EmbedderTaskRunner::PostDelayedTask(fml::closure task,
+void EmbedderTaskRunner::PostDelayedTask(const fml::closure& task,
                                          fml::TimeDelta delay) {
   PostTaskForTime(task, fml::TimePoint::Now() + delay);
 }

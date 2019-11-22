@@ -81,7 +81,7 @@ void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
 }
 
 DartServiceIsolate::CallbackHandle DartServiceIsolate::AddServerStatusCallback(
-    DartServiceIsolate::ObservatoryServerStateCallback callback) {
+    const DartServiceIsolate::ObservatoryServerStateCallback& callback) {
   if (!callback) {
     return 0;
   }

@@ -49,18 +49,19 @@ class EmbedderTestContext {
 
   void AddNativeCallback(const char* name, Dart_NativeFunction function);
 
-  void SetSemanticsNodeCallback(SemanticsNodeCallback update_semantics_node);
+  void SetSemanticsNodeCallback(
+      const SemanticsNodeCallback& update_semantics_node);
 
   void SetSemanticsCustomActionCallback(
-      SemanticsActionCallback semantics_custom_action);
+      const SemanticsActionCallback& semantics_custom_action);
 
   void SetPlatformMessageCallback(
-      std::function<void(const FlutterPlatformMessage*)> callback);
+      const std::function<void(const FlutterPlatformMessage*)>& callback);
 
   EmbedderTestCompositor& GetCompositor();
 
   using NextSceneCallback = std::function<void(sk_sp<SkImage> image)>;
-  void SetNextSceneCallback(NextSceneCallback next_scene_callback);
+  void SetNextSceneCallback(const NextSceneCallback& next_scene_callback);
 
   size_t GetGLSurfacePresentCount() const;
 
@@ -126,7 +127,7 @@ class EmbedderTestContext {
   bool SofwarePresent(sk_sp<SkImage> image);
 
   void FireRootSurfacePresentCallbackIfPresent(
-      std::function<sk_sp<SkImage>(void)> image_callback);
+      const std::function<sk_sp<SkImage>(void)>& image_callback);
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContext);
 };

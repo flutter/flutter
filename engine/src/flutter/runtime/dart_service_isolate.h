@@ -34,7 +34,7 @@ class DartServiceIsolate {
   // RemoveServerStatusCallback
   FML_WARN_UNUSED_RESULT
   static CallbackHandle AddServerStatusCallback(
-      ObservatoryServerStateCallback callback);
+      const ObservatoryServerStateCallback& callback);
 
   // Accepts the handle returned by AddServerStatusCallback
   static bool RemoveServerStatusCallback(CallbackHandle handle);

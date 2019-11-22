@@ -67,7 +67,7 @@ class Animator final {
   ///           `SmoothPointerDataDispatcher`.
   ///
   /// @see      `PointerDataDispatcher::ScheduleSecondaryVsyncCallback`.
-  void ScheduleSecondaryVsyncCallback(fml::closure callback);
+  void ScheduleSecondaryVsyncCallback(const fml::closure& callback);
 
   void Start();
 

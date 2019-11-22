@@ -20,17 +20,18 @@ TaskRunner::TaskRunner(fml::RefPtr<MessageLoopImpl> loop)
 
 TaskRunner::~TaskRunner() = default;
 
-void TaskRunner::PostTask(fml::closure task) {
-  loop_->PostTask(std::move(task), fml::TimePoint::Now());
+void TaskRunner::PostTask(const fml::closure& task) {
+  loop_->PostTask(task, fml::TimePoint::Now());
 }
 
-void TaskRunner::PostTaskForTime(fml::closure task,
+void TaskRunner::PostTaskForTime(const fml::closure& task,
                                  fml::TimePoint target_time) {
-  loop_->PostTask(std::move(task), target_time);
+  loop_->PostTask(task, target_time);
 }
 
-void TaskRunner::PostDelayedTask(fml::closure task, fml::TimeDelta delay) {
-  loop_->PostTask(std::move(task), fml::TimePoint::Now() + delay);
+void TaskRunner::PostDelayedTask(const fml::closure& task,
+                                 fml::TimeDelta delay) {
+  loop_->PostTask(task, fml::TimePoint::Now() + delay);
 }
 
 TaskQueueId TaskRunner::GetTaskQueueId() {
@@ -62,7 +63,7 @@ bool TaskRunner::RunsTasksOnCurrentThread() {
 }
 
 void TaskRunner::RunNowOrPostTask(fml::RefPtr<fml::TaskRunner> runner,
-                                  fml::closure task) {
+                                  const fml::closure& task) {
   FML_DCHECK(runner);
   if (runner->RunsTasksOnCurrentThread()) {
     task();

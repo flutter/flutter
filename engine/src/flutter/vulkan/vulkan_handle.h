@@ -21,7 +21,7 @@ class VulkanHandle {
 
   VulkanHandle() : handle_(VK_NULL_HANDLE) {}
 
-  VulkanHandle(Handle handle, Disposer disposer = nullptr)
+  VulkanHandle(Handle handle, const Disposer& disposer = nullptr)
       : handle_(handle), disposer_(disposer) {}
 
   VulkanHandle(VulkanHandle&& other)

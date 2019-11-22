@@ -31,7 +31,7 @@ using closure = std::function<void()>;
 ///
 class ScopedCleanupClosure {
  public:
-  ScopedCleanupClosure(fml::closure closure) : closure_(closure) {}
+  ScopedCleanupClosure(const fml::closure& closure) : closure_(closure) {}
 
   ~ScopedCleanupClosure() {
     if (closure_) {

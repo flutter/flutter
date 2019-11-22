@@ -34,13 +34,13 @@ class ViewHolder {
   static void Create(zx_koid_t id,
                      fml::RefPtr<fml::TaskRunner> ui_task_runner,
                      fuchsia::ui::views::ViewHolderToken view_holder_token,
-                     BindCallback on_bind_callback);
+                     const BindCallback& on_bind_callback);
   static void Destroy(zx_koid_t id);
   static ViewHolder* FromId(zx_koid_t id);
 
   ViewHolder(fml::RefPtr<fml::TaskRunner> ui_task_runner,
              fuchsia::ui::views::ViewHolderToken view_holder_token,
-             BindCallback on_bind_callback);
+             const BindCallback& on_bind_callback);
   ~ViewHolder() = default;
 
   // Sets the properties/opacity of the child view by issuing a Scenic command.

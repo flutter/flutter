@@ -227,7 +227,7 @@ bool EmbedderEngine::ReloadSystemFonts() {
   return shell_->ReloadSystemFonts();
 }
 
-bool EmbedderEngine::PostRenderThreadTask(fml::closure task) {
+bool EmbedderEngine::PostRenderThreadTask(const fml::closure& task) {
   if (!IsValid()) {
     return false;
   }

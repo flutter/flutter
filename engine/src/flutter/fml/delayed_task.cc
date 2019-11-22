@@ -9,9 +9,9 @@
 namespace fml {
 
 DelayedTask::DelayedTask(size_t order,
-                         fml::closure task,
+                         const fml::closure& task,
                          fml::TimePoint target_time)
-    : order_(order), task_(std::move(task)), target_time_(target_time) {}
+    : order_(order), task_(task), target_time_(target_time) {}
 
 DelayedTask::DelayedTask(const DelayedTask& other) = default;
 

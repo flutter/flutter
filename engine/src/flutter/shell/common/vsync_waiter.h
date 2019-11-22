@@ -23,12 +23,12 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
 
   virtual ~VsyncWaiter();
 
-  void AsyncWaitForVsync(Callback callback);
+  void AsyncWaitForVsync(const Callback& callback);
 
   /// Add a secondary callback for the next vsync.
   ///
   /// See also |PointerDataDispatcher::ScheduleSecondaryVsyncCallback|.
-  void ScheduleSecondaryCallback(fml::closure callback);
+  void ScheduleSecondaryCallback(const fml::closure& callback);
 
   static constexpr float kUnknownRefreshRateFPS = 0.0;
 

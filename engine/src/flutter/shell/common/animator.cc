@@ -244,8 +244,8 @@ void Animator::AwaitVSync() {
   delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
 }
 
-void Animator::ScheduleSecondaryVsyncCallback(fml::closure callback) {
-  waiter_->ScheduleSecondaryCallback(std::move(callback));
+void Animator::ScheduleSecondaryVsyncCallback(const fml::closure& callback) {
+  waiter_->ScheduleSecondaryCallback(callback);
 }
 
 }  // namespace flutter

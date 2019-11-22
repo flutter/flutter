@@ -49,8 +49,8 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   ///                                     embedder for presentation.
   ///
   EmbedderExternalViewEmbedder(
-      CreateRenderTargetCallback create_render_target_callback,
-      PresentCallback present_callback);
+      const CreateRenderTargetCallback& create_render_target_callback,
+      const PresentCallback& present_callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Collects the external view embedder.

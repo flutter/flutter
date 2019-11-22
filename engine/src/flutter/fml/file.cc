@@ -62,7 +62,7 @@ ScopedTemporaryDirectory::~ScopedTemporaryDirectory() {
 }
 
 bool VisitFilesRecursively(const fml::UniqueFD& directory,
-                           FileVisitor visitor) {
+                           const FileVisitor& visitor) {
   FileVisitor recursive_visitor = [&recursive_visitor, &visitor](
                                       const UniqueFD& directory,
                                       const std::string& filename) {

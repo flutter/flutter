@@ -10,7 +10,7 @@ namespace flutter {
 
 EmbedderExternalTextureGL::EmbedderExternalTextureGL(
     int64_t texture_identifier,
-    ExternalTextureCallback callback)
+    const ExternalTextureCallback& callback)
     : Texture(texture_identifier), external_texture_callback_(callback) {
   FML_DCHECK(external_texture_callback_);
 }

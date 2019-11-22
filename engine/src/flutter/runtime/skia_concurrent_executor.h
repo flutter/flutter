@@ -14,7 +14,7 @@ namespace flutter {
 class SkiaConcurrentExecutor : public SkExecutor {
  public:
   using OnWorkCallback = std::function<void(fml::closure work)>;
-  SkiaConcurrentExecutor(OnWorkCallback on_work);
+  SkiaConcurrentExecutor(const OnWorkCallback& on_work);
 
   ~SkiaConcurrentExecutor() override;
 

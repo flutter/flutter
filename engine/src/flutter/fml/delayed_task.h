@@ -14,7 +14,9 @@ namespace fml {
 
 class DelayedTask {
  public:
-  DelayedTask(size_t order, fml::closure task, fml::TimePoint target_time);
+  DelayedTask(size_t order,
+              const fml::closure& task,
+              fml::TimePoint target_time);
 
   DelayedTask(const DelayedTask& other);
 

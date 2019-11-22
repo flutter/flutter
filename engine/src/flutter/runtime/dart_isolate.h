@@ -199,8 +199,8 @@ class DartIsolate : public UIDartState {
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
       Dart_IsolateFlags* flags,
-      fml::closure isolate_create_callback,
-      fml::closure isolate_shutdown_callback);
+      const fml::closure& isolate_create_callback,
+      const fml::closure& isolate_shutdown_callback);
 
   // |UIDartState|
   ~DartIsolate() override;
@@ -332,7 +332,7 @@ class DartIsolate : public UIDartState {
   FML_WARN_UNUSED_RESULT
   bool Run(const std::string& entrypoint,
            const std::vector<std::string>& args,
-           fml::closure on_run = nullptr);
+           const fml::closure& on_run = nullptr);
 
   //----------------------------------------------------------------------------
   /// @brief      Transition the root isolate to the `Phase::Running` phase and
@@ -356,7 +356,7 @@ class DartIsolate : public UIDartState {
   bool RunFromLibrary(const std::string& library_name,
                       const std::string& entrypoint,
                       const std::vector<std::string>& args,
-                      fml::closure on_run = nullptr);
+                      const fml::closure& on_run = nullptr);
 
   //----------------------------------------------------------------------------
   /// @brief      Transition the isolate to the `Phase::Shutdown` phase. The
@@ -374,7 +374,7 @@ class DartIsolate : public UIDartState {
   ///
   /// @param[in]  closure  The callback to invoke on isolate shutdown.
   ///
-  void AddIsolateShutdownCallback(fml::closure closure);
+  void AddIsolateShutdownCallback(const fml::closure& closure);
 
   //----------------------------------------------------------------------------
   /// @brief      The snapshot used to launch this isolate. This is referenced
@@ -413,7 +413,7 @@ class DartIsolate : public UIDartState {
 
   class AutoFireClosure {
    public:
-    AutoFireClosure(fml::closure closure);
+    AutoFireClosure(const fml::closure& closure);
 
     ~AutoFireClosure();
 
@@ -444,9 +444,9 @@ class DartIsolate : public UIDartState {
               fml::WeakPtr<ImageDecoder> image_decoder,
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,
-              ChildIsolatePreparer child_isolate_preparer,
-              fml::closure isolate_create_callback,
-              fml::closure isolate_shutdown_callback,
+              const ChildIsolatePreparer& child_isolate_preparer,
+              const fml::closure& isolate_create_callback,
+              const fml::closure& isolate_shutdown_callback,
               bool is_root_isolate,
               bool is_group_root_isolate);
   FML_WARN_UNUSED_RESULT bool Initialize(Dart_Isolate isolate);

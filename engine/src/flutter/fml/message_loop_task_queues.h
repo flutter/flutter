@@ -78,7 +78,7 @@ class MessageLoopTaskQueues
   // Tasks methods.
 
   void RegisterTask(TaskQueueId queue_id,
-                    fml::closure task,
+                    const fml::closure& task,
                     fml::TimePoint target_time);
 
   bool HasPendingTasks(TaskQueueId queue_id) const;
@@ -93,7 +93,7 @@ class MessageLoopTaskQueues
 
   void AddTaskObserver(TaskQueueId queue_id,
                        intptr_t key,
-                       fml::closure callback);
+                       const fml::closure& callback);
 
   void RemoveTaskObserver(TaskQueueId queue_id, intptr_t key);
 

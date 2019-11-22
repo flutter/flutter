@@ -27,7 +27,7 @@ class EmbedderPlatformMessageResponse : public PlatformMessageResponse {
   ///                       contents of the response sent by the framework back
   ///                       to the emebder.
   EmbedderPlatformMessageResponse(fml::RefPtr<fml::TaskRunner> runner,
-                                  Callback callback);
+                                  const Callback& callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the message response. Can be called on any thread.

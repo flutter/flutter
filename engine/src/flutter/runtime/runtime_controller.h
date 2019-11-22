@@ -39,9 +39,9 @@ class RuntimeController final : public WindowClient {
       fml::WeakPtr<ImageDecoder> image_decoder,
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
-      std::function<void(int64_t)> idle_notification_callback,
-      fml::closure isolate_create_callback,
-      fml::closure isolate_shutdown_callback,
+      const std::function<void(int64_t)>& idle_notification_callback,
+      const fml::closure& isolate_create_callback,
+      const fml::closure& isolate_shutdown_callback,
       std::shared_ptr<const fml::Mapping> persistent_isolate_data);
 
   ~RuntimeController() override;
@@ -155,10 +155,10 @@ class RuntimeController final : public WindowClient {
       fml::WeakPtr<ImageDecoder> image_decoder,
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
-      std::function<void(int64_t)> idle_notification_callback,
+      const std::function<void(int64_t)>& idle_notification_callback,
       WindowData data,
-      fml::closure isolate_create_callback,
-      fml::closure isolate_shutdown_callback,
+      const fml::closure& isolate_create_callback,
+      const fml::closure& isolate_shutdown_callback,
       std::shared_ptr<const fml::Mapping> persistent_isolate_data);
 
   Window* GetWindowIfAvailable();

@@ -50,7 +50,8 @@ MessageLoopImpl::~MessageLoopImpl() {
   task_queue_->Dispose(queue_id_);
 }
 
-void MessageLoopImpl::PostTask(fml::closure task, fml::TimePoint target_time) {
+void MessageLoopImpl::PostTask(const fml::closure& task,
+                               fml::TimePoint target_time) {
   FML_DCHECK(task != nullptr);
   FML_DCHECK(task != nullptr);
   if (terminated_) {
@@ -61,7 +62,8 @@ void MessageLoopImpl::PostTask(fml::closure task, fml::TimePoint target_time) {
   task_queue_->RegisterTask(queue_id_, task, target_time);
 }
 
-void MessageLoopImpl::AddTaskObserver(intptr_t key, fml::closure callback) {
+void MessageLoopImpl::AddTaskObserver(intptr_t key,
+                                      const fml::closure& callback) {
   FML_DCHECK(callback != nullptr);
   FML_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
       << "Message loop task observer must be added on the same thread as the "
