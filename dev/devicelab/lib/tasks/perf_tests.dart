@@ -72,6 +72,14 @@ TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createPictureCachePerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/picture_cache_perf.dart',
+    'picture_cache_perf',
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
@@ -152,9 +160,6 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
-
       await flutter('run', options: <String>[
         '--verbose',
         '--profile',
@@ -196,9 +201,6 @@ class PerfTest {
       await device.unlock();
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
 
       await flutter('drive', options: <String>[
         '-v',
@@ -340,7 +342,6 @@ class CompileTest {
   }
 
   static Future<Map<String, dynamic>> _compileAot() async {
-    // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = Stopwatch()..start();
     final List<String> options = <String>[
@@ -385,7 +386,6 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        await prepareProvisioningCertificates(cwd);
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -430,7 +430,6 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        await prepareProvisioningCertificates(cwd);
         break;
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
@@ -541,9 +540,6 @@ class MemoryTest {
       _device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(project);
 
       final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {
@@ -686,9 +682,6 @@ class ReportedDurationTest {
       _device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(project);
 
       final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {

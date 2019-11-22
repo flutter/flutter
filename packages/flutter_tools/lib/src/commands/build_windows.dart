@@ -17,19 +17,8 @@ import 'build.dart';
 /// A command to build a windows desktop target through a build shell script.
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand() {
+    addBuildModeFlags();
     usesTargetOption();
-    argParser.addFlag('debug',
-      negatable: false,
-      help: 'Build a debug version of your app.',
-    );
-    argParser.addFlag('profile',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.',
-    );
-    argParser.addFlag('release',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.',
-    );
   }
 
   @override

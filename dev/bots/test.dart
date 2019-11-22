@@ -265,9 +265,7 @@ Future<void> _runToolTests() async {
         testPath: path.join(kTest, '$subshard$kDotShard'),
         useBuildRunner: canUseBuildRunner,
         tableData: bigqueryApi?.tabledata,
-        // TODO(ianh): The integration tests fail to start on Windows if asserts are enabled.
-        // See https://github.com/flutter/flutter/issues/36476
-        enableFlutterToolAsserts: !(subshard == 'integration' && Platform.isWindows),
+        enableFlutterToolAsserts: true,
       );
     },
   );

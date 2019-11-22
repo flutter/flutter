@@ -210,7 +210,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
     LocalFileComparator defaultComparator,
   }) async {
 
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
@@ -293,7 +293,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     LocalFileComparator defaultComparator,
   }) async {
 
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
@@ -391,7 +391,7 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
     String reason, {
     LocalFileComparator defaultComparator,
   }) {
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     const FileSystem fs = LocalFileSystem();
     final Uri basedir = defaultComparator.basedir;
     final SkiaGoldClient skiaClient = SkiaGoldClient(fs.directory(basedir));
@@ -472,7 +472,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     LocalFileComparator defaultComparator,
     Directory baseDirectory,
   }) async {
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,

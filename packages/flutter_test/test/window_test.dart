@@ -224,7 +224,7 @@ void verifyThatTestWindowCanFakeProperty<WindowPropertyType>({
 TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
   final WidgetsBinding binding = tester.binding;
   assert(binding is TestWidgetsFlutterBinding);
-  final TestWidgetsFlutterBinding testBinding = binding;
+  final TestWidgetsFlutterBinding testBinding = binding as TestWidgetsFlutterBinding;
   return testBinding;
 }
 

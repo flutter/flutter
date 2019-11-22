@@ -816,15 +816,20 @@ class TextPainter {
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   TextRange getWordBoundary(TextPosition position) {
     assert(!_needsLayout);
-    // TODO(gspencergoog): remove the List<int>-based code when the engine API
-    // returns a TextRange instead of a List<int>.
-    final dynamic boundary = _paragraph.getWordBoundary(position);
-    if (boundary is List<int>) {
-      final List<int> indices = boundary;
-      return TextRange(start: indices[0], end: indices[1]);
-    }
-    final TextRange range = boundary;
-    return range;
+    return _paragraph.getWordBoundary(position);
+  }
+
+  /// Returns the [TextRange] of the line at the given [TextPosition].
+  ///
+  /// The newline, if any, is returned as part of the range.
+  ///
+  /// Not valid until after layout.
+  ///
+  /// This can potentially be expensive, since it needs to compute the full
+  /// layout before it is available.
+  TextRange getLineBoundary(TextPosition position) {
+    assert(!_needsLayout);
+    return _paragraph.getLineBoundary(position);
   }
 
   /// Returns the full list of [LineMetrics] that describe in detail the various

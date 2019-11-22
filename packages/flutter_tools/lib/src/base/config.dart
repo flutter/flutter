@@ -5,12 +5,13 @@
 import '../convert.dart';
 import 'context.dart';
 import 'file_system.dart';
+import 'utils.dart';
 
 class Config {
   Config([File configFile]) {
     _configFile = configFile ?? fs.file(fs.path.join(userHomePath(), '.flutter_settings'));
     if (_configFile.existsSync()) {
-      _values = json.decode(_configFile.readAsStringSync());
+      _values = castStringKeyedMap(json.decode(_configFile.readAsStringSync()));
     }
   }
 

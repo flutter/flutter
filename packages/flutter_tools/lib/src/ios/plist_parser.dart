@@ -6,6 +6,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../globals.dart';
 
@@ -45,7 +46,7 @@ class PlistParser {
         args,
         throwOnError: true,
       ).stdout.trim();
-      return json.decode(jsonContent);
+      return castStringKeyedMap(json.decode(jsonContent));
     } on ProcessException catch (error) {
       printTrace('$error');
       return const <String, dynamic>{};
@@ -64,6 +65,6 @@ class PlistParser {
   String getValueFromFile(String plistFilePath, String key) {
     assert(key != null);
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
-    return parsed[key];
+    return parsed[key] as String;
   }
 }

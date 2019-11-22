@@ -40,7 +40,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     // the GestureTransformable parent widget.
     return Scaffold(
       appBar: AppBar(
-        title: const Text('2D Tranformations'),
+        title: const Text('2D Transformations'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.help),

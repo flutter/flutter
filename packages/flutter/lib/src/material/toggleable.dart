@@ -474,7 +474,9 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       final double reactionRadius = hasFocus || hovering
           ? kRadialReactionRadius
           : _kRadialReactionRadiusTween.evaluate(_reaction);
-      canvas.drawCircle(center + offset, reactionRadius, reactionPaint);
+      if (reactionRadius > 0.0) {
+        canvas.drawCircle(center + offset, reactionRadius, reactionPaint);
+      }
     }
   }
 

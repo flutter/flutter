@@ -479,6 +479,11 @@ class FlutterErrorDetails extends Diagnosticable {
 
 /// Error class used to report Flutter-specific assertion failures and
 /// contract violations.
+///
+/// See also:
+///
+///  * <https://flutter.dev/docs/testing/errors>, more information about error
+///    handling in Flutter.
 class FlutterError extends Error with DiagnosticableTreeMixin implements AssertionError {
   /// Create an error message from a string.
   ///

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -519,9 +520,9 @@ class _LocalizationsState extends State<Localizations> {
       // have finished loading. Until then the old locale will continue to be used.
       // - If we're running at app startup time then defer reporting the first
       // "useful" frame until after the async load has completed.
-      WidgetsBinding.instance.deferFirstFrameReport();
+      RendererBinding.instance.deferFirstFrame();
       typeToResourcesFuture.then<void>((Map<Type, dynamic> value) {
-        WidgetsBinding.instance.allowFirstFrameReport();
+        RendererBinding.instance.allowFirstFrame();
         if (!mounted)
           return;
         setState(() {

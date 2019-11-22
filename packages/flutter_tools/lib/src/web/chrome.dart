@@ -210,8 +210,8 @@ class ChromeLauncher {
       final HttpClient client = HttpClient();
       final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
       final HttpClientResponse response = await request.close();
-      final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single;
-      return base.resolve(jsonObject.first['devtoolsFrontendUrl']);
+      final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>;
+      return base.resolve(jsonObject.first['devtoolsFrontendUrl'] as String);
     } catch (_) {
       // If we fail to talk to the remote debugger protocol, give up and return
       // the raw URL rather than crashing.

@@ -118,8 +118,9 @@ task:
       environment:
         # As of October 2019, the tool_tests-commands-linux shard got faster with more CPUs up to 6
         # CPUs, and needed at least 8G of RAM to not run out of memory.
+        # Increased to 10GB on 19th Nov 2019 due to significant number of OOMKilled failures on PR builds.
         CPU: 6
-        MEMORY: 8G
+        MEMORY: 10G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 

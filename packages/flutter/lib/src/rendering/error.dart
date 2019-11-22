@@ -10,9 +10,6 @@ import 'object.dart';
 const double _kMaxWidth = 100000.0;
 const double _kMaxHeight = 100000.0;
 
-// Line length to fit small phones without dynamically checking size.
-const String _kLine = '\n\n────────────────────\n\n';
-
 /// A render object used as a placeholder when an error occurs.
 ///
 /// The box will be painted in the color given by the
@@ -25,8 +22,9 @@ const String _kLine = '\n\n─────────────────�
 /// [RenderErrorBox.textStyle] and [RenderErrorBox.paragraphStyle] static
 /// properties.
 ///
-/// Again to help simplify the class, this box tries to be 100000.0 pixels wide
-/// and high, to approximate being infinitely high but without using infinities.
+/// Again to help simplify the class, if the parent has left the constraints
+/// unbounded, this box tries to be 100000.0 pixels wide and high, to
+/// approximate being infinitely high but without using infinities.
 class RenderErrorBox extends RenderBox {
   /// Creates a RenderErrorBox render object.
   ///
@@ -45,13 +43,10 @@ class RenderErrorBox extends RenderBox {
         // see the paragraph.dart file and the RenderParagraph class.
         final ui.ParagraphBuilder builder = ui.ParagraphBuilder(paragraphStyle);
         builder.pushStyle(textStyle);
-        builder.addText(
-          '$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine'
-          '$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message'
-        );
+        builder.addText(message);
         _paragraph = builder.build();
       }
-    } catch (e) {
+    } catch (error) {
       // Intentionally left empty.
     }
   }
@@ -82,39 +77,87 @@ class RenderErrorBox extends RenderBox {
     size = constraints.constrain(const Size(_kMaxWidth, _kMaxHeight));
   }
 
+  /// The distance to place around the text.
+  ///
+  /// This is intended to ensure that if the [RenderErrorBox] is placed at the top left
+  /// of the screen, under the system's status bar, the error text is still visible in
+  /// the area below the status bar.
+  ///
+  /// The padding is ignored if the error box is smaller than the padding.
+  ///
+  /// See also:
+  ///
+  ///  * [minimumWidth], which controls how wide the box must be before the
+  //     horizontal padding is applied.
+  static EdgeInsets padding = const EdgeInsets.fromLTRB(64.0, 96.0, 64.0, 12.0);
+
+  /// The width below which the horizontal padding is not applied.
+  ///
+  /// If the left and right padding would reduce the available width to less than
+  /// this value, then the text is rendered flush with the left edge.
+  static double minimumWidth = 200.0;
+
   /// The color to use when painting the background of [RenderErrorBox] objects.
-  static Color backgroundColor = const Color(0xF0900000);
+  ///
+  /// Defaults to red in debug mode, a light gray otherwise.
+  static Color backgroundColor = _initBackgroundColor();
+
+  static Color _initBackgroundColor() {
+    Color result = const Color(0xF0C0C0C0);
+    assert(() {
+      result = const Color(0xF0900000);
+      return true;
+    }());
+    return result;
+  }
 
   /// The text style to use when painting [RenderErrorBox] objects.
-  static ui.TextStyle textStyle = ui.TextStyle(
-    color: const Color(0xFFFFFF66),
-    fontFamily: 'monospace',
-    fontSize: 14.0,
-    fontWeight: FontWeight.bold,
-  );
+  ///
+  /// Defaults to a yellow monospace font in debug mode, and a dark gray
+  /// sans-serif font otherwise.
+  static ui.TextStyle textStyle = _initTextStyle();
+
+  static ui.TextStyle _initTextStyle() {
+    ui.TextStyle result = ui.TextStyle(
+      color: const Color(0xFF303030),
+      fontFamily: 'sans-serif',
+      fontSize: 18.0,
+    );
+    assert(() {
+      result = ui.TextStyle(
+        color: const Color(0xFFFFFF66),
+        fontFamily: 'monospace',
+        fontSize: 14.0,
+        fontWeight: FontWeight.bold,
+      );
+      return true;
+    }());
+    return result;
+  }
 
   /// The paragraph style to use when painting [RenderErrorBox] objects.
   static ui.ParagraphStyle paragraphStyle = ui.ParagraphStyle(
-    height: 1.0,
+    textDirection: TextDirection.ltr,
+    textAlign: TextAlign.left,
   );
 
   @override
   void paint(PaintingContext context, Offset offset) {
     try {
       context.canvas.drawRect(offset & size, Paint() .. color = backgroundColor);
-      double width;
       if (_paragraph != null) {
-        // See the comment in the RenderErrorBox constructor. This is not the
-        // code you want to be copying and pasting. :-)
-        if (parent is RenderBox) {
-          final RenderBox parentBox = parent;
-          width = parentBox.size.width;
-        } else {
-          width = size.width;
+        double width = size.width;
+        double left = 0.0;
+        double top = 0.0;
+        if (width > padding.left + minimumWidth + padding.right) {
+          width -= padding.left + padding.right;
+          left += padding.left;
         }
         _paragraph.layout(ui.ParagraphConstraints(width: width));
-
-        context.canvas.drawParagraph(_paragraph, offset);
+        if (size.height > padding.top + _paragraph.height + padding.bottom) {
+          top += padding.top;
+        }
+        context.canvas.drawParagraph(_paragraph, offset + Offset(left, top));
       }
     } catch (e) {
       // Intentionally left empty.

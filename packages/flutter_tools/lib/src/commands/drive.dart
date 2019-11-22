@@ -83,9 +83,9 @@ class DriveCommand extends RunCommandBase {
 
   Device _device;
   Device get device => _device;
-  bool get shouldBuild => argResults['build'];
+  bool get shouldBuild => boolArg('build');
 
-  bool get verboseSystemLogs => argResults['verbose-system-logs'];
+  bool get verboseSystemLogs => boolArg('verbose-system-logs');
 
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
@@ -128,7 +128,7 @@ class DriveCommand extends RunCommandBase {
       observatoryUri = result.observatoryUri.toString();
     } else {
       printStatus('Will connect to already running application instance.');
-      observatoryUri = argResults['use-existing-app'];
+      observatoryUri = stringArg('use-existing-app');
     }
 
     Cache.releaseLockEarly();
@@ -141,7 +141,7 @@ class DriveCommand extends RunCommandBase {
       }
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
-      if (argResults['keep-app-running'] ?? (argResults['use-existing-app'] != null)) {
+      if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         printStatus('Leaving the application running.');
       } else {
         printStatus('Stopping application instance.');
@@ -154,7 +154,7 @@ class DriveCommand extends RunCommandBase {
 
   String _getTestFile() {
     if (argResults['driver'] != null) {
-      return argResults['driver'];
+      return stringArg('driver');
     }
 
     // If the --driver argument wasn't provided, then derive the value from
