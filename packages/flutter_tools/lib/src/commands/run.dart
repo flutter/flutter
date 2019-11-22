@@ -187,6 +187,12 @@ class RunCommand extends RunCommandBase {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
+      ..addFlag('fast-start',
+        negatable: false,
+        defaultsTo: false,
+        hide: true,
+        help: 'Whether to bootstrap an empty application.'
+      )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
@@ -322,6 +328,7 @@ class RunCommand extends RunCommandBase {
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
         vmserviceOutFile: stringArg('vmservice-out-file'),
+        fastStart: boolArg('fast-start')
       );
     }
   }

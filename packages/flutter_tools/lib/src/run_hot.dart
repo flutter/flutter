@@ -212,6 +212,10 @@ class HotRunner extends ResidentRunner {
       }
     }
 
+    if (debuggingOptions.fastStart) {
+      await _restartFromSources(benchmarkMode: true, reason: 'restart');
+    }
+
     appStartedCompleter?.complete();
 
     if (benchmarkMode) {
@@ -439,9 +443,7 @@ class HotRunner extends ResidentRunner {
             }
             return null;
           },
-        ).whenComplete(
-          () { completer.complete(null); },
-        ));
+        ).whenComplete(completer.complete));
       }
     }
     await Future.wait(futures);
@@ -464,9 +466,11 @@ class HotRunner extends ResidentRunner {
       for (FlutterDevice device in flutterDevices) {
         for (FlutterView view in device.views) {
           isolateNotifications.add(
-            view.owner.vm.vmService.onIsolateEvent.then((Stream<ServiceEvent> serviceEvents) async {
+            view.owner.vm.vmService.onIsolateEvent
+              .then((Stream<ServiceEvent> serviceEvents) async {
               await for (ServiceEvent serviceEvent in serviceEvents) {
-                if (serviceEvent.owner.name.contains('_spawn') && serviceEvent.kind == ServiceEvent.kIsolateExit) {
+                if (serviceEvent.owner.name.contains('_spawn')
+                  && serviceEvent.kind == ServiceEvent.kIsolateExit) {
                   return;
                 }
               }
