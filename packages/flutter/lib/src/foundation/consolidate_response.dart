@@ -37,6 +37,9 @@ typedef BytesReceivedCallback = void Function(int cumulative, int total);
 /// callback. For more information on how to interpret the parameters to the
 /// callback, see the documentation on [BytesReceivedCallback].
 ///
+/// The `sendChunkEventsController` allows to dynamically enable/disable
+/// `onBytesReceived` callback invocation.
+///
 /// If the `response` is gzipped and the `autoUncompress` parameter is true,
 /// this will automatically un-compress the bytes in the returned list if it
 /// hasn't already been done via [HttpClient.autoUncompress]. To get compressed
@@ -47,6 +50,7 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   HttpClientResponse response, {
   bool autoUncompress = true,
   BytesReceivedCallback onBytesReceived,
+  SendChunkEventsController sendChunkEventsController,
 }) {
   assert(autoUncompress != null);
   final Completer<Uint8List> completer = Completer<Uint8List>.sync();
@@ -77,6 +81,10 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   StreamSubscription<List<int>> subscription;
   subscription = response.listen((List<int> chunk) {
     sink.add(chunk);
+    if (sendChunkEventsController != null &&
+        !sendChunkEventsController.isSomebodyListening) {
+      return;
+    }
     if (onBytesReceived != null) {
       bytesReceived += chunk.length;
       try {
@@ -126,4 +134,20 @@ class _OutputBuffer extends ByteConversionSinkBase {
     assert(_bytes != null);
     return _bytes;
   }
+}
+
+///  Encapsulates [isSomebodyListening] flag allowing for image loader
+///  to dynamically enable or disable sending of chunk events.
+class SendChunkEventsController {
+
+  /// Request to start sending chunk events updates.
+  void start() { _isSomebodyListening = true; }
+
+  /// Request to stop chunk events updates.
+  void stop() { _isSomebodyListening = false;}
+
+  /// Were the chunk events updates requested?
+  bool get isSomebodyListening => _isSomebodyListening;
+
+  bool _isSomebodyListening = false;
 }

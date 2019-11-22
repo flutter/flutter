@@ -43,8 +43,10 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     // has been loaded or an error is thrown.
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
-    return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents, decode),
+    final SendChunkEventsController sendChunkEventsController = SendChunkEventsController();
+    return _ListenerAwareMultiFrameImageStreamCompleter(
+      sendChunkEventsController: sendChunkEventsController,
+      codec: _loadAsync(key, chunkEvents, decode, sendChunkEventsController),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       informationCollector: () {
@@ -76,6 +78,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     NetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
     image_provider.DecoderCallback decode,
+    SendChunkEventsController sendChunkEventsController,
   ) async {
     try {
       assert(key == this);
@@ -97,6 +100,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
             expectedTotalBytes: total,
           ));
         },
+        sendChunkEventsController: sendChunkEventsController,
       );
       if (bytes.lengthInBytes == 0)
         throw Exception('NetworkImage is an empty file: $resolved');
@@ -121,4 +125,38 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   @override
   String toString() => '$runtimeType("$url", scale: $scale)';
+}
+
+class _ListenerAwareMultiFrameImageStreamCompleter extends MultiFrameImageStreamCompleter {
+  _ListenerAwareMultiFrameImageStreamCompleter({
+    @required Future<ui.Codec> codec,
+    @required double scale,
+    Stream<ImageChunkEvent> chunkEvents,
+    InformationCollector informationCollector,
+    this.sendChunkEventsController,
+  }) : super(codec: codec, scale: scale, chunkEvents: chunkEvents, informationCollector: informationCollector);
+
+  @override
+  void addListener(ImageStreamListener listener) {
+    if (listener.onChunk != null) {
+      sendChunkEventsController.start();
+      chunkListeners.add(listener);
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(ImageStreamListener listener) {
+    super.removeListener(listener);
+    if (listener.onChunk != null) {
+      chunkListeners.remove(listener);
+
+      if (chunkListeners.isEmpty) {
+        sendChunkEventsController.stop();
+      }
+    }
+  }
+
+  final Set<ImageStreamListener> chunkListeners = <ImageStreamListener>{};
+  final SendChunkEventsController sendChunkEventsController;
 }
