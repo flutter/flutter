@@ -278,6 +278,7 @@ void main() {
       await tester.fling(find.text('Item 1'), const Offset(0, -200), 200);
       await tester.pumpAndSettle();
 
+      // TODO(itome): Make sure UserScrollNotification and ScrollUpdateNotification are called correctly.
       final List<Type> types = <Type>[
         ScrollStartNotification,
         ScrollEndNotification,
