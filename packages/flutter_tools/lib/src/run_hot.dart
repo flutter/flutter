@@ -18,6 +18,7 @@ import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'bundle.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
@@ -262,14 +263,31 @@ class HotRunner extends ResidentRunner {
 
     firstBuildTime = DateTime.now();
 
+    final List<Future<bool>> startupTasks = <Future<bool>>[];
     for (FlutterDevice device in flutterDevices) {
-      final int result = await device.runHot(
+      // Here we initialize the frontend_server conccurently with the gradle
+      // build, reducing initialization time. This is safe because the first
+      // invocation of the frontend server produces a full dill file that
+      // the subsequent invocation in devfs will not overwrite.
+      if (device.generator != null) {
+        startupTasks.add(
+          device.generator.recompile(
+            mainPath,
+            <Uri>[],
+            outputPath: dillOutputPath ??
+              getDefaultApplicationKernelPath(trackWidgetCreation: device.trackWidgetCreation),
+            packagesFilePath : packagesFilePath,
+          ).then((CompilerOutput output) => output?.errorCount == 0)
+        );
+      }
+      startupTasks.add(device.runHot(
         hotRunner: this,
         route: route,
-      );
-      if (result != 0) {
-        return result;
-      }
+      ).then((int result) => result == 0));
+    }
+    final List<bool> results = await Future.wait(startupTasks);
+    if (!results.every((bool passed) => passed)) {
+      return 1;
     }
 
     return attach(
@@ -988,7 +1006,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       for (VMService vm in device.vmServices) {
-        printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.wsAddress}');
+        printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.httpAddress}');
       }
     }
     final String quitMessage = _didAttach

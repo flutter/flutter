@@ -99,9 +99,9 @@ class FuchsiaPM {
     ]);
   }
 
-  /// Spawns an http server in a new process for serving Fuchisa packages.
+  /// Spawns an http server in a new process for serving Fuchsia packages.
   ///
-  /// The arguemnt [repoPath] should have previously been an arguemnt to
+  /// The argument [repoPath] should have previously been an argument to
   /// [newrepo]. The [host] should be the host reported by
   /// [FuchsiaDevFinder.resolve], and [port] should be an unused port for the
   /// http server to bind.
@@ -187,13 +187,13 @@ class FuchsiaPackageServer {
 
   Process _process;
 
-  /// The url that can be used by the device to access this package server.
+  /// The URL that can be used by the device to access this package server.
   String get url => 'http://$_host:$_port';
 
   // The name used to reference the server by fuchsia-pkg:// urls.
   final String name;
 
-  /// Usees [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
+  /// Uses [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.
   ///
   /// Returns false if the repo could not be created or the server could not

@@ -88,7 +88,9 @@ class FlutterDevice {
         fileSystemScheme: fileSystemScheme,
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
-        platformDill: artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode),
+        platformDill: fs.file(artifacts
+          .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode))
+          .absolute.uri.toString(),
         dartDefines: dartDefines,
       );
     } else if (flutterProject.hasBuilders) {
@@ -912,7 +914,7 @@ abstract class ResidentRunner {
       throw 'The service protocol is not enabled.';
     }
 
-    _finished ??= Completer<int>();
+    _finished = Completer<int>();
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
@@ -964,25 +966,22 @@ abstract class ResidentRunner {
       // User requested the application exit.
       return;
     }
-    if (_finished == null || _finished.isCompleted) {
+    if (_finished.isCompleted) {
       return;
     }
     printStatus('Lost connection to device.');
     _finished.complete(0);
-    _finished = null;
   }
 
   void appFinished() {
-    if (_finished == null || _finished.isCompleted) {
+    if (_finished.isCompleted) {
       return;
     }
     printStatus('Application finished.');
     _finished.complete(0);
-    _finished = null;
   }
 
   Future<int> waitForAppToFinish() async {
-    _finished ??= Completer<int>();
     final int exitCode = await _finished.future;
     assert(exitCode != null);
     await cleanupAtFinish();

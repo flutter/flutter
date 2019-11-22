@@ -83,7 +83,7 @@ class VisualStudio {
   /// The names of the components within the workload that must be installed.
   ///
   /// If there is an existing Visual Studio installation, the major version
-  /// should be provided here, as the descriptions of some componets differ
+  /// should be provided here, as the descriptions of some components differ
   /// from version to version.
   List<String> necessaryComponentDescriptions([int visualStudioMajorVersion]) {
     return _requiredComponents(visualStudioMajorVersion).values.toList();
@@ -118,7 +118,7 @@ class VisualStudio {
     'vswhere.exe',
   );
 
-  /// Components for use with vswhere requriements.
+  /// Components for use with vswhere requirements.
   ///
   /// Maps from component IDs to description in the installer UI.
   /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
@@ -283,7 +283,7 @@ class VisualStudio {
   /// Studio.
   ///
   /// If there's a version that has all the required components, that
-  /// will be returned, otherwise returs the lastest installed version (if any).
+  /// will be returned, otherwise returns the latest installed version (if any).
   Map<String, dynamic> get _bestVisualStudioDetails {
     if (_usableVisualStudioDetails.isNotEmpty) {
       return _usableVisualStudioDetails;

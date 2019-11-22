@@ -22,6 +22,32 @@ import 'scroll_physics.dart';
 
 export 'scroll_activity.dart' show ScrollHoldController;
 
+/// The policy to use when applying the `alignment` parameter of
+/// [ScrollPosition.ensureVisible].
+enum ScrollPositionAlignmentPolicy {
+  /// Use the `alignment` property of [ScrollPosition.ensureVisible] to decide
+  /// where to align the visible object.
+  explicit,
+
+  /// Find the bottom edge of the scroll container, and scroll the container, if
+  /// necessary, to show the bottom of the object.
+  ///
+  /// For example, find the bottom edge of the scroll container. If the bottom
+  /// edge of the item is below the bottom edge of the scroll container, scroll
+  /// the item so that the bottom of the item is just visible. If the entire
+  /// item is already visible, then do nothing.
+  keepVisibleAtEnd,
+
+  /// Find the top edge of the scroll container, and scroll the container if
+  /// necessary to show the top of the object.
+  ///
+  /// For example, find the top edge of the scroll container. If the top edge of
+  /// the item is above the top edge of the scroll container, scroll the item so
+  /// that the top of the item is just visible. If the entire item is already
+  /// visible, then do nothing.
+  keepVisibleAtStart,
+}
+
 /// Determines which portion of the content is visible in a scroll view.
 ///
 /// The [pixels] value determines the scroll offset that the scroll view uses to
@@ -497,17 +523,41 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Animates the position such that the given object is as visible as possible
   /// by just scrolling this position.
+  ///
+  /// See also:
+  ///
+  /// * [ScrollPositionAlignmentPolicy] for the way in which `alignment` is
+  ///   applied, and the way the given `object` is aligned.
   Future<void> ensureVisible(
     RenderObject object, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
+    assert(alignmentPolicy != null);
     assert(object.attached);
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
     assert(viewport != null);
 
-    final double target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
+    double target;
+    switch (alignmentPolicy) {
+      case ScrollPositionAlignmentPolicy.explicit:
+        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
+        break;
+      case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
+        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent);
+        if (target < pixels) {
+          target = pixels;
+        }
+        break;
+      case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
+        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent);
+        if (target > pixels) {
+          target = pixels;
+        }
+        break;
+    }
 
     if (target == pixels)
       return Future<void>.value();

@@ -192,7 +192,16 @@ class AndroidDevice extends Device {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
       switch (await _getProperty('ro.product.cpu.abi')) {
         case 'arm64-v8a':
-          _platform = TargetPlatform.android_arm64;
+          // Perform additional verification for 64 bit ABI. Some devices,
+          // like the Kindle Fire 8, misreport the abilist. We might not
+          // be able to retrieve this property, in which case we fall back
+          // to assuming 64 bit.
+          final String abilist = await _getProperty('ro.product.cpu.abilist');
+          if (abilist == null || abilist.contains('arm64-v8a')) {
+            _platform = TargetPlatform.android_arm64;
+          } else {
+            _platform = TargetPlatform.android_arm;
+          }
           break;
         case 'x86_64':
           _platform = TargetPlatform.android_x64;

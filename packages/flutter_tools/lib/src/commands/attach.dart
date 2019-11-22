@@ -198,8 +198,13 @@ class AttachCommand extends FlutterCommand {
     final int devicePort = await getDevicePort();
 
     final Daemon daemon = boolArg('machine')
-      ? Daemon(stdinCommandStream, stdoutCommandResponse,
-            notifyingLogger: NotifyingLogger(), logToStdout: true)
+      ? Daemon(
+          stdinCommandStream,
+          stdoutCommandResponse,
+          notifyingLogger: NotifyingLogger(),
+          logToStdout: true,
+          dartDefines: dartDefines,
+        )
       : null;
 
     Stream<Uri> observatoryUri;
@@ -214,7 +219,7 @@ class AttachCommand extends FlutterCommand {
         if (module == null) {
           throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
         }
-        usesIpv6 = device.ipv6;
+        usesIpv6 = await device.ipv6;
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);

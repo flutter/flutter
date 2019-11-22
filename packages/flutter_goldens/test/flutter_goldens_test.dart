@@ -97,8 +97,8 @@ void main() {
       });
 
       test('validates SkiaDigest', () {
-        final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate());
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate()) as Map<String, dynamic>;
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
         expect(
           digest.isValid(
             platform,
@@ -111,9 +111,9 @@ void main() {
 
       test('invalidates bad SkiaDigest - platform', () {
         final Map<String, dynamic> skiaJson = json.decode(
-          digestResponseTemplate(platform: 'linux')
-        );
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+          digestResponseTemplate(platform: 'linux'),
+        ) as Map<String, dynamic>;
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
         expect(
           digest.isValid(
             platform,
@@ -126,9 +126,9 @@ void main() {
 
       test('invalidates bad SkiaDigest - test name', () {
         final Map<String, dynamic> skiaJson = json.decode(
-          digestResponseTemplate(testName: 'flutter.golden_test.2')
-        );
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+          digestResponseTemplate(testName: 'flutter.golden_test.2'),
+        ) as Map<String, dynamic>;
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
         expect(
           digest.isValid(
             platform,
@@ -141,9 +141,9 @@ void main() {
 
       test('invalidates bad SkiaDigest - expectation', () {
         final Map<String, dynamic> skiaJson = json.decode(
-          digestResponseTemplate(expectation: '1deg543sf645erg44awqcc78')
-        );
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+          digestResponseTemplate(expectation: '1deg543sf645erg44awqcc78'),
+        ) as Map<String, dynamic>;
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
         expect(
           digest.isValid(
             platform,
@@ -156,9 +156,9 @@ void main() {
 
       test('invalidates bad SkiaDigest - status', () {
         final Map<String, dynamic> skiaJson = json.decode(
-          digestResponseTemplate(status: 'negative')
-        );
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+          digestResponseTemplate(status: 'negative'),
+        ) as Map<String, dynamic>;
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
         expect(
           digest.isValid(
             platform,
@@ -189,8 +189,8 @@ void main() {
 
       test('detects invalid digests SkiaDigest', () {
         const String testName = 'flutter.golden_test.2';
-        final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate());
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate()) as Map<String, dynamic>;
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
         expect(digest.isValid(platform, testName, expectation), isFalse);
       });
 
@@ -795,16 +795,16 @@ class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {
   MockHttpClientResponse(this.response);
 
-  final Uint8List response;
+  final List<int> response;
 
   @override
-  StreamSubscription<Uint8List> listen(
-    void onData(Uint8List event), {
+  StreamSubscription<List<int>> listen(
+    void onData(List<int> event), {
       Function onError,
       void onDone(),
       bool cancelOnError,
     }) {
-    return Stream<Uint8List>.fromFuture(Future<Uint8List>.value(response))
+    return Stream<List<int>>.fromFuture(Future<List<int>>.value(response))
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 }

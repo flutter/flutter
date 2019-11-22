@@ -27,7 +27,7 @@ class ProtocolDiscovery {
       _handleLine,
       onDone: _stopScrapingLogs,
     );
-    _uriStreamController = StreamController<Uri>.broadcast();
+    _uriStreamController = _BufferedStreamController<Uri>();
   }
 
   factory ProtocolDiscovery.observatory(
@@ -61,22 +61,22 @@ class ProtocolDiscovery {
   final Duration throttleDuration;
 
   StreamSubscription<String> _deviceLogSubscription;
-  StreamController<Uri> _uriStreamController;
+  _BufferedStreamController<Uri> _uriStreamController;
 
-  /// The discovered service URI.
+  /// The discovered service URL.
   /// Use [uris] instead.
   // TODO(egarciad): replace `uri` for `uris`.
   Future<Uri> get uri {
     return uris.first;
   }
 
-  /// The discovered service URIs.
+  /// The discovered service URLs.
   ///
-  /// When a new observatory URI is available in [logReader],
-  /// the URIs are forwarded at most once every [throttleDuration].
+  /// When a new observatory URL: is available in [logReader],
+  /// the URLs are forwarded at most once every [throttleDuration].
   ///
   /// Port forwarding is only attempted when this is invoked,
-  /// for each observatory URI in the stream.
+  /// for each observatory URL in the stream.
   Stream<Uri> get uris {
     return _uriStreamController.stream
       .transform(_throttle<Uri>(
@@ -139,6 +139,64 @@ class ProtocolDiscovery {
       hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }
     return hostUri;
+  }
+}
+
+/// Provides a broadcast stream controller that buffers the events
+/// if there isn't a listener attached.
+/// The events are then delivered when a listener is attached to the stream.
+class _BufferedStreamController<T> {
+  _BufferedStreamController() : _events = <dynamic>[];
+
+  /// The stream that this controller is controlling.
+  Stream<T> get stream {
+    return _streamController.stream;
+  }
+
+  StreamController<T> _streamControllerInstance;
+
+  StreamController<T> get _streamController {
+    _streamControllerInstance ??= StreamController<T>.broadcast(onListen: () {
+      for (dynamic event in _events) {
+        assert(!(T is List));
+        if (event is T) {
+          _streamControllerInstance.add(event);
+        } else {
+          _streamControllerInstance.addError(
+            event.first as Object,
+            event.last as StackTrace,
+          );
+        }
+      }
+      _events.clear();
+    });
+    return _streamControllerInstance;
+  }
+
+  final List<dynamic> _events;
+
+  /// Sends [event] if there is a listener attached to the broadcast stream.
+  /// Otherwise, it enqueues [event] until a listener is attached.
+  void add(T event) {
+    if (_streamController.hasListener) {
+      _streamController.add(event);
+    } else {
+      _events.add(event);
+    }
+  }
+
+  /// Sends or enqueues an error event.
+  void addError(Object error, [StackTrace stackTrace]) {
+    if (_streamController.hasListener) {
+      _streamController.addError(error, stackTrace);
+    } else {
+      _events.add(<dynamic>[error, stackTrace]);
+    }
+  }
+
+  /// Closes the stream.
+  Future<void> close() {
+    return _streamController.close();
   }
 }
 

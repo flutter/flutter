@@ -703,7 +703,7 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 ///
 /// All methods returning String values return JSON.
 mixin WidgetInspectorService {
-  /// Ring of cached JSON values to prevent json from being garbage
+  /// Ring of cached JSON values to prevent JSON from being garbage
   /// collected before it can be requested over the Observatory protocol.
   final List<String> _serializeRing = List<String>(20);
   int _serializeRingIndex = 0;
@@ -1691,7 +1691,7 @@ mixin WidgetInspectorService {
   /// to be at most [width] pixels wide and [height] pixels tall. The returned
   /// image will never have a scale between logical pixels and the
   /// size of the output image larger than maxPixelRatio.
-  /// [margin] indicates the number of pixels relative to the unscaled size of
+  /// [margin] indicates the number of pixels relative to the un-scaled size of
   /// the [object] to include as a margin to include around the bounds of the
   /// [object] in the screenshot. Including a margin can be useful to capture
   /// areas that are slightly outside of the normal bounds of an object such as

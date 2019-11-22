@@ -67,6 +67,28 @@ void main() {
         expect('$uri', 'http://127.0.0.1:9999');
       });
 
+      testUsingContext('discovers uri if logs already produced output and no listener is attached', () async {
+        initialize();
+        logReader.addLine('HELLO WORLD');
+        logReader.addLine('Observatory listening on http://127.0.0.1:9999');
+
+        await Future<void>.delayed(Duration.zero);
+
+        final Uri uri = await discoverer.uri;
+        expect(uri, isNotNull);
+        expect(uri.port, 9999);
+        expect('$uri', 'http://127.0.0.1:9999');
+      });
+
+      testUsingContext('uri throws if logs produce bad line and no listener is attached', () async {
+        initialize();
+        logReader.addLine('Observatory listening on http://127.0.0.1:apple');
+
+        await Future<void>.delayed(Duration.zero);
+
+        expect(discoverer.uri, throwsA(isFormatException));
+      });
+
       testUsingContext('discovers uri if logs not yet produced output', () async {
         initialize();
         final Future<Uri> uriFuture = discoverer.uri;

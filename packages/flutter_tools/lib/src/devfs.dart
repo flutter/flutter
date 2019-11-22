@@ -487,6 +487,9 @@ class DevFS {
     if (fullRestart) {
       generator.reset();
     }
+    // On a full restart, or on an initial compile for the attach based workflow,
+    // this will produce a full dill. Subsequent invocations will produce incremental
+    // dill files that depend on the invalidated files.
     printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
@@ -534,5 +537,5 @@ class DevFS {
   }
 }
 
-/// Converts a platform-specific file path to a platform-independent Uri path.
+/// Converts a platform-specific file path to a platform-independent URL path.
 String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';
