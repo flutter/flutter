@@ -1747,9 +1747,8 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
     this.ignoring = true,
     this.ignoringSemantics,
     Widget sliver,
-  })
-    : assert(ignoring != null),
-      super(key: key, child: sliver);
+  }) : assert(ignoring != null),
+       super(key: key, child: sliver);
 
   /// Whether this sliver is ignored during hit testing.
   ///
@@ -1773,6 +1772,7 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
     );
   }
 
+  @override
   void updateRenderObject(BuildContext context, RenderSliverIgnorePointer renderObject) {
     renderObject
       ..ignoring = ignoring

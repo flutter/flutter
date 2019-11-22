@@ -563,6 +563,7 @@ void main() {
       semantics.dispose();
     });
   });
+
   group('SliverIgnorePointer - ', () {
     testWidgets('ignores pointer events', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);

@@ -893,7 +893,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
 
   void _updateOpacity() {
     final int oldAlpha = _alpha;
-    _alpha = ui.Color.getAlphaFromOpacity(_opacity.value.clamp(0.0, 1.0));
+    _alpha = ui.Color.getAlphaFromOpacity(_opacity.value);
     if (oldAlpha != _alpha) {
       final bool didNeedCompositing = _currentlyNeedsCompositing;
       _currentlyNeedsCompositing = _alpha > 0 && _alpha < 255;
