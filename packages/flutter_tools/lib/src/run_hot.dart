@@ -104,7 +104,7 @@ class HotRunner extends ResidentRunner {
     bool pause = false,
   }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
-    final OperationResult result = await restart(pauseAfterRestart: pause);
+    final OperationResult result = await restart(pause: pause);
     if (!result.isOk) {
       throw rpc.RpcException(
         rpc_error_code.INTERNAL_ERROR,
@@ -115,7 +115,7 @@ class HotRunner extends ResidentRunner {
 
   Future<void> _restartService({ bool pause = false }) async {
     final OperationResult result =
-      await restart(fullRestart: true, pauseAfterRestart: pause);
+      await restart(fullRestart: true, pause: pause);
     if (!result.isOk) {
       throw rpc.RpcException(
         rpc_error_code.INTERNAL_ERROR,
@@ -213,7 +213,13 @@ class HotRunner extends ResidentRunner {
     }
 
     if (debuggingOptions.fastStart) {
-      await _restartFromSources(benchmarkMode: true, reason: 'restart');
+      await restart(
+        fullRestart: true,
+        benchmarkMode: true,
+        reason: 'restart',
+        // pause: debuggingOptions.startPaused, does not currently work.
+        silent: true,
+      );
     }
 
     appStartedCompleter?.complete();
@@ -361,12 +367,10 @@ class HotRunner extends ResidentRunner {
     Uri packagesUri,
     Uri assetsDirectoryUri,
   ) {
-    final List<Future<void>> futures = <Future<void>>[
-      for (FlutterView view in device.views) view.runFromSource(entryUri, packagesUri, assetsDirectoryUri),
-    ];
-    final Completer<void> completer = Completer<void>();
-    Future.wait(futures).whenComplete(() { completer.complete(null); });
-    return completer.future;
+    return Future.wait(<Future<void>>[
+      for (FlutterView view in device.views)
+        view.runFromSource(entryUri, packagesUri, assetsDirectoryUri),
+    ]);
   }
 
   Future<void> _launchFromDevFS(String mainScript) async {
@@ -531,9 +535,10 @@ class HotRunner extends ResidentRunner {
   @override
   Future<OperationResult> restart({
     bool fullRestart = false,
-    bool pauseAfterRestart = false,
     String reason,
     bool benchmarkMode = false,
+    bool silent = false,
+    bool pause = false, // this is not currently supported for hot restart.
   }) async {
     String targetPlatform;
     String sdkName;
@@ -560,8 +565,11 @@ class HotRunner extends ResidentRunner {
         emulator: emulator,
         reason: reason,
         benchmarkMode: benchmarkMode,
+        silent: silent,
       );
-      printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      if (!silent) {
+        printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      }
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
@@ -569,11 +577,12 @@ class HotRunner extends ResidentRunner {
       sdkName: sdkName,
       emulator: emulator,
       reason: reason,
-      pauseAfterRestart: pauseAfterRestart,
     );
     if (result.isOk) {
       final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
-      printStatus('${result.message} in $elapsed.');
+      if (!silent) {
+        printStatus('${result.message} in $elapsed.');
+      }
     }
     return result;
   }
@@ -584,15 +593,19 @@ class HotRunner extends ResidentRunner {
     bool emulator,
     String reason,
     bool benchmarkMode,
+    bool silent,
   }) async {
     if (!canHotRestart) {
       return OperationResult(1, 'hotRestart not supported');
     }
-    final Status status = logger.startProgress(
-      'Performing hot restart...',
-      timeout: timeoutConfiguration.fastOperation,
-      progressId: 'hot.restart',
-    );
+    Status status;
+    if (!silent) {
+      status = logger.startProgress(
+        'Performing hot restart...',
+        timeout: timeoutConfiguration.fastOperation,
+        progressId: 'hot.restart',
+      );
+    }
     OperationResult result;
     String restartEvent = 'restart';
     try {
@@ -620,7 +633,7 @@ class HotRunner extends ResidentRunner {
         emulator: emulator,
         fullRestart: true,
         reason: reason).send();
-      status.cancel();
+      status?.cancel();
     }
     return result;
   }
@@ -630,7 +643,6 @@ class HotRunner extends ResidentRunner {
     String sdkName,
     bool emulator,
     String reason,
-    bool pauseAfterRestart = false,
   }) async {
     final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
     final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
@@ -645,7 +657,6 @@ class HotRunner extends ResidentRunner {
         targetPlatform: targetPlatform,
         sdkName: sdkName,
         emulator: emulator,
-        pause: pauseAfterRestart,
         reason: reason,
         onSlow: (String message) {
           status?.cancel();

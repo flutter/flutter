@@ -188,7 +188,7 @@ class RunCommand extends RunCommandBase {
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
       ..addFlag('fast-start',
-        negatable: false,
+        negatable: true,
         defaultsTo: false,
         hide: true,
         help: 'Whether to bootstrap an empty application.'

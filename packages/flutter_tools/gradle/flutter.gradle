@@ -750,7 +750,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (!fastStart || buildMode != "debug") {
                 args "-dTargetFile=${targetPath}"
             } else {
-                args "-dTargetFile=${Paths.get(flutterRoot.absolutePath, "examples", "hello_world", "lib", "main.dart")}"
+                args "-dTargetFile=${Paths.get(flutterRoot.absolutePath, "examples", "splash", "lib", "main.dart")}"
             }
             args "-dTargetPlatform=android"
             args "-dBuildMode=${buildMode}"
