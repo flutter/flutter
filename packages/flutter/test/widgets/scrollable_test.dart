@@ -36,6 +36,10 @@ Future<void> pumpTest(
 
 const double dragOffset = 200.0;
 
+const LogicalKeyboardKey modifierKey = (!kIsWeb && Platform.isMacOS)
+    ? LogicalKeyboardKey.metaLeft
+    : LogicalKeyboardKey.controlLeft;
+
 double getScrollOffset(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   return viewport.offset.pixels;
@@ -295,7 +299,6 @@ void main() {
         ),
       ),
     );
-    final LogicalKeyboardKey modifierKey = Platform.isMacOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
 
     focusNode.requestFocus();
     await tester.pumpAndSettle();
@@ -346,8 +349,6 @@ void main() {
       ),
     );
 
-    final LogicalKeyboardKey modifierKey = Platform.isMacOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
-
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
@@ -390,7 +391,6 @@ void main() {
         ),
       ),
     );
-    final LogicalKeyboardKey modifierKey = Platform.isMacOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
 
     focusNode.requestFocus();
     await tester.pumpAndSettle();
@@ -442,8 +442,6 @@ void main() {
       ),
     );
 
-    final LogicalKeyboardKey modifierKey = Platform.isMacOS ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
-
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
@@ -457,6 +455,62 @@ void main() {
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
+
+    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
+    // of Platform.isMacOS, don't skip this on web anymore.
+    // https://github.com/flutter/flutter/issues/31366
+  }, skip: kIsWeb);
+
+  testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+    final List<String> items = List<String>.generate(20, (int index) => 'Item $index');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.fuchsia,
+        ),
+        home: CustomScrollView(
+          controller: controller,
+          center: const ValueKey<String>('Item 10'),
+          slivers: items.map<Widget>(
+            (String item) {
+              return SliverToBoxAdapter(
+                key: ValueKey<String>(item),
+                child: Focus(
+                  focusNode: focusNode,
+                  child: Container(
+                    alignment: Alignment.center,
+                    height: 100,
+                    child: Text(item),
+                  ),
+                ),
+              );
+            },
+          ).toList(),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    for (int i = 0; i < 10; ++i) {
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyUpEvent(modifierKey);
+      await tester.pumpAndSettle();
+    }
+    // Starts at #10 already, so doesn't work out to 500.0 because it hits bottom.
+    expect(controller.position.pixels, equals(400.0));
+    for (int i = 0; i < 10; ++i) {
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.sendKeyUpEvent(modifierKey);
+      await tester.pumpAndSettle();
+    }
+    // Goes up two past "center" where it started, so negative.
+    expect(controller.position.pixels, equals(-100.0));
 
     // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
     // of Platform.isMacOS, don't skip this on web anymore.
