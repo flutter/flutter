@@ -188,3 +188,12 @@ config("symbol_visibility_hidden") {
   # Empty but present because this is also present in other buildroots.
   # The same config from gcc/BUILD.gn is used instead.
 }
+
+config("no_rtti") {
+  if (is_win) {
+    cflags_cc = [ "/GR-" ]
+  } else {
+    cflags_cc = [ "-fno-rtti" ]
+    cflags_objcc = cflags_cc
+  }
+}
