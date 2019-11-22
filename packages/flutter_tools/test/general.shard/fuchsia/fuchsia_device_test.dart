@@ -25,6 +25,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/tiles_ctl.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
@@ -111,6 +112,7 @@ void main() {
       expect(await device.targetPlatform, TargetPlatform.fuchsia_arm64);
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
       ProcessUtils: () => mockProcessUtils,
     });
 
@@ -122,6 +124,7 @@ void main() {
       expect(await device.targetPlatform, TargetPlatform.fuchsia_x64);
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
       ProcessUtils: () => mockProcessUtils,
     });
   });
@@ -180,6 +183,7 @@ void main() {
             sshConfig: mockFile,
             devFinder: mockFile,
           ),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
     group('device logs', () {
@@ -378,7 +382,38 @@ void main() {
     });
   });
 
-  group('fuchsia app start and stop: ', () {
+  testUsingContext('Correct flutter runner', () async {
+    expect(artifacts.getArtifactPath(
+        Artifact.fuchsiaFlutterRunner,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.debug,
+      ),
+      contains('flutter_jit_runner'),
+    );
+    expect(artifacts.getArtifactPath(
+        Artifact.fuchsiaFlutterRunner,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.profile,
+      ),
+      contains('flutter_aot_runner'),
+    );
+    expect(artifacts.getArtifactPath(
+        Artifact.fuchsiaFlutterRunner,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.release,
+      ),
+      contains('flutter_aot_product_runner'),
+    );
+    expect(artifacts.getArtifactPath(
+        Artifact.fuchsiaFlutterRunner,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.jitRelease,
+      ),
+      contains('flutter_jit_product_runner'),
+    );
+  });
+
+  group('Fuchsia app start and stop: ', () {
     MemoryFileSystem memoryFileSystem;
     FakeOperatingSystemUtils osUtils;
     FakeFuchsiaDeviceTools fuchsiaDeviceTools;
@@ -420,7 +455,7 @@ void main() {
         mode: anyNamed('mode'),
       )).thenReturn(patchedSdk.path);
       when(mockArtifacts.getArtifactPath(
-        Artifact.fuchsiaFlutterJitRunner,
+        Artifact.fuchsiaFlutterRunner,
         platform: anyNamed('platform'),
         mode: anyNamed('mode'),
       )).thenReturn(runner.path);
@@ -650,6 +685,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockSuccessProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
     testUsingContext('returns "Fuchsia" when device command fails', () async {
@@ -658,6 +694,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockFailureProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
     testUsingContext('returns "Fuchsia" when device gives an empty result', () async {
@@ -666,6 +703,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
     });
   });
 }
@@ -722,12 +760,16 @@ Process _createMockProcess({
 }
 
 class MockFuchsiaDevice extends Mock implements FuchsiaDevice {
-  MockFuchsiaDevice(this.id, this.portForwarder, this.ipv6);
+  MockFuchsiaDevice(this.id, this.portForwarder, this._ipv6);
+
+  final bool _ipv6;
 
   @override
-  final bool ipv6;
+  Future<bool> get ipv6 async => _ipv6;
+
   @override
   final String id;
+
   @override
   final DevicePortForwarder portForwarder;
 
@@ -1073,7 +1115,7 @@ class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
   }
 
   @override
-  Future<String> resolve(String deviceName) async {
+  Future<String> resolve(String deviceName, {bool local = false}) async {
     return '192.168.42.10';
   }
 }
@@ -1085,7 +1127,7 @@ class FailingDevFinder implements FuchsiaDevFinder {
   }
 
   @override
-  Future<String> resolve(String deviceName) async {
+  Future<String> resolve(String deviceName, {bool local = false}) async {
     return null;
   }
 }

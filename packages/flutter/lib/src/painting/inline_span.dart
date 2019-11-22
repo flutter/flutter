@@ -43,7 +43,7 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 ///   * [InlineSpan.getSemanticsInformation]
 @immutable
 class InlineSpanSemanticsInformation {
-  /// Constructs an object that holds the text and sematnics label values of an
+  /// Constructs an object that holds the text and semantics label values of an
   /// [InlineSpan].
   ///
   /// The text parameter must not be null.
@@ -283,7 +283,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// represented as a 0xFFFC 'object replacement character'.
   ///
   /// The plain-text representation of this [InlineSpan] is written into the `buffer`.
-  /// This method will then recursively call [computeToPlainText] on its childen
+  /// This method will then recursively call [computeToPlainText] on its children
   /// [InlineSpan]s if available.
   @protected
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});

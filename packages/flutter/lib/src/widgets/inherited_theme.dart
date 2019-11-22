@@ -101,7 +101,7 @@ abstract class InheritedTheme extends InheritedWidget {
   /// This implementation for [TooltipTheme] is typical:
   /// ```dart
   /// Widget wrap(BuildContext context, Widget child) {
-  ///   final TooltipTheme ancestorTheme = context.ancestorWidgetOfExactType(TooltipTheme);
+  ///   final TooltipTheme ancestorTheme = context.findAncestorWidgetOfExactType<TooltipTheme>());
   ///   return identical(this, ancestorTheme) ? child : TooltipTheme(data: data, child: child);
   /// }
   /// ```

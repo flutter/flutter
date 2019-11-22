@@ -371,7 +371,7 @@ class _HeroState extends State<Hero> {
   @override
   Widget build(BuildContext context) {
     assert(
-      context.ancestorWidgetOfExactType(Hero) == null,
+      context.findAncestorWidgetOfExactType<Hero>() == null,
       'A Hero widget cannot be the descendant of another Hero widget.'
     );
 

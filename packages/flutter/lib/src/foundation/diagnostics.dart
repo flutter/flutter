@@ -1056,7 +1056,7 @@ bool _isSingleLine(DiagnosticsTreeStyle style) {
   return style == DiagnosticsTreeStyle.singleLine;
 }
 
-/// Renderer that creates ascii art representations of trees of
+/// Renderer that creates ASCII art representations of trees of
 /// [DiagnosticsNode] objects.
 ///
 /// See also:
@@ -1385,7 +1385,7 @@ class TextTreeRenderer {
 /// Defines diagnostics data for a [value].
 ///
 /// For debug and profile modes, [DiagnosticsNode] provides a high quality
-/// multi-line string dump via [toStringDeep]. The core members are the [name],
+/// multiline string dump via [toStringDeep]. The core members are the [name],
 /// [toDescription], [getProperties], [value], and [getChildren]. All other
 /// members exist typically to provide hints for how [toStringDeep] and
 /// debugging tools should format output.
@@ -3352,7 +3352,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
   ///
   /// `joiner` specifies the string which is place between each part obtained
   /// from [debugFillProperties]. Passing a string such as `'\n '` will result
-  /// in a multi-line string that indents the properties of the object below its
+  /// in a multiline string that indents the properties of the object below its
   /// name (as per [toString]).
   ///
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included

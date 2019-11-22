@@ -67,7 +67,7 @@ class CupertinoTheme extends StatelessWidget {
   /// Resolves all the colors defined in that [CupertinoThemeData] against the
   /// given [BuildContext] on a best-effort basis.
   static CupertinoThemeData of(BuildContext context) {
-    final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
+    final _InheritedCupertinoTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
     return (inheritedTheme?.theme?.data ?? const CupertinoThemeData()).resolveFrom(context, nullOk: true);
   }
 
@@ -80,7 +80,7 @@ class CupertinoTheme extends StatelessWidget {
   /// Throws an exception if no such [CupertinoTheme] or [MediaQuery] widgets exist
   /// in the ancestry tree, unless [nullOk] is set to true.
   static Brightness brightnessOf(BuildContext context, { bool nullOk = false }) {
-    final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
+    final _InheritedCupertinoTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
     return inheritedTheme?.theme?.data?._brightness ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness;
   }
 
@@ -277,7 +277,7 @@ class CupertinoThemeData extends Diagnosticable {
     );
   }
 
-  /// Returns a new `CupertinoThemeData` with all its colors resolved aginst the
+  /// Returns a new `CupertinoThemeData` with all its colors resolved against the
   /// given [BuildContext].
   ///
   /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved

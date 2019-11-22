@@ -779,6 +779,8 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// Animated version of [Padding] which automatically transitions the
 /// indentation over a given duration whenever the given inset changes.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=PY2m0fhGNz4}
+///
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
@@ -941,6 +943,8 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 
 /// Animated version of [Positioned] which automatically transitions the child's
 /// position over a given duration whenever the given position changes.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=hC3s2YdtWt8}
 ///
 /// Only works if it's the child of a [Stack].
 ///
@@ -1237,6 +1241,8 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 
 /// Animated version of [Opacity] which automatically transitions the child's
 /// opacity over a given duration whenever the given opacity changes.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=QZAvjqOqiLY}
 ///
 /// Animating an opacity is relatively expensive because it requires painting
 /// the child into an intermediate buffer.

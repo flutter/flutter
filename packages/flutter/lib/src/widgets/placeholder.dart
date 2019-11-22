@@ -49,6 +49,8 @@ class _PlaceholderPainter extends CustomPainter {
 /// By default, the placeholder is sized to fit its container. If the
 /// placeholder is in an unbounded space, it will size itself according to the
 /// given [fallbackWidth] and [fallbackHeight].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=LPe56fezmoo}
 class Placeholder extends StatelessWidget {
   /// Creates a widget which draws a box.
   const Placeholder({

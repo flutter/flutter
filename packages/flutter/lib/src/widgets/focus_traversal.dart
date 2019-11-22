@@ -101,7 +101,7 @@ abstract class FocusTraversalPolicy {
   @protected
   void invalidateScopeData(FocusScopeNode node) {}
 
-  /// This is called whenever the given [node] is reparented into a new scope,
+  /// This is called whenever the given [node] is re-parented into a new scope,
   /// so that the policy has a chance to update or invalidate any cached data
   /// that it maintains per scope about the node.
   ///
@@ -868,7 +868,7 @@ class DefaultFocusTraversal extends InheritedWidget {
   /// The [context] argument must not be null.
   static FocusTraversalPolicy of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
-    final DefaultFocusTraversal inherited = context.inheritFromWidgetOfExactType(DefaultFocusTraversal);
+    final DefaultFocusTraversal inherited = context.dependOnInheritedWidgetOfExactType<DefaultFocusTraversal>();
     assert(() {
       if (nullOk) {
         return true;

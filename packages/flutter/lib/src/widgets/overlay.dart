@@ -234,7 +234,7 @@ class Overlay extends StatefulWidget {
   /// OverlayState overlay = Overlay.of(context);
   /// ```
   static OverlayState of(BuildContext context, { Widget debugRequiredFor }) {
-    final OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
+    final OverlayState result = context.findAncestorStateOfType<OverlayState>();
     assert(() {
       if (debugRequiredFor != null && result == null) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
