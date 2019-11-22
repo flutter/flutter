@@ -130,7 +130,7 @@ void main() {
     when(mockWipConnection.debugger).thenReturn(mockWipDebugger);
   }
 
-  test('runner with web server device does not support debugging', () => testbed.run(() async {
+  test('runner with web server device does not support debugging without --start-paused', () => testbed.run(() {
     when(mockFlutterDevice.device).thenReturn(WebServerDevice());
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
@@ -144,7 +144,6 @@ void main() {
     expect(profileResidentWebRunner.debuggingEnabled, false);
 
     when(mockFlutterDevice.device).thenReturn(MockChromeDevice());
-
     expect(residentWebRunner.debuggingEnabled, true);
   }));
 
@@ -161,6 +160,45 @@ void main() {
     expect(didSkipDwds, true);
   }));
 
+  test('runner with web server device supports debugging with --start-paused', () => testbed.run(() {
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+    final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
+      ipv6: true,
+      stayResident: true,
+      dartDefines: <String>[],
+    );
+
+    expect(profileResidentWebRunner.debuggingEnabled, true);
+  }));
+
+  test('runner with web server device uses debug extension with --start-paused', () => testbed.run(() async {
+    _setupMocks();
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+    final BufferLogger bufferLogger = logger;
+
+    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
+      ipv6: true,
+      stayResident: true,
+      dartDefines: <String>[],
+    );
+
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+     unawaited(runner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    // Check connect() was told to use the debug extension.
+    verify(mockWebFs.connect(true)).called(1);
+    // And ensure the debug services was started.
+    expect(bufferLogger.statusText, contains('Debug service listening on'));
+  }));
 
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
      when(mockFlutterDevice.device).thenReturn(mockChromeDevice);

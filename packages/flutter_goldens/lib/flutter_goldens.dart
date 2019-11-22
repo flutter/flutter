@@ -156,7 +156,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     return goldenFile;
   }
 
-  /// Prepends the golden Uri with the library name that encloses the current
+  /// Prepends the golden URL with the library name that encloses the current
   /// test.
   Uri _addPrefix(Uri golden) {
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
@@ -210,7 +210,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
     LocalFileComparator defaultComparator,
   }) async {
 
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
@@ -293,7 +293,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     LocalFileComparator defaultComparator,
   }) async {
 
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
@@ -391,7 +391,7 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
     String reason, {
     LocalFileComparator defaultComparator,
   }) {
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     const FileSystem fs = LocalFileSystem();
     final Uri basedir = defaultComparator.basedir;
     final SkiaGoldClient skiaClient = SkiaGoldClient(fs.directory(basedir));
@@ -472,7 +472,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     LocalFileComparator defaultComparator,
     Directory baseDirectory,
   }) async {
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,

@@ -186,10 +186,10 @@ void main() {
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+          return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
               .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+              .findAncestorStateOfType<_StatefulState>();
         }
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
@@ -616,10 +616,10 @@ void main() {
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+          return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
               .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+              .findAncestorStateOfType<_StatefulState>();
         }
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(

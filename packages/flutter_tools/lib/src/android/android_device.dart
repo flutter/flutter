@@ -192,7 +192,16 @@ class AndroidDevice extends Device {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
       switch (await _getProperty('ro.product.cpu.abi')) {
         case 'arm64-v8a':
-          _platform = TargetPlatform.android_arm64;
+          // Perform additional verification for 64 bit ABI. Some devices,
+          // like the Kindle Fire 8, misreport the abilist. We might not
+          // be able to retrieve this property, in which case we fall back
+          // to assuming 64 bit.
+          final String abilist = await _getProperty('ro.product.cpu.abilist');
+          if (abilist == null || abilist.contains('arm64-v8a')) {
+            _platform = TargetPlatform.android_arm64;
+          } else {
+            _platform = TargetPlatform.android_arm;
+          }
           break;
         case 'x86_64':
           _platform = TargetPlatform.android_x64;
@@ -846,25 +855,9 @@ class _AdbLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
-  DateTime _timeOrigin;
-
-  DateTime _adbTimestampToDateTime(String adbTimestamp) {
-    // The adb timestamp format is: mm-dd hours:minutes:seconds.milliseconds
-    // Dart's DateTime parse function accepts this format so long as we provide
-    // the year, resulting in:
-    // yyyy-mm-dd hours:minutes:seconds.milliseconds.
-    return DateTime.parse('${DateTime.now().year}-$adbTimestamp');
-  }
-
   void _start() {
-    // Start the adb logcat process.
-    final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time'];
-    final String lastTimestamp = device.lastLogcatTimestamp;
-    if (lastTimestamp != null) {
-      _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
-    } else {
-      _timeOrigin = null;
-    }
+    // Start the adb logcat process and filter logs by the "flutter" tag.
+    final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'];
     processUtils.start(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -914,18 +907,7 @@ class _AdbLogReader extends DeviceLogReader {
   // mm-dd hh:mm:ss.milliseconds Priority/Tag( PID): ....
   void _onLine(String line) {
     final Match timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
-    if (timeMatch == null) {
-      return;
-    }
-    if (_timeOrigin != null) {
-      final String timestamp = timeMatch.group(0);
-      final DateTime time = _adbTimestampToDateTime(timestamp);
-      if (!time.isAfter(_timeOrigin)) {
-        // Ignore log messages before the origin.
-        return;
-      }
-    }
-    if (line.length == timeMatch.end) {
+    if (timeMatch == null || line.length == timeMatch.end) {
       return;
     }
     // Chop off the time.

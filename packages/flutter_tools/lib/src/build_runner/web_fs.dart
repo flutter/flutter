@@ -33,7 +33,6 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
-import '../device.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -72,7 +71,7 @@ typedef DwdsFactory = Future<Dwds> Function({
   bool enableDebugExtension,
 });
 
-/// A function with the same signatuure as [WebFs.start].
+/// A function with the same signature as [WebFs.start].
 typedef WebFsFactory = Future<WebFs> Function({
   @required String target,
   @required FlutterProject flutterProject,
@@ -101,7 +100,7 @@ class WebFs {
     this._dartDefines,
   );
 
-  /// The server uri.
+  /// The server URL.
   final String uri;
 
   final HttpServer _server;
@@ -131,12 +130,12 @@ class WebFs {
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
   /// Only calls [AppConnection.runMain] on the subsequent connections.
-  Future<ConnectionResult> connect(DebuggingOptions debuggingOptions) {
+  Future<ConnectionResult> connect(bool useDebugExtension) {
     final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
-      final DebugConnection debugConnection = debuggingOptions.browserLaunch
-        ? await _dwds.debugConnection(appConnection)
-        : await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first);
+      final DebugConnection debugConnection = useDebugExtension
+        ? await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first)
+        : await _dwds.debugConnection(appConnection);
       if (!firstConnection.isCompleted) {
         firstConnection.complete(ConnectionResult(appConnection, debugConnection));
       } else {
