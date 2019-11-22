@@ -620,8 +620,11 @@ void main() {
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
-    expect(residentCompiler.platformDill,
-      artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug));
+    expect(
+      residentCompiler.platformDill,
+      fs.file(artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug))
+        .absolute.uri.toString(),
+    );
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
