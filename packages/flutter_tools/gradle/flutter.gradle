@@ -344,8 +344,8 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePluginDependencies(String pluginName, String dependencies) {
         Project pluginProject = project.rootProject.findProject(":$pluginName")
         if (pluginProject == null) {
-            // Ignore plugins that don't have a project since they most likely
-            // they don't have an android/ directory.
+            // Ignore plugins that don't have a project since most likely they don't
+            // have an android/ directory.
             return
         }
         dependencies.split(',').each { pluginDependencyName ->
