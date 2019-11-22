@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -32,7 +32,8 @@ void main() {
       // Add basic properties to the Flutter project and subprojects
       flutterProject = MockFlutterProject();
       when(flutterProject.directory).thenReturn(fs.directory('/'));
-      when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.plugins'));
+      when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
+      when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
       iosProject = MockIosProject();
       when(flutterProject.ios).thenReturn(iosProject);
       when(iosProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('Runner'));
@@ -189,6 +190,37 @@ flutter:
         );
     }
 
+    void createPluginWithDependencies({
+      @required String name,
+      @required List<String> dependencies,
+    }) {
+      assert(name != null);
+      assert(dependencies != null);
+
+      final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('plugin.');
+      pluginDirectory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+name: $name
+flutter:
+  plugin:
+    androidPackage: plugin2
+    pluginClass: UseNewEmbedding
+dependencies:
+''');
+      for (String dependency in dependencies) {
+        pluginDirectory
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('  $dependency:\n', mode: FileMode.append);
+      }
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync(
+          '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
+          mode: FileMode.append,
+        );
+    }
+
     // Creates the files that would indicate that pod install has run for the
     // given project.
     void simulatePodInstallRun(XcodeBasedProject project) {
@@ -199,6 +231,7 @@ flutter:
       testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () {
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -210,6 +243,7 @@ flutter:
         when(macosProject.existsSync()).thenReturn(false);
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -221,6 +255,47 @@ flutter:
         when(macosProject.existsSync()).thenReturn(false);
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
+        createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
+        createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
+        createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
+        when(iosProject.existsSync()).thenReturn(false);
+        when(macosProject.existsSync()).thenReturn(false);
+
+        refreshPluginsList(flutterProject);
+
+        expect(flutterProject.flutterPluginsFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsFile.readAsStringSync(),
+          'plugin-a=/.tmp_rand0/plugin.rand0/\n'
+          'plugin-b=/.tmp_rand0/plugin.rand1/\n'
+          'plugin-c=/.tmp_rand0/plugin.rand2/\n'
+          ''
+        );
+        expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
+          '{'
+            '"dependencyGraph":['
+              '{'
+                '"name":"plugin-a",'
+                '"dependencies":["plugin-b","plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-b",'
+                '"dependencies":["plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-c",'
+                '"dependencies":[]'
+              '}'
+            ']'
+          '}'
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
