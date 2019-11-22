@@ -307,11 +307,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         // Add plugin dependency to the app project.
         project.dependencies {
-            if (project.getConfigurations().findByName("implementation")) {
-                implementation pluginProject
-            } else {
-                compile pluginProject
-            }
+            implementation pluginProject
         }
         Closure addEmbeddingCompileOnlyDependency = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
@@ -338,7 +334,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // Add the dependencies on other plugin projects to the plugin projects.
+    // Add the dependencies on other plugin projects to the plugin project.
     // A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
     // making the Gradle plugin project A depend on the Gradle plugin project B.
     private void configurePluginDependencies(String pluginName, String dependencies) {
@@ -359,11 +355,7 @@ class FlutterPlugin implements Plugin<Project> {
             // Wait for the Android plugin to load and add the dependency to the plugin project.
             pluginProject.afterEvaluate {
                 pluginProject.dependencies {
-                    if (project.getConfigurations().findByName("implementation")) {
-                        implementation dependencyProject
-                    } else {
-                        compile dependencyProject
-                    }
+                    implementation dependencyProject
                 }
             }
         }

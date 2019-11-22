@@ -254,7 +254,7 @@ class Plugin {
   final String name;
   final String path;
 
-  /// The plugin list of dependencies.
+  /// The name of the packages this plugin depends on.
   final List<String> dependencies;
 
   /// This is a mapping from platform config key to the plugin platform spec.
@@ -308,7 +308,10 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
-/// Returns true if .flutter-plugins or .flutter-plugins-dependencies have changed,
+/// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
+/// If there aren't any plugins, then the files aren't written to disk.
+///
+/// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
 /// otherwise returns false.
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final StringBuffer dependenciesFileBuffer = StringBuffer();
