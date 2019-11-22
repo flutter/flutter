@@ -52,6 +52,8 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// those children that are actually visible.
 ///
 /// All [children] must have a key.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.

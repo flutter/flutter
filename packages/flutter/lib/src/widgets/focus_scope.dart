@@ -266,7 +266,7 @@ class Focus extends StatefulWidget {
     assert(context != null);
     assert(nullOk != null);
     assert(scopeOk != null);
-    final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
+    final _FocusMarker marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     final FocusNode node = marker?.notifier;
     if (node == null) {
       if (!nullOk) {
@@ -538,7 +538,7 @@ class FocusScope extends Focus {
   /// The [context] argument must not be null.
   static FocusScopeNode of(BuildContext context) {
     assert(context != null);
-    final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
+    final _FocusMarker marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     return marker?.notifier?.nearestScope ?? context.owner.focusManager.rootScope;
   }
 

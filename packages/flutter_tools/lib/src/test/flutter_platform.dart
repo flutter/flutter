@@ -293,7 +293,7 @@ class FlutterPlatform extends PlatformPlugin {
 
   /// The test compiler produces dill files for each test main.
   ///
-  /// To speed up compilation, each compile is intialized from an existing
+  /// To speed up compilation, each compile is initialized from an existing
   /// dill file from previous runs, if possible.
   TestCompiler compiler;
 

@@ -423,24 +423,24 @@ void main() {
     expect(controller.offset, 800.0);
   });
 
-  group('SliverOpacity - ', () {
-    Widget _boilerPlate(Widget sliver) {
-      return Localizations(
-        locale: const Locale('en', 'us'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultWidgetsLocalizations.delegate,
-          DefaultMaterialLocalizations.delegate,
-        ],
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: CustomScrollView(slivers: <Widget>[sliver])
-          )
+  Widget _boilerPlate(Widget sliver) {
+    return Localizations(
+      locale: const Locale('en', 'us'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CustomScrollView(slivers: <Widget>[sliver])
         )
-      );
-    }
+      )
+    );
+  }
 
+  group('SliverOpacity - ', () {
     testWidgets('painting & semantics', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -561,6 +561,95 @@ void main() {
       expect(find.byType(SliverOpacity), paints..paragraph());
 
       semantics.dispose();
+    });
+  });
+  group('SliverIgnorePointer - ', () {
+    testWidgets('ignores pointer events', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final List<String> events = <String>[];
+      await tester.pumpWidget(_boilerPlate(
+        SliverIgnorePointer(
+          ignoring: true,
+          ignoringSemantics: false,
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () {
+                events.add('tap');
+              },
+            )
+          )
+        )
+      ));
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      await tester.tap(find.byType(GestureDetector));
+      expect(events, equals(<String>[]));
+    });
+
+    testWidgets('ignores semantics', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final List<String> events = <String>[];
+      await tester.pumpWidget(_boilerPlate(
+        SliverIgnorePointer(
+          ignoring: false,
+          ignoringSemantics: true,
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () {
+                events.add('tap');
+              },
+            )
+          )
+        )
+      ));
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
+      await tester.tap(find.byType(GestureDetector));
+      expect(events, equals(<String>['tap']));
+    });
+
+    testWidgets('ignores pointer events & semantics', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final List<String> events = <String>[];
+      await tester.pumpWidget(_boilerPlate(
+        SliverIgnorePointer(
+          ignoring: true,
+          ignoringSemantics: true,
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () {
+                events.add('tap');
+              },
+            )
+          )
+        )
+      ));
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
+      await tester.tap(find.byType(GestureDetector));
+      expect(events, equals(<String>[]));
+    });
+
+    testWidgets('ignores nothing', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final List<String> events = <String>[];
+      await tester.pumpWidget(_boilerPlate(
+        SliverIgnorePointer(
+          ignoring: false,
+          ignoringSemantics: false,
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () {
+                events.add('tap');
+              },
+            )
+          )
+        )
+      ));
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      await tester.tap(find.byType(GestureDetector));
+      expect(events, equals(<String>['tap']));
     });
   });
 }

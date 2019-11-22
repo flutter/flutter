@@ -7,7 +7,7 @@ import 'package:xml/xml.dart' as xml;
 import '../base/file_system.dart';
 
 /// Writes a property sheet (.props) file to expose all of the key/value
-/// pairs in [variables] as enivornment variables.
+/// pairs in [variables] as environment variables.
 void writePropertySheet(File propertySheetFile, Map<String, String> variables) {
   final xml.XmlBuilder builder = xml.XmlBuilder();
   builder.processing('xml', 'version="1.0" encoding="utf-8"');

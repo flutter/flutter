@@ -85,7 +85,7 @@ int debugDoublePrecision;
 
 /// Formats a double to have standard formatting.
 ///
-/// This behavior can be overriden by [debugDoublePrecision].
+/// This behavior can be overridden by [debugDoublePrecision].
 String debugFormatDouble(double value) {
   if (value == null) {
     return 'null';

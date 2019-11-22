@@ -78,7 +78,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///
 ///  * Letting [KeepAlive] be the root widget of the sliver child widget subtree
 ///    that needs to be preserved. The [KeepAlive] widget marks the child
-///    subtree's top render object child for keep-alive. When the associated top
+///    subtree's top render object child for keepalive. When the associated top
 ///    render object is scrolled out of view, the sliver keeps the child's
 ///    render object (and by extension, its associated elements and states) in a
 ///    cache list instead of destroying them. When scrolled back into view, the
@@ -98,7 +98,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///
 ///    As an example, the [EditableText] widget signals its sliver child element
 ///    subtree to stay alive while its text field has input focus. If it doesn't
-///    have focus and no other descendants signaled for keep-alive via a
+///    have focus and no other descendants signaled for keepalive via a
 ///    [KeepAliveNotification], the sliver child element subtree will be
 ///    destroyed when scrolled away.
 ///
@@ -1676,9 +1676,10 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
     @required this.opacity,
     this.alwaysIncludeSemantics = false,
     Widget sliver,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       assert(alwaysIncludeSemantics != null),
-       super(key: key, child: sliver);
+  })
+    : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+      assert(alwaysIncludeSemantics != null),
+      super(key: key, child: sliver);
 
   /// The fraction to scale the sliver child's alpha value.
   ///
@@ -1711,7 +1712,8 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverOpacity renderObject) {
+  void updateRenderObject(BuildContext context,
+    RenderSliverOpacity renderObject) {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
@@ -1722,6 +1724,66 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<double>('opacity', opacity));
     properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics',));
+  }
+}
+
+/// A sliver widget that is invisible during hit testing.
+///
+/// When [ignoring] is true, this widget (and its subtree) is invisible
+/// to hit testing. It still consumes space during layout and paints its sliver
+/// child as usual. It just cannot be the target of located events, because it
+/// returns false from [RenderSliver.hitTest].
+///
+/// When [ignoringSemantics] is true, the subtree will be invisible to
+/// the semantics layer (and thus e.g. accessibility tools). If
+/// [ignoringSemantics] is null, it uses the value of [ignoring].
+class SliverIgnorePointer extends SingleChildRenderObjectWidget {
+  /// Creates a sliver widget that is invisible to hit testing.
+  ///
+  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
+  /// this render object will be ignored for semantics if [ignoring] is true.
+  const SliverIgnorePointer({
+    Key key,
+    this.ignoring = true,
+    this.ignoringSemantics,
+    Widget sliver,
+  })
+    : assert(ignoring != null),
+      super(key: key, child: sliver);
+
+  /// Whether this sliver is ignored during hit testing.
+  ///
+  /// Regardless of whether this sliver is ignored during hit testing, it will
+  /// still consume space during layout and be visible during painting.
+  final bool ignoring;
+
+  /// Whether the semantics of this sliver is ignored when compiling the
+  /// semantics tree.
+  ///
+  /// If null, defaults to value of [ignoring].
+  ///
+  /// See [SemanticsNode] for additional information about the semantics tree.
+  final bool ignoringSemantics;
+
+  @override
+  RenderSliverIgnorePointer createRenderObject(BuildContext context) {
+    return RenderSliverIgnorePointer(
+      ignoring: ignoring,
+      ignoringSemantics: ignoringSemantics,
+    );
+  }
+
+  void updateRenderObject(BuildContext context, RenderSliverIgnorePointer renderObject) {
+    renderObject
+      ..ignoring = ignoring
+      ..ignoringSemantics = ignoringSemantics;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
+    properties.add(DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null));
   }
 }
 

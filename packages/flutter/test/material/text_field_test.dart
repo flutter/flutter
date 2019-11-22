@@ -1713,13 +1713,13 @@ void main() {
 
     // Toolbar should fade in. Starting at 0% opacity.
     final Element target = tester.element(find.text('SELECT ALL'));
-    final FadeTransition opacity = target.ancestorWidgetOfExactType(FadeTransition);
+    final FadeTransition opacity = target.findAncestorWidgetOfExactType<FadeTransition>();
     expect(opacity, isNotNull);
     expect(opacity.opacity.value, equals(0.0));
 
     // Still fading in.
     await tester.pump(const Duration(milliseconds: 50));
-    final FadeTransition opacity2 = target.ancestorWidgetOfExactType(FadeTransition);
+    final FadeTransition opacity2 = target.findAncestorWidgetOfExactType<FadeTransition>();
     expect(opacity, same(opacity2));
     expect(opacity.opacity.value, greaterThan(0.0));
     expect(opacity.opacity.value, lessThan(1.0));

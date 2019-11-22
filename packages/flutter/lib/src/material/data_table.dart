@@ -212,6 +212,8 @@ class DataCell {
 
 /// A material design data table.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ktTajqbhIcY}
+///
 /// Displaying data in a table is expensive, because to lay out the
 /// table all the data must be measured twice, once to negotiate the
 /// dimensions to use for each column, and once to actually lay out

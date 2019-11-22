@@ -12,7 +12,7 @@ export 'dart:ui' show Offset, PointerDeviceKind;
 /// The bit of [PointerEvent.buttons] that corresponds to a cross-device
 /// behavior of "primary operation".
 ///
-/// More specifially, it includes:
+/// More specifically, it includes:
 ///
 ///  * [kTouchContact]: The pointer contacts the touch screen.
 ///  * [kStylusContact]: The stylus contacts the screen.
@@ -135,7 +135,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 
 /// Returns the button of `buttons` with the smallest integer.
 ///
-/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// The `buttons` parameter is a bit field where each set bit represents a button.
 /// This function returns the set bit closest to the least significant bit.
 ///
 /// It returns zero when `buttons` is zero.
@@ -155,7 +155,7 @@ int smallestButton(int buttons) => buttons & (-buttons);
 
 /// Returns whether `buttons` contains one and only one button.
 ///
-/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// The `buttons` parameter is a bit field where each set bit represents a button.
 /// This function returns whether there is only one set bit in the given integer.
 ///
 /// It returns false when `buttons` is zero.
@@ -170,7 +170,7 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///
 /// See also:
 ///
-///   * [smallestButton], which returns the button in a `buttons` bitfield with
+///   * [smallestButton], which returns the button in a `buttons` bit field with
 ///     the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 

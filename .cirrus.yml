@@ -329,8 +329,8 @@ task:
   environment:
     # It's not clear that changing the cpu/memory fields here has any impact, so we use
     # small numbers...
-    CPU: 2 # 1-8 without compute credits, 1-30 with
-    MEMORY: 2G # 256M-24G without compute credits, 256M-90G with
+    CPU: 4 # 1-8 without compute credits, 1-30 with
+    MEMORY: 12G # 256M-24G without compute credits, 256M-90G with
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\$FLUTTER_SDK_PATH_WITH_SPACE"
     PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
   pub_cache:
