@@ -348,6 +348,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         assert dependencyObject.dependencies instanceof List
         dependencyObject.dependencies.each { pluginDependencyName ->
+            assert pluginDependencyName instanceof String
             if (pluginDependencyName.empty) {
                 return
             }

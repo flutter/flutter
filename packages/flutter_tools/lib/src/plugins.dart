@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:mustache/mustache.dart' as mustache;
@@ -12,6 +11,7 @@ import 'package:yaml/yaml.dart';
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart';
