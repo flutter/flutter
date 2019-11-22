@@ -108,6 +108,16 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
                  name:UIApplicationDidReceiveMemoryWarningNotification
                object:nil];
 
+  [center addObserver:self
+             selector:@selector(applicationBecameActive:)
+                 name:UIApplicationDidBecomeActiveNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(applicationWillResignActive:)
+                 name:UIApplicationWillResignActiveNotification
+               object:nil];
+
   return self;
 }
 
@@ -117,11 +127,11 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   [_binaryMessenger release];
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-  [center removeObserver:self name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
   if (_flutterViewControllerWillDeallocObserver) {
     [center removeObserver:_flutterViewControllerWillDeallocObserver];
     [_flutterViewControllerWillDeallocObserver release];
   }
+  [center removeObserver:self];
 
   [super dealloc];
 }
@@ -456,6 +466,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
     }
     _publisher.reset([[FlutterObservatoryPublisher alloc] init]);
     [self maybeSetupPlatformViewChannels];
+    _shell->GetIsGpuDisabledSyncSwitch()->SetSwitch(_isGpuDisabled ? true : false);
   }
 
   return _shell != nullptr;
@@ -639,13 +650,28 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   return _pluginPublications[pluginKey];
 }
 
-#pragma mark - Memory Notifications
+#pragma mark - Notifications
+
+- (void)applicationBecameActive:(NSNotification*)notification {
+  [self setIsGpuDisabled:NO];
+}
+
+- (void)applicationWillResignActive:(NSNotification*)notification {
+  [self setIsGpuDisabled:YES];
+}
 
 - (void)onMemoryWarning:(NSNotification*)notification {
   if (_shell) {
     _shell->NotifyLowMemoryWarning();
   }
   [_systemChannel sendMessage:@{@"type" : @"memoryPressure"}];
+}
+
+- (void)setIsGpuDisabled:(BOOL)value {
+  if (_shell) {
+    _shell->GetIsGpuDisabledSyncSwitch()->SetSwitch(value ? true : false);
+  }
+  _isGpuDisabled = value;
 }
 
 @end
