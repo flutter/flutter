@@ -259,14 +259,17 @@ def merge_on_success(github_repo, local_repo, pull_request):
 
   # TODO(bkonyi): Handle case where Flutter tree is red and we're trying to
   # merge into flutter/flutter.
-  should_merge = wait_for_status(commit)
+  should_merge = wait_for_status(pull_request, commit)
   if should_merge:
-    pull_request.create_issue_comment('Checks successful, automatically merging.')
-    merge_status = pull_request.merge(merge_method='rebase').merged
-    if not merge_status:
-      print_error('Merge failed! Aborting roll.')
-      sys.exit(1)
-    print_status('Merge was successful!')
+    if not pull_request.is_merged():
+      pull_request.create_issue_comment('Checks successful, automatically merging.')
+      merge_status = pull_request.merge(merge_method='squash').merged
+      if not merge_status:
+        print_error('Merge failed! Aborting roll.')
+        sys.exit(1)
+      print_status('Merge was successful!')
+    else:
+      print_status('Manual merge was performed.')
   else:
     cleanup_pr(github_repo, pull_request, 'Checks failed')
     sys.exit(1)
@@ -300,7 +303,7 @@ def is_only_engine_build_failing(commit):
   return True
 
 
-def wait_for_status(commit):
+def wait_for_status(pull_request, commit):
   if FLAG_skip_wait_for_artifacts:
     return True
 
@@ -315,6 +318,9 @@ def wait_for_status(commit):
 
   # Ensure all checks pass.
   while True:
+    # Check to see if the PR was manually merged.
+    if pull_request.is_merged():
+      break
     status = commit.get_combined_status().state
     if status == GITHUB_STATUS_SUCCESS:
       break
