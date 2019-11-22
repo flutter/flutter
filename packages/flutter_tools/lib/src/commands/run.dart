@@ -340,8 +340,13 @@ class RunCommand extends RunCommandBase {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
       }
-      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(), logToStdout: true);
+      final Daemon daemon = Daemon(
+        stdinCommandStream,
+        stdoutCommandResponse,
+        notifyingLogger: NotifyingLogger(),
+        logToStdout: true,
+        dartDefines: dartDefines,
+      );
       AppInstance app;
       try {
         final String applicationBinaryPath = stringArg('use-application-binary');
