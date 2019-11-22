@@ -468,6 +468,7 @@ abstract class ResidentCompiler {
     List<String> dartDefines,
   }) = DefaultResidentCompiler;
 
+
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
   /// On successive runs [invalidatedFiles] indicates which files need to be
