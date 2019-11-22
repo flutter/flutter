@@ -81,7 +81,7 @@ class Plugin {
 
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
 
-    if (platformsYaml[AndroidPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, AndroidPlugin.kConfigKey)) {
       platforms[AndroidPlugin.kConfigKey] = AndroidPlugin.fromYaml(
         name,
         platformsYaml[AndroidPlugin.kConfigKey] as YamlMap,
@@ -89,27 +89,27 @@ class Plugin {
       );
     }
 
-    if (platformsYaml[IOSPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, IOSPlugin.kConfigKey)) {
       platforms[IOSPlugin.kConfigKey] =
           IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey] as YamlMap);
     }
 
-    if (platformsYaml[LinuxPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, LinuxPlugin.kConfigKey)) {
       platforms[LinuxPlugin.kConfigKey] =
           LinuxPlugin.fromYaml(name, platformsYaml[LinuxPlugin.kConfigKey] as YamlMap);
     }
 
-    if (platformsYaml[MacOSPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, MacOSPlugin.kConfigKey)) {
       platforms[MacOSPlugin.kConfigKey] =
           MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey] as YamlMap);
     }
 
-    if (platformsYaml[WebPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, WebPlugin.kConfigKey)) {
       platforms[WebPlugin.kConfigKey] =
           WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey] as YamlMap);
     }
 
-    if (platformsYaml[WindowsPlugin.kConfigKey] != null) {
+    if (_providesImplementationForPlatform(platformsYaml, WindowsPlugin.kConfigKey)) {
       platforms[WindowsPlugin.kConfigKey] =
           WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey] as YamlMap);
     }
@@ -178,7 +178,13 @@ class Plugin {
   static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
     bool isInvalid(String key, bool Function(YamlMap) validate) {
       final dynamic value = yaml[key];
-      return value is YamlMap && !validate(value);
+      if (!(value is YamlMap)) {
+        return false;
+      }
+      if (value.containsKey('default_package')) {
+        return false;
+      }
+      return !validate(value);
     }
     final List<String> errors = <String>[];
     if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {
@@ -211,6 +217,16 @@ class Plugin {
       errors.add('The "pluginClass" must either be null or a string..');
     }
     return errors;
+  }
+
+  static bool _providesImplementationForPlatform(YamlMap platformsYaml, String platformKey) {
+    if (!platformsYaml.containsKey(platformKey)) {
+      return false;
+    }
+    if (platformsYaml[platformKey].containsKey('default_package')) {
+      return false;
+    }
+    return true;
   }
 
   final String name;
