@@ -490,6 +490,8 @@ class _DraggableScrollableSheetScrollPosition
         velocity = ballisticController.velocity + (physics.tolerance.velocity * ballisticController.velocity.sign);
         super.goBallistic(velocity);
         ballisticController.stop();
+      } else if (ballisticController.isCompleted) {
+        super.goBallistic(0);
       }
     }
 
