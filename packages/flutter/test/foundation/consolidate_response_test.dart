@@ -87,6 +87,65 @@ void main() {
       ]);
     });
 
+    test('Doesn\'t invoke onBytesReceived when controller is off', () async {
+      final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
+      when(response.contentLength).thenReturn(syntheticTotal);
+      final List<int> records = <int>[];
+      final SendChunkEventsController sendChunkEventsController = SendChunkEventsController();
+      await consolidateHttpClientResponseBytes(
+        response,
+        onBytesReceived: (int cumulative, int total) {
+          records.addAll(<int>[cumulative, total]);
+        },
+        sendChunkEventsController: sendChunkEventsController,
+      );
+
+      expect(records, <int>[]);
+    });
+
+    test('Invokes onBytesReceived when controller is on', () async {
+      final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
+      when(response.contentLength).thenReturn(syntheticTotal);
+      final List<int> records = <int>[];
+      final SendChunkEventsController sendChunkEventsController = SendChunkEventsController();
+      sendChunkEventsController.start();
+      await consolidateHttpClientResponseBytes(
+        response,
+        onBytesReceived: (int cumulative, int total) {
+          records.addAll(<int>[cumulative, total]);
+        },
+        sendChunkEventsController: sendChunkEventsController,
+      );
+
+      expect(records, <int>[
+        chunkOne.length,
+        syntheticTotal,
+        chunkOne.length + chunkTwo.length,
+        syntheticTotal,
+      ]);
+    });
+
+    test('Stops invoking onBytesReceived when controller turns off', () async {
+      final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
+      when(response.contentLength).thenReturn(syntheticTotal);
+      final List<int> records = <int>[];
+      final SendChunkEventsController sendChunkEventsController = SendChunkEventsController();
+      sendChunkEventsController.start();
+      await consolidateHttpClientResponseBytes(
+        response,
+        onBytesReceived: (int cumulative, int total) {
+          records.addAll(<int>[cumulative, total]);
+          sendChunkEventsController.stop();
+        },
+        sendChunkEventsController: sendChunkEventsController,
+      );
+
+      expect(records, <int>[
+        chunkOne.length,
+        syntheticTotal,
+      ]);
+    });
+
     test('forwards errors from HttpClientResponse', () async {
       when(response.listen(
         any,
