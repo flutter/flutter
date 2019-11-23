@@ -30,14 +30,14 @@ TestMetalSurfaceImpl::TestMetalSurfaceImpl(SkISize surface_size) {
     return;
   }
 
-  auto texture_descriptor = fml::scoped_nsobject{[[MTLTextureDescriptor
-      texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
-                                   width:surface_size.width()
-                                  height:surface_size.height()
-                               mipmapped:NO] retain]};
+  auto texture_descriptor = fml::scoped_nsobject{
+      [[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                                          width:surface_size.width()
+                                                         height:surface_size.height()
+                                                      mipmapped:NO] retain]};
 
   // The most pessimistic option and disables all optimizations but allows tests
-  // the most flexible access to the surface. They may read and wrote to the
+  // the most flexible access to the surface. They may read and write to the
   // surface from shaders or use as a pixel view.
   texture_descriptor.get().usage = MTLTextureUsageUnknown;
 
@@ -46,8 +46,8 @@ TestMetalSurfaceImpl::TestMetalSurfaceImpl(SkISize surface_size) {
     return;
   }
 
-  auto texture = fml::scoped_nsobject{
-      [device.get() newTextureWithDescriptor:texture_descriptor.get()]};
+  auto texture =
+      fml::scoped_nsobject{[device.get() newTextureWithDescriptor:texture_descriptor.get()]};
 
   if (!texture) {
     FML_LOG(ERROR) << "Could not create texture from texture descriptor.";
@@ -85,8 +85,8 @@ TestMetalSurfaceImpl::TestMetalSurfaceImpl(SkISize surface_size) {
       kBGRA_8888_SkColorType,    // color type
       nullptr,                   // color space
       nullptr,                   // surface properties
-      nullptr,  // release proc (texture is already ref counted in sk_cf_obj)
-      nullptr   // release context
+      nullptr,                   // release proc (texture is already ref counted in sk_cf_obj)
+      nullptr                    // release context
   );
 
   if (!surface) {
