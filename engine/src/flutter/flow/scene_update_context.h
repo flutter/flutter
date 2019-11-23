@@ -124,7 +124,7 @@ class SceneUpdateContext {
     void AddPaintLayer(Layer* layer);
 
    private:
-    const SkRRect& rrect_;
+    const SkRRect rrect_;
     SkColor const color_;
 
     std::vector<Layer*> paint_layers_;
